@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Cumulocity: Hello World</title>
+	<link rel="stylesheet" href="/apis/ui/extjs/resources/css/ext-all-gray.css" type="text/css" media="screen" title="no title" charset="utf-8">
+	<link rel="stylesheet" href="/apis/ui/esources/css/specific.css" type="text/css" media="screen" title="no title" charset="utf-8">
+	<script src="/apis/ui/extjs/ext-all-debug.js" type="text/javascript" charset="utf-8"></script>
+
+	<!-- Define Root URL for api calls -->
+	<script type="text/javascript" charset="utf-8">
+		var rooturl = '/apis';
+	</script>
+	
+	</head>
+	<body>
+	
+	<div id="c8ypageloading"><span></span></div>
+	
+	<!-- Client lib -->
+	<script src="/apis/ui/c8y/clientlib-debug.js" type="text/javascript" charset="utf-8"></script>
+	<!-- Components -->
+	<script src="/apis/ui/c8y/c8y-all-debug.js" type="text/javascript" charset="utf-8"></script>
+	
+	<!-- 
+	Application Creation
+	
+	Items are now described here, they replace the Views in the ExtJs MVC model.
+	-->
+	<script>
+		C8Y.application({
+		    name        : 'APP',
+		    items       : [
+		        {
+                     xtype       : 'c8yinventorygrid',
+                     menuOption  : 'Inventory',
+                     iconCls     : 'iconInventory'
+		        }
+		    ]
+		});
+	</script>
+</body>
+</html>
