@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Energyapp
+Bundle-SymbolicName: com.cumulocity.energyapp
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: CUMULOCITY
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Web-ContextPath: /energy

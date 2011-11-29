@@ -5,14 +5,10 @@
 	<title>Cumulocity: Energy Example</title>
 	<link rel="stylesheet" href="/apis/ui/extjs/resources/css/ext-all-gray.css" type="text/css" media="screen" title="no title" charset="utf-8">
 	<link rel="stylesheet" href="/apis/ui/resources/css/specific.css" type="text/css" media="screen" title="no title" charset="utf-8">
-	<script src="/apis/ui/extjs/ext-all-debug.js" type="text/javascript" charset="utf-8"></script>
-	
-	<!-- Define Root URL for api calls -->
+	<script src="/apis/ui/extjs/ext-all.js" type="text/javascript" charset="utf-8"></script>
 	<script type="text/javascript" charset="utf-8">
 		var rooturl = '/apis';
 	</script>
-	
-	<!-- Define ExtJS Loader -->
 	<script type="text/javascript" charset="utf-8">
 		Ext.Loader.setConfig({
 		     enabled : true,
@@ -21,25 +17,11 @@
 		     }
 		});       
 	</script>
-	
-	
-	
-	
-	</head>
+</head>
 <body>
-	
-	<div id="c8ypageloading"><span></span></div>
-	
-	<!-- Client lib -->
-	<script src="/apis/ui/c8y/clientlib-debug.js" type="text/javascript" charset="utf-8"></script>
-	<!-- Components -->
-	<script src="/apis/ui/c8y-all-debug.js" type="text/javascript" charset="utf-8"></script>
-
-	<!-- Application
-	
-	The rest of the files of the application will be loaded with Ext Dynamic Loader.
-	-->
-	<script src="app.js" type="text/javascript" charset="utf-8"></script>
-	
+  <div id="c8ypageloading"><span></span></div>
+  <script src="/apis/ui/c8y/clientlib-debug.js" type="text/javascript" charset="utf-8"></script> 
+  <script src="/apis/ui/c8y/c8y-all-debug.js" type="text/javascript" charset="utf-8"></script> 
+  <script src="app.js" type="text/javascript" charset="utf-8"></script>
 </body>
 </html>
