@@ -17,11 +17,9 @@ import com.cumulocity.sdk.client.platform.PlatformImpl;
 
 public class HelloAgent implements Runnable {
 
-    private static final String CUMULOCITY_HOST = "http://developer.cumulocity.com";
+    private static final String CUMULOCITY_HOST = "http://developer.cumulocity.com/";
 
-    private static final int CUMULOCITY_PORT = 80;
-
-    private static final String TENANT = "...";
+    private static final String TENANT = "demo";
 
     private static final String USER = "...";
 
@@ -46,7 +44,7 @@ public class HelloAgent implements Runnable {
         }
 
         // Create a platform client
-        Platform platform = new PlatformImpl(CUMULOCITY_HOST + ":" + CUMULOCITY_PORT, TENANT, USER, PASS);
+        Platform platform = new PlatformImpl(CUMULOCITY_HOST, TENANT, USER, PASS);
         
         // Retrieve the Resource for the Inventory and Measurement
         InventoryResource inventoryResource = platform.getInventory();
