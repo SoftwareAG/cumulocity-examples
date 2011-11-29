@@ -1,8 +1,8 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Energyapp
+Bundle-Name: Sample energy application
 Bundle-SymbolicName: com.cumulocity.energyapp
 Bundle-Version: 1.0.0.qualifier
-Bundle-Vendor: CUMULOCITY
+Bundle-Vendor: Nokia Siemens Networks
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Web-ContextPath: /energy
