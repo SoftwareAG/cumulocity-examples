@@ -1,7 +1,9 @@
 package com.cumulocity.helloagent;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.Properties;
 
 import org.osgi.framework.FrameworkListener;
 
@@ -17,24 +19,28 @@ import com.cumulocity.sdk.client.platform.PlatformImpl;
 
 public class HelloAgent implements Runnable {
 
-    private static final String CUMULOCITY_HOST = "http://developer.cumulocity.com/";
+    private static final String CUMULOCITY_HOST = "cumulocity.host";
 
-    private static final String TENANT = "demo";
+    private static final String TENANT = "cumulocity.tenant";
 
-    private static final String USER = "...";
+    private static final String USER = "cumulocity.user";
 
-    private static final String PASS = "...";
+    private static final String PASS = "cumulocity.password";
 
+    private Properties configuration;
+    
     private FrameworkListener listener;
 
-    public HelloAgent(FrameworkListener listener) {
+    public HelloAgent(FrameworkListener listener) throws IOException {
         this.listener = listener;
+        
+        this.configuration = new Properties();
+		this.configuration.load(getClass().getClassLoader().getResourceAsStream("helloagent.properties"));
     }
 
     @Override
     public void run() {
-
-        // Wait for all OSGi bundles to become active
+    	// Wait for all OSGi bundles to become active
         try {
             synchronized (listener) {
                 listener.wait();
@@ -44,7 +50,11 @@ public class HelloAgent implements Runnable {
         }
 
         // Create a platform client
-        Platform platform = new PlatformImpl(CUMULOCITY_HOST, TENANT, USER, PASS);
+        Platform platform = new PlatformImpl(
+        		configuration.getProperty(CUMULOCITY_HOST),
+        		configuration.getProperty(TENANT),
+        		configuration.getProperty(USER),
+        		configuration.getProperty(PASS));
         
         // Retrieve the Resource for the Inventory and Measurement
         InventoryResource inventoryResource = platform.getInventory();
