@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/com.nsn.cumulocity.sdk_0.6.0.qualifier.jar" id="com.nsn.cumulocity.sdk" version="0.6.0.qualifier">
+      <category name="com.nsn.cumulocity.sdk"/>
+   </feature>
+   <feature url="features/com.cumulocity.examples-feature_1.0.0.qualifier.jar" id="com.cumulocity.examples-feature" version="1.0.0.qualifier">
+      <category name="com.nsn.cumulocity.examples"/>
+   </feature>
+   <category-def name="com.nsn.cumulocity.sdk" label="Cumulocity SDK"/>
+   <category-def name="com.nsn.cumulocity.examples" label="Cumulocity Ecamples"/>
+</site>

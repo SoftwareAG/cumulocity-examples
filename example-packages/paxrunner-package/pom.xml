@@ -1,0 +1,100 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	
+	<modelVersion>4.0.0</modelVersion>
+	
+	<parent>
+		<groupId>com.cumulocity.example</groupId>
+		<artifactId>example-packages</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+	</parent>
+	
+	<artifactId>paxrunner-package</artifactId>
+	<packaging>pom</packaging>
+	
+	<properties>
+		<pax.runner.version>1.7.5</pax.runner.version>
+		<unpack.dir>${project.build.directory}/unpacked</unpack.dir>
+	</properties>
+	
+	<build>
+		<plugins>
+            <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.3</version>
+                <executions>
+                    <execution>
+                        <id>unpack</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+	                            <artifactItem>
+	                                 <groupId>org.ops4j.pax.runner</groupId>
+	                                 <artifactId>pax-runner-assembly</artifactId>
+	                                 <version>${pax.runner.version}</version>
+	                                 <classifier>jdk15</classifier>
+	                                 <type>zip</type>
+	                                 <outputDirectory>${unpack.dir}</outputDirectory>
+	                            </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.cumulocity.example</groupId>
+                                    <artifactId>examples-repository</artifactId>
+                                    <version>${project.version}</version>
+                                    <type>zip</type>
+                                    <outputDirectory>${unpack.dir}/repository</outputDirectory>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            
+            <plugin>
+            	<artifactId>maven-resources-plugin</artifactId>
+            	<version>2.5</version>
+            	<configuration>
+            		<outputDirectory>${unpack.dir}</outputDirectory>
+	            	<resources>
+						<resource>
+							<directory>src/main/resources</directory>
+							<filtering>true</filtering>
+						</resource>
+	            	</resources>
+            	</configuration>
+            	<executions>
+            		<execution>
+            			<id>copy-resources</id>
+            			<phase>process-resources</phase>
+            			<goals>
+            				<goal>copy-resources</goal>
+            			</goals>
+            		</execution>
+            	</executions>
+            </plugin>
+            
+            <plugin>
+            	<artifactId>maven-assembly-plugin</artifactId>
+            	<version>2.2.1</version>
+            	<configuration>
+            		<descriptors>
+            			<descriptors>${basedir}/src/main/assembly/zip-assembly.xml</descriptors>
+            		</descriptors>
+            		<appendAssemblyId>false</appendAssemblyId>
+            	</configuration>
+            	<executions>
+            		<execution>
+            			<id>zip</id>
+            			<phase>package</phase>
+            			<goals>
+            				<goal>single</goal>
+            			</goals>
+            		</execution>
+            	</executions>
+            </plugin>
+		</plugins>
+	</build>
+	
+</project>

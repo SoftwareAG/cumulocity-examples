@@ -1,0 +1,110 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.cumulocity.example</groupId>
+	<artifactId>cumulocity-examples</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.compiler.source>1.6</maven.compiler.source>
+		<maven.compiler.target>1.6</maven.compiler.target>
+	    <tycho.version>0.13.0</tycho.version>
+	</properties>
+	
+	<modules>
+		<module>com.cumulocity.helloapp</module>
+		<module>com.cumulocity.helloagent</module>
+		<module>com.cumulocity.energyapp</module>
+		<module>com.cumulocity.agents.mps</module>
+<!-- 		<module>example-packages</module> -->
+	</modules>
+
+	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<targetPath>.</targetPath>
+			</resource>
+			<resource>
+				<!-- 
+					This extra resource entry is for META-INF directory,
+					that can only be placed in project root,
+					because of Eclipse PDE restrictions.
+				 -->
+				<directory>META-INF</directory>
+				<targetPath>META-INF</targetPath>
+			</resource>
+		</resources>
+		
+		<plugins>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-maven-plugin</artifactId>
+				<version>${tycho.version}</version>
+				<extensions>true</extensions>
+			</plugin>
+			
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>target-platform-configuration</artifactId>
+				<version>${tycho.version}</version>
+				<configuration>
+					<resolver>p2</resolver>
+					<pomDependencies>consider</pomDependencies>
+					<includeAllDependencies>true</includeAllDependencies>
+					<environments>
+						<environment>
+							<os>win32</os>
+							<ws>gtk</ws>
+							<arch>x86</arch>
+						</environment>
+						<environment>
+							<os>win32</os>
+							<ws>gtk</ws>
+							<arch>x86_64</arch>
+						</environment>
+						<environment>
+							<os>macosx</os>
+							<ws>gtk</ws>
+							<arch>x86</arch>
+						</environment>
+						<environment>
+							<os>macosx</os>
+							<ws>gtk</ws>
+							<arch>x86_64</arch>
+						</environment>
+						<environment>
+							<os>linux</os>
+							<ws>gtk</ws>
+							<arch>x86</arch>
+						</environment>
+						<environment>
+							<os>linux</os>
+							<ws>gtk</ws>
+							<arch>x86_64</arch>
+						</environment>
+					</environments>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.3.2</version>
+				<configuration>
+					<archive>
+						<!--
+							Prevents Maven from generating the manifest file.
+							We are providing the OSGi compliant one instead.
+						 -->
+						<manifestFile>META-INF/MANIFEST.MF</manifestFile>
+					</archive>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	
+</project>

@@ -1,0 +1,44 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>com.cumulocity.example</groupId>
+		<artifactId>cumulocity-examples</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>example-packages</artifactId>
+	<packaging>pom</packaging>
+	
+	<modules>
+		<module>com.cumulocity.examples-feature</module>
+		<module>examples-repository</module>
+		<module>paxrunner-package</module>
+	</modules>
+	
+	<dependencies>
+		<dependency>
+			<groupId>com.cumulocity.example</groupId>
+			<artifactId>com.cumulocity.helloapp</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.cumulocity.example</groupId>
+			<artifactId>com.cumulocity.helloagent</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.cumulocity.example</groupId>
+			<artifactId>com.cumulocity.energyapp</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.cumulocity.example</groupId>
+			<artifactId>com.cumulocity.agents.mps</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+	</dependencies>	
+	
+</project>
