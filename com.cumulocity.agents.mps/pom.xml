@@ -4,15 +4,25 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.cumulocity.example</groupId>
-	<artifactId>com.cumulocity.helloagent</artifactId>
+	<artifactId>com.cumulocity.agents.mps</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
 	<packaging>eclipse-plugin</packaging>
 	
 	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.compiler.source>1.6</maven.compiler.source>
+		<maven.compiler.target>1.6</maven.compiler.target>
 	   	<tycho.version>0.13.0</tycho.version>
 	</properties>
 	
 	<build>
+		<resources>
+			<resource>
+				<directory>META-INF</directory>
+				<targetPath>META-INF</targetPath>
+			</resource>
+		</resources>
+		
 		<plugins>
 			<plugin>
 				<artifactId>maven-jar-plugin</artifactId>

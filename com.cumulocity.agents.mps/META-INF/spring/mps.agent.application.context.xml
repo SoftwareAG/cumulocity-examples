@@ -46,10 +46,18 @@
     
     <util:list id="cyclicActionsList">
         <bean class="com.cumulocity.agents.mps.action.ChildDevicesLookupAction" />
-        <bean class="com.cumulocity.agents.mps.action.ObtainDeviceMeasurementsAction" />
+        <bean class="com.cumulocity.sdk.agent.action.ObtainDeviceMeasurementsAction"
+            p:measurementsRetriever-ref="mpsDeviceMeasurementsRetriever" />
         <bean class="com.cumulocity.sdk.agent.action.UploadDeviceMeasurementsAction" />
         <bean class="com.cumulocity.sdk.agent.action.ObtainDeviceOperationsAction" />
-        <bean class="com.cumulocity.agents.mps.action.ExecuteDeviceOperationsAction" />
+        <bean class="com.cumulocity.sdk.agent.action.ExecuteDeviceOperationsAction"
+            p:operationExecutor-ref="mpsDeviceOperationExecutor" />
     </util:list>
-
+    
+    <bean id="mpsDeviceMeasurementsRetriever"
+        class="com.cumulocity.agents.mps.action.MpsDeviceMeasurementsRetriever" />
+    
+    <bean id="mpsDeviceOperationExecutor"
+        class="com.cumulocity.agents.mps.action.MpsDeviceOperationExecutor" />
+	
 </beans>

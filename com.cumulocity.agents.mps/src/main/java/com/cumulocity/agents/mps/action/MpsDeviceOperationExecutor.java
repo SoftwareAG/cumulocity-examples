@@ -11,7 +11,8 @@ import com.cumulocity.model.control.Relay;
 import com.cumulocity.model.control.Relay.RelayState;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
-import com.cumulocity.sdk.agent.action.AbstractExecuteDeviceOperationsAction;
+import com.cumulocity.sdk.agent.action.ExecuteDeviceOperationsAction.DeviceOperationExecutor;
+import com.cumulocity.sdk.agent.action.OperationExecutionResult;
 import com.cumulocity.sdk.client.Platform;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
@@ -22,17 +23,22 @@ import com.sun.jersey.client.apache.ApacheHttpClient;
 /**
  * Executes the operations on the device.
  */
-public class ExecuteDeviceOperationsAction extends AbstractExecuteDeviceOperationsAction<MpsDevice> {
+public class MpsDeviceOperationExecutor implements DeviceOperationExecutor {
 
-	private static final Logger LOG = LoggerFactory.getLogger(ExecuteDeviceOperationsAction.class);
+	private static final Logger LOG = LoggerFactory.getLogger(MpsDeviceOperationExecutor.class);
+	
+	private Platform platform;
+	
+	private MpsAgent agent;
 	
 	@Autowired
-	public ExecuteDeviceOperationsAction(Platform platform, MpsAgent agent) {
-		super(platform, agent);
+	public MpsDeviceOperationExecutor(Platform platform, MpsAgent agent) {
+		this.platform = platform;
+		this.agent = agent;
 	}
 	
 	@Override
-	protected boolean isOperationSupported(OperationRepresentation operation) {
+	public boolean isOperationSupported(OperationRepresentation operation) {
 		if (operation.get(Relay.class) == null) {
 			LOG.warn(String.format("Unknown operation with id: %s.", operation.getId().toJSON()));
 			return false;
@@ -42,25 +48,29 @@ public class ExecuteDeviceOperationsAction extends AbstractExecuteDeviceOperatio
 	}
 
 	@Override
-	protected boolean handleSupportedOperation(OperationRepresentation operation) {
+	public OperationExecutionResult handleSupportedOperation(OperationRepresentation operation) {
 		Relay relay = operation.get(Relay.class);
 		RelayState relayState = relay.getRelayState();
 		
 		if (relayState == null) {
-            LOG.warn(String.format("Relay received but no RelayState present. Ignoring. OperationID: %s.", 
-            		operation.getId().toJSON()));
-            return false;
+			String failureReason = String.format("Relay received but no RelayState present. Ignoring. OperationID: %s.", 
+            		operation.getId().toJSON());
+	        LOG.warn(failureReason);
+	        return new OperationExecutionResult(false, failureReason);
+
         }
         
         MpsDevice device = agent.getDevice(operation.getDeviceId());
         if (device == null){
-            LOG.warn(String.format("Relay received for unknown meter device GId: %s. OperationID: %s.", 
-            		operation.getDeviceId().toJSON(), operation.getId().toString()));
-            return false;
+        	String failureReason = String.format("Relay received for unknown meter device GId: %s. OperationID: %s.", 
+            		operation.getDeviceId().toJSON(), operation.getId().toString());
+            LOG.warn(failureReason);
+            return new OperationExecutionResult(false, failureReason);
         }
         
-        if (!executeRelayOperationOnDevice(device, relayState)) {
-        	return false;
+        OperationExecutionResult executionResult = executeRelayOperationOnDevice(device, relayState); 
+        if (!executionResult.isSuccess()) {
+        	return executionResult;
         }
         
         return addEventToPlatform(operation.getDeviceId(), relayState);
@@ -70,17 +80,18 @@ public class ExecuteDeviceOperationsAction extends AbstractExecuteDeviceOperatio
 	 * Executes the operation on the device.
 	 * @param device the device to execute the operation on.
 	 * @param relayState the state to set.
-	 * @return <code>true</code> if operation was performed sucessfully.
+	 * @return <code>OperationExecutionResult</code> which corresponds result of execution
 	 */
-	private boolean executeRelayOperationOnDevice(MpsDevice device, RelayState relayState) {
+	private OperationExecutionResult executeRelayOperationOnDevice(MpsDevice device, RelayState relayState) {
         ClientResponse response = getWebResource(device.getChangeStateUrl(relayState)).post(ClientResponse.class);
         
         if (Status.OK.getStatusCode() == response.getStatus()) {
         	LOG.info("Relay state set sucessfully.");
-        	return true;
+        	return new OperationExecutionResult(true);
         } else {
-        	LOG.error(String.format("Error setting relay state! Recieved HTTP status %d.", response.getStatus()));
-        	return false;
+        	String failureReason = String.format("Error setting relay state! Recieved HTTP status %d.", response.getStatus());
+        	LOG.error(failureReason);
+        	return new OperationExecutionResult(false, failureReason);
         }
 	}
 	
@@ -88,16 +99,17 @@ public class ExecuteDeviceOperationsAction extends AbstractExecuteDeviceOperatio
 	 * Adds an event about operatin executed on the device.
 	 * @param deviceId the GID of the device the opeation was executed on.
 	 * @param relayState the state set to the device.
-	 * @return <code>true</code> if event was registered sucessfully.
+	 * @return <code>OperationExecutionResult</code> which corresponds result of execution
 	 */
-	private boolean addEventToPlatform(GId deviceId, RelayState relayState) {
+	private OperationExecutionResult addEventToPlatform(GId deviceId, RelayState relayState) {
         MpsRelayEvent event = new MpsRelayEvent(deviceId, relayState);
         try {
         	platform.getEvent().getEventCollectionResource().create(event);
-        	return true;
+        	return new OperationExecutionResult(true);
         } catch (Exception e) {
-            LOG.error("Problem posting event", e);
-            return false;
+        	String failureReason = "Problem posting event";
+            LOG.error(failureReason, e);
+            return new OperationExecutionResult(false, failureReason);
         }
 	}
 	
