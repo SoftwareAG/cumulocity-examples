@@ -28,15 +28,17 @@ Building with Maven
         </server>
       </servers>
 
-      <profile>
-        <id>cumulocity</id>
-        <repositories>
-          <repository>
-            <id>cumulocity-sdk-repo</id>
-            <layout>p2</layout>
-            <url>**********</repository>
-        </repositories>
-      </profile>
+      <profiles>
+        <profile>
+          <id>cumulocity</id>
+          <repositories>
+            <repository>
+              <id>cumulocity-sdk-repo</id>
+              <layout>p2</layout>
+              <url>**********</repository>
+          </repositories>
+        </profile>
+      </profiles>
     </settings>
 
 
