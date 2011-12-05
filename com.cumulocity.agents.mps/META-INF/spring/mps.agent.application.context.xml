@@ -14,6 +14,9 @@
 	
 	<context:annotation-config />
 
+    <bean id="deviceDriver"
+        class="com.cumulocity.agents.mps.driver.MpsDeviceDriver" />
+
 	<bean id="platform" 
 	   class="com.cumulocity.sdk.client.platform.PlatformImpl"
 	   p:host="${cumulocity.host}"
@@ -24,7 +27,7 @@
 	<bean id="agent"
 	   class="com.cumulocity.agents.mps.model.MpsAgent"
 	   p:externalId="${agent.external.id}" />
-
+	   
 	<bean id="agentController" 
 	   class="com.cumulocity.sdk.agent.action.AgentActionsController"
 	   p:startupChain-ref="startupChain"
@@ -47,17 +50,11 @@
     <util:list id="cyclicActionsList">
         <bean class="com.cumulocity.agents.mps.action.ChildDevicesLookupAction" />
         <bean class="com.cumulocity.sdk.agent.action.ObtainDeviceMeasurementsAction"
-            p:measurementsRetriever-ref="mpsDeviceMeasurementsRetriever" />
+            p:deviceDriver-ref="deviceDriver" />
         <bean class="com.cumulocity.sdk.agent.action.UploadDeviceMeasurementsAction" />
         <bean class="com.cumulocity.sdk.agent.action.ObtainDeviceOperationsAction" />
         <bean class="com.cumulocity.sdk.agent.action.ExecuteDeviceOperationsAction"
-            p:operationExecutor-ref="mpsDeviceOperationExecutor" />
+            p:deviceDriver-ref="deviceDriver" />
     </util:list>
-    
-    <bean id="mpsDeviceMeasurementsRetriever"
-        class="com.cumulocity.agents.mps.action.MpsDeviceMeasurementsRetriever" />
-    
-    <bean id="mpsDeviceOperationExecutor"
-        class="com.cumulocity.agents.mps.action.MpsDeviceOperationExecutor" />
 	
 </beans>
