@@ -30,13 +30,16 @@
 				<targetPath>.</targetPath>
 			</resource>
 			<resource>
-				<!-- 
-					This extra resource entry is for META-INF directory,
-					that can only be placed in project root,
-					because of Eclipse PDE restrictions.
-				 -->
-				<directory>META-INF</directory>
-				<targetPath>META-INF</targetPath>
+			    <directory>.</directory>
+			    <targetPath>.</targetPath>
+			    <excludes>
+			        <exclude>.*</exclude>
+			        <exclude>.*/**/*</exclude>
+			        <exclude>src/**/*</exclude>
+			        <exclude>target/**/*</exclude>
+			        <exclude>pom.xml</exclude>
+			        <exclude>build.properties</exclude>
+			    </excludes>
 			</resource>
 		</resources>
 		
