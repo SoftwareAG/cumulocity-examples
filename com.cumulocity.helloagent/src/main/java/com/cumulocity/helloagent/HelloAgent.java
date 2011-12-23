@@ -27,6 +27,8 @@ public class HelloAgent implements Runnable {
 
     private static final String PASS = "cumulocity.password";
 
+	private static final String APP_KEY = "cumulocity.appKey";
+
     private Properties configuration;
     
     private FrameworkListener listener;
@@ -54,7 +56,8 @@ public class HelloAgent implements Runnable {
         		configuration.getProperty(CUMULOCITY_HOST),
         		configuration.getProperty(TENANT),
         		configuration.getProperty(USER),
-        		configuration.getProperty(PASS));
+        		configuration.getProperty(PASS),
+        		configuration.getProperty(APP_KEY));
         
         // Retrieve the Resource for the Inventory and Measurement
         InventoryResource inventoryResource = platform.getInventory();
