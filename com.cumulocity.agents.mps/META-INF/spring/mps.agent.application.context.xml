@@ -22,7 +22,8 @@
 	   p:host="${cumulocity.host}"
 	   p:tenantId="${cumulocity.tenant}"
 	   p:user="${cumulocity.user}"
-	   p:password="${cumulocity.password}" />
+	   p:password="${cumulocity.password}"
+	   p:applicationKey="${cumulocity.applicationKey}" />
 	   
 	<bean id="agent"
 	   class="com.cumulocity.agents.mps.model.MpsAgent"
