@@ -7,3 +7,4 @@ Bundle-Vendor: Nokia Siemens Networks
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Web-ContextPath: /hello
+Require-Bundle: com.nsn.cumulocity.sdk.support;bundle-version="[0.8,0.9)"

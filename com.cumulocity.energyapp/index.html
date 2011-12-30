@@ -2,7 +2,7 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title>Cumulocity: Energy Example</title>
+	<title>Cumulocity Energy Example</title>
 	<link rel="stylesheet" href="/apis/ui/extjs/resources/css/ext-all-gray.css" type="text/css" media="screen" title="no title" charset="utf-8">
 	<link rel="stylesheet" href="/apis/ui/resources/css/specific.css" type="text/css" media="screen" title="no title" charset="utf-8">
 	<script src="/apis/ui/extjs/ext-all-debug.js" type="text/javascript" charset="utf-8"></script>
@@ -10,6 +10,7 @@
 	<!-- Define Root URL for api calls -->
 	<script type="text/javascript" charset="utf-8">
 		var rooturl = '/apis';
+		var APP_KEY = 'secretKeyForTheApplication';
 	</script>
 	
 	<!-- Define ExtJS Loader -->
@@ -17,15 +18,11 @@
 		Ext.Loader.setConfig({
 		     enabled : true,
 		     paths   : {
-				 'APP'   : 'app'
+				   'APP'   : 'app'
 		     }
 		});       
 	</script>
-	
-	
-	
-	
-	</head>
+</head>
 <body>
 	
 	<div id="c8ypageloading"><span></span></div>
@@ -35,10 +32,7 @@
 	<!-- Components -->
 	<script src="/apis/ui/c8y/c8y-all-debug.js" type="text/javascript" charset="utf-8"></script>
 
-	<!-- Application
-	
-	The rest of the files of the application will be loaded with Ext Dynamic Loader.
-	-->
+	<!-- Application. The rest of the files of the application will be loaded with Ext Dynamic Loader. -->
 	<script src="app.js" type="text/javascript" charset="utf-8"></script>
 	
 </body>

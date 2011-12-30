@@ -9,19 +9,19 @@ C8Y.application({
     controllers : ['Energy'],
     items       : [
 		{
-			 	xtype	    : 'energypanel',
-				menuOption	: 'Energy',
-				iconCls		: 'iconGraph'
+			xtype	    : 'energypanel',
+			menuOption	: 'Energy',
+			iconCls		: 'iconGraph'
 		},
         {
-                xtype      : 'c8yinventorymanagement',
-                iconCls    : 'iconInventory',
-                menuOption : 'Inventory'   
+            xtype      : 'c8yinventorymanagement',
+            iconCls    : 'iconInventory',
+            menuOption : 'Inventory'   
         },
         {
-               xtype       : 'c8yusermanagementpanel',
-               menuOption  : 'Administration',
-               iconCls     : 'iconManagement'
+           xtype       : 'c8yusermanagementpanel',
+           menuOption  : 'Administration',
+           iconCls     : 'iconManagement'
         }
     ]
 });
