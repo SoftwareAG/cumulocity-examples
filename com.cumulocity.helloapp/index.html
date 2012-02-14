@@ -1,36 +1,37 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="utf-8">
-	<title>Hello, world!</title>
-	<link rel="stylesheet" href="/apis/ui/extjs/resources/css/ext-all-gray.css" type="text/css" media="screen" title="no title" charset="utf-8">
-	<link rel="stylesheet" href="/apis/ui/resources/css/specific.css" type="text/css" media="screen" title="no title" charset="utf-8">
-	<script src="/apis/ui/extjs/ext-all-debug.js" type="text/javascript" charset="utf-8"></script>
-	
-	<!-- Define Root URL for api calls -->
-	<script type="text/javascript" charset="utf-8">
-		var rooturl = '/apis';
-		var APP_KEY = 'secretKeyForTheApplication';
-	</script>
+ <meta charset="utf-8">
+ <title>Hello, world!</title>
+ <link rel="stylesheet" href="/apis/ui/extjs/resources/css/ext-all-gray.css" type="text/css" media="screen" title="no title" charset="utf-8">
+ <link rel="stylesheet" href="/apis/ui/resources/css/specific.css" type="text/css" media="screen" title="no title" charset="utf-8">
+ <script src="/apis/ui/extjs/ext-all-debug.js" type="text/javascript" charset="utf-8"></script>
+        
+ <!-- Define Root URL for api calls -->
+ <script type="text/javascript" charset="utf-8">
+ var rooturl = '/apis';
+ var APP_KEY = 'uL27no8nhvLlYmW1JIK1CA==';
+ </script>
 </head>
 <body>
 
-	<div id="c8ypageloading"><span></span></div>
-	
-	<script src="/apis/ui/c8y/clientlib-debug.js" type="text/javascript" charset="utf-8"></script>
-	<script src="/apis/ui/c8y/c8y-all-debug.js" type="text/javascript" charset="utf-8"></script>
-	
-	<script>
-    	C8Y.application({
-      		name : 'APP',
-	  		items : [
-      			{
-          			xtype : 'c8yinventorygrid',
-          			menuOption : 'Inventory',
-          			iconCls : 'iconInventory'
-        		}
-      		]
-    	});
-	</script>
+ <div id="c8ypageloading"><span></span></div>
+        
+ <script src="/apis/ui/c8y/clientlib.js" type="text/javascript" charset="utf-8"></script>
+ <script src="/apis/ui/c8y/all-classes.js" type="text/javascript" charset="utf-8"></script>
+ <script src="/apis/ui/c8y/app-all.js" type="text/javascript" charset="utf-8"></script>
+        
+ <script>
+ C8Y.application({
+ name : 'APP',
+ items : [
+ {
+ xtype : 'c8yinventorygrid',
+ menuOption : 'Inventory',
+ iconCls : 'iconInventory'
+ }
+ ]
+ });
+ </script>
 </body>
 </html>
