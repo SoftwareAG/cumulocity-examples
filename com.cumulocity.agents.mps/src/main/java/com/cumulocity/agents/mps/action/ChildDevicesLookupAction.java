@@ -48,7 +48,7 @@ public class ChildDevicesLookupAction implements AgentAction {
             GId childGid = null;
             try {
                 childGid = childReferenceRepresentation.getManagedObject().getId();
-                ManagedObjectRepresentation childRepresentation = platform.getInventory().getManagedObjectResource(childGid).get();
+                ManagedObjectRepresentation childRepresentation = platform.getInventoryApi().getManagedObject(childGid).get();
                 MpsDevice mpsDevice = childRepresentation.get(MpsDevice.class);
                 if (mpsDevice != null) {
                     LOG.info(format("found mps device: %s", childGid.toString()));

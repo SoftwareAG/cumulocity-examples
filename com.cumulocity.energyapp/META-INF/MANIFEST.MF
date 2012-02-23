@@ -6,4 +6,4 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: Nokia Siemens Networks
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Web-ContextPath: /energy
-Require-Bundle: com.nsn.cumulocity.sdk.support;bundle-version="[0.8,0.9)"
+Require-Bundle: com.nsn.cumulocity.sdk.support

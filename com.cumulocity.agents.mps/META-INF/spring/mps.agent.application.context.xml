@@ -18,7 +18,7 @@
         class="com.cumulocity.agents.mps.driver.MpsDeviceDriver" />
 
 	<bean id="platform" 
-	   class="com.cumulocity.sdk.client.platform.PlatformImpl"
+	   class="com.cumulocity.sdk.client.PlatformImpl"
 	   p:host="${cumulocity.host}"
 	   p:tenantId="${cumulocity.tenant}"
 	   p:user="${cumulocity.user}"

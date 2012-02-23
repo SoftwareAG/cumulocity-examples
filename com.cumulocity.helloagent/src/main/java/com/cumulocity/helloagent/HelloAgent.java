@@ -6,18 +6,21 @@ import java.util.Date;
 import java.util.Properties;
 
 import org.osgi.framework.FrameworkListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.cumulocity.model.measurement.MeasurementValue;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
-import com.cumulocity.sdk.client.ClientException;
 import com.cumulocity.sdk.client.Platform;
-import com.cumulocity.sdk.client.ResourceInternalException;
-import com.cumulocity.sdk.client.inventory.InventoryResource;
-import com.cumulocity.sdk.client.measurement.MeasurementApiResource;
-import com.cumulocity.sdk.client.platform.PlatformImpl;
+import com.cumulocity.sdk.client.PlatformImpl;
+import com.cumulocity.sdk.client.SDKException;
+import com.cumulocity.sdk.client.inventory.InventoryApi;
+import com.cumulocity.sdk.client.measurement.MeasurementApi;
 
 public class HelloAgent implements Runnable {
+	
+	private final Logger logger = LoggerFactory.getLogger(HelloAgent.class);
 
     private static final String CUMULOCITY_HOST = "cumulocity.host";
 
@@ -60,8 +63,8 @@ public class HelloAgent implements Runnable {
         		configuration.getProperty(APP_KEY));
         
         // Retrieve the Resource for the Inventory and Measurement
-        InventoryResource inventoryResource = platform.getInventory();
-        MeasurementApiResource measurementResource = platform.getMeasurement();
+        InventoryApi inventoryResource = platform.getInventoryApi();
+        MeasurementApi measurementResource = platform.getMeasurementApi();
 
         try {
 
@@ -71,7 +74,8 @@ public class HelloAgent implements Runnable {
 
             // Create the object in the database (update the local representation
             // with the data added by the database)
-            mor = inventoryResource.getMOCollectionResource().create(mor);
+            mor = inventoryResource.create(mor);
+            logger.info(mor.getSelf());
 
 			// Create a MeasurementRepresentation for our object and set some properties
 			MeasurementRepresentation measurementRepresentation = new MeasurementRepresentation();
@@ -85,12 +89,10 @@ public class HelloAgent implements Runnable {
 			measurement.setValue(new BigDecimal(System.currentTimeMillis()));
 			
 			measurementRepresentation.set(measurement, "My measurement");
-			measurementResource.getMeasurementCollectionResource().create(measurementRepresentation);
+			measurementRepresentation = measurementResource.create(measurementRepresentation);
+			logger.info(measurementRepresentation.getSelf());
 
-        } catch (ResourceInternalException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
-        } catch (ClientException e1) {
+        } catch (SDKException e1) {
             // TODO Auto-generated catch block
             e1.printStackTrace();
         }

@@ -255,7 +255,7 @@ public class MpsDeviceDriver implements DeviceDriver<MpsDevice> {
 	private void addEventToPlatform(GId deviceId, RelayState relayState) throws DeviceException {
         MpsRelayEvent event = new MpsRelayEvent(deviceId, relayState);
         try {
-        	platform.getEvent().getEventCollectionResource().create(event);
+        	platform.getEventApi().create(event);
         } catch (Exception e) {
         	String failureReason = "Problem posting event";
             LOG.error(failureReason, e);
