@@ -8,7 +8,7 @@ Access to [Cumulocity SDK] [1] p2 repository is required to build examples [Mave
 Running from Eclipse
 ---------------
 
-All examples are ready to import as `Existing Eclipse Project`. Refer to Developer's guide for detailed instructions.
+Refer to Developer's guide for detailed instructions.
 
 Building with Maven
 ---------------

@@ -1,0 +1,24 @@
+This example is similar to the Hello World! agent described on the Guides section of www.cumulocity.com.
+
+The changes are:
+* configuration via an external file
+* separation between OSGi activator and HelloAgent class
+* additional error logging
+
+Building in Eclipse
+-------------------
+
+In Eclipse, click "File" → "New" → "Project..." and select "Java Project" in the New Project Wizard.
+Deselect "Use default location" and select "Browse...". 
+Choose the folder containing this README.
+Click "Finish".
+Right-click on the project in the "Package Explorer" → "Configure" → "Convert to Plug-in Projects...".
+Make sure the project is selected and click "Finish".
+Right-click on the src/main/resources folder and choose "Build Path" → "Use as Source Folder"
+
+Running in Eclipse
+------------------
+
+Add your credentials to the src/main/resources/helloagent.properties file.
+Right-click on the com.cumulocity.helloagent project name and choose: Run As→ OSGi framework.
+
