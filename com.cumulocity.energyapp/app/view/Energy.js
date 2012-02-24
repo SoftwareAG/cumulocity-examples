@@ -21,7 +21,6 @@ Ext.define('APP.view.Energy', {
 				itemId				: 'mpsTree',
 				region   			: 'west',
 				width	 			: 280,
-				//Quick hack to work on developer.cumulocity.com for the demo
     			managedObjectType 	: 'mpsdevice',
 				childType			: 'childDevices',
 				editable 			: false,
