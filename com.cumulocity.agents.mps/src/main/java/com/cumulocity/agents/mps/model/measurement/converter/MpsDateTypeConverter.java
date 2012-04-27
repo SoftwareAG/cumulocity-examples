@@ -7,7 +7,7 @@ import org.svenson.converter.TypeConverter;
 
 public class MpsDateTypeConverter implements TypeConverter {
 
-	public static final String DATE_TIME_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss";
+	public static final String DATE_TIME_FORMAT_PATTERN = "yy-MM-dd HH:mm:ss";
 	
 	public static final DateFormat DATE_TIME_FORMAT = new SimpleDateFormat(DATE_TIME_FORMAT_PATTERN);
 	
