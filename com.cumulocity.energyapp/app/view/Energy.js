@@ -4,6 +4,7 @@ Ext.define('APP.view.Energy', {
 	requires : [
 		'C8Y.ux.InventoryTree',
 		'C8Y.ux.MeasurementGraph',
+		'C8Y.ux.plugin.Panel',
 		'C8Y.ux.DeviceControlPanel'
 	],
 	
@@ -15,54 +16,58 @@ Ext.define('APP.view.Energy', {
 	},
 	
 	buildItems : function() {
-		return [
-			{
-				xtype	 			: 'c8yinventorytree',
-				itemId				: 'mpsTree',
-				region   			: 'west',
-				width	 			: 280,
-    			managedObjectType 	: 'mpsdevice',
-				childType			: 'childDevices',
-				editable 			: false,
-				plugins  			: [
-					'c8ypanel'
-				]
-			},
-			{
-				xtype	 : 'c8ymeasurementgraph',
-				itemId	 : 'mpsGraph',
-				region	 : 'center',
-				measurementProperty : 'com_cumulocity_model_energy_measurement_ThreePhaseEnergyMeasurement',
-				ytitle		: 'Energy (kWh)',
-				bodyStyle   : 'border-top-width: 0 !important;',
-				dockedItems : {
-				    xtype    : 'c8ydevicecontrolpanel',
-				    dock    : 'bottom',
-				    height  : 120,
-				    title   : 'Device Control'
-				},
-				series	 : [
-					{
-						type 	: 'line',
-						yField  : 'A+:1'
-					},
-					{
-						type 	: 'line',
-						yField  : 'A+:2'
-					},
-					{
-						type 	: 'line',
-						yField  : 'A+'
-					},
-					{
-						type 	: 'line',
-						yField  : 'A-'
-					}
-				],
-				plugins  : [
-					'c8ypanel'
-				]
-			}
-		]
+		if (C8Y.client.auth.hasInventoryReadRole() && C8Y.client.auth.hasMeasurementReadRole()) {
+            return [
+                {
+                    xtype               : 'c8yinventorytree',
+                    itemId	            : 'mpsTree',
+                    region              : 'west',
+                    width               : 280,
+                    childType           : 'childDevices',
+                    editable            : false,
+                    plugins             : [
+                        'c8ypanel'
+                    ]
+                },
+                {
+                    xtype	 : 'c8ymeasurementgraph',
+                    itemId	 : 'mpsGraph',
+                    region	 : 'center',
+                    measurementProperty : 'com_cumulocity_model_energy_measurement_ThreePhaseEnergyMeasurement',
+                    ytitle		: 'Energy (kWh)',
+                    bodyStyle   : 'border-top-width: 0 !important;',
+                    dockedItems : {
+                        xtype    : 'c8ydevicecontrolpanel',
+                        dock    : 'bottom',
+                        height  : 120,
+                        title   : 'Device Control'
+                    },
+                    series  : [
+                        {
+                            type    : 'line',
+                            yField  : 'A+:1'
+                        },
+                        {
+                            type    : 'line',
+                            yField  : 'A+:2'
+                        },
+                        {
+                            type    : 'line',
+                            yField  : 'A+'
+                        },
+                        {
+                            type    : 'line',
+                            yField  : 'A-'
+                        }
+                    ],
+                    plugins  : [
+                        'c8ypanel'
+                    ]
+                }
+            ];
+		} else {
+			Ext.getCmp(this.xtype + 'MenuButton').disable();
+			return [];
+		}
 	}
 });
