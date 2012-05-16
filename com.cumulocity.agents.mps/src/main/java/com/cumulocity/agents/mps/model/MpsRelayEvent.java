@@ -11,6 +11,9 @@ public class MpsRelayEvent extends EventRepresentation {
 	
     private static final String MPS_RELAY_EVENT = "MpsRelayEvent";
 
+	public MpsRelayEvent() {
+	}
+
     public MpsRelayEvent(GId source, RelayState meterRelayStatus) {
         setType(MPS_RELAY_EVENT);
         setTime(new Date());
