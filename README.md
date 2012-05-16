@@ -41,6 +41,7 @@ Building with Maven
       </profiles>
     </settings>
 
+To built `example-packages` it may also be necessary to put the current version of [Cumulocity] [1] in `example-packages/examples-repository/category.xml`.
 
   [1]: http://www.cumulocity.com
   [2]: http://maven.apache.org/

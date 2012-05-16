@@ -30,7 +30,7 @@
       <import plugin="org.springframework.beans"/>
       <import plugin="org.springframework.context"/>
       <import plugin="org.springframework.core"/>
-      <import plugin="com.nsn.cumulocity.shared-components.svenson-bundle"/>
+      <import plugin="com.nsn.cumulocity.dependencies.osgi.svenson"/>
       <import plugin="com.nsn.cumulocity.shared-components.common-utils"/>
    </requires>
 
