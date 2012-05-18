@@ -1,0 +1,61 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:p="http://www.springframework.org/schema/p" xmlns:task="http://www.springframework.org/schema/task"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.0.xsd
+                http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+                http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd
+                http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+	
+    <context:property-placeholder location="classpath:META-INF/mps.agent.properties"
+       system-properties-mode="OVERRIDE" />
+	
+	<task:scheduler id="scheduler" pool-size="${agent.scheduler.pool.size}" />
+	
+	<context:annotation-config />
+
+    <bean id="deviceDriver"
+        class="com.cumulocity.agents.mps.driver.MpsDeviceDriver" />
+
+	<bean id="platform" 
+	   class="com.cumulocity.sdk.client.PlatformImpl"
+	   p:host="${cumulocity.host}"
+	   p:tenantId="${cumulocity.tenant}"
+	   p:user="${cumulocity.user}"
+	   p:password="${cumulocity.password}"
+	   p:applicationKey="${cumulocity.applicationKey}" />
+	   
+	<bean id="agent"
+	   class="com.cumulocity.agents.mps.model.MpsAgent"
+	   p:externalId="${agent.external.id}" />
+	   
+	<bean id="agentController" 
+	   class="com.cumulocity.sdk.agent.action.AgentActionsController"
+	   p:startupChain-ref="startupChain"
+	   p:cyclicChain-ref="cyclicChain"
+	   p:cyclicChainDelay="${agent.sheduler.fixed.delay}" />
+	
+	<bean id="startupChain"
+	   class="com.cumulocity.sdk.agent.action.AgentActionsChain"
+	   p:actions-ref="startupActionsList" />
+	
+	<util:list id="startupActionsList">
+	    <bean class="com.cumulocity.sdk.agent.action.AgentGidLookupAction" />
+	    <bean class="com.cumulocity.sdk.agent.action.RepresentationLookupAction" />
+	</util:list>
+	
+   <bean id="cyclicChain"
+       class="com.cumulocity.sdk.agent.action.AgentActionsChain"
+       p:actions-ref="cyclicActionsList" />
+    
+    <util:list id="cyclicActionsList">
+        <bean class="com.cumulocity.agents.mps.action.ChildDevicesLookupAction" />
+        <bean class="com.cumulocity.sdk.agent.action.ObtainDeviceMeasurementsAction"
+            p:deviceDriver-ref="deviceDriver" />
+        <bean class="com.cumulocity.sdk.agent.action.UploadDeviceMeasurementsAction" />
+        <bean class="com.cumulocity.sdk.agent.action.ObtainDeviceOperationsAction" />
+        <bean class="com.cumulocity.sdk.agent.action.ExecuteDeviceOperationsAction"
+            p:deviceDriver-ref="deviceDriver" />
+    </util:list>
+	
+</beans>
