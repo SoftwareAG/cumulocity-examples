@@ -1,0 +1,15 @@
+.C8Yheaderlogo { margin: 0 16px 0 50px; background: transparent url('../images/energy/header.myenergy.png') no-repeat center center; }
+.C8Yloginpanel { border: 0; background: transparent url('../images/energy/login-energy.png') no-repeat center center }
+.C8Yloginpanel-copyright-text { color: #333333; font-size: 11px !important; font-weight: normal; margin: 0; padding: 0; position: absolute; left: 410px; top: 366px }
+.x-form-item-label { color: #907050 }
+
+.mainAction { background: transparent url('/apis/ui/resources/images/c8y-generic/buttonsgrad_up.png') repeat-x !important; }
+.mainAction * { color: #000000 !important; }
+.mainAction.x-btn-pressed, .mainAction:hover { background: transparent url('/apis/ui/resources/images/c8y-generic/buttonsgrad_down.png') repeat-x !important; }
+
+.C8Ymaintoolbar { background: #666666 none !important; }
+
+.C8Ymainmenubtn:hover { background-color: #666666 !important; }
+.C8Ymainmenubtn:hover * { background-color: #666666; color:#FFCC00 !important; }
+
+.C8YmainAfterLogin { background-image: initial; }
