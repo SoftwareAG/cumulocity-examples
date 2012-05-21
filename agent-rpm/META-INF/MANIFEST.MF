@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Sample energy agent
+Bundle-Name: Sample energy agent 3210
 Bundle-SymbolicName: com.cumulocity.agents.mps;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: Nokia Siemens Networks
