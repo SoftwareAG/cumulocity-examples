@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-
-<groupId>mps-device-emulator</groupId>
-<version>0.0.1-SNAPSHOT</version>
-	<artifactId>mps-device-emulator</artifactId>
+	<groupId>mps-device-emulator</groupId>
+	<version>0.0.1-SNAPSHOT</version>
+	<artifactId>mps-device-emulator-rpm</artifactId>
 	<name>Cumulocity :: Agents :: MPS :: MPS Device Emulator RPM</name>
 	
 	<properties>
 		<unpack.dir>${basedir}/target/unpacked</unpack.dir>
 		<rpm.version>${project.version}</rpm.version>
+		<mps.emulator.version>0.0.1-SNAPSHOT</mps.emulator.version>
 	</properties>
 
 	<build>
@@ -29,7 +29,7 @@
 								<artifactItem>
 									<groupId>mps-device-emulator</groupId>
 									<artifactId>mps-device-emulator</artifactId>
-									<version>0.0.1-SNAPSHOT</version>
+									<version>${mps.emulator.version}</version>
 									<type>jar</type>
 									<outputDirectory>${unpack.dir}</outputDirectory>
 								</artifactItem>
