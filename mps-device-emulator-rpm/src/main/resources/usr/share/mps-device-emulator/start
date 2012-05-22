@@ -1,0 +1,19 @@
+init() {
+    EMULATOR_DATA="/var/log/mps-device-emulator"
+}
+
+run() {
+    # Ensure the log directory exists -- we need to have a place to redirect stdout/stderr
+    if [ ! -d "$EMULATOR_DATA" ]; then
+        mkdir -p "$EMULATOR_DATA"
+    fi
+    exec java -Dserver.port=8091 -jar mps-device-emulator-0.0.1-SNAPSHOT-jar-with-dependencies.jar >> "$EMULATOR_DATA/emulator.out" 2>&1 &
+}
+
+main() {
+    init
+    run "$@"
+}
+
+main "$@"
+

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+<groupId>mps-device-emulator</groupId>
+<version>0.0.1-SNAPSHOT</version>
+	<artifactId>mps-device-emulator</artifactId>
+	<name>Cumulocity :: Agents :: MPS :: MPS Device Emulator RPM</name>
+	
+	<properties>
+		<unpack.dir>${basedir}/target/unpacked</unpack.dir>
+		<rpm.version>${project.version}</rpm.version>
+	</properties>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>unpack</id>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>mps-device-emulator</groupId>
+									<artifactId>mps-device-emulator</artifactId>
+									<version>0.0.1-SNAPSHOT</version>
+									<type>jar</type>
+									<outputDirectory>${unpack.dir}</outputDirectory>
+								</artifactItem>
+							</artifactItems>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>rpm-maven-plugin</artifactId>
+				<configuration>
+					<copyright>NSN</copyright>
+					<group>MTM/AGENT</group>
+					<version>1.0.0-SNAPSHOT</version>
+					<copyright>2011, Nokia Siemens Networks</copyright>
+					<projversion>${rpm.version}</projversion>
+					<mappings>
+						<mapping>
+							<directory>/usr/share/mps-device-emulator</directory>
+							<sources>
+								<source>
+									<location>${unpack.dir}</location>
+								</source>
+							</sources>
+						</mapping>
+						<mapping>
+						  <directory>/usr/share/mps-device-emulator</directory>
+						  <sources>
+							<source>
+							  <location>${basedir}/src/main/resources/usr/share/mps-device-emulator/</location>
+							</source>
+						  </sources>
+						</mapping>
+					</mappings>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>rpm</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>
