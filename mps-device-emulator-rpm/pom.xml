@@ -30,6 +30,7 @@
 									<groupId>mps-device-emulator</groupId>
 									<artifactId>mps-device-emulator</artifactId>
 									<version>${mps.emulator.version}</version>
+									<classifier>jar-with-dependencies</classifier>
 									<type>jar</type>
 									<outputDirectory>${unpack.dir}</outputDirectory>
 								</artifactItem>
