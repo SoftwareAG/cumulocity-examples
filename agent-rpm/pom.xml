@@ -53,14 +53,32 @@
 					<projversion>${rpm.version}</projversion>
 					<mappings>
 						<mapping>
-							<directory>/usr/share/cumulocity-demo-karaf/deploy</directory>
+							<directory>/usr/share/cumulocity-demo-karaf/system/com/cumulocity/example/com.cumulocity.agents.mps/1.0.0-SNAPSHOT</directory>
 							<sources>
 								<source>
 									<location>${unpack.dir}</location>
 								</source>
 							</sources>
 						</mapping>
+						
+						<mapping>
+						  <directory>/usr/share/cumulocity-demo-karaf/system</directory>
+						  <sources>
+							<source>
+							  <location>${basedir}/src/main/resources/system/</location>
+							</source>
+						  </sources>
+						</mapping>
+						
 					</mappings>
+					<postinstallScriptlet>
+						<scriptFile>src/main/scripts/postinstall</scriptFile>
+						<fileEncoding>utf-8</fileEncoding>
+					</postinstallScriptlet>
+					<preremoveScriptlet>
+						<scriptFile>src/main/scripts/preremove</scriptFile>
+						<fileEncoding>utf-8</fileEncoding>
+					</preremoveScriptlet>
 				</configuration>
 				<executions>
 					<execution>

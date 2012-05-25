@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<features name="cumulocity-mps-agent">
+	<feature name="cumulocity-mps-agent" version="1.0.0-SNAPSHOT">
+		<bundle>mvn:com.cumulocity.example/com.cumulocity.agents.mps/1.0.0-SNAPSHOT</bundle>
+	</feature>
+</features>
