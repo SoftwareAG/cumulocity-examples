@@ -1,3 +1,6 @@
+/*
+ * Copyright 2012 Nokia Siemens Networks 
+ */
 package com.cumulocity.agents.mps.model.measurement.converter;
 
 import org.svenson.converter.DefaultTypeConverterRepository;

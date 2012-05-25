@@ -1,3 +1,6 @@
+/*
+ * Copyright 2012 Nokia Siemens Networks 
+ */
 package com.cumulocity.helloagent;
 
 import java.io.IOException;

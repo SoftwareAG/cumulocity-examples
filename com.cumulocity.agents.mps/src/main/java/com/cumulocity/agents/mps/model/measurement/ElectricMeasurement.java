@@ -1,3 +1,6 @@
+/*
+ * Copyright 2012 Nokia Siemens Networks 
+ */
 package com.cumulocity.agents.mps.model.measurement;
 
 import org.svenson.AbstractDynamicProperties;
