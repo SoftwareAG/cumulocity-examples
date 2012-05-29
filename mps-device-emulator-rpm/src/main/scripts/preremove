@@ -1,0 +1,13 @@
+# stop service
+service mps-device-emulator stop
+sleep 5
+
+# clean up folders
+rm -rf /usr/share/mps-device-emulator
+
+# remove vsys init scripts for Ubuntu/CentOS
+#if [ -x /usr/sbin/update-rc.d ]; then
+#    update-rc.d -f cumulocity-demo-karaf remove
+#elif [ -x /sbin/chkconfig ]; then
+#    chkconfig --del cumulocity-demo-karaf
+#fi

@@ -3,11 +3,11 @@ init() {
 }
 
 run() {
-    # Ensure the log directory exists -- we need to have a place to redirect stdout/stderr
+    # Ensure the log directory exists 
     if [ ! -d "$EMULATOR_DATA" ]; then
         mkdir -p "$EMULATOR_DATA"
     fi
-    exec java -Dserver.port=8091 -jar mps-device-emulator-0.0.1-SNAPSHOT-jar-with-dependencies.jar &
+    exec java -Dserver.port=8091 -jar /usr/share/mps-device-emulator/mps-device-emulator-0.0.1-SNAPSHOT-jar-with-dependencies.jar &
 }
 
 main() {
