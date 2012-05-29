@@ -1,16 +1,4 @@
 croot=/usr/share/mps-device-emulator
-#vname=`ls -t /usr/share | grep "mps-device-emulator-.*" | head -1`
-#iroot="/usr/share/$vname"
-
-#if [ -L "$croot" ]; then
-#	rm $croot
-#fi
-#if [ -e "$croot" ]; then
-#	echo "ERROR: $croot exists"
-#	exit 1
-#fi
-
-#ln -s $iroot $croot
 
 # logs to /var/log
 mkdir -p /var/log/mps-device-emulator
@@ -20,25 +8,11 @@ chmod +x $croot/bin/start
 chmod +x $croot/bin/stop
 
 # add vsys init scripts for Ubuntu/CentOS
-#if [ -x /usr/sbin/update-rc.d ]; then
-#        update-rc.d cumulocity-demo-karaf defaults 86 14
-#elif [ -x /sbin/chkconfig ]; then
-#        chkconfig --add cumulocity-demo-karaf
-#fi
-
-# add current IP public address to conf file
-#IPPUB=`curl -s http://169.254.169.254/latest/meta-data/public-ipv4`
-#if [ -z $IPPUB ]; then#
-#	IPPUB=`hostname`
-#fi
-#echo "linkTemplateProcessor.baseURL=http://$IPPUB" >> /etc/cumulocity/cumulocity-demo.properties
-
-# This patch (MTM-1577) has been included in ami-e1526f95 (TBD)
-# set system parameters for CouchDB
-# sed -i 's/\# End of file/couchdb\t\tsoft\tnofile\t256000\ncouchdb\t\thard\tnofile\t384000\n\# End of file/g' /etc/security/limits.conf
-# sed -i 's/\# session.*required.*pam_limits.so/session\trequired\tpam_limits.so/g' /etc/pam.d/su
-# service couchdb restart
-
+if [ -x /usr/sbin/update-rc.d ]; then
+        update-rc.d mps-device-emulator defaults 86 14
+elif [ -x /sbin/chkconfig ]; then
+        chkconfig --add mps-device-emulator
+fi
 
 service mps-device-emulator start 
 

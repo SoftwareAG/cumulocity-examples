@@ -40,6 +40,28 @@
 						</executions>
 					</plugin>
 					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-resources-plugin</artifactId>
+						<executions>
+	    	                <execution>
+	    	                    <id>copy-applications</id>
+	    	                    <phase>process-sources</phase>
+	    	                    <goals>
+	    	                        <goal>copy-resources</goal>
+	    	                    </goals>
+	    	                    <configuration>
+	    	                        <outputDirectory>${unpack.dir}</outputDirectory>
+	    	                        <resources>
+	    	                            <resource>
+	    	                                <directory>src/main/resources/usr/share/mps-device-emulator</directory>
+	    	                                <filtering>true</filtering>
+	                                	</resource>
+	                            	</resources>
+	                        	</configuration>
+	                    	</execution>
+	                	</executions>
+	            	</plugin>
+					<plugin>
 						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>rpm-maven-plugin</artifactId>
 						<configuration>
@@ -59,14 +81,6 @@
 										</source>
 									</sources>
 								</mapping>
-								<mapping>
-								  <directory>/usr/share/mps-device-emulator</directory>
-								  <sources>
-									<source>
-									  <location>${basedir}/src/main/resources/usr/share/mps-device-emulator/</location>
-									</source>
-								  </sources>
-								</mapping>
 								
 								<mapping>
 									<directory>/etc/init.d</directory>
@@ -77,9 +91,8 @@
 											<location>${basedir}/src/main/scripts/init.d/mps-device-emulator</location>
 										</source>
 									</sources>
-								</mapping>								
-								
-								
+								</mapping>
+
 							</mappings>
 							<postinstallScriptlet>
 								<scriptFile>src/main/scripts/postinstall</scriptFile>
