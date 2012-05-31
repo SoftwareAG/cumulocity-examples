@@ -1,2 +1,5 @@
-#NEED STOP SCRIPT
-echo "STOP SCRIPT"
+#Looking for mps-device-emulator process and then kill it
+pid=$(ps aux | grep mps-device-emulator | grep java | awk '{print $2}')
+if [ $pid > 0 ]; then
+  kill -9 $pid
+fi
