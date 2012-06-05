@@ -13,6 +13,8 @@
 		<maven.compiler.source>1.6</maven.compiler.source>
 		<maven.compiler.target>1.6</maven.compiler.target>
 	    <tycho.version>0.13.0</tycho.version>
+	    
+	    <nexus.port>443</nexus.port>
 	</properties>
 	
 	<modules>
@@ -133,12 +135,12 @@
 
     <distributionManagement>
         <snapshotRepository>
-            <id>cumulocity-resources-snapshot</id>
-            <url>http://resources.cumulocity.com/maven/repository-snapshots/</url>
+            <id>snapshot</id>
+            <url>https://nexus.cumulocity.com:${nexus.port}/nexus/content/repositories/snapshots/</url>
         </snapshotRepository>
         <repository>
-            <id>cumulocity-resources-release</id>
-            <url>http://resources.cumulocity.com/maven/repository/</url>
+            <id>release</id>
+            <url>https://nexus.cumulocity.com:${nexus.port}/nexus/content/repositories/releases/</url>
         </repository>
     </distributionManagement>
 	
