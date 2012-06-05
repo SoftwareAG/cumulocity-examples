@@ -111,5 +111,16 @@
 			</plugin>
 		</plugins>
 	</build>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>cumulocity-resources-snapshot</id>
+            <url>http://resources.cumulocity.com/maven/repository-snapshots/</url>
+        </snapshotRepository>
+        <repository>
+            <id>cumulocity-resources-release</id>
+            <url>http://resources.cumulocity.com/maven/repository/</url>
+        </repository>
+    </distributionManagement>
 	
 </project>
