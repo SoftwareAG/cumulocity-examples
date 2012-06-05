@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>com.cumulocity.example</groupId>
 		<artifactId>cumulocity-examples</artifactId>
-		<version>1.0.0-SNAPSHOT</version>
+		<version>1.0.1</version>
 	</parent>
 
 	<artifactId>example-packages</artifactId>
@@ -40,5 +40,51 @@
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>	
+	
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <targetPath>.</targetPath>
+            </resource>
+            <resource>
+                <directory>.</directory>
+                <targetPath>.</targetPath>
+                <excludes>
+                    <exclude>.*</exclude>
+                    <exclude>.*/**/*</exclude>
+                    <exclude>src/**/*</exclude>
+                    <exclude>target/**/*</exclude>
+                    <exclude>pom.xml</exclude>
+                    <exclude>build.properties</exclude>
+                </excludes>
+            </resource>
+        </resources>
+        
+        <plugins>
+            <plugin>
+                <groupId>org.eclipse.tycho</groupId>
+                <artifactId>tycho-maven-plugin</artifactId>
+            </plugin>
+            
+            <plugin>
+                <groupId>org.eclipse.tycho</groupId>
+                <artifactId>target-platform-configuration</artifactId>
+            </plugin>
+            
+            <plugin>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <!--
+                            Prevents Maven from generating the manifest file.
+                            We are providing the OSGi compliant one instead.
+                         -->
+                        <manifestFile>META-INF/MANIFEST.MF</manifestFile>
+                    </archive>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 	
 </project>
