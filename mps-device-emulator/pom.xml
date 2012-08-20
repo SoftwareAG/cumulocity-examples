@@ -15,7 +15,7 @@
 	<url>http://startups.jira.com/wiki/display/MTM/Home</url>
 
 	<properties>
-		<jetty.version>7.4.5.v2.2.0-SNAPSHOT725</jetty.version>
+		<jetty.version>7.4.5.v20110725</jetty.version>
 		<spring.version>3.0.5.RELEASE</spring.version>
 	</properties>
 
