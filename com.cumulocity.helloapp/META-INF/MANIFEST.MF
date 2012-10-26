@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Hello world application
 Bundle-SymbolicName: com.cumulocity.helloapp
-Bundle-Version: 2.1.1
+Bundle-Version: 2.2.0
 Bundle-Vendor: Nokia Siemens Networks
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
