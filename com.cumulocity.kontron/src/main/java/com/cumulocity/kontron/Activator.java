@@ -4,6 +4,7 @@
 
 package com.cumulocity.kontron;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -24,7 +25,7 @@ public class Activator implements BundleActivator, M2M_Demo_Constants {
 	public void start(BundleContext bundleContext) throws Exception {
 		Activator.context = bundleContext;
 
-		InputStream bundleProps = getClass().getResourceAsStream(PROPERTIES_FILE);
+		InputStream bundleProps = getClass().getResourceAsStream("/" + PROPERTIES_FILE);
 		prop.load(bundleProps);
 
 		try {
@@ -35,18 +36,23 @@ public class Activator implements BundleActivator, M2M_Demo_Constants {
 		}
 
         if (prop.getProperty(PROP_ADMIN_NAME).isEmpty()) {
-    		System.out.println("Error : "+PROP_ADMIN_NAME+" is not defined inside the file "+PROPERTIES_FILE) ;
+    		System.out.println("Error: "+PROP_ADMIN_NAME+" is not defined inside the file "+PROPERTIES_FILE) ;
             System.exit(1) ;
         }
         if (prop.getProperty(PROP_ADMIN_PASS).isEmpty()) {
-    		System.out.println("Error : "+PROP_ADMIN_PASS+" is not defined inside the file "+PROPERTIES_FILE) ;
+    		System.out.println("Error: "+PROP_ADMIN_PASS+" is not defined inside the file "+PROPERTIES_FILE) ;
             System.exit(1) ;
         } 
-        
-        System.out.println("      Cumulocity URL: " + prop.getProperty(PROP_C8Y_SERVER_URL)) ;
-        System.out.println("              Tenant: " + prop.getProperty(PROP_TENNANT)) ;
-        System.out.println("                User: " + prop.getProperty(PROP_ADMIN_NAME)) ;
-        System.out.println("          Accel rate: " + Integer.parseInt(prop.getProperty(PROP_READING_PERIOD))) ;
+        if (!new File(prop.getProperty(ACCELEROMETER_FULL_SCALE)).exists()) {
+        	System.out.println("Error: Cannot access accelerometer at " + prop.getProperty(ACCELEROMETER_FULL_SCALE));
+        	System.exit(1);
+        }
+        	
+        	
+        System.out.println("Cumulocity URL: " + prop.getProperty(PROP_C8Y_SERVER_URL)) ;
+        System.out.println("Tenant: " + prop.getProperty(PROP_TENNANT)) ;
+        System.out.println("User: " + prop.getProperty(PROP_ADMIN_NAME)) ;
+        System.out.println("Accel rate: " + Integer.parseInt(prop.getProperty(PROP_READING_PERIOD))) ;
  
         M2MKontronAgentRepresentation agentRep = M2MKontronAgentRepresentation.getInstance(prop) ;
     	if (! agentRep.isOK())  {
@@ -54,7 +60,7 @@ public class Activator implements BundleActivator, M2M_Demo_Constants {
             System.exit(1) ;
     	}
 
-    	System.out.println("         Agent MO ID: " + agentRep.getID()) ;
+    	System.out.println("Agent MO ID: " + agentRep.getID()) ;
     	agentRep.setAlarmTimeThreshold(Integer.parseInt(prop.getProperty(ALARM_TIME_THRESHOLD))) ;
 
         System.out.println() ;

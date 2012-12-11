@@ -13,11 +13,6 @@ public class AccelerometerThresholdActionImpl implements AccelerometerThresholdA
 {
 	public void action (AccelerometerXYZReading xyz, AccelerometerThresholds thr)
 	{
-		//String message = "thresholds x:(-" +  thr.negative_x + ", " + thr.positive_x + ") " +
-		//		"y:(-" +  thr.negative_y + ", " + thr.positive_y + ") " +
-		//		"z:(-" +  thr.negative_z + ", " + thr.positive_z + ") " +
-		//		"  XYZ reading : " + xyz.getX() + " " + xyz.getY() + " " + xyz.getZ() ;
-		
 		DecimalFormat df = new DecimalFormat("#.##") ;
 		StringBuffer msgBuffer = new StringBuffer("Threshold crossed: ") ;
 		if ( xyz.getX() < -thr.negative_x || xyz.getX() > thr.positive_x )
