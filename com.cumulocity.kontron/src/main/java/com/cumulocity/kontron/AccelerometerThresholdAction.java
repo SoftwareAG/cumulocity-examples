@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Nokia Siemens Networks 
+ * Copyright 2012 Cumulocity GmbH 
  */
 
 package com.cumulocity.kontron;

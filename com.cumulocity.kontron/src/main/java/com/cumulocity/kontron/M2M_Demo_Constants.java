@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Nokia Siemens Networks 
+ * Copyright 2012 Cumulocity GmbH 
  */
 
 package com.cumulocity.kontron;
@@ -17,8 +17,8 @@ public interface M2M_Demo_Constants
 	public static final String PROPERTIES_FILE = "/kontron.agent.properties" ;
 	public static final String PROP_C8Y_SERVER_URL = "c8y.server.url" ;
 	public static final String PROP_TENNANT = "tennant.name" ;
-	public static final String PROP_ADMIN_NAME = "admin.name" ;
-	public static final String PROP_ADMIN_PASS = "admin.password" ;
+	public static final String PROP_ADMIN_NAME = "user.name" ;
+	public static final String PROP_ADMIN_PASS = "user.password" ;
 	public static final String PROP_APPLICATION_KEY = "application.key" ;
 	public static final String PROP_READING_PERIOD = "reading.period" ;
 	

@@ -1,14 +1,13 @@
+/*
+ * Copyright 2012 Cumulocity GmbH 
+ */
+
 package com.cumulocity.kontron;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-
-
-/*
- * Copyright 2012 Nokia Siemens Networks 
- */
 
 public class CLIService
 {
