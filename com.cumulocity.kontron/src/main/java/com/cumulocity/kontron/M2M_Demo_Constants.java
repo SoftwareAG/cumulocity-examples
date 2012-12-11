@@ -14,7 +14,7 @@ public interface M2M_Demo_Constants
 	public static final String FRI_ETH0_MAC_FILE = "/sys/class/net/eth0/address" ;
 	public static final String FRI_ETH0_MAC_DEFAULT = "00:00:00:00:00:00" ;
 	
-	public static final String PROPERTIES_FILE = "kontron.agent.properties" ;
+	public static final String PROPERTIES_FILE = "/kontron.agent.properties" ;
 	public static final String PROP_C8Y_SERVER_URL = "c8y.server.url" ;
 	public static final String PROP_TENNANT = "tennant.name" ;
 	public static final String PROP_ADMIN_NAME = "admin.name" ;
