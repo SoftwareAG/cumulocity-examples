@@ -1,6 +1,23 @@
 /*
- * Copyright 2012 Nokia Siemens Networks 
+ * Copyright (C) 2013 Cumulocity GmbH
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of 
+ * this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation the rights to use,
+ * copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+ * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+ * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 package com.cumulocity.agents.mps.action;
 
 import static java.lang.String.format;
@@ -26,16 +43,16 @@ public class ChildDevicesLookupAction implements AgentAction {
     private static final Logger LOG = LoggerFactory.getLogger(ChildDevicesLookupAction.class);
 
     private Platform platform;
-    
+
     private MpsAgent agent;
 
     @Autowired
     public ChildDevicesLookupAction(Platform platform, MpsAgent agent) {
-		this.platform = platform;
-		this.agent = agent;
-	}
+        this.platform = platform;
+        this.agent = agent;
+    }
 
-	@Override
+    @Override
     public void run() {
         if (agent.getAgentRepresentation() == null) {
             String message = "Agent representation is not known. Cannot check childDevices";
@@ -46,7 +63,7 @@ public class ChildDevicesLookupAction implements AgentAction {
     }
 
     public List<MpsDevice> findChildDevicesForParent(ManagedObjectRepresentation parent) {
-    	List<MpsDevice> devices = new ArrayList<MpsDevice>();
+        List<MpsDevice> devices = new ArrayList<MpsDevice>();
         for (ManagedObjectReferenceRepresentation childReferenceRepresentation : parent.getChildDevices().getReferences()) {
             GId childGid = null;
             try {
@@ -58,8 +75,8 @@ public class ChildDevicesLookupAction implements AgentAction {
                     mpsDevice.setGlobalId(childGid);
                     MpsBridge mpsBridge = parent.get(MpsBridge.class);
                     if (mpsBridge != null) {
-                        LOG.info(format("found mps bridge: %s - setting deviceUrl for device: %s",
-                        		parent.getId().toString(), childGid.toString()));
+                        LOG.info(format("found mps bridge: %s - setting deviceUrl for device: %s", parent.getId().toString(),
+                                childGid.toString()));
                         mpsDevice.setDeviceUrl(mpsBridge.getDeviceUrl());
                     }
                     devices.add(mpsDevice);
