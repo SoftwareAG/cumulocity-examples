@@ -17,9 +17,7 @@
  * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-/*
- * Copyright 2012 Nokia Siemens Networks 
- */
+
 package com.cumulocity.helloagent;
 
 import java.io.IOException;
@@ -38,11 +36,11 @@ import com.cumulocity.sdk.client.inventory.InventoryApi;
 public class HelloAgent {
 
     private static final String PROPERTIES_FILENAME = "helloagent.properties";
-    private static final String PLATFORM_HOST = "http://developer.cumulocity.com/inventory/managedObjects/1855";
-    private static final String TENANT = "demo";
-    private static final String USER = "Siemiński";
-    private static final String PASSWORD = "testowe";
-    private static final String APPLICATION_KEY = "uL27no8nhvLlYmW1JIK1CA==";
+    private static final String PLATFORM_HOST = "cumulocity.host";
+    private static final String TENANT = "cumulocity.tenant";
+    private static final String USER = "cumulocity.user";
+    private static final String PASSWORD = "cumulocity.password";
+    private static final String APPLICATION_KEY = "cumulocity.applicationKey";
 
     private final Properties configuration;
     private final Logger logger = LoggerFactory.getLogger(HelloAgent.class);
