@@ -1,8 +1,24 @@
 /*
- * Copyright 2012 Nokia Siemens Networks 
+ * Copyright (C) 2013 Cumulocity GmbH
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of 
+ * this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation the rights to use,
+ * copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+ * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+ * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.nsn.m2m.intelagent;
+package com.cumulocity.kontron;
 
 import java.util.Date;
 
@@ -34,7 +50,7 @@ public class AccelerometerReader implements Runnable
 		cli = new CLIService() ;
 		
 		// read current scale (sensitivity) - 2g, 4g or 8g
-		String line = cli.readFile(Main.prop.getProperty(M2M_Demo_Constants.ACCELEROMETER_FULL_SCALE)) ;
+		String line = cli.readFile(Activator.prop.getProperty(M2M_Demo_Constants.ACCELEROMETER_FULL_SCALE)) ;
 		scale = Integer.parseInt(line) ;
 		switch (scale)
 		{
@@ -61,14 +77,13 @@ public class AccelerometerReader implements Runnable
 	}
 
 	
-	@Override
 	public void run ()
 	{
 		System.out.println(" -> AccelerometerReader started") ;
 
 		while (running)
 		{
-			String line = cli.readFile(Main.prop.getProperty(M2M_Demo_Constants.ACCELEROMETER_XYZ_VALUES)) ;
+			String line = cli.readFile(Activator.prop.getProperty(M2M_Demo_Constants.ACCELEROMETER_XYZ_VALUES)) ;
 			//System.out.println(" AccelerometerReader : line = " + line) ;
 			String[] values = line.split(" ") ;
 			storeData(Integer.parseInt(values[1].trim()), Integer.parseInt(values[2].trim()), Integer.parseInt(values[3].trim())) ;

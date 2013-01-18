@@ -13,3 +13,4 @@ Import-Package: com.cumulocity.rest.representation;version="[2.0,3.0)",
  org.osgi.framework;version="1.6.0",
  org.slf4j;version="1.6.1"
 Bundle-ActivationPolicy: lazy
+Export-Package: com.cumulocity.helloagent

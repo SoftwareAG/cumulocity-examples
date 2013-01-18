@@ -18,20 +18,35 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.cumulocity.agents.mps.model;
+package com.cumulocity.kontron;
 
-import org.svenson.JSONProperty;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 
-public class MpsBridge {
-
-    private String deviceUrl;
-
-    @JSONProperty(value = "deviceUrl", ignoreIfNull = true)
-    public String getDeviceUrl() {
-        return deviceUrl;
-    }
-
-    public void setDeviceUrl(String deviceUrl) {
-        this.deviceUrl = deviceUrl;
+public class CLIService
+{
+  
+    public String readFile (String filename)
+    {
+        BufferedReader reader;
+        String line = null ;
+               
+        try
+        {
+            reader = new BufferedReader( new FileReader( filename ) );
+            line = reader.readLine() ;
+            reader.close();
+        }
+        catch( FileNotFoundException e )
+        {
+            System.err.println(e.getMessage()) ;
+        }
+        catch( IOException e )
+        {
+        	System.err.println(e.getMessage()) ;
+        }    	
+    	return line ;
     }
 }

@@ -18,20 +18,34 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.cumulocity.agents.mps.model;
+package com.cumulocity.kontron;
 
-import org.svenson.JSONProperty;
+import java.util.Date;
 
-public class MpsBridge {
+public class AccelerometerXYZReading
+{
+	private double x = 0 ;
+	private double y = 0 ;
+	private double z = 0 ;
+	private Date date = null ;
+	
+	public AccelerometerXYZReading (Date date, double x, double y, double z)
+	{
+		this.x = x ;
+		this.y = y ;
+		this.z = z ;
+		this.date = date ;
+	}
 
-    private String deviceUrl;
+	public double getX () { return x ; } 
+	public double getY () { return y ; } 
+	public double getZ () { return z ; }
+	public Date getDate () { return date ; }
 
-    @JSONProperty(value = "deviceUrl", ignoreIfNull = true)
-    public String getDeviceUrl() {
-        return deviceUrl;
-    }
+	public String toString ()
+	{
+		return date.toString() + " " + x + " " + y + " " + z ;
+	}
 
-    public void setDeviceUrl(String deviceUrl) {
-        this.deviceUrl = deviceUrl;
-    }
+	
 }

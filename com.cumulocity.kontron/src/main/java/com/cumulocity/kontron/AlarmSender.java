@@ -18,20 +18,43 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.cumulocity.agents.mps.model;
+package com.cumulocity.kontron;
 
-import org.svenson.JSONProperty;
+import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
+import com.cumulocity.sdk.client.SDKException;
+import com.cumulocity.sdk.client.alarm.AlarmApi;
 
-public class MpsBridge {
 
-    private String deviceUrl;
 
-    @JSONProperty(value = "deviceUrl", ignoreIfNull = true)
-    public String getDeviceUrl() {
-        return deviceUrl;
-    }
+public class AlarmSender implements Runnable
+{
+	private AlarmRepresentation alarm ;
+	private AlarmApi alarmApi ;
+	
+	
+	public AlarmSender (AlarmRepresentation alarm, AlarmApi alarmApi)
+	{
+		this.alarm = alarm ;
+		this.alarmApi = alarmApi ;
+	}
+	
+	
+	public void sendAlarm ()
+	{
+		 Thread t = new Thread(this, "AlarmSender") ;
+		 t.start() ;
+	}
+	
+	public void run()
+	{
+        try {
+            System.out.println("Info: Sending alarm");
+            alarmApi.create(alarm);
+            System.out.println("Info: Alarm created ");
 
-    public void setDeviceUrl(String deviceUrl) {
-        this.deviceUrl = deviceUrl;
-    }
+        } catch (SDKException e) {
+            System.out.println("There is a problem connecting to the platform: " + e.getMessage());
+        }   		
+	}
+
 }
