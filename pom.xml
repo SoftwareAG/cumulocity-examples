@@ -22,6 +22,7 @@
 		<module>com.cumulocity.helloagent</module>
 		<module>com.cumulocity.energyapp</module>
 		<module>com.cumulocity.agents.mps</module>
+		<module>com.cumulocity.kontron</module>
 		<module>mps-device-emulator</module>
 		<module>mps-device-emulator-rpm</module>
 <!-- 		<module>example-packages</module> -->
