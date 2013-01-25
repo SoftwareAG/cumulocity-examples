@@ -18,13 +18,13 @@
 	</properties>
 	
 	<modules>
-		<module>com.cumulocity.helloapp</module>
-		<module>com.cumulocity.helloagent</module>
-		<module>com.cumulocity.energyapp</module>
-		<module>com.cumulocity.agents.mps</module>
-		<module>com.cumulocity.kontron</module>
+		<module>hello-app</module>
+		<module>hello-agent</module>
 		<module>mps-device-emulator</module>
 		<module>mps-device-emulator-rpm</module>
+		<module>mps-energy-agent</module>
+		<module>mps-energy-app</module>
+		<module>kontron-shock-agent</module>
 <!-- 		<module>example-packages</module> -->
 	</modules>
 
