@@ -7,7 +7,7 @@ You need to change locationURI variable in 'linkedResources -> link' where [$%7B
 		<link>
 			<name>java-client-me-sdk</name>
 			<type>2</type>
-			<locationURI>$%7BPARENT-1-PROJECT_LOC%7D/java-me-client/src/main/java</locationURI>
+			<locationURI>$%7BPARENT-2-PROJECT_LOC%7D/clients-java/java-me-client/src/main/java</locationURI>
 		</link>
 	</linkedResources>
 
