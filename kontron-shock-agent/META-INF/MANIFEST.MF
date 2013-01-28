@@ -1,10 +1,10 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Kontron demo agent
-Bundle-SymbolicName: com.cumulocity.kontron
-Bundle-Version: 2.6.0.qualifier
+Bundle-SymbolicName: com.cumulocity.example.kontron-shock-agent
+Bundle-Version: 2.5.2.qualifier
 Bundle-Activator: com.cumulocity.kontron.Activator
-Bundle-Vendor: Cumulocity GmbH
+Bundle-Vendor: (C) Cumulocity GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.cumulocity.model;version="[2.0,3.0)",
  com.cumulocity.model.idtype;version="[2.0,3.0)",
