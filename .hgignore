@@ -1,6 +1,6 @@
-.project
+(^|/)\.
 target
-.classpath
-.settings
 bin
-.DS_Store
+.*\.iml
+.*\.orig
+cucumber.html

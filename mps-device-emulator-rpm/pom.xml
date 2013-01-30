@@ -148,18 +148,4 @@
         </plugins>
     </build>
 
-
-    <!-- profiles> <profile> <id>rpm</id> <build> <plugins> <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-dependency-plugin</artifactId> 
-        <executions> <execution> <id>unpack</id> <phase>generate-resources</phase> <goals> <goal>copy</goal> </goals> <configuration> 
-        <artifactItems> <artifactItem> <groupId>mps-device-emulator</groupId> <artifactId>mps-device-emulator</artifactId> <version>${mps.emulator.version}</version> 
-        <classifier>jar-with-dependencies</classifier> <type>jar</type> <outputDirectory>${unpack.dir}</outputDirectory> </artifactItem> 
-        </artifactItems> </configuration> </execution> </executions> </plugin> <plugin> <groupId>org.codehaus.mojo</groupId> <artifactId>rpm-maven-plugin</artifactId> 
-        <configuration> <name>mps-device-emulator</name> <copyright>2012, Nokia Siemens Networks</copyright> <distribution>Cumulocity 
-        2012</distribution> <group>M2M/Agent</group> <packager>NSN</packager> <version>2.6.0-SNAPSHOT</version> <projversion>${rpm.version}</projversion> 
-        <mappings> <mapping> <directory>/usr/share/mps-device-emulator</directory> <sources> <source> <location>${unpack.dir}</location> 
-        </source> </sources> </mapping> <mapping> <directory>/usr/share/mps-device-emulator</directory> <sources> <source> <location>${basedir}/src/main/resources/usr/share/mps-device-emulator/</location> 
-        </source> </sources> </mapping> </mappings> <postinstallScriptlet> <scriptFile>src/main/scripts/postinstall</scriptFile> 
-        <fileEncoding>utf-8</fileEncoding> </postinstallScriptlet> </configuration> <executions> <execution> <goals> <goal>rpm</goal> 
-        </goals> </execution> </executions> </plugin> </plugins> </build> </profile> </profiles -->
-
 </project>
