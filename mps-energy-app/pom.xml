@@ -3,16 +3,15 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    
+
     <parent>
         <groupId>com.cumulocity.example</groupId>
         <artifactId>cumulocity-examples</artifactId>
-        <version>2.5.2-SNAPSHOT</version>
+        <version>2.6.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>com.cumulocity.agents.mps</artifactId>
-    <packaging>eclipse-plugin</packaging>
-    
+    <artifactId>mps-energy-app</artifactId>
+
     <licenses>
         <license>
             <name>MIT License</name>
@@ -60,16 +59,6 @@
         </resources>
 
         <plugins>
-            <plugin>
-                <groupId>org.eclipse.tycho</groupId>
-                <artifactId>tycho-maven-plugin</artifactId>
-            </plugin>
-
-            <plugin>
-                <groupId>org.eclipse.tycho</groupId>
-                <artifactId>target-platform-configuration</artifactId>
-            </plugin>
-
             <plugin>
                 <artifactId>maven-jar-plugin</artifactId>
                 <configuration>

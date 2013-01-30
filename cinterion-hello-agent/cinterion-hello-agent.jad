@@ -1,0 +1,7 @@
+MIDlet-Version: 1.0.0
+MIDlet-Vendor: Cumulocity
+MIDlet-Jar-URL: cinterion-hello-agent.jar
+MicroEdition-Configuration: CLDC-1.1
+MIDlet-1: HelloWorld,,com.cumulocity.me.example.cinterion.HelloWorld
+MicroEdition-Profile: IMP-NG
+MIDlet-Name: cinterion-hello-agent
