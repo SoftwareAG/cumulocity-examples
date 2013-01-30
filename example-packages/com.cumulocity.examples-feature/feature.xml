@@ -23,8 +23,8 @@
       <import plugin="com.nsn.cumulocity.model.core-model"/>
       <import plugin="com.nsn.cumulocity.model.device-capability-model"/>
       <import plugin="com.nsn.cumulocity.model.rest-representation"/>
-      <import plugin="com.nsn.cumulocity.platform-services.sdk.agent-lib"/>
-      <import plugin="com.nsn.cumulocity.platform-services.sdk.java-client-lib"/>
+      <import plugin="com.nsn.cumulocity.clients-java.java-agent-support"/>
+      <import plugin="com.nsn.cumulocity.clients-java.java-client"/>
       <import plugin="org.eclipse.osgi"/>
       <import plugin="org.slf4j.api"/>
       <import plugin="org.springframework.beans"/>
@@ -35,28 +35,28 @@
    </requires>
 
    <plugin
-         id="com.cumulocity.agents.mps"
+         id="mps-energy-agent"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="com.cumulocity.energyapp"
+         id="mps-energy-app"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="com.cumulocity.helloagent"
+         id="hello-agent"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="com.cumulocity.helloapp"
+         id="hello-app"
          download-size="0"
          install-size="0"
          version="0.0.0"

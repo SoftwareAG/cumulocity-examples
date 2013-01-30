@@ -47,22 +47,22 @@
     <dependencies>
         <dependency>
             <groupId>com.cumulocity.example</groupId>
-            <artifactId>com.cumulocity.helloapp</artifactId>
+            <artifactId>hello-app</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.cumulocity.example</groupId>
-            <artifactId>com.cumulocity.helloagent</artifactId>
+            <artifactId>hello-agent</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.cumulocity.example</groupId>
-            <artifactId>com.cumulocity.energyapp</artifactId>
+            <artifactId>mps-energy-app</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.cumulocity.example</groupId>
-            <artifactId>com.cumulocity.agents.mps</artifactId>
+            <artifactId>mps-energy-agent</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
