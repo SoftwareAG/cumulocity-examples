@@ -3,7 +3,7 @@ Cumulocity examples
 
 This repository contains example applications created using Cumulocity SDK. For more information on [Cumulocity] [1] visit [http://www.cumulocity.com] [1].
 
-Access to [Cumulocity SDK] [1] p2 repository is required to build examples with [Maven] [2]. URL and credentials are available to registered users of [http://www.cumulocity.com] [1] under Guides -> Developer's guide -> Installing the SDK.
+Access to [Cumulocity SDK] [1] p2 repository is required to build examples with [Maven] [2].
 
 Running from Eclipse
 ---------------
@@ -20,14 +20,6 @@ Building with Maven
         <activeProfile>cumulocity</activeProfile>
       </activeProfiles>
 
-      <servers>
-        <server>
-          <id>cumulocity-sdk-repo</id>
-          <username>********</username>
-          <password>********</password>
-        </server>
-      </servers>
-
       <profiles>
         <profile>
           <id>cumulocity</id>
@@ -35,7 +27,7 @@ Building with Maven
             <repository>
               <id>cumulocity-sdk-repo</id>
               <layout>p2</layout>
-              <url>**********</url>
+              <url>http://resources.cumulocity.com/p2/repository</url>
             </repository>
           </repositories>
         </profile>
