@@ -2,21 +2,21 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Kontron demo agent
 Bundle-SymbolicName: kontron-shock-agent
-Bundle-Version: 2.9.0.qualifier
+Bundle-Version: 3.0.1.qualifier
 Bundle-Activator: com.cumulocity.kontron.Activator
 Bundle-Vendor: (C) Cumulocity GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.cumulocity.model;version="[2.0,3.0)",
- com.cumulocity.model.idtype;version="[2.0,3.0)",
- com.cumulocity.rest.representation;version="[2.0,3.0)",
- com.cumulocity.rest.representation.alarm;version="[2.0,3.0)",
- com.cumulocity.rest.representation.event;version="[2.0,3.0)",
- com.cumulocity.rest.representation.identity;version="[2.0,3.0)",
- com.cumulocity.rest.representation.inventory;version="[2.0,3.0)",
- com.cumulocity.sdk.client;version="[2.0,3.0)",
- com.cumulocity.sdk.client.alarm;version="[2.0,3.0)",
- com.cumulocity.sdk.client.identity;version="[2.0,3.0)",
- com.cumulocity.sdk.client.inventory;version="[2.0,3.0)",
+Import-Package: com.cumulocity.model;version="[3.0,4.0)",
+ com.cumulocity.model.idtype;version="[3.0,4.0)",
+ com.cumulocity.rest.representation;version="[3.0,4.0)",
+ com.cumulocity.rest.representation.alarm;version="[3.0,4.0)",
+ com.cumulocity.rest.representation.event;version="[3.0,4.0)",
+ com.cumulocity.rest.representation.identity;version="[3.0,4.0)",
+ com.cumulocity.rest.representation.inventory;version="[3.0,4.0)",
+ com.cumulocity.sdk.client;version="[3.0,4.0)",
+ com.cumulocity.sdk.client.alarm;version="[3.0,4.0)",
+ com.cumulocity.sdk.client.identity;version="[3.0,4.0)",
+ com.cumulocity.sdk.client.inventory;version="[3.0,4.0)",
  org.osgi.framework;version="1.3.0",
  org.svenson;version="1.3.8.2_4_0"
 Bundle-ActivationPolicy: lazy

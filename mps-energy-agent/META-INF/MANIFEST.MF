@@ -2,25 +2,25 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Sample energy agent
 Bundle-SymbolicName: mps-energy-agent;singleton:=true
-Bundle-Version: 2.9.0.qualifier
+Bundle-Version: 3.0.1.qualifier
 Bundle-Vendor: (C) Cumulocity GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.cumulocity.model;version="[2.0,3.0)",
- com.cumulocity.model.control;version="[2.0,3.0)",
- com.cumulocity.model.energy.measurement;version="[2.0,3.0)",
- com.cumulocity.model.idtype;version="[2.0,3.0)",
- com.cumulocity.model.measurement;version="[2.0,3.0)",
- com.cumulocity.rest.representation;version="[2.0,3.0)",
- com.cumulocity.rest.representation.event;version="[2.0,3.0)",
- com.cumulocity.rest.representation.inventory;version="[2.0,3.0)",
- com.cumulocity.rest.representation.measurement;version="[2.0,3.0)",
- com.cumulocity.rest.representation.operation;version="[2.0,3.0)",
- com.cumulocity.sdk.agent.action;version="[2.0,3.0)",
- com.cumulocity.sdk.agent.driver;version="[2.0,3.0)",
- com.cumulocity.sdk.agent.model;version="[2.0,3.0)",
- com.cumulocity.sdk.client;version="[2.0,3.0)",
- com.cumulocity.sdk.client.event;version="[2.0,3.0)",
- com.cumulocity.sdk.client.inventory;version="[2.0,3.0)",
+Import-Package: com.cumulocity.model;version="[3.0,4.0)",
+ com.cumulocity.model.control;version="[3.0,4.0)",
+ com.cumulocity.model.energy.measurement;version="[3.0,4.0)",
+ com.cumulocity.model.idtype;version="[3.0,4.0)",
+ com.cumulocity.model.measurement;version="[3.0,4.0)",
+ com.cumulocity.rest.representation;version="[3.0,4.0)",
+ com.cumulocity.rest.representation.event;version="[3.0,4.0)",
+ com.cumulocity.rest.representation.inventory;version="[3.0,4.0)",
+ com.cumulocity.rest.representation.measurement;version="[3.0,4.0)",
+ com.cumulocity.rest.representation.operation;version="[3.0,4.0)",
+ com.cumulocity.sdk.agent.action;version="[3.0,4.0)",
+ com.cumulocity.sdk.agent.driver;version="[3.0,4.0)",
+ com.cumulocity.sdk.agent.model;version="[3.0,4.0)",
+ com.cumulocity.sdk.client;version="[3.0,4.0)",
+ com.cumulocity.sdk.client.event;version="[3.0,4.0)",
+ com.cumulocity.sdk.client.inventory;version="[3.0,4.0)",
  com.sun.jersey.api.client;version="[1.8,1.9)",
  com.sun.jersey.client.apache;version="[1.8,1.9)",
  com.sun.jersey.core.header;version="[1.8,1.9)",
