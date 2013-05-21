@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.cumulocity.example</groupId>
         <artifactId>cumulocity-examples</artifactId>
-        <version>3.2.1-SNAPSHOT</version>
+        <version>3.3.0</version>
     </parent>
 
     <artifactId>kontron-shock-agent</artifactId>
