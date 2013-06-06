@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.cumulocity.example</groupId>
         <artifactId>example-packages</artifactId>
-        <version>3.3.0</version>
+        <version>3.4.0</version>
     </parent>
 
     <artifactId>examples-repository</artifactId>
