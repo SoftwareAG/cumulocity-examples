@@ -10,7 +10,7 @@ Import-Package: com.cumulocity.rest.representation;version="[3.0,4.0)",
  com.cumulocity.rest.representation.inventory;version="[3.0,4.0)",
  com.cumulocity.sdk.client;version="[3.0,4.0)",
  com.cumulocity.sdk.client.inventory;version="[3.0,4.0)",
- org.osgi.framework;version="1.6.0",
- org.slf4j;version="1.6.1"
+ org.osgi.framework;version="[1.0,2.0)",
+ org.slf4j;version="[1.7,1.8)"
 Bundle-ActivationPolicy: lazy
 Export-Package: com.cumulocity.helloagent
