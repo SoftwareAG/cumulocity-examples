@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Kontron demo agent
 Bundle-SymbolicName: kontron-shock-agent
-Bundle-Version: 3.4.0.qualifier
+Bundle-Version: 3.4.0
 Bundle-Activator: com.cumulocity.kontron.Activator
 Bundle-Vendor: (C) Cumulocity GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -17,6 +17,6 @@ Import-Package: com.cumulocity.model;version="[3.0,4.0)",
  com.cumulocity.sdk.client.alarm;version="[3.0,4.0)",
  com.cumulocity.sdk.client.identity;version="[3.0,4.0)",
  com.cumulocity.sdk.client.inventory;version="[3.0,4.0)",
- org.osgi.framework;version="1.3.0",
- org.svenson;version="1.3.8.2_4_0"
+ org.osgi.framework;version="[1.0,2.0)",
+ org.svenson;version="[1.3,1.4)"
 Bundle-ActivationPolicy: lazy
