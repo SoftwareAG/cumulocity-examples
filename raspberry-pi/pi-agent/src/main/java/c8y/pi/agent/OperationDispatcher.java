@@ -97,10 +97,8 @@ public class OperationDispatcher {
 				gid.getValue()).byStatus(status);
 		PagedCollectionResource<OperationCollectionRepresentation> opsQuery = control
 				.getOperationsByFilter(opsFilter);
-		OperationCollectionRepresentation ops = opsQuery.get(1000);// TODO Fix
-																	// this, use
-																	// an
-																	// iterable
+		// TODO Fix this, use an iterable
+		OperationCollectionRepresentation ops = opsQuery.get(1000);
 		return ops.getOperations();
 	}
 

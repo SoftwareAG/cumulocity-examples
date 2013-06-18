@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.ServiceLoader;
 
 import c8y.pi.driver.ConfigurationListener;
+import c8y.pi.driver.DeviceManagedObject;
 import c8y.pi.driver.Driver;
 import c8y.pi.driver.Executer;
 
