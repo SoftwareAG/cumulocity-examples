@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Sample energy application
 Bundle-SymbolicName: mps-energy-app
-Bundle-Version: 3.5.0
+Bundle-Version: 3.6.0.qualifier
 Bundle-Vendor: (C) Cumulocity GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Web-ContextPath: /energy
