@@ -20,11 +20,6 @@
 
 package c8y.pi.agent;
 
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -69,8 +64,9 @@ public class ConfigurationDriver implements Driver, Executer {
 
 	@Override
 	public void initializeInventory(ManagedObjectRepresentation mo) {
-		fromFile(CONFIGFILE, props);
-		Configuration configuration = new Configuration(toString(props));
+		PropUtils.fromFile(CONFIGFILE, props);
+		Configuration configuration = new Configuration(
+				PropUtils.toString(props));
 		mo.set(configuration);
 	}
 
@@ -99,7 +95,7 @@ public class ConfigurationDriver implements Driver, Executer {
 
 		Configuration configuration = (Configuration) operation
 				.get(Configuration.class);
-		props = fromString(configuration.getConfig());
+		props = PropUtils.fromString(configuration.getConfig());
 
 		for (Configurable configurable : configurables) {
 			configurable.configurationChanged(props);
@@ -111,56 +107,17 @@ public class ConfigurationDriver implements Driver, Executer {
 		mo.set(configuration);
 		inventory.getManagedObject(gid).update(mo);
 
-		String error = toFile(props, CONFIGFILE);
+		String error = PropUtils.toFile(props, CONFIGFILE);
 		operation.setFailureReason(error);
 	}
-	
+
 	Properties getProperties() {
 		return props;
 	}
 
-	public static Properties fromString(String propsStr) throws IOException {
-		Properties result = new Properties();
-		try (StringReader reader = new StringReader(propsStr)) {
-			result.load(reader);
-			logger.debug("Read configuration: " + result);
-		}
-		return result;
-	}
+	private static Logger logger = LoggerFactory
+			.getLogger(ConfigurationDriver.class);
 
-	public static String toString(Properties props) {
-		String result = "";
-		try (StringWriter configWriter = new StringWriter()) {
-			props.store(configWriter, null);
-			result = configWriter.getBuffer().toString();
-		} catch (IOException iox) {
-			// Storing in a String shouldn't cause I/O exception
-			logger.warn("Bogus IOException", iox);
-		}
-		return result;
-	}
-
-	public static void fromFile(String file, Properties props) {
-		try (FileReader reader = new FileReader(file)) {
-			props.load(reader);
-			logger.debug("Read configuration file, current configuration: " + props);
-		} catch (IOException iox) {
-			logger.warn("Configuration file {} cannot be read, assuming empty configuration", file);
-		}
-	}
-	
-	public static String toFile(Properties props, String file) {
-		try (FileWriter writer = new FileWriter(file)) {
-			props.store(writer, null);
-		} catch (IOException iox) {
-			logger.warn("Configuration file {} cannot be written", file);
-			return ErrorLog.toString(iox);
-		}
-		return null;
-	}
-
-	private static Logger logger = LoggerFactory.getLogger(ConfigurationDriver.class);
-	
 	private InventoryApi inventory;
 	private Properties props = new Properties();
 	private List<Configurable> configurables = new ArrayList<Configurable>();

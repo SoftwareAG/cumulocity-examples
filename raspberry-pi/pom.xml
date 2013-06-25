@@ -18,5 +18,6 @@
 		<module>pi-driver</module>
 		<module>pi-agent</module>
 		<module>piface-driver</module>
+		<module>tinkerforge-driver</module>
 	</modules>
 </project>

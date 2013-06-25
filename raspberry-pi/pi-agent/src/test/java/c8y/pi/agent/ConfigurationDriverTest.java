@@ -66,13 +66,13 @@ public class ConfigurationDriverTest {
 
 	@Test
 	public void testFromString() throws IOException {
-		Properties props = ConfigurationDriver.fromString(REFERENCE_PROPSTR);
+		Properties props = PropUtils.fromString(REFERENCE_PROPSTR);
 		assertEquals(referenceProps, props);
 	}
 
 	@Test
 	public void testToString() {
-		String string = ConfigurationDriver.toString(referenceProps);
+		String string = PropUtils.toString(referenceProps);
 		string = string.substring(string.indexOf("\n") + 1);
 		assertEquals(REFERENCE_PROPSTR, string);
 	}
@@ -80,14 +80,14 @@ public class ConfigurationDriverTest {
 	@Test
 	public void testFromFile() {
 		Properties props = new Properties();
-		ConfigurationDriver.fromFile(REFERENCE_CONFIG, props);
+		PropUtils.fromFile(REFERENCE_CONFIG, props);
 		assertEquals(referenceProps, props);
 	}
 
 	@Test
 	public void testNonExistantFile() {
 		Properties props = new Properties();
-		ConfigurationDriver.fromFile("a non-existant file", props);
+		PropUtils.fromFile("a non-existant file", props);
 		assertEquals(new Properties(), props);
 	}
 	
@@ -102,7 +102,7 @@ public class ConfigurationDriverTest {
 		assertEquals("valueC", driver.getProperties().getProperty("propC"));
 		
 		// Test merged
-		ConfigurationDriver.fromFile(REFERENCE_CONFIG, driver.getProperties());
+		PropUtils.fromFile(REFERENCE_CONFIG, driver.getProperties());
 		assertEquals(3, driver.getProperties().size());
 		assertEquals("valueA", driver.getProperties().getProperty("propA"));
 		assertEquals("valueB", driver.getProperties().getProperty("propB"));

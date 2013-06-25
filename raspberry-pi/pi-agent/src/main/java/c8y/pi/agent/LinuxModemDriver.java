@@ -40,6 +40,7 @@ import c8y.pi.driver.Executer;
 
 import com.cumulocity.model.dm.Mobile;
 import com.cumulocity.model.dm.Signal;
+import com.cumulocity.model.dm.SupportedMeasurements;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.model.measurement.MeasurementValue;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
@@ -56,8 +57,10 @@ public class LinuxModemDriver extends TimerTask implements Driver, Configurable 
 	public static final String GET_ICCID = "AT^SCID";
 	public static final String GET_SIGNAL = "AT+CSQ";
 
+	public static final String SIGNAL_MSMT_TYPE = "c8y_SignalStrength";
+
 	public static final String POLLING_PROP = "c8y.modem.signalPolling";
-	public static final long POLLING_INTERVAL = 1000;
+	public static final long POLLING_INTERVAL = 5000;
 
 	public static final double[] BER_TABLE = { 0.14, 0.28, 0.57, 1.13, 2.26,
 			4.53, 9.05, 18.10 };
@@ -109,8 +112,22 @@ public class LinuxModemDriver extends TimerTask implements Driver, Configurable 
 	@Override
 	public void initializeInventory(ManagedObjectRepresentation mo) {
 		if (mobile != null) {
+			synchronized (mobile) {
+				try {
+					while (receivedCommands < 3) {
+						mobile.wait();
+					}
+				} catch (InterruptedException e) {
+					logger.warn("Spurious exception", e);
+				}
+			}
 			mo.set(mobile);
 		}
+
+		if (mo.get(SupportedMeasurements.class) == null) {
+			mo.set(new SupportedMeasurements());
+		}
+		mo.get(SupportedMeasurements.class).add(SIGNAL_MSMT_TYPE);
 	}
 
 	@Override
@@ -130,7 +147,7 @@ public class LinuxModemDriver extends TimerTask implements Driver, Configurable 
 
 	private void createMeasurementTemplate() {
 		measurement = new MeasurementRepresentation();
-		measurement.setType("c8y_SignalStrength");
+		measurement.setType(SIGNAL_MSMT_TYPE);
 
 		ManagedObjectRepresentation mo = new ManagedObjectRepresentation();
 		mo.setId(gid);
@@ -180,12 +197,13 @@ public class LinuxModemDriver extends TimerTask implements Driver, Configurable 
 		}
 
 		private void digest(String line) {
-			if ("OK".equals(line)) {
+			if ("".equals(line) || "OK".equals(line)) {
 				return;
 			}
 
-			if (command == null) {
+			if (line.startsWith("AT")) {
 				command = line;
+				receivedCommands++;
 				return;
 			}
 
@@ -193,18 +211,21 @@ public class LinuxModemDriver extends TimerTask implements Driver, Configurable 
 					&& !line.startsWith("+CME ")) {
 				if (GET_IMEI.equals(command)) {
 					mobile.setImei(line);
-				}
-				if (GET_CELLID.equals(command)) {
+				} else if (GET_CELLID.equals(command)) {
 					mobile.setCellId(line);
-				}
-				if (GET_ICCID.equals(command)) {
-					mobile.setIccid(line);
-				}
-				if (GET_SIGNAL.equals(command)) {
+				} else if (GET_ICCID.equals(command)) {
+					String iccid = line.split(" ")[1];
+					mobile.setIccid(iccid);
+				} else if (GET_SIGNAL.equals(command)) {
 					sendSignalMeasurement(line);
 				}
 			}
 			command = null;
+			if (receivedCommands >= 3) {
+				synchronized (mobile) {
+					mobile.notify();
+				}
+			}
 		}
 
 		private String command = null;
@@ -248,6 +269,7 @@ public class LinuxModemDriver extends TimerTask implements Driver, Configurable 
 	private MeasurementApi measurements;
 	private SerialPort port;
 	private Mobile mobile;
+	private int receivedCommands = 0;
 	private GId gid;
 	private long pollingInterval = POLLING_INTERVAL;
 	private Timer timer;

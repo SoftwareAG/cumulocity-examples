@@ -1,6 +1,5 @@
 package c8y.pi.agent;
 
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.Properties;
 
@@ -13,9 +12,7 @@ public class CredentialManager {
 
 	public CredentialManager() throws IOException {
 		Properties props = new Properties();
-		try (FileReader reader = new FileReader(PROPS)) {
-			props.load(reader);
-		}
+		PropUtils.fromFile(PROPS, props);
 
 		String host = props.getProperty("host",
 				"http://developer.cumulocity.com");
