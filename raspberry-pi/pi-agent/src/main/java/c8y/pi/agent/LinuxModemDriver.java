@@ -27,6 +27,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import jssc.SerialPort;
+import jssc.SerialPortEvent;
+import jssc.SerialPortEventListener;
 import jssc.SerialPortException;
 
 import org.slf4j.Logger;
@@ -46,8 +48,7 @@ import com.cumulocity.sdk.client.Platform;
 import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.measurement.MeasurementApi;
 
-public class LinuxModemDriver extends TimerTask implements Driver,
-		Configurable {
+public class LinuxModemDriver extends TimerTask implements Driver, Configurable {
 	public static final String PORT = "/dev/ttyUSB0";
 
 	public static final String GET_IMEI = "AT+GSN";
@@ -55,22 +56,26 @@ public class LinuxModemDriver extends TimerTask implements Driver,
 	public static final String GET_ICCID = "AT^SCID";
 	public static final String GET_SIGNAL = "AT+CSQ";
 
-	public static final String POLLING_PROP = "c8y.pi.agent.SignalStrengthPolling";
+	public static final String POLLING_PROP = "c8y.modem.signalPolling";
 	public static final long POLLING_INTERVAL = 1000;
-	
-	public static final double[] BER_TABLE = { 0.14, 0.28, 0.57, 1.13, 2.26, 4.53, 9.05, 18.10 };			
+
+	public static final double[] BER_TABLE = { 0.14, 0.28, 0.57, 1.13, 2.26,
+			4.53, 9.05, 18.10 };
 
 	@Override
 	public void addDefaults(Properties props) {
-		// TODO Auto-generated method stub
-		
+		props.setProperty(POLLING_PROP, Long.toString(POLLING_INTERVAL));
 	}
 
 	@Override
 	public void configurationChanged(Properties props) {
 		try {
 			String intervalStr = props.getProperty(POLLING_PROP);
-			this.pollingInterval = Long.parseLong(intervalStr);
+			pollingInterval = Long.parseLong(intervalStr);
+			if (timer != null) {
+				timer.cancel();
+				scheduleMeasurements();
+			}
 		} catch (NumberFormatException x) {
 			this.pollingInterval = POLLING_INTERVAL;
 		}
@@ -80,17 +85,14 @@ public class LinuxModemDriver extends TimerTask implements Driver,
 	public void initialize(Platform platform) throws Exception {
 		this.measurements = platform.getMeasurementApi();
 		this.port = new SerialPort(PORT);
-		this.pollingInterval = POLLING_INTERVAL;
 
 		try {
 			port.openPort();
-
-			String imei = command(GET_IMEI);
-			String cellId = command(GET_CELLID);
-			String iccid = command(GET_ICCID);
-			mobile = new Mobile(imei, cellId, iccid);
-
-			port.closePort();
+			mobile = new Mobile();
+			port.addEventListener(new ResultListener(), SerialPort.MASK_RXCHAR);
+			run(GET_IMEI);
+			run(GET_CELLID);
+			run(GET_ICCID);
 		} catch (SerialPortException ex) {
 			logger.info("Cannot connect to modem.");
 			logger.trace("Cannot open modem port", ex);
@@ -121,74 +123,9 @@ public class LinuxModemDriver extends TimerTask implements Driver,
 		if (mobile == null) {
 			return;
 		}
-		
+
 		createMeasurementTemplate();
-
-		long now = new Date().getTime();
-		Date firstPolling = computeFirstPolling(now, pollingInterval / 1000);
-
-		Timer timer = new Timer("SignalStrengthPoller");
-		timer.scheduleAtFixedRate(this, firstPolling, pollingInterval);
-	}
-
-	private String command(String command) throws SerialPortException {
-		port.writeString(command + "\r\n");
-		readLine(); // Consume echo
-		port.readBytes(1); // Consume one additional lf from echo
-		
-		String answer = readLine();
-		if ("ERROR".equals(answer)) {
-			return null;
-		}
-		if (answer.startsWith("COMMAND NOT SUPPORT")) {
-			return null;
-		}
-		
-		readLine(); // Consume blank line
-		readLine(); // Consume "OK"
-
-		return answer;
-	}
-
-	private String readLine() throws SerialPortException {
-		byte[] input;
-		StringBuffer line = new StringBuffer();
-
-		while ((char)(input = port.readBytes(1))[0] != '\r') {
-			line.append((char)input[0]);
-		}
-		char cr = (char)port.readBytes(1)[0]; // Consume "\n"
-
-		return line.toString();
-	}
-
-	@Override
-	public void run() {
-		try {
-			logger.debug("Getting modem signal measurements");
-			String csq = command(GET_SIGNAL);
-			int startOfRssi = csq.indexOf(' ') + 1;
-			int startOfBer = csq.indexOf(',') + 1;
-
-			String rssiStr = csq.substring(startOfRssi, startOfBer - 1);
-			String berStr = csq.substring(startOfBer);
-			
-			int rssiVal = - 53 - (30 - Integer.parseInt(rssiStr)) * 2;
-			rssi.setValue(new BigDecimal(rssiVal));
-			
-			double berVal = BER_TABLE[Integer.parseInt(berStr)];
-			ber.setValue(new BigDecimal(berVal));
-			
-			measurement.setTime(new Date());
-			measurements.create(measurement);
-		} catch (SDKException | SerialPortException e) {
-			e.printStackTrace();
-		}
-	}
-
-	static Date computeFirstPolling(long time, long pollingInterval) {
-		return new Date(time / pollingInterval * pollingInterval
-				+ pollingInterval);
+		scheduleMeasurements();
 	}
 
 	private void createMeasurementTemplate() {
@@ -211,14 +148,109 @@ public class LinuxModemDriver extends TimerTask implements Driver,
 
 		measurement.set(signalMeasurement);
 	}
-	
-	private static Logger logger = LoggerFactory.getLogger(LinuxModemDriver.class);
+
+	private void scheduleMeasurements() {
+		long now = new Date().getTime();
+		Date firstPolling = computeFirstPolling(now, pollingInterval / 1000);
+
+		timer = new Timer("SignalStrengthPoller");
+		timer.scheduleAtFixedRate(this, firstPolling, pollingInterval);
+	}
+
+	public void run(String command) {
+		try {
+			port.writeString(command + "\r\n");
+		} catch (SerialPortException e) {
+			logger.warn("Error sending command {} to modem", command, e);
+		}
+	}
+
+	class ResultListener implements SerialPortEventListener {
+		@Override
+		public void serialEvent(SerialPortEvent event) {
+			try {
+				String[] lines = port.readString().split("\\n+");
+				for (String line : lines) {
+					digest(line);
+				}
+			} catch (SerialPortException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+		private void digest(String line) {
+			if ("OK".equals(line)) {
+				return;
+			}
+
+			if (command == null) {
+				command = line;
+				return;
+			}
+
+			if (!line.startsWith("ERROR") && !line.startsWith("COMMAND NOT")
+					&& !line.startsWith("+CME ")) {
+				if (GET_IMEI.equals(command)) {
+					mobile.setImei(line);
+				}
+				if (GET_CELLID.equals(command)) {
+					mobile.setCellId(line);
+				}
+				if (GET_ICCID.equals(command)) {
+					mobile.setIccid(line);
+				}
+				if (GET_SIGNAL.equals(command)) {
+					sendSignalMeasurement(line);
+				}
+			}
+			command = null;
+		}
+
+		private String command = null;
+	}
+
+	@Override
+	public void run() {
+		logger.debug("Getting modem signal measurements");
+		run(GET_SIGNAL);
+	}
+
+	public void sendSignalMeasurement(String line) {
+		int startOfRssi = line.indexOf(' ') + 1;
+		int startOfBer = line.indexOf(',') + 1;
+
+		String rssiStr = line.substring(startOfRssi, startOfBer - 1);
+		String berStr = line.substring(startOfBer);
+
+		int rssiVal = -53 - (30 - Integer.parseInt(rssiStr)) * 2;
+		rssi.setValue(new BigDecimal(rssiVal));
+
+		double berVal = BER_TABLE[Integer.parseInt(berStr)];
+		ber.setValue(new BigDecimal(berVal));
+
+		measurement.setTime(new Date());
+		try {
+			measurements.create(measurement);
+		} catch (SDKException e) {
+			logger.warn("Cannot create signal measurement", e);
+		}
+	}
+
+	static Date computeFirstPolling(long time, long pollingInterval) {
+		return new Date(time / pollingInterval * pollingInterval
+				+ pollingInterval);
+	}
+
+	private static Logger logger = LoggerFactory
+			.getLogger(LinuxModemDriver.class);
 
 	private MeasurementApi measurements;
 	private SerialPort port;
 	private Mobile mobile;
 	private GId gid;
-	private long pollingInterval;
+	private long pollingInterval = POLLING_INTERVAL;
+	private Timer timer;
 	private MeasurementRepresentation measurement;
 	private MeasurementValue rssi, ber;
 }
