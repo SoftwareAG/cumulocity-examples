@@ -31,6 +31,9 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.util.Map.Entry;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import c8y.pi.driver.Driver;
 import c8y.pi.driver.Executer;
 
@@ -61,7 +64,6 @@ public class JavaSoftwareDriver implements Driver, Executer {
 				return false;
 			}
 		});
-
 	}
 
 	@Override
@@ -105,6 +107,7 @@ public class JavaSoftwareDriver implements Driver, Executer {
 	}
 
 	private void finishExecuting(OperationRepresentation operation) {
+		logger.info("Checking installed software base after update");
 		Software shouldBeInstalled = operation.get(Software.class);
 
 		OperationStatus status = OperationStatus.SUCCESSFUL;
@@ -117,6 +120,7 @@ public class JavaSoftwareDriver implements Driver, Executer {
 				String shouldBeInstalledFile = shouldBeInstalled.get(pkg
 						.getKey());
 				if (!equals(shouldBeInstalledFile, isInstalledFile)) {
+					logger.warn("Software {} was not installed", shouldBeInstalledFile);
 					status = OperationStatus.FAILED;
 					break;
 				}
@@ -159,14 +163,17 @@ public class JavaSoftwareDriver implements Driver, Executer {
 		}
 	}
 
-	private void download(Software toBeInstalled) throws IOException {
+	private void download(Software toBeInstalled) throws MalformedURLException {
 		for (String pkg : toBeInstalled.values()) {
+			logger.debug("Downloading " + pkg);
 			URL url = new URL(pkg);
 			String file = url.getFile() + DOWNLOADING;
 			try (InputStream os = url.openStream();
 					ReadableByteChannel rbc = Channels.newChannel(os);
 					FileOutputStream fos = new FileOutputStream(file);) {
 				fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+			} catch (IOException iox) {
+				logger.warn("Failed downloading " + pkg);
 			}
 		}
 	}
@@ -182,11 +189,13 @@ public class JavaSoftwareDriver implements Driver, Executer {
 
 	private void remove(Software toBeRemoved) {
 		for (String pkg : toBeRemoved.values()) {
+			logger.debug("Removing " + pkg);
 			new File(pkg).deleteOnExit();
 		}
 	}
 
 	private static final String DOWNLOADING = ".download";
+	private static Logger logger = LoggerFactory.getLogger(JavaSoftwareDriver.class);
 
 	private Software software = new Software();
 	private GId gid;

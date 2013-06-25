@@ -22,23 +22,23 @@ package c8y.pi.agent;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 
-import c8y.pi.driver.ConfigurationListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import c8y.pi.driver.Configurable;
 import c8y.pi.driver.DeviceManagedObject;
 import c8y.pi.driver.Driver;
 import c8y.pi.driver.Executer;
 
 import com.cumulocity.model.ID;
 import com.cumulocity.model.dm.Hardware;
+import com.cumulocity.model.dm.IsDevice;
 import com.cumulocity.model.dm.SupportedOperations;
-import com.cumulocity.model.event.CumulocityAlarmStatuses;
-import com.cumulocity.model.event.CumulocitySeverities;
-import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.Platform;
 import com.cumulocity.sdk.client.PlatformImpl;
@@ -63,36 +63,35 @@ public class Agent {
 	public static final String XTIDTYPE = "c8y_Serial";
 	public static final String ALARMTYPE = "c8y_AgentStartupError";
 
-	public static void main(String[] args) throws IOException, SDKException {
-		new Agent();
+	public static void main(String[] args) {
+		try {
+			new Agent();
+		} catch (Exception x) {
+			logger.error("Error caught", x);
+		}
 	}
 
 	public Agent() throws IOException, SDKException {
+		logger.info("Starting Raspberry Pi agent");
 		Credentials creds = new CredentialManager().getCredentials();
 		platform = new PlatformImpl(creds.getHost(), creds.getTenant(),
 				creds.getUser(), creds.getPassword(), creds.getKey());
 
-		try {
-			// See {@link Driver} for an explanation of the driver life cycle.
-			initializeDrivers();
-			initializeInventory();
-			discoverChildren();
-			startDrivers();
-			new OperationDispatcher(platform, mo.getId(), dispatchMap);
-		} catch (SDKException e) {
-			errorLog.add(e);
-		}
-
-		if (!errorLog.isEmpty() && mo.getId() != null) {
-			logError(errorLog.toString());
-		}
+		// See {@link Driver} for an explanation of the driver life cycle.
+		initializeDrivers();
+		initializeInventory();
+		discoverChildren();
+		startDrivers();
+		new OperationDispatcher(platform, mo.getId(), dispatchMap);
 	}
 
 	private void initializeDrivers() {
 		ConfigurationDriver cfgDriver = null;
+		logger.info("Initializing drivers");
 
 		for (Driver driver : ServiceLoader.load(Driver.class)) {
 			try {
+				logger.info("Initializing " + driver.getClass());
 				driver.initialize(platform);
 				drivers.add(driver);
 
@@ -100,19 +99,18 @@ public class Agent {
 					cfgDriver = (ConfigurationDriver) driver;
 				}
 			} catch (Exception e) {
-				errorLog.add(e);
+				logger.warn("Error initializing driver " + driver.getClass(), e);
 			}
 		}
 
 		/*
 		 * ConfigurationDriver notifies other drivers of changes in
-		 * configuration if they implement ConfigurationListener.
+		 * configuration if they implement Configurable.
 		 */
 		if (cfgDriver != null) {
 			for (Driver driver : drivers) {
-				if (driver instanceof ConfigurationListener) {
-					cfgDriver
-							.addConfigurationListener((ConfigurationListener) driver);
+				if (driver instanceof Configurable) {
+					cfgDriver.addConfigurable((Configurable) driver);
 				}
 			}
 		}
@@ -120,7 +118,8 @@ public class Agent {
 
 	private void initializeInventory() throws SDKException {
 		SupportedOperations supportedOps = new SupportedOperations();
-		
+		logger.info("Initializing inventory");
+
 		for (Driver driver : drivers) {
 			driver.initializeInventory(mo);
 
@@ -130,45 +129,46 @@ public class Agent {
 				supportedOps.add(supportedOp);
 			}
 		}
-		
+
 		mo.set(supportedOps);
+		mo.set(new com.cumulocity.model.Agent());
+		mo.set(new IsDevice());
+		logger.debug("Agent representation is {}, updating inventory", mo);
 
 		String serial = mo.get(Hardware.class).getSerialNumber();
 		String id = "raspberrypi-" + serial;
-		String defaultName = "Raspberry Pi " + serial;
+		String defaultName = "RaspPi " + serial.substring(8);
 
 		ID extId = new ID(id);
 		extId.setType(XTIDTYPE);
 		DeviceManagedObject dmo = new DeviceManagedObject(platform, extId);
-		dmo.createOrUpdate(mo, defaultName);
+		boolean created = dmo.createOrUpdate(mo, defaultName, TYPE);
+
+		if (created) {
+			logger.debug("Agent was created in the inventory");
+		} else {
+			logger.debug("Agent was updated in the inventory");
+		}
 	}
 
 	private void discoverChildren() {
+		logger.info("Discovering child devices");
 		for (Driver driver : drivers) {
 			driver.discoverChildren(mo);
 		}
 	}
 
 	private void startDrivers() {
+		logger.info("Starting drivers");
 		for (Driver driver : drivers) {
 			driver.start();
 		}
 	}
 
-	private void logError(String error) throws SDKException {
-		AlarmRepresentation alarm = new AlarmRepresentation();
-		alarm.setType(ALARMTYPE);
-		alarm.setSource(mo);
-		alarm.setSeverity(CumulocitySeverities.MAJOR.toString());
-		alarm.setStatus(CumulocityAlarmStatuses.ACTIVE.toString());
-		alarm.setText(error);
-		alarm.setTime(new Date());
-		platform.getAlarmApi().create(alarm);
-	}
+	private static Logger logger = LoggerFactory.getLogger(Agent.class);
 
 	private List<Driver> drivers = new ArrayList<Driver>();
 	private Platform platform;
 	private ManagedObjectRepresentation mo = new ManagedObjectRepresentation();
-	private Map<String, Executer> dispatchMap = new HashMap<String,Executer>();
-	private ErrorLog errorLog = new ErrorLog();
+	private Map<String, Executer> dispatchMap = new HashMap<String, Executer>();
 }

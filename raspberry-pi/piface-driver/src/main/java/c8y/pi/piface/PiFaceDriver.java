@@ -22,6 +22,9 @@ package c8y.pi.piface;
 
 import java.util.Date;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import c8y.pi.driver.DeviceManagedObject;
 import c8y.pi.driver.Driver;
 import c8y.pi.driver.Executer;
@@ -51,6 +54,8 @@ import com.pi4j.wiringpi.Spi;
 public class PiFaceDriver implements Driver, Executer {
 	private static final int NUMBUTTONS = 4;
 	private static final int NUMLEDS = 8;
+	public static final String LEDTYPE = "c8y_PiFaceLED";
+	public static final String SWITCHTYPE = "c8y_PiFaceSwitch";
 	public static final String XTIDTYPE = "c8y_Serial";
 
 	@Override
@@ -77,7 +82,7 @@ public class PiFaceDriver implements Driver, Executer {
 	public void discoverChildren(ManagedObjectRepresentation mo) {
 		String piSerial = mo.get(Hardware.class).getSerialNumber();
 		String idPrefix = "raspberrypi-" + piSerial + "-";
-		String namePrefix = "Raspberry Pi " + piSerial + " ";
+		String namePrefix = "RaspPi " + piSerial.substring(8) + " ";
 
 		try {
 			createLeds(mo.getId(), idPrefix, namePrefix);
@@ -105,7 +110,9 @@ public class PiFaceDriver implements Driver, Executer {
 			String id = idPrefix + "led-" + idx;
 			String defaultName = namePrefix + "LED " + idx;
 
-			boolean created = createOrUpdate(ledMos[idx], id, defaultName);
+			logger.trace("Creating LED {}", idx);
+			boolean created = createOrUpdate(ledMos[idx], id, defaultName,
+					LEDTYPE);
 			if (created) {
 				link(parent, ledMos[idx]);
 			}
@@ -119,19 +126,21 @@ public class PiFaceDriver implements Driver, Executer {
 			String id = idPrefix + "button-" + idx;
 			String defaultName = namePrefix + "Button " + idx;
 
-			boolean created = createOrUpdate(buttonMos[idx], id, defaultName);
+			logger.trace("Creating button {}", idx);
+			boolean created = createOrUpdate(buttonMos[idx], id, defaultName,
+					SWITCHTYPE);
 			if (created) {
-				link(parent, ledMos[idx]);
+				link(parent, buttonMos[idx]);
 			}
 		}
 	}
 
 	private boolean createOrUpdate(ManagedObjectRepresentation mo, String id,
-			String defaultName) throws SDKException {
+			String defaultName, String type) throws SDKException {
 		ID extId = new ID(id);
 		extId.setType(XTIDTYPE);
 		DeviceManagedObject dmo = new DeviceManagedObject(platform, extId);
-		return dmo.createOrUpdate(mo, defaultName);
+		return dmo.createOrUpdate(mo, defaultName, type);
 	}
 
 	private void link(GId parent, ManagedObjectRepresentation child)
@@ -157,6 +166,7 @@ public class PiFaceDriver implements Driver, Executer {
 		@Override
 		public void onStateChange(SwitchStateChangeEvent event) {
 			if (event.getNewState() == SwitchState.ON) {
+				logger.trace("Button {} pressed, sending event", idx);
 				eventTemplate.setSource(buttonMos[idx]);
 				eventTemplate.setTime(new Date());
 				try {
@@ -182,6 +192,7 @@ public class PiFaceDriver implements Driver, Executer {
 
 		for (int idx = 0; idx < NUMLEDS; idx++) {
 			if (ledMos[idx].getId().equals(targetGId)) {
+				logger.trace("Switching relay {} to {}", idx, relayOp.getRelayState());
 				if (relayOp.getRelayState() == RelayState.CLOSED) {
 					piface.getLed(idx).on();
 				} else {
@@ -196,6 +207,8 @@ public class PiFaceDriver implements Driver, Executer {
 		}
 	}
 
+	private static Logger logger = LoggerFactory.getLogger(PiFaceDriver.class);
+	
 	private Platform platform;
 	private ManagedObjectRepresentation[] buttonMos = new ManagedObjectRepresentation[NUMBUTTONS];
 	private ManagedObjectRepresentation[] ledMos = new ManagedObjectRepresentation[NUMLEDS];

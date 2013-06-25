@@ -15,7 +15,7 @@
 		<dependency>
 			<groupId>com.nsn.cumulocity.clients-java</groupId>
 			<artifactId>java-client</artifactId>
-			<version>3.5.0-SNAPSHOT</version>
+			<version>3.6.0-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 </project>

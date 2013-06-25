@@ -43,6 +43,15 @@ import com.cumulocity.sdk.client.Platform;
  * Drivers can rely on the presence of an initialized configuration fragment in
  * the inventory, if there is a configuration possibility for the device.
  * </p>
+ * <p>
+ * Drivers can log messages using SLF4J Loggers. Log levels:</p>
+ * <ul>
+ * <li>Error: Serious error requiring human intervention. Sent as alarm to the platform.</li>
+ * <li>Warn: Error within driver, agent can continue to operation. Sent as event to the platform.</li>
+ * <li>Info: Low volume informational messages. Sent as event if trace is enabled.</li>
+ * <li>Debug: Higher volume informational messages. Sent as event if trace is enabled.</li>
+ * <li>Trace: High volume including stack traces. Not sent unless requested.</li>
+ * </ul>
  */
 public interface Driver {
 	/**

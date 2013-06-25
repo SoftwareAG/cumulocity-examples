@@ -2,6 +2,11 @@ package c8y.pi.agent;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import c8y.pi.driver.Driver;
 import c8y.pi.driver.Executer;
@@ -26,28 +31,36 @@ public class LinuxHardwareDriver implements Driver, Executer {
 
 	@Override
 	public void initialize(Platform platform) throws Exception {
-		String name = "Unknown hardware", serialNumber = "Unknown serial", revision = "Unknown revision";
-
-		try (FileReader fr = new FileReader(CPUINFO);
-				BufferedReader reader = new BufferedReader(fr)) {
+		initializeFromFile(CPUINFO);
+	}
+	
+	void initializeFromFile(String file) {
+		try (FileReader fr = new FileReader(CPUINFO)) {
+			initializeFromReader(fr);
+		} catch (IOException iox) {
+			logger.warn("Cannot read hardware information from " + CPUINFO, iox);
+		}
+		
+	}
+	
+	void initializeFromReader(Reader r) throws IOException {
+		try (BufferedReader reader = new BufferedReader(r)) {
 			String line = null;
 
 			while ((line = reader.readLine()) != null) {
 				String[] keyval = line.split(PATTERN);
 
 				if ("Hardware".equals(keyval[0])) {
-					name = keyval[1];
+					hardware.setModel(keyval[1]);
 				}
 				if ("Revision".equals(keyval[0])) {
-					revision = keyval[1];
+					hardware.setRevision(keyval[1]);
 				}
 				if ("Serial".equals(keyval[0])) {
-					serialNumber = keyval[1];
+					hardware.setSerialNumber(keyval[1]);
 				}
 			}
 		}
-
-		this.hardware = new Hardware(name, serialNumber, revision);
 	}
 
 	@Override
@@ -86,10 +99,17 @@ public class LinuxHardwareDriver implements Driver, Executer {
 		if (OperationStatus.EXECUTING.toString().equals(operation.getStatus())) {
 			operation.setStatus(OperationStatus.SUCCESSFUL.toString());
 		} else {
+			logger.info("Shutting down");
 			new ProcessBuilder("shutdown", "-r", "now").start().waitFor();
 		}
 	}
 
+	public Hardware getHardware() {
+		return hardware;
+	}
+
+	private static Logger logger = LoggerFactory.getLogger(LinuxHardwareDriver.class);
+	
 	private GId gid;
-	private Hardware hardware;
+	private Hardware hardware = new Hardware("Unknown model", "Unknown serial", "Unknown revision");
 }

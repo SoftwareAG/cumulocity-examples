@@ -23,7 +23,12 @@ package c8y.pi.driver;
 
 import java.util.Properties;
 
-public interface ConfigurationListener {
+public interface Configurable {
+	/**
+	 * Add the default configuration to the given properties.
+	 */
+	void addDefaults(Properties props);
+	
 	/**
 	 * Notifies driver of a configuration change. Unknown configuration entries
 	 * should be ignored by the driver.

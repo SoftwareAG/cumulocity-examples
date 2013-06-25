@@ -28,7 +28,11 @@ import java.util.TimerTask;
 
 import jssc.SerialPort;
 import jssc.SerialPortException;
-import c8y.pi.driver.ConfigurationListener;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import c8y.pi.driver.Configurable;
 import c8y.pi.driver.Driver;
 import c8y.pi.driver.Executer;
 
@@ -43,18 +47,24 @@ import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.measurement.MeasurementApi;
 
 public class LinuxModemDriver extends TimerTask implements Driver,
-		ConfigurationListener {
+		Configurable {
 	public static final String PORT = "/dev/ttyUSB0";
 
 	public static final String GET_IMEI = "AT+GSN";
-	public static final String GET_IMSI = "AT+CIMI";
 	public static final String GET_CELLID = "AT+CSCI";
+	public static final String GET_ICCID = "AT^SCID";
 	public static final String GET_SIGNAL = "AT+CSQ";
 
 	public static final String POLLING_PROP = "c8y.pi.agent.SignalStrengthPolling";
 	public static final long POLLING_INTERVAL = 1000;
 	
 	public static final double[] BER_TABLE = { 0.14, 0.28, 0.57, 1.13, 2.26, 4.53, 9.05, 18.10 };			
+
+	@Override
+	public void addDefaults(Properties props) {
+		// TODO Auto-generated method stub
+		
+	}
 
 	@Override
 	public void configurationChanged(Properties props) {
@@ -76,14 +86,14 @@ public class LinuxModemDriver extends TimerTask implements Driver,
 			port.openPort();
 
 			String imei = command(GET_IMEI);
-			String imsi = command(GET_IMSI);
-			String msIsdn = null; // How to get msIsdn??
 			String cellId = command(GET_CELLID);
-			mobile = new Mobile(imei, imsi, msIsdn, cellId);
+			String iccid = command(GET_ICCID);
+			mobile = new Mobile(imei, cellId, iccid);
 
 			port.closePort();
 		} catch (SerialPortException ex) {
-			ex.printStackTrace();
+			logger.info("Cannot connect to modem.");
+			logger.trace("Cannot open modem port", ex);
 		}
 	}
 
@@ -96,7 +106,9 @@ public class LinuxModemDriver extends TimerTask implements Driver,
 
 	@Override
 	public void initializeInventory(ManagedObjectRepresentation mo) {
-		mo.set(mobile);
+		if (mobile != null) {
+			mo.set(mobile);
+		}
 	}
 
 	@Override
@@ -106,6 +118,10 @@ public class LinuxModemDriver extends TimerTask implements Driver,
 
 	@Override
 	public void start() {
+		if (mobile == null) {
+			return;
+		}
+		
 		createMeasurementTemplate();
 
 		long now = new Date().getTime();
@@ -117,11 +133,17 @@ public class LinuxModemDriver extends TimerTask implements Driver,
 
 	private String command(String command) throws SerialPortException {
 		port.writeString(command + "\r\n");
-
+		readLine(); // Consume echo
+		port.readBytes(1); // Consume one additional lf from echo
+		
 		String answer = readLine();
 		if ("ERROR".equals(answer)) {
 			return null;
 		}
+		if (answer.startsWith("COMMAND NOT SUPPORT")) {
+			return null;
+		}
+		
 		readLine(); // Consume blank line
 		readLine(); // Consume "OK"
 
@@ -132,10 +154,10 @@ public class LinuxModemDriver extends TimerTask implements Driver,
 		byte[] input;
 		StringBuffer line = new StringBuffer();
 
-		while ((input = port.readBytes(1))[0] != '\r') {
-			line.append(input[0]);
+		while ((char)(input = port.readBytes(1))[0] != '\r') {
+			line.append((char)input[0]);
 		}
-		port.readBytes(1); // Consume "\n"
+		char cr = (char)port.readBytes(1)[0]; // Consume "\n"
 
 		return line.toString();
 	}
@@ -143,6 +165,7 @@ public class LinuxModemDriver extends TimerTask implements Driver,
 	@Override
 	public void run() {
 		try {
+			logger.debug("Getting modem signal measurements");
 			String csq = command(GET_SIGNAL);
 			int startOfRssi = csq.indexOf(' ') + 1;
 			int startOfBer = csq.indexOf(',') + 1;
@@ -170,7 +193,7 @@ public class LinuxModemDriver extends TimerTask implements Driver,
 
 	private void createMeasurementTemplate() {
 		measurement = new MeasurementRepresentation();
-		measurement.setType("c8y_PiSignalStrength");
+		measurement.setType("c8y_SignalStrength");
 
 		ManagedObjectRepresentation mo = new ManagedObjectRepresentation();
 		mo.setId(gid);
@@ -188,6 +211,8 @@ public class LinuxModemDriver extends TimerTask implements Driver,
 
 		measurement.set(signalMeasurement);
 	}
+	
+	private static Logger logger = LoggerFactory.getLogger(LinuxModemDriver.class);
 
 	private MeasurementApi measurements;
 	private SerialPort port;

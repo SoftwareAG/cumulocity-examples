@@ -59,7 +59,7 @@ public class PiFirmwareDriver implements Driver, Executer {
 			version = lastLine.substring(STARTOFVERSION, endOfVersion);
 		}
 
-		firmware = new Firmware(FILE, version);
+		firmware = new Firmware(FILE, version, null);
 	}
 
 	@Override
@@ -143,6 +143,6 @@ public class PiFirmwareDriver implements Driver, Executer {
 	private static final String[] SHUTDOWN = { "shutdown", "-r", "now" };
 
 	private Platform platform;
-	private Firmware firmware;
+	private Firmware firmware = new Firmware(FILE, "Unknown version", null);
 	private GId gid;
 }

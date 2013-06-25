@@ -23,6 +23,9 @@ package c8y.pi.agent;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import c8y.pi.driver.Executer;
 
 import com.cumulocity.model.idtype.GId;
@@ -58,12 +61,14 @@ public class OperationDispatcher {
 	}
 
 	private void finishExecutingOps() throws SDKException {
+		logger.info("Finishing leftover operations");
 		for (OperationRepresentation operation : byStatus(OperationStatus.EXECUTING)) {
 			execute(operation);
 		}
 	}
 
 	private void listenToOperations() throws SDKException {
+		logger.info("Listening for new operations");
 		Subscriber<GId, OperationRepresentation> subscriber;
 		subscriber = control.getNotificationsSubscriber();
 		subscriber.subscribe(gid,
@@ -86,6 +91,7 @@ public class OperationDispatcher {
 	}
 
 	private void executePendingOps() throws SDKException {
+		logger.info("Executing queued operations");
 		for (OperationRepresentation operation : byStatus(OperationStatus.PENDING)) {
 			executePending(operation);
 		}
@@ -114,16 +120,20 @@ public class OperationDispatcher {
 		try {
 			for (String key : operation.getAttrs().keySet()) {
 				if (dispatchMap.containsKey(key)) {
+					logger.info("Executing operation " + operation);
 					dispatchMap.get(key).execute(operation);
 				}
 			}
 		} catch (Exception e) {
 			operation.setStatus(OperationStatus.FAILED.toString());
 			operation.setFailureReason(ErrorLog.toString(e));
+			logger.warn("Error while executing operation", e);
 		}
 		control.update(operation);
 	}
 
+	private static Logger logger = LoggerFactory.getLogger(OperationDispatcher.class);
+	
 	private DeviceControlApi control;
 	private GId gid;
 	private Map<String, Executer> dispatchMap;
