@@ -31,9 +31,9 @@ import jssc.SerialPortException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import c8y.Mobile;
 import c8y.pi.driver.PollingDriver;
 
-import com.cumulocity.model.dm.Mobile;
 import com.cumulocity.model.measurement.MeasurementValue;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.Platform;

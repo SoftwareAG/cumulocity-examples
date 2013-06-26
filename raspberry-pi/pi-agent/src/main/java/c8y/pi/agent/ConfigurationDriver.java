@@ -27,12 +27,13 @@ import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import c8y.Configuration;
 import c8y.pi.driver.Configurable;
 import c8y.pi.driver.Driver;
 import c8y.pi.driver.Executer;
 
-import com.cumulocity.model.dm.Configuration;
 import com.cumulocity.model.idtype.GId;
+import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.Platform;
@@ -86,10 +87,16 @@ public class ConfigurationDriver implements Driver, Executer {
 	}
 
 	@Override
-	public void execute(OperationRepresentation operation) throws Exception {
+	public void execute(OperationRepresentation operation, boolean cleanup) throws Exception {
 		if (!gid.equals(operation.getDeviceId())) {
 			// Silently ignore the operation if it is not targeted to us,
 			// another driver will (hopefully) care.
+			return;
+		}
+		
+		if (cleanup) {
+			// The operation was interrupted somehow.
+			operation.setStatus(OperationStatus.FAILED.toString());
 			return;
 		}
 
@@ -103,12 +110,12 @@ public class ConfigurationDriver implements Driver, Executer {
 
 		logger.info("Configuration set, updating inventory");
 		ManagedObjectRepresentation mo = new ManagedObjectRepresentation();
-		mo.setId(gid);
 		mo.set(configuration);
 		inventory.getManagedObject(gid).update(mo);
 
 		String error = PropUtils.toFile(props, CONFIGFILE);
 		operation.setFailureReason(error);
+		operation.setStatus(OperationStatus.SUCCESSFUL.toString());
 	}
 
 	Properties getProperties() {

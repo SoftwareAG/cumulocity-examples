@@ -63,7 +63,7 @@ public class OperationDispatcher {
 	private void finishExecutingOps() throws SDKException {
 		logger.info("Finishing leftover operations");
 		for (OperationRepresentation operation : byStatus(OperationStatus.EXECUTING)) {
-			execute(operation);
+			execute(operation, true);
 		}
 	}
 
@@ -82,7 +82,7 @@ public class OperationDispatcher {
 					public void onNotification(Subscription<GId> sub,
 							OperationRepresentation operation) {
 						try {
-							execute(operation);
+							executePending(operation);
 						} catch (SDKException e) {
 							e.printStackTrace();
 						}
@@ -113,15 +113,15 @@ public class OperationDispatcher {
 		operation.setStatus(OperationStatus.EXECUTING.toString());
 		control.update(operation);
 
-		execute(operation);
+		execute(operation, false);
 	}
 
-	private void execute(OperationRepresentation operation) throws SDKException {
+	private void execute(OperationRepresentation operation, boolean cleanup) throws SDKException {
 		try {
 			for (String key : operation.getAttrs().keySet()) {
 				if (dispatchMap.containsKey(key)) {
-					logger.info("Executing operation " + operation);
-					dispatchMap.get(key).execute(operation);
+					logger.info("Executing operation {} cleanup {}", operation, cleanup);
+					dispatchMap.get(key).execute(operation, cleanup);
 				}
 			}
 		} catch (Exception e) {

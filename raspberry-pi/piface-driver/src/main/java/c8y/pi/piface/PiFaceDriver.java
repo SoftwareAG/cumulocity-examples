@@ -25,6 +25,7 @@ import java.util.Date;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import c8y.Hardware;
 import c8y.pi.driver.DeviceManagedObject;
 import c8y.pi.driver.Driver;
 import c8y.pi.driver.Executer;
@@ -32,7 +33,6 @@ import c8y.pi.driver.Executer;
 import com.cumulocity.model.ID;
 import com.cumulocity.model.control.Relay;
 import com.cumulocity.model.control.Relay.RelayState;
-import com.cumulocity.model.dm.Hardware;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.rest.representation.event.EventRepresentation;
@@ -186,7 +186,7 @@ public class PiFaceDriver implements Driver, Executer {
 	}
 
 	@Override
-	public void execute(OperationRepresentation operation) throws Exception {
+	public void execute(OperationRepresentation operation, boolean cleanup) throws Exception {
 		Relay relayOp = operation.get(Relay.class);
 		GId targetGId = operation.getId();
 

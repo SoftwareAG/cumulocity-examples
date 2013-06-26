@@ -29,7 +29,7 @@ import java.io.Reader;
 
 import org.junit.Test;
 
-import com.cumulocity.model.dm.Hardware;
+import c8y.Hardware;
 
 public class LinuxHardwareDriverTest {
 	public static final String REFERENCE_HWFILE = "/hardware.txt";

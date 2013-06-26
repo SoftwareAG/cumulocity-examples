@@ -8,10 +8,10 @@ import java.io.Reader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import c8y.Hardware;
 import c8y.pi.driver.Driver;
 import c8y.pi.driver.Executer;
 
-import com.cumulocity.model.dm.Hardware;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
@@ -89,14 +89,14 @@ public class LinuxHardwareDriver implements Driver, Executer {
 	}
 
 	@Override
-	public void execute(OperationRepresentation operation) throws Exception {
+	public void execute(OperationRepresentation operation, boolean cleanup) throws Exception {
 		if (!gid.equals(operation.getDeviceId())) {
 			// Silently ignore the operation if it is not targeted to us,
 			// another driver will (hopefully) care.
 			return;
 		}
 
-		if (OperationStatus.EXECUTING.toString().equals(operation.getStatus())) {
+		if (cleanup) {
 			operation.setStatus(OperationStatus.SUCCESSFUL.toString());
 		} else {
 			logger.info("Shutting down");

@@ -21,6 +21,7 @@
 package c8y.pi.driver;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Timer;
@@ -29,8 +30,8 @@ import java.util.TimerTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.cumulocity.model.dm.SupportedMeasurements;
-import com.cumulocity.model.measurement.MeasurementType;
+import c8y.SupportedMeasurements;
+
 import com.cumulocity.model.measurement.MeasurementValue;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
@@ -111,8 +112,8 @@ public abstract class PollingDriver extends TimerTask implements Driver,
 	@Override
 	public void start() {
 		measurementRep.setType(measurementType);
-		measurementRep.set(measurement);
-		createMeasurementTemplate(measurement.getMeasurements());
+		measurementRep.set(measurement, measurementType);
+		createMeasurementTemplate(measurement);
 		scheduleMeasurements();
 	}
 
@@ -156,5 +157,5 @@ public abstract class PollingDriver extends TimerTask implements Driver,
 	
 	private Timer timer;
 	private MeasurementRepresentation measurementRep = new MeasurementRepresentation();
-	private MeasurementType measurement = new MeasurementType();
+	private Map<String,MeasurementValue> measurement = new HashMap<String,MeasurementValue>();
 }

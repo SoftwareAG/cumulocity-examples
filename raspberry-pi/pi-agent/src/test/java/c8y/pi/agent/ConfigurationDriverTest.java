@@ -31,9 +31,9 @@ import java.util.Properties;
 import org.junit.Before;
 import org.junit.Test;
 
+import c8y.Configuration;
 import c8y.pi.driver.Configurable;
 
-import com.cumulocity.model.dm.Configuration;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
@@ -113,14 +113,14 @@ public class ConfigurationDriverTest {
 	public void testNotification() throws Exception {
 		driver.discoverChildren(mo);	
 		driver.addConfigurable(cfgListener);
-		driver.execute(op);
+		driver.execute(op, false);
 		assertTrue(cfgListener.isNotified());
 	}
 	
 	@Test
 	public void testInventoryUpdate() throws Exception {
 		driver.discoverChildren(mo);
-		driver.execute(op);
+		driver.execute(op, false);
 
 		ManagedObjectRepresentation mo = new ManagedObjectRepresentation();
 		mo.setId(gid);

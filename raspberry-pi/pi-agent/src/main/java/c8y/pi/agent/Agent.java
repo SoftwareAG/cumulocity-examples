@@ -30,15 +30,15 @@ import java.util.ServiceLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import c8y.Hardware;
+import c8y.IsDevice;
+import c8y.SupportedOperations;
 import c8y.pi.driver.Configurable;
 import c8y.pi.driver.DeviceManagedObject;
 import c8y.pi.driver.Driver;
 import c8y.pi.driver.Executer;
 
 import com.cumulocity.model.ID;
-import com.cumulocity.model.dm.Hardware;
-import com.cumulocity.model.dm.IsDevice;
-import com.cumulocity.model.dm.SupportedOperations;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.Platform;
 import com.cumulocity.sdk.client.PlatformImpl;

@@ -1,6 +1,7 @@
+# The hardware driver must be present, since the serial number from the hardware driver is used to identify the device.
+c8y.pi.agent.LinuxHardwareDriver
 c8y.pi.agent.ConfigurationDriver
 c8y.pi.agent.TracelogDriver
 c8y.pi.agent.JavaSoftwareDriver
-c8y.pi.agent.LinuxHardwareDriver
 c8y.pi.agent.PiFirmwareDriver
 c8y.pi.agent.LinuxModemDriver
