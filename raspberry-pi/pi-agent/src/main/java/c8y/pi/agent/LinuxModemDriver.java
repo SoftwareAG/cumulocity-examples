@@ -21,10 +21,7 @@
 package c8y.pi.agent;
 
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.Properties;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.Map;
 
 import jssc.SerialPort;
 import jssc.SerialPortEvent;
@@ -34,22 +31,14 @@ import jssc.SerialPortException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import c8y.pi.driver.Configurable;
-import c8y.pi.driver.Driver;
-import c8y.pi.driver.Executer;
+import c8y.pi.driver.PollingDriver;
 
 import com.cumulocity.model.dm.Mobile;
-import com.cumulocity.model.dm.Signal;
-import com.cumulocity.model.dm.SupportedMeasurements;
-import com.cumulocity.model.idtype.GId;
 import com.cumulocity.model.measurement.MeasurementValue;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
-import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
 import com.cumulocity.sdk.client.Platform;
-import com.cumulocity.sdk.client.SDKException;
-import com.cumulocity.sdk.client.measurement.MeasurementApi;
 
-public class LinuxModemDriver extends TimerTask implements Driver, Configurable {
+public class LinuxModemDriver extends PollingDriver {
 	public static final String PORT = "/dev/ttyUSB0";
 
 	public static final String GET_IMEI = "AT+GSN";
@@ -57,38 +46,18 @@ public class LinuxModemDriver extends TimerTask implements Driver, Configurable 
 	public static final String GET_ICCID = "AT^SCID";
 	public static final String GET_SIGNAL = "AT+CSQ";
 
-	public static final String SIGNAL_MSMT_TYPE = "c8y_SignalStrength";
-
-	public static final String POLLING_PROP = "c8y.modem.signalPolling";
-	public static final long POLLING_INTERVAL = 5000;
-
 	public static final double[] BER_TABLE = { 0.14, 0.28, 0.57, 1.13, 2.26,
 			4.53, 9.05, 18.10 };
-
-	@Override
-	public void addDefaults(Properties props) {
-		props.setProperty(POLLING_PROP, Long.toString(POLLING_INTERVAL));
-	}
-
-	@Override
-	public void configurationChanged(Properties props) {
-		try {
-			String intervalStr = props.getProperty(POLLING_PROP);
-			pollingInterval = Long.parseLong(intervalStr);
-			if (timer != null) {
-				timer.cancel();
-				scheduleMeasurements();
-			}
-		} catch (NumberFormatException x) {
-			this.pollingInterval = POLLING_INTERVAL;
-		}
+	
+	public LinuxModemDriver() {
+		super("c8y_SignalStrength", "c8y.modem.signalPolling", 5000L);
 	}
 
 	@Override
 	public void initialize(Platform platform) throws Exception {
-		this.measurements = platform.getMeasurementApi();
+		super.initialize(platform);
+		
 		this.port = new SerialPort(PORT);
-
 		try {
 			port.openPort();
 			mobile = new Mobile();
@@ -103,14 +72,8 @@ public class LinuxModemDriver extends TimerTask implements Driver, Configurable 
 	}
 
 	@Override
-	public Executer[] getSupportedOperations() {
-		// TODO Enable modem configuration, i.e., APN, user name, password
-		// setting
-		return new Executer[] {};
-	}
-
-	@Override
-	public void initializeInventory(ManagedObjectRepresentation mo) {
+	public void initializeInventory(ManagedObjectRepresentation mo) {		
+		super.setSource(mo);
 		if (mobile != null) {
 			synchronized (mobile) {
 				try {
@@ -123,55 +86,24 @@ public class LinuxModemDriver extends TimerTask implements Driver, Configurable 
 			}
 			mo.set(mobile);
 		}
-
-		if (mo.get(SupportedMeasurements.class) == null) {
-			mo.set(new SupportedMeasurements());
-		}
-		mo.get(SupportedMeasurements.class).add(SIGNAL_MSMT_TYPE);
 	}
 
 	@Override
-	public void discoverChildren(ManagedObjectRepresentation mo) {
-		this.gid = mo.getId();
+	protected void createMeasurementTemplate(Map<String,MeasurementValue> measurement) {
+		rssi.setUnit("dB");
+		ber.setUnit("%");
+		measurement.put("rssi", rssi);
+		measurement.put("ber", ber);
 	}
-
+	
 	@Override
-	public void start() {
+	public void run() {
 		if (mobile == null) {
 			return;
 		}
 
-		createMeasurementTemplate();
-		scheduleMeasurements();
-	}
-
-	private void createMeasurementTemplate() {
-		measurement = new MeasurementRepresentation();
-		measurement.setType(SIGNAL_MSMT_TYPE);
-
-		ManagedObjectRepresentation mo = new ManagedObjectRepresentation();
-		mo.setId(gid);
-		measurement.setSource(mo);
-
-		rssi = new MeasurementValue();
-		rssi.setUnit("dB");
-
-		ber = new MeasurementValue();
-		ber.setUnit("%");
-
-		Signal signalMeasurement = new Signal();
-		signalMeasurement.put("rssi", rssi);
-		signalMeasurement.put("ber", ber);
-
-		measurement.set(signalMeasurement);
-	}
-
-	private void scheduleMeasurements() {
-		long now = new Date().getTime();
-		Date firstPolling = computeFirstPolling(now, pollingInterval / 1000);
-
-		timer = new Timer("SignalStrengthPoller");
-		timer.scheduleAtFixedRate(this, firstPolling, pollingInterval);
+		logger.debug("Getting modem signal measurements");
+		run(GET_SIGNAL);
 	}
 
 	public void run(String command) {
@@ -191,8 +123,7 @@ public class LinuxModemDriver extends TimerTask implements Driver, Configurable 
 					digest(line);
 				}
 			} catch (SerialPortException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.warn("Reading from serial port failed", e);
 			}
 		}
 
@@ -231,12 +162,6 @@ public class LinuxModemDriver extends TimerTask implements Driver, Configurable 
 		private String command = null;
 	}
 
-	@Override
-	public void run() {
-		logger.debug("Getting modem signal measurements");
-		run(GET_SIGNAL);
-	}
-
 	public void sendSignalMeasurement(String line) {
 		int startOfRssi = line.indexOf(' ') + 1;
 		int startOfBer = line.indexOf(',') + 1;
@@ -250,29 +175,15 @@ public class LinuxModemDriver extends TimerTask implements Driver, Configurable 
 		double berVal = BER_TABLE[Integer.parseInt(berStr)];
 		ber.setValue(new BigDecimal(berVal));
 
-		measurement.setTime(new Date());
-		try {
-			measurements.create(measurement);
-		} catch (SDKException e) {
-			logger.warn("Cannot create signal measurement", e);
-		}
-	}
-
-	static Date computeFirstPolling(long time, long pollingInterval) {
-		return new Date(time / pollingInterval * pollingInterval
-				+ pollingInterval);
+		super.sendMeasurement();
 	}
 
 	private static Logger logger = LoggerFactory
 			.getLogger(LinuxModemDriver.class);
 
-	private MeasurementApi measurements;
 	private SerialPort port;
 	private Mobile mobile;
 	private int receivedCommands = 0;
-	private GId gid;
-	private long pollingInterval = POLLING_INTERVAL;
-	private Timer timer;
-	private MeasurementRepresentation measurement;
-	private MeasurementValue rssi, ber;
+	private MeasurementValue rssi = new MeasurementValue();
+	private MeasurementValue ber = new MeasurementValue();
 }

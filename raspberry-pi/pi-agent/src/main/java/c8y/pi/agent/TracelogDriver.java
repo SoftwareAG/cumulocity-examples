@@ -62,7 +62,7 @@ public class TracelogDriver extends AppenderBase<ILoggingEvent> implements
 
 	@Override
 	public Executer[] getSupportedOperations() {
-		return new Executer[] { };
+		return new Executer[0];
 	}
 
 	@Override

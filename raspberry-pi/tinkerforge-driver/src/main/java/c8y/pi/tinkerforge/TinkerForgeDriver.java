@@ -22,7 +22,9 @@ package c8y.pi.tinkerforge;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
+import c8y.pi.driver.Configurable;
 import c8y.pi.driver.Driver;
 import c8y.pi.driver.Executer;
 
@@ -34,7 +36,26 @@ import com.cumulocity.sdk.client.Platform;
  * main agent, since they are enumerated at runtime and multiple instances of
  * the same type may exist.
  */
-public class TinkerForgeDriver implements Driver, BrickletController {
+public class TinkerForgeDriver implements Driver, BrickletController, Configurable {
+	@Override
+	public void addDefaults(Properties props) {
+		for (Driver driver : drivers) {
+			if (driver instanceof Configurable) {
+				Configurable cfg = (Configurable) driver;
+				cfg.addDefaults(props);
+			}
+		}
+	}
+
+	@Override
+	public void configurationChanged(Properties props) {
+		for (Driver driver : drivers) {
+			if (driver instanceof Configurable) {
+				Configurable cfg = (Configurable) driver;
+				cfg.configurationChanged(props);
+			}
+		}		
+	}
 
 	@Override
 	public void initialize(Platform platform) throws Exception {
