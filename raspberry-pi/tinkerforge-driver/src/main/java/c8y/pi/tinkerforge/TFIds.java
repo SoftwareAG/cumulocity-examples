@@ -18,31 +18,37 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+
 package c8y.pi.tinkerforge;
 
-import java.math.BigDecimal;
+import com.cumulocity.model.ID;
 
-import com.cumulocity.model.environmental.measurement.TemperatureMeasurement;
-import com.cumulocity.model.environmental.sensor.TemperatureSensor;
-import com.tinkerforge.BrickletTemperature;
-import com.tinkerforge.Device;
+/**
+ * Utility class for generating various kinds of names and IDs for TinkerForge devices.
+ */
+public class TFIds {
+	public static final String XTIDTYPE = "c8y_Serial";
 
-public class TemperatureBricklet extends TFSensor {
-	public TemperatureBricklet(String id, Device device) {
-		super(id, device, "Temperature", new TemperatureSensor());
+	public static String getType(String type) {
+		return "c8y_TinkerForge" + type;
 	}
 
-	@Override
-	public void run() {
-		try {
-			BrickletTemperature tb = (BrickletTemperature) getDevice();
-			BigDecimal t = new BigDecimal((double) tb.getTemperature() / 100.0);
-			temperature.setTemperature(t);
-			super.sendMeasurement(temperature);
-		} catch (Exception x) {
-			logger.warn("Cannot read temperature from bricklet", x);
-		}
+	public static String getDefaultName(String parentName, String type,
+			String id) {
+		return parentName + " " + type + " " + id;
 	}
 
-	private TemperatureMeasurement temperature = new TemperatureMeasurement();
+	public static ID getXtId(String id) {
+		ID extId = new ID("tinkerforge-" + id);
+		extId.setType(XTIDTYPE);
+		return extId;
+	}
+
+	public static String getMeasurementType(String type) {
+		return "c8y_" + type + "Measurement";
+	}
+
+	public static String getPropertyName(String type) {
+		return "c8y." + type + "Interval";
+	}
 }

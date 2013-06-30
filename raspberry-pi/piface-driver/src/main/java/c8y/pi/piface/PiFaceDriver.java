@@ -36,7 +36,6 @@ import com.cumulocity.model.control.Relay.RelayState;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.rest.representation.event.EventRepresentation;
-import com.cumulocity.rest.representation.inventory.ManagedObjectReferenceRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.Platform;
@@ -61,6 +60,7 @@ public class PiFaceDriver implements Driver, Executer {
 	@Override
 	public void initialize(Platform platform) throws Exception {
 		this.platform = platform;
+		dmo = new DeviceManagedObject(platform);		
 		piface = new PiFaceDevice(Spi.CHANNEL_0);
 
 		eventTemplate = new EventRepresentation();
@@ -105,17 +105,14 @@ public class PiFaceDriver implements Driver, Executer {
 			}
 
 			ledMos[idx] = new ManagedObjectRepresentation();
+			ledMos[idx].setType(LEDTYPE);
+			ledMos[idx].setName(namePrefix + "LED " + idx);
 			ledMos[idx].set(relay);
 
 			String id = idPrefix + "led-" + idx;
-			String defaultName = namePrefix + "LED " + idx;
 
 			logger.trace("Creating LED {}", idx);
-			boolean created = createOrUpdate(ledMos[idx], id, defaultName,
-					LEDTYPE);
-			if (created) {
-				link(parent, ledMos[idx]);
-			}
+			createOrUpdate(ledMos[idx], id, parent);
 		}
 	}
 
@@ -123,32 +120,21 @@ public class PiFaceDriver implements Driver, Executer {
 			throws SDKException {
 		for (int idx = 0; idx < NUMBUTTONS; idx++) {
 			buttonMos[idx] = new ManagedObjectRepresentation();
+			buttonMos[idx].setType(SWITCHTYPE);
+			buttonMos[idx].setName(namePrefix + "Button " + idx);
+			
 			String id = idPrefix + "button-" + idx;
-			String defaultName = namePrefix + "Button " + idx;
 
 			logger.trace("Creating button {}", idx);
-			boolean created = createOrUpdate(buttonMos[idx], id, defaultName,
-					SWITCHTYPE);
-			if (created) {
-				link(parent, buttonMos[idx]);
-			}
+			createOrUpdate(buttonMos[idx], id, parent);
 		}
 	}
 
 	private boolean createOrUpdate(ManagedObjectRepresentation mo, String id,
-			String defaultName, String type) throws SDKException {
+			GId parent) throws SDKException {
 		ID extId = new ID(id);
 		extId.setType(XTIDTYPE);
-		DeviceManagedObject dmo = new DeviceManagedObject(platform, extId);
-		return dmo.createOrUpdate(mo, defaultName, type);
-	}
-
-	private void link(GId parent, ManagedObjectRepresentation child)
-			throws SDKException {
-		ManagedObjectReferenceRepresentation moRef = new ManagedObjectReferenceRepresentation();
-		moRef.setManagedObject(child);
-		platform.getInventoryApi().getManagedObject(parent)
-				.addChildDevice(moRef);
+		return dmo.createOrUpdate(mo, extId, parent);
 	}
 
 	@Override
@@ -186,13 +172,15 @@ public class PiFaceDriver implements Driver, Executer {
 	}
 
 	@Override
-	public void execute(OperationRepresentation operation, boolean cleanup) throws Exception {
+	public void execute(OperationRepresentation operation, boolean cleanup)
+			throws Exception {
 		Relay relayOp = operation.get(Relay.class);
 		GId targetGId = operation.getId();
 
 		for (int idx = 0; idx < NUMLEDS; idx++) {
 			if (ledMos[idx].getId().equals(targetGId)) {
-				logger.trace("Switching relay {} to {}", idx, relayOp.getRelayState());
+				logger.trace("Switching relay {} to {}", idx,
+						relayOp.getRelayState());
 				if (relayOp.getRelayState() == RelayState.CLOSED) {
 					piface.getLed(idx).on();
 				} else {
@@ -208,11 +196,13 @@ public class PiFaceDriver implements Driver, Executer {
 	}
 
 	private static Logger logger = LoggerFactory.getLogger(PiFaceDriver.class);
-	
+
 	private Platform platform;
+	private DeviceManagedObject dmo;
+	private PiFaceDevice piface;
+	
 	private ManagedObjectRepresentation[] buttonMos = new ManagedObjectRepresentation[NUMBUTTONS];
 	private ManagedObjectRepresentation[] ledMos = new ManagedObjectRepresentation[NUMLEDS];
 	private EventRepresentation eventTemplate;
 
-	private PiFaceDevice piface;
 }

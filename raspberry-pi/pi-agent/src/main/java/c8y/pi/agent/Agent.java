@@ -130,21 +130,20 @@ public class Agent {
 			}
 		}
 
+		String serial = mo.get(Hardware.class).getSerialNumber();
+
+		String id = "raspberrypi-" + serial;
+		ID extId = new ID(id);
+		extId.setType(XTIDTYPE);
+
+		mo.setType(TYPE);
+		mo.setName("RaspPi " + serial.substring(8));
 		mo.set(supportedOps);
 		mo.set(new com.cumulocity.model.Agent());
 		mo.set(new IsDevice());
 		logger.debug("Agent representation is {}, updating inventory", mo);
 
-		String serial = mo.get(Hardware.class).getSerialNumber();
-		String id = "raspberrypi-" + serial;
-		String defaultName = "RaspPi " + serial.substring(8);
-
-		ID extId = new ID(id);
-		extId.setType(XTIDTYPE);
-		DeviceManagedObject dmo = new DeviceManagedObject(platform, extId);
-		boolean created = dmo.createOrUpdate(mo, defaultName, TYPE);
-
-		if (created) {
+		if (new DeviceManagedObject(platform).createOrUpdate(mo, extId, null)) {
 			logger.debug("Agent was created in the inventory");
 		} else {
 			logger.debug("Agent was updated in the inventory");

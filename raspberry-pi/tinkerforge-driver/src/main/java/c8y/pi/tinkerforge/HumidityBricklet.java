@@ -18,31 +18,33 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+
 package c8y.pi.tinkerforge;
 
 import java.math.BigDecimal;
 
-import com.cumulocity.model.environmental.measurement.TemperatureMeasurement;
-import com.cumulocity.model.environmental.sensor.TemperatureSensor;
-import com.tinkerforge.BrickletTemperature;
+import c8y.HumidityMeasurement;
+import c8y.HumiditySensor;
+
+import com.tinkerforge.BrickletHumidity;
 import com.tinkerforge.Device;
 
-public class TemperatureBricklet extends TFSensor {
-	public TemperatureBricklet(String id, Device device) {
-		super(id, device, "Temperature", new TemperatureSensor());
+public class HumidityBricklet extends TFSensor {
+	public HumidityBricklet(String id, Device device) {
+		super(id, device, "Humidity", new HumiditySensor());
 	}
 
 	@Override
 	public void run() {
 		try {
-			BrickletTemperature tb = (BrickletTemperature) getDevice();
-			BigDecimal t = new BigDecimal((double) tb.getTemperature() / 100.0);
-			temperature.setTemperature(t);
-			super.sendMeasurement(temperature);
+			BrickletHumidity hb = (BrickletHumidity) getDevice();
+			BigDecimal h = new BigDecimal((double) hb.getHumidity() / 10.0);
+			humidity.setHumidity(h);
+			super.sendMeasurement(humidity);
 		} catch (Exception x) {
-			logger.warn("Cannot read temperature from bricklet", x);
+			logger.warn("Cannot read humidity from bricklet", x);
 		}
 	}
 
-	private TemperatureMeasurement temperature = new TemperatureMeasurement();
+	private HumidityMeasurement humidity = new HumidityMeasurement();
 }

@@ -18,31 +18,33 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+
 package c8y.pi.tinkerforge;
 
 import java.math.BigDecimal;
 
-import com.cumulocity.model.environmental.measurement.TemperatureMeasurement;
-import com.cumulocity.model.environmental.sensor.TemperatureSensor;
-import com.tinkerforge.BrickletTemperature;
+import c8y.LightMeasurement;
+import c8y.LightSensor;
+
+import com.tinkerforge.BrickletAmbientLight;
 import com.tinkerforge.Device;
 
-public class TemperatureBricklet extends TFSensor {
-	public TemperatureBricklet(String id, Device device) {
-		super(id, device, "Temperature", new TemperatureSensor());
+public class LightBricklet extends TFSensor {
+	public LightBricklet(String id, Device device) {
+		super(id, device, "Light", new LightSensor());
 	}
 
 	@Override
 	public void run() {
 		try {
-			BrickletTemperature tb = (BrickletTemperature) getDevice();
-			BigDecimal t = new BigDecimal((double) tb.getTemperature() / 100.0);
-			temperature.setTemperature(t);
-			super.sendMeasurement(temperature);
+			BrickletAmbientLight lb = (BrickletAmbientLight) getDevice();
+			BigDecimal l = new BigDecimal((double) lb.getIlluminance() / 10.0);
+			light.setIlluminance(l);
+			super.sendMeasurement(light);
 		} catch (Exception x) {
-			logger.warn("Cannot read temperature from bricklet", x);
+			logger.warn("Cannot read illuminance from bricklet", x);
 		}
 	}
 
-	private TemperatureMeasurement temperature = new TemperatureMeasurement();
+	private LightMeasurement light = new LightMeasurement();
 }

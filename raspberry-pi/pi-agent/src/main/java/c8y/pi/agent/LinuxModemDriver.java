@@ -20,9 +20,6 @@
 
 package c8y.pi.agent;
 
-import java.math.BigDecimal;
-import java.util.Map;
-
 import jssc.SerialPort;
 import jssc.SerialPortEvent;
 import jssc.SerialPortEventListener;
@@ -32,9 +29,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import c8y.Mobile;
+import c8y.SignalMeasurement;
 import c8y.pi.driver.PollingDriver;
 
-import com.cumulocity.model.measurement.MeasurementValue;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.Platform;
 
@@ -46,9 +43,6 @@ public class LinuxModemDriver extends PollingDriver {
 	public static final String GET_ICCID = "AT^SCID";
 	public static final String GET_SIGNAL = "AT+CSQ";
 
-	public static final double[] BER_TABLE = { 0.14, 0.28, 0.57, 1.13, 2.26,
-			4.53, 9.05, 18.10 };
-	
 	public LinuxModemDriver() {
 		super("c8y_SignalStrength", "c8y.modem.signalPolling", 5000L);
 	}
@@ -88,14 +82,6 @@ public class LinuxModemDriver extends PollingDriver {
 		}
 	}
 
-	@Override
-	protected void createMeasurementTemplate(Map<String,MeasurementValue> measurement) {
-		rssi.setUnit("dB");
-		ber.setUnit("%");
-		measurement.put("rssi", rssi);
-		measurement.put("ber", ber);
-	}
-	
 	@Override
 	public void run() {
 		if (mobile == null) {
@@ -169,13 +155,10 @@ public class LinuxModemDriver extends PollingDriver {
 		String rssiStr = line.substring(startOfRssi, startOfBer - 1);
 		String berStr = line.substring(startOfBer);
 
-		int rssiVal = -53 - (30 - Integer.parseInt(rssiStr)) * 2;
-		rssi.setValue(new BigDecimal(rssiVal));
-
-		double berVal = BER_TABLE[Integer.parseInt(berStr)];
-		ber.setValue(new BigDecimal(berVal));
-
-		super.sendMeasurement();
+		signal.putRawRssi(Integer.parseInt(rssiStr));
+		signal.putRawBer(Integer.parseInt(berStr));
+		
+		super.sendMeasurement(signal);
 	}
 
 	private static Logger logger = LoggerFactory
@@ -184,6 +167,5 @@ public class LinuxModemDriver extends PollingDriver {
 	private SerialPort port;
 	private Mobile mobile;
 	private int receivedCommands = 0;
-	private MeasurementValue rssi = new MeasurementValue();
-	private MeasurementValue ber = new MeasurementValue();
+	private SignalMeasurement signal = new SignalMeasurement();
 }

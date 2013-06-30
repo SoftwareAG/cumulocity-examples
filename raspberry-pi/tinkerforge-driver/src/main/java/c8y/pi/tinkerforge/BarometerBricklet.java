@@ -22,27 +22,31 @@ package c8y.pi.tinkerforge;
 
 import java.math.BigDecimal;
 
-import com.cumulocity.model.environmental.measurement.TemperatureMeasurement;
-import com.cumulocity.model.environmental.sensor.TemperatureSensor;
-import com.tinkerforge.BrickletTemperature;
+import c8y.Barometer;
+import c8y.BarometerMeasurement;
+
+import com.tinkerforge.BrickletBarometer;
 import com.tinkerforge.Device;
 
-public class TemperatureBricklet extends TFSensor {
-	public TemperatureBricklet(String id, Device device) {
-		super(id, device, "Temperature", new TemperatureSensor());
+public class BarometerBricklet extends TFSensor {
+
+	public BarometerBricklet(String id, Device device) {
+		super(id, device, "Barometer", new Barometer());
 	}
 
 	@Override
 	public void run() {
 		try {
-			BrickletTemperature tb = (BrickletTemperature) getDevice();
-			BigDecimal t = new BigDecimal((double) tb.getTemperature() / 100.0);
-			temperature.setTemperature(t);
-			super.sendMeasurement(temperature);
+			BrickletBarometer b = (BrickletBarometer) getDevice();
+			BigDecimal p = new BigDecimal((double) b.getAirPressure() / 100.0);
+			barometer.setPressure(p);
+			BigDecimal a = new BigDecimal((double) b.getAltitude() / 100.0);
+			barometer.setAltitude(a);
+			super.sendMeasurement(barometer);
 		} catch (Exception x) {
-			logger.warn("Cannot read temperature from bricklet", x);
+			logger.warn("Cannot read barometer bricklet", x);
 		}
 	}
 
-	private TemperatureMeasurement temperature = new TemperatureMeasurement();
+	private BarometerMeasurement barometer = new BarometerMeasurement();
 }

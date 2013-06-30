@@ -18,12 +18,12 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-
 package c8y.pi.driver;
 
 import com.cumulocity.model.ID;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.identity.ExternalIDRepresentation;
+import com.cumulocity.rest.representation.inventory.ManagedObjectReferenceRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.Platform;
 import com.cumulocity.sdk.client.SDKException;
@@ -32,33 +32,67 @@ import com.cumulocity.sdk.client.inventory.InventoryApi;
 import com.cumulocity.sdk.client.inventory.ManagedObject;
 
 /**
- * A utility class that simplifies handling devices and their associated external IDs.
+ * A utility class that simplifies handling devices and their associated
+ * external IDs.
  */
 public class DeviceManagedObject {
-	public DeviceManagedObject(Platform platform, ID extId) {
+	public DeviceManagedObject(Platform platform) {
 		this.registry = platform.getIdentityApi();
 		this.inventory = platform.getInventoryApi();
-		this.extId = extId;
 	}
-	
-	public boolean createOrUpdate(ManagedObjectRepresentation mo, String defaultName, String type) throws SDKException {
-		GId gid = tryGetBinding();
-		ManagedObjectRepresentation returnedMo = null;
-		if (gid == null) {
-			mo.setName(defaultName);
-			mo.setType(type);
-			returnedMo = inventory.create(mo);
-			bind(returnedMo);
-		} else {
-			ManagedObject moHandle = inventory.getManagedObject(gid);
-			returnedMo = moHandle.update(mo);
-		}
-		mo.setId(returnedMo.getId());
-		mo.setSelf(returnedMo.getSelf());
+
+	/**
+	 * Create a managed object if it does not exist, or update it if it exists
+	 * already. Optionally, link to parent managed object as child device.
+	 * 
+	 * @param mo
+	 *            Representation of the managed object to create or update
+	 * @param parentId
+	 *            ID of the parent to link to, or null if no link is needed.
+	 */
+	public boolean createOrUpdate(ManagedObjectRepresentation mo, ID extId, GId parentId)
+			throws SDKException {
+		GId gid = tryGetBinding(extId);
+
+		ManagedObjectRepresentation returnedMo;
+		returnedMo = (gid == null) ? create(mo, extId, parentId) : update(mo, gid);
+
+		copyProps(returnedMo, mo);
+
 		return gid == null;
 	}
 
-	public GId tryGetBinding() throws SDKException {
+	private ManagedObjectRepresentation create(ManagedObjectRepresentation mo,
+			ID extId, GId parentId) throws SDKException {
+		ManagedObjectRepresentation returnedMo;
+		returnedMo = inventory.create(mo);
+		bind(returnedMo, extId);
+
+		if (parentId != null) {
+			ManagedObjectReferenceRepresentation moRef = new ManagedObjectReferenceRepresentation();
+			moRef.setManagedObject(mo);
+			inventory.getManagedObject(parentId).addChildDevice(moRef);
+		}
+		return returnedMo;
+	}
+
+	private ManagedObjectRepresentation update(ManagedObjectRepresentation mo,
+			GId gid) throws SDKException {
+		ManagedObjectRepresentation returnedMo;
+		mo.setName(null); // Don't overwrite user-modified names
+		ManagedObject moHandle = inventory.getManagedObject(gid);
+		returnedMo = moHandle.update(mo);
+		return returnedMo;
+	}
+
+	private void copyProps(ManagedObjectRepresentation returnedMo,
+			ManagedObjectRepresentation mo) {
+		mo.setId(returnedMo.getId());
+		mo.setName(returnedMo.getName());
+		mo.setSelf(returnedMo.getSelf());
+	}
+
+	public GId tryGetBinding(ID extId) throws SDKException {
 		ExternalIDRepresentation eir = null;
 		try {
 			eir = registry.getExternalId(extId);
@@ -70,16 +104,15 @@ public class DeviceManagedObject {
 		return eir != null ? eir.getManagedObject().getId() : null;
 	}
 
-	public void bind(ManagedObjectRepresentation mo) throws SDKException {
+	public void bind(ManagedObjectRepresentation mo, ID extId)
+			throws SDKException {
 		ExternalIDRepresentation eir = new ExternalIDRepresentation();
 		eir.setExternalId(extId.getValue());
 		eir.setType(extId.getType());
 		eir.setManagedObject(mo);
 		registry.create(eir);
 	}
-	
-	
+
 	private IdentityApi registry;
 	private InventoryApi inventory;
-	private ID extId;
 }

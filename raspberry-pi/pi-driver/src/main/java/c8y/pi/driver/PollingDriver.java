@@ -21,8 +21,6 @@
 package c8y.pi.driver;
 
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -32,7 +30,7 @@ import org.slf4j.LoggerFactory;
 
 import c8y.SupportedMeasurements;
 
-import com.cumulocity.model.measurement.MeasurementValue;
+import com.cumulocity.model.measurement.MeasurementFragment;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
 import com.cumulocity.sdk.client.Platform;
@@ -43,8 +41,9 @@ public abstract class PollingDriver extends TimerTask implements Driver,
 		Configurable {
 	public PollingDriver(String measurementType, String pollingIntervalProp,
 			long defaultPollingInterval) {
-		this.pollingIntervalProp = pollingIntervalProp;
+		measurementRep.setType(measurementType);		
 		this.measurementType = measurementType;
+		this.pollingIntervalProp = pollingIntervalProp;
 		this.defaultPollingInterval = defaultPollingInterval;
 		this.actualPollingInterval = this.defaultPollingInterval;
 	}
@@ -111,16 +110,12 @@ public abstract class PollingDriver extends TimerTask implements Driver,
 
 	@Override
 	public void start() {
-		measurementRep.setType(measurementType);
-		measurementRep.set(measurement, measurementType);
-		createMeasurementTemplate(measurement);
 		scheduleMeasurements();
 	}
 
-	protected abstract void createMeasurementTemplate(Map<String,MeasurementValue> measurement);
-
-	protected void sendMeasurement() {
+	protected void sendMeasurement(MeasurementFragment measurement) {
 		try {
+			measurementRep.set(measurement);
 			measurementRep.setTime(new Date());
 			measurements.create(measurementRep);
 		} catch (SDKException e) {
@@ -137,7 +132,7 @@ public abstract class PollingDriver extends TimerTask implements Driver,
 		Date firstPolling = computeFirstPolling(now,
 				actualPollingInterval / 1000);
 
-		timer = new Timer("SignalStrengthPoller");
+		timer = new Timer("MeasurementPoller");
 		timer.scheduleAtFixedRate(this, firstPolling, actualPollingInterval);
 	}
 
@@ -157,5 +152,4 @@ public abstract class PollingDriver extends TimerTask implements Driver,
 	
 	private Timer timer;
 	private MeasurementRepresentation measurementRep = new MeasurementRepresentation();
-	private Map<String,MeasurementValue> measurement = new HashMap<String,MeasurementValue>();
 }
