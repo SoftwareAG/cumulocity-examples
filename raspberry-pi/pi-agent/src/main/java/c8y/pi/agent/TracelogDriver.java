@@ -83,7 +83,7 @@ public class TracelogDriver extends AppenderBase<ILoggingEvent> implements
 		LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
 		setContext(lc);
 		lc.getLogger("root").addAppender(this);
-		start();
+		start(); // This is the start method from appender, which is started earlier than our normal start().
 	}
 
 	@Override

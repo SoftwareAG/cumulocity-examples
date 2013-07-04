@@ -45,7 +45,7 @@ public class LinuxHardwareDriverTest {
 	}
 
 	@Test
-	public void noProcFilesystemExisting() {
+	public void noProcFilesystemExisting() throws IOException {
 		driver.initializeFromFile("the proc filesystem is not existing here");
 		assertEquals(new LinuxHardwareDriver().getHardware(), driver.getHardware());
 	}

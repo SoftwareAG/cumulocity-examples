@@ -65,7 +65,14 @@ public class ConfigurationDriver implements Driver, Executer {
 
 	@Override
 	public void initializeInventory(ManagedObjectRepresentation mo) {
+		/*
+		 * At this point in time, props contains the defaults from the devices.
+		 * Merge with the stored configuration, notify others of potential
+		 * updates and send to inventory.
+		 */
 		PropUtils.fromFile(CONFIGFILE, props);
+		notifyConfigurationUpdate();
+
 		Configuration configuration = new Configuration(
 				PropUtils.toString(props));
 		mo.set(configuration);
@@ -87,13 +94,14 @@ public class ConfigurationDriver implements Driver, Executer {
 	}
 
 	@Override
-	public void execute(OperationRepresentation operation, boolean cleanup) throws Exception {
+	public void execute(OperationRepresentation operation, boolean cleanup)
+			throws Exception {
 		if (!gid.equals(operation.getDeviceId())) {
 			// Silently ignore the operation if it is not targeted to us,
 			// another driver will (hopefully) care.
 			return;
 		}
-		
+
 		if (cleanup) {
 			// The operation was interrupted somehow.
 			operation.setStatus(OperationStatus.FAILED.toString());
@@ -104,9 +112,7 @@ public class ConfigurationDriver implements Driver, Executer {
 				.get(Configuration.class);
 		props = PropUtils.fromString(configuration.getConfig());
 
-		for (Configurable configurable : configurables) {
-			configurable.configurationChanged(props);
-		}
+		notifyConfigurationUpdate();
 
 		logger.info("Configuration set, updating inventory");
 		ManagedObjectRepresentation mo = new ManagedObjectRepresentation();
@@ -116,6 +122,12 @@ public class ConfigurationDriver implements Driver, Executer {
 		String error = PropUtils.toFile(props, CONFIGFILE);
 		operation.setFailureReason(error);
 		operation.setStatus(OperationStatus.SUCCESSFUL.toString());
+	}
+
+	private void notifyConfigurationUpdate() {
+		for (Configurable configurable : configurables) {
+			configurable.configurationChanged(props);
+		}
 	}
 
 	Properties getProperties() {

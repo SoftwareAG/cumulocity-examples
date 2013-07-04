@@ -99,7 +99,8 @@ public class Agent {
 					cfgDriver = (ConfigurationDriver) driver;
 				}
 			} catch (Exception e) {
-				logger.warn("Error initializing driver " + driver.getClass(), e);
+				logger.warn("Skipping driver " + driver.getClass());
+				logger.debug("Driver message: ", e);
 			}
 		}
 

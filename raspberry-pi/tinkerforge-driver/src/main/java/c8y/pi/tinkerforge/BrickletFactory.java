@@ -23,11 +23,11 @@ package c8y.pi.tinkerforge;
 
 import c8y.pi.driver.Driver;
 
+import com.tinkerforge.BrickletAmbientLight;
 import com.tinkerforge.BrickletBarometer;
 import com.tinkerforge.BrickletHumidity;
 import com.tinkerforge.BrickletLCD20x4;
 import com.tinkerforge.BrickletTemperature;
-import com.tinkerforge.Device;
 import com.tinkerforge.IPConnection;
 
 /**
@@ -39,7 +39,6 @@ public class BrickletFactory {
 	}
 
 	public Driver produceDevice(String uid, int deviceIdentifier) {
-		Device d = null;
 		switch (deviceIdentifier) {
 /*		case BrickDC.DEVICE_IDENTIFIER:
 			return new BrickDC(uid, ipcon);
@@ -59,8 +58,6 @@ public class BrickletFactory {
 			return new BrickletDualRelay(uid, ipcon);
 		case BrickletGPS.DEVICE_IDENTIFIER:
 			return new BrickletGPS(uid, ipcon);
-		case BrickletHumidity.DEVICE_IDENTIFIER:
-			return new BrickletHumidity(uid, ipcon);
 		case BrickletIndustrialDigitalIn4.DEVICE_IDENTIFIER:
 			return new BrickletIndustrialDigitalIn4(uid, ipcon);
 		case BrickletIndustrialDigitalOut4.DEVICE_IDENTIFIER:
@@ -93,15 +90,11 @@ public class BrickletFactory {
 			return new BrickServo(uid, ipcon);
 		case BrickStepper.DEVICE_IDENTIFIER:
 			return new BrickStepper(uid, ipcon);
-		case BrickletAmbientLight.DEVICE_IDENTIFIER:
-			d = new BrickletAmbientLight(uid, ipcon);
-			return new LightMapper(d, uid, uid);
-		case BrickletHumidity.DEVICE_IDENTIFIER:
-			d = new BrickletHumidity(uid, ipcon);
-			return new HumidityMapper(d, uid, uid);
 		case BrickMaster.DEVICE_IDENTIFIER:
 			d = new BrickMaster(uid, ipcon);
 			return new MasterMapper(d, uid, uid);*/
+		case BrickletAmbientLight.DEVICE_IDENTIFIER:
+			return new LightBricklet(uid, new BrickletAmbientLight(uid, ipcon));
 		case BrickletBarometer.DEVICE_IDENTIFIER:
 			return new BarometerBricklet(uid, new BrickletBarometer(uid, ipcon));
 		case BrickletHumidity.DEVICE_IDENTIFIER:

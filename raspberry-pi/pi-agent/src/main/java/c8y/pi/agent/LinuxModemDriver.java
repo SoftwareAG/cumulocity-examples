@@ -29,7 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import c8y.Mobile;
-import c8y.SignalMeasurement;
+import c8y.SignalStrength;
 import c8y.pi.driver.PollingDriver;
 
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
@@ -44,18 +44,19 @@ public class LinuxModemDriver extends PollingDriver {
 	public static final String GET_SIGNAL = "AT+CSQ";
 
 	public LinuxModemDriver() {
-		super("c8y_SignalStrength", "c8y.modem.signalPolling", 5000L);
+		super("c8y_SignalStrength", "c8y.modelSignal", 5000L);
 	}
 
 	@Override
 	public void initialize(Platform platform) throws Exception {
 		super.initialize(platform);
 		
-		this.port = new SerialPort(PORT);
+		port = new SerialPort(PORT);
 		try {
 			port.openPort();
 			mobile = new Mobile();
 			port.addEventListener(new ResultListener(), SerialPort.MASK_RXCHAR);
+			Thread.sleep(2000);
 			run(GET_IMEI);
 			run(GET_CELLID);
 			run(GET_ICCID);
@@ -72,7 +73,8 @@ public class LinuxModemDriver extends PollingDriver {
 			synchronized (mobile) {
 				try {
 					while (receivedCommands < 3) {
-						mobile.wait();
+						mobile.wait(1000);
+						receivedCommands++;
 					}
 				} catch (InterruptedException e) {
 					logger.warn("Spurious exception", e);
@@ -104,9 +106,12 @@ public class LinuxModemDriver extends PollingDriver {
 		@Override
 		public void serialEvent(SerialPortEvent event) {
 			try {
-				String[] lines = port.readString().split("\\n+");
-				for (String line : lines) {
-					digest(line);
+				String modemData = port.readString();
+				if (modemData != null) { 
+					String[] lines = modemData.split("[\\r\\n]+");
+					for (String line : lines) {
+						digest(line);
+					}
 				}
 			} catch (SerialPortException e) {
 				logger.warn("Reading from serial port failed", e);
@@ -118,6 +123,7 @@ public class LinuxModemDriver extends PollingDriver {
 				return;
 			}
 
+			// TODO This might not count correctly, since sometimes modems echo commands that we haven't sent from here.
 			if (line.startsWith("AT")) {
 				command = line;
 				receivedCommands++;
@@ -167,5 +173,5 @@ public class LinuxModemDriver extends PollingDriver {
 	private SerialPort port;
 	private Mobile mobile;
 	private int receivedCommands = 0;
-	private SignalMeasurement signal = new SignalMeasurement();
+	private SignalStrength signal = new SignalStrength();
 }

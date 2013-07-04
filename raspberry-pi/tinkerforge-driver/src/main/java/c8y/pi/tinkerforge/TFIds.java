@@ -49,6 +49,6 @@ public class TFIds {
 	}
 
 	public static String getPropertyName(String type) {
-		return "c8y." + type + "Interval";
+		return "c8y." + type;
 	}
 }

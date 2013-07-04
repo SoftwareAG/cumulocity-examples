@@ -37,27 +37,34 @@ import com.cumulocity.sdk.client.Platform;
 import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.measurement.MeasurementApi;
 
-public abstract class PollingDriver extends TimerTask implements Driver,
-		Configurable {
-	public PollingDriver(String measurementType, String pollingIntervalProp,
+/**
+ * Base class for a driver that produces sensor readings. Provides the
+ * functionality to regularly poll for readings and to configure polling
+ * intervals from device management.
+ */
+public abstract class PollingDriver implements Driver, Configurable, Runnable {
+	public static final String INTERVAL_PROP = ".interval";
+//	public static final String DELTAS_PROP = ""
+	
+	public PollingDriver(String measurementType, String pollingProp,
 			long defaultPollingInterval) {
-		measurementRep.setType(measurementType);		
+		measurementRep.setType(measurementType);
 		this.measurementType = measurementType;
-		this.pollingIntervalProp = pollingIntervalProp;
+		this.pollingProp = pollingProp;
 		this.defaultPollingInterval = defaultPollingInterval;
 		this.actualPollingInterval = this.defaultPollingInterval;
 	}
 
 	@Override
 	public void addDefaults(Properties props) {
-		props.setProperty(pollingIntervalProp,
+		props.setProperty(pollingProp,
 				Long.toString(defaultPollingInterval));
 	}
 
 	@Override
 	public void configurationChanged(Properties props) {
 		try {
-			String intervalStr = props.getProperty(pollingIntervalProp,
+			String intervalStr = props.getProperty(pollingProp,
 					Long.toString(defaultPollingInterval));
 			actualPollingInterval = Long.parseLong(intervalStr);
 			if (timer != null) {
@@ -76,17 +83,17 @@ public abstract class PollingDriver extends TimerTask implements Driver,
 		this.platform = platform;
 		this.measurements = platform.getMeasurementApi();
 	}
-	
+
 	@Override
 	public Executer[] getSupportedOperations() {
 		return new Executer[0];
 	}
-	
+
 	@Override
 	public void initializeInventory(ManagedObjectRepresentation mo) {
 		// Nothing to do here
 	}
-	
+
 	@Override
 	public void discoverChildren(ManagedObjectRepresentation mo) {
 		// Nothing to do here
@@ -103,10 +110,9 @@ public abstract class PollingDriver extends TimerTask implements Driver,
 		if (!sm.contains(measurementType)) {
 			sm.add(measurementType);
 		}
-		
+
 		measurementRep.setSource(mo);
 	}
-
 
 	@Override
 	public void start() {
@@ -122,18 +128,37 @@ public abstract class PollingDriver extends TimerTask implements Driver,
 			logger.warn("Cannot send measurement", e);
 		}
 	}
-	
+
 	protected Platform getPlatform() {
 		return platform;
 	}
 
 	private void scheduleMeasurements() {
+		if (actualPollingInterval == 0) {
+			return;
+		}
+
 		long now = new Date().getTime();
 		Date firstPolling = computeFirstPolling(now,
 				actualPollingInterval / 1000);
 
-		timer = new Timer("MeasurementPoller");
-		timer.scheduleAtFixedRate(this, firstPolling, actualPollingInterval);
+		timer = new Timer(measurementType + "Poller");
+		timer.scheduleAtFixedRate(new WrappedTask(this), firstPolling,
+				actualPollingInterval);
+	}
+
+	// This class only exists because TimerTasks cannot be rescheduled.
+	private class WrappedTask extends TimerTask {
+		public WrappedTask(Runnable runnable) {
+			this.runnable = runnable;
+		}
+
+		@Override
+		public void run() {
+			runnable.run();
+		}
+
+		private Runnable runnable;
 	}
 
 	static Date computeFirstPolling(long time, long pollingInterval) {
@@ -144,12 +169,14 @@ public abstract class PollingDriver extends TimerTask implements Driver,
 	private static Logger logger = LoggerFactory.getLogger(PollingDriver.class);
 
 	private String measurementType;
-	private String pollingIntervalProp;
-	private long defaultPollingInterval, actualPollingInterval;
 	
+	private String pollingProp;
+	private long defaultPollingInterval, actualPollingInterval;
+	//private boolean defaultDeltas = true, actualDeltas;
+
 	private Platform platform;
 	private MeasurementApi measurements;
-	
+
 	private Timer timer;
 	private MeasurementRepresentation measurementRep = new MeasurementRepresentation();
 }

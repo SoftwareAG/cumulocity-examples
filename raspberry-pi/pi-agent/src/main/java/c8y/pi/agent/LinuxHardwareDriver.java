@@ -34,13 +34,10 @@ public class LinuxHardwareDriver implements Driver, Executer {
 		initializeFromFile(CPUINFO);
 	}
 	
-	void initializeFromFile(String file) {
+	void initializeFromFile(String file) throws IOException {
 		try (FileReader fr = new FileReader(CPUINFO)) {
 			initializeFromReader(fr);
-		} catch (IOException iox) {
-			logger.warn("Cannot read hardware information from " + CPUINFO, iox);
-		}
-		
+		}	
 	}
 	
 	void initializeFromReader(Reader r) throws IOException {
@@ -62,7 +59,7 @@ public class LinuxHardwareDriver implements Driver, Executer {
 			}
 		}
 	}
-
+	
 	@Override
 	public Executer[] getSupportedOperations() {
 		return new Executer[] { this };
