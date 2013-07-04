@@ -22,7 +22,46 @@
 package c8y.pi.tinkerforge;
 
 import c8y.pi.driver.Driver;
+import c8y.pi.driver.Executer;
 
-public interface BrickletController {
-	void add(Driver driver);
+import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
+import com.cumulocity.sdk.client.Platform;
+import com.tinkerforge.BrickletGPS;
+
+// Reports current location as location update event and stores it in the inventory
+public class GPSBricklet implements Driver {
+	public GPSBricklet(String id, BrickletGPS gps) {
+		//this.id = id;
+		this.gps = gps;
+	}
+
+	@Override
+	public void initialize(Platform platform) throws Exception {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public Executer[] getSupportedOperations() {
+		return new Executer[0];
+	}
+
+	@Override
+	public void initializeInventory(ManagedObjectRepresentation mo) {
+		// Nothing to do here.
+	}
+
+	@Override
+	public void discoverChildren(ManagedObjectRepresentation mo) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void start() {
+		//gps.add
+		// Add location listener that reports location and updates 
+	}
+
+	private BrickletGPS gps;
 }
