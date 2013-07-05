@@ -34,6 +34,7 @@ import c8y.Position;
 
 import com.cumulocity.model.ID;
 import com.cumulocity.model.idtype.GId;
+import com.cumulocity.rest.representation.event.EventRepresentation;
 import com.cumulocity.rest.representation.identity.ExternalIDRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.Platform;
@@ -92,6 +93,13 @@ public class TrackerManagerTest {
 		ArgumentCaptor<ExternalIDRepresentation> idArg = ArgumentCaptor.forClass(ExternalIDRepresentation.class);
 		verify(registry).create(idArg.capture());
 		assertEquals(IMEI, idArg.getValue().getExternalId());
+		
+		// Check if location update event was created
+		ArgumentCaptor<EventRepresentation> eventArg = ArgumentCaptor.forClass(EventRepresentation.class);
+		verify(events).create(eventArg.capture());
+		EventRepresentation event = eventArg.getValue();
+		assertEquals(returnedMo.getId(), event.getSource().getId());
+		assertEquals(LATITUDE, event.get(Position.class).getLatitude());
 	}
 	
 	@Test 
@@ -125,9 +133,10 @@ public class TrackerManagerTest {
 	}
 	
 	private void verifyMo(ArgumentCaptor<ManagedObjectRepresentation> moArg) {
-		assertEquals(LATITUDE, moArg.getValue().get(Position.class).getLatitude());
-		assertEquals(LONGITUDE, moArg.getValue().get(Position.class).getLongitude());
-		assertEquals(ALTITUDE, moArg.getValue().get(Position.class).getAltitude());
+		ManagedObjectRepresentation mo = moArg.getValue();
+		assertEquals(LATITUDE, mo.get(Position.class).getLatitude());
+		assertEquals(LONGITUDE, mo.get(Position.class).getLongitude());
+		assertEquals(ALTITUDE, mo.get(Position.class).getAltitude());
 	}
 
 

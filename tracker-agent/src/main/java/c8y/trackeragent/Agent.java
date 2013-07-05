@@ -27,7 +27,7 @@ public class Agent {
 	public static void main(String[] args) {
 		try {
 			PlatformAccess pa = new PlatformAccess();
-			new Server(pa.getPlatform(), pa.getProps());
+			new Server(pa.getPlatform(), pa.getProps()).run();
 		} catch (Exception x) {
 			LoggerFactory.getLogger(Agent.class).error("Error caught", x);
 		}

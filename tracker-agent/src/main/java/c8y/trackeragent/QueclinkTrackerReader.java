@@ -61,6 +61,9 @@ public class QueclinkTrackerReader implements Runnable {
 			if ((char)c == CMD_SEPARATOR) {
 				break;
 			}
+			if ((char)c == '\n') {
+				continue;
+			}
 			result.append((char)c);
 		}
 		
@@ -72,6 +75,7 @@ public class QueclinkTrackerReader implements Runnable {
 	}
 	
 	private String execute(String command) {
+		logger.debug("Executing " + command);
 		String[] parameters = command.split(FIELD_SEPARATOR);
 		
 
