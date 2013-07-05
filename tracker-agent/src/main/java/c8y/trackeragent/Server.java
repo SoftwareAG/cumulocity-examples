@@ -50,8 +50,11 @@ public class Server implements Runnable {
 						"Accepted connection from {}, launching worker thread.",
 						client.getRemoteSocketAddress());
 				TrackerManager trackerManager = new TrackerManager(platform);
-				Worker worker = new Worker(client, trackerManager);
-				new Thread(worker).start();
+				
+				QueclinkTrackerReader reader = new QueclinkTrackerReader(client, trackerManager);
+				new Thread(reader).start();
+				
+				QueclinkTrackerCommands writer = new QueclinkTrackerCommands(client, trackerManager);
 			} catch (IOException e) {
 				logger.warn("Couldn't accept connection", e);
 			}

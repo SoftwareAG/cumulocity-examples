@@ -59,6 +59,7 @@ public class TrackerDevice extends DeviceManagedObject {
 		position.setLatitude(latitude);
 		position.setLongitude(longitude);
 		position.setAltitude(altitude);
+		
 		updateInventory();
 		
 		locationUpdate.setTime(new Date());
