@@ -23,10 +23,13 @@ package c8y.trackeragent;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.net.Socket;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.cumulocity.sdk.client.SDKException;
 
 public class QueclinkTrackerReader implements Runnable {
 	public static final char CMD_SEPARATOR = '$';
@@ -44,10 +47,12 @@ public class QueclinkTrackerReader implements Runnable {
 			processReports(is);
 		} catch (IOException e) {
 			logger.warn("Error during communication with client device", e);
+		} catch (SDKException e) {
+			logger.warn("Error during communication with the platform", e);
 		}
 	}
 
-	void processReports(InputStream is) throws IOException {
+	void processReports(InputStream is) throws IOException, SDKException {
 		String command;
 		while ((command = readCommand(is)) != null) {
 			execute(command);
@@ -75,9 +80,17 @@ public class QueclinkTrackerReader implements Runnable {
 		return result.toString();
 	}
 
-	private String execute(String command) {
+	private String execute(String command) throws SDKException {
 		logger.debug("Executing " + command);
 		String[] parameters = command.split(FIELD_SEPARATOR);
+
+		if ("+RESP:GTGEO".equals(parameters[0])) {
+			ReportParameters reportParameters = new ReportParameters(parameters);
+			trackerMgr.locationUpdate(reportParameters.getImei(),
+					new BigDecimal(reportParameters.getLatitude()),
+					new BigDecimal(reportParameters.getLongitude()),
+					new BigDecimal(reportParameters.getAltitude()));
+		}
 
 		// Do the processing and invoke tracker mgr
 		// trackerMgr.locationUpdate(imei, latitude, longitude, altitude);
