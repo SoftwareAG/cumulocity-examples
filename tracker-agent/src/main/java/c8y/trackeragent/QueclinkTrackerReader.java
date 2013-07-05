@@ -23,18 +23,16 @@ package c8y.trackeragent;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Worker implements Runnable {
-	public static final char CMD_SEPARATOR = ';';
+public class QueclinkTrackerReader implements Runnable {
+	public static final char CMD_SEPARATOR = '$';
 	public static final String FIELD_SEPARATOR = ",";
 
-	public Worker(Socket client, TrackerManager trackerMgr) {
+	public QueclinkTrackerReader(Socket client, TrackerManager trackerMgr) {
 		this.client = client;
 		this.trackerMgr = trackerMgr;
 	}
@@ -42,15 +40,11 @@ public class Worker implements Runnable {
 	@Override
 	public void run() {
 		try (InputStream is = client.getInputStream();
-				BufferedInputStream bis = new BufferedInputStream(is);
-				OutputStream os = client.getOutputStream()) {
-			String command = null;
-			
+				BufferedInputStream bis = new BufferedInputStream(is)) {
+
+			String command;	
 			while ((command = readCommand(is)) != null) {
-				String reply = execute(command);
-				if (reply != null) {
-					os.write(reply.getBytes(StandardCharsets.US_ASCII));
-				}
+				execute(command);
 			}			
 		} catch (IOException e) {
 			logger.warn(
@@ -79,6 +73,7 @@ public class Worker implements Runnable {
 	
 	private String execute(String command) {
 		String[] parameters = command.split(FIELD_SEPARATOR);
+		
 
 		// Do the processing and invoke tracker mgr 
 		// trackerMgr.locationUpdate(imei, latitude, longitude, altitude);
