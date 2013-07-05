@@ -83,13 +83,33 @@ public class QueclinkTrackerReader implements Runnable {
 	private String execute(String command) throws SDKException {
 		logger.debug("Executing " + command);
 		String[] parameters = command.split(FIELD_SEPARATOR);
+		String header = parameters[0];
 
-		if ("+RESP:GTGEO".equals(parameters[0])) {
+		switch (header) {
+		case "+RESP:GTFRI": // update the location with the new position
 			ReportParameters reportParameters = new ReportParameters(parameters);
 			trackerMgr.locationUpdate(reportParameters.getImei(),
 					new BigDecimal(reportParameters.getLatitude()),
 					new BigDecimal(reportParameters.getLongitude()),
 					new BigDecimal(reportParameters.getAltitude()));
+			break;
+		case "+RESP:GTPFA": // power
+			PowerReportParametes powerOffReportParametes = new PowerReportParametes(
+					parameters);
+			// TODO Report an alarm : Power off
+			break;
+		case "+RESP:GTPNA":
+			PowerReportParametes powerOnReportParametes = new PowerReportParametes(
+					parameters);
+			System.out.println("power on");
+			// TODO Report an alarm: Power on
+			break;
+		case "+RESP:GTBPL":
+			BatteryReportParameters batteryReportParameters = new BatteryReportParameters(
+					parameters);
+			// TODO Report an alarm:
+		default:
+			break;
 		}
 
 		// Do the processing and invoke tracker mgr
