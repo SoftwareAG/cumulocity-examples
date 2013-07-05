@@ -23,9 +23,11 @@ package c8y.trackeragent;
 import java.math.BigDecimal;
 import java.util.Date;
 
+import c8y.IsDevice;
 import c8y.Position;
 
 import com.cumulocity.model.ID;
+import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.event.EventRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.Platform;
@@ -43,6 +45,7 @@ public class TrackerDevice extends DeviceManagedObject {
 
 		this.imei = imei;
 
+		this.device.set(new IsDevice());
 		this.device.set(position);
 		
 		this.locationUpdate.setType(EVENT_TYPE);
@@ -67,7 +70,7 @@ public class TrackerDevice extends DeviceManagedObject {
 	}
 
 	private void updateInventory() throws SDKException {
-		if (device.getId() == null) {
+		if (gid == null) {
 			ID extId = new ID(imei);
 			extId.setType(XTID_TYPE);
 			
@@ -75,18 +78,21 @@ public class TrackerDevice extends DeviceManagedObject {
 			device.setName("Tracker " + imei);
 
 			createOrUpdate(device, extId, null);
+			gid = device.getId();
+			device.setId(null); // Ugly ugly
 			
 			ManagedObjectRepresentation source = new ManagedObjectRepresentation();
-			source.setId(device.getId());
+			source.setId(gid);
 			source.setSelf(device.getSelf());
 			locationUpdate.setSource(source);
 		} else {
-			getInventory().getManagedObject(device.getId()).update(device);
+			getInventory().getManagedObject(gid).update(device);
 		}
 	}
 
 	private EventApi events;
 	private String imei;
+	private GId gid;
 	private ManagedObjectRepresentation device = new ManagedObjectRepresentation();
 	private Position position = new Position();
 	private EventRepresentation locationUpdate = new EventRepresentation();

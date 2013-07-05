@@ -20,11 +20,9 @@
 
 package c8y.trackeragent;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
 
@@ -43,13 +41,23 @@ import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.event.EventApi;
 import com.cumulocity.sdk.client.identity.IdentityApi;
 import com.cumulocity.sdk.client.inventory.InventoryApi;
+import com.cumulocity.sdk.client.inventory.ManagedObject;
 
 public class TrackerManagerTest {
+	public static final String IMEI = "0123456789";
+	public static final ID extId = new ID(IMEI);
+	public static final ExternalIDRepresentation eir = new ExternalIDRepresentation();
+	public static final BigDecimal LATITUDE = new BigDecimal(37.0625);
+	public static final BigDecimal LONGITUDE =  new BigDecimal(-95.677068);
+	public static final BigDecimal ALTITUDE = new BigDecimal(1);	
+
 	@Before
-	public void setup() {
+	public void setup() throws SDKException {
 		when(platform.getIdentityApi()).thenReturn(registry);
 		when(platform.getInventoryApi()).thenReturn(inventory);
 		when(platform.getEventApi()).thenReturn(events);
+		when(inventory.getManagedObject(any(GId.class))).thenReturn(moHandle);
+		
 		extId.setType(TrackerDevice.XTID_TYPE);
 
 		ManagedObjectRepresentation mo = new ManagedObjectRepresentation();
@@ -78,9 +86,7 @@ public class TrackerManagerTest {
 		// Check if device is correctly created in the inventory
 		ArgumentCaptor<ManagedObjectRepresentation> moArg = ArgumentCaptor.forClass(ManagedObjectRepresentation.class);
 		verify(inventory).create(moArg.capture());
-		assertEquals(LATITUDE, moArg.getValue().get(Position.class).getLatitude());
-		assertEquals(LONGITUDE, moArg.getValue().get(Position.class).getLongitude());
-		assertEquals(ALTITUDE, moArg.getValue().get(Position.class).getAltitude());
+		verifyMo(moArg);
 		
 		// Check if IMEI is correctly registered in the identity service
 		ArgumentCaptor<ExternalIDRepresentation> idArg = ArgumentCaptor.forClass(ExternalIDRepresentation.class);
@@ -93,25 +99,42 @@ public class TrackerManagerTest {
 		// Identity API knows the device
 		when (registry.getExternalId(extId)).thenReturn(eir);
 		
+		// This device is returned after creation
+		ManagedObjectRepresentation returnedMo = new ManagedObjectRepresentation();
+		returnedMo.setId(new GId("123"));
+		returnedMo.setName("Heinz");
+		returnedMo.setSelf("http://link.to.my/self");
+		
+		when(moHandle.update(any(ManagedObjectRepresentation.class))).thenReturn(returnedMo);
+
 		trackerMgr.locationUpdate(IMEI, LATITUDE, LONGITUDE, ALTITUDE);
 		
-		// Check if device is correctly created in the inventory
+		// Check that only update was invoked and that the update was correct
 		ArgumentCaptor<ManagedObjectRepresentation> moArg = ArgumentCaptor.forClass(ManagedObjectRepresentation.class);
-		verify(inventory).update(moArg.capture());
+		verify(moHandle).update(moArg.capture());
+		verifyMo(moArg);
+		verify(inventory, never()).create(any(ManagedObjectRepresentation.class));
 		
-		
+		// Check that only get and not create was invoked
+		verify(registry).getExternalId(any(ID.class));
+		verify(registry, never()).create(any(ExternalIDRepresentation.class));
+
+		// Check that after second invocation, registry was still only queried once
+		trackerMgr.locationUpdate(IMEI, LATITUDE, LONGITUDE, ALTITUDE);
+		verify(registry).getExternalId(any(ID.class));		
+	}
+	
+	private void verifyMo(ArgumentCaptor<ManagedObjectRepresentation> moArg) {
+		assertEquals(LATITUDE, moArg.getValue().get(Position.class).getLatitude());
+		assertEquals(LONGITUDE, moArg.getValue().get(Position.class).getLongitude());
+		assertEquals(ALTITUDE, moArg.getValue().get(Position.class).getAltitude());
 	}
 
-	Platform platform = mock(Platform.class);
-	IdentityApi registry = mock(IdentityApi.class);
-	InventoryApi inventory = mock(InventoryApi.class);
-	EventApi events = mock (EventApi.class);
-	TrackerManager trackerMgr = new TrackerManager(platform);
-	
-	public static final String IMEI = "0123456789";
-	public static final ID extId = new ID(IMEI);
-	public static final ExternalIDRepresentation eir = new ExternalIDRepresentation();
-	public static final BigDecimal LATITUDE = new BigDecimal(37.0625);
-	public static final BigDecimal LONGITUDE =  new BigDecimal(-95.677068);
-	public static final BigDecimal ALTITUDE = new BigDecimal(1);	
+
+	private Platform platform = mock(Platform.class);
+	private IdentityApi registry = mock(IdentityApi.class);
+	private InventoryApi inventory = mock(InventoryApi.class);
+	private ManagedObject moHandle = mock(ManagedObject.class);
+	private EventApi events = mock (EventApi.class);
+	private TrackerManager trackerMgr = new TrackerManager(platform);
 }
