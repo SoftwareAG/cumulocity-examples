@@ -20,16 +20,14 @@
 
 package c8y.trackeragent;
 
-import org.slf4j.LoggerFactory;
+import java.util.concurrent.ConcurrentHashMap;
 
-public class Agent {
+public class ConnectionRegistry extends ConcurrentHashMap<String,Executor> {
+	private static final long serialVersionUID = 5586917831953937323L;
 
-	public static void main(String[] args) {
-		try {
-			PlatformAccess pa = new PlatformAccess();
-			new Server(pa.getPlatform(), pa.getProps()).run();
-		} catch (Exception x) {
-			LoggerFactory.getLogger(Agent.class).error("Error caught", x);
-		}
+	public static ConnectionRegistry instance() {
+		return instance;
 	}
+
+	private static ConnectionRegistry instance = new ConnectionRegistry();	
 }

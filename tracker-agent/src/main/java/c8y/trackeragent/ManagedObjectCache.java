@@ -20,8 +20,32 @@
 
 package c8y.trackeragent;
 
-import c8y.Position;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
-public interface TrackerCommands {
-	void setGeofence(Position position, int radius);	
+import com.cumulocity.model.idtype.GId;
+
+public class ManagedObjectCache extends ConcurrentHashMap<GId,TrackerDevice> {
+	private static final long serialVersionUID = 1L;
+
+	public static ManagedObjectCache instance() {
+		return instance;
+	}
+	
+	public void put(TrackerDevice device) {
+		deviceByGid.put(device.getGId(), device);
+		deviceByImei.put(device.getImei(), device);
+	}
+
+	public TrackerDevice get(String imei) {
+		return deviceByImei.get(imei);
+	}
+	
+	public TrackerDevice get(GId gid) {
+		return deviceByGid.get(gid);
+	}
+	
+	private static ManagedObjectCache instance = new ManagedObjectCache();
+	private ConcurrentMap<GId,TrackerDevice> deviceByGid = new ConcurrentHashMap<GId,TrackerDevice>();
+	private ConcurrentMap<String,TrackerDevice> deviceByImei = new ConcurrentHashMap<String,TrackerDevice>();
 }

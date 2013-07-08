@@ -23,8 +23,10 @@ package c8y.trackeragent;
 import java.math.BigDecimal;
 import java.util.Date;
 
+import c8y.Geofence;
 import c8y.IsDevice;
 import c8y.Position;
+import c8y.SupportedOperations;
 
 import com.cumulocity.model.ID;
 import com.cumulocity.model.idtype.GId;
@@ -38,56 +40,72 @@ public class TrackerDevice extends DeviceManagedObject {
 	public static final String TYPE = "c8y_Tracker";
 	public static final String XTID_TYPE = "c8y_Imei";
 	public static final String EVENT_TYPE = "c8y_LocationUpdate";
-	
-	public TrackerDevice(Platform platform, String imei) {
+
+	public TrackerDevice(Platform platform, GId agentGid, String imei)
+			throws SDKException {
 		super(platform);
 		this.events = platform.getEventApi();
-
 		this.imei = imei;
-
-		this.device.set(new IsDevice());
-		this.device.set(position);
-		
-		this.locationUpdate.setType(EVENT_TYPE);
-		this.locationUpdate.setText("Location updated");
-		this.locationUpdate.set(position);
+		setupMo(agentGid);
+		setupEvents(agentGid);
 	}
 
 	public String getImei() {
 		return imei;
 	}
 
+	public GId getGId() {
+		return gid;
+	}
+
 	public void setLocation(BigDecimal latitude, BigDecimal longitude,
 			BigDecimal altitude) throws SDKException {
-		position.setLatitude(latitude);
-		position.setLongitude(longitude);
-		position.setAltitude(altitude);
-		
-		updateInventory();
-		
+		position.setLat(latitude);
+		position.setLng(longitude);
+		position.setAlt(altitude);
+		getInventory().getManagedObject(gid).update(device);
+
 		locationUpdate.setTime(new Date());
 		events.create(locationUpdate);
 	}
 
-	private void updateInventory() throws SDKException {
-		if (gid == null) {
-			ID extId = new ID(imei);
-			extId.setType(XTID_TYPE);
-			
-			device.setType(TYPE);
-			device.setName("Tracker " + imei);
+	public void geofenceAlarm(String imei2, boolean equals) {
+		// TODO Auto-generated method stub
 
-			createOrUpdate(device, extId, null);
-			gid = device.getId();
-			device.setId(null); // Ugly ugly
-			
-			ManagedObjectRepresentation source = new ManagedObjectRepresentation();
-			source.setId(gid);
-			source.setSelf(device.getSelf());
-			locationUpdate.setSource(source);
-		} else {
-			getInventory().getManagedObject(gid).update(device);
-		}
+	}
+
+	public void setGeofence(String imei2, Geofence ackedFence) {
+		// TODO Auto-generated method stub
+
+	}
+
+	private void setupEvents(GId agentGid) throws SDKException {
+		this.locationUpdate.setType(EVENT_TYPE);
+		this.locationUpdate.setText("Location updated");
+		this.locationUpdate.set(position);
+
+		ManagedObjectRepresentation source = new ManagedObjectRepresentation();
+		source.setId(gid);
+		source.setSelf(device.getSelf());
+		locationUpdate.setSource(source);
+	}
+
+	private void setupMo(GId agentGid) throws SDKException {
+		SupportedOperations ops = ConnectionRegistry.instance().get(imei)
+				.getSupportedOperations();
+		this.device.set(ops);
+		this.device.set(new IsDevice());
+		this.device.set(position);
+
+		ID extId = new ID(imei);
+		extId.setType(XTID_TYPE);
+
+		device.setType(TYPE);
+		device.setName("Tracker " + imei);
+
+		createOrUpdate(device, extId, agentGid);
+		gid = device.getId();
+		device.setId(null); // Ugly ugly
 	}
 
 	private EventApi events;

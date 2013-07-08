@@ -20,34 +20,18 @@
 
 package c8y.trackeragent;
 
-import java.math.BigDecimal;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.io.IOException;
 
-import com.cumulocity.sdk.client.Platform;
-import com.cumulocity.sdk.client.SDKException;
+import c8y.SupportedOperations;
 
-public class TrackerManager {
-	public TrackerManager(Platform platform) {
-		this.platform = platform;
-	}
+import com.cumulocity.rest.representation.operation.OperationRepresentation;
 
-	public void locationUpdate(String imei, BigDecimal latitude,
-			BigDecimal longitude, BigDecimal altitude) throws SDKException {
-		getOrCreate(imei).setLocation(latitude, longitude, altitude);
-	}
-
-	public TrackerDevice getOrCreate(String imei) {
-		TrackerDevice device = devices.get(imei);
-
-		if (device == null) {
-			device = new TrackerDevice(platform, imei);
-			devices.put(imei, device);
-		}
-
-		return device;
-	}
-
-	private Platform platform;
-	private Map<String, TrackerDevice> devices = new ConcurrentHashMap<String, TrackerDevice>();
+/**
+ * Interface to execute an operation on a device.
+ * 
+ * @return true if the operation was understood
+ */
+public interface Executor {
+	SupportedOperations getSupportedOperations();
+	void execute(OperationRepresentation operation) throws IOException;
 }

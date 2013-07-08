@@ -22,46 +22,61 @@ package c8y.trackeragent;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.cumulocity.sdk.client.Platform;
+import com.cumulocity.sdk.client.SDKException;
 
+/**
+ * The server listens to connections from devices and starts threads for
+ * handling device communication for particular types of devices. (Currently,
+ * only GL200.)
+ */
 public class Server implements Runnable {
-
 	public static final String PORT_PROP = "port";
 	public static final String DEFAULT_PORT = "8081";
 
-	public Server(Platform platform, Properties props) throws IOException {
-		this.platform = platform;
+	public Server(Platform platform, Properties props) throws IOException,
+			SDKException {
 		int port = Integer.parseInt(props.getProperty(PORT_PROP, DEFAULT_PORT));
 		this.server = new ServerSocket(port);
+		this.trackerAgent = new TrackerAgent(platform);
 	}
 
 	@Override
 	public void run() {
 		while (true) {
-			try {
-				logger.debug("Waiting for connection");
-				Socket client = server.accept();
-				logger.debug(
-						"Accepted connection from {}, launching worker thread.",
-						client.getRemoteSocketAddress());
-				TrackerManager trackerManager = new TrackerManager(platform);
-				
-				QueclinkTrackerReader reader = new QueclinkTrackerReader(client, trackerManager);
-				new Thread(reader).start();
-				
-				QueclinkTrackerCommands writer = new QueclinkTrackerCommands(client, trackerManager);
-			} catch (IOException e) {
-				logger.warn("Couldn't accept connection", e);
-			}
+			accept();
 		}
 	}
 
-	private Logger logger = LoggerFactory.getLogger(Agent.class);
-	private Platform platform;
+	private void accept() {
+		try {
+			logger.debug("Waiting for connection");
+			Socket client = server.accept();
+			logger.debug(
+					"Accepted connection from {}, launching worker thread.",
+					client.getRemoteSocketAddress());
+
+			// TODO Device-independent implementation of this, e.g., peek into
+			// client's InputStream and check what tracker to set up.
+			List<Object> fragments = new ArrayList<Object>();
+			fragments.add(new GL200Geofence(trackerAgent, "gl200"));
+			ConnectedTracker tracker = new ConnectedTracker(client, fragments,
+					'$', ",");
+
+			new Thread(tracker).start();
+		} catch (IOException e) {
+			logger.warn("Couldn't connect", e);
+		}
+	}
+
+	private Logger logger = LoggerFactory.getLogger(Main.class);
 	private ServerSocket server;
+	private TrackerAgent trackerAgent;
 }

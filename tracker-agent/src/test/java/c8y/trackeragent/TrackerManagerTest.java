@@ -54,6 +54,8 @@ public class TrackerManagerTest {
 
 	@Before
 	public void setup() throws SDKException {
+		trackerMgr = new TrackerAgent(platform);
+		
 		when(platform.getIdentityApi()).thenReturn(registry);
 		when(platform.getInventoryApi()).thenReturn(inventory);
 		when(platform.getEventApi()).thenReturn(events);
@@ -82,7 +84,7 @@ public class TrackerManagerTest {
 		
 		when(inventory.create(any(ManagedObjectRepresentation.class))).thenReturn(returnedMo);
 		
-		trackerMgr.locationUpdate(IMEI, LATITUDE, LONGITUDE, ALTITUDE);
+		trackerMgr.getOrCreate(IMEI).setLocation(LATITUDE, LONGITUDE, ALTITUDE);
 		
 		// Check if device is correctly created in the inventory
 		ArgumentCaptor<ManagedObjectRepresentation> moArg = ArgumentCaptor.forClass(ManagedObjectRepresentation.class);
@@ -99,7 +101,7 @@ public class TrackerManagerTest {
 		verify(events).create(eventArg.capture());
 		EventRepresentation event = eventArg.getValue();
 		assertEquals(returnedMo.getId(), event.getSource().getId());
-		assertEquals(LATITUDE, event.get(Position.class).getLatitude());
+		assertEquals(LATITUDE, event.get(Position.class).getLat());
 	}
 	
 	@Test 
@@ -115,7 +117,7 @@ public class TrackerManagerTest {
 		
 		when(moHandle.update(any(ManagedObjectRepresentation.class))).thenReturn(returnedMo);
 
-		trackerMgr.locationUpdate(IMEI, LATITUDE, LONGITUDE, ALTITUDE);
+		trackerMgr.getOrCreate(IMEI).setLocation(LATITUDE, LONGITUDE, ALTITUDE);
 		
 		// Check that only update was invoked and that the update was correct
 		ArgumentCaptor<ManagedObjectRepresentation> moArg = ArgumentCaptor.forClass(ManagedObjectRepresentation.class);
@@ -128,15 +130,15 @@ public class TrackerManagerTest {
 		verify(registry, never()).create(any(ExternalIDRepresentation.class));
 
 		// Check that after second invocation, registry was still only queried once
-		trackerMgr.locationUpdate(IMEI, LATITUDE, LONGITUDE, ALTITUDE);
+		trackerMgr.getOrCreate(IMEI).setLocation(LATITUDE, LONGITUDE, ALTITUDE);
 		verify(registry).getExternalId(any(ID.class));		
 	}
 	
 	private void verifyMo(ArgumentCaptor<ManagedObjectRepresentation> moArg) {
 		ManagedObjectRepresentation mo = moArg.getValue();
-		assertEquals(LATITUDE, mo.get(Position.class).getLatitude());
-		assertEquals(LONGITUDE, mo.get(Position.class).getLongitude());
-		assertEquals(ALTITUDE, mo.get(Position.class).getAltitude());
+		assertEquals(LATITUDE, mo.get(Position.class).getLat());
+		assertEquals(LONGITUDE, mo.get(Position.class).getLng());
+		assertEquals(ALTITUDE, mo.get(Position.class).getAlt());
 	}
 
 
@@ -145,5 +147,5 @@ public class TrackerManagerTest {
 	private InventoryApi inventory = mock(InventoryApi.class);
 	private ManagedObject moHandle = mock(ManagedObject.class);
 	private EventApi events = mock (EventApi.class);
-	private TrackerManager trackerMgr = new TrackerManager(platform);
+	private TrackerAgent trackerMgr;
 }

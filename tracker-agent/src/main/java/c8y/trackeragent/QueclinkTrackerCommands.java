@@ -25,7 +25,7 @@ import java.net.Socket;
 import c8y.Position;
 
 public class QueclinkTrackerCommands implements TrackerCommands {
-	public QueclinkTrackerCommands(Socket client, TrackerManager trackerManager) {
+	public QueclinkTrackerCommands(Socket client, TrackerAgent trackerManager) {
 		this.client = client;
 	}
 

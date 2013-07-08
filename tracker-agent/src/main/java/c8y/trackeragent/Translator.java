@@ -20,33 +20,9 @@
 
 package c8y.trackeragent;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import com.cumulocity.rest.representation.operation.OperationRepresentation;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.math.BigDecimal;
-import java.net.Socket;
-
-import org.junit.Test;
-
-import com.cumulocity.sdk.client.SDKException;
-
-public class QueclinkTrackerReaderTest {
-
-	@Test
-	public void testSinglePositionReport() throws IOException, SDKException {
-		InputStream is = getClass().getResourceAsStream(
-				"/singlepositionreport.txt");
-		qtr.processReports(is);
-		
-		verify(trackerMgr).locationUpdate("135790246811220",
-				new BigDecimal("31.222073"), new BigDecimal("121.354335"),
-				new BigDecimal("70.0"));
-	}
-
-	private TrackerAgent trackerMgr = mock(TrackerAgent.class);
-	private Socket client = mock(Socket.class);
-	private QueclinkTrackerReader qtr = new QueclinkTrackerReader(client,
-			trackerMgr);
+public interface Translator {
+	String getSupportOperation();
+	String translate(OperationRepresentation operation);
 }

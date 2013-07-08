@@ -35,7 +35,7 @@ public class QueclinkTrackerReader implements Runnable {
 	public static final char CMD_SEPARATOR = '$';
 	public static final String FIELD_SEPARATOR = ",";
 
-	public QueclinkTrackerReader(Socket client, TrackerManager trackerMgr) {
+	public QueclinkTrackerReader(Socket client, TrackerAgent trackerMgr) {
 		this.client = client;
 		this.trackerMgr = trackerMgr;
 	}
@@ -118,7 +118,7 @@ public class QueclinkTrackerReader implements Runnable {
 		return null;
 	}
 
-	private Logger logger = LoggerFactory.getLogger(Agent.class);
+	private Logger logger = LoggerFactory.getLogger(Main.class);
 	private Socket client;
-	private TrackerManager trackerMgr;
+	private TrackerAgent trackerMgr;
 }
