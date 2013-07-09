@@ -59,7 +59,7 @@ public class GL200Geofence implements Translator, Parser {
 	 * latitude, radius, check interval, correlation ID
 	 */
 	public static final String GEO_TEMPLATE = "AT+GTGEO=%s," + GEO_ID + ","
-			+ FENCE_MODE + ",%s,%s,%d,%d,,,,,,,,,%s$";
+			+ FENCE_MODE + ",%s,%s,%d,%d,,,,,,,,,%04x$";
 
 	/**
 	 * Acknowledgement of fence setting from tracker.
@@ -98,29 +98,29 @@ public class GL200Geofence implements Translator, Parser {
 		
 		TrackerDevice device = trackerAgent.getOrCreate(imei);
 		device.setLocation(lat, lng, alt);
-		device.geofenceAlarm(imei, "1".equals(type));
+		device.geofenceAlarm("1".equals(type));
 		return imei;
 	}
 
 	private String parseAcknowledgement(String[] report) throws SDKException {
 		String imei = report[2];
 		String geoId = report[4];
-		short returnedCorr = Short.parseShort(report[5]);
+		short returnedCorr = Short.parseShort(report[5], 16);
 		Geofence ackedFence = null;
 
-		synchronized (lastFence) {
-			if (returnedCorr != corrId || geoId != GEO_ID) {
+		synchronized (this) {
+			if (returnedCorr != corrId || !GEO_ID.equals(geoId) || lastFence == null) {
 				return null;
 			}
 			ackedFence = lastFence;
 		}
 
-		trackerAgent.getOrCreate(imei).setGeofence(imei, ackedFence);
+		trackerAgent.getOrCreate(imei).setGeofence(ackedFence);
 		return imei;
 	}
 
 	/**
-	 * Convert the operation to set or disable a geofence to GL200 format.5
+	 * Convert the operation to set or disable a geofence to GL200 format.
 	 */
 	@Override
 	public String translate(OperationRepresentation operation) {
@@ -152,7 +152,7 @@ public class GL200Geofence implements Translator, Parser {
 			checkInterval = 0;
 		}
 
-		synchronized (lastFence) {
+		synchronized (this) {
 			corrId++;
 			lastFence = geofence;
 		}
@@ -169,5 +169,5 @@ public class GL200Geofence implements Translator, Parser {
 	private TrackerAgent trackerAgent;
 	private String password;
 	private short corrId = 0;
-	private Geofence lastFence;
+	private Geofence lastFence = new Geofence();
 }

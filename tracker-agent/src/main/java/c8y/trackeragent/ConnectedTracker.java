@@ -54,7 +54,7 @@ public class ConnectedTracker implements Runnable, Executor {
 		try (InputStream is = client.getInputStream();
 				BufferedInputStream bis = new BufferedInputStream(is);
 				OutputStream out = client.getOutputStream()) {
-			this.out = out;
+			setOut(out);
 			processReports(bis);
 		} catch (IOException e) {
 			logger.warn("Error during communication with client device", e);
@@ -66,6 +66,7 @@ public class ConnectedTracker implements Runnable, Executor {
 	void processReports(InputStream is) throws IOException, SDKException {
 		String reportStr;
 		while ((reportStr = readReport(is)) != null) {
+			logger.debug("Processing report: " + reportStr);
 			String[] report = reportStr.split(fieldSeparator);
 			processReport(report);
 		}
@@ -92,7 +93,7 @@ public class ConnectedTracker implements Runnable, Executor {
 		return result.toString();
 	}
 
-	protected void processReport(String[] report) throws SDKException {
+	void processReport(String[] report) throws SDKException {
 		for (Object fragment : fragments) {
 			if (fragment instanceof Parser) {
 				Parser parser = (Parser) fragment;
@@ -108,6 +109,7 @@ public class ConnectedTracker implements Runnable, Executor {
 
 	@Override
 	public void execute(OperationRepresentation operation) throws IOException {
+		logger.debug("Executing operation " + operation);
 		String translation = translate(operation);
 
 		if (translation != null) {
@@ -139,6 +141,10 @@ public class ConnectedTracker implements Runnable, Executor {
 			}
 		}
 		return result;
+	}
+	
+	void setOut(OutputStream out) {
+		this.out = out;
 	}
 
 	protected Logger logger = LoggerFactory.getLogger(ConnectedTracker.class);

@@ -68,7 +68,7 @@ public class Server implements Runnable {
 			List<Object> fragments = new ArrayList<Object>();
 			fragments.add(new GL200Geofence(trackerAgent, "gl200"));
 			ConnectedTracker tracker = new ConnectedTracker(client, fragments,
-					'$', ",");
+					GL200Constants.REPORT_SEP, GL200Constants.FIELD_SEP);
 
 			new Thread(tracker).start();
 		} catch (IOException e) {

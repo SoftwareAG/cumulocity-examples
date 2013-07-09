@@ -22,6 +22,10 @@ package c8y.trackeragent;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import c8y.Geofence;
 import c8y.IsDevice;
@@ -29,25 +33,35 @@ import c8y.Position;
 import c8y.SupportedOperations;
 
 import com.cumulocity.model.ID;
+import com.cumulocity.model.event.CumulocityAlarmStatuses;
+import com.cumulocity.model.event.CumulocitySeverities;
 import com.cumulocity.model.idtype.GId;
+import com.cumulocity.rest.representation.alarm.AlarmCollectionRepresentation;
+import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
 import com.cumulocity.rest.representation.event.EventRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
+import com.cumulocity.sdk.client.PagedCollectionResource;
 import com.cumulocity.sdk.client.Platform;
 import com.cumulocity.sdk.client.SDKException;
+import com.cumulocity.sdk.client.alarm.AlarmApi;
+import com.cumulocity.sdk.client.alarm.AlarmFilter;
 import com.cumulocity.sdk.client.event.EventApi;
 
 public class TrackerDevice extends DeviceManagedObject {
 	public static final String TYPE = "c8y_Tracker";
 	public static final String XTID_TYPE = "c8y_Imei";
 	public static final String EVENT_TYPE = "c8y_LocationUpdate";
+	public static final String ALARM_TYPE = "c8y_GeofenceAlarm";
 
 	public TrackerDevice(Platform platform, GId agentGid, String imei)
 			throws SDKException {
 		super(platform);
 		this.events = platform.getEventApi();
+		this.alarms = platform.getAlarmApi();
+
 		this.imei = imei;
-		setupMo(agentGid);
-		setupEvents(agentGid);
+		createMo(agentGid);
+		setupTemplates(gid);
 	}
 
 	public String getImei() {
@@ -60,42 +74,93 @@ public class TrackerDevice extends DeviceManagedObject {
 
 	public void setLocation(BigDecimal latitude, BigDecimal longitude,
 			BigDecimal altitude) throws SDKException {
+		logger.debug("Updating location of {} to lat {}, lng {}, alt {}", imei,
+				latitude, longitude, altitude);
+
+		Position position = new Position();
 		position.setLat(latitude);
 		position.setLng(longitude);
 		position.setAlt(altitude);
+
+		ManagedObjectRepresentation device = new ManagedObjectRepresentation();
+		device.set(position);
+
 		getInventory().getManagedObject(gid).update(device);
 
 		locationUpdate.setTime(new Date());
+		locationUpdate.set(position);
 		events.create(locationUpdate);
 	}
 
-	public void geofenceAlarm(String imei2, boolean equals) {
+	public void geofenceAlarm(boolean raise) throws SDKException {
+		logger.debug("Geofence alarm of {} is {}", imei, raise ? "raised"
+				: "cleared");
+
+		String newStatus = raise ? CumulocityAlarmStatuses.ACTIVE.toString()
+				: CumulocityAlarmStatuses.CLEARED.toString();
+
+		AlarmRepresentation activeAlarm = findActiveAlarm();
+
+		if (activeAlarm != null) {
+			activeAlarm.setTime(new Date());
+			activeAlarm.setStatus(newStatus);
+			alarms.updateAlarm(activeAlarm);
+		} else {
+			fenceAlarm.setTime(new Date());
+			fenceAlarm.setStatus(newStatus);
+			alarms.create(fenceAlarm);
+		}
+	}
+
+	private AlarmRepresentation findActiveAlarm() throws SDKException {
+		PagedCollectionResource<AlarmCollectionRepresentation> alarmQuery = alarms
+				.getAlarmsByFilter(fenceAlarmFilter);
+		AlarmCollectionRepresentation acr = alarmQuery.get(1000);
+		List<AlarmRepresentation> alarms = acr.getAlarms();
+		if (alarms.size() > 0) {
+			return alarms.get(0);
+		} else {
+			return null;
+		}
+	}
+
+	public void setGeofence(Geofence fence) {
+		if (fence.isActive()) {
+			logger.debug("Geofence of {} is set to lat {}, lng {}, radius {}",
+					imei, fence.getLat(), fence.getLng(), fence.getRadius());
+		} else {
+			logger.debug("Geofence of {} is disabled.");
+		}
+
 		// TODO Auto-generated method stub
 
 	}
 
-	public void setGeofence(String imei2, Geofence ackedFence) {
-		// TODO Auto-generated method stub
-
-	}
-
-	private void setupEvents(GId agentGid) throws SDKException {
-		this.locationUpdate.setType(EVENT_TYPE);
-		this.locationUpdate.setText("Location updated");
-		this.locationUpdate.set(position);
-
+	private void setupTemplates(GId agentGid) throws SDKException {
 		ManagedObjectRepresentation source = new ManagedObjectRepresentation();
 		source.setId(gid);
-		source.setSelf(device.getSelf());
+		source.setSelf(self);
+
+		locationUpdate.setType(EVENT_TYPE);
+		locationUpdate.setText("Location updated");
 		locationUpdate.setSource(source);
+
+		fenceAlarm.setType(ALARM_TYPE);
+		fenceAlarm.setSeverity(CumulocitySeverities.MAJOR.toString());
+		fenceAlarm.setText("Asset left preconfigured geo fence.");
+		fenceAlarm.setSource(source);
+
+		fenceAlarmFilter.bySource(source);
+		fenceAlarmFilter.byStatus(CumulocityAlarmStatuses.ACTIVE);
 	}
 
-	private void setupMo(GId agentGid) throws SDKException {
+	private void createMo(GId agentGid) throws SDKException {
+		ManagedObjectRepresentation device = new ManagedObjectRepresentation();
+
 		SupportedOperations ops = ConnectionRegistry.instance().get(imei)
 				.getSupportedOperations();
-		this.device.set(ops);
-		this.device.set(new IsDevice());
-		this.device.set(position);
+		device.set(ops);
+		device.set(new IsDevice());
 
 		ID extId = new ID(imei);
 		extId.setType(XTID_TYPE);
@@ -105,13 +170,18 @@ public class TrackerDevice extends DeviceManagedObject {
 
 		createOrUpdate(device, extId, agentGid);
 		gid = device.getId();
-		device.setId(null); // Ugly ugly
+		self = device.getSelf();
 	}
 
+	private Logger logger = LoggerFactory.getLogger(getClass());
 	private EventApi events;
+	private AlarmApi alarms;
+
 	private String imei;
 	private GId gid;
-	private ManagedObjectRepresentation device = new ManagedObjectRepresentation();
-	private Position position = new Position();
+	private String self;
+
 	private EventRepresentation locationUpdate = new EventRepresentation();
+	private AlarmRepresentation fenceAlarm = new AlarmRepresentation();
+	private AlarmFilter fenceAlarmFilter = new AlarmFilter();
 }

@@ -20,20 +20,7 @@
 
 package c8y.trackeragent;
 
-import java.net.Socket;
-
-import c8y.Position;
-
-public class QueclinkTrackerCommands implements TrackerCommands {
-	public QueclinkTrackerCommands(Socket client, TrackerAgent trackerManager) {
-		this.client = client;
-	}
-
-	@Override
-	public void setGeofence(Position position, int radius) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	private Socket client;
+public interface GL200Constants {
+	static final char REPORT_SEP = '$';
+	static final String FIELD_SEP = ",";
 }
