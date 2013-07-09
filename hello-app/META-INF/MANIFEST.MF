@@ -7,4 +7,3 @@ Bundle-Vendor: (C) Cumulocity GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Web-ContextPath: /hello
-Require-Bundle: com.nsn.cumulocity.sdk.support
