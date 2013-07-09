@@ -23,6 +23,7 @@ package c8y.trackeragent;
 import java.math.BigDecimal;
 
 import c8y.Geofence;
+import c8y.Position;
 
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
@@ -97,7 +98,12 @@ public class GL200Geofence implements Translator, Parser {
 		BigDecimal lat = new BigDecimal(report[12]);
 		
 		TrackerDevice device = trackerAgent.getOrCreate(imei);
-		device.setLocation(lat, lng, alt);
+		
+		Position position = new Position();
+		position.setLat(lat);
+		position.setLng(lng);
+		position.setAlt(alt);
+		device.setPosition(position);
 		device.geofenceAlarm("1".equals(type));
 		return imei;
 	}

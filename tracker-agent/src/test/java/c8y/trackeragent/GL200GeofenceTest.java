@@ -20,14 +20,11 @@
 
 package c8y.trackeragent;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigDecimal;
-import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,6 +32,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import c8y.Geofence;
+import c8y.Position;
 
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
@@ -102,8 +100,13 @@ public class GL200GeofenceTest {
 
 		assertEquals(IMEI, imei);
 		verify(trackerAgent).getOrCreate(IMEI);
-		verify(device).setLocation(new BigDecimal("31.222073"),
-				new BigDecimal("121.354335"), new BigDecimal("70.0"));
+
+		Position position = new Position();
+		position.setLat(new BigDecimal("31.222073"));
+		position.setLng(new BigDecimal("121.354335"));
+		position.setAlt(new BigDecimal("70.0"));
+		verify(device).setPosition(position);
+
 		verify(device).geofenceAlarm(false);
 	}
 

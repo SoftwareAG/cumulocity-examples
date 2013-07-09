@@ -69,8 +69,11 @@ public class DeviceManagedObject {
 		bind(returnedMo, extId);
 
 		if (parentId != null) {
+			ManagedObjectRepresentation handle = new ManagedObjectRepresentation();
+			handle.setId(returnedMo.getId());
+			handle.setSelf(returnedMo.getSelf());
 			ManagedObjectReferenceRepresentation moRef = new ManagedObjectReferenceRepresentation();
-			moRef.setManagedObject(mo);
+			moRef.setManagedObject(handle);
 			inventory.getManagedObject(parentId).addChildDevice(moRef);
 		}
 		return returnedMo;

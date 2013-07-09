@@ -98,7 +98,7 @@ public class ConnectedTracker implements Runnable, Executor {
 			if (fragment instanceof Parser) {
 				Parser parser = (Parser) fragment;
 				String imei = parser.parse(report);
-				if (!ConnectionRegistry.instance().contains(imei)) {
+				if (!ConnectionRegistry.instance().containsKey(imei)) {
 					// Works because no two devices have the same IMEI.
 					ConnectionRegistry.instance().put(imei, this);
 					break;

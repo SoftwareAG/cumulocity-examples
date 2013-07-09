@@ -43,11 +43,12 @@ public class ConnectedTrackerTest {
 	
 	@Before
 	public void setup() throws IOException {
+		ConnectionRegistry.instance().remove("imei");
 		List<Object> fragments = new ArrayList<Object>();
 		fragments.add(translator);
 		fragments.add(parser);
 		tracker = new ConnectedTracker(client, fragments, GL200Constants.REPORT_SEP, GL200Constants.FIELD_SEP);
-		tracker.setOut(out);		
+		tracker.setOut(out);
 	}
 	
 	@Test
