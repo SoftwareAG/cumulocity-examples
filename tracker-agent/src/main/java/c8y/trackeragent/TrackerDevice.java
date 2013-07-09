@@ -111,7 +111,15 @@ public class TrackerDevice extends DeviceManagedObject {
 			alarms.create(fenceAlarm);
 		}
 	}
+	
+	public void powerOnAlarm(String imei, String name, String time) {
+	    
+	}
 
+	public void powerOffAlarm(String imei, String name, String time){
+	    
+	}
+	
 	private AlarmRepresentation findActiveAlarm() throws SDKException {
 		PagedCollectionResource<AlarmCollectionRepresentation> alarmQuery = alarms
 				.getAlarmsByFilter(fenceAlarmFilter);
