@@ -20,6 +20,7 @@
 
 package c8y.trackeragent;
 
+import com.cumulocity.model.Agent;
 import com.cumulocity.model.ID;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
@@ -63,6 +64,7 @@ public class TrackerAgent extends DeviceManagedObject {
 		ManagedObjectRepresentation agentMo = new ManagedObjectRepresentation();
 		agentMo.setType("c8y_TrackerAgent");
 		agentMo.setName("Tracker agent");
+		agentMo.set(new Agent());
 
 		ID extId = new ID("c8y_TrackerAgent");
 		extId.setType("c8y_ServerSideAgent");
