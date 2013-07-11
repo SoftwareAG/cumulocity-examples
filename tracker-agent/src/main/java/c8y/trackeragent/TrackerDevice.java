@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import c8y.Battery;
 import c8y.Geofence;
 import c8y.IsDevice;
+import c8y.Mobile;
 import c8y.MotionTracking;
 import c8y.Position;
 import c8y.SignalStrength;
@@ -154,6 +155,13 @@ public class TrackerDevice extends DeviceManagedObject {
 		gprsSignalMsrmt.setTime(new Date());
 		measurements.create(gprsSignalMsrmt);
 	}
+	
+	public void setCellId(String cellId) throws SDKException {
+		ManagedObjectRepresentation device = new ManagedObjectRepresentation();
+		mobile.setCellId(cellId);
+		device.set(mobile);
+		getInventory().getManagedObject(gid).update(device);		
+	}
 
 	private void createOrCancelAlarm(boolean status,
 			AlarmRepresentation newAlarm) throws SDKException {
@@ -239,6 +247,10 @@ public class TrackerDevice extends DeviceManagedObject {
 		device.set(msmts);
 
 		device.set(new IsDevice());
+		
+		mobile = new Mobile();
+		mobile.setImei(imei);
+		device.set(mobile);
 
 		ID extId = new ID(imei);
 		extId.setType(XTID_TYPE);
@@ -260,6 +272,7 @@ public class TrackerDevice extends DeviceManagedObject {
 	private String imei;
 	private GId gid;
 	private String self;
+	private Mobile mobile;
 
 	private EventRepresentation locationUpdate = new EventRepresentation();
 	
