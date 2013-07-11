@@ -20,7 +20,6 @@
 
 package c8y.trackeragent;
 
-import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 
 /**
@@ -61,24 +60,19 @@ public class GL200Power implements  Parser {
     }
 
     private String parsePowerOff(String[] report) throws SDKException {
-        String imei = report[2];
-        String name = report[3];
-        String time = report[4];
-        
-        TrackerDevice device = trackerAgent.getOrCreate(imei);
-        device.powerOffAlarm(imei,name,time);
-        return imei;
+    	return powerAlarm(report, true);
     }
 
     private String parsePowerOn(String[] report) throws SDKException {
-        String imei = report[2];
-        String name = report[3];
-        String time = report[4];
-
-        TrackerDevice device = trackerAgent.getOrCreate(imei);
-        device.powerOnAlarm(imei,name,time);
-        return imei;
+    	return powerAlarm(report, false);
     }
     
-    private TrackerAgent trackerAgent;
+    private String powerAlarm(String[] report, boolean b) throws SDKException {
+        String imei = report[2];
+        TrackerDevice device = trackerAgent.getOrCreate(imei);
+        device.powerAlarm(true);;
+        return imei;
+	}
+
+	private TrackerAgent trackerAgent;
 }
