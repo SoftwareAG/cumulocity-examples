@@ -99,7 +99,7 @@ public class GL200GeofenceTest {
 		String imei = gl200gf.parse(REPFENCE);
 
 		assertEquals(IMEI, imei);
-		verify(trackerAgent).getOrCreate(IMEI);
+		verify(trackerAgent, times(2)).getOrCreate(IMEI);
 
 		Position position = new Position();
 		position.setLat(new BigDecimal("31.222073"));

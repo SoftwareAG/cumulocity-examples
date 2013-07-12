@@ -36,24 +36,46 @@ import com.cumulocity.sdk.client.SDKException;
  * +RESP:GTFRI,02010B,135790246811220,,0,0,2,1,4.3,92,70.0,121.354335,31.222073,20090 214013254,0460,0000,18d8,6141,00,0,4.3,92,70.0,121.354335,31.222073,20090101000000,04 60,0000,18d8,6141,00,,20090214093254,11F0$
  * </pre>
  */
-public class GL200FixedReport implements Parser {
+public class GL200LocationReport implements Parser {
 	/**
-	 * Location report from tracker.
+	 * Online reports sent directly by the device when GPRS is available.
 	 */
-	public static final String FIXED_REPORT = "+RESP:GTFRI";
+	public static final String ONLINE_REP = "+RESP";
 
-	public GL200FixedReport(TrackerAgent trackerAgent) {
+	/**
+	 * Reports that have been buffered due to GPRS unavailability. TODO Time
+	 * handling for such reports is incorrect.
+	 */
+	public static final String BUFFER_REP = "+BUFF";
+
+	/**
+	 * Diverse Location reports sent by tracker.
+	 */
+	public static final String[] LOCATION_REPORTS = { "GTFRI", "GTGEO",
+			"GTSPD", "GTSOS", "GTRTL", "GTPNL", "GTNMR", "GTDIS", "GTDOG",
+			"GTIGL" };
+
+	public GL200LocationReport(TrackerAgent trackerAgent) {
 		this.trackerAgent = trackerAgent;
 	}
 
 	@Override
 	public String parse(String[] report) throws SDKException {
-		String reportType = report[0];
+		String[] reportType = report[0].split(":");
 
-		if (!FIXED_REPORT.equals(reportType)) {
-			return null;
+		if (ONLINE_REP.equals(reportType[0])
+				|| BUFFER_REP.equals(reportType[0])) {
+			for (String availableReps : LOCATION_REPORTS) {
+				if (availableReps.equals(reportType[1])) {
+					return parseLocationReport(report);
+				}
+			}
 		}
 
+		return null;
+	}
+
+	private String parseLocationReport(String[] report) throws SDKException {
 		String imei = report[2];
 		TrackerDevice device = trackerAgent.getOrCreate(imei);
 
@@ -74,7 +96,7 @@ public class GL200FixedReport implements Parser {
 		pos.setLng(new BigDecimal(report[reportStart + 4]));
 		pos.setLat(new BigDecimal(report[reportStart + 5]));
 		device.setPosition(pos);
-		
+
 		device.setCellId(report[reportStart + 10]);
 	}
 

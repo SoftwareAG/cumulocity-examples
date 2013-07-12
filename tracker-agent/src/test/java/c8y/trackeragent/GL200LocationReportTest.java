@@ -33,7 +33,7 @@ import c8y.Position;
 
 import com.cumulocity.sdk.client.SDKException;
 
-public class GL200FixedReportTest {
+public class GL200LocationReportTest {
 	public static final String IMEI = "135790246811220";
 	public static final Position POS1 = new Position();
 	public static final String CELLID1 = "6141";
@@ -45,7 +45,7 @@ public class GL200FixedReportTest {
 
 	@Before
 	public void setup() throws SDKException {
-		gl200fr = new GL200FixedReport(trackerAgent);
+		gl200fr = new GL200LocationReport(trackerAgent);
 		when(trackerAgent.getOrCreate(anyString())).thenReturn(device);
 
 		POS1.setAlt(new BigDecimal("70.0"));
@@ -70,8 +70,26 @@ public class GL200FixedReportTest {
 		verify(device).setPosition(POS2);
 		verify(device).setCellId(CELLID2);		
 	}
+	
+	@Test 
+	public void otherReports() throws SDKException {
+		String[] nonsenseReport = { "+NONSENSE" }; 
+		String imei = gl200fr.parse(nonsenseReport);
+		assertNull(imei);
+		
+		String[] buffReport = FIXEDREPSTR.split(GL200Constants.FIELD_SEP);
+		buffReport[0] = "+BUFF:GTFRI";
+		imei = gl200fr.parse(buffReport);
+		assertEquals(IMEI, imei);
 
-	private GL200FixedReport gl200fr;
+		String[] pnlReport = FIXEDREPSTR.split(GL200Constants.FIELD_SEP);
+		pnlReport[0] = "+BUFF:GTPNL";
+		imei = gl200fr.parse(pnlReport);
+		assertEquals(IMEI, imei);
+		
+	}
+
+	private GL200LocationReport gl200fr;
 	private TrackerAgent trackerAgent = mock(TrackerAgent.class);
 	private TrackerDevice device = mock(TrackerDevice.class);	
 }

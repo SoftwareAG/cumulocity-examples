@@ -20,10 +20,7 @@
 
 package c8y.trackeragent;
 
-import java.math.BigDecimal;
-
 import c8y.Geofence;
-import c8y.Position;
 
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
@@ -39,7 +36,7 @@ import com.cumulocity.sdk.client.SDKException;
  * +ACK:GTGEO,02010B,135790246811220,,0,0008,20100310172830,11F0$
  * +RESP:GTGEO,02010B,135790246811220,,0,0,1,1,4.3,92,70.0,121.354335,31.222073,2009 0214013254,0460,0000,18d8,6141,00,,20090214093254,11F0$
  */
-public class GL200Geofence implements Translator, Parser {
+public class GL200Geofence extends GL200LocationReport implements Translator {
 	/**
 	 * Number of fence, device supports up to five fences.
 	 */
@@ -72,8 +69,9 @@ public class GL200Geofence implements Translator, Parser {
 	 */
 	public static final String GEOFENCE_REPORT = "+RESP:GTGEO";
 
-	public GL200Geofence(TrackerAgent trackerMgr, String password) {
-		this.trackerAgent = trackerMgr;
+	public GL200Geofence(TrackerAgent trackerAgent, String password) {
+		super(trackerAgent);
+		this.trackerAgent = trackerAgent;
 		this.password = password;
 	}
 
@@ -91,19 +89,10 @@ public class GL200Geofence implements Translator, Parser {
 	}
 
 	private String parseFenceReport(String[] report) throws SDKException {
-		String imei = report[2];
+		String imei = super.parse(report);
 		String type = report[5];
-		BigDecimal alt = new BigDecimal(report[10]);
-		BigDecimal lng = new BigDecimal(report[11]);
-		BigDecimal lat = new BigDecimal(report[12]);
-		
+
 		TrackerDevice device = trackerAgent.getOrCreate(imei);
-		
-		Position position = new Position();
-		position.setLat(lat);
-		position.setLng(lng);
-		position.setAlt(alt);
-		device.setPosition(position);
 		device.geofenceAlarm("1".equals(type));
 		return imei;
 	}
