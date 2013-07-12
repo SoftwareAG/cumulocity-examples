@@ -132,8 +132,9 @@ public class TrackerDevice extends DeviceManagedObject {
 		createOrCancelAlarm(moving, motionAlarm);
 	}
 
-	public void powerAlarm(boolean powerLost) throws SDKException {
+	public void powerAlarm(boolean powerLost,boolean extInt) throws SDKException {
 		logger.debug("{} {}", imei, powerLost ? "lost power" : "has power again");
+		powerAlarm.setText(extInt ? "Asset lost power" : "Tracker lost power");
 		createOrCancelAlarm(powerLost, powerAlarm);
 	}
 	

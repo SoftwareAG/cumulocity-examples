@@ -33,6 +33,18 @@ import com.cumulocity.sdk.client.SDKException;
  * +RESP:GTPNA,02010B,135790246811220,,20100214093254,11F0$
  * or
  * +RESP:GTPFA,02010B,135790246811220,,20100214093254,11F0$
+ * 
+ * 
+ * The report for connecting external power supply protocol of GL200 tracker. Samples below show: getting external power supply report.
+ * This event is triggered when a certain event occur.
+ * </p>
+ * 
+ * <pre>
+ * 
+ * +RESP:GTEPN,02010B,135790246811220,,0,4.3,92,70.0,121.354335,31.222073,20090214013254,0460,0000,18d8,6141,00,20100214093254,11F0$
+ * or
+ * +RESP:GTEPF,02010B,135790246811220,0,,4.3,92,70.0,121.354335,31.222073,20090214013254,0460,0000,18d8,18d8,6141,00,20100214093254,11F0$
+ * 
  */
 public class GL200Power implements  Parser {
     
@@ -41,6 +53,9 @@ public class GL200Power implements  Parser {
      */
     public static final String POWERON_REPORT = "+RESP:GTPNA";
     public static final String POWEROFF_REPORT = "+RESP:GTPFA";
+    
+    public static final String EXTERNALPOWERON_REPORT = "+RESP:GTEPN";
+    public static final String EXTERNALPOWEROFF_REPORT = "+RESP:GTEPF";
 
     public GL200Power(TrackerAgent trackerMgr) {
         this.trackerAgent = trackerMgr;
@@ -54,23 +69,35 @@ public class GL200Power implements  Parser {
             return parsePowerOn(report);
         } else if (POWEROFF_REPORT.equals(reportType)) {
             return parsePowerOff(report);
+        } else if (EXTERNALPOWERON_REPORT.equals(reportType)) {
+            return parseExternalPowerOn(report);
+        } else if (EXTERNALPOWEROFF_REPORT.equals(reportType)) {
+            return parseExternalPowerOff(report);
         } else {
             return null;
         }
     }
 
     private String parsePowerOff(String[] report) throws SDKException {
-    	return powerAlarm(report, true);
+    	return powerAlarm(report, false);
     }
 
     private String parsePowerOn(String[] report) throws SDKException {
     	return powerAlarm(report, false);
     }
     
+    private String parseExternalPowerOff(String[] report) throws SDKException {
+        return powerAlarm(report, true);
+    }
+
+    private String parseExternalPowerOn(String[] report) throws SDKException {
+        return powerAlarm(report, true);
+    }
+    
     private String powerAlarm(String[] report, boolean b) throws SDKException {
         String imei = report[2];
         TrackerDevice device = trackerAgent.getOrCreate(imei);
-        device.powerAlarm(true);;
+        device.powerAlarm(true,b);;
         return imei;
 	}
 
