@@ -25,8 +25,6 @@ import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -60,9 +58,6 @@ public class GL200GeofenceTest {
 		operation.set(fence);
 
 		gl200gf = new GL200Geofence(trackerAgent, PASSWORD);
-
-		List<Object> fragments = new ArrayList<Object>();
-		fragments.add(gl200gf);
 
 		when(trackerAgent.getOrCreate(anyString())).thenReturn(device);
 	}

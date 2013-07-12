@@ -118,7 +118,7 @@ public class TrackerManagerITTest {
 		pos.setAlt(ALTITUDE);
 		device.setPosition(pos);
 		
-		device.setMotion(true);
+		device.setMotionTracking(true);
 
 		device.geofenceAlarm(true);
 		device.motionAlarm(true);

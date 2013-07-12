@@ -20,51 +20,113 @@
 
 package c8y.trackeragent;
 
+import c8y.MotionTracking;
+
+import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 
 /**
  * <p>
- * Device Motion State indication protocol of GL200 tracker. Samples below show: getting device motion state indication report.
- * This event is triggered when a certain event occur.
+ * Device Motion State indication protocol of GL200 tracker. Samples below show:
+ * getting device motion state indication report. This event is triggered when a
+ * certain event occur.
  * </p>
  * 
  * <pre>
- * 
  * +RESP:GTSTT,02010B,135790246811220,,41,0,4.3,92,70.0,121.354335,31.222073,2009021,4013254,0460,0000,18d8,6141,00,20100214093254,11F0$
+ * </pre>
  */
-public class GL200DeviceMotionState implements  Parser {
-    
-    /**
-     * Type of report: Device Motion State Indication.
-     */
-    public static final String GTSTT_REPORT = "+RESP:GTSTT";
-    
+public class GL200DeviceMotionState implements Parser, Translator {
 
-    public GL200DeviceMotionState(TrackerAgent trackerMgr) {
-        this.trackerAgent = trackerMgr;
-    }
+	/**
+	 * Type of report: Device Motion State Indication.
+	 */
+	public static final String MOTION_REPORT = "+RESP:GTSTT";
 
-    @Override
-    public String parse(String[] report) throws SDKException {
-        String reportType = report[0];
+	public static final String MOTION_DETECTED = "42";
 
-        if (GTSTT_REPORT.equals(reportType)) {
-            return deviceMotionStateIndication(report);
-        }  else {
-            return null;
-        }
-    }
+	/**
+	 * Change the event mask to include motion tracking.
+	 */
+	public static final String MOTION_TEMPLATE = "AT+GTCFG=%s,,,,,,,,,,%d,,,,,,,,,,,%04x$";
 
-    private String deviceMotionStateIndication(String[] report) throws SDKException {
-    	return deviceMotionAlarm(report, false);
-    }
-    
-    private String deviceMotionAlarm(String[] report, boolean b) throws SDKException {
-        String imei = report[2];
-        TrackerDevice device = trackerAgent.getOrCreate(imei);
-        device.motionAlarm(true);;
-        return imei;
+	/**
+	 * Events to set: Power on/off, external power on/off, battery low are
+	 * always on. Device motion is added depending on configuration from
+	 * platform.
+	 */
+	public static final int MOTION_OFF = 1 + 2 + 4 + 8 + 32;
+	public static final int MOTION_ON = 1 + 2 + 4 + 8 + 32 + 256;
+
+	public static final String MOTION_ACK = "+ACK:GTCFG";
+
+	public GL200DeviceMotionState(TrackerAgent trackerMgr, String password) {
+		this.trackerAgent = trackerMgr;
+		this.password = password;
+	}
+
+	@Override
+	public String parse(String[] report) throws SDKException {
+		String reportType = report[0];
+
+		if (MOTION_ACK.equals(reportType)) {
+			return parseAcknowledgement(report);
+		} else if (MOTION_REPORT.equals(reportType)) {
+			return parseMotionReport(report);
+		} else {
+			return null;
+		}
+	}
+
+	private String parseMotionReport(String[] report) throws SDKException {
+		String imei = report[2];
+		boolean motion = MOTION_DETECTED.equals(report[4]);
+
+		TrackerDevice device = trackerAgent.getOrCreate(imei);
+		device.motionAlarm(motion);
+		return imei;
+	}
+
+	private String parseAcknowledgement(String[] report) throws SDKException {
+		String imei = report[2];
+		short returnedCorr = Short.parseShort(report[4], 16);
+		boolean ackedState;
+
+		synchronized (this) {
+			if (returnedCorr != corrId) {
+				return null;
+			}
+			ackedState = lastState;
+		}
+
+		trackerAgent.getOrCreate(imei).setMotionTracking(ackedState);
+		return imei;
+	}
+
+	@Override
+	public String translate(OperationRepresentation operation) {
+		MotionTracking mTrack = operation.get(MotionTracking.class);
+
+		if (mTrack == null) {
+			return null;
+		}
+
+		synchronized (this) {
+			corrId++;
+			lastState = mTrack.isActive();
+		}
+
+		return String.format(MOTION_TEMPLATE, password,
+				mTrack.isActive() ? MOTION_ON : MOTION_OFF, corrId);
+	}
+
+	@Override
+	public String getSupportOperation() {
+		return "c8y_MotionTracking";
 	}
 
 	private TrackerAgent trackerAgent;
+	private String password;
+	private short corrId = 0;
+	private boolean lastState;
 }

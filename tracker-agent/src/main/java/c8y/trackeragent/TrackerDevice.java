@@ -117,7 +117,7 @@ public class TrackerDevice extends DeviceManagedObject {
 		createOrCancelAlarm(raise, fenceAlarm);
 	}
 
-	public void setMotion(boolean active) throws SDKException {
+	public void setMotionTracking(boolean active) throws SDKException {
 		logger.debug("Motion tracking for {} set to {}", imei, active);
 
 		ManagedObjectRepresentation device = new ManagedObjectRepresentation();

@@ -66,10 +66,10 @@ public class Server implements Runnable {
 			// TODO Device-independent implementation of this, e.g., peek into
 			// client's InputStream and check what tracker to set up.
 			List<Object> fragments = new ArrayList<Object>();
-			fragments.add(new GL200Geofence(trackerAgent, "gl200"));
+			fragments.add(new GL200Geofence(trackerAgent, PASSWORD));
 			fragments.add(new GL200Power(trackerAgent));
 			fragments.add(new GL200LocationReport(trackerAgent));
-			fragments.add(new GL200DeviceMotionState(trackerAgent));
+			fragments.add(new GL200DeviceMotionState(trackerAgent, PASSWORD));
 			fragments.add(new GL200FallbackReport(trackerAgent));
 			ConnectedTracker tracker = new ConnectedTracker(client, fragments,
 					GL200Constants.REPORT_SEP, GL200Constants.FIELD_SEP);
@@ -80,6 +80,7 @@ public class Server implements Runnable {
 		}
 	}
 
+	private static final String PASSWORD = "gl200";
 	private Logger logger = LoggerFactory.getLogger(Main.class);
 	private ServerSocket server;
 	private TrackerAgent trackerAgent;

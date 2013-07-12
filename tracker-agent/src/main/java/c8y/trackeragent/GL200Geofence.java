@@ -81,7 +81,7 @@ public class GL200Geofence extends GL200LocationReport implements Translator {
 
 		if (GEOFENCE_ACKNOWLEDGE.equals(reportType)) {
 			return parseAcknowledgement(report);
-		} else if (GEOFENCE_REPORT.equals(report[0])) {
+		} else if (GEOFENCE_REPORT.equals(reportType)) {
 			return parseFenceReport(report);
 		} else {
 			return null;
@@ -108,6 +108,7 @@ public class GL200Geofence extends GL200LocationReport implements Translator {
 				return null;
 			}
 			ackedFence = lastFence;
+			lastFence = null;
 		}
 
 		trackerAgent.getOrCreate(imei).setGeofence(ackedFence);

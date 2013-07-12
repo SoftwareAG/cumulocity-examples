@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 
 import c8y.SupportedOperations;
 
+import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 
@@ -70,6 +71,7 @@ public class ConnectedTracker implements Runnable, Executor {
 			String[] report = reportStr.split(fieldSeparator);
 			processReport(report);
 		}
+		logger.debug("Connection closed by {} {} ", client.getRemoteSocketAddress(), imei);
 	}
 
 	String readReport(InputStream is) throws IOException {
@@ -99,6 +101,7 @@ public class ConnectedTracker implements Runnable, Executor {
 				Parser parser = (Parser) fragment;
 				String imei = parser.parse(report);
 				if (imei != null) {
+					this.imei = imei;
 					if (!ConnectionRegistry.instance().containsKey(imei)) {
 						// Works because no two devices have the same IMEI.
 						ConnectionRegistry.instance().put(imei, this);
@@ -118,6 +121,9 @@ public class ConnectedTracker implements Runnable, Executor {
 		if (translation != null) {
 			out.write(translation.getBytes());
 			out.flush();
+		} else {
+			operation.setStatus(OperationStatus.FAILED.toString());
+			operation.setFailureReason("Command currently not supported");
 		}
 	}
 
@@ -157,4 +163,5 @@ public class ConnectedTracker implements Runnable, Executor {
 	private Socket client;
 	private List<Object> fragments = new ArrayList<Object>();
 	private OutputStream out;
+	private String imei;
 }
