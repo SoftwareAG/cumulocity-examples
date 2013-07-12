@@ -39,7 +39,7 @@ import com.cumulocity.sdk.client.SDKException;
  */
 public class Server implements Runnable {
 	public static final String PORT_PROP = "port";
-	public static final String DEFAULT_PORT = "8081";
+	public static final String DEFAULT_PORT = "9090";
 
 	public Server(Platform platform, Properties props) throws IOException,
 			SDKException {
@@ -57,7 +57,7 @@ public class Server implements Runnable {
 
 	private void accept() {
 		try {
-			logger.debug("Waiting for connection");
+			logger.debug("Waiting for connection on port {}", server.getLocalPort());
 			Socket client = server.accept();
 			logger.debug(
 					"Accepted connection from {}, launching worker thread.",
@@ -69,6 +69,7 @@ public class Server implements Runnable {
 			fragments.add(new GL200Geofence(trackerAgent, "gl200"));
 			fragments.add(new GL200Power(trackerAgent));
 			fragments.add(new GL200LocationReport(trackerAgent));
+			fragments.add(new GL200FallbackReport(trackerAgent));
 			ConnectedTracker tracker = new ConnectedTracker(client, fragments,
 					GL200Constants.REPORT_SEP, GL200Constants.FIELD_SEP);
 
