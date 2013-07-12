@@ -69,6 +69,7 @@ public class Server implements Runnable {
 			fragments.add(new GL200Geofence(trackerAgent, "gl200"));
 			fragments.add(new GL200Power(trackerAgent));
 			fragments.add(new GL200LocationReport(trackerAgent));
+			fragments.add(new GL200DeviceMotionState(trackerAgent));
 			fragments.add(new GL200FallbackReport(trackerAgent));
 			ConnectedTracker tracker = new ConnectedTracker(client, fragments,
 					GL200Constants.REPORT_SEP, GL200Constants.FIELD_SEP);

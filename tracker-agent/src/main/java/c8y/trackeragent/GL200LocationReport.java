@@ -91,13 +91,19 @@ public class GL200LocationReport implements Parser {
 
 	private void parseLocationReport(TrackerDevice device, String[] report,
 			int reportStart) throws SDKException {
-		Position pos = new Position();
-		pos.setAlt(new BigDecimal(report[reportStart + 3]));
-		pos.setLng(new BigDecimal(report[reportStart + 4]));
-		pos.setLat(new BigDecimal(report[reportStart + 5]));
-		device.setPosition(pos);
-
-		device.setCellId(report[reportStart + 10]);
+		if (report[reportStart + 3].length() > 0
+				&& report[reportStart + 4].length() > 0
+				&& report[reportStart + 5].length() > 0) {
+			Position pos = new Position();
+			pos.setAlt(new BigDecimal(report[reportStart + 3]));
+			pos.setLng(new BigDecimal(report[reportStart + 4]));
+			pos.setLat(new BigDecimal(report[reportStart + 5]));
+			device.setPosition(pos);
+		}
+		
+		if (report[reportStart + 10].length() > 0) {
+			device.setCellId(report[reportStart + 10]);
+		}
 	}
 
 	private TrackerAgent trackerAgent;

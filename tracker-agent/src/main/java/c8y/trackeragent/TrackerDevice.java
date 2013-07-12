@@ -237,9 +237,11 @@ public class TrackerDevice extends DeviceManagedObject {
 	private void createMo(GId agentGid) throws SDKException {
 		ManagedObjectRepresentation device = new ManagedObjectRepresentation();
 
-		SupportedOperations ops = ConnectionRegistry.instance().get(imei)
-				.getSupportedOperations();
-		device.set(ops);
+		Executor exec = ConnectionRegistry.instance().get(imei);
+		if (exec != null) {
+			SupportedOperations ops = exec.getSupportedOperations();
+			device.set(ops);			
+		}
 
 		SupportedMeasurements msmts = new SupportedMeasurements();
 		msmts.add("c8y_Battery");
