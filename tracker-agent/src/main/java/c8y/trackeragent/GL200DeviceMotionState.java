@@ -91,15 +91,22 @@ public class GL200DeviceMotionState implements Parser, Translator {
 		String imei = report[2];
 		short returnedCorr = Short.parseShort(report[4], 16);
 		boolean ackedState;
+		OperationRepresentation ackOp;
 
 		synchronized (this) {
 			if (returnedCorr != corrId) {
 				return null;
 			}
 			ackedState = lastState;
+			ackOp = lastOperation;
 		}
 
-		trackerAgent.getOrCreate(imei).setMotionTracking(ackedState);
+		try {
+			trackerAgent.getOrCreate(imei).setMotionTracking(ackedState);
+			trackerAgent.finish(ackOp);
+		} catch (SDKException x) {
+			trackerAgent.fail(ackOp, "Error setting motion tracking", x);
+		}
 		return imei;
 	}
 
@@ -114,6 +121,7 @@ public class GL200DeviceMotionState implements Parser, Translator {
 		synchronized (this) {
 			corrId++;
 			lastState = mTrack.isActive();
+			lastOperation = operation;
 		}
 
 		return String.format(MOTION_TEMPLATE, password,
@@ -129,4 +137,5 @@ public class GL200DeviceMotionState implements Parser, Translator {
 	private String password;
 	private short corrId = 0;
 	private boolean lastState;
+	private OperationRepresentation lastOperation;
 }

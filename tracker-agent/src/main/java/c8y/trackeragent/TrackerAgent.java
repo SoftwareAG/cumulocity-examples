@@ -24,6 +24,7 @@ import com.cumulocity.model.Agent;
 import com.cumulocity.model.ID;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
+import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.Platform;
 import com.cumulocity.sdk.client.SDKException;
 
@@ -36,7 +37,7 @@ public class TrackerAgent extends DeviceManagedObject {
 		this.platform = platform;
 
 		createAgentMo();
-		new OperationDispatcher(platform, agentGid);
+		dispatcher = new OperationDispatcher(platform, agentGid);
 	}
 
 	/**
@@ -60,6 +61,15 @@ public class TrackerAgent extends DeviceManagedObject {
 		return device;
 	}
 
+	public void finish(OperationRepresentation operation) throws SDKException {
+		dispatcher.finish(operation);
+	}
+	
+	public void fail(OperationRepresentation operation, String text, SDKException x) throws SDKException {
+		dispatcher.fail(operation, text, x);
+	}
+
+
 	private void createAgentMo() throws SDKException {
 		ManagedObjectRepresentation agentMo = new ManagedObjectRepresentation();
 		agentMo.setType("c8y_TrackerAgent");
@@ -75,4 +85,5 @@ public class TrackerAgent extends DeviceManagedObject {
 
 	private Platform platform;
 	private GId agentGid;
+	private OperationDispatcher dispatcher;
 }

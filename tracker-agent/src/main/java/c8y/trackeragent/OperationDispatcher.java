@@ -66,6 +66,18 @@ public class OperationDispatcher extends TimerTask {
 		pollPendingOps();
 	}
 
+	public void finish(OperationRepresentation operation) throws SDKException {
+		operation.setStatus(OperationStatus.SUCCESSFUL.toString());
+		operations.update(operation);
+	}
+
+	public void fail(OperationRepresentation operation, String text,
+			SDKException x) throws SDKException {
+		operation.setStatus(OperationStatus.FAILED.toString());
+		operation.setFailureReason(text + " " + x.getMessage());
+		operations.update(operation);
+	}
+
 	/**
 	 * Clean up operations that are stuck in "executing" state.
 	 */
@@ -87,7 +99,7 @@ public class OperationDispatcher extends TimerTask {
 		logger.info("Executing queued operations");
 		try {
 			executePendingOps();
-		} catch (SDKException x) {
+		} catch (Exception x) {
 			logger.warn("Error while executing operations", x);
 		}
 	}
@@ -96,9 +108,17 @@ public class OperationDispatcher extends TimerTask {
 		for (OperationRepresentation operation : byStatus(OperationStatus.PENDING)) {
 			GId gid = operation.getDeviceId();
 			TrackerDevice device = ManagedObjectCache.instance().get(gid);
+			if (device == null) {
+				continue; // Device hasn't been identified yet
+			}
+			
 			Executor exec = ConnectionRegistry.instance().get(device.getImei());
 
 			if (exec != null) {
+				// Device is currently connected
+				operation.setStatus(OperationStatus.EXECUTING.toString());
+				operations.update(operation);
+				
 				try {
 					exec.execute(operation);
 				} catch (IOException x) {

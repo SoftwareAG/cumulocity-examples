@@ -102,16 +102,22 @@ public class GL200Geofence extends GL200LocationReport implements Translator {
 		String geoId = report[4];
 		short returnedCorr = Short.parseShort(report[5], 16);
 		Geofence ackedFence = null;
+		OperationRepresentation ackOp;
 
 		synchronized (this) {
 			if (returnedCorr != corrId || !GEO_ID.equals(geoId) || lastFence == null) {
 				return null;
 			}
 			ackedFence = lastFence;
-			lastFence = null;
+			ackOp = lastOperation;
 		}
 
-		trackerAgent.getOrCreate(imei).setGeofence(ackedFence);
+		try {
+			trackerAgent.getOrCreate(imei).setGeofence(ackedFence);
+			trackerAgent.finish(ackOp);
+		} catch (SDKException x) {
+			trackerAgent.fail(ackOp, "Error setting geofence", x);
+		}
 		return imei;
 	}
 
@@ -151,6 +157,7 @@ public class GL200Geofence extends GL200LocationReport implements Translator {
 		synchronized (this) {
 			corrId++;
 			lastFence = geofence;
+			lastOperation = operation;
 		}
 
 		return String.format(GEO_TEMPLATE, password, lng, lat, radius,
@@ -166,4 +173,5 @@ public class GL200Geofence extends GL200LocationReport implements Translator {
 	private String password;
 	private short corrId = 0;
 	private Geofence lastFence = new Geofence();
+	private OperationRepresentation lastOperation;
 }
