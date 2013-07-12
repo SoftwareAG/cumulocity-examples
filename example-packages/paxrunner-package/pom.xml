@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.cumulocity.example</groupId>
         <artifactId>example-packages</artifactId>
-        <version>3.6.1-SNAPSHOT</version>
+        <version>3.6.3-SNAPSHOT</version>
     </parent>
 
     <artifactId>paxrunner-package</artifactId>
