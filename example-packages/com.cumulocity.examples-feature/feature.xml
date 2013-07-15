@@ -2,7 +2,7 @@
 <feature
       id="com.cumulocity.examples-feature"
       label="Cumulocity Examples"
-      version="3.7.0.qualifier"
+      version="3.6.4.qualifier"
       provider-name="CUMULOCITY"
       os="linux,macosx,win32"
       arch="x86,x86_64">
@@ -23,40 +23,15 @@
       <import plugin="com.nsn.cumulocity.model.core-model"/>
       <import plugin="com.nsn.cumulocity.model.device-capability-model"/>
       <import plugin="com.nsn.cumulocity.model.rest-representation"/>
-      <import plugin="com.nsn.cumulocity.clients-java.java-agent-support"/>
       <import plugin="com.nsn.cumulocity.clients-java.java-client"/>
       <import plugin="org.eclipse.osgi"/>
       <import plugin="org.slf4j.api"/>
-      <import plugin="org.springframework.beans"/>
-      <import plugin="org.springframework.context"/>
-      <import plugin="org.springframework.core"/>
       <import plugin="com.nsn.cumulocity.dependencies.osgi.svenson"/>
       <import plugin="com.nsn.cumulocity.shared-components.common-utils"/>
    </requires>
 
    <plugin
-         id="mps-energy-agent"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="mps-energy-app"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
          id="hello-agent"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="hello-app"
          download-size="0"
          install-size="0"
          version="0.0.0"
