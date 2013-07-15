@@ -20,15 +20,22 @@
 
 package c8y.trackeragent;
 
+import c8y.Configuration;
+import c8y.Restart;
+
+import com.cumulocity.model.operation.OperationStatus;
+import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 
 /**
  * Try to parse a report and create a device on it anyway, even if the remainder
- * wasn't understood ...
+ * wasn't understood. Also, execute a verbatim command that was sent through the
+ * configuration widget.
  */
-public class GL200FallbackReport implements Parser {
-	public GL200FallbackReport(TrackerAgent trackerAgent) {
+public class GL200Fallback implements Parser, Translator {
+	public GL200Fallback(TrackerAgent trackerAgent, String password) {
 		this.trackerAgent = trackerAgent;
+		this.password = password;
 	}
 
 	@Override
@@ -38,5 +45,28 @@ public class GL200FallbackReport implements Parser {
 		return imei;
 	}
 
+	@Override
+	public String translate(OperationRepresentation operation) {
+		Configuration cfg = operation.get(Configuration.class);
+
+		if (cfg != null) {
+			operation.setStatus(OperationStatus.SUCCESSFUL.toString());
+			return cfg.getConfig();
+		}
+		
+		if (operation.get(Restart.class) != null) {
+			return String.format("AT+GTRTO=%s,3,,,,,,0001$", password);
+		}
+		
+		
+		return null;
+	}
+
+	@Override
+	public String getSupportOperation() {
+		return "c8y_Configuration";
+	}
+
 	private TrackerAgent trackerAgent;
+	private String password;
 }

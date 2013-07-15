@@ -20,8 +20,6 @@
 
 package c8y.trackeragent;
 
-import java.io.IOException;
-
 import c8y.SupportedOperations;
 
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
@@ -33,5 +31,5 @@ import com.cumulocity.rest.representation.operation.OperationRepresentation;
  */
 public interface Executor {
 	SupportedOperations getSupportedOperations();
-	void execute(OperationRepresentation operation) throws IOException;
+	void execute(OperationRepresentation operation) throws Exception;
 }

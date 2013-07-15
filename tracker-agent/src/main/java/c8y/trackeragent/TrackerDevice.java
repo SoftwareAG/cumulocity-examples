@@ -28,11 +28,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import c8y.Battery;
+import c8y.Configuration;
 import c8y.Geofence;
 import c8y.IsDevice;
 import c8y.Mobile;
 import c8y.MotionTracking;
 import c8y.Position;
+import c8y.Restart;
 import c8y.SignalStrength;
 import c8y.SupportedMeasurements;
 import c8y.SupportedOperations;
@@ -250,6 +252,8 @@ public class TrackerDevice extends DeviceManagedObject {
 		device.set(msmts);
 
 		device.set(new IsDevice());
+		device.set(new Configuration());
+		device.set(new Restart());
 		
 		mobile = new Mobile();
 		mobile.setImei(imei);

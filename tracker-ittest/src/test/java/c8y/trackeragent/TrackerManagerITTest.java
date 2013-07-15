@@ -36,7 +36,6 @@ import c8y.Position;
 import c8y.SupportedOperations;
 
 import com.cumulocity.model.ID;
-import com.cumulocity.model.event.AlarmStatus;
 import com.cumulocity.model.event.CumulocityAlarmStatuses;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.alarm.AlarmCollectionRepresentation;
@@ -122,7 +121,7 @@ public class TrackerManagerITTest {
 
 		device.geofenceAlarm(true);
 		device.motionAlarm(true);
-		device.powerAlarm(true);
+		device.powerAlarm(true, true);
 		device.batteryLevel(50);
 		device.signalStrength(new BigDecimal(22), new BigDecimal(2));
 		
@@ -130,7 +129,7 @@ public class TrackerManagerITTest {
 
 		device.geofenceAlarm(false);
 		device.motionAlarm(false);
-		device.powerAlarm(false);
+		device.powerAlarm(false, true);
 		device.batteryLevel(48);
 		device.signalStrength(new BigDecimal(21), new BigDecimal(3));
 		

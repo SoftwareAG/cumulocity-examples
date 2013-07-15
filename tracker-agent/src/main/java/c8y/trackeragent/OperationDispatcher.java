@@ -20,7 +20,6 @@
 
 package c8y.trackeragent;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -53,6 +52,7 @@ public class OperationDispatcher extends TimerTask {
 	 *            The connection to the platform.
 	 * @param agent
 	 *            The ID of this agent.
+	 * @param cfgDriver
 	 * @param executers
 	 *            A map of currently connected devices. The map is maintained by
 	 *            the threads communicating with the devices, hence it needs to
@@ -82,7 +82,7 @@ public class OperationDispatcher extends TimerTask {
 	 * Clean up operations that are stuck in "executing" state.
 	 */
 	private void finishExecutingOps() throws SDKException {
-		logger.info("Cancelling hanging operations");
+		logger.debug("Cancelling hanging operations");
 		for (OperationRepresentation operation : byStatus(OperationStatus.EXECUTING)) {
 			operation.setStatus(OperationStatus.FAILED.toString());
 			operations.update(operation);
@@ -96,7 +96,7 @@ public class OperationDispatcher extends TimerTask {
 
 	@Override
 	public void run() {
-		logger.info("Executing queued operations");
+		logger.debug("Executing queued operations");
 		try {
 			executePendingOps();
 		} catch (Exception x) {
@@ -107,31 +107,41 @@ public class OperationDispatcher extends TimerTask {
 	private void executePendingOps() throws SDKException {
 		for (OperationRepresentation operation : byStatus(OperationStatus.PENDING)) {
 			GId gid = operation.getDeviceId();
+
 			TrackerDevice device = ManagedObjectCache.instance().get(gid);
 			if (device == null) {
 				continue; // Device hasn't been identified yet
 			}
-			
+
 			Executor exec = ConnectionRegistry.instance().get(device.getImei());
 
 			if (exec != null) {
-				// Device is currently connected
-				operation.setStatus(OperationStatus.EXECUTING.toString());
-				operations.update(operation);
-				
-				try {
-					exec.execute(operation);
-				} catch (IOException x) {
-					String msg = "Error during communication with device "
-							+ operation.getDeviceId();
-					logger.warn(msg, x);
-					operation.setStatus(OperationStatus.FAILED.toString());
-					operation.setFailureReason(msg + x.getMessage());
+				// Device is currently connected, execute on device
+				executeOperation(exec, operation);
+				if (OperationStatus.FAILED.toString().equals(
+						operation.getStatus())) {
+					// Connection error, remove device
 					ConnectionRegistry.instance().remove(device.getImei());
 				}
-				operations.update(operation);
 			}
 		}
+	}
+
+	private void executeOperation(Executor exec,
+			OperationRepresentation operation) throws SDKException {
+		operation.setStatus(OperationStatus.EXECUTING.toString());
+		operations.update(operation);
+
+		try {
+			exec.execute(operation);
+		} catch (Exception x) {
+			String msg = "Error during communication with device "
+					+ operation.getDeviceId();
+			logger.warn(msg, x);
+			operation.setStatus(OperationStatus.FAILED.toString());
+			operation.setFailureReason(msg + x.getMessage());
+		}
+		operations.update(operation);
 	}
 
 	private List<OperationRepresentation> byStatus(OperationStatus status)

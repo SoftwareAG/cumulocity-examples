@@ -36,7 +36,8 @@ public class TrackerAgent extends DeviceManagedObject {
 		super(platform);
 		this.platform = platform;
 
-		createAgentMo();
+		ManagedObjectRepresentation mo = createAgentMo();
+		new TracelogDriver(platform, mo);
 		dispatcher = new OperationDispatcher(platform, agentGid);
 	}
 
@@ -70,7 +71,7 @@ public class TrackerAgent extends DeviceManagedObject {
 	}
 
 
-	private void createAgentMo() throws SDKException {
+	private ManagedObjectRepresentation createAgentMo() throws SDKException {
 		ManagedObjectRepresentation agentMo = new ManagedObjectRepresentation();
 		agentMo.setType("c8y_TrackerAgent");
 		agentMo.setName("Tracker agent");
@@ -81,6 +82,7 @@ public class TrackerAgent extends DeviceManagedObject {
 
 		createOrUpdate(agentMo, extId, null);
 		agentGid = agentMo.getId();
+		return agentMo;
 	}
 
 	private Platform platform;
