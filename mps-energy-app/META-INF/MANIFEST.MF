@@ -1,9 +1,0 @@
-Manifest-Version: 1.0
-Bundle-ManifestVersion: 2
-Bundle-Name: Sample energy application
-Bundle-SymbolicName: mps-energy-app
-Bundle-Version: 3.6.0
-Bundle-Vendor: (C) Cumulocity GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Web-ContextPath: /energy
-Require-Bundle: com.nsn.cumulocity.sdk.support
