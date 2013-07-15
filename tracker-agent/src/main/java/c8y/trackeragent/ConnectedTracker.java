@@ -31,8 +31,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import c8y.SupportedOperations;
-
 import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
@@ -138,18 +136,6 @@ public class ConnectedTracker implements Runnable, Executor {
 			}
 		}
 		return null;
-	}
-	
-	@Override
-	public SupportedOperations getSupportedOperations() {
-		SupportedOperations result = new SupportedOperations();
-		for (Object fragment : fragments) {
-			if (fragment instanceof Translator) {
-				Translator translator = (Translator) fragment;
-				result.add(translator.getSupportOperation());
-			}
-		}
-		return result;
 	}
 	
 	void setOut(OutputStream out) {

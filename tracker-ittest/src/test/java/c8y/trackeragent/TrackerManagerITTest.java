@@ -78,11 +78,6 @@ public class TrackerManagerITTest {
 		
 		ConnectionRegistry.instance().put(IMEI, new Executor() {
 			@Override
-			public SupportedOperations getSupportedOperations() {
-				return new SupportedOperations();
-			}
-			
-			@Override
 			public void execute(OperationRepresentation operation) throws IOException {
 				// Nothing
 			}

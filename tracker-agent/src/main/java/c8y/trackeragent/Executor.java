@@ -20,8 +20,6 @@
 
 package c8y.trackeragent;
 
-import c8y.SupportedOperations;
-
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 
 /**
@@ -30,6 +28,5 @@ import com.cumulocity.rest.representation.operation.OperationRepresentation;
  * @return true if the operation was understood
  */
 public interface Executor {
-	SupportedOperations getSupportedOperations();
 	void execute(OperationRepresentation operation) throws Exception;
 }

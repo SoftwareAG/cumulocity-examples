@@ -128,11 +128,6 @@ public class GL200DeviceMotionState implements Parser, Translator {
 				mTrack.isActive() ? MOTION_ON : MOTION_OFF, corrId);
 	}
 
-	@Override
-	public String getSupportOperation() {
-		return "c8y_MotionTracking";
-	}
-
 	private TrackerAgent trackerAgent;
 	private String password;
 	private short corrId = 0;

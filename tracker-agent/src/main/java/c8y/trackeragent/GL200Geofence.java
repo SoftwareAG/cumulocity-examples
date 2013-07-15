@@ -164,11 +164,6 @@ public class GL200Geofence extends GL200LocationReport implements Translator {
 				checkInterval, corrId);
 	}
 
-	@Override
-	public String getSupportOperation() {
-		return "c8y_Geofence";
-	}
-	
 	private TrackerAgent trackerAgent;
 	private String password;
 	private short corrId = 0;

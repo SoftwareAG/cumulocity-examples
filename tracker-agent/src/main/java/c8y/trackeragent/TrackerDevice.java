@@ -134,9 +134,11 @@ public class TrackerDevice extends DeviceManagedObject {
 		createOrCancelAlarm(moving, motionAlarm);
 	}
 
-	public void powerAlarm(boolean powerLost,boolean extInt) throws SDKException {
+	public void powerAlarm(boolean powerLost, boolean external) throws SDKException {
 		logger.debug("{} {}", imei, powerLost ? "lost power" : "has power again");
-		powerAlarm.setText(extInt ? "Asset lost power" : "Tracker lost power");
+		String msg = external ? "Asset " : "Tracker ";
+		msg+=powerLost ? "lost power" : "has power again";
+		powerAlarm.setText(msg);
 		createOrCancelAlarm(powerLost, powerAlarm);
 	}
 	
@@ -240,11 +242,12 @@ public class TrackerDevice extends DeviceManagedObject {
 	private void createMo(GId agentGid) throws SDKException {
 		ManagedObjectRepresentation device = new ManagedObjectRepresentation();
 
-		Executor exec = ConnectionRegistry.instance().get(imei);
-		if (exec != null) {
-			SupportedOperations ops = exec.getSupportedOperations();
-			device.set(ops);			
-		}
+		SupportedOperations ops = new SupportedOperations();
+		ops.add("c8y_Restart");
+		ops.add("c8y_Configuration");
+		ops.add("c8y_MotionTracking");
+		ops.add("c8y_Geofence");
+		device.set(ops);
 
 		SupportedMeasurements msmts = new SupportedMeasurements();
 		msmts.add("c8y_Battery");

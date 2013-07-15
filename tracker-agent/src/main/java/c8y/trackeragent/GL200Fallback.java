@@ -62,11 +62,6 @@ public class GL200Fallback implements Parser, Translator {
 		return null;
 	}
 
-	@Override
-	public String getSupportOperation() {
-		return "c8y_Configuration";
-	}
-
 	private TrackerAgent trackerAgent;
 	private String password;
 }

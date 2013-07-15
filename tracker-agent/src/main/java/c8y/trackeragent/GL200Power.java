@@ -79,25 +79,25 @@ public class GL200Power implements  Parser {
     }
 
     private String parsePowerOff(String[] report) throws SDKException {
-    	return powerAlarm(report, false);
+    	return powerAlarm(report, true, false);
     }
 
     private String parsePowerOn(String[] report) throws SDKException {
-    	return powerAlarm(report, false);
+    	return powerAlarm(report, false, false);
     }
     
     private String parseExternalPowerOff(String[] report) throws SDKException {
-        return powerAlarm(report, true);
+        return powerAlarm(report, true, true);
     }
 
     private String parseExternalPowerOn(String[] report) throws SDKException {
-        return powerAlarm(report, true);
+        return powerAlarm(report, false, true);
     }
     
-    private String powerAlarm(String[] report, boolean b) throws SDKException {
+    private String powerAlarm(String[] report, boolean powerLost, boolean external) throws SDKException {
         String imei = report[2];
         TrackerDevice device = trackerAgent.getOrCreate(imei);
-        device.powerAlarm(true,b);;
+        device.powerAlarm(powerLost, external);
         return imei;
 	}
 
