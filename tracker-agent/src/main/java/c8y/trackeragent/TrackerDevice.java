@@ -173,7 +173,7 @@ public class TrackerDevice extends DeviceManagedObject {
 		String newStatus = status ? CumulocityAlarmStatuses.ACTIVE.toString()
 				: CumulocityAlarmStatuses.CLEARED.toString();
 
-		AlarmRepresentation activeAlarm = findActiveAlarm(GEO_ALARM_TYPE);
+		AlarmRepresentation activeAlarm = findActiveAlarm(newAlarm.getType());
 
 		if (activeAlarm != null) {
 			activeAlarm.setTime(new Date());
