@@ -74,9 +74,15 @@ public class TracelogDriver extends AppenderBase<ILoggingEvent> {
 	protected void append(ILoggingEvent entry) {
 		try {
 			if (entry.getLevel().isGreaterOrEqual(alarmLevel)) {
+				StringBuffer msg = new StringBuffer(entry.getLoggerName());
+				msg.append(": ");
+				msg.append(entry.getMessage());
+				if (entry.getThrowableProxy() != null) {
+					msg.append(" - ");
+					msg.append(entry.getThrowableProxy().getMessage());
+				}
 				alarmTemplate.setTime(new Date());
-				alarmTemplate.setText(entry.getLoggerName() + ": "
-						+ entry.getMessage());
+				alarmTemplate.setText(msg.toString());
 				alarms.create(alarmTemplate);
 			} else if (entry.getLevel().isGreaterOrEqual(eventLevel)) {
 				eventTemplate.setTime(new Date());

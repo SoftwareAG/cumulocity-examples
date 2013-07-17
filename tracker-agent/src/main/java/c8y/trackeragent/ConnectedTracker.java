@@ -37,7 +37,7 @@ import com.cumulocity.sdk.client.SDKException;
 
 /**
  * Performs the communication with a connected device. Accepts reports from the
- * input stream and sends commands to the output stream. 
+ * input stream and sends commands to the output stream.
  */
 public class ConnectedTracker implements Runnable, Executor {
 	public ConnectedTracker(Socket client, List<Object> fragments,
@@ -67,9 +67,31 @@ public class ConnectedTracker implements Runnable, Executor {
 		while ((reportStr = readReport(is)) != null) {
 			logger.debug("Processing report: " + reportStr);
 			String[] report = reportStr.split(fieldSeparator);
+			tryProcessReport(report);
+		}
+		logger.debug("Connection closed by {} {} ",
+				client.getRemoteSocketAddress(), imei);
+	}
+
+	private void tryProcessReport(String[] report) throws SDKException {
+		try {
+			processReport(report);
+		} catch (SDKException x) {
+			/*
+			 * What might have happened here? Either the connection to the
+			 * platform is down or the object has been deleted from the
+			 * platform. We'll evict the object from the ManagedObjectCache and
+			 * try again after a while. If that fails, we give up.
+			 */
+			if (imei != null) {
+				ManagedObjectCache.instance().evict(imei);
+			}
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+			}
 			processReport(report);
 		}
-		logger.debug("Connection closed by {} {} ", client.getRemoteSocketAddress(), imei);
 	}
 
 	String readReport(InputStream is) throws IOException {
@@ -106,7 +128,7 @@ public class ConnectedTracker implements Runnable, Executor {
 					}
 
 					break;
-				}				
+				}
 			}
 		}
 	}
@@ -137,7 +159,7 @@ public class ConnectedTracker implements Runnable, Executor {
 		}
 		return null;
 	}
-	
+
 	void setOut(OutputStream out) {
 		this.out = out;
 	}

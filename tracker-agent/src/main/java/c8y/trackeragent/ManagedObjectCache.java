@@ -36,6 +36,16 @@ public class ManagedObjectCache extends ConcurrentHashMap<GId,TrackerDevice> {
 		deviceByGid.put(device.getGId(), device);
 		deviceByImei.put(device.getImei(), device);
 	}
+	
+	public void evict(String imei) {
+		if (imei != null) {
+			TrackerDevice device = get(imei);
+			deviceByImei.remove(imei);			
+			if (device != null && device.getGId() != null) {
+				deviceByGid.remove(device.getGId());
+			}
+		}
+	}
 
 	public TrackerDevice get(String imei) {
 		return deviceByImei.get(imei);
