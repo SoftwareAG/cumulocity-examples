@@ -36,6 +36,7 @@ import com.cumulocity.sdk.client.SDKException;
 public class GL200LocationReportTest {
 	public static final String IMEI = "135790246811220";
 	public static final Position POS1 = new Position();
+	public static final String LAC = "18d8";
 	public static final String CELLID1 = "6141";
 	public static final Position POS2 = new Position();
 	public static final String CELLID2 = "6142";
@@ -65,10 +66,10 @@ public class GL200LocationReportTest {
 		verify(trackerAgent).getOrCreate(IMEI);
 		
 		verify(device).setPosition(POS1);
-		verify(device).setCellId(CELLID1);
+		verify(device).setCellId(LAC + "-" + CELLID1);
 		
 		verify(device).setPosition(POS2);
-		verify(device).setCellId(CELLID2);		
+		verify(device).setCellId(LAC + "-" + CELLID2);		
 	}
 	
 	@Test 

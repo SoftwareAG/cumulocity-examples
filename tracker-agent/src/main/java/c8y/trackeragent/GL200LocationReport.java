@@ -102,7 +102,7 @@ public class GL200LocationReport implements Parser {
 		}
 		
 		if (report[reportStart + 10].length() > 0) {
-			device.setCellId(report[reportStart + 10]);
+			device.setCellId(report[reportStart + 9 ] + "-" + report[reportStart + 10]);
 		}
 	}
 
