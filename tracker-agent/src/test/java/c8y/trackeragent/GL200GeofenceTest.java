@@ -102,7 +102,7 @@ public class GL200GeofenceTest {
 		position.setAlt(new BigDecimal("70.0"));
 		verify(device).setPosition(position);
 
-		verify(device).geofenceAlarm(false);
+		verify(device).geofenceAlarm(true);
 	}
 
 	// TODO Verify the formatting of commands sent to the device (limits and lengths)

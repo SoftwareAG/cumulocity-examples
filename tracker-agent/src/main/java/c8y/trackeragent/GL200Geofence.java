@@ -93,7 +93,7 @@ public class GL200Geofence extends GL200LocationReport implements Translator {
 		String type = report[5];
 
 		TrackerDevice device = trackerAgent.getOrCreate(imei);
-		device.geofenceAlarm("1".equals(type));
+		device.geofenceAlarm("0".equals(type));
 		return imei;
 	}
 
