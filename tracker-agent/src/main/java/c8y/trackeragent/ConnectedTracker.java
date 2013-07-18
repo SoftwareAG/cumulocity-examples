@@ -69,6 +69,7 @@ public class ConnectedTracker implements Runnable, Executor {
 			String[] report = reportStr.split(fieldSeparator);
 			tryProcessReport(report);
 		}
+		ConnectionRegistry.instance().remove(imei);
 		logger.debug("Connection closed by {} {} ",
 				client.getRemoteSocketAddress(), imei);
 	}
@@ -122,11 +123,7 @@ public class ConnectedTracker implements Runnable, Executor {
 				String imei = parser.parse(report);
 				if (imei != null) {
 					this.imei = imei;
-					if (!ConnectionRegistry.instance().containsKey(imei)) {
-						// Works because no two devices have the same IMEI.
-						ConnectionRegistry.instance().put(imei, this);
-					}
-
+					ConnectionRegistry.instance().put(imei, this);
 					break;
 				}
 			}

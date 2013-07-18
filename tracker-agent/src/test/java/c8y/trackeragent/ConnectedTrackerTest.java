@@ -90,7 +90,6 @@ public class ConnectedTrackerTest {
 		verify(parser).parse(REPORT1.split(GL200Constants.FIELD_SEP));
 		verify(parser).parse(REPORT2.split(GL200Constants.FIELD_SEP));
 		verifyZeroInteractions(translator);
-		assertEquals(tracker, ConnectionRegistry.instance().get("imei"));		
 	}
 	
 	@Test
