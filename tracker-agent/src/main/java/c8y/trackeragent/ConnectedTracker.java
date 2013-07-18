@@ -135,8 +135,8 @@ public class ConnectedTracker implements Runnable, Executor {
 
 	@Override
 	public void execute(OperationRepresentation operation) throws IOException {
-		logger.debug("Executing operation " + operation);
 		String translation = translate(operation);
+		logger.debug("Executing operation\n{}\n{}", operation, translation);
 
 		if (translation != null) {
 			out.write(translation.getBytes());
