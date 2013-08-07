@@ -22,7 +22,8 @@ package com.cumulocity.agents.mps.model;
 
 import java.util.Date;
 
-import com.cumulocity.model.control.Relay.RelayState;
+import c8y.Relay.RelayState;
+
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.event.EventRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
