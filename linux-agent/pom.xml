@@ -5,18 +5,18 @@
 	<parent>
 		<groupId>com.cumulocity.example</groupId>
 		<artifactId>cumulocity-examples</artifactId>
-		<version>3.7.0-SNAPSHOT</version>
+		<version>3.8.0-SNAPSHOT</version>
 	</parent>
 
-	<groupId>c8y.pi</groupId>
-	<artifactId>pi</artifactId>
+	<groupId>c8y.lx</groupId>
+	<artifactId>lx</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>Cumulocity Agent for Raspberry Pi</name>
+	<name>Cumulocity Agent for Linux</name>
 	<packaging>pom</packaging>
 
 	<modules>
-		<module>pi-driver</module>
-		<module>pi-agent</module>
+		<module>lx-driver</module>
+		<module>lx-agent</module>
 		<module>piface-driver</module>
 		<module>tinkerforge-driver</module>
 	</modules>

@@ -2,25 +2,25 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>c8y.pi</groupId>
-		<artifactId>pi</artifactId>
+		<groupId>c8y.lx</groupId>
+		<artifactId>lx</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>pi-driver</artifactId>
-	<name>Cumulocity Pi Driver interfaces</name>
-	<description>Driver interfaces for the Cumulocity Raspberry Pi agent</description>
+	<artifactId>lx-driver</artifactId>
+	<name>Cumulocity Linux Driver interfaces</name>
+	<description>Driver interfaces for the Cumulocity Linux agent</description>
 
 	<dependencies>
 		<dependency>
 			<groupId>com.nsn.cumulocity.clients-java</groupId>
 			<artifactId>java-client</artifactId>
-			<version>3.7.0-SNAPSHOT</version>
+			<version>3.8.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.nsn.cumulocity.model</groupId>
 			<artifactId>device-capability-model</artifactId>
-			<version>3.7.0-SNAPSHOT</version>
+			<version>3.8.0-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 </project>

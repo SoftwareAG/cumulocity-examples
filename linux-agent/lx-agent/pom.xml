@@ -2,12 +2,12 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>c8y.pi</groupId>
-		<artifactId>pi</artifactId>
+		<groupId>c8y.lx</groupId>
+		<artifactId>lx</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-	<artifactId>pi-agent</artifactId>
-	<name>Cumulocity Raspberry Pi Agent</name>
+	<artifactId>lx-agent</artifactId>
+	<name>Cumulocity Linux Agent</name>
 	<description>Executable agent for remote control of a Raspberry Pi from Cumulocity.</description>
 	<properties>
 		<maven.compiler.source>1.7</maven.compiler.source>
@@ -16,19 +16,19 @@
 	<!-- TODO Provide jssc through the Cumulocity repository -->
 	<dependencies>
 		<dependency>
-			<groupId>c8y.pi</groupId>
-			<artifactId>pi-driver</artifactId>
+			<groupId>c8y.lx</groupId>
+			<artifactId>lx-driver</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.nsn.cumulocity.model</groupId>
 			<artifactId>device-capability-model</artifactId>
-			<version>3.7.0-SNAPSHOT</version>
+			<version>3.8.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.nsn.cumulocity.clients-java</groupId>
 			<artifactId>java-client</artifactId>
-			<version>3.7.0-SNAPSHOT</version>
+			<version>3.8.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.code</groupId>
@@ -57,6 +57,5 @@
 			<version>1.9.5</version>
 			<scope>test</scope>
 		</dependency>
-
 	</dependencies>
 </project>
