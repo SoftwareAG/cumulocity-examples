@@ -18,7 +18,7 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package c8y.pi.agent;
+package c8y.lx.agent;
 
 import jssc.SerialPort;
 import jssc.SerialPortEvent;
@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 
 import c8y.Mobile;
 import c8y.SignalStrength;
-import c8y.pi.driver.PollingDriver;
+import c8y.lx.driver.PollingDriver;
 
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.Platform;

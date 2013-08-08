@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import c8y.pi.driver.Driver;
+import c8y.lx.driver.Driver;
 
 import com.tinkerforge.IPConnection;
 import com.tinkerforge.IPConnection.EnumerateListener;

@@ -1,4 +1,4 @@
-package c8y.pi.agent;
+package c8y.lx.agent;
 
 public class Credentials {
 	public Credentials(String host, String tenant, String user, String password, String key) {

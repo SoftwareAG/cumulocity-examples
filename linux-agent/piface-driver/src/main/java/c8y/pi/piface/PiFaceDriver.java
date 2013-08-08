@@ -26,13 +26,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import c8y.Hardware;
-import c8y.pi.driver.DeviceManagedObject;
-import c8y.pi.driver.Driver;
-import c8y.pi.driver.Executer;
+import c8y.Relay;
+import c8y.Relay.RelayState;
+import c8y.lx.driver.DeviceManagedObject;
+import c8y.lx.driver.Driver;
+import c8y.lx.driver.Executer;
 
 import com.cumulocity.model.ID;
-import com.cumulocity.model.control.Relay;
-import com.cumulocity.model.control.Relay.RelayState;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.rest.representation.event.EventRepresentation;

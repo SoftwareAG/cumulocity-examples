@@ -18,7 +18,7 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package c8y.pi.driver;
+package c8y.lx.driver;
 
 import java.util.Date;
 import java.util.Properties;
@@ -30,7 +30,6 @@ import org.slf4j.LoggerFactory;
 
 import c8y.SupportedMeasurements;
 
-import com.cumulocity.model.measurement.MeasurementFragment;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
 import com.cumulocity.sdk.client.Platform;
@@ -44,8 +43,20 @@ import com.cumulocity.sdk.client.measurement.MeasurementApi;
  */
 public abstract class PollingDriver implements Driver, Configurable, Runnable {
 	public static final String INTERVAL_PROP = ".interval";
-//	public static final String DELTAS_PROP = ""
+
+	private static Logger logger = LoggerFactory.getLogger(PollingDriver.class);
+
+	private String measurementType;
 	
+	private String pollingProp;
+	private long defaultPollingInterval, actualPollingInterval;
+
+	private Platform platform;
+	private MeasurementApi measurements;
+
+	private Timer timer;
+	private MeasurementRepresentation measurementRep = new MeasurementRepresentation();
+
 	public PollingDriver(String measurementType, String pollingProp,
 			long defaultPollingInterval) {
 		measurementRep.setType(measurementType);
@@ -119,7 +130,7 @@ public abstract class PollingDriver implements Driver, Configurable, Runnable {
 		scheduleMeasurements();
 	}
 
-	protected void sendMeasurement(MeasurementFragment measurement) {
+	protected void sendMeasurement(Object measurement) {
 		try {
 			measurementRep.set(measurement);
 			measurementRep.setTime(new Date());
@@ -165,18 +176,4 @@ public abstract class PollingDriver implements Driver, Configurable, Runnable {
 		return new Date(time / pollingInterval * pollingInterval
 				+ pollingInterval);
 	}
-
-	private static Logger logger = LoggerFactory.getLogger(PollingDriver.class);
-
-	private String measurementType;
-	
-	private String pollingProp;
-	private long defaultPollingInterval, actualPollingInterval;
-	//private boolean defaultDeltas = true, actualDeltas;
-
-	private Platform platform;
-	private MeasurementApi measurements;
-
-	private Timer timer;
-	private MeasurementRepresentation measurementRep = new MeasurementRepresentation();
 }

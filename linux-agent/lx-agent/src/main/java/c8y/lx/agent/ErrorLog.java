@@ -18,22 +18,42 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+package c8y.lx.agent;
 
-package c8y.pi.driver;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
-import java.util.Properties;
+/**
+ * A cumulative error log that can be passed to the platform in alarms or in
+ * operation results.
+ */
+public class ErrorLog {
+	public void add(String s) {
+		empty = false;
+		pw.println(s);
+	}
 
-public interface Configurable {
-	/**
-	 * Add the default configuration to the given properties.
-	 */
-	void addDefaults(Properties props);
-	
-	/**
-	 * Notifies driver of a configuration change. Unknown configuration entries
-	 * should be ignored by the driver.
-	 * 
-	 * @param props The updated configuration.
-	 */
-	void configurationChanged(Properties props);
+	public void add(Throwable throwable) {
+		empty = false;
+		throwable.printStackTrace(pw);
+	}
+
+	public boolean isEmpty() {
+		return empty;
+	}
+
+	@Override
+	public String toString() {
+		return sw.getBuffer().toString();
+	}
+
+	public static String toString(Throwable throwable) {
+		ErrorLog el = new ErrorLog();
+		el.add(throwable);
+		return el.toString();
+	}
+
+	private boolean empty = true;
+	private StringWriter sw = new StringWriter();
+	private PrintWriter pw = new PrintWriter(sw, true);
 }

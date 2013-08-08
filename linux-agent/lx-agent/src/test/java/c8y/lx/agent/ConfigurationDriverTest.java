@@ -18,7 +18,7 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package c8y.pi.agent;
+package c8y.lx.agent;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -32,7 +32,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import c8y.Configuration;
-import c8y.pi.driver.Configurable;
+import c8y.lx.agent.ConfigurationDriver;
+import c8y.lx.agent.PropUtils;
+import c8y.lx.driver.Configurable;
 
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;

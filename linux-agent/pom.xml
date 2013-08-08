@@ -14,10 +14,53 @@
 	<name>Cumulocity Agent for Linux</name>
 	<packaging>pom</packaging>
 
+	<properties>
+		<maven.compiler.source>1.7</maven.compiler.source>
+		<maven.compiler.target>1.7</maven.compiler.target>
+		<cumulocity.version>3.8.0-SNAPSHOT</cumulocity.version>
+		<lx.version>0.0.1-SNAPSHOT</lx.version>
+	</properties>
+
 	<modules>
 		<module>lx-driver</module>
 		<module>lx-agent</module>
 		<module>piface-driver</module>
 		<module>tinkerforge-driver</module>
 	</modules>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.nsn.cumulocity.model</groupId>
+			<artifactId>device-capability-model</artifactId>
+			<version>${cumulocity.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.nsn.cumulocity.clients-java</groupId>
+			<artifactId>java-client</artifactId>
+			<version>${cumulocity.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.11</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-all</artifactId>
+			<version>1.9.5</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>c8y.lx</groupId>
+				<artifactId>lx-driver</artifactId>
+				<version>${lx.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 </project>

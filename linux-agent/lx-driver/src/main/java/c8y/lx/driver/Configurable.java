@@ -18,34 +18,22 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package c8y.pi.driver;
 
-import com.cumulocity.rest.representation.operation.OperationRepresentation;
+package c8y.lx.driver;
 
-/**
- * Executes a remote control operation.
- */
-public interface Executer {
+import java.util.Properties;
+
+public interface Configurable {
 	/**
-	 * The type of remote control operation that this Executer can execute.
+	 * Add the default configuration to the given properties.
 	 */
-	String supportedOperationType();
-
+	void addDefaults(Properties props);
+	
 	/**
-	 * Execute a particular remote control operation and write the result of the
-	 * operation back into the operation. Carries out additional updates, e.g.,
-	 * to the inventory.
+	 * Notifies driver of a configuration change. Unknown configuration entries
+	 * should be ignored by the driver.
 	 * 
-	 * @param operation
-	 *            The operation to execute
-	 * @param cleanup
-	 *            If set to true, the operation was hanging in executing state
-	 *            when the agent was started. This can have multiple reasons:
-	 *            One reason is that there was a failure during first execution.
-	 *            In this case, cleanup may be needed. Another reason might be
-	 *            that the operation required a restart of the agent, and the
-	 *            operation is successful when the agent could be restarted.
+	 * @param props The updated configuration.
 	 */
-	void execute(OperationRepresentation operation, boolean cleanup)
-			throws Exception;
+	void configurationChanged(Properties props);
 }

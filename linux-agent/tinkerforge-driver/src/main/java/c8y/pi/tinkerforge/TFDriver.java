@@ -26,9 +26,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import c8y.pi.driver.Configurable;
-import c8y.pi.driver.Driver;
-import c8y.pi.driver.Executer;
+import c8y.lx.driver.Configurable;
+import c8y.lx.driver.Driver;
+import c8y.lx.driver.Executer;
 import c8y.pi.tinkerforge.Discoverer.DiscoveryFinishedListener;
 
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;

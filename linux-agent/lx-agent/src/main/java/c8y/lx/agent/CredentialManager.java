@@ -1,4 +1,4 @@
-package c8y.pi.agent;
+package c8y.lx.agent;
 
 import java.io.IOException;
 import java.util.Properties;

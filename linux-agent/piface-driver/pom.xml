@@ -1,37 +1,26 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+	
 	<parent>
 		<groupId>c8y.lx</groupId>
 		<artifactId>lx</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
+	
 	<artifactId>piface-driver</artifactId>
-	<name>Piface driver for the Cumulocity Raspberry Pi agent</name>
-	<properties>
-		<maven.compiler.source>1.7</maven.compiler.source>
-		<maven.compiler.target>1.7</maven.compiler.target>
-	</properties>
+	<name>PiFace Driver</name>
+	<description>PiFace driver for the Cumulocity Raspberry Pi agent</description>
+	
 	<dependencies>
-		<dependency>
-			<groupId>c8y.lx</groupId>
-			<artifactId>lx-driver</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
 		<dependency>
 			<groupId>com.pi4j</groupId>
 			<artifactId>pi4j-example</artifactId>
 			<version>0.0.5</version>
 		</dependency>
 		<dependency>
-			<groupId>com.nsn.cumulocity.clients-java</groupId>
-			<artifactId>java-client</artifactId>
-			<version>3.8.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>com.nsn.cumulocity.model</groupId>
-			<artifactId>device-capability-model</artifactId>
-			<version>3.8.0-SNAPSHOT</version>
+			<groupId>c8y.lx</groupId>
+			<artifactId>lx-driver</artifactId>
 		</dependency>
 	</dependencies>
 </project>

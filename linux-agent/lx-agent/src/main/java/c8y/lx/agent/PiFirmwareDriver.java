@@ -18,7 +18,7 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package c8y.pi.agent;
+package c8y.lx.agent;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -28,8 +28,8 @@ import java.io.StringWriter;
 import org.apache.commons.io.IOUtils;
 
 import c8y.Firmware;
-import c8y.pi.driver.Driver;
-import c8y.pi.driver.Executer;
+import c8y.lx.driver.Driver;
+import c8y.lx.driver.Executer;
 
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.model.operation.OperationStatus;

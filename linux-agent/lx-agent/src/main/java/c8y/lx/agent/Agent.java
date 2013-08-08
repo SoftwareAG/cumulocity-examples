@@ -18,7 +18,7 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package c8y.pi.agent;
+package c8y.lx.agent;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -33,10 +33,10 @@ import org.slf4j.LoggerFactory;
 import c8y.Hardware;
 import c8y.IsDevice;
 import c8y.SupportedOperations;
-import c8y.pi.driver.Configurable;
-import c8y.pi.driver.DeviceManagedObject;
-import c8y.pi.driver.Driver;
-import c8y.pi.driver.Executer;
+import c8y.lx.driver.Configurable;
+import c8y.lx.driver.DeviceManagedObject;
+import c8y.lx.driver.Driver;
+import c8y.lx.driver.Executer;
 
 import com.cumulocity.model.ID;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
@@ -59,7 +59,7 @@ import com.cumulocity.sdk.client.SDKException;
  * @see {@link Driver}, {@link CredentialManager}
  */
 public class Agent {
-	public static final String TYPE = "c8y_RaspberryPi";
+	public static final String TYPE = "c8y_Linux";
 	public static final String XTIDTYPE = "c8y_Serial";
 	public static final String ALARMTYPE = "c8y_AgentStartupError";
 
@@ -72,7 +72,7 @@ public class Agent {
 	}
 
 	public Agent() throws IOException, SDKException {
-		logger.info("Starting Raspberry Pi agent");
+		logger.info("Starting agent");
 		Credentials creds = new CredentialManager().getCredentials();
 		platform = new PlatformImpl(creds.getHost(), creds.getTenant(),
 				creds.getUser(), creds.getPassword(), creds.getKey());
@@ -133,7 +133,7 @@ public class Agent {
 
 		String serial = mo.get(Hardware.class).getSerialNumber();
 
-		String id = "raspberrypi-" + serial;
+		String id = "linux-" + serial;
 		ID extId = new ID(id);
 		extId.setType(XTIDTYPE);
 

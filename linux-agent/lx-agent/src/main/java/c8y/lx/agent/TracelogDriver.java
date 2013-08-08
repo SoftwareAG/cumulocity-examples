@@ -18,16 +18,16 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package c8y.pi.agent;
+package c8y.lx.agent;
 
 import java.util.Date;
 import java.util.Properties;
 
 import org.slf4j.LoggerFactory;
 
-import c8y.pi.driver.Configurable;
-import c8y.pi.driver.Driver;
-import c8y.pi.driver.Executer;
+import c8y.lx.driver.Configurable;
+import c8y.lx.driver.Driver;
+import c8y.lx.driver.Executer;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;

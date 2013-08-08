@@ -19,7 +19,7 @@
  */
 
 
-package c8y.pi.agent;
+package c8y.lx.agent;
 
 import java.io.FileReader;
 import java.io.FileWriter;

@@ -18,42 +18,42 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package c8y.pi.agent;
+package c8y.lx.agent;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import static org.junit.Assert.*;
 
-/**
- * A cumulative error log that can be passed to the platform in alarms or in
- * operation results.
- */
-public class ErrorLog {
-	public void add(String s) {
-		empty = false;
-		pw.println(s);
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+
+import org.junit.Test;
+
+import c8y.Hardware;
+import c8y.lx.agent.LinuxHardwareDriver;
+
+public class LinuxHardwareDriverTest {
+	public static final String REFERENCE_HWFILE = "/hardware.txt";
+
+	@Test
+	public void hardwareReadingSuccessful() throws IOException {
+		try (InputStream is = getClass().getResourceAsStream(REFERENCE_HWFILE);
+				Reader reader = new InputStreamReader(is)) {
+			driver.initializeFromReader(reader);
+		}
+
+		assertEquals(referenceHw, driver.getHardware());
 	}
 
-	public void add(Throwable throwable) {
-		empty = false;
-		throwable.printStackTrace(pw);
+	@Test
+	public void noProcFilesystemExisting() throws IOException {
+		try {
+			driver.initializeFromFile("the proc filesystem is not existing here");
+		} catch (IOException x) {
+		}
+		assertEquals(new LinuxHardwareDriver().getHardware(), driver.getHardware());
 	}
 
-	public boolean isEmpty() {
-		return empty;
-	}
-
-	@Override
-	public String toString() {
-		return sw.getBuffer().toString();
-	}
-
-	public static String toString(Throwable throwable) {
-		ErrorLog el = new ErrorLog();
-		el.add(throwable);
-		return el.toString();
-	}
-
-	private boolean empty = true;
-	private StringWriter sw = new StringWriter();
-	private PrintWriter pw = new PrintWriter(sw, true);
+	private Hardware referenceHw = new Hardware("BCM2708", "0000000017b769d5", "000e");
+	private LinuxHardwareDriver driver = new LinuxHardwareDriver();
 }

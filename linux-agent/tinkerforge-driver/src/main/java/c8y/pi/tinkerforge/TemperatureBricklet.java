@@ -22,8 +22,9 @@ package c8y.pi.tinkerforge;
 
 import java.math.BigDecimal;
 
-import com.cumulocity.model.environmental.measurement.TemperatureMeasurement;
-import com.cumulocity.model.environmental.sensor.TemperatureSensor;
+import c8y.TemperatureMeasurement;
+import c8y.TemperatureSensor;
+
 import com.tinkerforge.BrickletTemperature;
 import com.tinkerforge.Device;
 

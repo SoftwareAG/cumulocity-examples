@@ -23,8 +23,8 @@ package c8y.pi.tinkerforge;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import c8y.pi.driver.DeviceManagedObject;
-import c8y.pi.driver.PollingDriver;
+import c8y.lx.driver.DeviceManagedObject;
+import c8y.lx.driver.PollingDriver;
 
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.SDKException;

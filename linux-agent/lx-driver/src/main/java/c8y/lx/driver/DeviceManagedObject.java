@@ -18,7 +18,7 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package c8y.pi.driver;
+package c8y.lx.driver;
 
 import com.cumulocity.model.ID;
 import com.cumulocity.model.idtype.GId;
@@ -36,6 +36,10 @@ import com.cumulocity.sdk.client.inventory.ManagedObject;
  * external IDs.
  */
 public class DeviceManagedObject {
+
+	private IdentityApi registry;
+	private InventoryApi inventory;
+
 	public DeviceManagedObject(Platform platform) {
 		this.registry = platform.getIdentityApi();
 		this.inventory = platform.getInventoryApi();
@@ -112,7 +116,4 @@ public class DeviceManagedObject {
 		eir.setManagedObject(mo);
 		registry.create(eir);
 	}
-
-	private IdentityApi registry;
-	private InventoryApi inventory;
 }
