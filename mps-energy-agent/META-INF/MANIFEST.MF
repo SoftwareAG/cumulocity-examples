@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Sample energy agent
 Bundle-SymbolicName: mps-energy-agent;singleton:=true
-Bundle-Version: 3.5.0.qualifier
+Bundle-Version: 3.7.0.qualifier
 Bundle-Vendor: (C) Cumulocity GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.cumulocity.model;version="[3.0,4.0)",
