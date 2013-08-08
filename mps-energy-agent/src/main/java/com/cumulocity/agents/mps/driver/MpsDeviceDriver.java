@@ -31,7 +31,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.svenson.JSONParser;
 import org.svenson.tokenize.InputStreamSource;
 
-import c8y.EnergyValue;
 import c8y.Relay;
 import c8y.Relay.RelayState;
 import c8y.ThreePhaseEnergyMeasurement;
@@ -45,6 +44,7 @@ import com.cumulocity.agents.mps.model.measurement.MpsMeasurement;
 import com.cumulocity.agents.mps.model.measurement.MpsResponse;
 import com.cumulocity.agents.mps.model.measurement.converter.MpsTypeConverterRepository;
 import com.cumulocity.model.idtype.GId;
+import com.cumulocity.model.measurement.MeasurementValue;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
@@ -239,11 +239,11 @@ public class MpsDeviceDriver implements DeviceDriver<MpsDevice> {
      * @param unit the unit of value.
      * @return the {@link EnergyValue}, or <code>null</code> if the value passed was <code>null</code>.
      */
-    private EnergyValue createEnergyValue(String value, String unit) {
+    private MeasurementValue createEnergyValue(String value, String unit) {
         if (value == null) {
             return null;
         }
-        EnergyValue ev = new EnergyValue();
+        MeasurementValue ev = new MeasurementValue();
         ev.setUnit(unit);
         ev.setValue(new BigDecimal(value));
         return ev;
