@@ -19,10 +19,11 @@
  */
 
 
-package c8y.pi.tinkerforge;
+package c8y.tinkerforge;
 
 import c8y.lx.driver.Driver;
 
+import com.tinkerforge.BrickMaster;
 import com.tinkerforge.BrickletAmbientLight;
 import com.tinkerforge.BrickletBarometer;
 import com.tinkerforge.BrickletHumidity;
@@ -93,6 +94,8 @@ public class BrickletFactory {
 		case BrickMaster.DEVICE_IDENTIFIER:
 			d = new BrickMaster(uid, ipcon);
 			return new MasterMapper(d, uid, uid);*/
+		case BrickMaster.DEVICE_IDENTIFIER:
+			return null;
 		case BrickletAmbientLight.DEVICE_IDENTIFIER:
 			return new LightBricklet(uid, new BrickletAmbientLight(uid, ipcon));
 		case BrickletBarometer.DEVICE_IDENTIFIER:

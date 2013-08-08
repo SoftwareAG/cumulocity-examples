@@ -23,7 +23,6 @@ package c8y.lx.driver;
 import java.util.Date;
 import java.util.Properties;
 import java.util.Timer;
-import java.util.TimerTask;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -154,22 +153,8 @@ public abstract class PollingDriver implements Driver, Configurable, Runnable {
 				actualPollingInterval / 1000);
 
 		timer = new Timer(measurementType + "Poller");
-		timer.scheduleAtFixedRate(new WrappedTask(this), firstPolling,
+		timer.scheduleAtFixedRate(new RestartableTimerTask(this), firstPolling,
 				actualPollingInterval);
-	}
-
-	// This class only exists because TimerTasks cannot be rescheduled.
-	private class WrappedTask extends TimerTask {
-		public WrappedTask(Runnable runnable) {
-			this.runnable = runnable;
-		}
-
-		@Override
-		public void run() {
-			runnable.run();
-		}
-
-		private Runnable runnable;
 	}
 
 	static Date computeFirstPolling(long time, long pollingInterval) {

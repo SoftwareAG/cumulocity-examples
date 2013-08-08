@@ -18,7 +18,7 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package c8y.pi.tinkerforge;
+package c8y.tinkerforge;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
@@ -29,7 +29,7 @@ import java.util.Properties;
 import c8y.lx.driver.Configurable;
 import c8y.lx.driver.Driver;
 import c8y.lx.driver.Executer;
-import c8y.pi.tinkerforge.Discoverer.DiscoveryFinishedListener;
+import c8y.tinkerforge.Discoverer.DiscoveryFinishedListener;
 
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.Platform;
@@ -70,9 +70,9 @@ public class TFDriver implements Driver, DiscoveryFinishedListener,
 
 	@Override
 	public void initialize(Platform platform) throws Exception {
-		synchronized (drivers) {
+		synchronized (this) {
 			if (drivers == null) {
-				drivers.wait();
+				wait();
 			}
 		}
 
@@ -114,9 +114,9 @@ public class TFDriver implements Driver, DiscoveryFinishedListener,
 
 	@Override
 	public void discoveredDevices(List<Driver> drivers) {
-		synchronized (drivers) {
+		synchronized (this) {
 			this.drivers = drivers;
-			drivers.notify();
+			notify();
 		}
 	}
 

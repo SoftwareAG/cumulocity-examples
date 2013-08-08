@@ -19,32 +19,32 @@
  */
 
 
-package c8y.pi.tinkerforge;
+package c8y.tinkerforge;
 
 import java.math.BigDecimal;
 
-import c8y.HumidityMeasurement;
-import c8y.HumiditySensor;
+import c8y.LightMeasurement;
+import c8y.LightSensor;
 
-import com.tinkerforge.BrickletHumidity;
+import com.tinkerforge.BrickletAmbientLight;
 import com.tinkerforge.Device;
 
-public class HumidityBricklet extends TFSensor {
-	public HumidityBricklet(String id, Device device) {
-		super(id, device, "Humidity", new HumiditySensor());
+public class LightBricklet extends TFSensor {
+	public LightBricklet(String id, Device device) {
+		super(id, device, "Light", new LightSensor());
 	}
 
 	@Override
 	public void run() {
 		try {
-			BrickletHumidity hb = (BrickletHumidity) getDevice();
-			BigDecimal h = new BigDecimal((double) hb.getHumidity() / 10.0);
-			humidity.setHumidity(h);
-			super.sendMeasurement(humidity);
+			BrickletAmbientLight lb = (BrickletAmbientLight) getDevice();
+			BigDecimal l = new BigDecimal((double) lb.getIlluminance() / 10.0);
+			light.setIlluminance(l);
+			super.sendMeasurement(light);
 		} catch (Exception x) {
-			logger.warn("Cannot read humidity from bricklet", x);
+			logger.warn("Cannot read illuminance from bricklet", x);
 		}
 	}
 
-	private HumidityMeasurement humidity = new HumidityMeasurement();
+	private LightMeasurement light = new LightMeasurement();
 }

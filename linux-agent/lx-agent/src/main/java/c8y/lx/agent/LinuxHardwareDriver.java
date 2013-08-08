@@ -48,7 +48,7 @@ public class LinuxHardwareDriver implements Driver, Executer {
 				String[] keyval = line.split(PATTERN);
 
 				if ("Hardware".equals(keyval[0])) {
-					hardware.setModel(keyval[1]);
+					hardware.setModel("RaspPi " + keyval[1]);
 				}
 				if ("Revision".equals(keyval[0])) {
 					hardware.setRevision(keyval[1]);

@@ -18,14 +18,14 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package c8y.pi.tinkerforge;
+package c8y.tinkerforge;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
-import java.util.TimerTask;
 
 import c8y.lx.driver.Driver;
+import c8y.lx.driver.RestartableTimerTask;
 
 import com.tinkerforge.IPConnection;
 import com.tinkerforge.IPConnection.EnumerateListener;
@@ -36,7 +36,7 @@ import com.tinkerforge.IPConnection.EnumerateListener;
  * enumeration is considered finished when a timeout after the last discovery of
  * a device is exceeded.
  */
-public class Discoverer extends TimerTask implements EnumerateListener {
+public class Discoverer implements EnumerateListener, Runnable {
 
 	public interface DiscoveryFinishedListener {
 		void discoveredDevices(List<Driver> devices);
@@ -47,6 +47,7 @@ public class Discoverer extends TimerTask implements EnumerateListener {
 		this.factory = factory;
 		this.finished = finished;
 		this.timeout = timeout;
+		startTimer();
 	}
 
 	public void enumerate(String uid, String connectedUid, char position,
@@ -57,11 +58,18 @@ public class Discoverer extends TimerTask implements EnumerateListener {
 			timeoutTimer.cancel();
 
 			Driver driver = factory.produceDevice(uid, deviceId);
-			devices.add(driver);
+			if (driver != null) {
+				devices.add(driver);				
+			}
 
-			timeoutTimer.schedule(this, timeout);
+			startTimer();
 		}
 
+	}
+	
+	private void startTimer() {
+		timeoutTimer = new Timer("BrickDiscoveryTimeout");
+		timeoutTimer.schedule(new RestartableTimerTask(this), timeout);
 	}
 
 	@Override
@@ -72,6 +80,6 @@ public class Discoverer extends TimerTask implements EnumerateListener {
 	private BrickletFactory factory;
 	private DiscoveryFinishedListener finished;
 	private long timeout;
-	private Timer timeoutTimer = new Timer("DiscoveryTimeout");
+	private Timer timeoutTimer;
 	private List<Driver> devices = new ArrayList<Driver>();
 }

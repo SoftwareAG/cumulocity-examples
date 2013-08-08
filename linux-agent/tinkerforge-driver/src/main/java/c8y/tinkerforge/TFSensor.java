@@ -18,32 +18,59 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package c8y.pi.tinkerforge;
+package c8y.tinkerforge;
+
+import java.util.Arrays;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import c8y.Hardware;
 import c8y.lx.driver.DeviceManagedObject;
 import c8y.lx.driver.PollingDriver;
 
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 import com.tinkerforge.Device;
+import com.tinkerforge.Device.Identity;
+import com.tinkerforge.NotConnectedException;
+import com.tinkerforge.TimeoutException;
 
 public abstract class TFSensor extends PollingDriver {
 	public static final long DEFAULT_INTERVAL = 5000;
 
+	protected Logger logger = LoggerFactory.getLogger(TFSensor.class);
+
+	private Device device;
+	private String id;
+	private String type;
+	private ManagedObjectRepresentation sensorMo = new ManagedObjectRepresentation();
+
 	public TFSensor(String id, Device device, String type, Object sensorFragment) {
 		super(TFIds.getMeasurementType(type), TFIds.getPropertyName(type),
 				DEFAULT_INTERVAL);
-		this.id = id;
 		this.device = device;
+		this.type = type;
+		this.id = id;
 		sensorMo.set(sensorFragment);
 	}
 
 	@Override
 	public void discoverChildren(ManagedObjectRepresentation parent) {
+		try {
+			Identity identity = device.getIdentity();
+			String model = "TF" + type + "Bricklet";
+			String revision = Arrays.toString(identity.hardwareVersion);
+			Hardware hardware = new Hardware(model, identity.uid, revision);
+			sensorMo.set(hardware);
+		} catch (TimeoutException | NotConnectedException e) {
+			logger.warn("Cannot read hardware parameters", e);
+		}
+
+		sensorMo.setType(TFIds.getType(type));
+		sensorMo.setName(TFIds.getDefaultName(parent.getName(), type, id));
 		setSource(sensorMo);
+
 		DeviceManagedObject dmo = new DeviceManagedObject(getPlatform());
 		try {
 			dmo.createOrUpdate(sensorMo, TFIds.getXtId(id), parent.getId());
@@ -59,10 +86,4 @@ public abstract class TFSensor extends PollingDriver {
 	protected Device getDevice() {
 		return device;
 	}
-
-	protected Logger logger = LoggerFactory.getLogger(TFSensor.class);
-
-	private Device device;
-	private String id;
-	private ManagedObjectRepresentation sensorMo = new ManagedObjectRepresentation();
 }

@@ -63,6 +63,13 @@ public class Agent {
 	public static final String XTIDTYPE = "c8y_Serial";
 	public static final String ALARMTYPE = "c8y_AgentStartupError";
 
+	private static Logger logger = LoggerFactory.getLogger(Agent.class);
+
+	private List<Driver> drivers = new ArrayList<Driver>();
+	private Platform platform;
+	private ManagedObjectRepresentation mo = new ManagedObjectRepresentation();
+	private Map<String, Executer> dispatchMap = new HashMap<String, Executer>();
+
 	public static void main(String[] args) {
 		try {
 			new Agent();
@@ -131,14 +138,16 @@ public class Agent {
 			}
 		}
 
-		String serial = mo.get(Hardware.class).getSerialNumber();
+		Hardware hardware = mo.get(Hardware.class);
+		String model = hardware.getModel();
+		String serial = hardware.getSerialNumber();
 
 		String id = "linux-" + serial;
 		ID extId = new ID(id);
 		extId.setType(XTIDTYPE);
 
 		mo.setType(TYPE);
-		mo.setName("RaspPi " + serial.substring(8));
+		mo.setName(model + " " + serial);
 		mo.set(supportedOps);
 		mo.set(new com.cumulocity.model.Agent());
 		mo.set(new IsDevice());
@@ -164,11 +173,4 @@ public class Agent {
 			driver.start();
 		}
 	}
-
-	private static Logger logger = LoggerFactory.getLogger(Agent.class);
-
-	private List<Driver> drivers = new ArrayList<Driver>();
-	private Platform platform;
-	private ManagedObjectRepresentation mo = new ManagedObjectRepresentation();
-	private Map<String, Executer> dispatchMap = new HashMap<String, Executer>();
 }

@@ -44,7 +44,7 @@ public class LinuxModemDriver extends PollingDriver {
 	public static final String GET_SIGNAL = "AT+CSQ";
 
 	public LinuxModemDriver() {
-		super("c8y_SignalStrength", "c8y.modelSignal", 5000L);
+		super("c8y_SignalStrength", "c8y.modemPolling", 5000L);
 	}
 
 	@Override

@@ -18,17 +18,17 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package c8y.pi.tinkerforge;
+package c8y.tinkerforge;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
 
-import c8y.pi.tinkerforge.Discoverer.DiscoveryFinishedListener;
+import c8y.tinkerforge.Discoverer.DiscoveryFinishedListener;
 
 import com.tinkerforge.AlreadyConnectedException;
 import com.tinkerforge.IPConnection;
-import com.tinkerforge.NotConnectedException;
 import com.tinkerforge.IPConnection.ConnectedListener;
+import com.tinkerforge.NotConnectedException;
 
 /**
  * Connects to TinkerForge and starts enumeration.
@@ -39,6 +39,8 @@ public class BrickConnector implements ConnectedListener {
 
 	public BrickConnector(DiscoveryFinishedListener finished)
 			throws UnknownHostException, AlreadyConnectedException, IOException {
+		this.finished = finished;
+		
 		ipcon = new IPConnection();
 		ipcon.addConnectedListener(this);
 		ipcon.connect(DEVHOST, DEVPORT);

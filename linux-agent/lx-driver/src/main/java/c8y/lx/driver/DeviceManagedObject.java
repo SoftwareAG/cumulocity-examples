@@ -54,12 +54,13 @@ public class DeviceManagedObject {
 	 * @param parentId
 	 *            ID of the parent to link to, or null if no link is needed.
 	 */
-	public boolean createOrUpdate(ManagedObjectRepresentation mo, ID extId, GId parentId)
-			throws SDKException {
+	public boolean createOrUpdate(ManagedObjectRepresentation mo, ID extId,
+			GId parentId) throws SDKException {
 		GId gid = tryGetBinding(extId);
 
 		ManagedObjectRepresentation returnedMo;
-		returnedMo = (gid == null) ? create(mo, extId, parentId) : update(mo, gid);
+		returnedMo = (gid == null) ? create(mo, extId, parentId) : update(mo,
+				gid);
 
 		copyProps(returnedMo, mo);
 
@@ -73,8 +74,11 @@ public class DeviceManagedObject {
 		bind(returnedMo, extId);
 
 		if (parentId != null) {
+			ManagedObjectRepresentation handle = new ManagedObjectRepresentation();
+			handle.setId(returnedMo.getId());
+			handle.setSelf(returnedMo.getSelf());
 			ManagedObjectReferenceRepresentation moRef = new ManagedObjectReferenceRepresentation();
-			moRef.setManagedObject(mo);
+			moRef.setManagedObject(handle);
 			inventory.getManagedObject(parentId).addChildDevice(moRef);
 		}
 		return returnedMo;

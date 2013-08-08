@@ -18,32 +18,50 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package c8y.pi.tinkerforge;
 
-import java.math.BigDecimal;
+package c8y.tinkerforge;
 
-import c8y.TemperatureMeasurement;
-import c8y.TemperatureSensor;
+import c8y.lx.driver.Driver;
+import c8y.lx.driver.Executer;
 
-import com.tinkerforge.BrickletTemperature;
-import com.tinkerforge.Device;
+import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
+import com.cumulocity.sdk.client.Platform;
+import com.tinkerforge.BrickletGPS;
 
-public class TemperatureBricklet extends TFSensor {
-	public TemperatureBricklet(String id, Device device) {
-		super(id, device, "Temperature", new TemperatureSensor());
+// Reports current location as location update event and stores it in the inventory
+public class GPSBricklet implements Driver {
+	public GPSBricklet(String id, BrickletGPS gps) {
+		//this.id = id;
+		this.gps = gps;
 	}
 
 	@Override
-	public void run() {
-		try {
-			BrickletTemperature tb = (BrickletTemperature) getDevice();
-			BigDecimal t = new BigDecimal((double) tb.getTemperature() / 100.0);
-			temperature.setTemperature(t);
-			super.sendMeasurement(temperature);
-		} catch (Exception x) {
-			logger.warn("Cannot read temperature from bricklet", x);
-		}
+	public void initialize(Platform platform) throws Exception {
+		// TODO Auto-generated method stub
+		
 	}
 
-	private TemperatureMeasurement temperature = new TemperatureMeasurement();
+	@Override
+	public Executer[] getSupportedOperations() {
+		return new Executer[0];
+	}
+
+	@Override
+	public void initializeInventory(ManagedObjectRepresentation mo) {
+		// Nothing to do here.
+	}
+
+	@Override
+	public void discoverChildren(ManagedObjectRepresentation mo) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void start() {
+		//gps.add
+		// Add location listener that reports location and updates 
+	}
+
+	private BrickletGPS gps;
 }

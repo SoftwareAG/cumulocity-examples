@@ -18,37 +18,35 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+package c8y.tinkerforge;
 
-package c8y.pi.tinkerforge;
+import java.math.BigDecimal;
 
-import com.cumulocity.model.ID;
+import c8y.Barometer;
+import c8y.BarometerMeasurement;
 
-/**
- * Utility class for generating various kinds of names and IDs for TinkerForge devices.
- */
-public class TFIds {
-	public static final String XTIDTYPE = "c8y_Serial";
+import com.tinkerforge.BrickletBarometer;
+import com.tinkerforge.Device;
 
-	public static String getType(String type) {
-		return "c8y_TinkerForge" + type;
+public class BarometerBricklet extends TFSensor {
+
+	public BarometerBricklet(String id, Device device) {
+		super(id, device, "Barometer", new Barometer());
 	}
 
-	public static String getDefaultName(String parentName, String type,
-			String id) {
-		return parentName + " " + type + " " + id;
+	@Override
+	public void run() {
+		try {
+			BrickletBarometer b = (BrickletBarometer) getDevice();
+			BigDecimal p = new BigDecimal((double) b.getAirPressure() / 100.0);
+			barometer.setPressure(p);
+			BigDecimal a = new BigDecimal((double) b.getAltitude() / 100.0);
+			barometer.setAltitude(a);
+			super.sendMeasurement(barometer);
+		} catch (Exception x) {
+			logger.warn("Cannot read barometer bricklet", x);
+		}
 	}
 
-	public static ID getXtId(String id) {
-		ID extId = new ID("tinkerforge-" + id);
-		extId.setType(XTIDTYPE);
-		return extId;
-	}
-
-	public static String getMeasurementType(String type) {
-		return "c8y_" + type + "Measurement";
-	}
-
-	public static String getPropertyName(String type) {
-		return "c8y." + type;
-	}
+	private BarometerMeasurement barometer = new BarometerMeasurement();
 }
