@@ -22,7 +22,8 @@ package com.cumulocity.agents.mps.model;
 
 import org.svenson.JSONProperty;
 
-import com.cumulocity.model.control.Relay.RelayState;
+import c8y.Relay.RelayState;
+
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.sdk.agent.model.Device;
 
