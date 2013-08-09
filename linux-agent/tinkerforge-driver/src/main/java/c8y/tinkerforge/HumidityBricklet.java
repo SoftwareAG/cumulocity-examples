@@ -30,6 +30,9 @@ import com.tinkerforge.BrickletHumidity;
 import com.tinkerforge.Device;
 
 public class HumidityBricklet extends TFSensor {
+
+	private HumidityMeasurement humidity = new HumidityMeasurement();
+
 	public HumidityBricklet(String id, Device device) {
 		super(id, device, "Humidity", new HumiditySensor());
 	}
@@ -45,6 +48,4 @@ public class HumidityBricklet extends TFSensor {
 			logger.warn("Cannot read humidity from bricklet", x);
 		}
 	}
-
-	private HumidityMeasurement humidity = new HumidityMeasurement();
 }

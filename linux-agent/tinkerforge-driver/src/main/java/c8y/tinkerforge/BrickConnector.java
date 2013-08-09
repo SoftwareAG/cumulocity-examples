@@ -37,6 +37,10 @@ public class BrickConnector implements ConnectedListener {
 	public static final String DEVHOST = "localhost";
 	public static final int DEVPORT = 4223;
 
+	private IPConnection ipcon;
+	private Discoverer discoverer;
+	private DiscoveryFinishedListener finished;
+
 	public BrickConnector(DiscoveryFinishedListener finished)
 			throws UnknownHostException, AlreadyConnectedException, IOException {
 		this.finished = finished;
@@ -66,8 +70,4 @@ public class BrickConnector implements ConnectedListener {
 
 		ipcon.addEnumerateListener(discoverer);
 	}
-
-	private IPConnection ipcon;
-	private Discoverer discoverer;
-	private DiscoveryFinishedListener finished;
 }

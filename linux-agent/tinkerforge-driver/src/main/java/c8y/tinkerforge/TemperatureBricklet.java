@@ -29,6 +29,9 @@ import com.tinkerforge.BrickletTemperature;
 import com.tinkerforge.Device;
 
 public class TemperatureBricklet extends TFSensor {
+
+	private TemperatureMeasurement temperature = new TemperatureMeasurement();
+
 	public TemperatureBricklet(String id, Device device) {
 		super(id, device, "Temperature", new TemperatureSensor());
 	}
@@ -44,6 +47,4 @@ public class TemperatureBricklet extends TFSensor {
 			logger.warn("Cannot read temperature from bricklet", x);
 		}
 	}
-
-	private TemperatureMeasurement temperature = new TemperatureMeasurement();
 }

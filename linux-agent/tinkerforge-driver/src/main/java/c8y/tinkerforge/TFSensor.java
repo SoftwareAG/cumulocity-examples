@@ -20,26 +20,17 @@
 
 package c8y.tinkerforge;
 
-import java.util.Arrays;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import c8y.Hardware;
 import c8y.lx.driver.DeviceManagedObject;
-import c8y.lx.driver.PollingDriver;
+import c8y.lx.driver.MeasurementPollingDriver;
 
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 import com.tinkerforge.Device;
-import com.tinkerforge.Device.Identity;
 import com.tinkerforge.NotConnectedException;
 import com.tinkerforge.TimeoutException;
 
-public abstract class TFSensor extends PollingDriver {
+public abstract class TFSensor extends MeasurementPollingDriver {
 	public static final long DEFAULT_INTERVAL = 5000;
-
-	protected Logger logger = LoggerFactory.getLogger(TFSensor.class);
 
 	private Device device;
 	private String id;
@@ -58,11 +49,7 @@ public abstract class TFSensor extends PollingDriver {
 	@Override
 	public void discoverChildren(ManagedObjectRepresentation parent) {
 		try {
-			Identity identity = device.getIdentity();
-			String model = "TF" + type + "Bricklet";
-			String revision = Arrays.toString(identity.hardwareVersion);
-			Hardware hardware = new Hardware(model, identity.uid, revision);
-			sensorMo.set(hardware);
+			sensorMo.set(TFIds.getHardware(device, type));
 		} catch (TimeoutException | NotConnectedException e) {
 			logger.warn("Cannot read hardware parameters", e);
 		}

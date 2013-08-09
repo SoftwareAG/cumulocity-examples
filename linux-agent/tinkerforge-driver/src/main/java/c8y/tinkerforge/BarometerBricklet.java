@@ -30,6 +30,8 @@ import com.tinkerforge.Device;
 
 public class BarometerBricklet extends TFSensor {
 
+	private BarometerMeasurement barometer = new BarometerMeasurement();
+
 	public BarometerBricklet(String id, Device device) {
 		super(id, device, "Barometer", new Barometer());
 	}
@@ -47,6 +49,4 @@ public class BarometerBricklet extends TFSensor {
 			logger.warn("Cannot read barometer bricklet", x);
 		}
 	}
-
-	private BarometerMeasurement barometer = new BarometerMeasurement();
 }

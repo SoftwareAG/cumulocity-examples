@@ -29,6 +29,11 @@ public class LinuxHardwareDriver implements Driver, Executer {
 	public static final String CPUINFO = "/proc/cpuinfo";
 	public static final String PATTERN = "\\s+:\\s+";
 
+	private static Logger logger = LoggerFactory.getLogger(LinuxHardwareDriver.class);
+	
+	private GId gid;
+	private Hardware hardware = new Hardware("Unknown model", "Unknown serial", "Unknown revision");
+
 	@Override
 	public void initialize(Platform platform) throws Exception {
 		initializeFromFile(CPUINFO);
@@ -104,9 +109,4 @@ public class LinuxHardwareDriver implements Driver, Executer {
 	public Hardware getHardware() {
 		return hardware;
 	}
-
-	private static Logger logger = LoggerFactory.getLogger(LinuxHardwareDriver.class);
-	
-	private GId gid;
-	private Hardware hardware = new Hardware("Unknown model", "Unknown serial", "Unknown revision");
 }

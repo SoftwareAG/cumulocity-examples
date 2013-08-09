@@ -28,6 +28,11 @@ import java.io.StringWriter;
  * operation results.
  */
 public class ErrorLog {
+
+	private boolean empty = true;
+	private StringWriter sw = new StringWriter();
+	private PrintWriter pw = new PrintWriter(sw, true);
+
 	public void add(String s) {
 		empty = false;
 		pw.println(s);
@@ -52,8 +57,4 @@ public class ErrorLog {
 		el.add(throwable);
 		return el.toString();
 	}
-
-	private boolean empty = true;
-	private StringWriter sw = new StringWriter();
-	private PrintWriter pw = new PrintWriter(sw, true);
 }

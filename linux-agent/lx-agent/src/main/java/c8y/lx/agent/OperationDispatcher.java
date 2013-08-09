@@ -49,6 +49,12 @@ import com.cumulocity.sdk.client.notification.SubscriptionListener;
  */
 public class OperationDispatcher {
 
+	private static Logger logger = LoggerFactory.getLogger(OperationDispatcher.class);
+	
+	private DeviceControlApi control;
+	private GId gid;
+	private Map<String, Executer> dispatchMap;
+
 	public OperationDispatcher(Platform platform, GId gid,
 			Map<String, Executer> dispatchMap) throws SDKException {
 		this.control = platform.getDeviceControlApi();
@@ -131,10 +137,4 @@ public class OperationDispatcher {
 		}
 		control.update(operation);
 	}
-
-	private static Logger logger = LoggerFactory.getLogger(OperationDispatcher.class);
-	
-	private DeviceControlApi control;
-	private GId gid;
-	private Map<String, Executer> dispatchMap;
 }

@@ -27,13 +27,8 @@ import java.util.Timer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import c8y.SupportedMeasurements;
-
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
-import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
 import com.cumulocity.sdk.client.Platform;
-import com.cumulocity.sdk.client.SDKException;
-import com.cumulocity.sdk.client.measurement.MeasurementApi;
 
 /**
  * Base class for a driver that produces sensor readings. Provides the
@@ -43,32 +38,25 @@ import com.cumulocity.sdk.client.measurement.MeasurementApi;
 public abstract class PollingDriver implements Driver, Configurable, Runnable {
 	public static final String INTERVAL_PROP = ".interval";
 
-	private static Logger logger = LoggerFactory.getLogger(PollingDriver.class);
+	protected static Logger logger = LoggerFactory.getLogger(PollingDriver.class);
 
-	private String measurementType;
-	
+	private String type;
 	private String pollingProp;
 	private long defaultPollingInterval, actualPollingInterval;
-
 	private Platform platform;
-	private MeasurementApi measurements;
-
 	private Timer timer;
-	private MeasurementRepresentation measurementRep = new MeasurementRepresentation();
 
-	public PollingDriver(String measurementType, String pollingProp,
+	public PollingDriver(String type, String pollingProp,
 			long defaultPollingInterval) {
-		measurementRep.setType(measurementType);
-		this.measurementType = measurementType;
-		this.pollingProp = pollingProp;
+		this.type = type;
+		this.pollingProp = pollingProp + INTERVAL_PROP;
 		this.defaultPollingInterval = defaultPollingInterval;
 		this.actualPollingInterval = this.defaultPollingInterval;
 	}
 
 	@Override
 	public void addDefaults(Properties props) {
-		props.setProperty(pollingProp,
-				Long.toString(defaultPollingInterval));
+		props.setProperty(pollingProp, Long.toString(defaultPollingInterval));
 	}
 
 	@Override
@@ -91,7 +79,6 @@ public abstract class PollingDriver implements Driver, Configurable, Runnable {
 	@Override
 	public void initialize(Platform platform) throws Exception {
 		this.platform = platform;
-		this.measurements = platform.getMeasurementApi();
 	}
 
 	@Override
@@ -109,34 +96,9 @@ public abstract class PollingDriver implements Driver, Configurable, Runnable {
 		// Nothing to do here
 	}
 
-	public void setSource(ManagedObjectRepresentation mo) {
-		SupportedMeasurements sm = mo.get(SupportedMeasurements.class);
-
-		if (sm == null) {
-			sm = new SupportedMeasurements();
-			mo.set(sm);
-		}
-
-		if (!sm.contains(measurementType)) {
-			sm.add(measurementType);
-		}
-
-		measurementRep.setSource(mo);
-	}
-
 	@Override
 	public void start() {
 		scheduleMeasurements();
-	}
-
-	protected void sendMeasurement(Object measurement) {
-		try {
-			measurementRep.set(measurement);
-			measurementRep.setTime(new Date());
-			measurements.create(measurementRep);
-		} catch (SDKException e) {
-			logger.warn("Cannot send measurement", e);
-		}
 	}
 
 	protected Platform getPlatform() {
@@ -152,7 +114,7 @@ public abstract class PollingDriver implements Driver, Configurable, Runnable {
 		Date firstPolling = computeFirstPolling(now,
 				actualPollingInterval / 1000);
 
-		timer = new Timer(measurementType + "Poller");
+		timer = new Timer(type + "Poller");
 		timer.scheduleAtFixedRate(new RestartableTimerTask(this), firstPolling,
 				actualPollingInterval);
 	}

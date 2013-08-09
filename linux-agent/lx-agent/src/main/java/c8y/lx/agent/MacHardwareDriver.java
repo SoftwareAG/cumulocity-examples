@@ -30,6 +30,13 @@ public class MacHardwareDriver implements Driver, Executer {
 	public static final String MACINFO = "system_profiler SPHardwareDataType";
 	public static final String PATTERN = ":\\s+";
 
+	private static Logger logger = LoggerFactory
+			.getLogger(MacHardwareDriver.class);
+
+	private GId gid;
+	private Hardware hardware = new Hardware("Unknown model", "Unknown serial",
+			"Unknown revision");
+
 	@Override
 	public void initialize(Platform platform) throws Exception {
 		initializeFromProcess(MACINFO);
@@ -108,11 +115,4 @@ public class MacHardwareDriver implements Driver, Executer {
 	public Hardware getHardware() {
 		return hardware;
 	}
-
-	private static Logger logger = LoggerFactory
-			.getLogger(MacHardwareDriver.class);
-
-	private GId gid;
-	private Hardware hardware = new Hardware("Unknown model", "Unknown serial",
-			"Unknown revision");
 }

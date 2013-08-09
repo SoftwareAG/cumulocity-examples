@@ -1,6 +1,13 @@
 package c8y.lx.agent;
 
 public class Credentials {
+
+	private String host;
+	private String tenant;
+	private String user;
+	private String password;
+	private String key;
+
 	public Credentials(String host, String tenant, String user, String password, String key) {
 		this.host = host;
 		this.tenant = tenant;
@@ -28,10 +35,4 @@ public class Credentials {
 	public String getKey() {
 		return key;
 	}
-
-	private String host;
-	private String tenant;
-	private String user;
-	private String password;
-	private String key;
 }

@@ -52,6 +52,12 @@ import com.cumulocity.sdk.client.Platform;
  */
 public class JavaSoftwareDriver implements Driver, Executer {
 
+	private static final String DOWNLOADING = ".download";
+	private static Logger logger = LoggerFactory.getLogger(JavaSoftwareDriver.class);
+
+	private Software software = new Software();
+	private GId gid;
+
 	@Override
 	public void initialize(Platform platform) throws Exception {
 		new File(".").listFiles(new FilenameFilter() {
@@ -193,10 +199,4 @@ public class JavaSoftwareDriver implements Driver, Executer {
 			new File(pkg).deleteOnExit();
 		}
 	}
-
-	private static final String DOWNLOADING = ".download";
-	private static Logger logger = LoggerFactory.getLogger(JavaSoftwareDriver.class);
-
-	private Software software = new Software();
-	private GId gid;
 }

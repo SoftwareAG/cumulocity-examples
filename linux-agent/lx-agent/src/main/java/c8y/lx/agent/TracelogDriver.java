@@ -53,6 +53,13 @@ public class TracelogDriver extends AppenderBase<ILoggingEvent> implements
 	public static final String EVENT_LEVEL_PROP = "c8y.log.eventLevel";
 	public static final String DEFAULT_EVENT_LEVEL = "INFO";
 
+	private AlarmApi alarms;
+	private AlarmRepresentation alarmTemplate = new AlarmRepresentation();
+	private Level alarmLevel = Level.toLevel(DEFAULT_ALARM_LEVEL);
+
+	private EventApi events;
+	private EventRepresentation eventTemplate = new EventRepresentation();
+	private Level eventLevel = Level.toLevel(DEFAULT_EVENT_LEVEL);
 
 	@Override
 	public void initialize(Platform platform) throws Exception {
@@ -122,12 +129,4 @@ public class TracelogDriver extends AppenderBase<ILoggingEvent> implements
 				DEFAULT_EVENT_LEVEL);
 		eventLevel = Level.toLevel(eventLevStr);
 	}
-
-	private AlarmApi alarms;
-	private AlarmRepresentation alarmTemplate = new AlarmRepresentation();
-	private Level alarmLevel = Level.toLevel(DEFAULT_ALARM_LEVEL);
-
-	private EventApi events;
-	private EventRepresentation eventTemplate = new EventRepresentation();
-	private Level eventLevel = Level.toLevel(DEFAULT_EVENT_LEVEL);
 }

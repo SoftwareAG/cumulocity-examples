@@ -43,8 +43,16 @@ public class LinuxModemDriver extends PollingDriver {
 	public static final String GET_ICCID = "AT^SCID";
 	public static final String GET_SIGNAL = "AT+CSQ";
 
+	private static Logger logger = LoggerFactory
+			.getLogger(LinuxModemDriver.class);
+
+	private SerialPort port;
+	private Mobile mobile;
+	private int receivedCommands = 0;
+	private SignalStrength signal = new SignalStrength();
+
 	public LinuxModemDriver() {
-		super("c8y_SignalStrength", "c8y.modemPolling", 5000L);
+		super("c8y_SignalStrength", "c8y.modem", 5000L);
 	}
 
 	@Override
@@ -166,12 +174,4 @@ public class LinuxModemDriver extends PollingDriver {
 		
 		super.sendMeasurement(signal);
 	}
-
-	private static Logger logger = LoggerFactory
-			.getLogger(LinuxModemDriver.class);
-
-	private SerialPort port;
-	private Mobile mobile;
-	private int receivedCommands = 0;
-	private SignalStrength signal = new SignalStrength();
 }

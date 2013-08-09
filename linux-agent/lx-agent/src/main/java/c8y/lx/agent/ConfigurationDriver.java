@@ -46,7 +46,16 @@ import com.cumulocity.sdk.client.inventory.InventoryApi;
  * drivers that implement the Configurable interface.
  */
 public class ConfigurationDriver implements Driver, Executer {
+	
 	public static final String CONFIGFILE = "/etc/cumulocity-configuration.properties";
+
+	private static Logger logger = LoggerFactory
+			.getLogger(ConfigurationDriver.class);
+
+	private InventoryApi inventory;
+	private Properties props = new Properties();
+	private List<Configurable> configurables = new ArrayList<Configurable>();
+	private GId gid;
 
 	@Override
 	public void initialize(Platform platform) throws Exception {
@@ -133,12 +142,4 @@ public class ConfigurationDriver implements Driver, Executer {
 	Properties getProperties() {
 		return props;
 	}
-
-	private static Logger logger = LoggerFactory
-			.getLogger(ConfigurationDriver.class);
-
-	private InventoryApi inventory;
-	private Properties props = new Properties();
-	private List<Configurable> configurables = new ArrayList<Configurable>();
-	private GId gid;
 }

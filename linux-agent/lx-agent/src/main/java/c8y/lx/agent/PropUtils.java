@@ -32,6 +32,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class PropUtils {
+
+	private static Logger logger = LoggerFactory.getLogger(PropUtils.class);
+
 	public static Properties fromString(String propsStr) throws IOException {
 		Properties result = new Properties();
 		try (StringReader reader = new StringReader(propsStr)) {
@@ -71,6 +74,4 @@ public class PropUtils {
 		}
 		return null;
 	}
-
-	private static Logger logger = LoggerFactory.getLogger(PropUtils.class);
 }

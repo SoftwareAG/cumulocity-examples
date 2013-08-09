@@ -21,6 +21,7 @@
 package c8y.tinkerforge;
 
 import java.util.Date;
+import java.util.Properties;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +30,7 @@ import c8y.Display;
 import c8y.Message;
 import c8y.Relay;
 import c8y.Relay.RelayState;
+import c8y.lx.driver.Configurable;
 import c8y.lx.driver.DeviceManagedObject;
 import c8y.lx.driver.Driver;
 import c8y.lx.driver.Executer;
@@ -42,17 +44,45 @@ import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.event.EventApi;
 import com.tinkerforge.BrickletLCD20x4;
 import com.tinkerforge.BrickletLCD20x4.ButtonPressedListener;
+import com.tinkerforge.NotConnectedException;
+import com.tinkerforge.TimeoutException;
 
-public class DisplayBricklet implements Driver {
+public class DisplayBricklet implements Driver, Configurable {
 	public static final short LINES = 4;
 	public static final short WIDTH = 20;
 	public static final String TYPE = "Display";
+	public static final String TEXT_PROP = "c8y.display.text";
+
+	private static final Logger logger = LoggerFactory
+			.getLogger(DisplayBricklet.class);
+
+	private Platform platform;
+	private EventApi events;
+	private ManagedObjectRepresentation displayMo = new ManagedObjectRepresentation();
+	private EventRepresentation buttonEvent = new EventRepresentation();
+	private String id;
+	private BrickletLCD20x4 display;
 
 	public DisplayBricklet(String id, BrickletLCD20x4 display) {
 		this.id = id;
 		this.display = display;
 	}
 
+	@Override
+	public void addDefaults(Properties props) {
+		props.setProperty(TEXT_PROP, "");
+	}
+
+	@Override
+	public void configurationChanged(Properties props) {
+		String newText = props.getProperty(TEXT_PROP, "");
+		try {
+			submitText(newText);
+		} catch (TimeoutException | NotConnectedException e) {
+			logger.warn("Could not write text to display", e);
+		}
+	}
+	
 	@Override
 	public void initialize(Platform platform) throws Exception {
 		this.platform = platform;
@@ -66,6 +96,12 @@ public class DisplayBricklet implements Driver {
 
 	@Override
 	public void discoverChildren(ManagedObjectRepresentation parent) {
+		try {
+			displayMo.set(TFIds.getHardware(display, TYPE));
+		} catch (TimeoutException | NotConnectedException e) {
+			logger.warn("Cannot read hardware parameters", e);
+		}
+
 		displayMo.setType(TFIds.getType(TYPE));
 		displayMo.setName(TFIds.getDefaultName(parent.getName(), TYPE, id));
 		displayMo.set(new Display());
@@ -116,14 +152,7 @@ public class DisplayBricklet implements Driver {
 			}
 
 			String text = operation.get(Message.class).getText();
-			int length = text.length();
-
-			display.clearDisplay();
-			for (short idx = 0, start = 0; idx < LINES && start < length; idx++, start += WIDTH) {
-				String line = text.substring(start,
-						Math.min(length, start + WIDTH));
-				display.writeLine(idx, (short) 0, line);
-			}
+			submitText(text);
 
 			operation.setStatus(OperationStatus.SUCCESSFUL.toString());
 		}
@@ -151,16 +180,17 @@ public class DisplayBricklet implements Driver {
 
 			operation.setStatus(OperationStatus.SUCCESSFUL.toString());
 		}
-
 	}
 
-	private static final Logger logger = LoggerFactory
-			.getLogger(DisplayBricklet.class);
+	private void submitText(String text) throws TimeoutException,
+			NotConnectedException {
+		int length = text.length();
 
-	private Platform platform;
-	private EventApi events;
-	private ManagedObjectRepresentation displayMo = new ManagedObjectRepresentation();
-	private EventRepresentation buttonEvent = new EventRepresentation();
-	private String id;
-	private BrickletLCD20x4 display;
+		display.clearDisplay();
+		for (short idx = 0, start = 0; idx < LINES && start < length; idx++, start += WIDTH) {
+			String line = text.substring(start,
+					Math.min(length, start + WIDTH));
+			display.writeLine(idx, (short) 0, line);
+		}
+	}
 }

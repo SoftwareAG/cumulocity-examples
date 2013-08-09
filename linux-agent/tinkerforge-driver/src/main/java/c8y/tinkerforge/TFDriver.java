@@ -43,6 +43,8 @@ import com.tinkerforge.AlreadyConnectedException;
 public class TFDriver implements Driver, DiscoveryFinishedListener,
 		Configurable {
 
+	private List<Driver> drivers;
+
 	public TFDriver() throws UnknownHostException, AlreadyConnectedException,
 			IOException {
 		new BrickConnector(this);
@@ -119,6 +121,4 @@ public class TFDriver implements Driver, DiscoveryFinishedListener,
 			notify();
 		}
 	}
-
-	private List<Driver> drivers;
 }

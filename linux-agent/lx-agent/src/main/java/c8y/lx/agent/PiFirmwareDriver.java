@@ -39,6 +39,16 @@ import com.cumulocity.sdk.client.Platform;
 
 public class PiFirmwareDriver implements Driver, Executer {
 
+	private static final String FILE = "raspberrypi-bootloader";
+	private static final String FWQUERY = "dpkg-query -l " + FILE;
+	private static final int STARTOFVERSION = 42;
+	private static final String FWUPDATE = "rpi-update";
+	private static final String[] SHUTDOWN = { "shutdown", "-r", "now" };
+
+	private Platform platform;
+	private Firmware firmware = new Firmware(FILE, "Unknown version", null);
+	private GId gid;
+
 	@Override
 	public void initialize(Platform platform) throws Exception {
 		this.platform = platform;
@@ -135,14 +145,4 @@ public class PiFirmwareDriver implements Driver, Executer {
 		}
 		operation.setStatus(OperationStatus.SUCCESSFUL.toString());
 	}
-
-	private static final String FILE = "raspberrypi-bootloader";
-	private static final String FWQUERY = "dpkg-query -l " + FILE;
-	private static final int STARTOFVERSION = 42;
-	private static final String FWUPDATE = "rpi-update";
-	private static final String[] SHUTDOWN = { "shutdown", "-r", "now" };
-
-	private Platform platform;
-	private Firmware firmware = new Firmware(FILE, "Unknown version", null);
-	private GId gid;
 }

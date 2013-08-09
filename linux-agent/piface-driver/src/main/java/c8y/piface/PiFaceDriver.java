@@ -57,6 +57,16 @@ public class PiFaceDriver implements Driver, Executer {
 	public static final String SWITCHTYPE = "c8y_PiFaceSwitch";
 	public static final String XTIDTYPE = "c8y_Serial";
 
+	private static Logger logger = LoggerFactory.getLogger(PiFaceDriver.class);
+
+	private Platform platform;
+	private DeviceManagedObject dmo;
+	private PiFaceDevice piface;
+	
+	private ManagedObjectRepresentation[] buttonMos = new ManagedObjectRepresentation[NUMBUTTONS];
+	private ManagedObjectRepresentation[] ledMos = new ManagedObjectRepresentation[NUMLEDS];
+	private EventRepresentation eventTemplate;
+
 	@Override
 	public void initialize(Platform platform) throws Exception {
 		this.platform = platform;
@@ -194,15 +204,4 @@ public class PiFaceDriver implements Driver, Executer {
 			}
 		}
 	}
-
-	private static Logger logger = LoggerFactory.getLogger(PiFaceDriver.class);
-
-	private Platform platform;
-	private DeviceManagedObject dmo;
-	private PiFaceDevice piface;
-	
-	private ManagedObjectRepresentation[] buttonMos = new ManagedObjectRepresentation[NUMBUTTONS];
-	private ManagedObjectRepresentation[] ledMos = new ManagedObjectRepresentation[NUMLEDS];
-	private EventRepresentation eventTemplate;
-
 }

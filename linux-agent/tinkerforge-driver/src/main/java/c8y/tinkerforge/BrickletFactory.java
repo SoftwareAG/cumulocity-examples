@@ -26,6 +26,8 @@ import c8y.lx.driver.Driver;
 import com.tinkerforge.BrickMaster;
 import com.tinkerforge.BrickletAmbientLight;
 import com.tinkerforge.BrickletBarometer;
+import com.tinkerforge.BrickletDistanceIR;
+import com.tinkerforge.BrickletGPS;
 import com.tinkerforge.BrickletHumidity;
 import com.tinkerforge.BrickletLCD20x4;
 import com.tinkerforge.BrickletTemperature;
@@ -35,6 +37,9 @@ import com.tinkerforge.IPConnection;
  * Instantiates the correct driver for a discovered bricklet. 
  */
 public class BrickletFactory {
+
+	private IPConnection ipcon;
+
 	public BrickletFactory(IPConnection ipcon) {
 		this.ipcon = ipcon;
 	}
@@ -53,12 +58,8 @@ public class BrickletFactory {
 			return new BrickletCurrent12(uid, ipcon);
 		case BrickletCurrent25.DEVICE_IDENTIFIER:
 			return new BrickletCurrent25(uid, ipcon);
-		case BrickletDistanceIR.DEVICE_IDENTIFIER:
-			return new BrickletDistanceIR(uid, ipcon);
 		case BrickletDualRelay.DEVICE_IDENTIFIER:
 			return new BrickletDualRelay(uid, ipcon);
-		case BrickletGPS.DEVICE_IDENTIFIER:
-			return new BrickletGPS(uid, ipcon);
 		case BrickletIndustrialDigitalIn4.DEVICE_IDENTIFIER:
 			return new BrickletIndustrialDigitalIn4(uid, ipcon);
 		case BrickletIndustrialDigitalOut4.DEVICE_IDENTIFIER:
@@ -100,6 +101,10 @@ public class BrickletFactory {
 			return new LightBricklet(uid, new BrickletAmbientLight(uid, ipcon));
 		case BrickletBarometer.DEVICE_IDENTIFIER:
 			return new BarometerBricklet(uid, new BrickletBarometer(uid, ipcon));
+		case BrickletDistanceIR.DEVICE_IDENTIFIER:
+			return new DistanceBricklet(uid, new BrickletDistanceIR(uid, ipcon));
+		case BrickletGPS.DEVICE_IDENTIFIER:
+			return new GpsBricklet(uid, new BrickletGPS(uid, ipcon));
 		case BrickletHumidity.DEVICE_IDENTIFIER:
 			return new HumidityBricklet(uid, new BrickletHumidity(uid, ipcon));
 		case BrickletLCD20x4.DEVICE_IDENTIFIER:
@@ -111,6 +116,4 @@ public class BrickletFactory {
 					+ deviceIdentifier);
 		}
 	}
-
-	private IPConnection ipcon;
 }

@@ -8,7 +8,10 @@ import java.util.Properties;
  * by a device bootstrap procedure in future.
  */
 public class CredentialManager {
+	
 	public static final String PROPS = "/etc/cumulocity.properties";
+
+	private Credentials credentials;
 
 	public CredentialManager() throws IOException {
 		Properties props = new Properties();
@@ -27,6 +30,4 @@ public class CredentialManager {
 	public Credentials getCredentials() {
 		return credentials;
 	}
-
-	private Credentials credentials;
 }

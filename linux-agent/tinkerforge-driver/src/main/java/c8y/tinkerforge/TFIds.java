@@ -21,7 +21,15 @@
 
 package c8y.tinkerforge;
 
+import java.util.Arrays;
+
+import c8y.Hardware;
+
 import com.cumulocity.model.ID;
+import com.tinkerforge.Device;
+import com.tinkerforge.Device.Identity;
+import com.tinkerforge.NotConnectedException;
+import com.tinkerforge.TimeoutException;
 
 /**
  * Utility class for generating various kinds of names and IDs for TinkerForge devices.
@@ -49,6 +57,13 @@ public class TFIds {
 	}
 
 	public static String getPropertyName(String type) {
-		return "c8y." + type;
+		return "c8y." + type.toLowerCase();
+	}
+	
+	public static Hardware getHardware(Device device, String type) throws TimeoutException, NotConnectedException {
+		Identity identity = device.getIdentity();
+		String model = "TF" + type + "Bricklet";
+		String revision = Arrays.toString(identity.hardwareVersion);
+		return new Hardware(model, identity.uid, revision);
 	}
 }

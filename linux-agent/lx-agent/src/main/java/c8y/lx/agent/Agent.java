@@ -59,6 +59,7 @@ import com.cumulocity.sdk.client.SDKException;
  * @see {@link Driver}, {@link CredentialManager}
  */
 public class Agent {
+	
 	public static final String TYPE = "c8y_Linux";
 	public static final String XTIDTYPE = "c8y_Serial";
 	public static final String ALARMTYPE = "c8y_AgentStartupError";

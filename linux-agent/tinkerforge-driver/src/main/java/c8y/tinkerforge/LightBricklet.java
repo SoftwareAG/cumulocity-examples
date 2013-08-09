@@ -30,6 +30,9 @@ import com.tinkerforge.BrickletAmbientLight;
 import com.tinkerforge.Device;
 
 public class LightBricklet extends TFSensor {
+
+	private LightMeasurement light = new LightMeasurement();
+
 	public LightBricklet(String id, Device device) {
 		super(id, device, "Light", new LightSensor());
 	}
@@ -45,6 +48,4 @@ public class LightBricklet extends TFSensor {
 			logger.warn("Cannot read illuminance from bricklet", x);
 		}
 	}
-
-	private LightMeasurement light = new LightMeasurement();
 }

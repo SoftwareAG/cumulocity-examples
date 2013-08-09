@@ -38,6 +38,12 @@ import com.tinkerforge.IPConnection.EnumerateListener;
  */
 public class Discoverer implements EnumerateListener, Runnable {
 
+	private BrickletFactory factory;
+	private DiscoveryFinishedListener finished;
+	private long timeout;
+	private Timer timeoutTimer;
+	private List<Driver> devices = new ArrayList<Driver>();
+
 	public interface DiscoveryFinishedListener {
 		void discoveredDevices(List<Driver> devices);
 	}
@@ -76,10 +82,4 @@ public class Discoverer implements EnumerateListener, Runnable {
 	public void run() {
 		finished.discoveredDevices(devices);
 	}
-
-	private BrickletFactory factory;
-	private DiscoveryFinishedListener finished;
-	private long timeout;
-	private Timer timeoutTimer;
-	private List<Driver> devices = new ArrayList<Driver>();
 }
