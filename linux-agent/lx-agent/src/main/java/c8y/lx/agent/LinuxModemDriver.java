@@ -30,12 +30,12 @@ import org.slf4j.LoggerFactory;
 
 import c8y.Mobile;
 import c8y.SignalStrength;
-import c8y.lx.driver.PollingDriver;
+import c8y.lx.driver.MeasurementPollingDriver;
 
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.Platform;
 
-public class LinuxModemDriver extends PollingDriver {
+public class LinuxModemDriver extends MeasurementPollingDriver {
 	public static final String PORT = "/dev/ttyUSB0";
 
 	public static final String GET_IMEI = "AT+GSN";

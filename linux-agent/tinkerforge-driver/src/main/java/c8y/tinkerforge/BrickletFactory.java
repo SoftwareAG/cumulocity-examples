@@ -27,6 +27,7 @@ import com.tinkerforge.BrickMaster;
 import com.tinkerforge.BrickletAmbientLight;
 import com.tinkerforge.BrickletBarometer;
 import com.tinkerforge.BrickletDistanceIR;
+import com.tinkerforge.BrickletDualRelay;
 import com.tinkerforge.BrickletGPS;
 import com.tinkerforge.BrickletHumidity;
 import com.tinkerforge.BrickletLCD20x4;
@@ -58,8 +59,6 @@ public class BrickletFactory {
 			return new BrickletCurrent12(uid, ipcon);
 		case BrickletCurrent25.DEVICE_IDENTIFIER:
 			return new BrickletCurrent25(uid, ipcon);
-		case BrickletDualRelay.DEVICE_IDENTIFIER:
-			return new BrickletDualRelay(uid, ipcon);
 		case BrickletIndustrialDigitalIn4.DEVICE_IDENTIFIER:
 			return new BrickletIndustrialDigitalIn4(uid, ipcon);
 		case BrickletIndustrialDigitalOut4.DEVICE_IDENTIFIER:
@@ -103,6 +102,8 @@ public class BrickletFactory {
 			return new BarometerBricklet(uid, new BrickletBarometer(uid, ipcon));
 		case BrickletDistanceIR.DEVICE_IDENTIFIER:
 			return new DistanceBricklet(uid, new BrickletDistanceIR(uid, ipcon));
+		case BrickletDualRelay.DEVICE_IDENTIFIER:
+			return new DualRelayBricklet(uid, new BrickletDualRelay(uid, ipcon));
 		case BrickletGPS.DEVICE_IDENTIFIER:
 			return new GpsBricklet(uid, new BrickletGPS(uid, ipcon));
 		case BrickletHumidity.DEVICE_IDENTIFIER:

@@ -93,6 +93,7 @@ public class GpsBricklet extends PollingDriver {
 
 	@Override
 	public void run() {
+		// TODO Change this to use a listener ... now that I know how it works.
 		Position newPos = new Position();
 
 		try {
@@ -119,12 +120,13 @@ public class GpsBricklet extends PollingDriver {
 
 		if (!position.equals(newPos)) {
 			position = newPos;
-			
+
 			try {
-				gpsMo.set(position);
+				ManagedObjectRepresentation mo = new ManagedObjectRepresentation();
+				mo.set(position);
 				getPlatform().getInventoryApi().getManagedObject(gpsMo.getId())
-						.update(gpsMo);
-				
+						.update(mo);
+
 				locationUpdate.setTime(new Date());
 				locationUpdate.set(position);
 				getPlatform().getEventApi().create(locationUpdate);

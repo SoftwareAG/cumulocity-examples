@@ -1,46 +1,99 @@
 package c8y.tinkerforge;
 
-import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
-import com.cumulocity.sdk.client.Platform;
-import com.tinkerforge.BrickletDistanceIR;
+import java.util.Date;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import c8y.lx.driver.DeviceManagedObject;
 import c8y.lx.driver.Driver;
 import c8y.lx.driver.Executer;
 
+import com.cumulocity.rest.representation.event.EventRepresentation;
+import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
+import com.cumulocity.sdk.client.Platform;
+import com.cumulocity.sdk.client.SDKException;
+import com.tinkerforge.BrickletDistanceIR;
+import com.tinkerforge.BrickletDistanceIR.DistanceListener;
+import com.tinkerforge.NotConnectedException;
+import com.tinkerforge.TimeoutException;
+
 public class DistanceBricklet implements Driver {
 
-	public DistanceBricklet(String uid, BrickletDistanceIR brickletDistanceIR) {
-		// TODO Auto-generated constructor stub
-	}
+	public static final String TYPE = "Distance";
+	public static final long DIST_POLLING = 1000;
+	public static final String EVENT_TYPE = "c8y_EntranceEvent";
+	
+	private static final Logger logger = LoggerFactory
+			.getLogger(DisplayBricklet.class);
 
-	@Override
-	public void initialize(Platform platform) throws Exception {
-		// TODO Auto-generated method stub
+	private Platform platform;
+	private ManagedObjectRepresentation mo = new ManagedObjectRepresentation();
+	private EventRepresentation event = new EventRepresentation();
 
+	private String id;
+	private BrickletDistanceIR distance;
+	
+	public DistanceBricklet(String id, BrickletDistanceIR distance) {
+		this.id = id;
+		this.distance = distance;
 	}
 
 	@Override
 	public Executer[] getSupportedOperations() {
-		// TODO Auto-generated method stub
-		return null;
+		return new Executer[0];
+	}
+
+	@Override
+	public void initialize(Platform platform) throws Exception {
+		this.platform = platform;
 	}
 
 	@Override
 	public void initializeInventory(ManagedObjectRepresentation mo) {
-		// TODO Auto-generated method stub
-
+		// Nothing to do here.
 	}
 
 	@Override
-	public void discoverChildren(ManagedObjectRepresentation mo) {
-		// TODO Auto-generated method stub
+	public void discoverChildren(ManagedObjectRepresentation parent) {
+		try {
+			mo.set(TFIds.getHardware(distance, TYPE));
+		} catch (TimeoutException | NotConnectedException e) {
+			logger.warn("Cannot read hardware parameters", e);
+		}
 
+		mo.setType(TFIds.getType(TYPE));
+		mo.setName(TFIds.getDefaultName(parent.getName(), TYPE, id));
+
+		try {
+			DeviceManagedObject dmo = new DeviceManagedObject(platform);
+			dmo.createOrUpdate(mo, TFIds.getXtId(id), parent.getId());
+
+			event.setSource(mo);
+			event.setType(EVENT_TYPE);
+			event.setText("Entrance sensor triggered");
+		} catch (SDKException e) {
+			logger.warn("Cannot create sensor", e);
+		}
 	}
 
 	@Override
 	public void start() {
-		// TODO Auto-generated method stub
-
+		distance.addDistanceListener(new DistanceListener() {
+			@Override
+			public void distance(int distance) {
+				event.setTime(new Date());
+				try {
+					platform.getEventApi().create(event);
+				} catch (SDKException e) {
+					logger.warn("Cannot send entrance event", e);
+				}
+			}
+		});
+		try {
+			distance.setDistanceCallbackPeriod(DIST_POLLING);
+		} catch (TimeoutException | NotConnectedException e) {
+			logger.warn("Cannot start distance sensor polling", e);
+		}
 	}
-
 }
