@@ -54,6 +54,6 @@ public class LinuxHardwareDriverTest {
 		assertEquals(new LinuxHardwareDriver().getHardware(), driver.getHardware());
 	}
 
-	private Hardware referenceHw = new Hardware("BCM2708", "0000000017b769d5", "000e");
+	private Hardware referenceHw = new Hardware("RaspPi BCM2708", "0000000017b769d5", "000e");
 	private LinuxHardwareDriver driver = new LinuxHardwareDriver();
 }
