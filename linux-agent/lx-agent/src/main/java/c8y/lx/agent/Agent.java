@@ -59,10 +59,11 @@ import com.cumulocity.sdk.client.SDKException;
  * @see {@link Driver}, {@link CredentialManager}
  */
 public class Agent {
-	
+
 	public static final String TYPE = "c8y_Linux";
 	public static final String XTIDTYPE = "c8y_Serial";
 	public static final String ALARMTYPE = "c8y_AgentStartupError";
+	public static final long RETRY_WAIT = 5000L;
 
 	private static Logger logger = LoggerFactory.getLogger(Agent.class);
 
@@ -75,7 +76,7 @@ public class Agent {
 		try {
 			new Agent();
 		} catch (Exception x) {
-			logger.error("Error caught", x);
+			logger.error("Unrecoverable error, exiting", x);
 		}
 	}
 
@@ -152,12 +153,34 @@ public class Agent {
 		mo.set(supportedOps);
 		mo.set(new com.cumulocity.model.Agent());
 		mo.set(new IsDevice());
+
+		checkConnection();
+
 		logger.debug("Agent representation is {}, updating inventory", mo);
 
 		if (new DeviceManagedObject(platform).createOrUpdate(mo, extId, null)) {
 			logger.debug("Agent was created in the inventory");
 		} else {
 			logger.debug("Agent was updated in the inventory");
+		}
+	}
+
+	private void checkConnection() {
+		logger.info("Checking platform connectivity");
+		boolean connected = false;
+
+		while (!connected) {
+			try {
+				platform.getInventoryApi().getManagedObjects().get(1);
+				connected = true;
+			} catch (Exception x) {
+				logger.debug("No connectivity, wait and retry");
+				try {
+					Thread.sleep(RETRY_WAIT);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 	}
 
