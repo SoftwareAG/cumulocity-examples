@@ -26,6 +26,7 @@
 		<module>lx-agent</module>
 		<module>piface-driver</module>
 		<module>tinkerforge-driver</module>
+		<module>rpi-setup</module>
 	</modules>
 
 	<dependencies>

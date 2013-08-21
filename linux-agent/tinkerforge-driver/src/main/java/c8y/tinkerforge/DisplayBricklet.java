@@ -152,6 +152,7 @@ public class DisplayBricklet implements Driver, Configurable {
 			}
 
 			String text = operation.get(Message.class).getText();
+			display.backlightOn();
 			submitText(text);
 
 			operation.setStatus(OperationStatus.SUCCESSFUL.toString());

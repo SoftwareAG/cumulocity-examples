@@ -22,10 +22,11 @@ public class DistanceBricklet implements Driver {
 
 	public static final String TYPE = "Distance";
 	public static final long DIST_POLLING = 1000;
+	public static final long SLACK_TIME = 10000;
 	public static final String EVENT_TYPE = "c8y_EntranceEvent";
-	
+
 	private static final Logger logger = LoggerFactory
-			.getLogger(DisplayBricklet.class);
+			.getLogger(DistanceBricklet.class);
 
 	private Platform platform;
 	private ManagedObjectRepresentation mo = new ManagedObjectRepresentation();
@@ -33,7 +34,8 @@ public class DistanceBricklet implements Driver {
 
 	private String id;
 	private BrickletDistanceIR distance;
-	
+	private Date lastTriggered = new Date();
+
 	public DistanceBricklet(String id, BrickletDistanceIR distance) {
 		this.id = id;
 		this.distance = distance;
@@ -82,11 +84,19 @@ public class DistanceBricklet implements Driver {
 		distance.addDistanceListener(new DistanceListener() {
 			@Override
 			public void distance(int distance) {
-				event.setTime(new Date());
-				try {
-					platform.getEventApi().create(event);
-				} catch (SDKException e) {
-					logger.warn("Cannot send entrance event", e);
+				Date currentTime = new Date();
+
+				logger.debug("Distance event " + distance);
+				if (currentTime.getTime() >= lastTriggered.getTime()
+						+ SLACK_TIME) {
+					logger.debug("Sending distance event");
+					event.setTime(currentTime);
+					try {
+						platform.getEventApi().create(event);
+						lastTriggered = currentTime;
+					} catch (SDKException e) {
+						logger.warn("Cannot send entrance event", e);
+					}
 				}
 			}
 		});

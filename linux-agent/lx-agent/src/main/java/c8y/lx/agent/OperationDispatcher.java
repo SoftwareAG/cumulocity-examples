@@ -49,8 +49,9 @@ import com.cumulocity.sdk.client.notification.SubscriptionListener;
  */
 public class OperationDispatcher {
 
-	private static Logger logger = LoggerFactory.getLogger(OperationDispatcher.class);
-	
+	private static Logger logger = LoggerFactory
+			.getLogger(OperationDispatcher.class);
+
 	private DeviceControlApi control;
 	private GId gid;
 	private Map<String, Executer> dispatchMap;
@@ -77,23 +78,35 @@ public class OperationDispatcher {
 		logger.info("Listening for new operations");
 		Subscriber<GId, OperationRepresentation> subscriber;
 		subscriber = control.getNotificationsSubscriber();
-		subscriber.subscribe(gid,
-				new SubscriptionListener<GId, OperationRepresentation>() {
-					@Override
-					public void onError(Subscription<GId> sub, Throwable e) {
-						e.printStackTrace();
-					}
+		for (int retries = 0; retries < 10; retries++) {
+			try {
+				subscriber.subscribe(gid, new MySubscriptionListener());
+				break;
+			} catch (SDKException x) {
+				logger.warn(
+						"Couldn't subscribe to operation notifications, retry "
+								+ retries, x);
+				try { Thread.sleep(5000); } catch (InterruptedException e) {}
+			}
+		}
+	}
 
-					@Override
-					public void onNotification(Subscription<GId> sub,
-							OperationRepresentation operation) {
-						try {
-							executePending(operation);
-						} catch (SDKException e) {
-							e.printStackTrace();
-						}
-					}
-				});
+	private class MySubscriptionListener implements
+			SubscriptionListener<GId, OperationRepresentation> {
+		@Override
+		public void onError(Subscription<GId> sub, Throwable e) {
+			e.printStackTrace();
+		}
+
+		@Override
+		public void onNotification(Subscription<GId> sub,
+				OperationRepresentation operation) {
+			try {
+				executePending(operation);
+			} catch (SDKException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	private void executePendingOps() throws SDKException {
@@ -122,11 +135,13 @@ public class OperationDispatcher {
 		execute(operation, false);
 	}
 
-	private void execute(OperationRepresentation operation, boolean cleanup) throws SDKException {
+	private void execute(OperationRepresentation operation, boolean cleanup)
+			throws SDKException {
 		try {
 			for (String key : operation.getAttrs().keySet()) {
 				if (dispatchMap.containsKey(key)) {
-					logger.info("Executing operation {} cleanup {}", operation, cleanup);
+					logger.info("Executing operation {} cleanup {}", operation,
+							cleanup);
 					dispatchMap.get(key).execute(operation, cleanup);
 				}
 			}

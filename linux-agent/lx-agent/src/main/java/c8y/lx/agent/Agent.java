@@ -174,7 +174,7 @@ public class Agent {
 				platform.getInventoryApi().getManagedObjects().get(1);
 				connected = true;
 			} catch (Exception x) {
-				logger.debug("No connectivity, wait and retry");
+				logger.debug("No connectivity, wait and retry", x);
 				try {
 					Thread.sleep(RETRY_WAIT);
 				} catch (InterruptedException e) {

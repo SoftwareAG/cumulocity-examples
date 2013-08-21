@@ -47,7 +47,7 @@ public class GpsBricklet extends PollingDriver {
 	public static final BigDecimal ALT_DIVISOR = new BigDecimal("100");
 
 	private static final Logger logger = LoggerFactory
-			.getLogger(DisplayBricklet.class);
+			.getLogger(GpsBricklet.class);
 
 	private ManagedObjectRepresentation gpsMo = new ManagedObjectRepresentation();
 	private EventRepresentation locationUpdate = new EventRepresentation();

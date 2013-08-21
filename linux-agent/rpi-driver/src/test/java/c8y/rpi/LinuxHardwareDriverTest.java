@@ -18,7 +18,7 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package c8y.lx.agent;
+package c8y.rpi;
 
 import static org.junit.Assert.*;
 
@@ -30,7 +30,7 @@ import java.io.Reader;
 import org.junit.Test;
 
 import c8y.Hardware;
-import c8y.lx.agent.LinuxHardwareDriver;
+import c8y.rpi.LinuxHardwareDriver;
 
 public class LinuxHardwareDriverTest {
 	public static final String REFERENCE_HWFILE = "/hardware.txt";
