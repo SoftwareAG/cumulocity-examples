@@ -1,4 +1,4 @@
-package c8y.lx.agent;
+package c8y.mac;
 
 import java.io.BufferedReader;
 import java.io.IOException;

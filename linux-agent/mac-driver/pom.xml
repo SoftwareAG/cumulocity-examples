@@ -6,9 +6,9 @@
 		<artifactId>lx</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-	<artifactId>rpi-driver</artifactId>
-	<name>Raspberry Pi driver</name>
-	<description>Hardware and firmware driver for the Raspberry Pi</description>
+	<artifactId>mac-driver</artifactId>
+	<name>Mac driver</name>
+	<description>Hardware driver for Mac OS</description>
 	<dependencies>
 		<dependency>
 			<groupId>c8y.lx</groupId>

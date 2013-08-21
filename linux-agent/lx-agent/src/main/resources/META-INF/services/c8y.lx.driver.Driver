@@ -1,7 +1,5 @@
-# The hardware driver must be present, since the serial number from the hardware driver is used to identify the device.
-c8y.lx.agent.MacHardwareDriver
+# At least one hardware driver must be present to get the serial number that is used to identify the device.
 c8y.lx.agent.ConfigurationDriver
 c8y.lx.agent.TracelogDriver
 c8y.lx.agent.JavaSoftwareDriver
-c8y.lx.agent.PiFirmwareDriver
 c8y.lx.agent.LinuxModemDriver

@@ -18,7 +18,7 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package c8y.lx.agent;
+package c8y.rpi;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
