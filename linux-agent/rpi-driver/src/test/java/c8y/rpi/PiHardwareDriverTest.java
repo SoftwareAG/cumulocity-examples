@@ -30,9 +30,9 @@ import java.io.Reader;
 import org.junit.Test;
 
 import c8y.Hardware;
-import c8y.rpi.LinuxHardwareDriver;
+import c8y.rpi.PiHardwareDriver;
 
-public class LinuxHardwareDriverTest {
+public class PiHardwareDriverTest {
 	public static final String REFERENCE_HWFILE = "/hardware.txt";
 
 	@Test
@@ -51,9 +51,9 @@ public class LinuxHardwareDriverTest {
 			driver.initializeFromFile("the proc filesystem is not existing here");
 		} catch (IOException x) {
 		}
-		assertEquals(new LinuxHardwareDriver().getHardware(), driver.getHardware());
+		assertEquals(new PiHardwareDriver().getHardware(), driver.getHardware());
 	}
 
 	private Hardware referenceHw = new Hardware("RaspPi BCM2708", "0000000017b769d5", "000e");
-	private LinuxHardwareDriver driver = new LinuxHardwareDriver();
+	private PiHardwareDriver driver = new PiHardwareDriver();
 }

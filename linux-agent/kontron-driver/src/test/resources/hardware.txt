@@ -1,0 +1,45 @@
+br0       Link encap:Ethernet  HWaddr 00:B3:38:00:01:CE  
+          inet addr:192.168.0.1  Bcast:192.168.0.255  Mask:255.255.255.0
+          inet6 addr: fe80::2b3:38ff:fe00:1ce/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:47709 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:18269 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:0 
+          RX bytes:35913297 (34.2 MiB)  TX bytes:1605808 (1.5 MiB)
+
+br0:1     Link encap:Ethernet  HWaddr 00:B3:38:00:01:CE  
+          inet addr:172.31.255.1  Bcast:172.31.255.255  Mask:255.255.0.0
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+
+eth0      Link encap:Ethernet  HWaddr 00:B3:38:00:01:CE  
+          UP BROADCAST MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 b)  TX bytes:0 (0.0 b)
+          Memory:d3158000-d3158200 
+
+lo        Link encap:Local Loopback  
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope:Host
+          UP LOOPBACK RUNNING  MTU:16436  Metric:1
+          RX packets:59 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:59 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:0 
+          RX bytes:2929 (2.8 KiB)  TX bytes:2929 (2.8 KiB)
+
+mon.wlan0 Link encap:UNSPEC  HWaddr A0-88-B4-19-7C-0C-06-53-00-00-00-00-00-00-00-00  
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:42025 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:9140197 (8.7 MiB)  TX bytes:0 (0.0 b)
+
+wlan0     Link encap:Ethernet  HWaddr A0:88:B4:19:7C:0C  
+          inet6 addr: fe80::a288:b4ff:fe19:7c0c/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:47736 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:19135 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:36582621 (34.8 MiB)  TX bytes:2100615 (2.0 MiB)
+

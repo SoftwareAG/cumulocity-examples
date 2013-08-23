@@ -1,8 +1,9 @@
-package c8y.rpi;
+package c8y.kontron;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Reader;
 
 import org.slf4j.Logger;
@@ -19,52 +20,56 @@ import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.Platform;
 
 /**
- * A driver that simply reports the currently installed hardware information to
- * the platform. It also enables restarting a device.
- * 
- * TODO The restart functionality could probably better go into an OS driver
- * that also reports syslog alerts and enables updating the OS software.
+ * A driver that uses the MAC address to fill in the platform. It also enables
+ * restarting a device.
  */
-public class LinuxHardwareDriver implements Driver, Executer {
-	public static final String CPUINFO = "/proc/cpuinfo";
-	public static final String PATTERN = "\\s+:\\s+";
+public class KontronHardwareDriver implements Driver, Executer {
+	public static final String GETINTERFACES = "ifconfig";
+	public static final String PATTERN = "\\s+";
 
-	private static Logger logger = LoggerFactory.getLogger(LinuxHardwareDriver.class);
-	
+	private static Logger logger = LoggerFactory
+			.getLogger(KontronHardwareDriver.class);
+
 	private GId gid;
-	private Hardware hardware = new Hardware("Unknown model", "Unknown serial", "Unknown revision");
+	private Hardware hardware = new Hardware("KM2M810", "Unknown", "Unknown");
 
 	@Override
 	public void initialize(Platform platform) throws Exception {
-		initializeFromFile(CPUINFO);
+		initializeFromProcess(GETINTERFACES);
 	}
-	
-	void initializeFromFile(String file) throws IOException {
-		try (FileReader fr = new FileReader(CPUINFO)) {
-			initializeFromReader(fr);
-		}	
+
+	private void initializeFromProcess(String process) throws Exception {
+		Process p = Runtime.getRuntime().exec(process);
+		try (InputStream is = p.getInputStream();
+				InputStreamReader ir = new InputStreamReader(is)) {
+			initializeFromReader(ir);
+		}
 	}
-	
+
 	void initializeFromReader(Reader r) throws IOException {
-		try (BufferedReader reader = new BufferedReader(r)) {
+		/*
+		 * Eclipse prints a warning here, however the construct with return
+		 * should be legal according to http: //
+		 * docs.oracle.com/javase/tutorial/
+		 * essential/exceptions/tryResourceClose.html
+		 */
+		try (@SuppressWarnings("resource")
+		BufferedReader reader = new BufferedReader(r)) {
 			String line = null;
 
 			while ((line = reader.readLine()) != null) {
-				String[] keyval = line.split(PATTERN);
+				String[] fields = line.trim().split(PATTERN);
 
-				if ("Hardware".equals(keyval[0])) {
-					hardware.setModel("RaspPi " + keyval[1]);
-				}
-				if ("Revision".equals(keyval[0])) {
-					hardware.setRevision(keyval[1]);
-				}
-				if ("Serial".equals(keyval[0])) {
-					hardware.setSerialNumber(keyval[1]);
+				for (int i = 0; i < fields.length; i++) {
+					if ("HWaddr".equals(fields[i]) && i + 1 < fields.length) {
+						hardware.setSerialNumber(fields[i + 1]);
+						return;
+					}
 				}
 			}
 		}
 	}
-	
+
 	@Override
 	public Executer[] getSupportedOperations() {
 		return new Executer[] { this };
@@ -91,7 +96,8 @@ public class LinuxHardwareDriver implements Driver, Executer {
 	}
 
 	@Override
-	public void execute(OperationRepresentation operation, boolean cleanup) throws Exception {
+	public void execute(OperationRepresentation operation, boolean cleanup)
+			throws Exception {
 		if (!gid.equals(operation.getDeviceId())) {
 			// Silently ignore the operation if it is not targeted to us,
 			// another driver will (hopefully) care.
