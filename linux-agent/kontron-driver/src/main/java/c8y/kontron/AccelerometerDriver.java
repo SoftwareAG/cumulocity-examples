@@ -1,5 +1,6 @@
 package c8y.kontron;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.Properties;
 
@@ -22,14 +23,22 @@ public class AccelerometerDriver extends PollingDriver {
 	public static final long REARM_TIME = 10000;
 	public static final String MOTION_TYPE = "c8y_MotionAlarm";
 
-	private AccelerometerReader reader = new AccelerometerReader(
-			THRESHOLD_DEFAULT);
+	private AccelerometerReader reader;
 	private AlarmRepresentation motion = new AlarmRepresentation();
-	private long lastAlarm = 0;
+	private long lastAlarm;
 
 	public AccelerometerDriver() {
-		super(TYPE, INTERVAL, INTERVAL_DEFAULT);
+		this(new AccelerometerReader(THRESHOLD_DEFAULT));
+	}
 
+	public AccelerometerDriver(AccelerometerReader reader) {
+		this(reader, 0);
+	}
+	
+	AccelerometerDriver(AccelerometerReader reader, long lastAlarm) {
+		super(TYPE, INTERVAL, INTERVAL_DEFAULT);
+		this.reader = reader;
+		this.lastAlarm = lastAlarm;
 	}
 
 	@Override
@@ -57,17 +66,19 @@ public class AccelerometerDriver extends PollingDriver {
 
 	@Override
 	public void run() {
-		if (reader.poll()) {
-			long now = new Date().getTime();
-			if (lastAlarm == 0 && now <= lastAlarm + REARM_TIME) {
-				try {
+		try {
+			if (reader.poll()) {
+				long now = new Date().getTime();
+				if (lastAlarm == 0 || now >= lastAlarm + REARM_TIME) {
 					logger.debug("Sending motion alarm from accelerometer.");
 					getPlatform().getAlarmApi().create(motion);
 					lastAlarm = now;
-				} catch (SDKException e) {
-					logger.warn("Cannot create alarm on platform", e);
 				}
 			}
+		} catch (SDKException e) {
+			logger.warn("Cannot create alarm on platform", e);
+		} catch (IOException e) {
+			logger.warn("Cannot read accelerometer", e);
 		}
 	}
 }
