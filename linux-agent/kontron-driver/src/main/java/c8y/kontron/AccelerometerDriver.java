@@ -13,11 +13,11 @@ import com.cumulocity.sdk.client.SDKException;
 
 public class AccelerometerDriver extends PollingDriver {
 	public static final String TYPE = "Accelerometer";
+	public static final String PROP_PREF = "c8y.accelerometer";
 
-	public static final String THRESHOLD = "c8y.accelerometer.threshold";
-	public static final double THRESHOLD_DEFAULT = 3.39;
+	public static final String THRESHOLD = PROP_PREF + "threshold";
+	public static final double THRESHOLD_DEFAULT = 2.5;
 
-	public static final String INTERVAL = "c8y.accelerometer.interval";
 	public static final long INTERVAL_DEFAULT = 500;
 
 	public static final long REARM_TIME = 10000;
@@ -36,7 +36,7 @@ public class AccelerometerDriver extends PollingDriver {
 	}
 	
 	AccelerometerDriver(AccelerometerReader reader, long lastAlarm) {
-		super(TYPE, INTERVAL, INTERVAL_DEFAULT);
+		super(TYPE, PROP_PREF, INTERVAL_DEFAULT);
 		this.reader = reader;
 		this.lastAlarm = lastAlarm;
 	}

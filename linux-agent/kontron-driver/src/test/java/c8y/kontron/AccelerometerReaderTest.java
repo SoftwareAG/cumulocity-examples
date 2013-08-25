@@ -47,5 +47,8 @@ public class AccelerometerReaderTest {
 	public void pollShaking() throws IOException {
 		ar.initializeScale(SCALE_FILE);
 		assertTrue(ar.poll(SHAKING_FILE));		
+		
+		ar.setThreshold(1000);
+		assertFalse(ar.poll(SHAKING_FILE));
 	}
 }
