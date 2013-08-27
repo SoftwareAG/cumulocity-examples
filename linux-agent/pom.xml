@@ -29,7 +29,7 @@
 		<module>rpi-driver</module>
 		<module>mac-driver</module>
 		<module>kontron-driver</module>
-		<module>profiles</module>
+		<module>assembly</module>
 	</modules>
 
 	<dependencies>

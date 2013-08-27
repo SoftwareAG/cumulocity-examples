@@ -11,12 +11,18 @@
 			<directory>${project.basedir}/..</directory>
 			<outputDirectory>/</outputDirectory>
 			<includes>
-				<include>cumulocity.properties</include>
-				<include>debug.sh</include>
-				<include>logback.xml</include>
 				<include>README.md</include>
 				<include>LICENSE</include>
+			</includes>
+		</fileSet>
+		<fileSet>
+			<directory>${project.basedir}/../lx-agent</directory>
+			<outputDirectory>/</outputDirectory>
+			<includes>
+				<include>cumulocity.properties</include>
+				<include>debug.sh</include>
 				<include>run.sh</include>
+				<include>logback.xml</include>
 			</includes>
 		</fileSet>
 		<fileSet>

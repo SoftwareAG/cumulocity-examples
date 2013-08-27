@@ -6,22 +6,20 @@
 		<artifactId>lx</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-	<artifactId>profiles</artifactId>
-	<name>Profiles</name>
+	<artifactId>assembly</artifactId>
+	<name>Assembly profiles</name>
 	<description>Build profiles for various environments</description>
 	<packaging>pom</packaging>
 
+	<dependencies>
+		<dependency>
+			<groupId>c8y.lx</groupId>
+			<artifactId>lx-agent</artifactId>
+			<version>${lx.version}</version>
+		</dependency>
+	</dependencies>
+	
 	<profiles>
-		<profile>
-			<id>lx-agent</id>
-			<dependencies>
-				<dependency>
-					<groupId>c8y.lx</groupId>
-					<artifactId>lx-agent</artifactId>
-					<version>${lx.version}</version>
-				</dependency>
-			</dependencies>
-		</profile>
 		<profile>
 			<id>kontron-driver</id>
 			<dependencies>
@@ -80,6 +78,7 @@
 				<artifactId>maven-assembly-plugin</artifactId>
 				<version>2.3</version>
 				<configuration>
+				    <finalName>lx-agent-${project.version}</finalName>
 					<descriptors>
 						<descriptor>assembly.xml</descriptor>
 					</descriptors>
