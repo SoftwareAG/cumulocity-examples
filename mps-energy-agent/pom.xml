@@ -97,7 +97,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.cumulocity.agents.mps.emulator.MpsDeviceEmulatorMain</mainClass>
+                            <mainClass>com.cumulocity.sdk.agent.MpsAgentMain</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
