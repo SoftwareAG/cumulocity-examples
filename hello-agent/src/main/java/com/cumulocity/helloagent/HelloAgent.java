@@ -27,6 +27,8 @@ import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import c8y.IsDevice;
+
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.Platform;
 import com.cumulocity.sdk.client.PlatformImpl;
@@ -56,6 +58,7 @@ public class HelloAgent {
         ManagedObjectRepresentation mor = new ManagedObjectRepresentation();
         // We should be able to see the name on the HelloWorld! application 
         mor.setName("Hello World!");
+        mor.set(new IsDevice());
 
         try {
             // Create the object in the database 
