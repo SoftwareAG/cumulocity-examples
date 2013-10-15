@@ -43,6 +43,7 @@ import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.Platform;
 import com.cumulocity.sdk.client.PlatformImpl;
 import com.cumulocity.sdk.client.SDKException;
+import com.sun.jersey.api.client.ClientHandlerException;
 
 /**
  * <p>
@@ -165,7 +166,7 @@ public class Agent {
 		}
 	}
 
-	private void checkConnection() {
+	private void checkConnection() throws SDKException {
 		logger.info("Checking platform connectivity");
 		boolean connected = false;
 
@@ -173,7 +174,7 @@ public class Agent {
 			try {
 				platform.getInventoryApi().getManagedObjects().get(1);
 				connected = true;
-			} catch (Exception x) {
+			} catch (ClientHandlerException x) {
 				logger.debug("No connectivity, wait and retry", x);
 				try {
 					Thread.sleep(RETRY_WAIT);

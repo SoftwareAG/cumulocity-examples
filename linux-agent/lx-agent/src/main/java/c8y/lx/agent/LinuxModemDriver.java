@@ -36,7 +36,7 @@ import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.Platform;
 
 public class LinuxModemDriver extends MeasurementPollingDriver {
-	public static final String PORT = "/dev/ttyUSB0";
+	public static final String PORT = "/dev/ttyUSB2";
 
 	public static final String GET_IMEI = "AT+GSN";
 	public static final String GET_CELLID = "AT+CSCI";
