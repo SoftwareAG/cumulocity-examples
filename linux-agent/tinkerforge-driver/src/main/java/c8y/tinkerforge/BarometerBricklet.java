@@ -29,7 +29,9 @@ import com.tinkerforge.BrickletBarometer;
 import com.tinkerforge.Device;
 
 public class BarometerBricklet extends TFSensor {
-
+	private static final double ALT_SCALE = 100.0;
+	private static final double PRESS_SCALE = 1000.0;
+	
 	private BarometerMeasurement barometer = new BarometerMeasurement();
 
 	public BarometerBricklet(String id, Device device) {
@@ -40,9 +42,9 @@ public class BarometerBricklet extends TFSensor {
 	public void run() {
 		try {
 			BrickletBarometer b = (BrickletBarometer) getDevice();
-			BigDecimal p = new BigDecimal((double) b.getAirPressure() / 100.0);
+			BigDecimal p = new BigDecimal((double) b.getAirPressure() / PRESS_SCALE);
 			barometer.setPressure(p);
-			BigDecimal a = new BigDecimal((double) b.getAltitude() / 100.0);
+			BigDecimal a = new BigDecimal((double) b.getAltitude() / ALT_SCALE);
 			barometer.setAltitude(a);
 			super.sendMeasurement(barometer);
 		} catch (Exception x) {

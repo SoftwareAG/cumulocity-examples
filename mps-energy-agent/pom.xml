@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-    <modelVersion>4.0.0</modelVersion>
-    
-    <parent>
-        <groupId>com.cumulocity.example</groupId>
-        <artifactId>cumulocity-examples</artifactId>
-        <version>4.2.1-SNAPSHOT</version>
-    </parent>
+	<modelVersion>4.0.0</modelVersion>
 
-    <artifactId>mps-energy-agent</artifactId>
-    
-    <licenses>
-        <license>
-            <name>MIT License</name>
-            <url>http://en.wikipedia.org/wiki/MIT_License</url>
-            <comments>
+	<parent>
+		<groupId>com.cumulocity.example</groupId>
+		<artifactId>cumulocity-examples</artifactId>
+		<version>4.3.0</version>
+	</parent>
+
+	<artifactId>mps-energy-agent</artifactId>
+
+	<licenses>
+		<license>
+			<name>MIT License</name>
+			<url>http://en.wikipedia.org/wiki/MIT_License</url>
+			<comments>
                 Copyright (C) 2013 Cumulocity GmbH
 
 			    Permission is hereby granted, free of charge, to any person obtaining a copy of 
@@ -35,8 +35,8 @@
 			    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 			    ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             </comments>
-        </license>
-    </licenses>
+		</license>
+	</licenses>
 
 	<dependencies>
 		<dependency>
@@ -51,7 +51,17 @@
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
+			<artifactId>jcl-over-slf4j</artifactId>
+			<version>${slf4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
+			<version>${slf4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
 			<version>${slf4j.version}</version>
 		</dependency>
 		<dependency>
@@ -79,5 +89,20 @@
 			</exclusions>
 		</dependency>
 	</dependencies>
+	
+	<build>
+		<plugins>
+            <plugin>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>com.cumulocity.sdk.agent.MpsAgentMain</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+		</plugins>
+	</build>
 
 </project>

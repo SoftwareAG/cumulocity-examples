@@ -2,4 +2,4 @@
 c8y.lx.agent.ConfigurationDriver
 c8y.lx.agent.TracelogDriver
 c8y.lx.agent.JavaSoftwareDriver
-c8y.lx.agent.LinuxModemDriver
+#c8y.lx.agent.LinuxModemDriver

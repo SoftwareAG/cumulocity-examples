@@ -5,4 +5,9 @@ This repository contains an example agent for Linux, in particular for the Raspb
 * piface-support: A simple Piface integration.
 * tinkerforge-support: Support for Tinkerforge bricks.
 
-For running the agent, just include the required jars into the classpath and run c8y.lx.agent.Agent. E.g., if you have a Raspberry Pi with a PiFace, use lx-driver, lx-agent, rpi-setup and piface-driver.
+For running the agent, just include the required jars into the classpath and run c8y.lx.agent.Agent. Maven can help you with that, for example
+
+	mvn clean install
+	cd assembly
+	mvn -P rpi-driver,tinkerforge-driver dependency:copy-dependencies
+	mvn -P rpi-driver,tinkerforge-driver assembly:single
