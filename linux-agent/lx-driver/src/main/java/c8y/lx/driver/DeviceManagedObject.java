@@ -62,6 +62,15 @@ public class DeviceManagedObject {
 		returnedMo = (gid == null) ? create(mo, extId, parentId) : update(mo,
 				gid);
 
+		if (parentId != null) {
+			ManagedObjectRepresentation handle = new ManagedObjectRepresentation();
+			handle.setId(returnedMo.getId());
+			handle.setSelf(returnedMo.getSelf());
+			ManagedObjectReferenceRepresentation moRef = new ManagedObjectReferenceRepresentation();
+			moRef.setManagedObject(handle);
+			inventory.getManagedObject(parentId).addChildDevice(moRef);
+		}
+
 		copyProps(returnedMo, mo);
 
 		return gid == null;
@@ -72,15 +81,6 @@ public class DeviceManagedObject {
 		ManagedObjectRepresentation returnedMo;
 		returnedMo = inventory.create(mo);
 		bind(returnedMo, extId);
-
-		if (parentId != null) {
-			ManagedObjectRepresentation handle = new ManagedObjectRepresentation();
-			handle.setId(returnedMo.getId());
-			handle.setSelf(returnedMo.getSelf());
-			ManagedObjectReferenceRepresentation moRef = new ManagedObjectReferenceRepresentation();
-			moRef.setManagedObject(handle);
-			inventory.getManagedObject(parentId).addChildDevice(moRef);
-		}
 		return returnedMo;
 	}
 
