@@ -5,7 +5,11 @@ This repository contains an example agent for Linux, in particular for the Raspb
 * piface-support: A simple Piface integration.
 * tinkerforge-support: Support for Tinkerforge bricks.
 
-For running the agent, just include the required jars into the classpath and run c8y.lx.agent.Agent. Maven can help you with that, for example
+For running the agent,
+* Edit lx-agent/cumulocity.properties and copy it to /etc.
+* Include the required jars into the classpath and run c8y.lx.agent.Agent. 
+
+Maven can help you with collecting the required jars, for example through
 
 	mvn clean install
 	cd assembly
