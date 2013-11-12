@@ -30,6 +30,7 @@ import java.util.ServiceLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import c8y.Availability;
 import c8y.Hardware;
 import c8y.IsDevice;
 import c8y.RequiredAvailability;
@@ -130,7 +131,6 @@ public class Agent {
 	}
 
 	private void initializeInventory() throws SDKException {
-		SupportedOperations supportedOps = new SupportedOperations();
 		logger.info("Initializing inventory");
 
 		for (Driver driver : drivers) {
@@ -139,7 +139,6 @@ public class Agent {
 			for (Executer exec : driver.getSupportedOperations()) {
 				String supportedOp = exec.supportedOperationType();
 				dispatchMap.put(supportedOp, exec);
-				supportedOps.add(supportedOp);
 			}
 		}
 
@@ -153,7 +152,6 @@ public class Agent {
 
 		mo.setType(TYPE);
 		mo.setName(model + " " + serial);
-		mo.set(supportedOps);
 		mo.set(new com.cumulocity.model.Agent());
 		mo.set(new IsDevice());
 		mo.set(new RequiredAvailability(RESPONSE_INTERVAL));

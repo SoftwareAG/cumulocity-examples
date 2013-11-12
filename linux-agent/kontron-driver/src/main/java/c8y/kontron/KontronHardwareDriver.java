@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import c8y.Hardware;
 import c8y.lx.driver.Driver;
 import c8y.lx.driver.Executer;
+import c8y.lx.driver.OpsUtil;
 
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.model.operation.OperationStatus;
@@ -78,6 +79,7 @@ public class KontronHardwareDriver implements Driver, Executer {
 	@Override
 	public void initializeInventory(ManagedObjectRepresentation mo) {
 		mo.set(hardware);
+		OpsUtil.add(mo, supportedOperationType());
 	}
 
 	@Override
