@@ -16,13 +16,14 @@
 	    <slf4j.version>1.7.0</slf4j.version>
 	    <spring.version>3.1.4.RELEASE</spring.version>
 	    
-	    <tycho.version>0.18.0</tycho.version>
+	    <tycho.version>0.18.1</tycho.version>
 	    
 	    <nexus.port>443</nexus.port>
 	</properties>
 	
 	<modules>
 		<module>hello-agent</module>
+		<module>linux-agent</module>
 		<module>mps-device-emulator</module>
 		<module>mps-device-emulator-rpm</module>
 		<module>mps-energy-agent</module>
