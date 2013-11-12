@@ -30,6 +30,7 @@ import org.apache.commons.io.IOUtils;
 import c8y.Firmware;
 import c8y.lx.driver.Driver;
 import c8y.lx.driver.Executer;
+import c8y.lx.driver.OpsUtil;
 
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.model.operation.OperationStatus;
@@ -80,6 +81,7 @@ public class PiFirmwareDriver implements Driver, Executer {
 	@Override
 	public void initializeInventory(ManagedObjectRepresentation mo) {
 		mo.set(firmware);
+		OpsUtil.add(mo, supportedOperationType());
 	}
 
 	@Override

@@ -31,6 +31,7 @@ import c8y.Configuration;
 import c8y.lx.driver.Configurable;
 import c8y.lx.driver.Driver;
 import c8y.lx.driver.Executer;
+import c8y.lx.driver.OpsUtil;
 
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.model.operation.OperationStatus;
@@ -46,7 +47,7 @@ import com.cumulocity.sdk.client.inventory.InventoryApi;
  * drivers that implement the Configurable interface.
  */
 public class ConfigurationDriver implements Driver, Executer {
-	
+
 	public static final String CONFIGFILE = "/etc/cumulocity-configuration.properties";
 
 	private static Logger logger = LoggerFactory
@@ -85,6 +86,7 @@ public class ConfigurationDriver implements Driver, Executer {
 		Configuration configuration = new Configuration(
 				PropUtils.toString(props));
 		mo.set(configuration);
+		OpsUtil.add(mo, supportedOperationType());
 	}
 
 	@Override

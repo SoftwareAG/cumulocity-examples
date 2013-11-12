@@ -31,6 +31,7 @@ import c8y.Relay.RelayState;
 import c8y.lx.driver.DeviceManagedObject;
 import c8y.lx.driver.Driver;
 import c8y.lx.driver.Executer;
+import c8y.lx.driver.OpsUtil;
 
 import com.cumulocity.model.ID;
 import com.cumulocity.model.idtype.GId;
@@ -118,6 +119,7 @@ public class PiFaceDriver implements Driver, Executer {
 			ledMos[idx].setType(LEDTYPE);
 			ledMos[idx].setName(namePrefix + "LED " + idx);
 			ledMos[idx].set(relay);
+			OpsUtil.add(ledMos[idx], supportedOperationType());
 
 			String id = idPrefix + "led-" + idx;
 

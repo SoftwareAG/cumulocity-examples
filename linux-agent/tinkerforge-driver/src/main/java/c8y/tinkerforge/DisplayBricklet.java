@@ -21,19 +21,17 @@
 package c8y.tinkerforge;
 
 import java.util.Date;
-import java.util.Properties;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import c8y.Display;
 import c8y.Message;
 import c8y.Relay;
 import c8y.Relay.RelayState;
-import c8y.lx.driver.Configurable;
 import c8y.lx.driver.DeviceManagedObject;
 import c8y.lx.driver.Driver;
 import c8y.lx.driver.Executer;
+import c8y.lx.driver.OpsUtil;
 
 import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.rest.representation.event.EventRepresentation;
@@ -47,11 +45,10 @@ import com.tinkerforge.BrickletLCD20x4.ButtonPressedListener;
 import com.tinkerforge.NotConnectedException;
 import com.tinkerforge.TimeoutException;
 
-public class DisplayBricklet implements Driver, Configurable {
+public class DisplayBricklet implements Driver {
 	public static final short LINES = 4;
 	public static final short WIDTH = 20;
 	public static final String TYPE = "Display";
-	public static final String TEXT_PROP = "c8y.display.text";
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(DisplayBricklet.class);
@@ -68,21 +65,6 @@ public class DisplayBricklet implements Driver, Configurable {
 		this.display = display;
 	}
 
-	@Override
-	public void addDefaults(Properties props) {
-		props.setProperty(TEXT_PROP, "");
-	}
-
-	@Override
-	public void configurationChanged(Properties props) {
-		String newText = props.getProperty(TEXT_PROP, "");
-		try {
-			submitText(newText);
-		} catch (TimeoutException | NotConnectedException e) {
-			logger.warn("Could not write text to display", e);
-		}
-	}
-	
 	@Override
 	public void initialize(Platform platform) throws Exception {
 		this.platform = platform;
@@ -104,7 +86,12 @@ public class DisplayBricklet implements Driver, Configurable {
 
 		displayMo.setType(TFIds.getType(TYPE));
 		displayMo.setName(TFIds.getDefaultName(parent.getName(), TYPE, id));
-		displayMo.set(new Display());
+		displayMo.set(new Message()); // Should actually persist the message
+										// between runs
+		OpsUtil.add(displayMo,
+				getSupportedOperations()[0].supportedOperationType());
+		OpsUtil.add(displayMo,
+				getSupportedOperations()[1].supportedOperationType());
 
 		try {
 			DeviceManagedObject dmo = new DeviceManagedObject(platform);
@@ -141,7 +128,7 @@ public class DisplayBricklet implements Driver, Configurable {
 	class MessageExecuter implements Executer {
 		@Override
 		public String supportedOperationType() {
-			return Message.class.getName();
+			return "c8y_Message";
 		}
 
 		@Override
@@ -162,7 +149,7 @@ public class DisplayBricklet implements Driver, Configurable {
 	class BacklightExecuter implements Executer {
 		@Override
 		public String supportedOperationType() {
-			return Relay.class.getName();
+			return "c8y_Relay";
 		}
 
 		@Override
@@ -188,9 +175,10 @@ public class DisplayBricklet implements Driver, Configurable {
 		int length = text.length();
 
 		display.clearDisplay();
+		display.backlightOn();
 		for (short idx = 0, start = 0; idx < LINES && start < length; idx++, start += WIDTH) {
-			String line = text.substring(start,
-					Math.min(length, start + WIDTH));
+			String line = text
+					.substring(start, Math.min(length, start + WIDTH));
 			display.writeLine(idx, (short) 0, line);
 		}
 	}
