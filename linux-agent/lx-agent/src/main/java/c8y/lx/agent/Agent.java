@@ -30,8 +30,10 @@ import java.util.ServiceLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import c8y.Availability;
 import c8y.Hardware;
 import c8y.IsDevice;
+import c8y.RequiredAvailability;
 import c8y.SupportedOperations;
 import c8y.lx.driver.Configurable;
 import c8y.lx.driver.DeviceManagedObject;
@@ -65,6 +67,7 @@ public class Agent {
 	public static final String XTIDTYPE = "c8y_Serial";
 	public static final String ALARMTYPE = "c8y_AgentStartupError";
 	public static final long RETRY_WAIT = 5000L;
+	public static final int RESPONSE_INTERVAL = 3; // We expect the agent to get back at least every three minutes. 
 
 	private static Logger logger = LoggerFactory.getLogger(Agent.class);
 
@@ -128,7 +131,6 @@ public class Agent {
 	}
 
 	private void initializeInventory() throws SDKException {
-		SupportedOperations supportedOps = new SupportedOperations();
 		logger.info("Initializing inventory");
 
 		for (Driver driver : drivers) {
@@ -137,7 +139,6 @@ public class Agent {
 			for (Executer exec : driver.getSupportedOperations()) {
 				String supportedOp = exec.supportedOperationType();
 				dispatchMap.put(supportedOp, exec);
-				supportedOps.add(supportedOp);
 			}
 		}
 
@@ -151,9 +152,9 @@ public class Agent {
 
 		mo.setType(TYPE);
 		mo.setName(model + " " + serial);
-		mo.set(supportedOps);
 		mo.set(new com.cumulocity.model.Agent());
 		mo.set(new IsDevice());
+		mo.set(new RequiredAvailability(RESPONSE_INTERVAL));
 
 		checkConnection();
 
