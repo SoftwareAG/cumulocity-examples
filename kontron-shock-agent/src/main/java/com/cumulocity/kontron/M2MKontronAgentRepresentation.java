@@ -25,9 +25,7 @@ import java.util.Properties;
 
 import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
 import com.cumulocity.rest.representation.identity.ExternalIDRepresentation;
-import com.cumulocity.rest.representation.inventory.ManagedObjectCollectionRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
-import com.cumulocity.sdk.client.PagedCollectionResource;
 import com.cumulocity.sdk.client.Platform;
 import com.cumulocity.sdk.client.PlatformImpl;
 import com.cumulocity.sdk.client.SDKException;
@@ -166,20 +164,13 @@ public class M2MKontronAgentRepresentation implements M2M_Demo_Constants
                 
         try
         {
-        	PagedCollectionResource<ManagedObjectCollectionRepresentation> pagedCollectionResource = 
-        			inventoryApi.getManagedObjectsByFilter(inventoryFilter);
-        	
-        	ManagedObjectCollectionRepresentation mos;
-        	for (mos = pagedCollectionResource.get(); mos != null && mos.getManagedObjects().size() > 0; mos = pagedCollectionResource.getNextPage(mos))
-        	{
-        		for (ManagedObjectRepresentation mo : mos.getManagedObjects())
-        		{
-        			if (mo.getName().equals(KONTRON_AGENT_DEFAULT_NAME) &&
-        					mo.getProperty(KONTRON_AGENT_ETH0_MAC_PROP).equals(eth0_mac))
-        				agent = mo ;
-        			//System.out.println("agent = " + mo.getId().getValue()) ;
-        		}
-        	}
+            for (ManagedObjectRepresentation mo : inventoryApi.getManagedObjectsByFilter(inventoryFilter).get().allPages())
+            {
+                if (mo.getName().equals(KONTRON_AGENT_DEFAULT_NAME) &&
+                        mo.getProperty(KONTRON_AGENT_ETH0_MAC_PROP).equals(eth0_mac))
+                    agent = mo ;
+                // System.out.println("agent = " + mo.getId().getValue()) ;
+            }
         }
         catch (SDKException e)
         {
