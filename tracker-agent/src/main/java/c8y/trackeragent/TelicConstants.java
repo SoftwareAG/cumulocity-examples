@@ -20,46 +20,7 @@
 
 package c8y.trackeragent;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.Properties;
-
-import com.cumulocity.model.authentication.CumulocityCredentials;
-import com.cumulocity.sdk.client.Platform;
-import com.cumulocity.sdk.client.PlatformImpl;
-
-/**
- * This class reads credentials from a configuration file and provides a link to
- * the platform.
- */
-public class PlatformAccess {
-	public static final String PROPS = "/cumulocity.properties";
-
-	public PlatformAccess() throws IOException {
-		props = new Properties();
-		try (InputStream is = getClass().getResourceAsStream(PROPS);
-				InputStreamReader ir = new InputStreamReader(is)) {
-			props.load(ir);
-		}
-
-		String host = props.getProperty("host",
-				"http://developer.cumulocity.com");
-		String user = props.getProperty("user");
-		String password = props.getProperty("password");
-
-		platform = new PlatformImpl(host, new CumulocityCredentials(user, password));
-		
-	}
-
-	public Platform getPlatform() {
-		return platform;
-	}
-	
-	public Properties getProps() {
-		return props;
-	}
-
-	private Platform platform;
-	private Properties props;
+public interface TelicConstants {
+	static final char REPORT_SEP = '\0';
+	static final String FIELD_SEP = ",";
 }

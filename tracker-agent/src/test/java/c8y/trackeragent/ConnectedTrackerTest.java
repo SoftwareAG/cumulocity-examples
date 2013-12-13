@@ -20,16 +20,20 @@
 
 package c8y.trackeragent;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -44,10 +48,9 @@ public class ConnectedTrackerTest {
 	@Before
 	public void setup() throws IOException {
 		ConnectionRegistry.instance().remove("imei");
-		List<Object> fragments = new ArrayList<Object>();
-		fragments.add(translator);
-		fragments.add(parser);
-		tracker = new ConnectedTracker(client, fragments, GL200Constants.REPORT_SEP, GL200Constants.FIELD_SEP);
+		tracker = new ConnectedTracker(client, bis, GL200Constants.REPORT_SEP, GL200Constants.FIELD_SEP);
+		tracker.addFragment(translator);
+		tracker.addFragment(parser);
 		tracker.setOut(out);
 	}
 	
@@ -107,8 +110,10 @@ public class ConnectedTrackerTest {
 	}
 	
 	private Socket client = mock(Socket.class);
+	private BufferedInputStream bis = mock(BufferedInputStream.class);
 	private OutputStream out = mock(OutputStream.class);
 	private Translator translator = mock(Translator.class);
 	private Parser parser = mock(Parser.class);
+	private TrackerAgent trackerAgent = mock(TrackerAgent.class);
 	private ConnectedTracker tracker;
 }

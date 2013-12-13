@@ -20,7 +20,6 @@
 
 package c8y.trackeragent;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -40,25 +39,32 @@ import com.cumulocity.sdk.client.SDKException;
  * input stream and sends commands to the output stream.
  */
 public class ConnectedTracker implements Runnable, Executor {
-	public ConnectedTracker(Socket client, List<Object> fragments,
+	public ConnectedTracker(Socket client, InputStream bis,
 			char reportSeparator, String fieldSeparator) {
 		this.client = client;
-		this.fragments = fragments;
+		this.bis = bis;
 		this.reportSeparator = reportSeparator;
 		this.fieldSeparator = fieldSeparator;
+	}
+	
+	public void addFragment(Object o) {
+		fragments.add(o);
 	}
 
 	@Override
 	public void run() {
-		try (InputStream is = client.getInputStream();
-				BufferedInputStream bis = new BufferedInputStream(is);
-				OutputStream out = client.getOutputStream()) {
+		try (OutputStream out = client.getOutputStream()) {
 			setOut(out);
 			processReports(bis);
 		} catch (IOException e) {
 			logger.warn("Error during communication with client device", e);
 		} catch (SDKException e) {
 			logger.warn("Error during communication with the platform", e);
+		}
+		try {
+			client.close();
+		} catch (IOException e) {
+			logger.warn("Error during closing socket", e);
 		}
 	}
 
@@ -166,6 +172,7 @@ public class ConnectedTracker implements Runnable, Executor {
 	private String fieldSeparator;
 
 	private Socket client;
+	private InputStream bis;
 	private List<Object> fragments = new ArrayList<Object>();
 	private OutputStream out;
 	private String imei;

@@ -44,9 +44,12 @@ public class GL200LocationReportTest {
 	public static final String[] FIXEDREP = FIXEDREPSTR
 			.split(GL200Constants.FIELD_SEP);
 
+	private TrackerAgent trackerAgent = mock(TrackerAgent.class);
+	private TrackerDevice device = mock(TrackerDevice.class);	
+	private GL200LocationReport gl200fr = new GL200LocationReport(trackerAgent);
+
 	@Before
 	public void setup() throws SDKException {
-		gl200fr = new GL200LocationReport(trackerAgent);
 		when(trackerAgent.getOrCreate(anyString())).thenReturn(device);
 
 		POS1.setAlt(new BigDecimal("70.0"));
@@ -89,8 +92,4 @@ public class GL200LocationReportTest {
 		assertEquals(IMEI, imei);
 		
 	}
-
-	private GL200LocationReport gl200fr;
-	private TrackerAgent trackerAgent = mock(TrackerAgent.class);
-	private TrackerDevice device = mock(TrackerDevice.class);	
 }

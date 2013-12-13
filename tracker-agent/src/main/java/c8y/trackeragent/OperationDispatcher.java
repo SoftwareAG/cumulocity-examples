@@ -20,7 +20,6 @@
 
 package c8y.trackeragent;
 
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -29,9 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.model.operation.OperationStatus;
-import com.cumulocity.rest.representation.operation.OperationCollectionRepresentation;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
-import com.cumulocity.sdk.client.PagedCollectionResource;
 import com.cumulocity.sdk.client.Platform;
 import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.devicecontrol.DeviceControlApi;
@@ -58,7 +55,8 @@ public class OperationDispatcher extends TimerTask {
 	 *            the threads communicating with the devices, hence it needs to
 	 *            be thread-safe.
 	 */
-	public OperationDispatcher(Platform platform, GId agent) throws SDKException {
+	public OperationDispatcher(Platform platform, GId agent)
+			throws SDKException {
 		this.operations = platform.getDeviceControlApi();
 		this.agent = agent;
 
@@ -144,14 +142,11 @@ public class OperationDispatcher extends TimerTask {
 		operations.update(operation);
 	}
 
-	private List<OperationRepresentation> byStatus(OperationStatus status)
+	private Iterable<OperationRepresentation> byStatus(OperationStatus status)
 			throws SDKException {
 		OperationFilter opsFilter = new OperationFilter().byAgent(
 				agent.getValue()).byStatus(status);
-		PagedCollectionResource<OperationCollectionRepresentation> opsQuery = operations
-				.getOperationsByFilter(opsFilter);
-		OperationCollectionRepresentation ops = opsQuery.get(1000);
-		return ops.getOperations();
+		return operations.getOperationsByFilter(opsFilter).get().allPages();
 	}
 
 	private static Logger logger = LoggerFactory

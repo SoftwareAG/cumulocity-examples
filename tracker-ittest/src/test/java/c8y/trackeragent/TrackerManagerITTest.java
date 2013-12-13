@@ -20,7 +20,9 @@
 
 package c8y.trackeragent;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -38,20 +40,18 @@ import c8y.SupportedOperations;
 import com.cumulocity.model.ID;
 import com.cumulocity.model.event.CumulocityAlarmStatuses;
 import com.cumulocity.model.idtype.GId;
-import com.cumulocity.rest.representation.alarm.AlarmCollectionRepresentation;
 import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
 import com.cumulocity.rest.representation.identity.ExternalIDRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
-import com.cumulocity.rest.representation.measurement.MeasurementCollectionRepresentation;
 import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
-import com.cumulocity.sdk.client.PagedCollectionResource;
 import com.cumulocity.sdk.client.Platform;
 import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.alarm.AlarmApi;
 import com.cumulocity.sdk.client.alarm.AlarmFilter;
 import com.cumulocity.sdk.client.inventory.InventoryApi;
 import com.cumulocity.sdk.client.measurement.MeasurementApi;
+import com.cumulocity.sdk.client.measurement.MeasurementCollection;
 import com.cumulocity.sdk.client.measurement.MeasurementFilter;
 
 public class TrackerManagerITTest {
@@ -72,7 +72,7 @@ public class TrackerManagerITTest {
 			extId.setType("c8y_Imei");
 			ExternalIDRepresentation eir = platform.getIdentityApi().getExternalId(extId);
 			GId gid = eir.getManagedObject().getId();
-			platform.getInventoryApi().getManagedObject(gid).delete();
+			platform.getInventoryApi().delete(gid);
 		} catch (SDKException e) {
 		}
 		
@@ -133,7 +133,7 @@ public class TrackerManagerITTest {
 
 	private void validateTrackerData(GId gid) throws SDKException {
 		InventoryApi inventory = platform.getInventoryApi();
-		ManagedObjectRepresentation mo = inventory.getManagedObject(gid).get();
+		ManagedObjectRepresentation mo = inventory.get(gid);
 
 		assertNotNull(mo.get(IsDevice.class));
 		assertNotNull(mo.get(SupportedOperations.class));
@@ -158,18 +158,15 @@ public class TrackerManagerITTest {
 		AlarmApi alarms = platform.getAlarmApi();
 		
 		AlarmFilter filter = new AlarmFilter();
-		filter.bySource(mo);
-		PagedCollectionResource<AlarmCollectionRepresentation> pcr = alarms.getAlarmsByFilter(filter);
-		List<AlarmRepresentation> deviceAlarms = pcr.get(1000).getAlarms();
-		assertEquals(3, deviceAlarms.size());
-		for (AlarmRepresentation alarm : deviceAlarms) {
+		filter.bySource(mo.getId());
+		for (AlarmRepresentation alarm : alarms.getAlarmsByFilter(filter).get().allPages()) {
 			assertEquals(CumulocityAlarmStatuses.CLEARED.toString(), alarm.getStatus());
 		}
 		
 		MeasurementApi measurements = platform.getMeasurementApi();
 		MeasurementFilter mf = new MeasurementFilter();
-		mf.bySource(mo);
-		PagedCollectionResource<MeasurementCollectionRepresentation> mpcr = measurements.getMeasurementsByFilter(mf);
+		mf.bySource(mo.getId());
+		MeasurementCollection mpcr = measurements.getMeasurementsByFilter(mf);
 		List<MeasurementRepresentation> msmts = mpcr.get(1000).getMeasurements();
 		assertEquals(4, msmts.size());
 	}

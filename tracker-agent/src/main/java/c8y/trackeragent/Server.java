@@ -19,11 +19,11 @@
  */
 package c8y.trackeragent;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
 
 import org.slf4j.Logger;
@@ -62,25 +62,28 @@ public class Server implements Runnable {
 			logger.debug(
 					"Accepted connection from {}, launching worker thread.",
 					client.getRemoteSocketAddress());
-
-			// TODO Device-independent implementation of this, e.g., peek into
-			// client's InputStream and check what tracker to set up.
-			List<Object> fragments = new ArrayList<Object>();
-			fragments.add(new GL200Geofence(trackerAgent, PASSWORD));
-			fragments.add(new GL200Power(trackerAgent));
-			fragments.add(new GL200LocationReport(trackerAgent));
-			fragments.add(new GL200DeviceMotionState(trackerAgent, PASSWORD));
-			fragments.add(new GL200Fallback(trackerAgent, PASSWORD));
-			ConnectedTracker tracker = new ConnectedTracker(client, fragments,
-					GL200Constants.REPORT_SEP, GL200Constants.FIELD_SEP);
-
+			
+			ConnectedTracker tracker = peekTracker(client);
 			new Thread(tracker).start();
 		} catch (IOException e) {
 			logger.warn("Couldn't connect", e);
 		}
 	}
 
-	private static final String PASSWORD = "gl200";
+	private ConnectedTracker peekTracker(Socket client) throws IOException {
+		InputStream is = client.getInputStream();
+		BufferedInputStream bis = new BufferedInputStream(is);
+		bis.mark(1);
+		int marker = bis.read();
+		bis.reset();
+
+		if (marker >= '0' && marker <= '9') {
+			return new ConnectedTelicTracker(client, bis, trackerAgent);
+		} else {
+			return new ConnectedGL200Tracker(client, bis, trackerAgent);
+		}
+	}
+
 	private Logger logger = LoggerFactory.getLogger(Main.class);
 	private ServerSocket server;
 	private TrackerAgent trackerAgent;

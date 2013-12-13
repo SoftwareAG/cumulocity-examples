@@ -29,7 +29,6 @@ import com.cumulocity.sdk.client.Platform;
 import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.identity.IdentityApi;
 import com.cumulocity.sdk.client.inventory.InventoryApi;
-import com.cumulocity.sdk.client.inventory.ManagedObject;
 
 /**
  * A utility class that simplifies handling devices and their associated
@@ -74,18 +73,15 @@ public class DeviceManagedObject {
 			handle.setSelf(returnedMo.getSelf());
 			ManagedObjectReferenceRepresentation moRef = new ManagedObjectReferenceRepresentation();
 			moRef.setManagedObject(handle);
-			inventory.getManagedObject(parentId).addChildDevice(moRef);
+			inventory.getManagedObjectApi(parentId).addChildDevice(moRef);
 		}
 		return returnedMo;
 	}
 
 	private ManagedObjectRepresentation update(ManagedObjectRepresentation mo,
 			GId gid) throws SDKException {
-		ManagedObjectRepresentation returnedMo;
 		mo.setName(null); // Don't overwrite user-modified names
-		ManagedObject moHandle = inventory.getManagedObject(gid);
-		returnedMo = moHandle.update(mo);
-		return returnedMo;
+		return inventory.update(mo); 
 	}
 
 	private void copyProps(ManagedObjectRepresentation returnedMo,
