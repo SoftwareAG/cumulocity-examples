@@ -71,11 +71,12 @@ public class ConnectedTracker implements Runnable, Executor {
 	void processReports(InputStream is) throws IOException, SDKException {
 		String reportStr;
 		while ((reportStr = readReport(is)) != null) {
-			logger.debug("Processing report: " + reportStr);
 			String[] report = reportStr.split(fieldSeparator);
 			tryProcessReport(report);
 		}
-		ConnectionRegistry.instance().remove(imei);
+		if (imei != null) {
+			ConnectionRegistry.instance().remove(imei);
+		}
 		logger.debug("Connection closed by {} {} ",
 				client.getRemoteSocketAddress(), imei);
 	}
@@ -114,6 +115,8 @@ public class ConnectedTracker implements Runnable, Executor {
 			}
 			result.append((char) c);
 		}
+
+		logger.debug("Processing report: " + result.toString());
 
 		if (c == -1) {
 			return null;

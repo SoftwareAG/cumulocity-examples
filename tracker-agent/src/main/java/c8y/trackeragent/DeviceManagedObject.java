@@ -81,6 +81,7 @@ public class DeviceManagedObject {
 	private ManagedObjectRepresentation update(ManagedObjectRepresentation mo,
 			GId gid) throws SDKException {
 		mo.setName(null); // Don't overwrite user-modified names
+		mo.setId(gid);
 		return inventory.update(mo); 
 	}
 
