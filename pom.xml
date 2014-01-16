@@ -5,7 +5,7 @@
 
 	<groupId>com.cumulocity.example</groupId>
 	<artifactId>cumulocity-examples</artifactId>
-	<version>4.7.0</version>
+	<version>4.8.0</version>
 	<packaging>pom</packaging>
 	
 	<properties>
@@ -16,7 +16,7 @@
 	    <slf4j.version>1.7.0</slf4j.version>
 	    <spring.version>3.1.4.RELEASE</spring.version>
 	    
-	    <tycho.version>0.18.1</tycho.version>
+	    <tycho.version>0.19.0</tycho.version>
 	    
 	    <nexus.port>443</nexus.port>
 	</properties>
