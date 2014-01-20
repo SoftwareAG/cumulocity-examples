@@ -20,19 +20,15 @@
 
 package c8y.lx.agent;
 
-import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import c8y.lx.driver.Executer;
-
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.model.operation.OperationStatus;
-import com.cumulocity.rest.representation.operation.OperationCollectionRepresentation;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
-import com.cumulocity.sdk.client.PagedCollectionResource;
 import com.cumulocity.sdk.client.Platform;
 import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.devicecontrol.DeviceControlApi;
@@ -49,107 +45,97 @@ import com.cumulocity.sdk.client.notification.SubscriptionListener;
  */
 public class OperationDispatcher {
 
-	private static Logger logger = LoggerFactory
-			.getLogger(OperationDispatcher.class);
+    private static Logger logger = LoggerFactory.getLogger(OperationDispatcher.class);
 
-	private DeviceControlApi control;
-	private GId gid;
-	private Map<String, Executer> dispatchMap;
+    private DeviceControlApi control;
+    private GId gid;
+    private Map<String, Executer> dispatchMap;
 
-	public OperationDispatcher(Platform platform, GId gid,
-			Map<String, Executer> dispatchMap) throws SDKException {
-		this.control = platform.getDeviceControlApi();
-		this.gid = gid;
-		this.dispatchMap = dispatchMap;
+    public OperationDispatcher(Platform platform, GId gid, Map<String, Executer> dispatchMap) throws SDKException {
+        this.control = platform.getDeviceControlApi();
+        this.gid = gid;
+        this.dispatchMap = dispatchMap;
 
-		finishExecutingOps();
-		listenToOperations();
-		executePendingOps();
-	}
+        finishExecutingOps();
+        listenToOperations();
+        executePendingOps();
+    }
 
-	private void finishExecutingOps() throws SDKException {
-		logger.info("Finishing leftover operations");
-		for (OperationRepresentation operation : byStatus(OperationStatus.EXECUTING)) {
-			execute(operation, true);
-		}
-	}
+    private void finishExecutingOps() throws SDKException {
+        logger.info("Finishing leftover operations");
+        for (OperationRepresentation operation : byStatus(OperationStatus.EXECUTING)) {
+            execute(operation, true);
+        }
+    }
 
-	private void listenToOperations() throws SDKException {
-		logger.info("Listening for new operations");
-		Subscriber<GId, OperationRepresentation> subscriber;
-		subscriber = control.getNotificationsSubscriber();
-		for (int retries = 0; retries < 10; retries++) {
-			try {
-				subscriber.subscribe(gid, new MySubscriptionListener());
-				break;
-			} catch (SDKException x) {
-				logger.warn(
-						"Couldn't subscribe to operation notifications, retry "
-								+ retries, x);
-				try { Thread.sleep(5000); } catch (InterruptedException e) {}
-			}
-		}
-	}
+    private void listenToOperations() throws SDKException {
+        logger.info("Listening for new operations");
+        Subscriber<GId, OperationRepresentation> subscriber;
+        subscriber = control.getNotificationsSubscriber();
+        for (int retries = 0; retries < 10; retries++) {
+            try {
+                subscriber.subscribe(gid, new MySubscriptionListener());
+                break;
+            } catch (SDKException x) {
+                logger.warn(
+                        "Couldn't subscribe to operation notifications, retry "
+                                + retries, x);
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                }
+            }
+        }
+    }
 
-	private class MySubscriptionListener implements
-			SubscriptionListener<GId, OperationRepresentation> {
-		@Override
-		public void onError(Subscription<GId> sub, Throwable e) {
-			e.printStackTrace();
-		}
+    private class MySubscriptionListener implements SubscriptionListener<GId, OperationRepresentation> {
+        @Override
+        public void onError(Subscription<GId> sub, Throwable e) {
+            e.printStackTrace();
+        }
 
-		@Override
-		public void onNotification(Subscription<GId> sub,
-				OperationRepresentation operation) {
-			try {
-				executePending(operation);
-			} catch (SDKException e) {
-				e.printStackTrace();
-			}
-		}
-	}
+        @Override
+        public void onNotification(Subscription<GId> sub, OperationRepresentation operation) {
+            try {
+                executePending(operation);
+            } catch (SDKException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
-	private void executePendingOps() throws SDKException {
-		logger.info("Executing queued operations");
-		for (OperationRepresentation operation : byStatus(OperationStatus.PENDING)) {
-			executePending(operation);
-		}
-	}
+    private void executePendingOps() throws SDKException {
+        logger.info("Executing queued operations");
+        for (OperationRepresentation operation : byStatus(OperationStatus.PENDING)) {
+            executePending(operation);
+        }
+    }
 
-	private List<OperationRepresentation> byStatus(OperationStatus status)
-			throws SDKException {
-		OperationFilter opsFilter = new OperationFilter().byAgent(
-				gid.getValue()).byStatus(status);
-		PagedCollectionResource<OperationCollectionRepresentation> opsQuery = control
-				.getOperationsByFilter(opsFilter);
-		// TODO Fix this, use an iterable
-		OperationCollectionRepresentation ops = opsQuery.get(1000);
-		return ops.getOperations();
-	}
+    private Iterable<OperationRepresentation> byStatus(OperationStatus status) throws SDKException {
+        OperationFilter opsFilter = new OperationFilter().byAgent(gid.getValue()).byStatus(status);
+        return control.getOperationsByFilter(opsFilter).get().allPages();
+    }
 
-	private void executePending(OperationRepresentation operation)
-			throws SDKException {
-		operation.setStatus(OperationStatus.EXECUTING.toString());
-		control.update(operation);
+    private void executePending(OperationRepresentation operation) throws SDKException {
+        operation.setStatus(OperationStatus.EXECUTING.toString());
+        control.update(operation);
+        execute(operation, false);
+    }
 
-		execute(operation, false);
-	}
-
-	private void execute(OperationRepresentation operation, boolean cleanup)
-			throws SDKException {
-		try {
-			for (String key : operation.getAttrs().keySet()) {
-				if (dispatchMap.containsKey(key)) {
-					logger.info("Executing operation {} cleanup {}", operation,
-							cleanup);
-					dispatchMap.get(key).execute(operation, cleanup);
-				}
-			}
-		} catch (Exception e) {
-			operation.setStatus(OperationStatus.FAILED.toString());
-			operation.setFailureReason(ErrorLog.toString(e));
-			logger.warn("Error while executing operation", e);
-		}
-		control.update(operation);
-	}
+    private void execute(OperationRepresentation operation, boolean cleanup) throws SDKException {
+        try {
+            for (String key : operation.getAttrs().keySet()) {
+                if (dispatchMap.containsKey(key)) {
+                    logger.info("Executing operation {} cleanup {}", operation,
+                            cleanup);
+                    dispatchMap.get(key).execute(operation, cleanup);
+                }
+            }
+        } catch (Exception e) {
+            operation.setStatus(OperationStatus.FAILED.toString());
+            operation.setFailureReason(ErrorLog.toString(e));
+            logger.warn("Error while executing operation", e);
+        }
+        control.update(operation);
+    }
 }

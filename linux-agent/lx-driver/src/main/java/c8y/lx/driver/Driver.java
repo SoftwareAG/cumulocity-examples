@@ -17,7 +17,6 @@
  * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
 package c8y.lx.driver;
 
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
@@ -54,34 +53,34 @@ import com.cumulocity.sdk.client.Platform;
  * </ul>
  */
 public interface Driver {
-	/**
-	 * Sets up driver and potentially cloud platform connectivity. Errors during
-	 * setup are reported as exception and send to the log.
-	 */
-	void initialize(Platform platform) throws Exception;
+    /**
+     * Sets up driver and potentially cloud platform connectivity. Errors during
+     * setup are reported as exception and send to the log.
+     */
+    void initialize(Platform platform) throws Exception;
 
-	/**
-	 * Return the operations supported by this driver.
-	 */
-	Executer[] getSupportedOperations();
+    /**
+     * Return the operations supported by this driver.
+     */
+    Executer[] getSupportedOperations();
 
-	/**
-	 * Provides additional fragments for the managed object representing the
-	 * device in the inventory. Note: The managed object's representation may
-	 * not have a global ID at this stage.
-	 */
-	void initializeInventory(ManagedObjectRepresentation mo);
+    /**
+     * Provides additional fragments for the managed object representing the
+     * device in the inventory. Note: The managed object's representation may
+     * not have a global ID at this stage.
+     */
+    void initializeInventory(ManagedObjectRepresentation mo);
 
-	/**
-	 * Synchronizes the children of the managed object in the inventory. At this
-	 * point in time, the representation has a global ID Note that the driver
-	 * may only manipulate types of children that it recognizes.
-	 */
-	void discoverChildren(ManagedObjectRepresentation mo);
+    /**
+     * Synchronizes the children of the managed object in the inventory. At this
+     * point in time, the representation has a global ID Note that the driver
+     * may only manipulate types of children that it recognizes.
+     */
+    void discoverChildren(ManagedObjectRepresentation mo);
 
-	/**
-	 * Start the regular tasks of this driver, i.e., listeners for sensors
-	 * events or sensor polling.
-	 */
-	void start();
+    /**
+     * Start the regular tasks of this driver, i.e., listeners for sensors
+     * events or sensor polling.
+     */
+    void start();
 }

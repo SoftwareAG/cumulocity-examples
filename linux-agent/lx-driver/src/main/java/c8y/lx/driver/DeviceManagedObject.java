@@ -17,7 +17,6 @@
  * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
 package c8y.lx.driver;
 
 import com.cumulocity.model.ID;
@@ -29,7 +28,6 @@ import com.cumulocity.sdk.client.Platform;
 import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.identity.IdentityApi;
 import com.cumulocity.sdk.client.inventory.InventoryApi;
-import com.cumulocity.sdk.client.inventory.ManagedObject;
 
 /**
  * A utility class that simplifies handling devices and their associated
@@ -37,87 +35,77 @@ import com.cumulocity.sdk.client.inventory.ManagedObject;
  */
 public class DeviceManagedObject {
 
-	private IdentityApi registry;
-	private InventoryApi inventory;
+    private final IdentityApi registry;
 
-	public DeviceManagedObject(Platform platform) {
-		this.registry = platform.getIdentityApi();
-		this.inventory = platform.getInventoryApi();
-	}
+    private final InventoryApi inventory;
 
-	/**
-	 * Create a managed object if it does not exist, or update it if it exists
-	 * already. Optionally, link to parent managed object as child device.
-	 * 
-	 * @param mo
-	 *            Representation of the managed object to create or update
-	 * @param parentId
-	 *            ID of the parent to link to, or null if no link is needed.
-	 */
-	public boolean createOrUpdate(ManagedObjectRepresentation mo, ID extId,
-			GId parentId) throws SDKException {
-		GId gid = tryGetBinding(extId);
+    public DeviceManagedObject(Platform platform) {
+        this.registry = platform.getIdentityApi();
+        this.inventory = platform.getInventoryApi();
+    }
 
-		ManagedObjectRepresentation returnedMo;
-		returnedMo = (gid == null) ? create(mo, extId, parentId) : update(mo,
-				gid);
+    /**
+     * Create a managed object if it does not exist, or update it if it exists
+     * already. Optionally, link to parent managed object as child device.
+     *
+     * @param mo       Representation of the managed object to create or update
+     * @param parentId ID of the parent to link to, or null if no link is needed.
+     */
+    public boolean createOrUpdate(ManagedObjectRepresentation mo, ID extId, GId parentId) {
+        GId gid = tryGetBinding(extId);
 
-		if (parentId != null) {
-			ManagedObjectRepresentation handle = new ManagedObjectRepresentation();
-			handle.setId(returnedMo.getId());
-			handle.setSelf(returnedMo.getSelf());
-			ManagedObjectReferenceRepresentation moRef = new ManagedObjectReferenceRepresentation();
-			moRef.setManagedObject(handle);
-			inventory.getManagedObject(parentId).addChildDevice(moRef);
-		}
+        ManagedObjectRepresentation returnedMo;
+        returnedMo = (gid == null) ? create(mo, extId) : update(mo);
 
-		copyProps(returnedMo, mo);
+        if (parentId != null) {
+            ManagedObjectRepresentation handle = new ManagedObjectRepresentation();
+            handle.setId(returnedMo.getId());
+            handle.setSelf(returnedMo.getSelf());
+            ManagedObjectReferenceRepresentation moRef = new ManagedObjectReferenceRepresentation();
+            moRef.setManagedObject(handle);
+            inventory.getManagedObjectApi(parentId).addChildDevice(moRef);
+        }
 
-		return gid == null;
-	}
+        copyProps(returnedMo, mo);
 
-	private ManagedObjectRepresentation create(ManagedObjectRepresentation mo,
-			ID extId, GId parentId) throws SDKException {
-		ManagedObjectRepresentation returnedMo;
-		returnedMo = inventory.create(mo);
-		bind(returnedMo, extId);
-		return returnedMo;
-	}
+        return gid == null;
+    }
 
-	private ManagedObjectRepresentation update(ManagedObjectRepresentation mo,
-			GId gid) throws SDKException {
-		ManagedObjectRepresentation returnedMo;
-		mo.setName(null); // Don't overwrite user-modified names
-		ManagedObject moHandle = inventory.getManagedObject(gid);
-		returnedMo = moHandle.update(mo);
-		return returnedMo;
-	}
+    private ManagedObjectRepresentation create(ManagedObjectRepresentation mo, ID extId) {
+        ManagedObjectRepresentation returnedMo;
+        returnedMo = inventory.create(mo);
+        bind(returnedMo, extId);
+        return returnedMo;
+    }
 
-	private void copyProps(ManagedObjectRepresentation returnedMo,
-			ManagedObjectRepresentation mo) {
-		mo.setId(returnedMo.getId());
-		mo.setName(returnedMo.getName());
-		mo.setSelf(returnedMo.getSelf());
-	}
+    private ManagedObjectRepresentation update(ManagedObjectRepresentation mo) {
+        mo.setName(null); // Don't overwrite user-modified names
+        return inventory.update(mo);
+    }
 
-	public GId tryGetBinding(ID extId) throws SDKException {
-		ExternalIDRepresentation eir = null;
-		try {
-			eir = registry.getExternalId(extId);
-		} catch (SDKException x) {
-			if (x.getHttpStatus() != 404) {
-				throw x;
-			}
-		}
-		return eir != null ? eir.getManagedObject().getId() : null;
-	}
+    private void copyProps(ManagedObjectRepresentation returnedMo, ManagedObjectRepresentation mo) {
+        mo.setId(returnedMo.getId());
+        mo.setName(returnedMo.getName());
+        mo.setSelf(returnedMo.getSelf());
+    }
 
-	public void bind(ManagedObjectRepresentation mo, ID extId)
-			throws SDKException {
-		ExternalIDRepresentation eir = new ExternalIDRepresentation();
-		eir.setExternalId(extId.getValue());
-		eir.setType(extId.getType());
-		eir.setManagedObject(mo);
-		registry.create(eir);
-	}
+    public GId tryGetBinding(ID extId) {
+        ExternalIDRepresentation eir = null;
+        try {
+            eir = registry.getExternalId(extId);
+        } catch (SDKException x) {
+            if (x.getHttpStatus() != 404) {
+                throw x;
+            }
+        }
+        return eir != null ? eir.getManagedObject().getId() : null;
+    }
+
+    public void bind(ManagedObjectRepresentation mo, ID extId) {
+        ExternalIDRepresentation eir = new ExternalIDRepresentation();
+        eir.setExternalId(extId.getValue());
+        eir.setType(extId.getType());
+        eir.setManagedObject(mo);
+        registry.create(eir);
+    }
 }

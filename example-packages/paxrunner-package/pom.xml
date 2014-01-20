@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.cumulocity.example</groupId>
+        <groupId>c8y.example</groupId>
         <artifactId>example-packages</artifactId>
         <version>4.9.0-SNAPSHOT</version>
     </parent>
