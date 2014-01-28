@@ -55,11 +55,17 @@
 
 	<dependencyManagement>
 		<dependencies>
-			<dependency>
-				<groupId>c8y.example</groupId>
-				<artifactId>lx-driver</artifactId>
-				<version>${project.version}</version>
-			</dependency>
+            <dependency>
+                <groupId>c8y.example</groupId>
+                <artifactId>lx-driver</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>c8y.example</groupId>
+                <artifactId>lx-agent</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
+            </dependency>
             <dependency>
                 <groupId>c8y.example</groupId>
                 <artifactId>lx-agent-assembly</artifactId>

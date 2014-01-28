@@ -18,6 +18,10 @@
             <artifactId>lx-driver</artifactId>
         </dependency>
         <dependency>
+            <groupId>c8y.example</groupId>
+            <artifactId>lx-agent</artifactId>
+        </dependency>
+        <dependency>
 			<groupId>com.pi4j</groupId>
 			<artifactId>pi4j-example</artifactId>
 			<version>0.0.5</version>

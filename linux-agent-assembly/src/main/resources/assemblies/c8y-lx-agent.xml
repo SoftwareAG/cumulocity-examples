@@ -11,7 +11,10 @@
     <dependencySets>
         <dependencySet>
             <outputDirectory>/lib</outputDirectory>
-            <scope>runtime</scope>
+            <scope>provided</scope>
+            <includes>
+                <include>*:jar:*</include>
+            </includes>
         </dependencySet>
         <dependencySet>
             <outputDirectory>/</outputDirectory>
