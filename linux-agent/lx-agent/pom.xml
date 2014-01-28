@@ -12,7 +12,6 @@
     <name>Cumulocity :: Examples :: Linux Agent</name>
 	<description>Executable agent for remote control of Linux enabled device from Cumulocity.</description>
 
-	<!-- TODO Provide jssc through the Cumulocity repository -->
 	<dependencies>
 		<dependency>
 			<groupId>c8y.example</groupId>
@@ -21,17 +20,17 @@
 		<dependency>
 			<groupId>com.google.code</groupId>
 			<artifactId>jssc</artifactId>
-			<version>2.6.0</version>
+			<version>${jssc.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
-			<version>2.4</version>
+			<version>${commons.io.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
-			<version>1.0.13</version>
+			<version>${logback.version}</version>
 		</dependency>
 	</dependencies>
 
