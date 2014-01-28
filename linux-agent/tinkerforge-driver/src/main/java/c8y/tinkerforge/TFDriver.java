@@ -28,7 +28,7 @@ import java.util.Properties;
 
 import c8y.lx.driver.Configurable;
 import c8y.lx.driver.Driver;
-import c8y.lx.driver.Executer;
+import c8y.lx.driver.OperationExecutor;
 import c8y.tinkerforge.Discoverer.DiscoveryFinishedListener;
 
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
@@ -40,13 +40,11 @@ import com.tinkerforge.AlreadyConnectedException;
  * with the main agent, since they are enumerated at runtime and multiple
  * instances of the same type may exist.
  */
-public class TFDriver implements Driver, DiscoveryFinishedListener,
-		Configurable {
+public class TFDriver implements Driver, DiscoveryFinishedListener, Configurable {
 
-	private List<Driver> drivers;
+	private Iterable<Driver> drivers;
 
-	public TFDriver() throws UnknownHostException, AlreadyConnectedException,
-			IOException {
+	public TFDriver() throws UnknownHostException, AlreadyConnectedException, IOException {
 		new BrickConnector(this);
 	}
 
@@ -84,15 +82,15 @@ public class TFDriver implements Driver, DiscoveryFinishedListener,
 	}
 
 	@Override
-	public Executer[] getSupportedOperations() {
-		List<Executer> execs = new ArrayList<Executer>();
+	public OperationExecutor[] getSupportedOperations() {
+		List<OperationExecutor> execs = new ArrayList<OperationExecutor>();
 		for (Driver driver : drivers) {
-			for (Executer exec : driver.getSupportedOperations()) {
+			for (OperationExecutor exec : driver.getSupportedOperations()) {
 				execs.add(exec);
 			}
 		}
 
-		return execs.toArray(new Executer[execs.size()]);
+		return execs.toArray(new OperationExecutor[execs.size()]);
 	}
 
 	@Override
@@ -115,7 +113,7 @@ public class TFDriver implements Driver, DiscoveryFinishedListener,
 	}
 
 	@Override
-	public void discoveredDevices(List<Driver> drivers) {
+	public void discoveredDevices(Iterable<Driver> drivers) {
 		synchronized (this) {
 			this.drivers = drivers;
 			notify();

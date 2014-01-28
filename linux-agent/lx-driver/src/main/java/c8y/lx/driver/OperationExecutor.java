@@ -24,9 +24,10 @@ import com.cumulocity.rest.representation.operation.OperationRepresentation;
 /**
  * Executes a remote control operation.
  */
-public interface Executer {
+public interface OperationExecutor {
+
     /**
-     * The type of remote control operation that this Executer can execute.
+     * The type of remote control operation that this OperationExecutor can execute.
      */
     String supportedOperationType();
 

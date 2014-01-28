@@ -30,7 +30,7 @@ import c8y.Relay;
 import c8y.Relay.RelayState;
 import c8y.lx.driver.DeviceManagedObject;
 import c8y.lx.driver.Driver;
-import c8y.lx.driver.Executer;
+import c8y.lx.driver.OperationExecutor;
 import c8y.lx.driver.OpsUtil;
 
 import com.cumulocity.model.operation.OperationStatus;
@@ -46,6 +46,7 @@ import com.tinkerforge.NotConnectedException;
 import com.tinkerforge.TimeoutException;
 
 public class DisplayBricklet implements Driver {
+
 	public static final short LINES = 4;
 	public static final short WIDTH = 20;
 	public static final String TYPE = "Display";
@@ -88,10 +89,10 @@ public class DisplayBricklet implements Driver {
 		displayMo.setName(TFIds.getDefaultName(parent.getName(), TYPE, id));
 		displayMo.set(new Message()); // Should actually persist the message
 										// between runs
-		OpsUtil.add(displayMo,
-				getSupportedOperations()[0].supportedOperationType());
-		OpsUtil.add(displayMo,
-				getSupportedOperations()[1].supportedOperationType());
+		OpsUtil.addSupportedOperation(displayMo,
+                getSupportedOperations()[0].supportedOperationType());
+		OpsUtil.addSupportedOperation(displayMo,
+                getSupportedOperations()[1].supportedOperationType());
 
 		try {
 			DeviceManagedObject dmo = new DeviceManagedObject(platform);
@@ -121,11 +122,11 @@ public class DisplayBricklet implements Driver {
 	}
 
 	@Override
-	public Executer[] getSupportedOperations() {
-		return new Executer[] { new MessageExecuter(), new BacklightExecuter() };
+	public OperationExecutor[] getSupportedOperations() {
+		return new OperationExecutor[] { new MessageOperationExecutor(), new BacklightOperationExecutor() };
 	}
 
-	class MessageExecuter implements Executer {
+	class MessageOperationExecutor implements OperationExecutor {
 		@Override
 		public String supportedOperationType() {
 			return "c8y_Message";
@@ -146,7 +147,7 @@ public class DisplayBricklet implements Driver {
 		}
 	}
 
-	class BacklightExecuter implements Executer {
+	class BacklightOperationExecutor implements OperationExecutor {
 		@Override
 		public String supportedOperationType() {
 			return "c8y_Relay";

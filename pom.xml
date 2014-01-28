@@ -28,6 +28,7 @@
 		<module>mps-device-emulator-rpm</module>
 		<module>mps-energy-agent</module>
 		<module>kontron-shock-agent</module>
+        <module>linux-agent-assembly</module>
         <module>linux-agent</module>
 	</modules>
 	

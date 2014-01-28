@@ -22,9 +22,11 @@ package c8y.lx.driver;
 import c8y.SupportedOperations;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 
-public class OpsUtil {
+public abstract class OpsUtil {
 
-    public static void add(ManagedObjectRepresentation mo, String op) {
+    protected OpsUtil() { }
+
+    public static void addSupportedOperation(ManagedObjectRepresentation mo, String op) {
         SupportedOperations ops = mo.get(SupportedOperations.class);
 
         if (ops == null) {

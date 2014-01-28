@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import c8y.Position;
 import c8y.lx.driver.DeviceManagedObject;
-import c8y.lx.driver.Executer;
+import c8y.lx.driver.OperationExecutor;
 import c8y.lx.driver.PollingDriver;
 
 import com.cumulocity.rest.representation.event.EventRepresentation;
@@ -64,8 +64,8 @@ public class GpsBricklet extends PollingDriver {
 	}
 
 	@Override
-	public Executer[] getSupportedOperations() {
-		return new Executer[0];
+	public OperationExecutor[] getSupportedOperations() {
+		return new OperationExecutor[0];
 	}
 
 	@Override

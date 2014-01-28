@@ -10,7 +10,7 @@
 
 	<artifactId>lx-agent</artifactId>
     <name>Cumulocity :: Examples :: Linux Agent</name>
-	<description>Executable agent for remote control of a Raspberry Pi from Cumulocity.</description>
+	<description>Executable agent for remote control of Linux enabled device from Cumulocity.</description>
 
 	<!-- TODO Provide jssc through the Cumulocity repository -->
 	<dependencies>

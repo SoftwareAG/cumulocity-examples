@@ -47,7 +47,7 @@ public abstract class PollingDriver implements Driver, Configurable, Runnable {
 
     private final ScheduledExecutorService executorService;
 
-    private ScheduledFuture<?> scheduledFuture;
+    private volatile ScheduledFuture<?> scheduledFuture;
 
     private final String pollingProp;
 
@@ -95,8 +95,8 @@ public abstract class PollingDriver implements Driver, Configurable, Runnable {
     }
 
     @Override
-    public Executer[] getSupportedOperations() {
-        return new Executer[0];
+    public OperationExecutor[] getSupportedOperations() {
+        return new OperationExecutor[0];
     }
 
     @Override

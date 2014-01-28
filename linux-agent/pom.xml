@@ -13,14 +13,13 @@
 	<packaging>pom</packaging>
 
 	<modules>
-		<module>lx-driver</module>
-		<module>lx-agent</module>
-		<module>piface-driver</module>
-		<module>tinkerforge-driver</module>
-		<module>rpi-driver</module>
-		<module>mac-driver</module>
-		<module>kontron-driver</module>
-		<module>assembly</module>
+        <module>lx-driver</module>
+        <module>lx-agent</module>
+        <module>piface-driver</module>
+        <module>tinkerforge-driver</module>
+        <module>rpi-driver</module>
+        <module>mac-driver</module>
+        <module>kontron-driver</module>
 	</modules>
 
 	<dependencies>
@@ -34,6 +33,11 @@
 			<artifactId>java-client</artifactId>
             <version>${project.version}</version>
 		</dependency>
+        <dependency>
+            <groupId>c8y.example</groupId>
+            <artifactId>lx-agent-assembly</artifactId>
+            <type>tar.gz</type>
+        </dependency>
 
 		<dependency>
 			<groupId>junit</groupId>
@@ -56,12 +60,43 @@
 				<artifactId>lx-driver</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+            <dependency>
+                <groupId>c8y.example</groupId>
+                <artifactId>lx-agent-assembly</artifactId>
+                <version>${project.version}</version>
+                <type>tar.gz</type>
+                <scope>provided</scope>
+            </dependency>
 		</dependencies>
 	</dependencyManagement>
 
 	<build>
 		<pluginManagement>
 			<plugins>
+                <plugin>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <dependencies>
+                        <dependency>
+                            <groupId>c8y.example</groupId>
+                            <artifactId>lx-agent-assembly</artifactId>
+                            <version>${project.version}</version>
+                        </dependency>
+                    </dependencies>
+                    <executions>
+                        <execution>
+                            <id>c8y-lx-agent-assembly</id>
+                            <goals>
+                                <goal>single</goal>
+                            </goals>
+                            <phase>package</phase>
+                            <configuration>
+                                <descriptorRefs>
+                                    <descriptorRef>c8y-lx-agent</descriptorRef>
+                                </descriptorRefs>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-dependency-plugin</artifactId>
@@ -73,4 +108,5 @@
 			</plugins>
 		</pluginManagement>
 	</build>
+
 </project>

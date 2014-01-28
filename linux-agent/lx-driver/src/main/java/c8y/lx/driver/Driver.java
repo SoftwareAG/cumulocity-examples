@@ -62,7 +62,7 @@ public interface Driver {
     /**
      * Return the operations supported by this driver.
      */
-    Executer[] getSupportedOperations();
+    OperationExecutor[] getSupportedOperations();
 
     /**
      * Provides additional fragments for the managed object representing the

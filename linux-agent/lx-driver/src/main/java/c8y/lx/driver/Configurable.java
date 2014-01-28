@@ -22,6 +22,7 @@ package c8y.lx.driver;
 import java.util.Properties;
 
 public interface Configurable {
+
     /**
      * Add the default configuration to the given properties.
      */

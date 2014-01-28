@@ -26,7 +26,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.ServiceLoader;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +36,7 @@ import c8y.RequiredAvailability;
 import c8y.lx.driver.Configurable;
 import c8y.lx.driver.DeviceManagedObject;
 import c8y.lx.driver.Driver;
-import c8y.lx.driver.Executer;
+import c8y.lx.driver.OperationExecutor;
 import com.cumulocity.model.ID;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.Platform;
@@ -73,13 +72,11 @@ public class Agent {
 
     public static final int RESPONSE_INTERVAL_MIN = 3; // We expect the agent to get back at least every three minutes.
 
-    private final List<Driver> drivers = new LinkedList<>();
-
     private final Platform platform;
 
-    private final ManagedObjectRepresentation mo = new ManagedObjectRepresentation();
+    private final List<Driver> drivers;
 
-    private final Map<String, Executer> dispatchMap = new HashMap<>();
+    private final ManagedObjectRepresentation mo = new ManagedObjectRepresentation();
 
     public static void main(String[] args) {
         try {
@@ -90,23 +87,31 @@ public class Agent {
     }
 
     public Agent() {
-        logger.info("Starting agent");
-        CredentialsManager credentialsManager = defaultCredentialsManager();
-        platform = new PlatformImpl(credentialsManager.getHost(), credentialsManager.getCredentials());
-
-        // See {@link Driver} for an explanation of the driver life cycle.
-        initializeDrivers();
-        initializeInventory();
-        discoverChildren();
-        startDrivers();
-        new OperationDispatcher(platform, mo.getId(), dispatchMap);
+        this(defaultCredentialsManager(), new ServiceLocatorDriversLoader());
     }
 
-    private void initializeDrivers() {
+    public Agent(CredentialsManager credentialsManager, DriversLoader driversLoader) {
+        this(new PlatformImpl(credentialsManager.getHost(), credentialsManager.getCredentials()), driversLoader);
+    }
+
+    public Agent(Platform platform, DriversLoader driversLoader) {
+        logger.info("Starting agent");
+        this.platform = platform;
+
+        // See {@link Driver} for an explanation of the driver life cycle.
+        this.drivers = initializeDrivers(driversLoader);
+        Map<String, OperationExecutor> dispatchMap = initializeInventory();
+        discoverChildren();
+        startDrivers();
+        new OperationDispatcher(this.platform.getDeviceControlApi(), mo.getId(), dispatchMap);
+    }
+
+    private List<Driver> initializeDrivers(DriversLoader driversLoader) {
+        List<Driver> drivers = new LinkedList<>();
         ConfigurationDriver cfgDriver = null;
         logger.info("Initializing drivers");
 
-        for (Driver driver : ServiceLoader.load(Driver.class)) {
+        for (Driver driver : driversLoader.loadDrivers()) {
             try {
                 logger.info("Initializing " + driver.getClass());
                 driver.initialize(platform);
@@ -132,15 +137,18 @@ public class Agent {
                 }
             }
         }
+
+        return drivers;
     }
 
-    private void initializeInventory() throws SDKException {
+    private Map<String, OperationExecutor> initializeInventory() throws SDKException {
         logger.info("Initializing inventory");
 
+        Map<String, OperationExecutor> dispatchMap = new HashMap<>();
         for (Driver driver : drivers) {
             driver.initializeInventory(mo);
 
-            for (Executer exec : driver.getSupportedOperations()) {
+            for (OperationExecutor exec : driver.getSupportedOperations()) {
                 String supportedOp = exec.supportedOperationType();
                 dispatchMap.put(supportedOp, exec);
             }
@@ -169,6 +177,8 @@ public class Agent {
         } else {
             logger.debug("Agent was updated in the inventory");
         }
+
+        return dispatchMap;
     }
 
     private void checkConnection() throws SDKException {

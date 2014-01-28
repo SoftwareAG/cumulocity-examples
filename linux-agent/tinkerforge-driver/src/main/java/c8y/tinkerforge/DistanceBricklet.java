@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import c8y.lx.driver.DeviceManagedObject;
 import c8y.lx.driver.Driver;
-import c8y.lx.driver.Executer;
+import c8y.lx.driver.OperationExecutor;
 
 import com.cumulocity.rest.representation.event.EventRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
@@ -42,8 +42,8 @@ public class DistanceBricklet implements Driver {
 	}
 
 	@Override
-	public Executer[] getSupportedOperations() {
-		return new Executer[0];
+	public OperationExecutor[] getSupportedOperations() {
+		return new OperationExecutor[0];
 	}
 
 	@Override

@@ -25,11 +25,10 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import c8y.lx.driver.Executer;
+import c8y.lx.driver.OperationExecutor;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
-import com.cumulocity.sdk.client.Platform;
 import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.devicecontrol.DeviceControlApi;
 import com.cumulocity.sdk.client.devicecontrol.OperationFilter;
@@ -47,12 +46,14 @@ public class OperationDispatcher {
 
     private static Logger logger = LoggerFactory.getLogger(OperationDispatcher.class);
 
-    private DeviceControlApi control;
-    private GId gid;
-    private Map<String, Executer> dispatchMap;
+    private final DeviceControlApi deviceControl;
 
-    public OperationDispatcher(Platform platform, GId gid, Map<String, Executer> dispatchMap) throws SDKException {
-        this.control = platform.getDeviceControlApi();
+    private final GId gid;
+
+    private Map<String, OperationExecutor> dispatchMap;
+
+    public OperationDispatcher(DeviceControlApi deviceControl, GId gid, Map<String, OperationExecutor> dispatchMap) throws SDKException {
+        this.deviceControl = deviceControl;
         this.gid = gid;
         this.dispatchMap = dispatchMap;
 
@@ -70,16 +71,13 @@ public class OperationDispatcher {
 
     private void listenToOperations() throws SDKException {
         logger.info("Listening for new operations");
-        Subscriber<GId, OperationRepresentation> subscriber;
-        subscriber = control.getNotificationsSubscriber();
+        Subscriber<GId, OperationRepresentation> subscriber = deviceControl.getNotificationsSubscriber();
         for (int retries = 0; retries < 10; retries++) {
             try {
-                subscriber.subscribe(gid, new MySubscriptionListener());
+                subscriber.subscribe(gid, new OperationDispatcherSubscriptionListener());
                 break;
             } catch (SDKException x) {
-                logger.warn(
-                        "Couldn't subscribe to operation notifications, retry "
-                                + retries, x);
+                logger.warn( "Couldn't subscribe to operation notifications, retry " + retries, x);
                 try {
                     Thread.sleep(5000);
                 } catch (InterruptedException e) {
@@ -88,10 +86,11 @@ public class OperationDispatcher {
         }
     }
 
-    private class MySubscriptionListener implements SubscriptionListener<GId, OperationRepresentation> {
+    private class OperationDispatcherSubscriptionListener implements SubscriptionListener<GId, OperationRepresentation> {
+
         @Override
         public void onError(Subscription<GId> sub, Throwable e) {
-            e.printStackTrace();
+            logger.error("OperationDispatcher error!", e);
         }
 
         @Override
@@ -99,7 +98,7 @@ public class OperationDispatcher {
             try {
                 executePending(operation);
             } catch (SDKException e) {
-                e.printStackTrace();
+                logger.error("OperationDispatcher error!", e);
             }
         }
     }
@@ -113,12 +112,12 @@ public class OperationDispatcher {
 
     private Iterable<OperationRepresentation> byStatus(OperationStatus status) throws SDKException {
         OperationFilter opsFilter = new OperationFilter().byAgent(gid.getValue()).byStatus(status);
-        return control.getOperationsByFilter(opsFilter).get().allPages();
+        return deviceControl.getOperationsByFilter(opsFilter).get().allPages();
     }
 
     private void executePending(OperationRepresentation operation) throws SDKException {
         operation.setStatus(OperationStatus.EXECUTING.toString());
-        control.update(operation);
+        deviceControl.update(operation);
         execute(operation, false);
     }
 
@@ -126,8 +125,7 @@ public class OperationDispatcher {
         try {
             for (String key : operation.getAttrs().keySet()) {
                 if (dispatchMap.containsKey(key)) {
-                    logger.info("Executing operation {} cleanup {}", operation,
-                            cleanup);
+                    logger.info("Executing operation {} cleanup {}", operation, cleanup);
                     dispatchMap.get(key).execute(operation, cleanup);
                 }
             }
@@ -136,6 +134,6 @@ public class OperationDispatcher {
             operation.setFailureReason(ErrorLog.toString(e));
             logger.warn("Error while executing operation", e);
         }
-        control.update(operation);
+        deviceControl.update(operation);
     }
 }

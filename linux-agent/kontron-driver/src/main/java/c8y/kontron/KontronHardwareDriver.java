@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import c8y.Hardware;
 import c8y.lx.driver.Driver;
-import c8y.lx.driver.Executer;
+import c8y.lx.driver.OperationExecutor;
 import c8y.lx.driver.OpsUtil;
 
 import com.cumulocity.model.idtype.GId;
@@ -24,7 +24,7 @@ import com.cumulocity.sdk.client.Platform;
  * A driver that uses the MAC address to fill in the platform. It also enables
  * restarting a device.
  */
-public class KontronHardwareDriver implements Driver, Executer {
+public class KontronHardwareDriver implements Driver, OperationExecutor {
 	public static final String GETINTERFACES = "ifconfig";
 	public static final String PATTERN = "\\s+";
 
@@ -72,14 +72,14 @@ public class KontronHardwareDriver implements Driver, Executer {
 	}
 
 	@Override
-	public Executer[] getSupportedOperations() {
-		return new Executer[] { this };
+	public OperationExecutor[] getSupportedOperations() {
+		return new OperationExecutor[] { this };
 	}
 
 	@Override
 	public void initializeInventory(ManagedObjectRepresentation mo) {
 		mo.set(hardware);
-		OpsUtil.add(mo, supportedOperationType());
+		OpsUtil.addSupportedOperation(mo, supportedOperationType());
 	}
 
 	@Override

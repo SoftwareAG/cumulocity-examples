@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 
 import c8y.Software;
 import c8y.lx.driver.Driver;
-import c8y.lx.driver.Executer;
+import c8y.lx.driver.OperationExecutor;
 import c8y.lx.driver.OpsUtil;
 
 import com.cumulocity.model.idtype.GId;
@@ -51,13 +51,14 @@ import com.cumulocity.sdk.client.Platform;
  * directory. After a successful update, the driver terminates the agent process
  * and finishes the update at next startup of the agent (through a wrapper script).
  */
-public class JavaSoftwareDriver implements Driver, Executer {
+public class JavaSoftwareDriver implements Driver, OperationExecutor {
 
 	private static final String DOWNLOADING = ".download";
 	private static Logger logger = LoggerFactory.getLogger(JavaSoftwareDriver.class);
 
 	private Software software = new Software();
-	private GId gid;
+
+	private GId deviceId;
 
 	@Override
 	public void initialize(Platform platform) throws Exception {
@@ -74,19 +75,19 @@ public class JavaSoftwareDriver implements Driver, Executer {
 	}
 
 	@Override
-	public Executer[] getSupportedOperations() {
-		return new Executer[] { this };
+	public OperationExecutor[] getSupportedOperations() {
+		return new OperationExecutor[] { this };
 	}
 
 	@Override
 	public void initializeInventory(ManagedObjectRepresentation mo) {
 		mo.set(software);
-		OpsUtil.add(mo, supportedOperationType());
+		OpsUtil.addSupportedOperation(mo, supportedOperationType());
 	}
 
 	@Override
 	public void discoverChildren(ManagedObjectRepresentation mo) {
-		this.gid = mo.getId();
+		this.deviceId = mo.getId();
 	}
 
 	@Override
@@ -101,7 +102,7 @@ public class JavaSoftwareDriver implements Driver, Executer {
 
 	@Override
 	public void execute(OperationRepresentation operation, boolean cleanup) throws Exception {
-		if (!gid.equals(operation.getDeviceId())) {
+		if (!deviceId.equals(operation.getDeviceId())) {
 			// Silently ignore the operation if it is not targeted to us,
 			// another driver will (hopefully) care.
 			return;
