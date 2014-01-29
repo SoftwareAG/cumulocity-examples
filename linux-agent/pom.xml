@@ -20,6 +20,7 @@
     </properties>
 
 	<modules>
+        <module>assembly</module>
         <module>lx-driver</module>
         <module>lx-agent</module>
         <module>piface-driver</module>
