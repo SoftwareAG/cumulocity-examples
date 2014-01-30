@@ -17,8 +17,6 @@
  * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
-
 package c8y.tinkerforge;
 
 import java.util.Arrays;
@@ -35,21 +33,21 @@ import com.tinkerforge.TimeoutException;
  * Utility class for generating various kinds of names and IDs for TinkerForge devices.
  */
 public class TFIds {
+
 	public static final String XTIDTYPE = "c8y_Serial";
 
 	public static String getType(String type) {
 		return "c8y_TinkerForge_" + type;
 	}
 
-	public static String getDefaultName(String parentName, String type,
-			String id) {
+	public static String getDefaultName(String parentName, String type, String id) {
 		return parentName + " " + type + " " + id;
 	}
 
 	public static ID getXtId(String id) {
-		ID extId = new ID("tinkerforge-" + id);
-		extId.setType(XTIDTYPE);
-		return extId;
+        ID extId = new ID("tinkerforge-" + id);
+        extId.setType(XTIDTYPE);
+        return extId;
 	}
 
 	public static String getMeasurementType(String type) {
@@ -61,9 +59,9 @@ public class TFIds {
 	}
 	
 	public static Hardware getHardware(Device device, String type) throws TimeoutException, NotConnectedException {
-		Identity identity = device.getIdentity();
-		String model = "TF" + type + "Bricklet";
-		String revision = Arrays.toString(identity.hardwareVersion);
+        String model = "TF" + type + "Bricklet";
+        Identity identity = device.getIdentity();
+        String revision = Arrays.toString(identity.hardwareVersion);
 		return new Hardware(model, identity.uid, revision);
 	}
 }

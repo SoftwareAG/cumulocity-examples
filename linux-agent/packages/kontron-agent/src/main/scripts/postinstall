@@ -1,0 +1,56 @@
+# run this postinstall script only if yum upgrade is called
+echo "STATUS postinstall: $1"
+if (( "$1" > 1 )); then 
+    /etc/init.d/cumulocity-core-karaf stop
+    sleep 10
+    rm -fR /usr/share/cumulocity-core-karaf/data/cache
+fi
+
+croot=/usr/share/cumulocity-core-karaf
+vname=`ls -t /usr/share | grep "cumulocity-core-karaf-.*" | head -1`
+iroot="/usr/share/$vname"
+
+if [ -L "$croot" ]; then
+	rm $croot
+fi
+if [ -e "$croot" ]; then
+	echo "ERROR: $croot exists"
+	exit 1
+fi
+
+ln -s $iroot $croot
+
+# move logs to /var/log
+mkdir -p /var/log/cumulocity
+mkdir -p /usr/share/cumulocity-core-karaf/data
+ln -s -T /var/log/cumulocity /usr/share/cumulocity-core-karaf/data/log
+
+# replace log conf
+if [ -f /etc/cumulocity/org.ops4j.pax.logging.cfg ]; then
+    mv /etc/cumulocity/org.ops4j.pax.logging.cfg /usr/share/cumulocity-core-karaf/etc
+fi
+
+chmod +x $iroot/bin/karaf
+chmod +x $iroot/bin/start
+chmod +x $iroot/bin/stop
+
+# add vsys init scripts for Ubuntu/CentOS
+if [ -x /usr/sbin/update-rc.d ]; then
+        update-rc.d cumulocity-core-karaf defaults 86 14
+elif [ -x /sbin/chkconfig ]; then
+        chkconfig --add cumulocity-core-karaf
+fi
+
+# add current IP public address to conf file
+IPPUB=`curl -s http://169.254.169.254/latest/meta-data/public-ipv4`
+if [ -z $IPPUB ]; then
+	IPPUB=`hostname`
+fi
+echo "linkTemplateProcessor.baseURL=http://$IPPUB" >> /etc/cumulocity/cumulocity-core.properties
+
+# This patch (MTM-1577) has been included in ami-e1526f95 (TBD)
+# set system parameters for CouchDB
+# sed -i 's/\# End of file/couchdb\t\tsoft\tnofile\t256000\ncouchdb\t\thard\tnofile\t384000\n\# End of file/g' /etc/security/limits.conf
+# sed -i 's/\# session.*required.*pam_limits.so/session\trequired\tpam_limits.so/g' /etc/pam.d/su
+# service couchdb restart
+

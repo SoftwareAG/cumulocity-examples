@@ -1,0 +1,20 @@
+echo "STATUS preremove: $1"
+# run this preun script only if yum remove is called
+if (( "$1" > 0 )); then exit 0; fi
+
+# stop karaf service
+service cumulocity-core-karaf stop
+sleep 5
+
+# clean up karaf folders
+rm -fR /usr/share/cumulocity-core-karaf/data
+rm -fR /usr/share/cumulocity-core-karaf/instances
+rm -fR /usr/share/cumulocity-core-karaf/local-repo
+rm -fR /usr/share/cumulocity-core-karaf/etc/*
+
+# remove vsys init scripts for Ubuntu/CentOS
+if [ -x /usr/sbin/update-rc.d ]; then
+    update-rc.d -f cumulocity-core-karaf remove
+elif [ -x /sbin/chkconfig ]; then
+    chkconfig --del cumulocity-core-karaf
+fi

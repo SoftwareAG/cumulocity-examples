@@ -18,34 +18,37 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-
-package c8y.tinkerforge;
+package c8y.tinkerforge.bricklet;
 
 import java.math.BigDecimal;
 
-import c8y.LightMeasurement;
-import c8y.LightSensor;
+import c8y.Barometer;
+import c8y.BarometerMeasurement;
 
-import com.tinkerforge.BrickletAmbientLight;
+import com.tinkerforge.BrickletBarometer;
 import com.tinkerforge.Device;
 
-public class LightBricklet extends TFSensor {
+public class BarometerBricklet extends BaseSensorBricklet {
+	private static final double ALT_SCALE = 100.0;
+	private static final double PRESS_SCALE = 1000.0;
+	
+	private BarometerMeasurement barometer = new BarometerMeasurement();
 
-	private LightMeasurement light = new LightMeasurement();
-
-	public LightBricklet(String id, Device device) {
-		super(id, device, "Light", new LightSensor());
+	public BarometerBricklet(String id, Device device) {
+		super(id, device, "Barometer", new Barometer());
 	}
 
 	@Override
 	public void run() {
 		try {
-			BrickletAmbientLight lb = (BrickletAmbientLight) getDevice();
-			BigDecimal l = new BigDecimal((double) lb.getIlluminance() / 10.0);
-			light.setIlluminance(l);
-			super.sendMeasurement(light);
+			BrickletBarometer b = (BrickletBarometer) getDevice();
+			BigDecimal p = new BigDecimal((double) b.getAirPressure() / PRESS_SCALE);
+			barometer.setPressure(p);
+			BigDecimal a = new BigDecimal((double) b.getAltitude() / ALT_SCALE);
+			barometer.setAltitude(a);
+			super.sendMeasurement(barometer);
 		} catch (Exception x) {
-			logger.warn("Cannot read illuminance from bricklet", x);
+			logger.warn("Cannot read barometer bricklet", x);
 		}
 	}
 }

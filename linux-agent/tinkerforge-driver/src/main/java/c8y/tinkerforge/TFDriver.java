@@ -83,7 +83,7 @@ public class TFDriver implements Driver, DiscoveryFinishedListener, Configurable
 
 	@Override
 	public OperationExecutor[] getSupportedOperations() {
-		List<OperationExecutor> execs = new ArrayList<OperationExecutor>();
+		List<OperationExecutor> execs = new ArrayList<>();
 		for (Driver driver : drivers) {
 			for (OperationExecutor exec : driver.getSupportedOperations()) {
 				execs.add(exec);

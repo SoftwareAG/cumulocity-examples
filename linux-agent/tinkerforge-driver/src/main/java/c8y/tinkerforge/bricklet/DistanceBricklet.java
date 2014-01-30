@@ -1,4 +1,4 @@
-package c8y.tinkerforge;
+package c8y.tinkerforge.bricklet;
 
 import java.util.Date;
 
@@ -9,6 +9,7 @@ import c8y.lx.driver.DeviceManagedObject;
 import c8y.lx.driver.Driver;
 import c8y.lx.driver.OperationExecutor;
 
+import c8y.tinkerforge.TFIds;
 import com.cumulocity.rest.representation.event.EventRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.Platform;

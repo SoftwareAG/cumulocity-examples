@@ -18,7 +18,7 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package c8y.tinkerforge;
+package c8y.tinkerforge.bricklet;
 
 import java.util.Date;
 
@@ -33,6 +33,7 @@ import c8y.lx.driver.Driver;
 import c8y.lx.driver.OperationExecutor;
 import c8y.lx.driver.OpsUtil;
 
+import c8y.tinkerforge.TFIds;
 import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.rest.representation.event.EventRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;

@@ -26,12 +26,10 @@ import static com.tinkerforge.IPConnection.ENUMERATION_TYPE_CONNECTED;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Timer;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 import c8y.lx.driver.Driver;
 import c8y.lx.driver.RestartableTimerTask;
-import com.tinkerforge.IPConnection;
+import c8y.tinkerforge.bricklet.BrickletFactory;
 import com.tinkerforge.IPConnection.EnumerateListener;
 
 /**

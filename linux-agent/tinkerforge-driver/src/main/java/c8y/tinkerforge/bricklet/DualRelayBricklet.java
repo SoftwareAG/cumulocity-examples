@@ -1,4 +1,4 @@
-package c8y.tinkerforge;
+package c8y.tinkerforge.bricklet;
 
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.Platform;
