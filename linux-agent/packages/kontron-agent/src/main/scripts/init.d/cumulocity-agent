@@ -1,11 +1,11 @@
 #!/bin/bash
 #
-# cumulocity-core Startup script for the Cumulocity Core server
+# Kontron-Agent Startup script
 #
 # chkconfig: 345 86 14
-# description: Cumulocity Core component
+# description: Kontron-Agent component
 # processname: java
-# pidfile: /var/run/cumulocity-core.pid
+# pidfile: /var/run/kontron-agent.pid
 
 ### BEGIN INIT INFO
 # Provides: java
@@ -13,7 +13,7 @@
 # Required-Stop: $network $syslog
 # Default-Start: 3 4 5
 # Default-Stop: 0 1 2 6
-# Short-Description: start and stop cumulocity-core-karaf
+# Short-Description: start and stop Kontron Agent
 ### END INIT INFO
 
 # Source function library.
@@ -38,37 +38,38 @@ else
 fi
 
 
-# check if port 8181 is ready to use
-karaf_process_running() {
-	ps aux|grep karaf|grep java > /dev/null
+# check if Kontron Agent is already started
+kontron_process_running() {
+	ps aux|grep java|grep lx.agent > /dev/null
 	RUNNING=$?
 }
 
-chome=/usr/share/cumulocity-core-karaf
-prog="cumulocity-core-karaf"
+chome=/usr/share/cumulocity-agent
+prog="kontron-agent.sh"
 
 start() {
-	karaf_process_running
+	kontron_process_running
 	if [ $RUNNING -eq 0 ]; then
-	    echo -n "Karaf process is already running."
+	    echo -n "Kontron Agent process is already running."
 	else
 	    echo -n $"Starting $prog: "
-            $chome/bin/start
+	    cd $chome
+            ./$prog &
         fi
 }
 stop() {
         echo -n $"Stopping $prog: "
-        $chome/bin/stop
+        killall $prog
 }
 status() {
         echo $"Status $prog: "
-	karaf_process_running
+	kontron_process_running
 	if [ "$RUNNING" -eq 0 ]; then
-	    echo "Karaf is running"
+	    echo "Kontron Agent is running"
       return 0
 	else
-	    echo "There's no Karaf process running"
-		  return 1
+	    echo "There's no Kontron Agent process running"
+	    return 1
 	fi
 }
 
