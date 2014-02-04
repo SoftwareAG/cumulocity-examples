@@ -17,6 +17,77 @@
         <module>rpi-agent</module>
         <module>kontron-agent</module>
         <module>mac-agent</module>
+        <module>piface-agent</module>
     </modules>
-    
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <dependencies>
+                        <dependency>
+                            <groupId>c8y.example</groupId>
+                            <artifactId>lx-agent-assembly</artifactId>
+                            <version>${project.version}</version>
+                        </dependency>
+                    </dependencies>
+                    <executions>
+                        <execution>
+                            <id>c8y-lx-agent-assembly</id>
+                            <goals>
+                                <goal>single</goal>
+                            </goals>
+                            <phase>prepare-package</phase>
+                            <configuration>
+                                <descriptorRefs>
+                                    <descriptorRef>c8y-lx-agent-unpacked</descriptorRef>
+                                </descriptorRefs>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>rpm-maven-plugin</artifactId>
+                    <extensions>true</extensions>
+                    <configuration>
+                        <name>cumulocity-agent</name>
+                        <projversion>${project.version}</projversion>
+                        <copyright>(C) 2014 Cumulocity GmbH</copyright>
+                        <distribution>Cumulocity Agent 2014</distribution>
+                        <group>C8Y/Agent</group>
+                        <packager>Cumulocity</packager>
+                        <defineStatements>
+                            <defineStatement>__jar_repack %{nil}</defineStatement>
+                        </defineStatements>
+                        <mappings>
+                            <mapping>
+                                <directory>/usr/share/cumulocity-agent</directory>
+                                <sources>
+                                    <source>
+                                        <location>${project.build.directory}/${project.build.finalName}</location>
+                                    </source>
+                                </sources>
+                            </mapping>
+                            <mapping>
+                                <directory>/etc/init.d</directory>
+                                <directoryIncluded>false</directoryIncluded>
+                                <filemode>755</filemode>
+                                <sources>
+                                    <source>
+                                        <location>../scripts/init.d/cumulocity-agent</location>
+                                    </source>
+                                </sources>
+                            </mapping>
+                        </mappings>
+                        <preinstallScriptlet>
+                            <script>echo "Installing Cumulocity Agent ${project.version}..."</script>
+                        </preinstallScriptlet>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
 </project>

@@ -28,7 +28,7 @@
         <module>rpi-driver</module>
         <module>mac-driver</module>
         <module>kontron-driver</module>
-        <!--<module>packages</module>-->
+        <module>packages</module>
 	</modules>
 
 	<dependencies>
