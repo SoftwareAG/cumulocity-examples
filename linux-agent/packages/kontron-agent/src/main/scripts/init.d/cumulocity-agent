@@ -1,11 +1,11 @@
 #!/bin/bash
 #
-# Kontron-Agent Startup script
+# Cumulocity-Agent Startup script
 #
 # chkconfig: 345 86 14
-# description: Kontron-Agent component
+# description: Cumulocity-Agent component
 # processname: java
-# pidfile: /var/run/kontron-agent.pid
+# pidfile: /var/run/c8y-agent.pid
 
 ### BEGIN INIT INFO
 # Provides: java
@@ -13,7 +13,7 @@
 # Required-Stop: $network $syslog
 # Default-Start: 3 4 5
 # Default-Stop: 0 1 2 6
-# Short-Description: start and stop Kontron Agent
+# Short-Description: start and stop Cumulocity Agent
 ### END INIT INFO
 
 # Source function library.
@@ -38,22 +38,22 @@ else
 fi
 
 
-# check if Kontron Agent is already started
-kontron_process_running() {
-	ps aux|grep java|grep lx.agent > /dev/null
-	RUNNING=$?
+# check if Cumulocity Agent is already started
+c8y_process_running() {
+    ps aux|grep java|grep lx.agent > /dev/null
+    RUNNING=$?
 }
 
 chome=/usr/share/cumulocity-agent
-prog="kontron-agent.sh"
+prog="c8y-agent.sh"
 
 start() {
-	kontron_process_running
-	if [ $RUNNING -eq 0 ]; then
-	    echo -n "Kontron Agent process is already running."
-	else
-	    echo -n $"Starting $prog: "
-	    cd $chome
+    c8y_process_running
+    if [ $RUNNING -eq 0 ]; then
+        echo -n "Cumulocity Agent process is already running."
+    else
+        echo -n $"Starting $prog: "
+        cd $chome
             ./$prog &
         fi
 }
@@ -62,15 +62,15 @@ stop() {
         killall $prog
 }
 status() {
-        echo $"Status $prog: "
-	kontron_process_running
-	if [ "$RUNNING" -eq 0 ]; then
-	    echo "Kontron Agent is running"
-      return 0
-	else
-	    echo "There's no Kontron Agent process running"
-	    return 1
-	fi
+    echo $"Status $prog: "
+    c8y_process_running
+    if [ "$RUNNING" -eq 0 ]; then
+        echo "Cumulocity Agent is running"
+        return 0
+    else
+        echo "There's no Cumulocity Agent process running"
+        return 1
+    fi
 }
 
 # See how we were called.
@@ -85,13 +85,12 @@ case "$1" in
         status $prog
         ;;
   restart)
-			  stop
-			  start
-			  ;;
+        stop
+        start
+        ;;
   *)
         echo $"Usage: $0 {start|stop|status}"
         exit 1
 esac
 
 exit $?
-
