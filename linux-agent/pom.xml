@@ -73,14 +73,12 @@
                 <groupId>c8y.example</groupId>
                 <artifactId>lx-agent</artifactId>
                 <version>${project.version}</version>
-                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>c8y.example</groupId>
                 <artifactId>lx-agent-assembly</artifactId>
                 <version>${project.version}</version>
                 <type>tar.gz</type>
-                <scope>provided</scope>
             </dependency>
 		</dependencies>
 	</dependencyManagement>

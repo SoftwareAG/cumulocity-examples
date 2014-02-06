@@ -3,14 +3,12 @@
     <dependencySets>
         <dependencySet>
             <outputDirectory>/lib</outputDirectory>
-            <scope>provided</scope>
             <includes>
                 <include>*:jar:*</include>
             </includes>
         </dependencySet>
         <dependencySet>
             <outputDirectory>/</outputDirectory>
-            <scope>provided</scope>
             <includes>
                 <include>c8y.example:lx-agent-assembly:tar.gz:${project.version}</include>
             </includes>
