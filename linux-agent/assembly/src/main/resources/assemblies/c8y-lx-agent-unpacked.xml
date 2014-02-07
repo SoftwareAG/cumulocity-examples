@@ -8,8 +8,27 @@
 
     <includeBaseDirectory>false</includeBaseDirectory>
 
-    <componentDescriptors>
-        <componentDescriptor>c8y-lx-agent-component.xml</componentDescriptor>
-    </componentDescriptors>
+    <dependencySets>
+        <dependencySet>
+            <outputDirectory>/bin/lib</outputDirectory>
+            <includes>
+                <include>*:jar:*</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <outputDirectory>/bin</outputDirectory>
+            <includes>
+                <include>c8y.example:lx-agent-assembly:tar.gz:tar:${project.version}</include>
+            </includes>
+            <unpack>true</unpack>
+        </dependencySet>
+        <dependencySet>
+            <outputDirectory>/etc</outputDirectory>
+            <includes>
+                <include>c8y.example:lx-agent-assembly:tar.gz:rpm:${project.version}</include>
+            </includes>
+            <unpack>true</unpack>
+        </dependencySet>
+    </dependencySets>
 
 </assembly>

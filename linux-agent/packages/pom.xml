@@ -20,6 +20,15 @@
         <module>piface-agent</module>
     </modules>
 
+    <dependencies>
+        <dependency>
+            <groupId>c8y.example</groupId>
+            <artifactId>lx-agent-assembly</artifactId>
+            <type>tar.gz</type>
+            <classifier>rpm</classifier>
+        </dependency>
+    </dependencies>
+
     <build>
         <pluginManagement>
             <plugins>
@@ -66,7 +75,7 @@
                                 <directory>/usr/share/cumulocity-agent</directory>
                                 <sources>
                                     <source>
-                                        <location>${project.build.directory}/${project.build.finalName}</location>
+                                        <location>${project.build.directory}/${project.build.finalName}/bin</location>
                                     </source>
                                 </sources>
                             </mapping>
@@ -76,7 +85,7 @@
                                 <filemode>755</filemode>
                                 <sources>
                                     <source>
-                                        <location>../scripts/init.d/cumulocity-agent</location>
+                                        <location>${project.build.directory}/${project.build.finalName}/etc</location>
                                     </source>
                                 </sources>
                             </mapping>

@@ -27,7 +27,8 @@
                         <phase>package</phase>
                         <configuration>
                             <descriptors>
-                                <descriptor>src/main/assembly/base.xml</descriptor>
+                                <descriptor>src/main/assembly/base-tar.xml</descriptor>
+                                <descriptor>src/main/assembly/base-rpm.xml</descriptor>
                             </descriptors>
                         </configuration>
                     </execution>

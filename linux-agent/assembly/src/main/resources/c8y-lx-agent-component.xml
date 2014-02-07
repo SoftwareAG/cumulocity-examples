@@ -10,7 +10,8 @@
         <dependencySet>
             <outputDirectory>/</outputDirectory>
             <includes>
-                <include>c8y.example:lx-agent-assembly:tar.gz:${project.version}</include>
+                <include>c8y.example:lx-agent-assembly:tar.gz:rpm:${project.version}</include>
+                <include>c8y.example:lx-agent-assembly:tar.gz:tar:${project.version}</include>
             </includes>
             <unpack>true</unpack>
         </dependencySet>

@@ -46,6 +46,7 @@
             <groupId>c8y.example</groupId>
             <artifactId>lx-agent-assembly</artifactId>
             <type>tar.gz</type>
+            <classifier>tar</classifier>
         </dependency>
 
 		<dependency>
@@ -79,6 +80,14 @@
                 <artifactId>lx-agent-assembly</artifactId>
                 <version>${project.version}</version>
                 <type>tar.gz</type>
+                <classifier>tar</classifier>
+            </dependency>
+            <dependency>
+                <groupId>c8y.example</groupId>
+                <artifactId>lx-agent-assembly</artifactId>
+                <version>${project.version}</version>
+                <type>tar.gz</type>
+                <classifier>rpm</classifier>
             </dependency>
 		</dependencies>
 	</dependencyManagement>

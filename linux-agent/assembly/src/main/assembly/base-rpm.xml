@@ -2,26 +2,19 @@
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
 
+    <id>rpm</id>
+
     <formats>
         <format>tar.gz</format>
     </formats>
 
     <includeBaseDirectory>false</includeBaseDirectory>
 
-    <dependencySets>
-        <dependencySet>
-            <outputDirectory>/lib</outputDirectory>
-            <includes>
-                <include>*:jar:*</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
+    <fileSets>
+        <fileSet>
             <outputDirectory>/</outputDirectory>
-            <includes>
-                <include>c8y.example:lx-agent-assembly:tar.gz:tar:${project.version}</include>
-            </includes>
-            <unpack>true</unpack>
-        </dependencySet>
-    </dependencySets>
+            <directory>src/main/base-rpm</directory>
+        </fileSet>
+    </fileSets>
 
 </assembly>
