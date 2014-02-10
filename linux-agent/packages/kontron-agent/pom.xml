@@ -11,6 +11,7 @@
     </parent>
 
     <artifactId>kontron-agent-package</artifactId>
+    <name>Cumulocity :: Examples :: Linux Kontron Package</name>
     <packaging>rpm</packaging>
 
     <dependencies>

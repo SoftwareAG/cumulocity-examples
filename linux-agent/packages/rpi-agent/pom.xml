@@ -11,6 +11,7 @@
     </parent>
 
     <artifactId>rpi-agent-package</artifactId>
+    <name>Cumulocity :: Examples :: Linux Rpi Package</name>
     <packaging>rpm</packaging>
 
     <dependencies>

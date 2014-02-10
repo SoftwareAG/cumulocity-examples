@@ -11,6 +11,7 @@
     </parent>
 
     <artifactId>mac-agent-package</artifactId>
+    <name>Cumulocity :: Examples :: Linux Mac Package</name>
     <packaging>rpm</packaging>
 
     <dependencies>
