@@ -11,7 +11,7 @@
     </parent>
 
     <artifactId>rpi-agent-package</artifactId>
-    <name>Cumulocity :: Examples :: Linux Rpi Package</name>
+    <name>Cumulocity :: Examples :: Rpi Package</name>
     <packaging>rpm</packaging>
 
     <dependencies>
@@ -22,6 +22,11 @@
         <dependency>
             <groupId>c8y.example</groupId>
             <artifactId>rpi-driver</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>c8y.example</groupId>
+            <artifactId>piface-driver</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

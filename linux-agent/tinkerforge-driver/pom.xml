@@ -9,7 +9,7 @@
 	</parent>
 	
 	<artifactId>tinkerforge-driver</artifactId>
-    <name>Cumulocity :: Examples :: Linux Tinkerforge Driver</name>
+    <name>Cumulocity :: Examples :: Tinkerforge Driver</name>
 	<description>Cumulocity driver for Tinkerforge bricks/bricklets</description>
 
 	<dependencies>

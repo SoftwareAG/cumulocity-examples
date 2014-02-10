@@ -9,7 +9,7 @@
 	</parent>
 	
 	<artifactId>piface-driver</artifactId>
-    <name>Cumulocity :: Examples :: Linux PiFace Driver</name>
+    <name>Cumulocity :: Examples :: PiFace Driver</name>
 	<description>PiFace driver for the Cumulocity Raspberry Pi agent</description>
 	
 	<dependencies>

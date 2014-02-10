@@ -11,13 +11,14 @@
     </parent>
 
     <artifactId>packages</artifactId>
+    <name>Cumulocity :: Examples :: Packages</name>
     <packaging>pom</packaging>
 
     <modules>
         <module>rpi-agent</module>
         <module>kontron-agent</module>
         <module>mac-agent</module>
-        <module>piface-agent</module>
+        <module>tinkerforge-agent</module>
     </modules>
 
     <dependencies>

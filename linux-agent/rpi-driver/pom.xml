@@ -9,7 +9,7 @@
 	</parent>
 
     <artifactId>rpi-driver</artifactId>
-    <name>Cumulocity :: Examples :: Linux Raspberry Pi Driver</name>
+    <name>Cumulocity :: Examples :: Raspberry Pi Driver</name>
 	<description>Hardware and firmware driver for the Raspberry Pi</description>
 
     <dependencies>

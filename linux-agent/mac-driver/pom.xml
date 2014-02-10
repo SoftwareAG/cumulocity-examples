@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>mac-driver</artifactId>
-    <name>Cumulocity :: Examples :: Linux Mac Driver</name>
+    <name>Cumulocity :: Examples :: Mac Driver</name>
 	<description>Hardware driver for Mac OS</description>
 
 	<dependencies>

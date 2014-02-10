@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>kontron-driver</artifactId>
-    <name>Cumulocity :: Examples :: Linux Kontron Driver</name>
+    <name>Cumulocity :: Examples :: Kontron Driver</name>
     <description>Hardware drivers for the Kontron M2MSSD kit</description>
 
     <dependencies>
