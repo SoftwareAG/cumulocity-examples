@@ -11,6 +11,10 @@
     <name>Cumulocity :: Examples :: Linux Agent Base Assembly</name>
     <description>Base assembly package for all environments</description>
 
+    <properties>
+        <nexus.port>443</nexus.port>
+    </properties>
+
     <build>
         <plugins>
             <plugin>
@@ -33,5 +37,16 @@
             </plugin>
         </plugins>
     </build>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>snapshot</id>
+            <url>https://nexus.cumulocity.com:${nexus.port}/nexus/content/repositories/snapshots/</url>
+        </snapshotRepository>
+        <repository>
+            <id>release</id>
+            <url>https://nexus.cumulocity.com:${nexus.port}/nexus/content/repositories/releases/</url>
+        </repository>
+    </distributionManagement>
 
 </project>
