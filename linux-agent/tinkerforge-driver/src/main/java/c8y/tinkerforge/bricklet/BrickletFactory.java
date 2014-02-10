@@ -19,10 +19,18 @@
  */
 
 
-package c8y.tinkerforge;
+package c8y.tinkerforge.bricklet;
 
 import c8y.lx.driver.Driver;
 
+import c8y.tinkerforge.bricklet.BarometerBricklet;
+import c8y.tinkerforge.bricklet.DisplayBricklet;
+import c8y.tinkerforge.bricklet.DistanceBricklet;
+import c8y.tinkerforge.bricklet.DualRelayBricklet;
+import c8y.tinkerforge.bricklet.GpsBricklet;
+import c8y.tinkerforge.bricklet.HumidityBricklet;
+import c8y.tinkerforge.bricklet.LightBricklet;
+import c8y.tinkerforge.bricklet.TemperatureBricklet;
 import com.tinkerforge.BrickMaster;
 import com.tinkerforge.BrickletAmbientLight;
 import com.tinkerforge.BrickletBarometer;

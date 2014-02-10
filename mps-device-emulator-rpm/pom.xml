@@ -5,14 +5,14 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.cumulocity.example</groupId>
-        <artifactId>cumulocity-examples</artifactId>
+        <groupId>c8y.example</groupId>
+        <artifactId>c8y-examples</artifactId>
         <version>4.10.0-SNAPSHOT</version>
     </parent>
 
     <groupId>mps-device-emulator</groupId>
     <artifactId>mps-device-emulator-rpm</artifactId>
-    <name>Cumulocity :: Agents :: MPS :: MPS Device Emulator RPM</name>
+    <name>Cumulocity :: Examples :: MPS Device Emulator RPM</name>
 
     <licenses>
         <license>

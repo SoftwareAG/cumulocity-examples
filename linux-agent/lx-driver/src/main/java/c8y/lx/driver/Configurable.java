@@ -17,23 +17,22 @@
  * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
-
 package c8y.lx.driver;
 
 import java.util.Properties;
 
 public interface Configurable {
-	/**
-	 * Add the default configuration to the given properties.
-	 */
-	void addDefaults(Properties props);
-	
-	/**
-	 * Notifies driver of a configuration change. Unknown configuration entries
-	 * should be ignored by the driver.
-	 * 
-	 * @param props The updated configuration.
-	 */
-	void configurationChanged(Properties props);
+
+    /**
+     * Add the default configuration to the given properties.
+     */
+    void addDefaults(Properties props);
+
+    /**
+     * Notifies driver of a configuration change. Unknown configuration entries
+     * should be ignored by the driver.
+     *
+     * @param props The updated configuration.
+     */
+    void configurationChanged(Properties props);
 }

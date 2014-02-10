@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import c8y.lx.driver.Configurable;
 import c8y.lx.driver.Driver;
-import c8y.lx.driver.Executer;
+import c8y.lx.driver.OperationExecutor;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -43,8 +43,8 @@ import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.alarm.AlarmApi;
 import com.cumulocity.sdk.client.event.EventApi;
 
-public class TracelogDriver extends AppenderBase<ILoggingEvent> implements
-		Configurable, Driver {
+public class TracelogDriver extends AppenderBase<ILoggingEvent> implements Configurable, Driver {
+
 	public static final String LOG_TYPE = "c8y_DeviceLog";
 
 	public static final String ALARM_LEVEL_PROP = "c8y.log.alarmLevel";
@@ -68,8 +68,8 @@ public class TracelogDriver extends AppenderBase<ILoggingEvent> implements
 	}
 
 	@Override
-	public Executer[] getSupportedOperations() {
-		return new Executer[0];
+	public OperationExecutor[] getSupportedOperations() {
+		return new OperationExecutor[0];
 	}
 
 	@Override

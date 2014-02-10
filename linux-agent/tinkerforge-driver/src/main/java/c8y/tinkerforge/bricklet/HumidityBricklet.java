@@ -18,34 +18,34 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package c8y.lx.driver;
 
-import com.cumulocity.rest.representation.operation.OperationRepresentation;
+package c8y.tinkerforge.bricklet;
 
-/**
- * Executes a remote control operation.
- */
-public interface Executer {
-	/**
-	 * The type of remote control operation that this Executer can execute.
-	 */
-	String supportedOperationType();
+import java.math.BigDecimal;
 
-	/**
-	 * Execute a particular remote control operation and write the result of the
-	 * operation back into the operation. Carries out additional updates, e.g.,
-	 * to the inventory.
-	 * 
-	 * @param operation
-	 *            The operation to execute
-	 * @param cleanup
-	 *            If set to true, the operation was hanging in executing state
-	 *            when the agent was started. This can have multiple reasons:
-	 *            One reason is that there was a failure during first execution.
-	 *            In this case, cleanup may be needed. Another reason might be
-	 *            that the operation required a restart of the agent, and the
-	 *            operation is successful when the agent could be restarted.
-	 */
-	void execute(OperationRepresentation operation, boolean cleanup)
-			throws Exception;
+import c8y.HumidityMeasurement;
+import c8y.HumiditySensor;
+
+import com.tinkerforge.BrickletHumidity;
+import com.tinkerforge.Device;
+
+public class HumidityBricklet extends BaseSensorBricklet {
+
+	private HumidityMeasurement humidity = new HumidityMeasurement();
+
+	public HumidityBricklet(String id, Device device) {
+		super(id, device, "Humidity", new HumiditySensor());
+	}
+
+	@Override
+	public void run() {
+		try {
+			BrickletHumidity hb = (BrickletHumidity) getDevice();
+			BigDecimal h = new BigDecimal((double) hb.getHumidity() / 10.0);
+			humidity.setHumidity(h);
+			super.sendMeasurement(humidity);
+		} catch (Exception x) {
+			logger.warn("Cannot read humidity from bricklet", x);
+		}
+	}
 }

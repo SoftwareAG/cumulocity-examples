@@ -18,18 +18,20 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package c8y.tinkerforge;
+package c8y.tinkerforge.bricklet;
 
 import c8y.lx.driver.DeviceManagedObject;
 import c8y.lx.driver.MeasurementPollingDriver;
 
+import c8y.tinkerforge.TFIds;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 import com.tinkerforge.Device;
 import com.tinkerforge.NotConnectedException;
 import com.tinkerforge.TimeoutException;
 
-public abstract class TFSensor extends MeasurementPollingDriver {
+public abstract class BaseSensorBricklet extends MeasurementPollingDriver {
+
 	public static final long DEFAULT_INTERVAL = 5000;
 
 	private Device device;
@@ -37,7 +39,7 @@ public abstract class TFSensor extends MeasurementPollingDriver {
 	private String type;
 	private ManagedObjectRepresentation sensorMo = new ManagedObjectRepresentation();
 
-	public TFSensor(String id, Device device, String type, Object sensorFragment) {
+	public BaseSensorBricklet(String id, Device device, String type, Object sensorFragment) {
 		super(TFIds.getMeasurementType(type), TFIds.getPropertyName(type),
 				DEFAULT_INTERVAL);
 		this.device = device;

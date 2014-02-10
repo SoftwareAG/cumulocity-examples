@@ -18,7 +18,7 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package c8y.tinkerforge;
+package c8y.tinkerforge.bricklet;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -28,9 +28,10 @@ import org.slf4j.LoggerFactory;
 
 import c8y.Position;
 import c8y.lx.driver.DeviceManagedObject;
-import c8y.lx.driver.Executer;
+import c8y.lx.driver.OperationExecutor;
 import c8y.lx.driver.PollingDriver;
 
+import c8y.tinkerforge.TFIds;
 import com.cumulocity.rest.representation.event.EventRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.SDKException;
@@ -58,14 +59,14 @@ public class GpsBricklet extends PollingDriver {
 
 	public GpsBricklet(String id, BrickletGPS gps) {
 		super("c8y_" + TYPE, TFIds.getPropertyName(TYPE),
-				TFSensor.DEFAULT_INTERVAL);
+				BaseSensorBricklet.DEFAULT_INTERVAL);
 		this.id = id;
 		this.gps = gps;
 	}
 
 	@Override
-	public Executer[] getSupportedOperations() {
-		return new Executer[0];
+	public OperationExecutor[] getSupportedOperations() {
+		return new OperationExecutor[0];
 	}
 
 	@Override

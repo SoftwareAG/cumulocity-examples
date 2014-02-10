@@ -18,33 +18,37 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package c8y.tinkerforge;
+package c8y.tinkerforge.bricklet;
 
 import java.math.BigDecimal;
 
-import c8y.TemperatureMeasurement;
-import c8y.TemperatureSensor;
+import c8y.Barometer;
+import c8y.BarometerMeasurement;
 
-import com.tinkerforge.BrickletTemperature;
+import com.tinkerforge.BrickletBarometer;
 import com.tinkerforge.Device;
 
-public class TemperatureBricklet extends TFSensor {
+public class BarometerBricklet extends BaseSensorBricklet {
+	private static final double ALT_SCALE = 100.0;
+	private static final double PRESS_SCALE = 1000.0;
+	
+	private BarometerMeasurement barometer = new BarometerMeasurement();
 
-	private TemperatureMeasurement temperature = new TemperatureMeasurement();
-
-	public TemperatureBricklet(String id, Device device) {
-		super(id, device, "Temperature", new TemperatureSensor());
+	public BarometerBricklet(String id, Device device) {
+		super(id, device, "Barometer", new Barometer());
 	}
 
 	@Override
 	public void run() {
 		try {
-			BrickletTemperature tb = (BrickletTemperature) getDevice();
-			BigDecimal t = new BigDecimal((double) tb.getTemperature() / 100.0);
-			temperature.setTemperature(t);
-			super.sendMeasurement(temperature);
+			BrickletBarometer b = (BrickletBarometer) getDevice();
+			BigDecimal p = new BigDecimal((double) b.getAirPressure() / PRESS_SCALE);
+			barometer.setPressure(p);
+			BigDecimal a = new BigDecimal((double) b.getAltitude() / ALT_SCALE);
+			barometer.setAltitude(a);
+			super.sendMeasurement(barometer);
 		} catch (Exception x) {
-			logger.warn("Cannot read temperature from bricklet", x);
+			logger.warn("Cannot read barometer bricklet", x);
 		}
 	}
 }
