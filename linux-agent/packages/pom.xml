@@ -92,8 +92,7 @@
                             <script>echo "Installing Cumulocity Agent ${project.version}..."</script>
                         </preinstallScriptlet>
                         <postinstallScriptlet>
-                            <script>chmod +x /usr/share/cumulocity-agent/c8y-agent.sh</script>
-                            <script>chmod +x /usr/share/cumulocity-agent/c8y-agent-debug.sh</script>
+                            <script>chmod +x /usr/share/cumulocity-agent/*.sh</script>
                         </postinstallScriptlet>
                     </configuration>
                 </plugin>
