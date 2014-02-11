@@ -10,7 +10,7 @@
         <version>4.10.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>tinkerforge-agent-package</artifactId>
+    <artifactId>cumulocity-tinkerforge-agent-package</artifactId>
     <name>Cumulocity :: Examples :: Tinkerforge Package</name>
     <packaging>rpm</packaging>
 

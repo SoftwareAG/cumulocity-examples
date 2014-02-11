@@ -10,7 +10,7 @@
         <version>4.10.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>mac-agent-package</artifactId>
+    <artifactId>cumulocity-mac-agent-package</artifactId>
     <name>Cumulocity :: Examples :: Mac Package</name>
     <packaging>rpm</packaging>
 

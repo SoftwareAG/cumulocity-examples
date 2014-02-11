@@ -10,7 +10,7 @@
         <version>4.10.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>rpi-agent-package</artifactId>
+    <artifactId>cumulocity-rpi-agent-package</artifactId>
     <name>Cumulocity :: Examples :: Rpi Package</name>
     <packaging>rpm</packaging>
 
