@@ -39,6 +39,11 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>rpm-maven-plugin</artifactId>
+                <configuration>
+                    <name>rpi-agent</name>
+                    <projversion>${project.version}</projversion>
+                    <group>C8Y/Agent</group>
+                </configuration>
             </plugin>
         </plugins>
     </build>
