@@ -30,7 +30,7 @@ public class CredentialsManager {
                 props.getProperty("tenant", "demo"),
                 props.getProperty("user"),
                 props.getProperty("password"),
-                props.getProperty("key"));
+                null);
     }
 
     public String getHost() {
