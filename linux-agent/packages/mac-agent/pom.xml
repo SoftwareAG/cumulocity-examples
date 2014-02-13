@@ -17,10 +17,6 @@
     <dependencies>
         <dependency>
             <groupId>c8y.example</groupId>
-            <artifactId>lx-agent</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>c8y.example</groupId>
             <artifactId>mac-driver</artifactId>
             <version>${project.version}</version>
         </dependency>
