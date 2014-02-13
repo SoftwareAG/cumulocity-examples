@@ -46,7 +46,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.cumulocity.example</groupId>
+            <groupId>c8y.example</groupId>
             <artifactId>hello-agent</artifactId>
             <version>${project.version}</version>
         </dependency>
