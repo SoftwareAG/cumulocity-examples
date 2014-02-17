@@ -6,12 +6,12 @@
 
     <parent>
         <groupId>c8y.example</groupId>
-        <artifactId>packages</artifactId>
+        <artifactId>lx-packages</artifactId>
         <version>4.10.0</version>
     </parent>
 
     <artifactId>cumulocity-kontron-agent-package</artifactId>
-    <name>Cumulocity :: Examples :: Kontron Package</name>
+    <name>Cumulocity :: Examples :: Kontron Agent Package</name>
     <packaging>rpm</packaging>
 
     <dependencies>
