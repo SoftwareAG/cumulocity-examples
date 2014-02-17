@@ -18,10 +18,19 @@
         <module>rpi-agent</module>
         <module>kontron-agent</module>
         <module>mac-agent</module>
-        <module>tinkerforge-agent</module>
     </modules>
 
     <dependencies>
+        <!--Common dependencies for all packages-->
+        <dependency>
+            <groupId>c8y.example</groupId>
+            <artifactId>lx-agent</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>c8y.example</groupId>
+            <artifactId>tinkerforge-driver</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>c8y.example</groupId>
             <artifactId>lx-agent-assembly</artifactId>
