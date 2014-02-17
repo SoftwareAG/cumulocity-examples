@@ -6,12 +6,12 @@
 
     <parent>
         <groupId>c8y.example</groupId>
-        <artifactId>packages</artifactId>
+        <artifactId>lx-packages</artifactId>
         <version>4.10.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>cumulocity-mac-agent-package</artifactId>
-    <name>Cumulocity :: Examples :: Mac Package</name>
+    <name>Cumulocity :: Examples :: Mac Agent Package</name>
     <packaging>rpm</packaging>
 
     <dependencies>

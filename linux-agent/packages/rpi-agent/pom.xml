@@ -6,12 +6,12 @@
 
     <parent>
         <groupId>c8y.example</groupId>
-        <artifactId>packages</artifactId>
+        <artifactId>lx-packages</artifactId>
         <version>4.10.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>cumulocity-rpi-agent-package</artifactId>
-    <name>Cumulocity :: Examples :: Rpi Package</name>
+    <name>Cumulocity :: Examples :: Raspberry Pi Package</name>
     <packaging>rpm</packaging>
 
     <dependencies>
