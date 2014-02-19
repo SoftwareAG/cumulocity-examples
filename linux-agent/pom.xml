@@ -2,47 +2,50 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>com.cumulocity.example</groupId>
-		<artifactId>cumulocity-examples</artifactId>
-		<version>4.9.0</version>
+    <parent>
+		<groupId>c8y.example</groupId>
+		<artifactId>c8y-examples</artifactId>
+		<version>4.10.2</version>
 	</parent>
 
-	<groupId>c8y.lx</groupId>
-	<artifactId>lx</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<name>Cumulocity Agent for Linux</name>
+	<artifactId>c8y-lx</artifactId>
+    <name>Cumulocity :: Examples :: Linux</name>
 	<packaging>pom</packaging>
 
-	<properties>
-		<maven.compiler.source>1.7</maven.compiler.source>
-		<maven.compiler.target>1.7</maven.compiler.target>
-		<cumulocity.version>4.3.0</cumulocity.version>
-		<lx.version>0.0.1-SNAPSHOT</lx.version>
-	</properties>
+    <properties>
+        <commons.io.version>2.4</commons.io.version>
+        <jssc.version>2.6.0</jssc.version>
+        <logback.version>1.0.13</logback.version>
+        <tinkerforge.version>2.0.9</tinkerforge.version>
+    </properties>
 
 	<modules>
-		<module>lx-driver</module>
-		<module>lx-agent</module>
-		<module>piface-driver</module>
-		<module>tinkerforge-driver</module>
-		<module>rpi-driver</module>
-		<module>mac-driver</module>
-		<module>kontron-driver</module>
-		<module>assembly</module>
+        <module>assembly</module>
+        <module>lx-driver</module>
+        <module>lx-agent</module>
+        <module>piface-driver</module>
+        <module>tinkerforge-driver</module>
+        <module>rpi-driver</module>
+        <module>mac-driver</module>
+        <module>kontron-driver</module>
+        <module>packages</module>
 	</modules>
 
 	<dependencies>
 		<dependency>
 			<groupId>com.nsn.cumulocity.model</groupId>
 			<artifactId>device-capability-model</artifactId>
-			<version>${cumulocity.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.nsn.cumulocity.clients-java</groupId>
 			<artifactId>java-client</artifactId>
-			<version>${cumulocity.version}</version>
 		</dependency>
+        <dependency>
+            <groupId>c8y.example</groupId>
+            <artifactId>lx-agent-assembly</artifactId>
+            <type>tar.gz</type>
+            <classifier>tar</classifier>
+        </dependency>
 
 		<dependency>
 			<groupId>junit</groupId>
@@ -60,26 +63,74 @@
 
 	<dependencyManagement>
 		<dependencies>
-			<dependency>
-				<groupId>c8y.lx</groupId>
-				<artifactId>lx-driver</artifactId>
-				<version>${lx.version}</version>
-			</dependency>
+            <dependency>
+                <groupId>c8y.example</groupId>
+                <artifactId>lx-driver</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>c8y.example</groupId>
+                <artifactId>lx-agent</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>c8y.example</groupId>
+                <artifactId>lx-agent-assembly</artifactId>
+                <version>${project.version}</version>
+                <type>tar.gz</type>
+                <classifier>tar</classifier>
+            </dependency>
+            <dependency>
+                <groupId>c8y.example</groupId>
+                <artifactId>lx-agent-assembly</artifactId>
+                <version>${project.version}</version>
+                <type>tar.gz</type>
+                <classifier>rpm</classifier>
+            </dependency>
 		</dependencies>
 	</dependencyManagement>
 
 	<build>
 		<pluginManagement>
 			<plugins>
+                <plugin>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <dependencies>
+                        <dependency>
+                            <groupId>c8y.example</groupId>
+                            <artifactId>lx-agent-assembly</artifactId>
+                            <version>${project.version}</version>
+                        </dependency>
+                    </dependencies>
+                    <executions>
+                        <execution>
+                            <id>c8y-lx-agent-assembly</id>
+                            <goals>
+                                <goal>single</goal>
+                            </goals>
+                            <phase>package</phase>
+                            <configuration>
+                                <descriptorRefs>
+                                    <descriptorRef>c8y-lx-agent</descriptorRef>
+                                </descriptorRefs>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
 				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-dependency-plugin</artifactId>
 					<version>2.6</version>
 					<configuration>
 						<includeScope>runtime</includeScope>
 					</configuration>
 				</plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>rpm-maven-plugin</artifactId>
+                    <version>2.1-alpha-1</version>
+                </plugin>
 			</plugins>
 		</pluginManagement>
 	</build>
+
 </project>

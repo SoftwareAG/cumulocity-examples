@@ -5,12 +5,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.cumulocity.example</groupId>
-        <artifactId>cumulocity-examples</artifactId>
-        <version>4.9.0</version>
+        <groupId>c8y.example</groupId>
+        <artifactId>c8y-examples</artifactId>
+        <version>4.10.2</version>
     </parent>
 
     <artifactId>kontron-shock-agent</artifactId>
+    <name>Cumulocity :: Examples :: Kontron Agent</name>
     <packaging>eclipse-plugin</packaging>
 
     <licenses>

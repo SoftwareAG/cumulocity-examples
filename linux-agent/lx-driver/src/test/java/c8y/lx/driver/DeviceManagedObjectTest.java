@@ -43,10 +43,10 @@ public class DeviceManagedObjectTest {
 		createdMo.setId(gid);
 		createdMo.setName("createMo");
 		createdMo.setSelf("http://self/link/123");
+        when(inventory.getManagedObjectApi(any(GId.class))).thenReturn(moHandle);
 		when(inventory.create(any(ManagedObjectRepresentation.class))).thenReturn(createdMo);
-		when(inventory.getManagedObject(any(GId.class))).thenReturn(moHandle);
 
-		when(moHandle.update(any(ManagedObjectRepresentation.class))).thenReturn(createdMo);
+		when(inventory.update(any(ManagedObjectRepresentation.class))).thenReturn(createdMo);
 	}
 	
 	@Test
@@ -65,8 +65,7 @@ public class DeviceManagedObjectTest {
 		boolean created = dmo.createOrUpdate(mo, extId, null);
 		
 		assertFalse(created);
-		verify(inventory).getManagedObject(gid);
-		verify(moHandle).update(any(ManagedObjectRepresentation.class)); // Too bad that MORep has no equals method.
+		verify(inventory).update(any(ManagedObjectRepresentation.class)); // Too bad that MORep has no equals method.
 	}
 
 	@Test
@@ -74,7 +73,7 @@ public class DeviceManagedObjectTest {
 		ManagedObjectRepresentation mo = prepareCreate();
 		dmo.createOrUpdate(mo, extId, parentId);
 
-		verify(inventory).getManagedObject(parentId);
+		verify(inventory).getManagedObjectApi(parentId);
 		verify(moHandle).addChildDevice(any(ManagedObjectReferenceRepresentation.class));
 	}
 
@@ -83,7 +82,7 @@ public class DeviceManagedObjectTest {
 		ManagedObjectRepresentation mo = prepareUpdate();
 		dmo.createOrUpdate(mo, extId, parentId);
 
-		verify(inventory).getManagedObject(parentId);
+		verify(inventory).getManagedObjectApi(parentId);
 		verify(moHandle).addChildDevice(any(ManagedObjectReferenceRepresentation.class));
 	}
 

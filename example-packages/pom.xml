@@ -4,9 +4,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.cumulocity.example</groupId>
-        <artifactId>cumulocity-examples</artifactId>
-        <version>4.9.0</version>
+        <groupId>c8y.example</groupId>
+        <artifactId>c8y-examples</artifactId>
+        <version>4.10.2</version>
     </parent>
 
     <artifactId>example-packages</artifactId>
@@ -46,7 +46,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.cumulocity.example</groupId>
+            <groupId>c8y.example</groupId>
             <artifactId>hello-agent</artifactId>
             <version>${project.version}</version>
         </dependency>

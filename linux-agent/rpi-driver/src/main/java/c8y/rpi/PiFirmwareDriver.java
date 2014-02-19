@@ -29,7 +29,7 @@ import org.apache.commons.io.IOUtils;
 
 import c8y.Firmware;
 import c8y.lx.driver.Driver;
-import c8y.lx.driver.Executer;
+import c8y.lx.driver.OperationExecutor;
 import c8y.lx.driver.OpsUtil;
 
 import com.cumulocity.model.idtype.GId;
@@ -38,7 +38,7 @@ import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.Platform;
 
-public class PiFirmwareDriver implements Driver, Executer {
+public class PiFirmwareDriver implements Driver, OperationExecutor {
 
 	private static final String FILE = "raspberrypi-bootloader";
 	private static final String FWQUERY = "dpkg-query -l " + FILE;
@@ -74,14 +74,14 @@ public class PiFirmwareDriver implements Driver, Executer {
 	}
 
 	@Override
-	public Executer[] getSupportedOperations() {
-		return new Executer[] { this };
+	public OperationExecutor[] getSupportedOperations() {
+		return new OperationExecutor[] { this };
 	}
 
 	@Override
 	public void initializeInventory(ManagedObjectRepresentation mo) {
 		mo.set(firmware);
-		OpsUtil.add(mo, supportedOperationType());
+		OpsUtil.addSupportedOperation(mo, supportedOperationType());
 	}
 
 	@Override

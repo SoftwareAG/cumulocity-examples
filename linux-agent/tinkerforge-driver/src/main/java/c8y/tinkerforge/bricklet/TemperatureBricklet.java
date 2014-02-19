@@ -18,34 +18,33 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-
-package c8y.tinkerforge;
+package c8y.tinkerforge.bricklet;
 
 import java.math.BigDecimal;
 
-import c8y.HumidityMeasurement;
-import c8y.HumiditySensor;
+import c8y.TemperatureMeasurement;
+import c8y.TemperatureSensor;
 
-import com.tinkerforge.BrickletHumidity;
+import com.tinkerforge.BrickletTemperature;
 import com.tinkerforge.Device;
 
-public class HumidityBricklet extends TFSensor {
+public class TemperatureBricklet extends BaseSensorBricklet {
 
-	private HumidityMeasurement humidity = new HumidityMeasurement();
+	private TemperatureMeasurement temperature = new TemperatureMeasurement();
 
-	public HumidityBricklet(String id, Device device) {
-		super(id, device, "Humidity", new HumiditySensor());
+	public TemperatureBricklet(String id, Device device) {
+		super(id, device, "Temperature", new TemperatureSensor());
 	}
 
 	@Override
 	public void run() {
 		try {
-			BrickletHumidity hb = (BrickletHumidity) getDevice();
-			BigDecimal h = new BigDecimal((double) hb.getHumidity() / 10.0);
-			humidity.setHumidity(h);
-			super.sendMeasurement(humidity);
+			BrickletTemperature tb = (BrickletTemperature) getDevice();
+			BigDecimal t = new BigDecimal((double) tb.getTemperature() / 100.0);
+			temperature.setTemperature(t);
+			super.sendMeasurement(temperature);
 		} catch (Exception x) {
-			logger.warn("Cannot read humidity from bricklet", x);
+			logger.warn("Cannot read temperature from bricklet", x);
 		}
 	}
 }

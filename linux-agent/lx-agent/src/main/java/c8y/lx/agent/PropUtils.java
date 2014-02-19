@@ -33,45 +33,51 @@ import org.slf4j.LoggerFactory;
 
 public class PropUtils {
 
-	private static Logger logger = LoggerFactory.getLogger(PropUtils.class);
+    private static final Logger logger = LoggerFactory.getLogger(PropUtils.class);
 
-	public static Properties fromString(String propsStr) throws IOException {
-		Properties result = new Properties();
-		try (StringReader reader = new StringReader(propsStr)) {
-			result.load(reader);
-			logger.debug("Read configuration: " + result);
-		}
-		return result;
-	}
+    public static Properties fromString(String propsStr) throws IOException {
+        Properties result = new Properties();
+        try (StringReader reader = new StringReader(propsStr)) {
+            result.load(reader);
+            logger.debug("Read configuration: " + result);
+        }
+        return result;
+    }
 
-	public static String toString(Properties props) {
-		String result = "";
-		try (StringWriter configWriter = new StringWriter()) {
-			props.store(configWriter, null);
-			result = configWriter.getBuffer().toString();
-		} catch (IOException iox) {
-			// Storing in a String shouldn't cause I/O exception
-			logger.warn("Bogus IOException", iox);
-		}
-		return result;
-	}
+    public static String toString(Properties props) {
+        String result = "";
+        try (StringWriter configWriter = new StringWriter()) {
+            props.store(configWriter, null);
+            result = configWriter.getBuffer().toString();
+        } catch (IOException iox) {
+            // Storing in a String shouldn't cause I/O exception
+            logger.warn("Bogus IOException", iox);
+        }
+        return result;
+    }
 
-	public static void fromFile(String file, Properties props) {
-		try (FileReader reader = new FileReader(file)) {
-			props.load(reader);
-			logger.debug("Read configuration file, current configuration: " + props);
-		} catch (IOException iox) {
-			logger.warn("Configuration file {} cannot be read, assuming empty configuration", file);
-		}
-	}
-	
-	public static String toFile(Properties props, String file) {
-		try (FileWriter writer = new FileWriter(file)) {
-			props.store(writer, null);
-		} catch (IOException iox) {
-			logger.warn("Configuration file {} cannot be written", file);
-			return ErrorLog.toString(iox);
-		}
-		return null;
-	}
+    public static Properties fromFile(String file) {
+        Properties props = new Properties();
+        fromFile(file, props);
+        return props;
+    }
+
+    public static void fromFile(String file, Properties props) {
+        try (FileReader reader = new FileReader(file)) {
+            props.load(reader);
+            logger.debug("Read configuration file, current configuration: " + props);
+        } catch (IOException iox) {
+            logger.warn("Configuration file {} cannot be read, assuming empty configuration", file);
+        }
+    }
+
+    public static String toFile(Properties props, String file) {
+        try (FileWriter writer = new FileWriter(file)) {
+            props.store(writer, null);
+        } catch (IOException iox) {
+            logger.warn("Configuration file {} cannot be written", file);
+            return ErrorLog.toString(iox);
+        }
+        return null;
+    }
 }

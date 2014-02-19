@@ -1,11 +1,11 @@
-package c8y.tinkerforge;
+package c8y.tinkerforge.bricklet;
 
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.Platform;
 import com.tinkerforge.BrickletDualRelay;
 
 import c8y.lx.driver.Driver;
-import c8y.lx.driver.Executer;
+import c8y.lx.driver.OperationExecutor;
 
 public class DualRelayBricklet implements Driver {
 
@@ -20,7 +20,7 @@ public class DualRelayBricklet implements Driver {
 	}
 
 	@Override
-	public Executer[] getSupportedOperations() {
+	public OperationExecutor[] getSupportedOperations() {
 		// TODO Auto-generated method stub
 		return null;
 	}

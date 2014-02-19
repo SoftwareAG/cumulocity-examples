@@ -19,7 +19,7 @@
  */
 
 
-package c8y.tinkerforge;
+package c8y.tinkerforge.bricklet;
 
 import java.math.BigDecimal;
 
@@ -29,7 +29,7 @@ import c8y.LightSensor;
 import com.tinkerforge.BrickletAmbientLight;
 import com.tinkerforge.Device;
 
-public class LightBricklet extends TFSensor {
+public class LightBricklet extends BaseSensorBricklet {
 
 	private LightMeasurement light = new LightMeasurement();
 

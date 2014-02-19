@@ -20,14 +20,16 @@
 
 package c8y.tinkerforge;
 
-import java.util.ArrayList;
+import static com.tinkerforge.IPConnection.ENUMERATION_TYPE_AVAILABLE;
+import static com.tinkerforge.IPConnection.ENUMERATION_TYPE_CONNECTED;
+
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Timer;
 
 import c8y.lx.driver.Driver;
 import c8y.lx.driver.RestartableTimerTask;
-
-import com.tinkerforge.IPConnection;
+import c8y.tinkerforge.bricklet.BrickletFactory;
 import com.tinkerforge.IPConnection.EnumerateListener;
 
 /**
@@ -38,34 +40,39 @@ import com.tinkerforge.IPConnection.EnumerateListener;
  */
 public class Discoverer implements EnumerateListener, Runnable {
 
-	private BrickletFactory factory;
-	private DiscoveryFinishedListener finished;
-	private long timeout;
-	private Timer timeoutTimer;
-	private List<Driver> devices = new ArrayList<Driver>();
+    public static interface DiscoveryFinishedListener {
 
-	public interface DiscoveryFinishedListener {
-		void discoveredDevices(List<Driver> devices);
-	}
+        void discoveredDevices(Iterable<Driver> devices);
 
-	public Discoverer(BrickletFactory factory,
-			DiscoveryFinishedListener finished, long timeout) {
+    }
+
+    private final BrickletFactory factory;
+
+    private final DiscoveryFinishedListener finished;
+
+    private final long timeout;
+
+    private final List<Driver> devices = new LinkedList<>();
+
+    private Timer timeoutTimer;
+
+	public Discoverer(BrickletFactory factory, DiscoveryFinishedListener finished, long timeout) {
 		this.factory = factory;
 		this.finished = finished;
 		this.timeout = timeout;
 		startTimer();
 	}
 
-	public void enumerate(String uid, String connectedUid, char position,
-			short[] hardwareVersion, short[] firmwareVersion, int deviceId,
-			short enumerationType) {
-		if (enumerationType == IPConnection.ENUMERATION_TYPE_CONNECTED
-				|| enumerationType == IPConnection.ENUMERATION_TYPE_AVAILABLE) {
+	public void enumerate(String uid, String connectedUid, char position, short[] hardwareVersion,
+            short[] firmwareVersion, int deviceId, short enumerationType) {
+
+		if (ENUMERATION_TYPE_CONNECTED == enumerationType ||
+                ENUMERATION_TYPE_AVAILABLE == enumerationType) {
 			timeoutTimer.cancel();
 
 			Driver driver = factory.produceDevice(uid, deviceId);
 			if (driver != null) {
-				devices.add(driver);				
+				devices.add(driver);
 			}
 
 			startTimer();

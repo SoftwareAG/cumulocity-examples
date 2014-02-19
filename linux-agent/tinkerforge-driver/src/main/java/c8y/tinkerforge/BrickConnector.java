@@ -25,6 +25,7 @@ import java.net.UnknownHostException;
 
 import c8y.tinkerforge.Discoverer.DiscoveryFinishedListener;
 
+import c8y.tinkerforge.bricklet.BrickletFactory;
 import com.tinkerforge.AlreadyConnectedException;
 import com.tinkerforge.IPConnection;
 import com.tinkerforge.IPConnection.ConnectedListener;

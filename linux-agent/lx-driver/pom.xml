@@ -1,22 +1,15 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+
 	<parent>
-		<groupId>c8y.lx</groupId>
-		<artifactId>lx</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<groupId>c8y.example</groupId>
+		<artifactId>c8y-lx</artifactId>
+        <version>4.10.2</version>
 	</parent>
 
 	<artifactId>lx-driver</artifactId>
-	<name>Cumulocity Linux Driver interfaces</name>
+    <name>Cumulocity :: Examples :: Linux Base Driver</name>
 	<description>Driver interfaces for the Cumulocity Linux agent</description>
 
-	<dependencies>
-		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-all</artifactId>
-			<version>1.9.5</version>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
 </project>

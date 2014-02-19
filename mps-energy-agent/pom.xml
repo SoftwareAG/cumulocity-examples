@@ -5,12 +5,13 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>com.cumulocity.example</groupId>
-		<artifactId>cumulocity-examples</artifactId>
-		<version>4.9.0</version>
+		<groupId>c8y.example</groupId>
+		<artifactId>c8y-examples</artifactId>
+		<version>4.10.2</version>
 	</parent>
 
 	<artifactId>mps-energy-agent</artifactId>
+    <name>Cumulocity :: Examples :: MPS Agent</name>
 
 	<licenses>
 		<license>
@@ -42,12 +43,10 @@
 		<dependency>
 			<groupId>com.nsn.cumulocity.clients-java</groupId>
 			<artifactId>java-client</artifactId>
-			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.nsn.cumulocity.model</groupId>
 			<artifactId>device-capability-model</artifactId>
-			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>

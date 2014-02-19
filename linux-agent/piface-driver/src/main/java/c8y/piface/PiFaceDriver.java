@@ -30,7 +30,7 @@ import c8y.Relay;
 import c8y.Relay.RelayState;
 import c8y.lx.driver.DeviceManagedObject;
 import c8y.lx.driver.Driver;
-import c8y.lx.driver.Executer;
+import c8y.lx.driver.OperationExecutor;
 import c8y.lx.driver.OpsUtil;
 
 import com.cumulocity.model.ID;
@@ -51,14 +51,15 @@ import com.pi4j.wiringpi.Spi;
  * Elementary support for the switches and LEDs on the PiFace. Currently, only a
  * single PiFace on Channel 0 is supported.
  */
-public class PiFaceDriver implements Driver, Executer {
-	private static final int NUMBUTTONS = 4;
-	private static final int NUMLEDS = 8;
-	public static final String LEDTYPE = "c8y_PiFaceLED";
-	public static final String SWITCHTYPE = "c8y_PiFaceSwitch";
-	public static final String XTIDTYPE = "c8y_Serial";
+public class PiFaceDriver implements Driver, OperationExecutor {
 
-	private static Logger logger = LoggerFactory.getLogger(PiFaceDriver.class);
+    private static Logger logger = LoggerFactory.getLogger(PiFaceDriver.class);
+
+    private static final int NUMBUTTONS = 4;
+    private static final int NUMLEDS = 8;
+    public static final String LEDTYPE = "c8y_PiFaceLED";
+    public static final String SWITCHTYPE = "c8y_PiFaceSwitch";
+	public static final String XTIDTYPE = "c8y_Serial";
 
 	private Platform platform;
 	private DeviceManagedObject dmo;
@@ -80,8 +81,8 @@ public class PiFaceDriver implements Driver, Executer {
 	}
 
 	@Override
-	public Executer[] getSupportedOperations() {
-		return new Executer[] { this };
+	public OperationExecutor[] getSupportedOperations() {
+		return new OperationExecutor[] { this };
 	}
 
 	@Override
@@ -104,8 +105,7 @@ public class PiFaceDriver implements Driver, Executer {
 		}
 	}
 
-	private void createLeds(GId parent, String idPrefix, String namePrefix)
-			throws SDKException {
+	private void createLeds(GId parent, String idPrefix, String namePrefix) {
 		for (int idx = 0; idx < NUMLEDS; idx++) {
 			Relay relay = new Relay();
 
@@ -119,7 +119,7 @@ public class PiFaceDriver implements Driver, Executer {
 			ledMos[idx].setType(LEDTYPE);
 			ledMos[idx].setName(namePrefix + "LED " + idx);
 			ledMos[idx].set(relay);
-			OpsUtil.add(ledMos[idx], supportedOperationType());
+			OpsUtil.addSupportedOperation(ledMos[idx], supportedOperationType());
 
 			String id = idPrefix + "led-" + idx;
 
@@ -128,8 +128,7 @@ public class PiFaceDriver implements Driver, Executer {
 		}
 	}
 
-	private void createButtons(GId parent, String idPrefix, String namePrefix)
-			throws SDKException {
+	private void createButtons(GId parent, String idPrefix, String namePrefix) {
 		for (int idx = 0; idx < NUMBUTTONS; idx++) {
 			buttonMos[idx] = new ManagedObjectRepresentation();
 			buttonMos[idx].setType(SWITCHTYPE);
@@ -142,8 +141,7 @@ public class PiFaceDriver implements Driver, Executer {
 		}
 	}
 
-	private boolean createOrUpdate(ManagedObjectRepresentation mo, String id,
-			GId parent) throws SDKException {
+	private boolean createOrUpdate(ManagedObjectRepresentation mo, String id, GId parent) {
 		ID extId = new ID(id);
 		extId.setType(XTIDTYPE);
 		return dmo.createOrUpdate(mo, extId, parent);
@@ -157,6 +155,9 @@ public class PiFaceDriver implements Driver, Executer {
 	}
 
 	class EventSwitchListener implements SwitchListener {
+
+        private int idx;
+
 		public EventSwitchListener(int idx) {
 			this.idx = idx;
 		}
@@ -174,9 +175,7 @@ public class PiFaceDriver implements Driver, Executer {
 				}
 			}
 		}
-
-		private int idx;
-	};
+	}
 
 	@Override
 	public String supportedOperationType() {
@@ -184,8 +183,7 @@ public class PiFaceDriver implements Driver, Executer {
 	}
 
 	@Override
-	public void execute(OperationRepresentation operation, boolean cleanup)
-			throws Exception {
+	public void execute(OperationRepresentation operation, boolean cleanup) throws Exception {
 		Relay relayOp = operation.get(Relay.class);
 		GId targetGId = operation.getId();
 

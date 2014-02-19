@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>c8y.example</groupId>
+        <artifactId>c8y-lx</artifactId>
+        <version>4.10.2</version>
+    </parent>
+
+    <artifactId>lx-packages</artifactId>
+    <name>Cumulocity :: Examples :: Linux Agent Packages</name>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>rpi-agent</module>
+        <module>kontron-agent</module>
+        <module>mac-agent</module>
+    </modules>
+
+    <dependencies>
+        <!--Common dependencies for all packages-->
+        <dependency>
+            <groupId>c8y.example</groupId>
+            <artifactId>lx-agent</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>c8y.example</groupId>
+            <artifactId>tinkerforge-driver</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>c8y.example</groupId>
+            <artifactId>lx-agent-assembly</artifactId>
+            <type>tar.gz</type>
+            <classifier>rpm</classifier>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <dependencies>
+                        <dependency>
+                            <groupId>c8y.example</groupId>
+                            <artifactId>lx-agent-assembly</artifactId>
+                            <version>${project.version}</version>
+                        </dependency>
+                    </dependencies>
+                    <executions>
+                        <execution>
+                            <id>c8y-lx-agent-assembly</id>
+                            <goals>
+                                <goal>single</goal>
+                            </goals>
+                            <phase>prepare-package</phase>
+                            <configuration>
+                                <descriptorRefs>
+                                    <descriptorRef>c8y-lx-agent-unpacked</descriptorRef>
+                                </descriptorRefs>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>rpm-maven-plugin</artifactId>
+                    <extensions>true</extensions>
+                    <configuration>
+                        <copyright>(C) 2014 Cumulocity GmbH</copyright>
+                        <distribution>Cumulocity Agent 2014</distribution>
+                        <packager>Cumulocity</packager>
+                        <defineStatements>
+                            <defineStatement>__jar_repack %{nil}</defineStatement>
+                        </defineStatements>
+                        <mappings>
+                            <mapping>
+                                <directory>/usr/share/cumulocity-agent</directory>
+                                <sources>
+                                    <source>
+                                        <location>${project.build.directory}/${project.build.finalName}/bin</location>
+                                    </source>
+                                </sources>
+                            </mapping>
+                            <mapping>
+                                <directory>/etc/init.d</directory>
+                                <directoryIncluded>false</directoryIncluded>
+                                <filemode>755</filemode>
+                                <sources>
+                                    <source>
+                                        <location>${project.build.directory}/${project.build.finalName}/etc</location>
+                                    </source>
+                                </sources>
+                            </mapping>
+                        </mappings>
+                        <preinstallScriptlet>
+                            <script>echo "Installing Cumulocity Agent ${project.version}..."</script>
+                        </preinstallScriptlet>
+                        <postinstallScriptlet>
+                            <script>chmod +x /usr/share/cumulocity-agent/*.sh</script>
+                        </postinstallScriptlet>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+</project>

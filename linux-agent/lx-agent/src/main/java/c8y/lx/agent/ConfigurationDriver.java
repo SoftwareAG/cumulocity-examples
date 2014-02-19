@@ -20,7 +20,7 @@
 
 package c8y.lx.agent;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 import c8y.Configuration;
 import c8y.lx.driver.Configurable;
 import c8y.lx.driver.Driver;
-import c8y.lx.driver.Executer;
+import c8y.lx.driver.OperationExecutor;
 import c8y.lx.driver.OpsUtil;
 
 import com.cumulocity.model.idtype.GId;
@@ -46,17 +46,19 @@ import com.cumulocity.sdk.client.inventory.InventoryApi;
  * in configuration is requested, the current configuration is passed to all
  * drivers that implement the Configurable interface.
  */
-public class ConfigurationDriver implements Driver, Executer {
+public class ConfigurationDriver implements Driver, OperationExecutor {
+
+    private static Logger logger = LoggerFactory .getLogger(ConfigurationDriver.class);
 
 	public static final String CONFIGFILE = "/etc/cumulocity-configuration.properties";
 
-	private static Logger logger = LoggerFactory
-			.getLogger(ConfigurationDriver.class);
-
 	private InventoryApi inventory;
-	private Properties props = new Properties();
-	private List<Configurable> configurables = new ArrayList<Configurable>();
-	private GId gid;
+
+    private Properties props = new Properties();
+
+    private List<Configurable> configurables = new LinkedList<>();
+
+	private GId deviceId;
 
 	@Override
 	public void initialize(Platform platform) throws Exception {
@@ -69,8 +71,8 @@ public class ConfigurationDriver implements Driver, Executer {
 	}
 
 	@Override
-	public Executer[] getSupportedOperations() {
-		return new Executer[] { this };
+	public OperationExecutor[] getSupportedOperations() {
+		return new OperationExecutor[] { this };
 	}
 
 	@Override
@@ -86,12 +88,12 @@ public class ConfigurationDriver implements Driver, Executer {
 		Configuration configuration = new Configuration(
 				PropUtils.toString(props));
 		mo.set(configuration);
-		OpsUtil.add(mo, supportedOperationType());
+		OpsUtil.addSupportedOperation(mo, supportedOperationType());
 	}
 
 	@Override
 	public void discoverChildren(ManagedObjectRepresentation mo) {
-		this.gid = mo.getId();
+		this.deviceId = mo.getId();
 	}
 
 	@Override
@@ -105,9 +107,8 @@ public class ConfigurationDriver implements Driver, Executer {
 	}
 
 	@Override
-	public void execute(OperationRepresentation operation, boolean cleanup)
-			throws Exception {
-		if (!gid.equals(operation.getDeviceId())) {
+	public void execute(OperationRepresentation operation, boolean cleanup) throws Exception {
+		if (!deviceId.equals(operation.getDeviceId())) {
 			// Silently ignore the operation if it is not targeted to us,
 			// another driver will (hopefully) care.
 			return;
@@ -119,8 +120,7 @@ public class ConfigurationDriver implements Driver, Executer {
 			return;
 		}
 
-		Configuration configuration = (Configuration) operation
-				.get(Configuration.class);
+		Configuration configuration = operation.get(Configuration.class);
 		props = PropUtils.fromString(configuration.getConfig());
 
 		notifyConfigurationUpdate();
@@ -128,7 +128,7 @@ public class ConfigurationDriver implements Driver, Executer {
 		logger.info("Configuration set, updating inventory");
 		ManagedObjectRepresentation mo = new ManagedObjectRepresentation();
 		mo.set(configuration);
-		inventory.getManagedObject(gid).update(mo);
+		inventory.update(mo);
 
 		String error = PropUtils.toFile(props, CONFIGFILE);
 		operation.setFailureReason(error);

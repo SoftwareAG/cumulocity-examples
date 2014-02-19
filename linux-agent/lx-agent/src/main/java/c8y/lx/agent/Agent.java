@@ -20,26 +20,23 @@
 
 package c8y.lx.agent;
 
-import java.io.IOException;
-import java.util.ArrayList;
+import static c8y.lx.agent.CredentialsManager.defaultCredentialsManager;
+
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.ServiceLoader;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import c8y.Availability;
 import c8y.Hardware;
 import c8y.IsDevice;
 import c8y.RequiredAvailability;
-import c8y.SupportedOperations;
 import c8y.lx.driver.Configurable;
 import c8y.lx.driver.DeviceManagedObject;
 import c8y.lx.driver.Driver;
-import c8y.lx.driver.Executer;
-
+import c8y.lx.driver.OperationExecutor;
 import com.cumulocity.model.ID;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.Platform;
@@ -58,145 +55,162 @@ import com.sun.jersey.api.client.ClientHandlerException;
  * Working directory should be the directory with the installed jars for
  * software management to work.
  * </p>
- * 
- * @see {@link Driver}, {@link CredentialManager}
+ *
+ * @see {@link Driver}, {@link CredentialsManager}
  */
 public class Agent {
 
-	public static final String TYPE = "c8y_Linux";
-	public static final String XTIDTYPE = "c8y_Serial";
-	public static final String ALARMTYPE = "c8y_AgentStartupError";
-	public static final long RETRY_WAIT = 5000L;
-	public static final int RESPONSE_INTERVAL = 3; // We expect the agent to get back at least every three minutes. 
+    private static final Logger logger = LoggerFactory.getLogger(Agent.class);
 
-	private static Logger logger = LoggerFactory.getLogger(Agent.class);
+    public static final String TYPE = "c8y_Linux";
 
-	private List<Driver> drivers = new ArrayList<Driver>();
-	private Platform platform;
-	private ManagedObjectRepresentation mo = new ManagedObjectRepresentation();
-	private Map<String, Executer> dispatchMap = new HashMap<String, Executer>();
+    public static final String XTIDTYPE = "c8y_Serial";
 
-	public static void main(String[] args) {
-		try {
-			new Agent();
-		} catch (Exception x) {
-			logger.error("Unrecoverable error, exiting", x);
-		}
-	}
+    public static final String ALARMTYPE = "c8y_AgentStartupError";
 
-	public Agent() throws IOException, SDKException {
-		logger.info("Starting agent");
-		Credentials creds = new CredentialManager().getCredentials();
-		platform = new PlatformImpl(creds.getHost(), creds.getTenant(),
-				creds.getUser(), creds.getPassword(), creds.getKey());
+    public static final long RETRY_WAIT_MS = 5000L;
 
-		// See {@link Driver} for an explanation of the driver life cycle.
-		initializeDrivers();
-		initializeInventory();
-		discoverChildren();
-		startDrivers();
-		new OperationDispatcher(platform, mo.getId(), dispatchMap);
-	}
+    public static final int RESPONSE_INTERVAL_MIN = 3; // We expect the agent to get back at least every three minutes.
 
-	private void initializeDrivers() {
-		ConfigurationDriver cfgDriver = null;
-		logger.info("Initializing drivers");
+    private final Platform platform;
 
-		for (Driver driver : ServiceLoader.load(Driver.class)) {
-			try {
-				logger.info("Initializing " + driver.getClass());
-				driver.initialize(platform);
-				drivers.add(driver);
+    private final List<Driver> drivers;
 
-				if (driver instanceof ConfigurationDriver) {
-					cfgDriver = (ConfigurationDriver) driver;
-				}
-			} catch (Exception e) {
-				logger.warn("Skipping driver " + driver.getClass());
-				logger.debug("Driver message: ", e);
-			}
-		}
+    private final ManagedObjectRepresentation mo = new ManagedObjectRepresentation();
+
+    public static void main(String[] args) {
+        try {
+            new Agent();
+        } catch (Exception x) {
+            logger.error("Unrecoverable error, exiting", x);
+        }
+    }
+
+    public Agent() {
+        this(defaultCredentialsManager(), new ServiceLocatorDriversLoader());
+    }
+
+    public Agent(CredentialsManager credentialsManager, DriversLoader driversLoader) {
+        this(new PlatformImpl(credentialsManager.getHost(), credentialsManager.getCredentials()), driversLoader);
+    }
+
+    public Agent(Platform platform, DriversLoader driversLoader) {
+        logger.info("Starting agent");
+        this.platform = platform;
+
+        // See {@link Driver} for an explanation of the driver life cycle.
+        this.drivers = initializeDrivers(driversLoader);
+        Map<String, OperationExecutor> dispatchMap = initializeInventory();
+        discoverChildren();
+        startDrivers();
+        new OperationDispatcher(this.platform.getDeviceControlApi(), mo.getId(), dispatchMap);
+    }
+
+    private List<Driver> initializeDrivers(DriversLoader driversLoader) {
+        List<Driver> drivers = new LinkedList<>();
+        ConfigurationDriver cfgDriver = null;
+        logger.info("Initializing drivers");
+
+        for (Driver driver : driversLoader.loadDrivers()) {
+            try {
+                logger.info("Initializing " + driver.getClass());
+                driver.initialize(platform);
+                drivers.add(driver);
+
+                if (driver instanceof ConfigurationDriver) {
+                    cfgDriver = (ConfigurationDriver) driver;
+                }
+            } catch (Exception e) {
+                logger.warn("Skipping driver " + driver.getClass());
+                logger.debug("Driver error message: ", e);
+            }
+        }
 
 		/*
-		 * ConfigurationDriver notifies other drivers of changes in
+         * ConfigurationDriver notifies other drivers of changes in
 		 * configuration if they implement Configurable.
 		 */
-		if (cfgDriver != null) {
-			for (Driver driver : drivers) {
-				if (driver instanceof Configurable) {
-					cfgDriver.addConfigurable((Configurable) driver);
-				}
-			}
-		}
-	}
+        if (cfgDriver != null) {
+            for (Driver driver : drivers) {
+                if (driver instanceof Configurable) {
+                    cfgDriver.addConfigurable((Configurable) driver);
+                }
+            }
+        }
 
-	private void initializeInventory() throws SDKException {
-		logger.info("Initializing inventory");
+        return drivers;
+    }
 
-		for (Driver driver : drivers) {
-			driver.initializeInventory(mo);
+    private Map<String, OperationExecutor> initializeInventory() throws SDKException {
+        logger.info("Initializing inventory");
 
-			for (Executer exec : driver.getSupportedOperations()) {
-				String supportedOp = exec.supportedOperationType();
-				dispatchMap.put(supportedOp, exec);
-			}
-		}
+        Map<String, OperationExecutor> dispatchMap = new HashMap<>();
+        for (Driver driver : drivers) {
+            driver.initializeInventory(mo);
 
-		Hardware hardware = mo.get(Hardware.class);
-		String model = hardware.getModel();
-		String serial = hardware.getSerialNumber();
+            for (OperationExecutor exec : driver.getSupportedOperations()) {
+                String supportedOp = exec.supportedOperationType();
+                dispatchMap.put(supportedOp, exec);
+            }
+        }
 
-		String id = "linux-" + serial;
-		ID extId = new ID(id);
-		extId.setType(XTIDTYPE);
+        Hardware hardware = mo.get(Hardware.class);
+        String model = hardware.getModel();
+        String serial = hardware.getSerialNumber();
 
-		mo.setType(TYPE);
-		mo.setName(model + " " + serial);
-		mo.set(new com.cumulocity.model.Agent());
-		mo.set(new IsDevice());
-		mo.set(new RequiredAvailability(RESPONSE_INTERVAL));
+        String id = "linux-" + serial;
+        ID extId = new ID(id);
+        extId.setType(XTIDTYPE);
 
-		checkConnection();
+        mo.setType(TYPE);
+        mo.setName(model + " " + serial);
+        mo.set(new com.cumulocity.model.Agent());
+        mo.set(new IsDevice());
+        mo.set(new RequiredAvailability(RESPONSE_INTERVAL_MIN));
 
-		logger.debug("Agent representation is {}, updating inventory", mo);
+        checkConnection();
 
-		if (new DeviceManagedObject(platform).createOrUpdate(mo, extId, null)) {
-			logger.debug("Agent was created in the inventory");
-		} else {
-			logger.debug("Agent was updated in the inventory");
-		}
-	}
+        logger.debug("Agent representation is {}, updating inventory", mo);
 
-	private void checkConnection() throws SDKException {
-		logger.info("Checking platform connectivity");
-		boolean connected = false;
+        if (new DeviceManagedObject(platform).createOrUpdate(mo, extId, null)) {
+            logger.debug("Agent was created in the inventory");
+        } else {
+            logger.debug("Agent was updated in the inventory");
+        }
 
-		while (!connected) {
-			try {
-				platform.getInventoryApi().getManagedObjects().get(1);
-				connected = true;
-			} catch (ClientHandlerException x) {
-				logger.debug("No connectivity, wait and retry", x);
-				try {
-					Thread.sleep(RETRY_WAIT);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-	}
+        return dispatchMap;
+    }
 
-	private void discoverChildren() {
-		logger.info("Discovering child devices");
-		for (Driver driver : drivers) {
-			driver.discoverChildren(mo);
-		}
-	}
+    private void checkConnection() throws SDKException {
+        logger.info("Checking platform connectivity");
+        boolean connected = false;
 
-	private void startDrivers() {
-		logger.info("Starting drivers");
-		for (Driver driver : drivers) {
-			driver.start();
-		}
-	}
+        while (!connected) {
+            try {
+                platform.getInventoryApi().getManagedObjects().get(1);
+                connected = true;
+            } catch (ClientHandlerException x) {
+                logger.debug("No connectivity, wait and retry", x);
+                try {
+                    Thread.sleep(RETRY_WAIT_MS);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private void discoverChildren() {
+        logger.info("Discovering child devices");
+        for (Driver driver : drivers) {
+            driver.discoverChildren(mo);
+        }
+    }
+
+    private void startDrivers() {
+        logger.info("Starting drivers");
+        for (Driver driver : drivers) {
+            driver.start();
+        }
+    }
 }

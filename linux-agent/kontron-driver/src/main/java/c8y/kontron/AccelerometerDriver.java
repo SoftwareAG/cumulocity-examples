@@ -12,6 +12,7 @@ import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 
 public class AccelerometerDriver extends PollingDriver {
+
 	public static final String TYPE = "Accelerometer";
 	public static final String PROP_PREF = "c8y.accelerometer";
 
