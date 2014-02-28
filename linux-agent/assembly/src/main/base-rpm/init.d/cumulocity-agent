@@ -22,7 +22,7 @@
 
 
 # set JAVA_HOME for Ubuntu/CentOS
-JAVA_HOME_UBUNTU=/usr/lib/jvm/java-6-sun
+JAVA_HOME_UBUNTU=/usr/lib/jvm/default-java
 JAVA_HOME_CENTOS=/usr/java/default
 
 if [ -x $JAVA_HOME_UBUNTU/bin/java ]; then
