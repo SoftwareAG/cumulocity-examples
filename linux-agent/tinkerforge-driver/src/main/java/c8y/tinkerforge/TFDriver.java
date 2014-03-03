@@ -20,8 +20,6 @@
 
 package c8y.tinkerforge;
 
-import java.io.IOException;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -33,7 +31,6 @@ import c8y.tinkerforge.Discoverer.DiscoveryFinishedListener;
 
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.Platform;
-import com.tinkerforge.AlreadyConnectedException;
 
 /**
  * Driver for bricklet drivers. Bricklet drivers cannot be registered directly
@@ -43,10 +40,6 @@ import com.tinkerforge.AlreadyConnectedException;
 public class TFDriver implements Driver, DiscoveryFinishedListener, Configurable {
 
 	private Iterable<Driver> drivers;
-
-	public TFDriver() throws UnknownHostException, AlreadyConnectedException, IOException {
-		new BrickConnector(this);
-	}
 
 	@Override
 	public void addDefaults(Properties props) {
@@ -70,7 +63,9 @@ public class TFDriver implements Driver, DiscoveryFinishedListener, Configurable
 
 	@Override
 	public void initialize(Platform platform) throws Exception {
-		synchronized (this) {
+        new BrickConnector(this);
+
+        synchronized (this) {
 			if (drivers == null) {
 				wait();
 			}
