@@ -37,6 +37,7 @@ import c8y.lx.driver.Configurable;
 import c8y.lx.driver.DeviceManagedObject;
 import c8y.lx.driver.Driver;
 import c8y.lx.driver.OperationExecutor;
+
 import com.cumulocity.model.ID;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.Platform;
@@ -123,6 +124,9 @@ public class Agent {
             } catch (Exception e) {
                 logger.warn("Skipping driver " + driver.getClass());
                 logger.debug("Driver error message: ", e);
+            } catch (UnsatisfiedLinkError error){
+                logger.warn("Skipping driver " + driver.getClass());
+                logger.debug("Driver error message: " + driver.getClass(), error);
             }
         }
 

@@ -7,7 +7,7 @@
     <parent>
         <groupId>c8y.example</groupId>
         <artifactId>c8y-lx</artifactId>
-        <version>4.10.2</version>
+        <version>4.10.3</version>
     </parent>
 
     <artifactId>lx-packages</artifactId>
@@ -101,8 +101,14 @@
                             <script>echo "Installing Cumulocity Agent ${project.version}..."</script>
                         </preinstallScriptlet>
                         <postinstallScriptlet>
-                            <script>chmod +x /usr/share/cumulocity-agent/*.sh</script>
+                            <script>
+                                chmod +x /usr/share/cumulocity-agent/*.sh
+                                update-rc.d cumulocity-agent defaults 99
+                            </script>
                         </postinstallScriptlet>
+                        <postremoveScriptlet>
+                            <script>update-rc.d -f cumulocity-agent remove</script>
+                        </postremoveScriptlet>
                     </configuration>
                 </plugin>
             </plugins>
