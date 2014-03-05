@@ -103,7 +103,7 @@
                         <postinstallScriptlet>
                             <script>
                                 chmod +x /usr/share/cumulocity-agent/*.sh
-                                update-rc.d cumulocity-agent defaults 99
+                                update-rc.d cumulocity-agent start 99 2 3 4 5 . stop 99 0 1 6 .
                             </script>
                         </postinstallScriptlet>
                         <postremoveScriptlet>
