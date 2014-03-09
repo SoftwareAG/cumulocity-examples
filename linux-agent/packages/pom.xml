@@ -31,12 +31,6 @@
             <artifactId>tinkerforge-driver</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>c8y.example</groupId>
-            <artifactId>lx-agent-assembly</artifactId>
-            <type>tar.gz</type>
-            <classifier>rpm</classifier>
-        </dependency>
     </dependencies>
 
     <build>
@@ -60,7 +54,7 @@
                             <phase>prepare-package</phase>
                             <configuration>
                                 <descriptorRefs>
-                                    <descriptorRef>c8y-lx-agent-unpacked</descriptorRef>
+                                    <descriptorRef>${addembly.descriptor}</descriptorRef>
                                 </descriptorRefs>
                             </configuration>
                         </execution>
@@ -92,7 +86,7 @@
                                 <filemode>755</filemode>
                                 <sources>
                                     <source>
-                                        <location>${project.build.directory}/${project.build.finalName}/etc</location>
+                                        <location>${project.build.directory}/${project.build.finalName}/etc/init.d</location>
                                     </source>
                                 </sources>
                             </mapping>

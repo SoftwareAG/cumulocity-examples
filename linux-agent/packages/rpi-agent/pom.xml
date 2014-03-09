@@ -14,6 +14,10 @@
     <name>Cumulocity :: Examples :: Raspberry Pi Package</name>
     <packaging>rpm</packaging>
 
+    <properties>
+        <addembly.descriptor>c8y-lx-agent-rpm</addembly.descriptor>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>c8y.example</groupId>

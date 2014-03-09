@@ -2,7 +2,7 @@
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
 
-    <id>rpm</id>
+    <id>deb</id>
 
     <formats>
         <format>tar.gz</format>
@@ -13,7 +13,7 @@
     <fileSets>
         <fileSet>
             <outputDirectory>/</outputDirectory>
-            <directory>src/main/base-rpm</directory>
+            <directory>src/main/base-deb</directory>
         </fileSet>
     </fileSets>
 
