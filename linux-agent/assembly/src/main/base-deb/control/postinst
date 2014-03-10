@@ -1,2 +1,3 @@
 chmod +x /usr/share/${project.artifactId}/*.sh
+ln -s /usr/share/${project.artifactId}/cfg/cumulocity.properties /etc/cumulocity-agent.properties
 update-rc.d cumulocity-agent start 99 2 3 4 5 . stop 99 0 1 6 .
