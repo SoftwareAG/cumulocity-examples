@@ -1,0 +1,2 @@
+/usr/share/${project.artifactId}/cfg/cumulocity.properties
+/usr/share/${project.artifactId}/cfg/logback.xml

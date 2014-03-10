@@ -2,6 +2,8 @@
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
 
+    <id>deb</id>
+
     <formats>
         <format>dir</format>
     </formats>
@@ -10,24 +12,28 @@
 
     <dependencySets>
         <dependencySet>
-            <outputDirectory>/bin/lib</outputDirectory>
+            <outputDirectory>/usr/share/${project.artifactId}/lib</outputDirectory>
             <includes>
                 <include>*:jar:*</include>
             </includes>
         </dependencySet>
         <dependencySet>
-            <outputDirectory>/bin</outputDirectory>
+            <outputDirectory>/usr/share/${project.artifactId}</outputDirectory>
             <includes>
                 <include>c8y.example:lx-agent-assembly:tar.gz:tar:${project.version}</include>
             </includes>
             <unpack>true</unpack>
         </dependencySet>
         <dependencySet>
-            <outputDirectory>/etc</outputDirectory>
+            <outputDirectory>/</outputDirectory>
             <includes>
                 <include>c8y.example:lx-agent-assembly:tar.gz:deb:${project.version}</include>
             </includes>
+            <outputFileNameMapping>./</outputFileNameMapping>
             <unpack>true</unpack>
+            <unpackOptions>
+                <filtered>true</filtered>
+            </unpackOptions>
         </dependencySet>
     </dependencySets>
 

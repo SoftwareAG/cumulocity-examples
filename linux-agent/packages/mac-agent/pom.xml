@@ -10,7 +10,7 @@
         <version>5.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>cumulocity-mac-agent-package</artifactId>
+    <artifactId>cumulocity-mac-agent</artifactId>
     <name>Cumulocity :: Examples :: Mac Agent Package</name>
     <packaging>pom</packaging>
 
