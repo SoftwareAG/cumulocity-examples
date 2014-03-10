@@ -10,7 +10,7 @@
         <version>5.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>cumulocity-kontron-agent-package</artifactId>
+    <artifactId>cumulocity-kontron-agent</artifactId>
     <name>Cumulocity :: Examples :: Kontron Agent Package</name>
     <packaging>pom</packaging>
 

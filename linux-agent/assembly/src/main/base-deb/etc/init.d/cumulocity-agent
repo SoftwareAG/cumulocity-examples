@@ -44,7 +44,7 @@ c8y_process_running() {
     RUNNING=$?
 }
 
-chome=/usr/share/cumulocity-agent
+chome=/usr/share/${project.artifactId}
 prog="c8y-agent.sh"
 
 start() {

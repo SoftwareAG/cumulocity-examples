@@ -10,12 +10,12 @@
         <version>5.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>cumulocity-rpi-agent-package</artifactId>
+    <artifactId>cumulocity-rpi-agent</artifactId>
     <name>Cumulocity :: Examples :: Raspberry Pi Package</name>
-    <packaging>rpm</packaging>
+    <packaging>pom</packaging>
 
     <properties>
-        <addembly.descriptor>c8y-lx-agent-rpm</addembly.descriptor>
+        <addembly.descriptor>c8y-lx-agent-deb</addembly.descriptor>
     </properties>
 
     <dependencies>
@@ -37,13 +37,8 @@
                 <artifactId>maven-assembly-plugin</artifactId>
             </plugin>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>rpm-maven-plugin</artifactId>
-                <configuration>
-                    <name>rpi-agent</name>
-                    <projversion>${project.version}</projversion>
-                    <group>C8Y/Agent</group>
-                </configuration>
+                <artifactId>jdeb</artifactId>
+                <groupId>org.vafer</groupId>
             </plugin>
         </plugins>
     </build>

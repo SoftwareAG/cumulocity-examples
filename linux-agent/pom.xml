@@ -87,6 +87,13 @@
                 <type>tar.gz</type>
                 <classifier>rpm</classifier>
             </dependency>
+            <dependency>
+                <groupId>c8y.example</groupId>
+                <artifactId>lx-agent-assembly</artifactId>
+                <version>${project.version}</version>
+                <type>tar.gz</type>
+                <classifier>deb</classifier>
+            </dependency>
 		</dependencies>
 	</dependencyManagement>
 

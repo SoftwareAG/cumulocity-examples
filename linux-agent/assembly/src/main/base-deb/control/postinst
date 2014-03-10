@@ -1,0 +1,2 @@
+chmod +x /usr/share/${project.artifactId}/*.sh
+update-rc.d cumulocity-agent start 99 2 3 4 5 . stop 99 0 1 6 .
