@@ -1,2 +1,3 @@
-/usr/share/${project.artifactId}/cfg/cumulocity.properties
+/etc/cumulocity.properties
+/etc/init.d/cumulocity-agent
 /usr/share/${project.artifactId}/cfg/logback.xml

@@ -55,7 +55,7 @@ public class DeviceManagedObject {
         GId gid = tryGetBinding(extId);
 
         ManagedObjectRepresentation returnedMo;
-        returnedMo = (gid == null) ? create(mo, extId) : update(mo);
+        returnedMo = (gid == null) ? create(extId, mo) : update(gid, mo);
 
         if (parentId != null) {
             ManagedObjectRepresentation handle = new ManagedObjectRepresentation();
@@ -71,14 +71,15 @@ public class DeviceManagedObject {
         return gid == null;
     }
 
-    private ManagedObjectRepresentation create(ManagedObjectRepresentation mo, ID extId) {
+    private ManagedObjectRepresentation create(ID extId, ManagedObjectRepresentation mo) {
         ManagedObjectRepresentation returnedMo;
         returnedMo = inventory.create(mo);
         bind(returnedMo, extId);
         return returnedMo;
     }
 
-    private ManagedObjectRepresentation update(ManagedObjectRepresentation mo) {
+    private ManagedObjectRepresentation update(GId gid, ManagedObjectRepresentation mo) {
+        mo.setId(gid);
         mo.setName(null); // Don't overwrite user-modified names
         return inventory.update(mo);
     }

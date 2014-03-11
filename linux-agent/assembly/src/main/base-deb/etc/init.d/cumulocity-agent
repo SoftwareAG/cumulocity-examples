@@ -1,34 +1,27 @@
 #!/bin/bash
 #
-# Cumulocity-Agent Startup script
+# /etc/init.d/cumulocity-agent - startup script for Cumulocity Agent
 #
-# chkconfig: 345 86 14
-# description: Cumulocity-Agent component
-# processname: java
-# pidfile: /var/run/c8y-agent.pid
-
 ### BEGIN INIT INFO
-# Provides: java
-# Required-Start: $network $syslog
-# Required-Stop: $network $syslog
-# Default-Start: 2 3 4 5
-# Default-Stop: 0 1 6
-# Short-Description: start and stop Cumulocity Agent
+# Provides:          cumulocity-agent
+# Required-Start:    $local_fs $remote_fs $network
+# Required-Stop:     $local_fs $remote_fs $network
+# Should-Start:      $named
+# Should-Stop:       $named
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start Cumulocity Agent.
+# Description:       Start Cumulocity Agent.
 ### END INIT INFO
 
 # Source function library.
 # There is no such script on Ubuntu
 #. /etc/init.d/functions
 
-
-# set JAVA_HOME for Ubuntu/CentOS
 JAVA_HOME_UBUNTU=/usr/lib/jvm/default-java
-JAVA_HOME_CENTOS=/usr/java/default
 
-if [ -x $JAVA_HOME_UBUNTU/bin/java ]; then
+if [ -z "$JAVA_HOME" ] && [ -x $JAVA_HOME_UBUNTU/bin/java ]; then
     export JAVA_HOME=$JAVA_HOME_UBUNTU
-elif [ -x $JAVA_HOME_CENTOS/bin/java ]; then
-    export JAVA_HOME=$JAVA_HOME_CENTOS
 fi
 
 if [ -z "$JAVA_HOME" ]; then
@@ -36,7 +29,6 @@ if [ -z "$JAVA_HOME" ]; then
 else
     export PATH=$PATH:$JAVA_HOME/bin
 fi
-
 
 # check if Cumulocity Agent is already started
 c8y_process_running() {
