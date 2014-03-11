@@ -1,6 +1,6 @@
 chmod +x /usr/share/${project.artifactId}/*.sh
 
-if [ -x "/etc/cumulocity-agent.properties" ]; then
+if [ -f "/etc/cumulocity-agent.properties" ]; then
     mv /usr/share/${project.artifactId}/cfg/cumulocity.properties /usr/share/${project.artifactId}/cfg/cumulocity.properties.template
 else
     cp /usr/share/${project.artifactId}/cfg/cumulocity.properties /usr/share/${project.artifactId}/cfg/cumulocity.properties.template
