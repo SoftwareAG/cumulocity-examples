@@ -1,1 +1,7 @@
-update-rc.d -f cumulocity-agent remove
+if [ -x "/etc/cumulocity-agent.properties" ]; then
+    rm /etc/cumulocity-agent.properties
+fi
+
+if [ -x "/etc/init.d/cumulocity-agent" ]; then
+    invoke-rc.d cumulocity-agent stop || true
+fi
