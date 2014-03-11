@@ -4,8 +4,8 @@
 #
 ### BEGIN INIT INFO
 # Provides:          cumulocity-agent
-# Required-Start:    $local_fs $remote_fs $network
-# Required-Stop:     $local_fs $remote_fs $network
+# Required-Start:    $local_fs $remote_fs $network $syslog
+# Required-Stop:     $local_fs $remote_fs $network $syslog
 # Should-Start:      $named
 # Should-Stop:       $named
 # Default-Start:     2 3 4 5
@@ -18,14 +18,14 @@
 # There is no such script on Ubuntu
 #. /etc/init.d/functions
 
-JAVA_HOME_UBUNTU=/usr/lib/jvm/default-java
+DEFAULT_JAVA_HOME=/usr/lib/jvm/default-java
 
-if [ -z "$JAVA_HOME" ] && [ -x $JAVA_HOME_UBUNTU/bin/java ]; then
-    export JAVA_HOME=$JAVA_HOME_UBUNTU
+if [ -z "$JAVA_HOME" ] && [ -x $DEFAULT_JAVA_HOME/bin/java ]; then
+    export JAVA_HOME=$DEFAULT_JAVA_HOME
 fi
 
 if [ -z "$JAVA_HOME" ]; then
-    echo -n "Cannot set JAVA_HOME env."
+    echo "Environment variable JAVA_HOME not set!"
 else
     export PATH=$PATH:$JAVA_HOME/bin
 fi
@@ -42,15 +42,15 @@ prog="c8y-agent.sh"
 start() {
     c8y_process_running
     if [ $RUNNING -eq 0 ]; then
-        echo -n "Cumulocity Agent process is already running."
+        echo "Cumulocity Agent process is already running."
     else
-        echo -n $"Starting $prog: "
+        echo $"Starting $prog..."
         cd $chome
             ./$prog &
         fi
 }
 stop() {
-        echo -n $"Stopping $prog: "
+        echo $"Stopping $prog..."
         killall $prog
 }
 status() {

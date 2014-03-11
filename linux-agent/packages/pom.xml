@@ -140,11 +140,11 @@
                                 <deb>${project.build.directory}/${project.artifactId}_${project.version}_all.deb</deb>
                                 <dataSet>
                                     <data>
-                                        <src>${assembly.output}/etc</src>
+                                        <src>${assembly.output}/etc/init.d</src>
                                         <type>directory</type>
                                         <mapper>
                                             <type>perm</type>
-                                            <prefix>/etc</prefix>
+                                            <prefix>/etc/init.d</prefix>
                                             <filemode>755</filemode>
                                         </mapper>
                                     </data>
