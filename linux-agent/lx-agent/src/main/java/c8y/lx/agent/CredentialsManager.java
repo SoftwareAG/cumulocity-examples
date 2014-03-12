@@ -10,7 +10,7 @@ import com.cumulocity.model.authentication.CumulocityCredentials;
  */
 public class CredentialsManager {
 
-    public static final String DEFAULT_PROPS_LOCATION = "/etc/cumulocity.properties";
+    public static final String DEFAULT_PROPS_LOCATION = "./cfg/cumulocity.properties";
 
     public static CredentialsManager defaultCredentialsManager() {
         return new CredentialsManager(DEFAULT_PROPS_LOCATION);
