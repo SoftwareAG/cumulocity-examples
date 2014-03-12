@@ -50,7 +50,7 @@ public class ConfigurationDriver implements Driver, OperationExecutor {
 
     private static Logger logger = LoggerFactory .getLogger(ConfigurationDriver.class);
 
-	public static final String DEFAULT_CONFIG_LOCATION = "./cfg/cumulocity.properties";
+	public static final String DEFAULT_CONFIG_LOCATION = "./cfg/cumulocity-config.properties";
 
     private final String configLocation;
 
