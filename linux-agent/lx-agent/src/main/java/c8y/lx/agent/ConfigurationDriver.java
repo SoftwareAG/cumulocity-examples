@@ -50,7 +50,9 @@ public class ConfigurationDriver implements Driver, OperationExecutor {
 
     private static Logger logger = LoggerFactory .getLogger(ConfigurationDriver.class);
 
-	public static final String CONFIGFILE = "/etc/cumulocity-configuration.properties";
+	public static final String DEFAULT_CONFIG_LOCATION = "./cfg/cumulocity.properties";
+
+    private final String configLocation;
 
 	private InventoryApi inventory;
 
@@ -60,7 +62,11 @@ public class ConfigurationDriver implements Driver, OperationExecutor {
 
 	private GId deviceId;
 
-	@Override
+    public ConfigurationDriver() {
+        this.configLocation = System.getProperty("config.location", DEFAULT_CONFIG_LOCATION);
+    }
+
+    @Override
 	public void initialize(Platform platform) throws Exception {
 		this.inventory = platform.getInventoryApi();
 	}
@@ -82,7 +88,7 @@ public class ConfigurationDriver implements Driver, OperationExecutor {
 		 * Merge with the stored configuration, notify others of potential
 		 * updates and send to inventory.
 		 */
-		PropUtils.fromFile(CONFIGFILE, props);
+		PropUtils.fromFile(configLocation, props);
 		notifyConfigurationUpdate();
 
 		Configuration configuration = new Configuration(
@@ -130,7 +136,7 @@ public class ConfigurationDriver implements Driver, OperationExecutor {
 		mo.set(configuration);
 		inventory.update(mo);
 
-		String error = PropUtils.toFile(props, CONFIGFILE);
+		String error = PropUtils.toFile(props, DEFAULT_CONFIG_LOCATION);
 		operation.setFailureReason(error);
 		operation.setStatus(OperationStatus.SUCCESSFUL.toString());
 	}
