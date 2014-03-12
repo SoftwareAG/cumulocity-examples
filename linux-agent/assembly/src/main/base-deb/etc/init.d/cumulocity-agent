@@ -46,8 +46,8 @@ start() {
     else
         echo $"Starting $prog..."
         cd $chome
-            ./$prog &
-        fi
+        ./$prog &
+    fi
 }
 stop() {
         echo $"Stopping $prog..."
