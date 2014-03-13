@@ -13,7 +13,7 @@
     <fileSets>
         <fileSet>
             <outputDirectory>/</outputDirectory>
-            <directory>src/main/base-rpm/init.d</directory>
+            <directory>src/main/base-rpm</directory>
         </fileSet>
     </fileSets>
 

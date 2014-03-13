@@ -7,12 +7,16 @@
     <parent>
         <groupId>c8y.example</groupId>
         <artifactId>lx-packages</artifactId>
-        <version>5.0.1-SNAPSHOT</version>
+        <version>5.0.2-SNAPSHOT</version>
     </parent>
 
-    <artifactId>cumulocity-kontron-agent-package</artifactId>
+    <artifactId>cumulocity-kontron-agent</artifactId>
     <name>Cumulocity :: Examples :: Kontron Agent Package</name>
-    <packaging>rpm</packaging>
+    <packaging>pom</packaging>
+
+    <properties>
+        <addembly.descriptor>c8y-lx-agent</addembly.descriptor>
+    </properties>
 
     <dependencies>
         <dependency>
@@ -26,15 +30,6 @@
         <plugins>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>rpm-maven-plugin</artifactId>
-                <configuration>
-                    <name>kontron-agent</name>
-                    <projversion>${project.version}</projversion>
-                    <group>C8Y/Agent</group>
-                </configuration>
             </plugin>
         </plugins>
     </build>

@@ -27,13 +27,14 @@ import com.cumulocity.sdk.client.Platform;
  * that also reports syslog alerts and enables updating the OS software.
  */
 public class PiHardwareDriver implements Driver, OperationExecutor {
+
 	public static final String CPUINFO = "/proc/cpuinfo";
 	public static final String PATTERN = "\\s+:\\s+";
 
 	private static Logger logger = LoggerFactory.getLogger(PiHardwareDriver.class);
 	
 	private GId gid;
-	private Hardware hardware = new Hardware("Unknown model", "Unknown serial", "Unknown revision");
+	private Hardware hardware = new Hardware("unknown-model", "unknown-serial", "unknown-revision");
 
 	@Override
 	public void initialize(Platform platform) throws Exception {
@@ -51,16 +52,16 @@ public class PiHardwareDriver implements Driver, OperationExecutor {
 			String line = null;
 
 			while ((line = reader.readLine()) != null) {
-				String[] keyval = line.split(PATTERN);
+				String[] entry = line.split(PATTERN);
 
-				if ("Hardware".equals(keyval[0])) {
-					hardware.setModel("RaspPi " + keyval[1]);
+				if ("hardware".equalsIgnoreCase(entry[0])) {
+					hardware.setModel("RaspPi " + entry[1]);
 				}
-				if ("Revision".equals(keyval[0])) {
-					hardware.setRevision(keyval[1]);
+				if ("revision".equalsIgnoreCase(entry[0])) {
+					hardware.setRevision(entry[1]);
 				}
-				if ("Serial".equals(keyval[0])) {
-					hardware.setSerialNumber(keyval[1]);
+				if ("serial".equalsIgnoreCase(entry[0])) {
+					hardware.setSerialNumber(entry[1]);
 				}
 			}
 		}

@@ -6,7 +6,7 @@
 
     <groupId>c8y.example</groupId>
     <artifactId>lx-agent-assembly</artifactId>
-    <version>5.0.1-SNAPSHOT</version>
+    <version>5.0.2-SNAPSHOT</version>
 
     <name>Cumulocity :: Examples :: Linux Agent Base Assembly</name>
     <description>Base assembly package for all environments</description>
@@ -30,6 +30,7 @@
                             <descriptors>
                                 <descriptor>src/main/assembly/base-tar.xml</descriptor>
                                 <descriptor>src/main/assembly/base-rpm.xml</descriptor>
+                                <descriptor>src/main/assembly/base-deb.xml</descriptor>
                             </descriptors>
                         </configuration>
                     </execution>

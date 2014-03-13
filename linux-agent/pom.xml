@@ -5,7 +5,7 @@
     <parent>
 		<groupId>c8y.example</groupId>
 		<artifactId>c8y-examples</artifactId>
-		<version>5.0.1-SNAPSHOT</version>
+		<version>5.0.2-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>c8y-lx</artifactId>
@@ -86,6 +86,13 @@
                 <version>${project.version}</version>
                 <type>tar.gz</type>
                 <classifier>rpm</classifier>
+            </dependency>
+            <dependency>
+                <groupId>c8y.example</groupId>
+                <artifactId>lx-agent-assembly</artifactId>
+                <version>${project.version}</version>
+                <type>tar.gz</type>
+                <classifier>deb</classifier>
             </dependency>
 		</dependencies>
 	</dependencyManagement>

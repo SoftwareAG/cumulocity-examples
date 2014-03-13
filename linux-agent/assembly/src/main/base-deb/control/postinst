@@ -1,0 +1,14 @@
+chmod +x /usr/share/${project.artifactId}/*.sh
+
+if [ -f "/etc/cumulocity-agent.properties" ]; then
+    mv /usr/share/${project.artifactId}/cfg/cumulocity.properties /usr/share/${project.artifactId}/cfg/cumulocity.properties.template
+else
+    cp /usr/share/${project.artifactId}/cfg/cumulocity.properties /usr/share/${project.artifactId}/cfg/cumulocity.properties.template
+    mv /usr/share/${project.artifactId}/cfg/cumulocity.properties /etc/cumulocity-agent.properties
+fi
+ln -s /etc/cumulocity-agent.properties /usr/share/${project.artifactId}/cfg/cumulocity.properties
+
+if [ -x "/etc/init.d/cumulocity-agent" ]; then
+    update-rc.d cumulocity-agent defaults 98 02 > /dev/null
+    invoke-rc.d cumulocity-agent start || true
+fi

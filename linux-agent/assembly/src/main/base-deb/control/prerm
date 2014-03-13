@@ -1,0 +1,8 @@
+if [ -x "/etc/init.d/cumulocity-agent" ]; then
+    invoke-rc.d cumulocity-agent stop || true
+    update-rc.d cumulocity-agent remove > /dev/null
+fi
+
+if [ -f "/usr/share/${project.artifactId}/cfg/cumulocity.properties.template" ]; then
+    rm /usr/share/${project.artifactId}/cfg/cumulocity.properties.template
+fi

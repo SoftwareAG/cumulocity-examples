@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>c8y.example</groupId>
 		<artifactId>c8y-lx</artifactId>
-        <version>5.0.1-SNAPSHOT</version>
+        <version>5.0.2-SNAPSHOT</version>
 	</parent>
 	
 	<artifactId>piface-driver</artifactId>
@@ -27,13 +27,5 @@
 			<version>0.0.5</version>
 		</dependency>
 	</dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
 
 </project>
