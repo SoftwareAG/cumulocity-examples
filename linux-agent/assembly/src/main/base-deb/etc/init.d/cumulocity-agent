@@ -2,13 +2,8 @@
 #
 # /etc/init.d/cumulocity-agent - startup script for Cumulocity Agent
 #
-# chkconfig: 345 86 14
-# description: Cumulocity-Agent component
-# processname: java
-# pidfile: /var/run/c8y-agent.pid
-
 ### BEGIN INIT INFO
-# Provides:          java
+# Provides:          cumulocity-agent
 # Required-Start:    $local_fs $remote_fs $network $syslog
 # Required-Stop:     $local_fs $remote_fs $network $syslog
 # Should-Start:      $named
@@ -57,6 +52,7 @@ start() {
 stop() {
         echo $"Stopping $prog..."
         killall $prog
+        pkill -f c8y.lx.agent.Agent
 }
 status() {
     echo $"Status $prog: "
