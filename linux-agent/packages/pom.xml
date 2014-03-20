@@ -7,7 +7,7 @@
     <parent>
         <groupId>c8y.example</groupId>
         <artifactId>c8y-lx</artifactId>
-        <version>5.0.2-SNAPSHOT</version>
+        <version>5.1.0</version>
     </parent>
 
     <artifactId>lx-packages</artifactId>
@@ -115,7 +115,7 @@
                         <postinstallScriptlet>
                             <script>
                                 chmod +x /usr/share/cumulocity-agent/*.sh
-                                update-rc.d cumulocity-agent defaults 99
+                                update-rc.d cumulocity-agent start 99 2 3 4 5 . stop 99 0 1 6 .
                             </script>
                         </postinstallScriptlet>
                         <postremoveScriptlet>

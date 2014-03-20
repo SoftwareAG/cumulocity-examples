@@ -11,8 +11,8 @@
 # Provides: java
 # Required-Start: $network $syslog
 # Required-Stop: $network $syslog
-# Default-Start: 3 4 5
-# Default-Stop: 0 1 2 6
+# Default-Start: 2 3 4 5
+# Default-Stop: 0 1 6
 # Short-Description: start and stop Cumulocity Agent
 ### END INIT INFO
 

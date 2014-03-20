@@ -52,6 +52,7 @@ start() {
 stop() {
         echo $"Stopping $prog..."
         killall $prog
+        pkill -f c8y.lx.agent.Agent
 }
 status() {
     echo $"Status $prog: "
