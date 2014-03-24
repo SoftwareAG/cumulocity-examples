@@ -34,32 +34,31 @@ import com.cumulocity.sdk.client.PlatformImpl;
  * the platform.
  */
 public class PlatformAccess {
-	public static final String PROPS = "/cumulocity.properties";
+    
+    public static final String PROPS = "/cumulocity.properties";
+    
+    private Platform platform;
+    private Properties props;
 
-	public PlatformAccess() throws IOException {
-		props = new Properties();
-		try (InputStream is = getClass().getResourceAsStream(PROPS);
-				InputStreamReader ir = new InputStreamReader(is)) {
-			props.load(ir);
-		}
+    public PlatformAccess() throws IOException {
+        props = new Properties();
+        try (InputStream is = getClass().getResourceAsStream(PROPS); InputStreamReader ir = new InputStreamReader(is)) {
+            props.load(ir);
+        }
 
-		String host = props.getProperty("host",
-				"http://developer.cumulocity.com");
-		String user = props.getProperty("user");
-		String password = props.getProperty("password");
+        String host = props.getProperty("host", "http://developer.cumulocity.com");
+        String user = props.getProperty("user");
+        String password = props.getProperty("password");
 
-		platform = new PlatformImpl(host, new CumulocityCredentials(user, password));
-		
-	}
+        platform = new PlatformImpl(host, new CumulocityCredentials(user, password));
 
-	public Platform getPlatform() {
-		return platform;
-	}
-	
-	public Properties getProps() {
-		return props;
-	}
+    }
 
-	private Platform platform;
-	private Properties props;
+    public Platform getPlatform() {
+        return platform;
+    }
+
+    public Properties getProps() {
+        return props;
+    }
 }

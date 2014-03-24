@@ -25,37 +25,38 @@ import java.util.concurrent.ConcurrentMap;
 
 import com.cumulocity.model.idtype.GId;
 
-public class ManagedObjectCache extends ConcurrentHashMap<GId,TrackerDevice> {
-	private static final long serialVersionUID = 1L;
+public class ManagedObjectCache extends ConcurrentHashMap<GId, TrackerDevice> {
 
-	public static ManagedObjectCache instance() {
-		return instance;
-	}
-	
-	public void put(TrackerDevice device) {
-		deviceByGid.put(device.getGId(), device);
-		deviceByImei.put(device.getImei(), device);
-	}
-	
-	public void evict(String imei) {
-		if (imei != null) {
-			TrackerDevice device = get(imei);
-			deviceByImei.remove(imei);			
-			if (device != null && device.getGId() != null) {
-				deviceByGid.remove(device.getGId());
-			}
-		}
-	}
+    private static final long serialVersionUID = 1L;
 
-	public TrackerDevice get(String imei) {
-		return deviceByImei.get(imei);
-	}
-	
-	public TrackerDevice get(GId gid) {
-		return deviceByGid.get(gid);
-	}
-	
-	private static ManagedObjectCache instance = new ManagedObjectCache();
-	private ConcurrentMap<GId,TrackerDevice> deviceByGid = new ConcurrentHashMap<GId,TrackerDevice>();
-	private ConcurrentMap<String,TrackerDevice> deviceByImei = new ConcurrentHashMap<String,TrackerDevice>();
+    private static ManagedObjectCache instance = new ManagedObjectCache();
+    private ConcurrentMap<GId, TrackerDevice> deviceByGid = new ConcurrentHashMap<GId, TrackerDevice>();
+    private ConcurrentMap<String, TrackerDevice> deviceByImei = new ConcurrentHashMap<String, TrackerDevice>();
+
+    public static ManagedObjectCache instance() {
+        return instance;
+    }
+
+    public void put(TrackerDevice device) {
+        deviceByGid.put(device.getGId(), device);
+        deviceByImei.put(device.getImei(), device);
+    }
+
+    public void evict(String imei) {
+        if (imei != null) {
+            TrackerDevice device = get(imei);
+            deviceByImei.remove(imei);
+            if (device != null && device.getGId() != null) {
+                deviceByGid.remove(device.getGId());
+            }
+        }
+    }
+
+    public TrackerDevice get(String imei) {
+        return deviceByImei.get(imei);
+    }
+
+    public TrackerDevice get(GId gid) {
+        return deviceByGid.get(gid);
+    }
 }

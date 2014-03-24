@@ -39,144 +39,143 @@ import com.cumulocity.sdk.client.SDKException;
  * input stream and sends commands to the output stream.
  */
 public class ConnectedTracker implements Runnable, Executor {
-	public ConnectedTracker(Socket client, InputStream bis,
-			char reportSeparator, String fieldSeparator) {
-		this.client = client;
-		this.bis = bis;
-		this.reportSeparator = reportSeparator;
-		this.fieldSeparator = fieldSeparator;
-	}
-	
-	public void addFragment(Object o) {
-		fragments.add(o);
-	}
 
-	@Override
-	public void run() {
-		try (OutputStream out = client.getOutputStream()) {
-			setOut(out);
-			processReports(bis);
-		} catch (IOException e) {
-			logger.warn("Error during communication with client device", e);
-		} catch (SDKException e) {
-			logger.warn("Error during communication with the platform", e);
-		}
-		try {
-			client.close();
-		} catch (IOException e) {
-			logger.warn("Error during closing socket", e);
-		}
-	}
+    protected static Logger logger = LoggerFactory.getLogger(ConnectedTracker.class);
+    
+    private char reportSeparator;
+    private String fieldSeparator;
+    private Socket client;
+    private InputStream bis;
+    private List<Object> fragments = new ArrayList<Object>();
+    private OutputStream out;
+    private String imei;
+    
+    public ConnectedTracker(Socket client, InputStream bis, char reportSeparator, String fieldSeparator) {
+        this.client = client;
+        this.bis = bis;
+        this.reportSeparator = reportSeparator;
+        this.fieldSeparator = fieldSeparator;
+    }
 
-	void processReports(InputStream is) throws IOException, SDKException {
-		String reportStr;
-		while ((reportStr = readReport(is)) != null) {
-			String[] report = reportStr.split(fieldSeparator);
-			tryProcessReport(report);
-		}
-		if (imei != null) {
-			ConnectionRegistry.instance().remove(imei);
-		}
-		logger.debug("Connection closed by {} {} ",
-				client.getRemoteSocketAddress(), imei);
-	}
+    public void addFragment(Object o) {
+        fragments.add(o);
+    }
 
-	private void tryProcessReport(String[] report) throws SDKException {
-		try {
-			processReport(report);
-		} catch (SDKException x) {
-			/*
-			 * What might have happened here? Either the connection to the
-			 * platform is down or the object has been deleted from the
-			 * platform. We'll evict the object from the ManagedObjectCache and
-			 * try again after a while. If that fails, we give up.
-			 */
-			if (imei != null) {
-				ManagedObjectCache.instance().evict(imei);
-			}
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-			}
-			processReport(report);
-		}
-	}
+    @Override
+    public void run() {
+        try (OutputStream out = client.getOutputStream()) {
+            setOut(out);
+            processReports(bis);
+        } catch (IOException e) {
+            logger.warn("Error during communication with client device", e);
+        } catch (SDKException e) {
+            logger.warn("Error during communication with the platform", e);
+        }
+        try {
+            client.close();
+        } catch (IOException e) {
+            logger.warn("Error during closing socket", e);
+        }
+    }
 
-	String readReport(InputStream is) throws IOException {
-		StringBuffer result = new StringBuffer();
-		int c;
+    void processReports(InputStream is) throws IOException, SDKException {
+        String reportStr;
+        while ((reportStr = readReport(is)) != null) {
+            String[] report = reportStr.split(fieldSeparator);
+            tryProcessReport(report);
+        }
+        if (imei != null) {
+            ConnectionRegistry.instance().remove(imei);
+        }
+        logger.debug("Connection closed by {} {} ", client.getRemoteSocketAddress(), imei);
+    }
 
-		while ((c = is.read()) != -1) {
-			if ((char) c == reportSeparator) {
-				break;
-			}
-			if ((char) c == '\n') {
-				continue;
-			}
-			result.append((char) c);
-		}
+    private void tryProcessReport(String[] report) throws SDKException {
+        try {
+            processReport(report);
+        } catch (SDKException x) {
+            /*
+             * What might have happened here? Either the connection to the
+             * platform is down or the object has been deleted from the
+             * platform. We'll evict the object from the ManagedObjectCache and
+             * try again after a while. If that fails, we give up.
+             */
+            if (imei != null) {
+                ManagedObjectCache.instance().evict(imei);
+            }
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+            }
+            processReport(report);
+        }
+    }
 
-		logger.debug("Processing report: " + result.toString());
+    String readReport(InputStream is) throws IOException {
+        StringBuffer result = new StringBuffer();
+        int c;
 
-		if (c == -1) {
-			return null;
-		}
+        while ((c = is.read()) != -1) {
+            if ((char) c == reportSeparator) {
+                break;
+            }
+            if ((char) c == '\n') {
+                continue;
+            }
+            result.append((char) c);
+        }
 
-		return result.toString();
-	}
+        logger.debug("Processing report: " + result.toString());
 
-	void processReport(String[] report) throws SDKException {
-		for (Object fragment : fragments) {
-			if (fragment instanceof Parser) {
-				Parser parser = (Parser) fragment;
-				String imei = parser.parse(report);
-				if (imei != null) {
-					this.imei = imei;
-					ConnectionRegistry.instance().put(imei, this);
-					break;
-				}
-			}
-		}
-	}
+        if (c == -1) {
+            return null;
+        }
 
-	@Override
-	public void execute(OperationRepresentation operation) throws IOException {
-		String translation = translate(operation);
-		logger.debug("Executing operation\n{}\n{}", operation, translation);
+        return result.toString();
+    }
 
-		if (translation != null) {
-			out.write(translation.getBytes());
-			out.flush();
-		} else {
-			operation.setStatus(OperationStatus.FAILED.toString());
-			operation.setFailureReason("Command currently not supported");
-		}
-	}
+    void processReport(String[] report) throws SDKException {
+        for (Object fragment : fragments) {
+            if (fragment instanceof Parser) {
+                Parser parser = (Parser) fragment;
+                String imei = parser.parse(report);
+                if (imei != null) {
+                    this.imei = imei;
+                    ConnectionRegistry.instance().put(imei, this);
+                    break;
+                }
+            }
+        }
+    }
 
-	public String translate(OperationRepresentation operation) {
-		for (Object fragment : fragments) {
-			if (fragment instanceof Translator) {
-				Translator translator = (Translator) fragment;
-				String translation = translator.translate(operation);
-				if (translation != null) {
-					return translation;
-				}
-			}
-		}
-		return null;
-	}
+    @Override
+    public void execute(OperationRepresentation operation) throws IOException {
+        String translation = translate(operation);
+        logger.debug("Executing operation\n{}\n{}", operation, translation);
 
-	void setOut(OutputStream out) {
-		this.out = out;
-	}
+        if (translation != null) {
+            out.write(translation.getBytes());
+            out.flush();
+        } else {
+            operation.setStatus(OperationStatus.FAILED.toString());
+            operation.setFailureReason("Command currently not supported");
+        }
+    }
 
-	protected Logger logger = LoggerFactory.getLogger(ConnectedTracker.class);
-	private char reportSeparator;
-	private String fieldSeparator;
+    public String translate(OperationRepresentation operation) {
+        for (Object fragment : fragments) {
+            if (fragment instanceof Translator) {
+                Translator translator = (Translator) fragment;
+                String translation = translator.translate(operation);
+                if (translation != null) {
+                    return translation;
+                }
+            }
+        }
+        return null;
+    }
 
-	private Socket client;
-	private InputStream bis;
-	private List<Object> fragments = new ArrayList<Object>();
-	private OutputStream out;
-	private String imei;
+    void setOut(OutputStream out) {
+        this.out = out;
+    }
 }

@@ -32,60 +32,60 @@ import com.cumulocity.sdk.client.SDKException;
  * Maintains agent entry in the inventory and currently connected devices.
  */
 public class TrackerAgent extends DeviceManagedObject {
-	public TrackerAgent(Platform platform) throws SDKException {
-		super(platform);
-		this.platform = platform;
+    
+    private Platform platform;
+    private GId agentGid;
+    private OperationDispatcher dispatcher;
 
-		ManagedObjectRepresentation mo = createAgentMo();
-		new TracelogDriver(platform, mo);
-		dispatcher = new OperationDispatcher(platform, agentGid);
-	}
+    public TrackerAgent(Platform platform) throws SDKException {
+        super(platform);
+        this.platform = platform;
 
-	/**
-	 * Get an existing or create a new device. Caches the devices used so far
-	 * during the life of the agent.
-	 * 
-	 * @param imei
-	 *            The IMEI identifying the device.
-	 * @param exec
-	 *            The executor responsible for running operations on the device.
-	 * @throws SDKException 
-	 */
-	public TrackerDevice getOrCreate(String imei) throws SDKException {
-		TrackerDevice device = ManagedObjectCache.instance().get(imei);
+        ManagedObjectRepresentation mo = createAgentMo();
+        new TracelogDriver(platform, mo);
+        dispatcher = new OperationDispatcher(platform, agentGid);
+    }
 
-		if (device == null) {
-			device = new TrackerDevice(platform, agentGid, imei);
-			ManagedObjectCache.instance().put(device);
-		}
+    /**
+     * Get an existing or create a new device. Caches the devices used so far
+     * during the life of the agent.
+     * 
+     * @param imei
+     *            The IMEI identifying the device.
+     * @param exec
+     *            The executor responsible for running operations on the device.
+     * @throws SDKException
+     */
+    public TrackerDevice getOrCreate(String imei) throws SDKException {
+        TrackerDevice device = ManagedObjectCache.instance().get(imei);
 
-		return device;
-	}
+        if (device == null) {
+            device = new TrackerDevice(platform, agentGid, imei);
+            ManagedObjectCache.instance().put(device);
+        }
 
-	public void finish(OperationRepresentation operation) throws SDKException {
-		dispatcher.finish(operation);
-	}
-	
-	public void fail(OperationRepresentation operation, String text, SDKException x) throws SDKException {
-		dispatcher.fail(operation, text, x);
-	}
+        return device;
+    }
 
+    public void finish(OperationRepresentation operation) throws SDKException {
+        dispatcher.finish(operation);
+    }
 
-	private ManagedObjectRepresentation createAgentMo() throws SDKException {
-		ManagedObjectRepresentation agentMo = new ManagedObjectRepresentation();
-		agentMo.setType("c8y_TrackerAgent");
-		agentMo.setName("Tracker agent");
-		agentMo.set(new Agent());
+    public void fail(OperationRepresentation operation, String text, SDKException x) throws SDKException {
+        dispatcher.fail(operation, text, x);
+    }
 
-		ID extId = new ID("c8y_TrackerAgent");
-		extId.setType("c8y_ServerSideAgent");
+    private ManagedObjectRepresentation createAgentMo() throws SDKException {
+        ManagedObjectRepresentation agentMo = new ManagedObjectRepresentation();
+        agentMo.setType("c8y_TrackerAgent");
+        agentMo.setName("Tracker agent");
+        agentMo.set(new Agent());
 
-		createOrUpdate(agentMo, extId, null);
-		agentGid = agentMo.getId();
-		return agentMo;
-	}
+        ID extId = new ID("c8y_TrackerAgent");
+        extId.setType("c8y_ServerSideAgent");
 
-	private Platform platform;
-	private GId agentGid;
-	private OperationDispatcher dispatcher;
+        createOrUpdate(agentMo, extId, null);
+        agentGid = agentMo.getId();
+        return agentMo;
+    }
 }

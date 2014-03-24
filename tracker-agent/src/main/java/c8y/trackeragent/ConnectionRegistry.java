@@ -22,12 +22,13 @@ package c8y.trackeragent;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ConnectionRegistry extends ConcurrentHashMap<String,Executor> {
-	private static final long serialVersionUID = 5586917831953937323L;
+public class ConnectionRegistry extends ConcurrentHashMap<String, Executor> {
+    
+    private static final long serialVersionUID = 5586917831953937323L;
 
-	public static ConnectionRegistry instance() {
-		return instance;
-	}
+    public static ConnectionRegistry instance() {
+        return instance;
+    }
 
-	private static ConnectionRegistry instance = new ConnectionRegistry();	
+    private static ConnectionRegistry instance = new ConnectionRegistry();
 }

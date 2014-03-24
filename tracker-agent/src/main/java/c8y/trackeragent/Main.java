@@ -20,18 +20,22 @@
 
 package c8y.trackeragent;
 
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Main class reading the configuration and starting the server.
  */
 public class Main {
-	public static void main(String[] args) {
-		try {
-			PlatformAccess pa = new PlatformAccess();
-			new Server(pa.getPlatform(), pa.getProps()).run();
-		} catch (Exception x) {
-			LoggerFactory.getLogger(Main.class).error("Error caught", x);
-		}
-	}
+    
+    private static final Logger logger = LoggerFactory.getLogger(Main.class);
+
+    public static void main(String[] args) {
+        try {
+            PlatformAccess pa = new PlatformAccess();
+            new Server(pa.getPlatform(), pa.getProps()).run();
+        } catch (Exception x) {
+            logger.error("Error caught", x);
+        }
+    }
 }

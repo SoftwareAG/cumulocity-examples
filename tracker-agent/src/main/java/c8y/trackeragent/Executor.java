@@ -28,5 +28,6 @@ import com.cumulocity.rest.representation.operation.OperationRepresentation;
  * @return true if the operation was understood
  */
 public interface Executor {
-	void execute(OperationRepresentation operation) throws Exception;
+
+    void execute(OperationRepresentation operation) throws Exception;
 }

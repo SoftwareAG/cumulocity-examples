@@ -38,53 +38,51 @@ import com.cumulocity.sdk.client.SDKException;
  * only GL200.)
  */
 public class Server implements Runnable {
-	public static final String PORT_PROP = "port";
-	public static final String DEFAULT_PORT = "9090";
+    
+    public static final String PORT_PROP = "port";
+    public static final String DEFAULT_PORT = "9090";
 
-	public Server(Platform platform, Properties props) throws IOException,
-			SDKException {
-		int port = Integer.parseInt(props.getProperty(PORT_PROP, DEFAULT_PORT));
-		this.server = new ServerSocket(port);
-		this.trackerAgent = new TrackerAgent(platform);
-	}
+    private Logger logger = LoggerFactory.getLogger(Main.class);
+    private ServerSocket server;
+    private TrackerAgent trackerAgent;
 
-	@Override
-	public void run() {
-		while (true) {
-			accept();
-		}
-	}
+    public Server(Platform platform, Properties props) throws IOException, SDKException {
+        int port = Integer.parseInt(props.getProperty(PORT_PROP, DEFAULT_PORT));
+        this.server = new ServerSocket(port);
+        this.trackerAgent = new TrackerAgent(platform);
+    }
 
-	private void accept() {
-		try {
-			logger.debug("Waiting for connection on port {}", server.getLocalPort());
-			Socket client = server.accept();
-			logger.debug(
-					"Accepted connection from {}, launching worker thread.",
-					client.getRemoteSocketAddress());
-			
-			ConnectedTracker tracker = peekTracker(client);
-			new Thread(tracker).start();
-		} catch (IOException e) {
-			logger.warn("Couldn't connect", e);
-		}
-	}
+    @Override
+    public void run() {
+        while (true) {
+            accept();
+        }
+    }
 
-	private ConnectedTracker peekTracker(Socket client) throws IOException {
-		InputStream is = client.getInputStream();
-		BufferedInputStream bis = new BufferedInputStream(is);
-		bis.mark(1);
-		int marker = bis.read();
-		bis.reset();
+    private void accept() {
+        try {
+            logger.debug("Waiting for connection on port {}", server.getLocalPort());
+            Socket client = server.accept();
+            logger.debug("Accepted connection from {}, launching worker thread.", client.getRemoteSocketAddress());
 
-		if (marker >= '0' && marker <= '9') {
-			return new ConnectedTelicTracker(client, bis, trackerAgent);
-		} else {
-			return new ConnectedGL200Tracker(client, bis, trackerAgent);
-		}
-	}
+            ConnectedTracker tracker = peekTracker(client);
+            new Thread(tracker).start();
+        } catch (IOException e) {
+            logger.warn("Couldn't connect", e);
+        }
+    }
 
-	private Logger logger = LoggerFactory.getLogger(Main.class);
-	private ServerSocket server;
-	private TrackerAgent trackerAgent;
+    private ConnectedTracker peekTracker(Socket client) throws IOException {
+        InputStream is = client.getInputStream();
+        BufferedInputStream bis = new BufferedInputStream(is);
+        bis.mark(1);
+        int marker = bis.read();
+        bis.reset();
+
+        if (marker >= '0' && marker <= '9') {
+            return new ConnectedTelicTracker(client, bis, trackerAgent);
+        } else {
+            return new ConnectedGL200Tracker(client, bis, trackerAgent);
+        }
+    }
 }

@@ -41,117 +41,110 @@ import com.cumulocity.sdk.client.devicecontrol.OperationFilter;
  * not connected are left in the queue on the platform for retry.
  */
 public class OperationDispatcher extends TimerTask {
-	public static final long POLLING_DELAY = 5000;
-	public static final long POLLING_INTERVAL = 5000;
+    
+    public static final long POLLING_DELAY = 5000;
+    public static final long POLLING_INTERVAL = 5000;
+    
+    private static Logger logger = LoggerFactory.getLogger(OperationDispatcher.class);
 
-	/**
-	 * @param platform
-	 *            The connection to the platform.
-	 * @param agent
-	 *            The ID of this agent.
-	 * @param cfgDriver
-	 * @param executers
-	 *            A map of currently connected devices. The map is maintained by
-	 *            the threads communicating with the devices, hence it needs to
-	 *            be thread-safe.
-	 */
-	public OperationDispatcher(Platform platform, GId agent)
-			throws SDKException {
-		this.operations = platform.getDeviceControlApi();
-		this.agent = agent;
+    private DeviceControlApi operations;
+    private GId agent;
 
-		finishExecutingOps();
-		pollPendingOps();
-	}
+    /**
+     * @param platform
+     *            The connection to the platform.
+     * @param agent
+     *            The ID of this agent.
+     * @param cfgDriver
+     * @param executers
+     *            A map of currently connected devices. The map is maintained by
+     *            the threads communicating with the devices, hence it needs to
+     *            be thread-safe.
+     */
+    public OperationDispatcher(Platform platform, GId agent) throws SDKException {
+        this.operations = platform.getDeviceControlApi();
+        this.agent = agent;
 
-	public void finish(OperationRepresentation operation) throws SDKException {
-		operation.setStatus(OperationStatus.SUCCESSFUL.toString());
-		operations.update(operation);
-	}
+        finishExecutingOps();
+        pollPendingOps();
+    }
 
-	public void fail(OperationRepresentation operation, String text,
-			SDKException x) throws SDKException {
-		operation.setStatus(OperationStatus.FAILED.toString());
-		operation.setFailureReason(text + " " + x.getMessage());
-		operations.update(operation);
-	}
+    public void finish(OperationRepresentation operation) throws SDKException {
+        operation.setStatus(OperationStatus.SUCCESSFUL.toString());
+        operations.update(operation);
+    }
 
-	/**
-	 * Clean up operations that are stuck in "executing" state.
-	 */
-	private void finishExecutingOps() throws SDKException {
-		logger.debug("Cancelling hanging operations");
-		for (OperationRepresentation operation : byStatus(OperationStatus.EXECUTING)) {
-			operation.setStatus(OperationStatus.FAILED.toString());
-			operations.update(operation);
-		}
-	}
+    public void fail(OperationRepresentation operation, String text, SDKException x) throws SDKException {
+        operation.setStatus(OperationStatus.FAILED.toString());
+        operation.setFailureReason(text + " " + x.getMessage());
+        operations.update(operation);
+    }
 
-	private void pollPendingOps() {
-		Timer poller = new Timer("OperationPoller");
-		poller.scheduleAtFixedRate(this, POLLING_DELAY, POLLING_INTERVAL);
-	}
+    /**
+     * Clean up operations that are stuck in "executing" state.
+     */
+    private void finishExecutingOps() throws SDKException {
+        logger.debug("Cancelling hanging operations");
+        for (OperationRepresentation operation : byStatus(OperationStatus.EXECUTING)) {
+            operation.setStatus(OperationStatus.FAILED.toString());
+            operations.update(operation);
+        }
+    }
 
-	@Override
-	public void run() {
-		logger.debug("Executing queued operations");
-		try {
-			executePendingOps();
-		} catch (Exception x) {
-			logger.warn("Error while executing operations", x);
-		}
-	}
+    private void pollPendingOps() {
+        Timer poller = new Timer("OperationPoller");
+        poller.scheduleAtFixedRate(this, POLLING_DELAY, POLLING_INTERVAL);
+    }
 
-	private void executePendingOps() throws SDKException {
-		for (OperationRepresentation operation : byStatus(OperationStatus.PENDING)) {
-			GId gid = operation.getDeviceId();
+    @Override
+    public void run() {
+        logger.debug("Executing queued operations");
+        try {
+            executePendingOps();
+        } catch (Exception x) {
+            logger.warn("Error while executing operations", x);
+        }
+    }
 
-			TrackerDevice device = ManagedObjectCache.instance().get(gid);
-			if (device == null) {
-				continue; // Device hasn't been identified yet
-			}
+    private void executePendingOps() throws SDKException {
+        for (OperationRepresentation operation : byStatus(OperationStatus.PENDING)) {
+            GId gid = operation.getDeviceId();
 
-			Executor exec = ConnectionRegistry.instance().get(device.getImei());
+            TrackerDevice device = ManagedObjectCache.instance().get(gid);
+            if (device == null) {
+                continue; // Device hasn't been identified yet
+            }
 
-			if (exec != null) {
-				// Device is currently connected, execute on device
-				executeOperation(exec, operation);
-				if (OperationStatus.FAILED.toString().equals(
-						operation.getStatus())) {
-					// Connection error, remove device
-					ConnectionRegistry.instance().remove(device.getImei());
-				}
-			}
-		}
-	}
+            Executor exec = ConnectionRegistry.instance().get(device.getImei());
 
-	private void executeOperation(Executor exec,
-			OperationRepresentation operation) throws SDKException {
-		operation.setStatus(OperationStatus.EXECUTING.toString());
-		operations.update(operation);
+            if (exec != null) {
+                // Device is currently connected, execute on device
+                executeOperation(exec, operation);
+                if (OperationStatus.FAILED.toString().equals(operation.getStatus())) {
+                    // Connection error, remove device
+                    ConnectionRegistry.instance().remove(device.getImei());
+                }
+            }
+        }
+    }
 
-		try {
-			exec.execute(operation);
-		} catch (Exception x) {
-			String msg = "Error during communication with device "
-					+ operation.getDeviceId();
-			logger.warn(msg, x);
-			operation.setStatus(OperationStatus.FAILED.toString());
-			operation.setFailureReason(msg + x.getMessage());
-		}
-		operations.update(operation);
-	}
+    private void executeOperation(Executor exec, OperationRepresentation operation) throws SDKException {
+        operation.setStatus(OperationStatus.EXECUTING.toString());
+        operations.update(operation);
 
-	private Iterable<OperationRepresentation> byStatus(OperationStatus status)
-			throws SDKException {
-		OperationFilter opsFilter = new OperationFilter().byAgent(
-				agent.getValue()).byStatus(status);
-		return operations.getOperationsByFilter(opsFilter).get().allPages();
-	}
+        try {
+            exec.execute(operation);
+        } catch (Exception x) {
+            String msg = "Error during communication with device " + operation.getDeviceId();
+            logger.warn(msg, x);
+            operation.setStatus(OperationStatus.FAILED.toString());
+            operation.setFailureReason(msg + x.getMessage());
+        }
+        operations.update(operation);
+    }
 
-	private static Logger logger = LoggerFactory
-			.getLogger(OperationDispatcher.class);
-
-	private DeviceControlApi operations;
-	private GId agent;
+    private Iterable<OperationRepresentation> byStatus(OperationStatus status) throws SDKException {
+        OperationFilter opsFilter = new OperationFilter().byAgent(agent.getValue()).byStatus(status);
+        return operations.getOperationsByFilter(opsFilter).get().allPages();
+    }
 }
