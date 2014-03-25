@@ -35,10 +35,10 @@ import com.cumulocity.sdk.client.inventory.InventoryApi;
  * external IDs.
  */
 public class DeviceManagedObject {
-    
+
     private IdentityApi registry;
     private InventoryApi inventory;
-    
+
     public DeviceManagedObject(Platform platform) {
         this.registry = platform.getIdentityApi();
         this.inventory = platform.getInventoryApi();
@@ -62,6 +62,16 @@ public class DeviceManagedObject {
         copyProps(returnedMo, mo);
 
         return gid == null;
+    }
+
+    public boolean updateIfExists(ManagedObjectRepresentation mo, ID extId) throws SDKException {
+        GId gid = tryGetBinding(extId);
+        if (gid == null) {
+            return false;
+        }
+        ManagedObjectRepresentation returnedMo = update(mo, gid);
+        copyProps(returnedMo, mo);
+        return true;
     }
 
     private ManagedObjectRepresentation create(ManagedObjectRepresentation mo, ID extId, GId parentId) throws SDKException {
@@ -103,6 +113,7 @@ public class DeviceManagedObject {
         }
         return eir != null ? eir.getManagedObject().getId() : null;
     }
+    
 
     public void bind(ManagedObjectRepresentation mo, ID extId) throws SDKException {
         ExternalIDRepresentation eir = new ExternalIDRepresentation();
@@ -114,5 +125,15 @@ public class DeviceManagedObject {
 
     protected InventoryApi getInventory() {
         return inventory;
+    }
+    
+    protected static ID imeiAsId(String imei) {
+        ID extId = new ID(imei);
+        extId.setType(TrackerDevice.XTID_TYPE);
+        return extId;
+    }
+    
+    public boolean existsDevice(String imei) {
+        return tryGetBinding(imeiAsId(imei)) != null;
     }
 }

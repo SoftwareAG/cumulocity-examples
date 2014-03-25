@@ -42,78 +42,77 @@ import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 
 public class ConnectedTrackerTest {
-	public static final String REPORT1 = "field1|field2";
-	public static final String REPORT2 = "field3|field4";
-	
-	@Before
-	public void setup() throws IOException {
-		ConnectionRegistry.instance().remove("imei");
-		tracker = new ConnectedTracker(client, bis, GL200Constants.REPORT_SEP, GL200Constants.FIELD_SEP);
-		tracker.addFragment(translator);
-		tracker.addFragment(parser);
-		tracker.setOut(out);
-	}
-	
-	@Test
-	public void singleReportProcessing() throws SDKException {
-		String[] dummyReport = null;
-		when(parser.parse(dummyReport)).thenReturn("imei");
-		
-		tracker.processReport(dummyReport);
-		
-		verify(parser).parse(dummyReport);
-		verifyZeroInteractions(translator);
-		assertEquals(tracker, ConnectionRegistry.instance().get("imei"));
-	}
-	
-	@Test
-	public void reportReading() throws IOException {
-		String reports = REPORT1 + GL200Constants.REPORT_SEP + REPORT2 + GL200Constants.REPORT_SEP;
-		
-		try (ByteArrayInputStream is = new ByteArrayInputStream(reports.getBytes(StandardCharsets.US_ASCII))) {
-			String report = tracker.readReport(is);
-			assertEquals(REPORT1, report);
-			report = tracker.readReport(is);
-			assertEquals(REPORT2, report);
-			report = tracker.readReport(is);
-			assertNull(report);
-		}
-	}
+    public static final String REPORT1 = "field1|field2";
+    public static final String REPORT2 = "field3|field4";
 
-	@Test
-	public void continuousReportProcessing() throws IOException, SDKException {
-		when(parser.parse(any(String[].class))).thenReturn("imei");
-		
-		String reports = REPORT1 + GL200Constants.REPORT_SEP + REPORT2 + GL200Constants.REPORT_SEP;
-		
-		try (ByteArrayInputStream is = new ByteArrayInputStream(reports.getBytes(StandardCharsets.US_ASCII))) {
-			tracker.processReports(is);
-		}
-		
-		verify(parser).parse(REPORT1.split(GL200Constants.FIELD_SEP));
-		verify(parser).parse(REPORT2.split(GL200Constants.FIELD_SEP));
-		verifyZeroInteractions(translator);
-	}
-	
-	@Test
-	public void testExecute() throws IOException {
-		String translation = "translation";
-		
-		OperationRepresentation operation = mock(OperationRepresentation.class);
-		when(translator.translate(operation)).thenReturn(translation);
-		
-		tracker.execute(operation);
-		
-		verifyZeroInteractions(parser);
-		verify(translator).translate(operation);
-		verify(out).write(translation.getBytes(StandardCharsets.US_ASCII));
-	}
-	
-	private Socket client = mock(Socket.class);
-	private BufferedInputStream bis = mock(BufferedInputStream.class);
-	private OutputStream out = mock(OutputStream.class);
-	private Translator translator = mock(Translator.class);
-	private Parser parser = mock(Parser.class);
-	private TrackerAgent trackerAgent = mock(TrackerAgent.class);
-	private ConnectedTracker tracker;
+    private Socket client = mock(Socket.class);
+    private BufferedInputStream bis = mock(BufferedInputStream.class);
+    private OutputStream out = mock(OutputStream.class);
+    private Translator translator = mock(Translator.class);
+    private Parser parser = mock(Parser.class);
+    private ConnectedTracker tracker;
+
+    @Before
+    public void setup() throws IOException {
+        ConnectionRegistry.instance().remove("imei");
+        tracker = new ConnectedTracker(client, bis, GL200Constants.REPORT_SEP, GL200Constants.FIELD_SEP);
+        tracker.addFragment(translator);
+        tracker.addFragment(parser);
+        tracker.setOut(out);
+    }
+
+    @Test
+    public void singleReportProcessing() throws SDKException {
+        String[] dummyReport = null;
+        when(parser.parse(dummyReport)).thenReturn("imei");
+
+        tracker.processReport(dummyReport);
+
+        verify(parser).parse(dummyReport);
+        verifyZeroInteractions(translator);
+        assertEquals(tracker, ConnectionRegistry.instance().get("imei"));
+    }
+
+    @Test
+    public void reportReading() throws IOException {
+        String reports = REPORT1 + GL200Constants.REPORT_SEP + REPORT2 + GL200Constants.REPORT_SEP;
+
+        try (ByteArrayInputStream is = new ByteArrayInputStream(reports.getBytes(StandardCharsets.US_ASCII))) {
+            String report = tracker.readReport(is);
+            assertEquals(REPORT1, report);
+            report = tracker.readReport(is);
+            assertEquals(REPORT2, report);
+            report = tracker.readReport(is);
+            assertNull(report);
+        }
+    }
+
+    @Test
+    public void continuousReportProcessing() throws IOException, SDKException {
+        when(parser.parse(any(String[].class))).thenReturn("imei");
+
+        String reports = REPORT1 + GL200Constants.REPORT_SEP + REPORT2 + GL200Constants.REPORT_SEP;
+
+        try (ByteArrayInputStream is = new ByteArrayInputStream(reports.getBytes(StandardCharsets.US_ASCII))) {
+            tracker.processReports(is);
+        }
+
+        verify(parser).parse(REPORT1.split(GL200Constants.FIELD_SEP));
+        verify(parser).parse(REPORT2.split(GL200Constants.FIELD_SEP));
+        verifyZeroInteractions(translator);
+    }
+
+    @Test
+    public void testExecute() throws IOException {
+        String translation = "translation";
+
+        OperationRepresentation operation = mock(OperationRepresentation.class);
+        when(translator.translate(operation)).thenReturn(translation);
+
+        tracker.execute(operation);
+
+        verifyZeroInteractions(parser);
+        verify(translator).translate(operation);
+        verify(out).write(translation.getBytes(StandardCharsets.US_ASCII));
+    }
 }

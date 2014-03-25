@@ -1,6 +1,7 @@
 package c8y.trackeragent;
 
 import static java.lang.String.format;
+import static com.cumulocity.model.authentication.CumulocityCredentials.Builder.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,18 +37,18 @@ public class TrackerContextFactory {
     public TrackerContext createTrackerContext() throws IOException {
         loadConfiguration();
         Map<String, TenantAccess> tenantAccesses = readTenantAccesses();
-        Map<String, Platform> platforms = asPlatforms(tenantAccesses);
+        Map<String, TrackerPlatform> platforms = asPlatforms(tenantAccesses);
         return new TrackerContext(platforms, props);
         
     }
 
-    private Map<String, Platform> asPlatforms(Map<String, TenantAccess> tenantAccesses) {
-        Map<String, Platform> result = new HashMap<>();
+    private Map<String, TrackerPlatform> asPlatforms(Map<String, TenantAccess> tenantAccesses) {
+        Map<String, TrackerPlatform> result = new HashMap<>();
         for (Entry<String, TenantAccess> tenantAccessEntry : tenantAccesses.entrySet()) {
             TenantAccess tenantAccess = tenantAccessEntry.getValue();
             String tenantId = tenantAccessEntry.getKey();
             if(tenantAccess.isValid()) {
-                result.put(tenantId, asPlatform(tenantAccess));
+                result.put(tenantId, asPlatform(tenantId, tenantAccess));
             } else {
                 logger.error(format("Missing access information for tenant %s; expected 'host', 'user' and 'password'", tenantId), tenantAccess);                
             }
@@ -55,9 +56,12 @@ public class TrackerContextFactory {
         return result;
     }
 
-    private Platform asPlatform(TenantAccess tenantAccess) {
-        CumulocityCredentials cumulocityCredentials = new CumulocityCredentials(tenantAccess.getUser(), tenantAccess.getPassword());
-        return new PlatformImpl(tenantAccess.getHost(), cumulocityCredentials);
+    private TrackerPlatform asPlatform(String tenantId, TenantAccess tenantAccess) {
+        CumulocityCredentials credentials = cumulocityCredentials(tenantAccess.getUser(), tenantAccess.getPassword())
+                .withTenantId(tenantId)
+                .build();
+        Platform platform = new PlatformImpl(tenantAccess.getHost(), credentials);
+        return new TrackerPlatform(tenantId, platform);
     }
 
     private Map<String, TenantAccess> readTenantAccesses() {

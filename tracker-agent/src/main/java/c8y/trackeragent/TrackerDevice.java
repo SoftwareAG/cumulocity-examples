@@ -273,8 +273,7 @@ public class TrackerDevice extends DeviceManagedObject {
         mobile.setImei(imei);
         device.set(mobile);
 
-        ID extId = new ID(imei);
-        extId.setType(XTID_TYPE);
+        ID extId = imeiAsId(imei);
 
         device.setType(TYPE);
         device.setName("Tracker " + imei);
@@ -283,4 +282,5 @@ public class TrackerDevice extends DeviceManagedObject {
         gid = device.getId();
         self = device.getSelf();
     }
+
 }

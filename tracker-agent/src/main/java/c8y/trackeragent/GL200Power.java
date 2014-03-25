@@ -56,9 +56,11 @@ public class GL200Power implements  Parser {
     
     public static final String EXTERNALPOWERON_REPORT = "+RESP:GTEPN";
     public static final String EXTERNALPOWEROFF_REPORT = "+RESP:GTEPF";
+    
+    private final TrackerAgent trackerAgent;
 
-    public GL200Power(TrackerAgent trackerMgr) {
-        this.trackerAgent = trackerMgr;
+    public GL200Power(TrackerAgent trackerAgent) {
+        this.trackerAgent = trackerAgent;
     }
 
     @Override
@@ -100,6 +102,4 @@ public class GL200Power implements  Parser {
         device.powerAlarm(powerLost, external);
         return imei;
 	}
-
-	private TrackerAgent trackerAgent;
 }

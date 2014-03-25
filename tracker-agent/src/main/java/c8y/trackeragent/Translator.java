@@ -23,5 +23,6 @@ package c8y.trackeragent;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 
 public interface Translator {
+    
 	String translate(OperationRepresentation operation);
 }

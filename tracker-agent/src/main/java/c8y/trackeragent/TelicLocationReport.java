@@ -18,13 +18,13 @@ public class TelicLocationReport implements Parser {
 	public static final int LATITUDE = 5;
 	public static final BigDecimal DIVISOR = new BigDecimal(10000);
 	
-	private TrackerAgent trackerAgent;
+    private TrackerAgent trackerAgent;
 
 	public TelicLocationReport(TrackerAgent trackerAgent) {
-		this.trackerAgent = trackerAgent;
-	}
+        this.trackerAgent = trackerAgent;
+    }
 
-	@Override
+    @Override
 	public String parse(String[] report) throws SDKException {
 		String imei = report[0].substring(4, report[0].length() - 2);	
 		TrackerDevice device = trackerAgent.getOrCreate(imei);

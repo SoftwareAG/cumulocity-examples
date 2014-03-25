@@ -24,13 +24,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Properties;
+import java.util.Collection;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.cumulocity.sdk.client.Platform;
-import com.cumulocity.sdk.client.SDKException;
+import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 
 /**
  * The server listens to connections from devices and starts threads for
@@ -39,30 +38,45 @@ import com.cumulocity.sdk.client.SDKException;
  */
 public class Server implements Runnable {
     
-    public static final String PORT_PROP = "port";
-    public static final String DEFAULT_PORT = "9090";
+    private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
-    private Logger logger = LoggerFactory.getLogger(Main.class);
-    private ServerSocket server;
-    private TrackerAgent trackerAgent;
+    private final ServerSocket serverSocket;
+    private final TrackerContext trackerContext;
+    private final TrackerAgent trackerAgent;
 
-    public Server(Platform platform, Properties props) throws IOException, SDKException {
-        int port = Integer.parseInt(props.getProperty(PORT_PROP, DEFAULT_PORT));
-        this.server = new ServerSocket(port);
-        this.trackerAgent = new TrackerAgent(platform);
+    public Server() throws IOException {
+        this.trackerContext = TrackerContextFactory.instance().createTrackerContext();
+        this.trackerAgent = new TrackerAgent(trackerContext);
+        int port = trackerContext.getInternalSocketPort();
+        this.serverSocket = new ServerSocket(port);
     }
 
     @Override
     public void run() {
+        startPlatformsUtilities();
         while (true) {
             accept();
         }
     }
 
+    private void startPlatformsUtilities() {
+        Collection<TrackerPlatform> platforms = trackerContext.getPlatforms();
+        for (TrackerPlatform trackerPlatform : platforms) {
+            startPlatformUtilities(trackerPlatform);
+        }
+    }
+
+    private void startPlatformUtilities(TrackerPlatform trackerPlatform) {
+        ManagedObjectRepresentation agent = trackerAgent.getOrCreateAgent(trackerPlatform.getTenantId());
+        new OperationDispatcher(trackerPlatform, agent.getId());
+        //new TracelogDriver(trackerPlatform, agent);
+        
+    }
+
     private void accept() {
         try {
-            logger.debug("Waiting for connection on port {}", server.getLocalPort());
-            Socket client = server.accept();
+            logger.debug("Waiting for connection on port {}", serverSocket.getLocalPort());
+            Socket client = serverSocket.accept();
             logger.debug("Accepted connection from {}, launching worker thread.", client.getRemoteSocketAddress());
 
             ConnectedTracker tracker = peekTracker(client);

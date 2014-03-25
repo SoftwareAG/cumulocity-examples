@@ -36,81 +36,82 @@ import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 
 public class GL200GeofenceTest {
-	public static final String PASSWORD = "gl200";
-	public static final String IMEI = "135790246811220";
+    public static final String PASSWORD = "gl200";
+    public static final String IMEI = "135790246811220";
 
-	public static final String SETFENCESTR = "AT+GTGEO=gl200,0,3,101.412248,21.187891,1000,30,,,,,,,,,0001$";
-	public static final String[] SETFENCE = SETFENCESTR
-			.split(GL200Constants.FIELD_SEP);
-	public static final String[] ACKFENCE = "+ACK:GTGEO,02010B,135790246811220,,0,0001,20100310172830,11F0$"
-			.split(GL200Constants.FIELD_SEP);
-	public static final String[] REPFENCE = "+RESP:GTGEO,02010B,135790246811220,,0,0,1,1,4.3,92,70.0,121.354335,31.222073,2009 0214013254,0460,0000,18d8,6141,00,,20090214093254,11F0$"
-			.split(GL200Constants.FIELD_SEP);
+    public static final String SETFENCESTR = "AT+GTGEO=gl200,0,3,101.412248,21.187891,1000,30,,,,,,,,,0001$";
+    public static final String[] SETFENCE = SETFENCESTR.split(GL200Constants.FIELD_SEP);
+    public static final String[] ACKFENCE = "+ACK:GTGEO,02010B,135790246811220,,0,0001,20100310172830,11F0$".split(GL200Constants.FIELD_SEP);
+    public static final String[] REPFENCE = "+RESP:GTGEO,02010B,135790246811220,,0,0,1,1,4.3,92,70.0,121.354335,31.222073,2009 0214013254,0460,0000,18d8,6141,00,,20090214093254,11F0$"
+            .split(GL200Constants.FIELD_SEP);
+    
+    private GL200Geofence gl200gf;
+    private TrackerAgent trackerAgent = mock(TrackerAgent.class);
+    private TrackerDevice device = mock(TrackerDevice.class);
 
-	@Before
-	public void setup() throws SDKException {
-		fence = new Geofence();
-		fence.setLng(new BigDecimal("101.412248"));
-		;
-		fence.setLat(new BigDecimal("21.187891"));
-		fence.setRadius(new BigDecimal("1000"));
-		fence.setActive(true);
-		operation.set(fence);
+    private OperationRepresentation operation = new OperationRepresentation();
+    private Geofence fence;
 
-		gl200gf = new GL200Geofence(trackerAgent, PASSWORD);
 
-		when(trackerAgent.getOrCreate(anyString())).thenReturn(device);
-	}
+    @Before
+    public void setup() throws SDKException {
+        fence = new Geofence();
+        fence.setLng(new BigDecimal("101.412248"));
+        ;
+        fence.setLat(new BigDecimal("21.187891"));
+        fence.setRadius(new BigDecimal("1000"));
+        fence.setActive(true);
+        operation.set(fence);
 
-	@Test
-	public void setGeofence() {
-		String asciiOperation = gl200gf.translate(operation);
-		assertEquals(SETFENCESTR, asciiOperation);
-	}
+        gl200gf = new GL200Geofence(trackerAgent, PASSWORD);
 
-	@Test
-	public void acknowledgeGeofence() throws SDKException {
-		gl200gf.translate(operation);
-		String imei = gl200gf.parse(ACKFENCE);
+        when(trackerAgent.getOrCreate(anyString())).thenReturn(device);
+    }
 
-		assertEquals(IMEI, imei);
-		verify(trackerAgent).getOrCreate(IMEI);
-		verify(device).setGeofence(fence);
-	}
+    @Test
+    public void setGeofence() {
+        String asciiOperation = gl200gf.translate(operation);
+        assertEquals(SETFENCESTR, asciiOperation);
+    }
 
-	@Test
-	public void acknowledgeGeofenceWrongReply() throws SDKException {
-		gl200gf.translate(operation);
+    @Test
+    public void acknowledgeGeofence() throws SDKException {
+        gl200gf.translate(operation);
+        String imei = gl200gf.parse(ACKFENCE);
 
-		String[] wrongCorrelation = ACKFENCE;
-		wrongCorrelation[5] = "0002";
-		gl200gf.parse(wrongCorrelation);
+        assertEquals(IMEI, imei);
+        verify(trackerAgent).getOrCreate(IMEI);
+        verify(device).setGeofence(fence);
+    }
 
-		verifyZeroInteractions(trackerAgent);
-	}
+    @Test
+    public void acknowledgeGeofenceWrongReply() throws SDKException {
+        gl200gf.translate(operation);
 
-	@Test
-	public void reportGeofence() throws SDKException {
-		String imei = gl200gf.parse(REPFENCE);
+        String[] wrongCorrelation = ACKFENCE;
+        wrongCorrelation[5] = "0002";
+        gl200gf.parse(wrongCorrelation);
 
-		assertEquals(IMEI, imei);
-		verify(trackerAgent, times(2)).getOrCreate(IMEI);
+        verifyZeroInteractions(trackerAgent);
+    }
 
-		Position position = new Position();
-		position.setLat(new BigDecimal("31.222073"));
-		position.setLng(new BigDecimal("121.354335"));
-		position.setAlt(new BigDecimal("70.0"));
-		verify(device).setPosition(position);
+    @Test
+    public void reportGeofence() throws SDKException {
+        String imei = gl200gf.parse(REPFENCE);
 
-		verify(device).geofenceAlarm(true);
-	}
+        assertEquals(IMEI, imei);
+        verify(trackerAgent, times(2)).getOrCreate(IMEI);
 
-	// TODO Verify the formatting of commands sent to the device (limits and lengths)
+        Position position = new Position();
+        position.setLat(new BigDecimal("31.222073"));
+        position.setLng(new BigDecimal("121.354335"));
+        position.setAlt(new BigDecimal("70.0"));
+        verify(device).setPosition(position);
 
-	private GL200Geofence gl200gf;
-	private TrackerAgent trackerAgent = mock(TrackerAgent.class);
-	private TrackerDevice device = mock(TrackerDevice.class);
+        verify(device).geofenceAlarm(true);
+    }
 
-	private OperationRepresentation operation = new OperationRepresentation();
-	private Geofence fence;
+    // TODO Verify the formatting of commands sent to the device (limits and
+    // lengths)
+
 }

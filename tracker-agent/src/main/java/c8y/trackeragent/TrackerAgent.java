@@ -1,91 +1,110 @@
-/*
- * Copyright (C) 2013 Cumulocity GmbH
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of 
- * this software and associated documentation files (the "Software"),
- * to deal in the Software without restriction, including without limitation the rights to use,
- * copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
- * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be
- * included in all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
- * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
- * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
- * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- */
-
 package c8y.trackeragent;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.cumulocity.model.Agent;
 import com.cumulocity.model.ID;
-import com.cumulocity.model.idtype.GId;
+import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
-import com.cumulocity.sdk.client.Platform;
 import com.cumulocity.sdk.client.SDKException;
+import com.cumulocity.sdk.client.devicecontrol.DeviceControlApi;
 
-/**
- * Maintains agent entry in the inventory and currently connected devices.
- */
-public class TrackerAgent extends DeviceManagedObject {
-    
-    private Platform platform;
-    private GId agentGid;
-    private OperationDispatcher dispatcher;
+public class TrackerAgent {
 
-    public TrackerAgent(Platform platform) throws SDKException {
-        super(platform);
-        this.platform = platform;
+    private final TrackerContext trackerContext;
+    private final Map<String, ManagedObjectRepresentation> tenantToAgent = new HashMap<>();
+    private final Map<String, String> imeiToTenantId = new HashMap<>();
 
-        ManagedObjectRepresentation mo = createAgentMo();
-        new TracelogDriver(platform, mo);
-        dispatcher = new OperationDispatcher(platform, agentGid);
+    public TrackerAgent(TrackerContext trackerContext) {
+        this.trackerContext = trackerContext;
     }
-
-    /**
-     * Get an existing or create a new device. Caches the devices used so far
-     * during the life of the agent.
-     * 
-     * @param imei
-     *            The IMEI identifying the device.
-     * @param exec
-     *            The executor responsible for running operations on the device.
-     * @throws SDKException
-     */
+    
     public TrackerDevice getOrCreate(String imei) throws SDKException {
         TrackerDevice device = ManagedObjectCache.instance().get(imei);
-
         if (device == null) {
-            device = new TrackerDevice(platform, agentGid, imei);
-            ManagedObjectCache.instance().put(device);
+            String tenantId = getTenantId(imei);
+            if(tenantId == null) {
+                throw new UnknownTenantException(imei);
+            }
+            device = getOrCreate(tenantId, imei);
         }
-
         return device;
     }
 
-    public void finish(OperationRepresentation operation) throws SDKException {
-        dispatcher.finish(operation);
+    protected TrackerDevice getOrCreate(String tenantId, String imei) {
+        TrackerPlatform platform = trackerContext.getPlatform(tenantId);
+        ManagedObjectRepresentation agent = getOrCreateAgent(tenantId);
+        TrackerDevice device = new TrackerDevice(platform, agent.getId(), imei);
+        ManagedObjectCache.instance().put(device);
+        return device;
     }
 
-    public void fail(OperationRepresentation operation, String text, SDKException x) throws SDKException {
-        dispatcher.fail(operation, text, x);
+    public void finish(String deviceImei, OperationRepresentation operation) throws UnknownTenantException {
+        operation.setStatus(OperationStatus.SUCCESSFUL.toString());
+        getDeviceControlApi(deviceImei).update(operation);
     }
 
-    private ManagedObjectRepresentation createAgentMo() throws SDKException {
+    public void fail(String deviceImei, OperationRepresentation operation, String text, SDKException ex) {
+        operation.setStatus(OperationStatus.FAILED.toString());
+        operation.setFailureReason(text + " " + ex.getMessage());
+        getDeviceControlApi(deviceImei).update(operation);
+    }
+    
+    public ManagedObjectRepresentation getOrCreateAgent(String tenantId) {
+        ManagedObjectRepresentation agent = tenantToAgent.get(tenantId);
+        if(agent == null) {
+            agent = createAgentMo(tenantId);
+            tenantToAgent.put(tenantId, agent);
+        }
+        return agent;
+    }
+    
+    private String getTenantId(String imei) {
+        String tenantId = imeiToTenantId.get(imei);
+        if(tenantId != null) {
+            return tenantId;
+        }
+        tenantId = discoverTenantId(imei, tenantId);
+        if(tenantId != null) {
+            imeiToTenantId.put(imei, tenantId);
+        }
+        return tenantId;
+    }
+
+    private String discoverTenantId(String imei, String tenantId) {
+        Collection<TrackerPlatform> platforms = trackerContext.getPlatforms();
+        for (TrackerPlatform platform : platforms) {
+            DeviceManagedObject deviceManagedObject = new DeviceManagedObject(platform);
+            if(deviceManagedObject.existsDevice(imei)) {
+                return platform.getTenantId();
+            }            
+        }
+        return null;
+    }
+
+    private ManagedObjectRepresentation createAgentMo(String tenantId) throws SDKException {
+        DeviceManagedObject deviceManagedObject = new DeviceManagedObject(trackerContext.getPlatform(tenantId));
         ManagedObjectRepresentation agentMo = new ManagedObjectRepresentation();
         agentMo.setType("c8y_TrackerAgent");
         agentMo.setName("Tracker agent");
         agentMo.set(new Agent());
-
         ID extId = new ID("c8y_TrackerAgent");
         extId.setType("c8y_ServerSideAgent");
-
-        createOrUpdate(agentMo, extId, null);
-        agentGid = agentMo.getId();
+        deviceManagedObject.createOrUpdate(agentMo, extId, null);
         return agentMo;
     }
+    
+    private DeviceControlApi getDeviceControlApi(String deviceImei) {
+        String tenantId = getTenantId(deviceImei);
+        if(tenantId == null) {
+            throw new UnknownTenantException(deviceImei);
+        }
+        DeviceControlApi deviceControlApi = trackerContext.getPlatform(tenantId).getDeviceControlApi();
+        return deviceControlApi;
+    }
+
+
 }

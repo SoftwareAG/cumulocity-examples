@@ -37,136 +37,132 @@ import com.cumulocity.sdk.client.SDKException;
  * +RESP:GTGEO,02010B,135790246811220,,0,0,1,1,4.3,92,70.0,121.354335,31.222073,2009 0214013254,0460,0000,18d8,6141,00,,20090214093254,11F0$
  */
 public class GL200Geofence extends GL200LocationReport implements Translator {
-	/**
-	 * Number of fence, device supports up to five fences.
-	 */
-	public static final String GEO_ID = "0";
-	
-	/**
-	 * Mode for fence, triggers report when entering and leaving fence.
-	 */
-	public static final String FENCE_MODE = "3";
-	
-	/**
-	 * Default checking interval.
-	 */
-	public static final int DEFAULT_INTERVAL = 30;
+    /**
+     * Number of fence, device supports up to five fences.
+     */
+    public static final String GEO_ID = "0";
 
-	/**
-	 * Template for setting fence. Parameters are: Password, longitude,
-	 * latitude, radius, check interval, correlation ID
-	 */
-	public static final String GEO_TEMPLATE = "AT+GTGEO=%s," + GEO_ID + ","
-			+ FENCE_MODE + ",%s,%s,%d,%d,,,,,,,,,%04x$";
+    /**
+     * Mode for fence, triggers report when entering and leaving fence.
+     */
+    public static final String FENCE_MODE = "3";
 
-	/**
-	 * Acknowledgement of fence setting from tracker.
-	 */
-	public static final String GEOFENCE_ACKNOWLEDGE = "+ACK:GTGEO";
+    /**
+     * Default checking interval.
+     */
+    public static final int DEFAULT_INTERVAL = 30;
 
-	/**
-	 * Fence enter/leave report from tracker.
-	 */
-	public static final String GEOFENCE_REPORT = "+RESP:GTGEO";
+    /**
+     * Template for setting fence. Parameters are: Password, longitude,
+     * latitude, radius, check interval, correlation ID
+     */
+    public static final String GEO_TEMPLATE = "AT+GTGEO=%s," + GEO_ID + "," + FENCE_MODE + ",%s,%s,%d,%d,,,,,,,,,%04x$";
 
-	public GL200Geofence(TrackerAgent trackerAgent, String password) {
-		super(trackerAgent);
-		this.trackerAgent = trackerAgent;
-		this.password = password;
-	}
+    /**
+     * Acknowledgement of fence setting from tracker.
+     */
+    public static final String GEOFENCE_ACKNOWLEDGE = "+ACK:GTGEO";
 
-	@Override
-	public String parse(String[] report) throws SDKException {
-		String reportType = report[0];
+    /**
+     * Fence enter/leave report from tracker.
+     */
+    public static final String GEOFENCE_REPORT = "+RESP:GTGEO";
 
-		if (GEOFENCE_ACKNOWLEDGE.equals(reportType)) {
-			return parseAcknowledgement(report);
-		} else if (GEOFENCE_REPORT.equals(reportType)) {
-			return parseFenceReport(report);
-		} else {
-			return null;
-		}
-	}
+    private String password;
+    private short corrId = 0;
+    private Geofence lastFence = new Geofence();
+    private OperationRepresentation lastOperation;
 
-	private String parseFenceReport(String[] report) throws SDKException {
-		String imei = super.parse(report);
-		String type = report[5];
+    public GL200Geofence(TrackerAgent trackerAgent, String password) {
+        super(trackerAgent);
+        this.password = password;
+    }
 
-		TrackerDevice device = trackerAgent.getOrCreate(imei);
-		device.geofenceAlarm("0".equals(type));
-		return imei;
-	}
+    @Override
+    public String parse(String[] report) throws SDKException {
+        String reportType = report[0];
 
-	private String parseAcknowledgement(String[] report) throws SDKException {
-		String imei = report[2];
-		String geoId = report[4];
-		short returnedCorr = Short.parseShort(report[5], 16);
-		Geofence ackedFence = null;
-		OperationRepresentation ackOp;
+        if (GEOFENCE_ACKNOWLEDGE.equals(reportType)) {
+            return parseAcknowledgement(report);
+        } else if (GEOFENCE_REPORT.equals(reportType)) {
+            return parseFenceReport(report);
+        } else {
+            return null;
+        }
+    }
 
-		synchronized (this) {
-			if (returnedCorr != corrId || !GEO_ID.equals(geoId) || lastFence == null) {
-				return null;
-			}
-			ackedFence = lastFence;
-			ackOp = lastOperation;
-		}
+    private String parseFenceReport(String[] report) throws SDKException {
+        String imei = super.parse(report);
+        String type = report[5];
 
-		try {
-			trackerAgent.getOrCreate(imei).setGeofence(ackedFence);
-			trackerAgent.finish(ackOp);
-		} catch (SDKException x) {
-			trackerAgent.fail(ackOp, "Error setting geofence", x);
-		}
-		return imei;
-	}
+        TrackerDevice device = trackerAgent.getOrCreate(imei);
+        device.geofenceAlarm("0".equals(type));
+        return imei;
+    }
 
-	/**
-	 * Convert the operation to set or disable a geofence to GL200 format.
-	 */
-	@Override
-	public String translate(OperationRepresentation operation) {
-		Geofence geofence = operation.get(Geofence.class);
+    private String parseAcknowledgement(String[] report) throws SDKException {
+        String imei = report[2];
+        String geoId = report[4];
+        short returnedCorr = Short.parseShort(report[5], 16);
+        Geofence ackedFence = null;
+        OperationRepresentation ackOp;
 
-		if (geofence == null) {
-			return null;
-		}
+        synchronized (this) {
+            if (returnedCorr != corrId || !GEO_ID.equals(geoId) || lastFence == null) {
+                return null;
+            }
+            ackedFence = lastFence;
+            ackOp = lastOperation;
+        }
 
-		String lng = geofence.getLng().toString();
-		if (lng.length() > 11) {
-			lng = lng.substring(0, 11);
-		}
+        try {
+            trackerAgent.getOrCreate(imei).setGeofence(ackedFence);
+            trackerAgent.finish(imei, ackOp);
+        } catch (SDKException x) {
+            trackerAgent.fail(imei, ackOp, "Error setting geofence", x);
+        }
+        return imei;
+    }
 
-		String lat = geofence.getLat().toString();
-		if (lat.length() > 10) {
-			lat = lat.substring(0, 10);
-		}
+    /**
+     * Convert the operation to set or disable a geofence to GL200 format.
+     */
+    @Override
+    public String translate(OperationRepresentation operation) {
+        Geofence geofence = operation.get(Geofence.class);
 
-		int radius = geofence.getRadius().intValue();
-		if (radius < 50) {
-			radius = 50;
-		} else if (radius > 6000000) {
-			radius = 6000000;
-		}
+        if (geofence == null) {
+            return null;
+        }
 
-		int checkInterval = DEFAULT_INTERVAL;
-		if (!geofence.isActive()) {
-			checkInterval = 0;
-		}
+        String lng = geofence.getLng().toString();
+        if (lng.length() > 11) {
+            lng = lng.substring(0, 11);
+        }
 
-		synchronized (this) {
-			corrId++;
-			lastFence = geofence;
-			lastOperation = operation;
-		}
+        String lat = geofence.getLat().toString();
+        if (lat.length() > 10) {
+            lat = lat.substring(0, 10);
+        }
 
-		return String.format(GEO_TEMPLATE, password, lng, lat, radius,
-				checkInterval, corrId);
-	}
+        int radius = geofence.getRadius().intValue();
+        if (radius < 50) {
+            radius = 50;
+        } else if (radius > 6000000) {
+            radius = 6000000;
+        }
 
-	private TrackerAgent trackerAgent;
-	private String password;
-	private short corrId = 0;
-	private Geofence lastFence = new Geofence();
-	private OperationRepresentation lastOperation;
+        int checkInterval = DEFAULT_INTERVAL;
+        if (!geofence.isActive()) {
+            checkInterval = 0;
+        }
+
+        synchronized (this) {
+            corrId++;
+            lastFence = geofence;
+            lastOperation = operation;
+        }
+
+        return String.format(GEO_TEMPLATE, password, lng, lat, radius, checkInterval, corrId);
+    }
 }

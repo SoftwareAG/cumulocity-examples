@@ -32,8 +32,7 @@ public class Main {
 
     public static void main(String[] args) {
         try {
-            PlatformAccess pa = new PlatformAccess();
-            new Server(pa.getPlatform(), pa.getProps()).run();
+            new Server().run();
         } catch (Exception x) {
             logger.error("Error caught", x);
         }

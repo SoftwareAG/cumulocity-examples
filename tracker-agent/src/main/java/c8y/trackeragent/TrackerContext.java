@@ -1,31 +1,37 @@
 package c8y.trackeragent;
 
-import java.util.Collection;
+import static java.lang.Integer.parseInt;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import com.cumulocity.sdk.client.Platform;
-
 public class TrackerContext {
     
+    public static final String INTERNAL_SOCKET_PORT_PROP = "port";
+    public static final String DEFAULT_INTERNAL_SOCKET_PORT = "9090";
+    
     private final Properties props;
-    private final Map<String, Platform> platforms;
+    private final Map<String, TrackerPlatform> tenantIdToPlatform;
+    private final List<TrackerPlatform> platforms;
 
-    public TrackerContext(Map<String, Platform> platforms, Properties props) {
-        this.platforms = platforms;
+    public TrackerContext(Map<String, TrackerPlatform> platforms, Properties props) {
+        this.tenantIdToPlatform = platforms;
+        this.platforms = new ArrayList<>(platforms.values());
         this.props = props;
     }
  
-    public Collection<Platform> getPlatforms() {
-        return platforms.values();
+    public List<TrackerPlatform> getPlatforms() {
+        return platforms;
     }
     
-    public Platform getPlatform(String tenantId) {
-        return platforms.get(tenantId);
+    public TrackerPlatform getPlatform(String tenantId) {
+        return tenantIdToPlatform.get(tenantId);
     }
     
-    public String getProperty(String key, String defaultValue) {
-        return props.getProperty(key, defaultValue);
+    public int getInternalSocketPort() {
+        return parseInt(props.getProperty(INTERNAL_SOCKET_PORT_PROP, DEFAULT_INTERNAL_SOCKET_PORT));
     }
     
 }

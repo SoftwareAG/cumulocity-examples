@@ -38,99 +38,99 @@ import com.cumulocity.sdk.client.SDKException;
  */
 public class GL200DeviceMotionState implements Parser, Translator {
 
-	/**
-	 * Type of report: Device Motion State Indication.
-	 */
-	public static final String MOTION_REPORT = "+RESP:GTSTT";
+    /**
+     * Type of report: Device Motion State Indication.
+     */
+    public static final String MOTION_REPORT = "+RESP:GTSTT";
 
-	public static final String MOTION_DETECTED = "42";
+    public static final String MOTION_DETECTED = "42";
 
-	/**
-	 * Change the event mask to include motion tracking.
-	 */
-	public static final String MOTION_TEMPLATE = "AT+GTCFG=%s,,,,,,,,,,%d,,,,,,,,,,,%04x$";
+    /**
+     * Change the event mask to include motion tracking.
+     */
+    public static final String MOTION_TEMPLATE = "AT+GTCFG=%s,,,,,,,,,,%d,,,,,,,,,,,%04x$";
 
-	/**
-	 * Events to set: Power on/off, external power on/off, battery low are
-	 * always on. Device motion is added depending on configuration from
-	 * platform.
-	 */
-	public static final int MOTION_OFF = 1 + 2 + 4 + 8 + 32;
-	public static final int MOTION_ON = 1 + 2 + 4 + 8 + 32 + 256;
+    /**
+     * Events to set: Power on/off, external power on/off, battery low are
+     * always on. Device motion is added depending on configuration from
+     * platform.
+     */
+    public static final int MOTION_OFF = 1 + 2 + 4 + 8 + 32;
+    public static final int MOTION_ON = 1 + 2 + 4 + 8 + 32 + 256;
 
-	public static final String MOTION_ACK = "+ACK:GTCFG";
+    public static final String MOTION_ACK = "+ACK:GTCFG";
 
-	public GL200DeviceMotionState(TrackerAgent trackerMgr, String password) {
-		this.trackerAgent = trackerMgr;
-		this.password = password;
-	}
+    private final TrackerAgent trackerAgent;
+    private final String password;
+    private short corrId = 0;
+    private boolean lastState;
+    private OperationRepresentation lastOperation;
 
-	@Override
-	public String parse(String[] report) throws SDKException {
-		String reportType = report[0];
 
-		if (MOTION_ACK.equals(reportType)) {
-			return parseAcknowledgement(report);
-		} else if (MOTION_REPORT.equals(reportType)) {
-			return parseMotionReport(report);
-		} else {
-			return null;
-		}
-	}
+    public GL200DeviceMotionState(TrackerAgent trackerAgent, String password) {
+        this.trackerAgent = trackerAgent;
+        this.password = password;
+    }
 
-	private String parseMotionReport(String[] report) throws SDKException {
-		String imei = report[2];
-		boolean motion = MOTION_DETECTED.equals(report[4]);
+    @Override
+    public String parse(String[] report) throws SDKException {
+        String reportType = report[0];
 
-		TrackerDevice device = trackerAgent.getOrCreate(imei);
-		device.motionAlarm(motion);
-		return imei;
-	}
+        if (MOTION_ACK.equals(reportType)) {
+            return parseAcknowledgement(report);
+        } else if (MOTION_REPORT.equals(reportType)) {
+            return parseMotionReport(report);
+        } else {
+            return null;
+        }
+    }
 
-	private String parseAcknowledgement(String[] report) throws SDKException {
-		String imei = report[2];
-		short returnedCorr = Short.parseShort(report[4], 16);
-		boolean ackedState;
-		OperationRepresentation ackOp;
+    private String parseMotionReport(String[] report) throws SDKException {
+        String imei = report[2];
+        boolean motion = MOTION_DETECTED.equals(report[4]);
 
-		synchronized (this) {
-			if (returnedCorr != corrId) {
-				return null;
-			}
-			ackedState = lastState;
-			ackOp = lastOperation;
-		}
+        TrackerDevice device = trackerAgent.getOrCreate(imei);
+        device.motionAlarm(motion);
+        return imei;
+    }
 
-		try {
-			trackerAgent.getOrCreate(imei).setMotionTracking(ackedState);
-			trackerAgent.finish(ackOp);
-		} catch (SDKException x) {
-			trackerAgent.fail(ackOp, "Error setting motion tracking", x);
-		}
-		return imei;
-	}
+    private String parseAcknowledgement(String[] report) throws SDKException {
+        String imei = report[2];
+        short returnedCorr = Short.parseShort(report[4], 16);
+        boolean ackedState;
+        OperationRepresentation ackOp;
 
-	@Override
-	public String translate(OperationRepresentation operation) {
-		MotionTracking mTrack = operation.get(MotionTracking.class);
+        synchronized (this) {
+            if (returnedCorr != corrId) {
+                return null;
+            }
+            ackedState = lastState;
+            ackOp = lastOperation;
+        }
 
-		if (mTrack == null) {
-			return null;
-		}
+        try {
+            trackerAgent.getOrCreate(imei).setMotionTracking(ackedState);
+            trackerAgent.finish(imei, ackOp);
+        } catch (SDKException x) {
+            trackerAgent.fail(imei, ackOp, "Error setting motion tracking", x);
+        }
+        return imei;
+    }
 
-		synchronized (this) {
-			corrId++;
-			lastState = mTrack.isActive();
-			lastOperation = operation;
-		}
+    @Override
+    public String translate(OperationRepresentation operation) {
+        MotionTracking mTrack = operation.get(MotionTracking.class);
 
-		return String.format(MOTION_TEMPLATE, password,
-				mTrack.isActive() ? MOTION_ON : MOTION_OFF, corrId);
-	}
+        if (mTrack == null) {
+            return null;
+        }
 
-	private TrackerAgent trackerAgent;
-	private String password;
-	private short corrId = 0;
-	private boolean lastState;
-	private OperationRepresentation lastOperation;
+        synchronized (this) {
+            corrId++;
+            lastState = mTrack.isActive();
+            lastOperation = operation;
+        }
+
+        return String.format(MOTION_TEMPLATE, password, mTrack.isActive() ? MOTION_ON : MOTION_OFF, corrId);
+    }
 }

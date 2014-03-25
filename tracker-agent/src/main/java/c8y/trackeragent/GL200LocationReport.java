@@ -54,6 +54,8 @@ public class GL200LocationReport implements Parser {
 	public static final String[] LOCATION_REPORTS = { "GTFRI", "GTGEO",
 			"GTSPD", "GTSOS", "GTRTL", "GTPNL", "GTNMR", "GTDIS", "GTDOG",
 			"GTIGL" };
+	
+	protected final TrackerAgent trackerAgent;
 
 	public GL200LocationReport(TrackerAgent trackerAgent) {
 		this.trackerAgent = trackerAgent;
@@ -105,6 +107,4 @@ public class GL200LocationReport implements Parser {
 			device.setCellId(report[reportStart + 9 ] + "-" + report[reportStart + 10]);
 		}
 	}
-
-	private TrackerAgent trackerAgent;
 }

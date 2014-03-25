@@ -33,35 +33,35 @@ import com.cumulocity.sdk.client.SDKException;
  * configuration widget.
  */
 public class GL200Fallback implements Parser, Translator {
-	public GL200Fallback(TrackerAgent trackerAgent, String password) {
-		this.trackerAgent = trackerAgent;
-		this.password = password;
-	}
 
-	@Override
-	public String parse(String[] report) throws SDKException {
-		String imei = report[2];
-		trackerAgent.getOrCreate(imei);
-		return imei;
-	}
+    private final TrackerAgent trackerAgent;
+    private final String password;
 
-	@Override
-	public String translate(OperationRepresentation operation) {
-		Configuration cfg = operation.get(Configuration.class);
+    public GL200Fallback(TrackerAgent trackerAgent, String password) {
+        this.trackerAgent = trackerAgent;
+        this.password = password;
+    }
 
-		if (cfg != null) {
-			operation.setStatus(OperationStatus.SUCCESSFUL.toString());
-			return cfg.getConfig();
-		}
-		
-		if (operation.get(Restart.class) != null) {
-			return String.format("AT+GTRTO=%s,3,,,,,,0001$", password);
-		}
-		
-		
-		return null;
-	}
+    @Override
+    public String parse(String[] report) throws SDKException {
+        String imei = report[2];
+        trackerAgent.getOrCreate(imei);
+        return imei;
+    }
 
-	private TrackerAgent trackerAgent;
-	private String password;
+    @Override
+    public String translate(OperationRepresentation operation) {
+        Configuration cfg = operation.get(Configuration.class);
+
+        if (cfg != null) {
+            operation.setStatus(OperationStatus.SUCCESSFUL.toString());
+            return cfg.getConfig();
+        }
+
+        if (operation.get(Restart.class) != null) {
+            return String.format("AT+GTRTO=%s,3,,,,,,0001$", password);
+        }
+
+        return null;
+    }
 }
