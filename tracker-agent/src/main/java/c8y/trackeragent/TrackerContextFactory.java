@@ -5,9 +5,7 @@ import static java.lang.String.format;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -30,8 +28,6 @@ public class TrackerContextFactory {
     private static final Pattern tenantAccessPattern = Pattern.compile(TENANT_ACCESS_REGEXP);
 
     private final Properties props = new Properties();
-    private final List<Platform> platforms = new ArrayList<>();
-    private final Map<String, TenantAccess> tenantAccesses = new HashMap<>();
     
     public static TrackerContextFactory instance() {
         return new TrackerContextFactory();
@@ -39,22 +35,37 @@ public class TrackerContextFactory {
     
     public TrackerContext createTrackerContext() throws IOException {
         loadConfiguration();
-        for (Object configEntry : props.keySet()) {
-            tryReadEntryAsTenantAccessInfo(String.valueOf(configEntry));
-        }
+        Map<String, TenantAccess> tenantAccesses = readTenantAccesses();
+        Map<String, Platform> platforms = asPlatforms(tenantAccesses);
+        return new TrackerContext(platforms, props);
+        
+    }
+
+    private Map<String, Platform> asPlatforms(Map<String, TenantAccess> tenantAccesses) {
+        Map<String, Platform> result = new HashMap<>();
         for (Entry<String, TenantAccess> tenantAccessEntry : tenantAccesses.entrySet()) {
             TenantAccess tenantAccess = tenantAccessEntry.getValue();
+            String tenantId = tenantAccessEntry.getKey();
             if(tenantAccess.isValid()) {
-                Platform platform = new PlatformImpl(tenantAccess.getHost(), tenantAccess.getCredentials());
-                platforms.add(platform);
+                result.put(tenantId, asPlatform(tenantAccess));
             } else {
-                logger.error(format("Missing access information for tenant %s; expected 'host', 'user' and 'password'", 
-                        tenantAccessEntry.getKey()), tenantAccess);                
+                logger.error(format("Missing access information for tenant %s; expected 'host', 'user' and 'password'", tenantId), tenantAccess);                
             }
         }
-        TrackerContext trackerContext = new TrackerContext(platforms, props);
-        return trackerContext;
-        
+        return result;
+    }
+
+    private Platform asPlatform(TenantAccess tenantAccess) {
+        CumulocityCredentials cumulocityCredentials = new CumulocityCredentials(tenantAccess.getUser(), tenantAccess.getPassword());
+        return new PlatformImpl(tenantAccess.getHost(), cumulocityCredentials);
+    }
+
+    private Map<String, TenantAccess> readTenantAccesses() {
+        Map<String, TenantAccess> tenantAccesses = new HashMap<>();
+        for (Object configEntry : props.keySet()) {
+            tryReadEntryAsTenantAccessInfo(tenantAccesses, String.valueOf(configEntry));
+        }
+        return tenantAccesses;
     }
 
     private void loadConfiguration() throws IOException {
@@ -64,16 +75,16 @@ public class TrackerContextFactory {
         }
     }
     
-    private void tryReadEntryAsTenantAccessInfo(String configEntry) {
+    private void tryReadEntryAsTenantAccessInfo(Map<String, TenantAccess> tenantAccesses, String configEntry) {
         Matcher matcher = tenantAccessPattern.matcher(configEntry);
         if(matcher.matches()) {
             String tenantId = matcher.group(1);
-            TenantAccess tenantAccess = getOrCreateTenantAccess(tenantId);
+            TenantAccess tenantAccess = getOrCreateTenantAccess(tenantAccesses, tenantId);
             tenantAccess.set(matcher.group(2), props.getProperty(configEntry));
         }
     }
 
-    private TenantAccess getOrCreateTenantAccess(String tenantId) {
+    private TenantAccess getOrCreateTenantAccess(Map<String, TenantAccess> tenantAccesses, String tenantId) {
         TenantAccess tenantAccess = tenantAccesses.get(tenantId);
         if(tenantAccess == null) {
             tenantAccess = new TenantAccess();
@@ -89,9 +100,6 @@ public class TrackerContextFactory {
         String getHost() {
             return vals.get("host");
         }
-        void set(String paramName, String paramValue) {
-            vals.put(paramName, paramValue);
-        }
         String getUser() {
             return vals.get("user");
         }
@@ -101,17 +109,13 @@ public class TrackerContextFactory {
         boolean isValid() {
             return vals.keySet().size() == 3;
         }
-        CumulocityCredentials getCredentials() {
-            return new CumulocityCredentials(getUser(), getPassword());
+        void set(String paramName, String paramValue) {
+            vals.put(paramName, paramValue);
         }
         @Override
         public String toString() {
             return String.format("TenantAccess [vals=%s]", vals);
         }
         
-    }
-    
-    public static void main(String[] args) {
-        TrackerContextFactory.instance().tryReadEntryAsTenantAccessInfo("vendme.password");
     }
 }

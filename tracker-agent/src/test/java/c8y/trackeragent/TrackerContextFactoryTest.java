@@ -1,9 +1,6 @@
 package c8y.trackeragent;
 
 import static org.fest.assertions.Assertions.assertThat;
-import static org.junit.Assert.*;
-
-import java.util.Collection;
 
 import org.junit.Test;
 
@@ -18,16 +15,10 @@ public class TrackerContextFactoryTest {
         TrackerContext trackerContext = TrackerContextFactory.instance().createTrackerContext();
         
         assertThat(trackerContext.getPlatforms()).hasSize(2);        
-        boolean hasOtherHost = false;
-        for (Platform platform : trackerContext.getPlatforms()) {
-            PlatformParameters platformParameters = (PlatformParameters) platform;
-            if(platformParameters.getHost().equals("http://other.com/")) {
-                hasOtherHost = true;
-                assertThat(platformParameters.getUser().equals("otherUser"));
-                assertThat(platformParameters.getPassword().equals("otherPassword"));
-            }
-        }        
-        assertThat(hasOtherHost).isTrue();
+        Platform platform = trackerContext.getPlatform("other");
+        PlatformParameters platformParameters = (PlatformParameters) platform;
+        assertThat(platformParameters.getUser().equals("otherUser"));
+        assertThat(platformParameters.getPassword().equals("otherPassword"));
     }
     
     @Test
