@@ -4,6 +4,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.cumulocity.model.Agent;
 import com.cumulocity.model.ID;
 import com.cumulocity.model.operation.OperationStatus;
@@ -14,6 +17,8 @@ import com.cumulocity.sdk.client.devicecontrol.DeviceControlApi;
 
 public class TrackerAgent {
 
+    private static final Logger logger = LoggerFactory.getLogger(TrackerAgent.class);
+    
     private final TrackerContext trackerContext;
     private final Map<String, ManagedObjectRepresentation> tenantToAgent = new HashMap<>();
     private final Map<String, String> imeiToTenantId = new HashMap<>();
@@ -22,24 +27,23 @@ public class TrackerAgent {
         this.trackerContext = trackerContext;
     }
     
-    public TrackerDevice getOrCreate(String imei) throws SDKException {
+    public TrackerDevice getOrCreateTrackerDevice(String imei) throws SDKException {
         TrackerDevice device = ManagedObjectCache.instance().get(imei);
         if (device == null) {
             String tenantId = getTenantId(imei);
             if(tenantId == null) {
                 throw new UnknownTenantException(imei);
             }
-            device = getOrCreate(tenantId, imei);
+            device = getOrCreateTrackerDevice(tenantId, imei);
+            ManagedObjectCache.instance().put(device);
         }
         return device;
     }
 
-    protected TrackerDevice getOrCreate(String tenantId, String imei) {
+    protected TrackerDevice getOrCreateTrackerDevice(String tenantId, String imei) {
         TrackerPlatform platform = trackerContext.getPlatform(tenantId);
         ManagedObjectRepresentation agent = getOrCreateAgent(tenantId);
-        TrackerDevice device = new TrackerDevice(platform, agent.getId(), imei);
-        ManagedObjectCache.instance().put(device);
-        return device;
+        return new TrackerDevice(platform, agent.getId(), imei);
     }
 
     public void finish(String deviceImei, OperationRepresentation operation) throws UnknownTenantException {
@@ -56,7 +60,8 @@ public class TrackerAgent {
     public ManagedObjectRepresentation getOrCreateAgent(String tenantId) {
         ManagedObjectRepresentation agent = tenantToAgent.get(tenantId);
         if(agent == null) {
-            agent = createAgentMo(tenantId);
+            agent = createOrUpdateAgent(tenantId);
+            logger.info("Agent for tenantId {} specified {}.", tenantId, agent.getId());
             tenantToAgent.put(tenantId, agent);
         }
         return agent;
@@ -70,6 +75,7 @@ public class TrackerAgent {
         tenantId = discoverTenantId(imei, tenantId);
         if(tenantId != null) {
             imeiToTenantId.put(imei, tenantId);
+            logger.info("Imei {} associated to tenant {}.", imei, tenantId);
         }
         return tenantId;
     }
@@ -85,7 +91,7 @@ public class TrackerAgent {
         return null;
     }
 
-    private ManagedObjectRepresentation createAgentMo(String tenantId) throws SDKException {
+    private ManagedObjectRepresentation createOrUpdateAgent(String tenantId) throws SDKException {
         DeviceManagedObject deviceManagedObject = new DeviceManagedObject(trackerContext.getPlatform(tenantId));
         ManagedObjectRepresentation agentMo = new ManagedObjectRepresentation();
         agentMo.setType("c8y_TrackerAgent");

@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Collection;
 
 import org.slf4j.Logger;
@@ -38,27 +39,30 @@ import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
  */
 public class Server implements Runnable {
     
-    private static final Logger logger = LoggerFactory.getLogger(Main.class);
+    private static final Logger logger = LoggerFactory.getLogger(Server.class);
 
     private final ServerSocket serverSocket;
     private final TrackerContext trackerContext;
     private final TrackerAgent trackerAgent;
+    private final Collection<OperationDispatcher> operationDispatchers = new ArrayList<>();
 
     public Server() throws IOException {
-        this.trackerContext = TrackerContextFactory.instance().createTrackerContext();
+        this.trackerContext = TrackerContextFactory.createTrackerContext();
         this.trackerAgent = new TrackerAgent(trackerContext);
-        int port = trackerContext.getInternalSocketPort();
-        this.serverSocket = new ServerSocket(port);
+        this.serverSocket = new ServerSocket(trackerContext.getLocalSocketPort());
+    }
+    
+    public void init() {
+        startPlatformsUtilities();        
     }
 
     @Override
     public void run() {
-        startPlatformsUtilities();
         while (true) {
             accept();
         }
     }
-
+    
     private void startPlatformsUtilities() {
         Collection<TrackerPlatform> platforms = trackerContext.getPlatforms();
         for (TrackerPlatform trackerPlatform : platforms) {
@@ -68,7 +72,7 @@ public class Server implements Runnable {
 
     private void startPlatformUtilities(TrackerPlatform trackerPlatform) {
         ManagedObjectRepresentation agent = trackerAgent.getOrCreateAgent(trackerPlatform.getTenantId());
-        new OperationDispatcher(trackerPlatform, agent.getId());
+        operationDispatchers.add(new OperationDispatcher(trackerPlatform, agent.getId()));
         //new TracelogDriver(trackerPlatform, agent);
         
     }
@@ -87,16 +91,28 @@ public class Server implements Runnable {
     }
 
     private ConnectedTracker peekTracker(Socket client) throws IOException {
-        InputStream is = client.getInputStream();
-        BufferedInputStream bis = new BufferedInputStream(is);
+        InputStream bis = asInput(client);
         bis.mark(1);
         int marker = bis.read();
         bis.reset();
 
-        if (marker >= '0' && marker <= '9') {
+        if (marker >= '0' && marker <= '9') {            
             return new ConnectedTelicTracker(client, bis, trackerAgent);
         } else {
             return new ConnectedGL200Tracker(client, bis, trackerAgent);
         }
+    }
+
+    private InputStream asInput(Socket client) throws IOException {
+        InputStream is = client.getInputStream();
+        return new BufferedInputStream(is);
+    }
+
+    public TrackerAgent getTrackerAgent() {
+        return trackerAgent;
+    }
+
+    public TrackerContext getTrackerContext() {
+        return trackerContext;
     }
 }

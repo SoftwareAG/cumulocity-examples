@@ -95,7 +95,7 @@ public class GL200Geofence extends GL200LocationReport implements Translator {
         String imei = super.parse(report);
         String type = report[5];
 
-        TrackerDevice device = trackerAgent.getOrCreate(imei);
+        TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(imei);
         device.geofenceAlarm("0".equals(type));
         return imei;
     }
@@ -116,7 +116,7 @@ public class GL200Geofence extends GL200LocationReport implements Translator {
         }
 
         try {
-            trackerAgent.getOrCreate(imei).setGeofence(ackedFence);
+            trackerAgent.getOrCreateTrackerDevice(imei).setGeofence(ackedFence);
             trackerAgent.finish(imei, ackOp);
         } catch (SDKException x) {
             trackerAgent.fail(imei, ackOp, "Error setting geofence", x);

@@ -98,7 +98,7 @@ public class GL200Power implements  Parser {
     
     private String powerAlarm(String[] report, boolean powerLost, boolean external) throws SDKException {
         String imei = report[2];
-        TrackerDevice device = trackerAgent.getOrCreate(imei);
+        TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(imei);
         device.powerAlarm(powerLost, external);
         return imei;
 	}

@@ -50,7 +50,7 @@ public class GL200LocationReportTest {
 
 	@Before
 	public void setup() throws SDKException {
-		when(trackerAgent.getOrCreate(anyString())).thenReturn(device);
+		when(trackerAgent.getOrCreateTrackerDevice(anyString())).thenReturn(device);
 
 		POS1.setAlt(new BigDecimal("70.0"));
 		POS1.setLng(new BigDecimal("121.354335"));
@@ -66,7 +66,7 @@ public class GL200LocationReportTest {
 		String imei = gl200fr.parse(FIXEDREP);
 		
 		assertEquals(IMEI, imei);
-		verify(trackerAgent).getOrCreate(IMEI);
+		verify(trackerAgent).getOrCreateTrackerDevice(IMEI);
 		
 		verify(device).setPosition(POS1);
 		verify(device).setCellId(LAC + "-" + CELLID1);

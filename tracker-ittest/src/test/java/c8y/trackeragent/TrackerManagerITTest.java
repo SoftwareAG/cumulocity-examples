@@ -67,7 +67,7 @@ public class TrackerManagerITTest {
 
     @Before
     public void setup() throws IOException {
-        trackerContext = TrackerContextFactory.instance().createTrackerContext();
+        trackerContext = TrackerContextFactory.createTrackerContext();
         platform = trackerContext.getPlatforms().get(0);
 
         // Clean up previous tests
@@ -95,7 +95,7 @@ public class TrackerManagerITTest {
 
     private GId createTrackerData() throws SDKException, InterruptedException {
         TrackerAgent trackerAgent = new TrackerAgent(trackerContext);
-        TrackerDevice device = trackerAgent.getOrCreate(platform.getTenantId(), IMEI);
+        TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(platform.getTenantId(), IMEI);
 
         Geofence fence = new Geofence();
         fence.setLat(LATITUDE);

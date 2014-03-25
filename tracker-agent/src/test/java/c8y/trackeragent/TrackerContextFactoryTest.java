@@ -8,7 +8,7 @@ public class TrackerContextFactoryTest {
     
     @Test
     public void shouldCreateTrackerContextBasingOnConfiguration() throws Exception {
-        TrackerContext trackerContext = TrackerContextFactory.instance().createTrackerContext();
+        TrackerContext trackerContext = TrackerContextFactory.createTrackerContext();
         
         assertThat(trackerContext.getPlatforms()).hasSize(1);        
         TrackerPlatform platform = trackerContext.getPlatform("vaillant");
@@ -18,8 +18,8 @@ public class TrackerContextFactoryTest {
     
     @Test
     public void shouldReadPortProperty() throws Exception {
-        TrackerContext trackerContext = TrackerContextFactory.instance().createTrackerContext();
+        TrackerContext trackerContext = TrackerContextFactory.createTrackerContext();
         
-        assertThat(trackerContext.getInternalSocketPort()).isEqualTo(9090);
+        assertThat(trackerContext.getLocalSocketPort()).isEqualTo(9090);
     }
 }

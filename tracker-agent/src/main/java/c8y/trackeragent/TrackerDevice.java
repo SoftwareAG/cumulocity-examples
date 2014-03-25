@@ -119,6 +119,11 @@ public class TrackerDevice extends DeviceManagedObject {
         locationUpdate.set(position);
         events.create(locationUpdate);
     }
+    
+    public Position getPosition() {
+        ManagedObjectRepresentation device = inventory.get(gid);
+        return device == null ? null : device.get(Position.class); 
+    }
 
     public void setGeofence(Geofence fence) throws SDKException {
         if (fence.isActive()) {

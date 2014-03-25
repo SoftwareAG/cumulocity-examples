@@ -49,6 +49,7 @@ public class OperationDispatcher extends TimerTask {
 
     private DeviceControlApi operations;
     private GId agent;
+    private Timer poller;
 
     /**
      * @param platform
@@ -64,6 +65,7 @@ public class OperationDispatcher extends TimerTask {
     public OperationDispatcher(Platform platform, GId agent) throws SDKException {
         this.operations = platform.getDeviceControlApi();
         this.agent = agent;
+        this.poller = new Timer("OperationPoller");
 
         finishExecutingOps();
         pollPendingOps();
@@ -92,7 +94,6 @@ public class OperationDispatcher extends TimerTask {
     }
 
     private void pollPendingOps() {
-        Timer poller = new Timer("OperationPoller");
         poller.scheduleAtFixedRate(this, POLLING_DELAY, POLLING_INTERVAL);
     }
 

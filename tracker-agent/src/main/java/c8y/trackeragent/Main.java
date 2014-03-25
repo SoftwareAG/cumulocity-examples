@@ -32,7 +32,9 @@ public class Main {
 
     public static void main(String[] args) {
         try {
-            new Server().run();
+            Server server = new Server();
+            server.init();
+            server.run();
         } catch (Exception x) {
             logger.error("Error caught", x);
         }

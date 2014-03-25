@@ -45,7 +45,7 @@ public class GL200Fallback implements Parser, Translator {
     @Override
     public String parse(String[] report) throws SDKException {
         String imei = report[2];
-        trackerAgent.getOrCreate(imei);
+        trackerAgent.getOrCreateTrackerDevice(imei);
         return imei;
     }
 

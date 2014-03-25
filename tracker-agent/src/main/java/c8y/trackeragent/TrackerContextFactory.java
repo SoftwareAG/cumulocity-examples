@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import com.cumulocity.model.authentication.CumulocityCredentials;
 import com.cumulocity.sdk.client.Platform;
 import com.cumulocity.sdk.client.PlatformImpl;
+import com.cumulocity.sdk.client.SDKException;
 
 public class TrackerContextFactory {
     
@@ -29,12 +30,12 @@ public class TrackerContextFactory {
     private static final Pattern tenantAccessPattern = Pattern.compile(TENANT_ACCESS_REGEXP);
 
     private final Properties props = new Properties();
-    
-    public static TrackerContextFactory instance() {
-        return new TrackerContextFactory();
+        
+    public static TrackerContext createTrackerContext() throws SDKException {
+        return new TrackerContextFactory().newTrackerContext();
     }
     
-    public TrackerContext createTrackerContext() throws IOException {
+    private TrackerContext newTrackerContext() throws SDKException {
         loadConfiguration();
         Map<String, TenantAccess> tenantAccesses = readTenantAccesses();
         Map<String, TrackerPlatform> platforms = asPlatforms(tenantAccesses);
@@ -72,10 +73,12 @@ public class TrackerContextFactory {
         return tenantAccesses;
     }
 
-    private void loadConfiguration() throws IOException {
+    private void loadConfiguration() throws SDKException {
         try (InputStream is = TrackerContext.class.getResourceAsStream(PROPS); 
                 InputStreamReader ir = new InputStreamReader(is)) {
             props.load(ir);
+        } catch (IOException ioex) {
+            new SDKException("Can't load configuration from " + PROPS, ioex);
         }
     }
     

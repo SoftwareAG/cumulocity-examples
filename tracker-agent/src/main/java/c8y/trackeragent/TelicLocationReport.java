@@ -27,7 +27,7 @@ public class TelicLocationReport implements Parser {
     @Override
 	public String parse(String[] report) throws SDKException {
 		String imei = report[0].substring(4, report[0].length() - 2);	
-		TrackerDevice device = trackerAgent.getOrCreate(imei);
+		TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(imei);
 		
 		Position pos = new Position();
 		pos.setAlt(new BigDecimal(report[ALTITUDE]));

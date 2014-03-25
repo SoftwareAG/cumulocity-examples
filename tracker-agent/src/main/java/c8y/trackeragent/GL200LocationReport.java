@@ -79,7 +79,7 @@ public class GL200LocationReport implements Parser {
 
 	private String parseLocationReport(String[] report) throws SDKException {
 		String imei = report[2];
-		TrackerDevice device = trackerAgent.getOrCreate(imei);
+		TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(imei);
 
 		int reportStart = 7;
 		final int reportLength = 12;

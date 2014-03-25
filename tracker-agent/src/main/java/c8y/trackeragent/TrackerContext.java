@@ -9,8 +9,8 @@ import java.util.Properties;
 
 public class TrackerContext {
     
-    public static final String INTERNAL_SOCKET_PORT_PROP = "port";
-    public static final String DEFAULT_INTERNAL_SOCKET_PORT = "9090";
+    public static final String LOCAL_SOCKET_PORT_PROP = "port";
+    public static final String DEFAULT_LOCAL_SOCKET_PORT = "9090";
     
     private final Properties props;
     private final Map<String, TrackerPlatform> tenantIdToPlatform;
@@ -30,8 +30,8 @@ public class TrackerContext {
         return tenantIdToPlatform.get(tenantId);
     }
     
-    public int getInternalSocketPort() {
-        return parseInt(props.getProperty(INTERNAL_SOCKET_PORT_PROP, DEFAULT_INTERNAL_SOCKET_PORT));
+    public int getLocalSocketPort() {
+        return parseInt(props.getProperty(LOCAL_SOCKET_PORT_PROP, DEFAULT_LOCAL_SOCKET_PORT));
     }
     
 }

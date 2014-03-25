@@ -56,7 +56,7 @@ public class GL200DeviceMotionStateTest {
     public void setup() throws SDKException {
         operation.set(track);
         gl200mot = new GL200DeviceMotionState(trackerAgent, PASSWORD);
-        when(trackerAgent.getOrCreate(anyString())).thenReturn(device);
+        when(trackerAgent.getOrCreateTrackerDevice(anyString())).thenReturn(device);
     }
 
     @Test
@@ -78,7 +78,7 @@ public class GL200DeviceMotionStateTest {
         String imei = gl200mot.parse(ACKMOTION);
 
         assertEquals(IMEI, imei);
-        verify(trackerAgent).getOrCreate(IMEI);
+        verify(trackerAgent).getOrCreateTrackerDevice(IMEI);
         verify(device).setMotionTracking(false);
     }
 
@@ -87,7 +87,7 @@ public class GL200DeviceMotionStateTest {
         String imei = gl200mot.parse(REPMOTION);
 
         assertEquals(IMEI, imei);
-        verify(trackerAgent).getOrCreate(IMEI);
+        verify(trackerAgent).getOrCreateTrackerDevice(IMEI);
         verify(device).motionAlarm(anyBoolean());
         verify(device).motionAlarm(true);
 

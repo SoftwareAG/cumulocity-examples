@@ -65,7 +65,7 @@ public class GL200GeofenceTest {
 
         gl200gf = new GL200Geofence(trackerAgent, PASSWORD);
 
-        when(trackerAgent.getOrCreate(anyString())).thenReturn(device);
+        when(trackerAgent.getOrCreateTrackerDevice(anyString())).thenReturn(device);
     }
 
     @Test
@@ -80,7 +80,7 @@ public class GL200GeofenceTest {
         String imei = gl200gf.parse(ACKFENCE);
 
         assertEquals(IMEI, imei);
-        verify(trackerAgent).getOrCreate(IMEI);
+        verify(trackerAgent).getOrCreateTrackerDevice(IMEI);
         verify(device).setGeofence(fence);
     }
 
@@ -100,7 +100,7 @@ public class GL200GeofenceTest {
         String imei = gl200gf.parse(REPFENCE);
 
         assertEquals(IMEI, imei);
-        verify(trackerAgent, times(2)).getOrCreate(IMEI);
+        verify(trackerAgent, times(2)).getOrCreateTrackerDevice(IMEI);
 
         Position position = new Position();
         position.setLat(new BigDecimal("31.222073"));

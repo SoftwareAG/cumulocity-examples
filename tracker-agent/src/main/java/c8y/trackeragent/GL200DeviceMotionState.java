@@ -89,7 +89,7 @@ public class GL200DeviceMotionState implements Parser, Translator {
         String imei = report[2];
         boolean motion = MOTION_DETECTED.equals(report[4]);
 
-        TrackerDevice device = trackerAgent.getOrCreate(imei);
+        TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(imei);
         device.motionAlarm(motion);
         return imei;
     }
@@ -109,7 +109,7 @@ public class GL200DeviceMotionState implements Parser, Translator {
         }
 
         try {
-            trackerAgent.getOrCreate(imei).setMotionTracking(ackedState);
+            trackerAgent.getOrCreateTrackerDevice(imei).setMotionTracking(ackedState);
             trackerAgent.finish(imei, ackOp);
         } catch (SDKException x) {
             trackerAgent.fail(imei, ackOp, "Error setting motion tracking", x);

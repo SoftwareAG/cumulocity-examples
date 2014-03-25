@@ -36,8 +36,8 @@ import com.cumulocity.sdk.client.inventory.InventoryApi;
  */
 public class DeviceManagedObject {
 
-    private IdentityApi registry;
-    private InventoryApi inventory;
+    protected IdentityApi registry;
+    protected InventoryApi inventory;
 
     public DeviceManagedObject(Platform platform) {
         this.registry = platform.getIdentityApi();
