@@ -26,6 +26,9 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,12 +50,13 @@ public class Server implements Runnable {
     private final ServerSocket serverSocket;
     private final TrackerContext trackerContext;
     private final TrackerAgent trackerAgent;
-    private final Collection<OperationDispatcher> operationDispatchers = new ArrayList<>();
+    private final ScheduledExecutorService scheduledExecutor;
 
     public Server() throws IOException {
         this.trackerContext = TrackerContextFactory.createTrackerContext();
         this.trackerAgent = new TrackerAgent(trackerContext);
         this.serverSocket = new ServerSocket(trackerContext.getLocalSocketPort());
+        this.scheduledExecutor = Executors.newScheduledThreadPool(trackerContext.getPlatforms().size());
     }
     
     public void init() {
@@ -75,9 +79,9 @@ public class Server implements Runnable {
 
     private void startPlatformUtilities(TrackerPlatform trackerPlatform) {
         ManagedObjectRepresentation agent = trackerContext.getOrCreateAgent(trackerPlatform.getTenantId());
-        operationDispatchers.add(new OperationDispatcher(trackerPlatform, agent.getId()));
-        //new TracelogDriver(trackerPlatform, agent);
-        
+        OperationDispatcher task = new OperationDispatcher(trackerPlatform, agent.getId());
+        scheduledExecutor.scheduleWithFixedDelay(task, OperationDispatcher.POLLING_DELAY, OperationDispatcher.POLLING_INTERVAL, TimeUnit.SECONDS);
+        //new TracelogDriver(trackerPlatform, agent);        
     }
 
     private void accept() {

@@ -20,9 +20,6 @@
 
 package c8y.trackeragent;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,16 +37,15 @@ import com.cumulocity.sdk.client.devicecontrol.OperationFilter;
  * currently connected to the agent. Operations for devices that are currently
  * not connected are left in the queue on the platform for retry.
  */
-public class OperationDispatcher extends TimerTask {
+public class OperationDispatcher implements Runnable {
     
-    public static final long POLLING_DELAY = 5000;
-    public static final long POLLING_INTERVAL = 5000;
+    public static final long POLLING_DELAY = 5;
+    public static final long POLLING_INTERVAL = 5;
     
     private static Logger logger = LoggerFactory.getLogger(OperationDispatcher.class);
 
     private DeviceControlApi operations;
     private GId agent;
-    private Timer poller;
 
     /**
      * @param platform
@@ -65,10 +61,8 @@ public class OperationDispatcher extends TimerTask {
     public OperationDispatcher(Platform platform, GId agent) throws SDKException {
         this.operations = platform.getDeviceControlApi();
         this.agent = agent;
-        this.poller = new Timer("OperationPoller");
-
+        
         finishExecutingOps();
-        pollPendingOps();
     }
 
     public void finish(OperationRepresentation operation) throws SDKException {
@@ -91,10 +85,6 @@ public class OperationDispatcher extends TimerTask {
             operation.setStatus(OperationStatus.FAILED.toString());
             operations.update(operation);
         }
-    }
-
-    private void pollPendingOps() {
-        poller.scheduleAtFixedRate(this, POLLING_DELAY, POLLING_INTERVAL);
     }
 
     @Override
