@@ -30,4 +30,8 @@ public class DeviceCredentials {
         this.password = password;
     }
 
+    @Override
+    public String toString() {
+        return String.format("DeviceCredentials [tenantId=%s, user=%s, password=%s]", tenantId, user, password);
+    }
 }
