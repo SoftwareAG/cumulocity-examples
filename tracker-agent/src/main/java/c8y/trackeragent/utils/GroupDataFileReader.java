@@ -20,9 +20,9 @@ import org.slf4j.LoggerFactory;
 
 import com.cumulocity.sdk.client.SDKException;
 
-public class KeyValueDataReader {
+public class GroupDataFileReader {
     
-    private static final Logger logger = LoggerFactory.getLogger(KeyValueDataReader.class);
+    private static final Logger logger = LoggerFactory.getLogger(GroupDataFileReader.class);
     
     private static final String CONFIG_DIR_NAME = ".trackeragent";
     
@@ -32,7 +32,7 @@ public class KeyValueDataReader {
     private final HashMap<String, Group> groups = new HashMap<>();
     private Properties source  = new Properties();
     
-    public KeyValueDataReader(String sourcePath, List<String> groupEntryNames) {
+    public GroupDataFileReader(String sourcePath, List<String> groupEntryNames) {
         this.sourcePath = sourcePath;
         this.groupEntryNames = groupEntryNames;
         this.entryPattern = createEntryPattern();
@@ -55,14 +55,35 @@ public class KeyValueDataReader {
     }
 
     private void loadData() throws SDKException {
+        source = loadDataFromResources();
+        if(source == null) {
+            source = loadDataFromFileSystem();
+        }
+    }
+    
+    private Properties loadDataFromFileSystem() {
         String home = System.getProperty("user.home");
         Path path = FileSystems.getDefault().getPath(home, CONFIG_DIR_NAME, sourcePath);
-        source = new Properties();
+        Properties source = new Properties();
         try (InputStream io = new FileInputStream(path.toFile())) {
             source.load(io);
+            return source;
         } catch (IOException ioex) {
-            throw new SDKException("Can't load configuration from " + path.toAbsolutePath().toString(), ioex);
+            throw new SDKException("Can't load configuration from file system " + path.toAbsolutePath().toString(), ioex);
         }
+        
+    }
+    private Properties loadDataFromResources() {
+        Properties source = null;
+        try (InputStream io = GroupDataFileReader.class.getResourceAsStream(sourcePath)) {
+            if(io != null) {
+                source = new Properties();
+                source.load(io);
+            }
+        } catch (IOException ioex) {
+            throw new SDKException("Can't load configuration from resources " + sourcePath, ioex);
+        } 
+        return source;                
     }
     
     private void tryReadEntry(String entry) {

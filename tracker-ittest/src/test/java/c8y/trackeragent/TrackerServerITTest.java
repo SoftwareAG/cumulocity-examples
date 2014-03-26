@@ -11,17 +11,15 @@ import org.junit.Test;
 import c8y.Position;
 import c8y.trackeragent.utils.Positions;
 
-public class TrackerServerTest {
+public class TrackerServerITTest {
 
     private Server server;
-    private TrackerPlatform trackerPlatform;
     private TrackerDevice trackerDevice;
 
     @Before
     public void setup() throws IOException {
         server = new Server();
         server.init();
-        trackerPlatform = server.getTrackerContext().getPlatforms().get(0);
         trackerDevice = server.getTrackerAgent().getOrCreateTrackerDevice(TelicLocationReportTest.IMEI);
         trackerDevice.setPosition(Positions.ZERO);
     }

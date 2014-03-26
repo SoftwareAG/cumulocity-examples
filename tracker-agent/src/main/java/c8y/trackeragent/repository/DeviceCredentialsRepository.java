@@ -6,8 +6,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import c8y.trackeragent.exception.UnknownDeviceException;
-import c8y.trackeragent.utils.KeyValueDataReader;
-import c8y.trackeragent.utils.KeyValueDataReader.Group;
+import c8y.trackeragent.utils.GroupDataFileReader;
+import c8y.trackeragent.utils.GroupDataFileReader.Group;
 
 public class DeviceCredentialsRepository {
     
@@ -37,7 +37,7 @@ public class DeviceCredentialsRepository {
     }
     
     private void refresh() {
-        KeyValueDataReader dataReader = new KeyValueDataReader(SOURCE_PATH, asList("tenantId", "user", "password"));
+        GroupDataFileReader dataReader = new GroupDataFileReader(SOURCE_PATH, asList("tenantId", "user", "password"));
         dataReader.init();
         for (Group group : dataReader.getGroups()) {
             if(group.isFullyInitialized()) {

@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import c8y.trackeragent.TrackerPlatform;
-import c8y.trackeragent.utils.KeyValueDataReader.Group;
+import c8y.trackeragent.utils.GroupDataFileReader.Group;
 
 import com.cumulocity.model.authentication.CumulocityCredentials;
 import com.cumulocity.sdk.client.PlatformImpl;
@@ -23,7 +23,7 @@ public class TrackerContextFactory {
     }
 
     private TrackerContext newTrackerContext() throws SDKException {
-        KeyValueDataReader keyValueDataReader = new KeyValueDataReader(PROPS, asList("host", "user", "password"));
+        GroupDataFileReader keyValueDataReader = new GroupDataFileReader(PROPS, asList("host", "user", "password"));
         keyValueDataReader.init();
         List<Group> groups = keyValueDataReader.getGroups();
         Map<String, TrackerPlatform> platforms = asPlatforms(groups);
