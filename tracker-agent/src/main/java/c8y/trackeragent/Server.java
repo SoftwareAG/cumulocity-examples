@@ -30,6 +30,9 @@ import java.util.Collection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import c8y.trackeragent.utils.TrackerContext;
+import c8y.trackeragent.utils.TrackerContextFactory;
+
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 
 /**
@@ -71,7 +74,7 @@ public class Server implements Runnable {
     }
 
     private void startPlatformUtilities(TrackerPlatform trackerPlatform) {
-        ManagedObjectRepresentation agent = trackerAgent.getOrCreateAgent(trackerPlatform.getTenantId());
+        ManagedObjectRepresentation agent = trackerContext.getOrCreateAgent(trackerPlatform.getTenantId());
         operationDispatchers.add(new OperationDispatcher(trackerPlatform, agent.getId()));
         //new TracelogDriver(trackerPlatform, agent);
         

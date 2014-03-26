@@ -1,8 +1,10 @@
-package c8y.trackeragent.repository;
+package c8y.trackeragent.utils;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,23 +24,23 @@ public class KeyValueDataReader {
     
     private static final Logger logger = LoggerFactory.getLogger(KeyValueDataReader.class);
     
-    public final String ENTRY_REGEXP = "(.*)\\.(%s)";
+    private static final String CONFIG_DIR_NAME = ".trackeragent";
+    
     private final Pattern entryPattern;
-
     private final String sourcePath;
     private final List<String> groupEntryNames;
-    private Properties source;
-    private HashMap<String, Group> groups;
+    private final HashMap<String, Group> groups = new HashMap<>();
+    private Properties source  = new Properties();
     
     public KeyValueDataReader(String sourcePath, List<String> groupEntryNames) {
         this.sourcePath = sourcePath;
         this.groupEntryNames = groupEntryNames;
-        this.entryPattern = asEntryPattern();
+        this.entryPattern = createEntryPattern();
     }
 
     public void init() {
         loadData();
-        this.groups = new HashMap<>();
+        groups.clear();
         for (Object entry : source.keySet()) {
             tryReadEntry(String.valueOf(entry));
         }
@@ -53,15 +55,14 @@ public class KeyValueDataReader {
     }
 
     private void loadData() throws SDKException {
-        Properties result = new Properties();
-        //TODO change to absolute
-        try (InputStream is = KeyValueDataReader.class.getResourceAsStream(sourcePath); 
-                InputStreamReader ir = new InputStreamReader(is)) {
-            result.load(ir);
+        String home = System.getProperty("user.home");
+        Path path = FileSystems.getDefault().getPath(home, CONFIG_DIR_NAME, sourcePath);
+        source = new Properties();
+        try (InputStream io = new FileInputStream(path.toFile())) {
+            source.load(io);
         } catch (IOException ioex) {
-            new SDKException("Can't load configuration from " + sourcePath, ioex);
+            throw new SDKException("Can't load configuration from " + path.toAbsolutePath().toString(), ioex);
         }
-        this.source = result;
     }
     
     private void tryReadEntry(String entry) {
@@ -82,7 +83,7 @@ public class KeyValueDataReader {
         return group;
     }
     
-    private Pattern asEntryPattern() {
+    private Pattern createEntryPattern() {
         StringBuffer joinedEntryNames = new StringBuffer();
         Iterator<String> iter = groupEntryNames.iterator();
         while (iter.hasNext()) {

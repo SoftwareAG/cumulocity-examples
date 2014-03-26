@@ -1,6 +1,8 @@
 package c8y.trackeragent;
 
+import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.Platform;
+import com.cumulocity.sdk.client.PlatformImpl;
 import com.cumulocity.sdk.client.PlatformParameters;
 import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.alarm.AlarmApi;
@@ -14,10 +16,8 @@ import com.cumulocity.sdk.client.measurement.MeasurementApi;
 public class TrackerPlatform implements Platform {
     
     private final Platform orig;
-    private final String tenantId;
 
-    public TrackerPlatform(String tenantId, Platform orig) {
-        this.tenantId = tenantId;
+    public TrackerPlatform(PlatformImpl orig) {
         this.orig = orig;
     }
 
@@ -50,9 +50,14 @@ public class TrackerPlatform implements Platform {
     }
 
     public String getTenantId() {
-        return tenantId;
+        return getPlatformParameters().getTenantId();
     }
-
+    
+    public String getHost() {
+        return getPlatformParameters().getHost();
+    }
+    
+    @Deprecated
     public PlatformParameters getPlatformParameters() {
         return (PlatformParameters) orig;
     }

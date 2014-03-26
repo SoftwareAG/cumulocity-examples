@@ -1,4 +1,4 @@
-package c8y.trackeragent;
+package c8y.trackeragent.utils;
 
 import static com.cumulocity.model.authentication.CumulocityCredentials.Builder.cumulocityCredentials;
 import static java.util.Arrays.asList;
@@ -7,17 +7,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import c8y.trackeragent.repository.KeyValueDataReader;
-import c8y.trackeragent.repository.KeyValueDataReader.Group;
+import c8y.trackeragent.TrackerPlatform;
+import c8y.trackeragent.utils.KeyValueDataReader.Group;
 
 import com.cumulocity.model.authentication.CumulocityCredentials;
-import com.cumulocity.sdk.client.Platform;
 import com.cumulocity.sdk.client.PlatformImpl;
 import com.cumulocity.sdk.client.SDKException;
 
 public class TrackerContextFactory {
 
-    public static final String PROPS = "/cumulocity.properties";
+    public static final String PROPS = "/tenant.properties";
 
     public static TrackerContext createTrackerContext() throws SDKException {
         return new TrackerContextFactory().newTrackerContext();
@@ -45,7 +44,6 @@ public class TrackerContextFactory {
     private TrackerPlatform asPlatform(Group group) {
         CumulocityCredentials credentials = cumulocityCredentials(
                 group.get("user"), group.get("password")).withTenantId(group.getGroupName()).build();
-        Platform platform = new PlatformImpl(group.get("host"), credentials);
-        return new TrackerPlatform(group.getGroupName(), platform);
+        return new TrackerPlatform(new PlatformImpl(group.get("host"), credentials));
     }
 }

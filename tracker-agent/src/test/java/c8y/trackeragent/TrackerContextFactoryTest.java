@@ -4,6 +4,9 @@ import static org.fest.assertions.Assertions.assertThat;
 
 import org.junit.Test;
 
+import c8y.trackeragent.utils.TrackerContext;
+import c8y.trackeragent.utils.TrackerContextFactory;
+
 public class TrackerContextFactoryTest {
     
     @Test

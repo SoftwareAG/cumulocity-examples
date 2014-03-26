@@ -1,9 +1,9 @@
 package c8y.trackeragent.repository;
 
-public class Credentials {
+public class DeviceCredentials {
 
     private String tenantId;
-    private String login;
+    private String user;
     private String password;
 
     public String getTenantId() {
@@ -14,12 +14,12 @@ public class Credentials {
         this.tenantId = tenantId;
     }
 
-    public String getLogin() {
-        return login;
+    public String getUser() {
+        return user;
     }
 
-    public void setLogin(String login) {
-        this.login = login;
+    public void setUser(String user) {
+        this.user = user;
     }
 
     public String getPassword() {

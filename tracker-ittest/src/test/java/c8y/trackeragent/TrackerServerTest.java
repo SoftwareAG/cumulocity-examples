@@ -22,7 +22,7 @@ public class TrackerServerTest {
         server = new Server();
         server.init();
         trackerPlatform = server.getTrackerContext().getPlatforms().get(0);
-        trackerDevice = server.getTrackerAgent().getOrCreateTrackerDevice(trackerPlatform.getTenantId(), TelicLocationReportTest.IMEI);
+        trackerDevice = server.getTrackerAgent().getOrCreateTrackerDevice(TelicLocationReportTest.IMEI);
         trackerDevice.setPosition(Positions.ZERO);
     }
 
