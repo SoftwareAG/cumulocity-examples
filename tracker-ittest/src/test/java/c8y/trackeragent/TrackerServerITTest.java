@@ -1,6 +1,7 @@
 package c8y.trackeragent;
 
 import static com.cumulocity.rest.representation.operation.DeviceControlMediaType.NEW_DEVICE_REQUEST;
+import static org.fest.assertions.Assertions.assertThat;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -10,6 +11,7 @@ import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.fest.assertions.Assertions;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -83,8 +85,8 @@ public class TrackerServerITTest {
         
         Thread.sleep(5000);
         
-        DeviceCredentials credentials = DeviceCredentialsRepository.instance().getCredentials(NEW_IMEI);
-        
+        DeviceCredentials credentials = DeviceCredentialsRepository.instance().getCredentials(NEW_IMEI);        
+        assertThat(credentials).isNotNull();        
     }
 
     private void writeToSocket(byte[] bis) throws Exception {
