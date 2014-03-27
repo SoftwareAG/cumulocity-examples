@@ -5,6 +5,18 @@ public class DeviceCredentials {
     private String tenantId;
     private String user;
     private String password;
+    
+    public DeviceCredentials() {}
+
+    public DeviceCredentials(String tenantId, String user, String password) {
+        this.tenantId = tenantId;
+        this.user = user;
+        this.password = password;
+    }
+    
+    public DeviceCredentials duplicate() {
+        return new DeviceCredentials(tenantId, user, password);
+    }
 
     public String getTenantId() {
         return tenantId;

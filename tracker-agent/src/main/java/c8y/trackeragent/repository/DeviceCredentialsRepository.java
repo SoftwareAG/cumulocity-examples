@@ -46,7 +46,7 @@ public class DeviceCredentialsRepository {
             if (deviceCredentials == null) {
                 throw UnknownDeviceException.forImei(imei);
             }
-            return deviceCredentials;
+            return deviceCredentials.duplicate();
         } finally {
             rwLock.readLock().unlock();
         }
