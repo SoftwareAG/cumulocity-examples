@@ -7,7 +7,6 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,7 +29,6 @@ public class GroupPropertyAccessor {
 
     private static final Logger logger = LoggerFactory.getLogger(GroupPropertyAccessor.class);
 
-    private static final String CONFIG_DIR_NAME = ".trackeragent";
     private static final String ENTRY_PATTERN = "%s.%s=%s";
 
     private final Pattern entryKeyPattern;
@@ -39,18 +37,19 @@ public class GroupPropertyAccessor {
     private final HashMap<String, Group> groups = new HashMap<>();
     private Properties source;
 
-    public GroupPropertyAccessor(String sourcePath, List<String> groupElementNames) {
-        this.sourceFile = getInputFile(sourcePath);
+    public GroupPropertyAccessor(Path sourcePath, List<String> groupElementNames) {
+        this.sourceFile = sourcePath.toFile();
         this.groupElementNames = groupElementNames;
         this.entryKeyPattern = createEntryKeyPattern(groupElementNames);
     }
 
-    public void read() {
-        loadData();
+    public GroupPropertyAccessor refresh() {
+        loadSource();
         groups.clear();
         for (Object entry : source.keySet()) {
             tryReadEntry(String.valueOf(entry));
         }
+        return this;
     }
 
     public void write(Group group) {
@@ -80,7 +79,7 @@ public class GroupPropertyAccessor {
         return new Group(groupName, groupElementNames);
     }
 
-    private void loadData() throws SDKException {
+    private void loadSource() throws SDKException {
         source = new Properties();
         try (InputStream io = new FileInputStream(sourceFile)) {
             source.load(io);
@@ -120,12 +119,6 @@ public class GroupPropertyAccessor {
         return Pattern.compile(regexp);
     }
     
-    private static File getInputFile(String relativePath) {
-        String home = System.getProperty("user.home");
-        Path path = FileSystems.getDefault().getPath(home, CONFIG_DIR_NAME, relativePath);
-        return path.toFile();
-    }
-
     public static class Group {
 
         private final Map<String, String> content = new HashMap<>();
@@ -167,6 +160,41 @@ public class GroupPropertyAccessor {
             }
             return valid;
         }
-    }
 
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((content == null) ? 0 : content.hashCode());
+            result = prime * result + ((groupName == null) ? 0 : groupName.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            Group other = (Group) obj;
+            if (content == null) {
+                if (other.content != null)
+                    return false;
+            } else if (!content.equals(other.content))
+                return false;
+            if (groupName == null) {
+                if (other.groupName != null)
+                    return false;
+            } else if (!groupName.equals(other.groupName))
+                return false;
+            return true;
+        }
+
+        @Override
+        public String toString() {
+            return String.format("Group [content=%s, groupName=%s]", content, groupName);
+        }
+    }
 }

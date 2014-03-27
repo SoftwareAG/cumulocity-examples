@@ -1,5 +1,6 @@
 package c8y.trackeragent.utils;
 
+import static c8y.trackeragent.utils.ConfigUtils.getConfigFilePath;
 import static com.cumulocity.model.authentication.CumulocityCredentials.Builder.cumulocityCredentials;
 import static java.util.Arrays.asList;
 
@@ -16,18 +17,18 @@ import com.cumulocity.sdk.client.SDKException;
 
 public class TrackerContextFactory {
 
-    public static final String PROPS = "/tenant.properties";
+    public static final String SOURCE_FILE = "common.properties";
 
     public static TrackerContext createTrackerContext() throws SDKException {
         return new TrackerContextFactory().newTrackerContext();
     }
 
     private TrackerContext newTrackerContext() throws SDKException {
-        GroupPropertyAccessor keyValueDataReader = new GroupPropertyAccessor(PROPS, asList("host", "user", "password"));
-        keyValueDataReader.read();
-        List<Group> groups = keyValueDataReader.getGroups();
+        GroupPropertyAccessor propertyAccessor = new GroupPropertyAccessor(
+                getConfigFilePath(SOURCE_FILE), asList("host", "user", "password"));
+        List<Group> groups = propertyAccessor.refresh().getGroups();
         Map<String, TrackerPlatform> platforms = asPlatforms(groups);
-        return new TrackerContext(platforms, keyValueDataReader.getSource());
+        return new TrackerContext(platforms, propertyAccessor.getSource());
 
     }
 

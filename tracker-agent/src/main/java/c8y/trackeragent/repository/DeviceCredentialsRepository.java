@@ -1,5 +1,6 @@
 package c8y.trackeragent.repository;
 
+import static c8y.trackeragent.utils.ConfigUtils.getConfigFilePath;
 import static java.util.Arrays.asList;
 
 import java.util.HashMap;
@@ -17,7 +18,7 @@ public class DeviceCredentialsRepository {
     
     private static final Logger logger = LoggerFactory.getLogger(DeviceCredentialsRepository.class);
 
-    public static final String SOURCE_PATH = "/device.properties";
+    public static final String SOURCE_FILE = "device.properties";
     private static final DeviceCredentialsRepository instance;
 
     private final Map<String, DeviceCredentials> credentials = new HashMap<>();
@@ -26,7 +27,7 @@ public class DeviceCredentialsRepository {
 
     static {
         instance = new DeviceCredentialsRepository();
-        instance.refreshSync();
+        instance.refresh();
     }
 
     public static DeviceCredentialsRepository instance() {
@@ -34,7 +35,8 @@ public class DeviceCredentialsRepository {
     }
 
     private DeviceCredentialsRepository() {
-        propertyAccessor = new GroupPropertyAccessor(SOURCE_PATH, asList("tenantId", "user", "password"));
+        propertyAccessor = new GroupPropertyAccessor(
+                getConfigFilePath(SOURCE_FILE), asList("tenantId", "user", "password"));
     }
 
     public DeviceCredentials getCredentials(String imei) {
@@ -59,24 +61,24 @@ public class DeviceCredentialsRepository {
             }
             propertyAccessor.write(group);
             logger.info("Credentials from device {} have been written: {}.", imei, credentials);
-            refresh();
-        } finally {
-            rwLock.writeLock().unlock();
-        }
-    }
-
-    private void refreshSync() {
-        rwLock.writeLock().lock();
-        try {
-            refresh();
+            copyGroupsToCredentials();
         } finally {
             rwLock.writeLock().unlock();
         }
     }
 
     private void refresh() {
+        rwLock.writeLock().lock();
+        try {
+            propertyAccessor.refresh();
+            copyGroupsToCredentials();
+        } finally {
+            rwLock.writeLock().unlock();
+        }
+    }
+
+    private void copyGroupsToCredentials() {
         credentials.clear();
-        propertyAccessor.read();
         for (Group group : propertyAccessor.getGroups()) {
             if (group.isFullyInitialized()) {
                 credentials.put(group.getGroupName(), asCredentials(group));
@@ -99,5 +101,4 @@ public class DeviceCredentialsRepository {
         group.put("password", credentials.getPassword());
         return group;
     }
-
 }
