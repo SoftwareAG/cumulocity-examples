@@ -17,9 +17,11 @@ import com.cumulocity.sdk.client.measurement.MeasurementApi;
 public class TrackerPlatform implements Platform {
     
     private final Platform orig;
+    private final PlatformType platformType;
 
-    public TrackerPlatform(PlatformImpl orig) {
+    public TrackerPlatform(PlatformImpl orig, PlatformType platformType) {
         this.orig = orig;
+        this.platformType = platformType;
     }
 
     public InventoryApi getInventoryApi() throws SDKException {
@@ -74,8 +76,27 @@ public class TrackerPlatform implements Platform {
         return getPlatformParameters().getPassword();
     }
     
-    private PlatformParameters getPlatformParameters() {
+    public PlatformParameters getPlatformParameters() {
         return (PlatformParameters) orig;
     }
+    
+    public PlatformType getPlatformType() {
+        return platformType;
+    }
+    
+    public boolean isRegular() {
+        return PlatformType.REGULAR.equals(platformType);
+    }
+    
+    public boolean isBootstrap() {
+        return PlatformType.BOOTSTRAP.equals(platformType);
+    }
+    
+    public static enum PlatformType {
+        REGULAR, 
+        BOOTSTRAP;
+    }
+
+
     
 }

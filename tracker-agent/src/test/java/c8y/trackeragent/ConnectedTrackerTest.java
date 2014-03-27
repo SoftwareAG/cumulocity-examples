@@ -20,9 +20,11 @@
 
 package c8y.trackeragent;
 
+import static org.fest.assertions.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -39,6 +41,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import c8y.trackeragent.devicebootstrap.DeviceBootstrapProcessor;
 import c8y.trackeragent.utils.TrackerContext;
 
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
@@ -61,6 +64,7 @@ public class ConnectedTrackerTest {
         ConnectionRegistry.instance().remove("imei");
         tracker = new ConnectedTracker(client, bis, GL200Constants.REPORT_SEP, GL200Constants.FIELD_SEP);
         tracker.trackerContext = Mockito.mock(TrackerContext.class);
+        tracker.deviceBootstrapProcessor = Mockito.mock(DeviceBootstrapProcessor.class);
         tracker.addFragment(translator);
         tracker.addFragment(parser);
         tracker.setOut(out);
@@ -79,6 +83,20 @@ public class ConnectedTrackerTest {
         verify(parser).onParsed(dummyReport, "imei");
         verifyZeroInteractions(translator);
         assertEquals(tracker, ConnectionRegistry.instance().get("imei"));
+    }
+    
+    @Test
+    public void singleReportProcessingForNewImei() throws SDKException {
+        String[] dummyReport = null;
+        when(parser.parse(dummyReport)).thenReturn("imei");
+        when(tracker.trackerContext.isDeviceRegistered("imei")).thenReturn(false);
+        doNothing().when(tracker.deviceBootstrapProcessor).startBootstaping("imei");
+        
+        tracker.processReport(dummyReport);
+        
+        assertThat(ConnectionRegistry.instance()).isEmpty();
+        verify(tracker.deviceBootstrapProcessor).startBootstaping("imei");
+        verifyZeroInteractions(translator);
     }
 
     @Test

@@ -43,38 +43,43 @@ import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
  * only GL200.)
  */
 public class Server implements Runnable {
-    
+
     private static final int REPORTS_EXECUTOR_POOL_SIZE = 10;
 
     private static final Logger logger = LoggerFactory.getLogger(Server.class);
 
-    private final ServerSocket serverSocket;
+    final ServerSocket serverSocket;
     private final TrackerContext trackerContext = TrackerContext.get();
     private final TrackerAgent trackerAgent;
     private final ScheduledExecutorService operationsExecutor;
     private final ExecutorService reportsExecutor;
+    private volatile boolean started = false;
 
     public Server() throws IOException {
         this.trackerAgent = new TrackerAgent();
         this.serverSocket = new ServerSocket(trackerContext.getLocalSocketPort());
-        this.operationsExecutor = Executors.newScheduledThreadPool(trackerContext.getPlatforms().size());
+        this.operationsExecutor = Executors.newScheduledThreadPool(trackerContext.getRegularPlatforms().size());
         this.reportsExecutor = Executors.newFixedThreadPool(REPORTS_EXECUTOR_POOL_SIZE);
     }
-    
+
     public void init() {
-        startPlatformsUtilities();        
+        startPlatformsUtilities();
     }
 
     @Override
     public void run() {
-        while (true) {
+        started = true;
+        while (started) {
             accept();
         }
     }
-    
+
+    public void stop() {
+        started = false;
+    }
+
     private void startPlatformsUtilities() {
-        Collection<TrackerPlatform> platforms = trackerContext.getPlatforms();
-        for (TrackerPlatform trackerPlatform : platforms) {
+        for (TrackerPlatform trackerPlatform : trackerContext.getRegularPlatforms()) {
             startPlatformUtilities(trackerPlatform);
         }
     }
@@ -82,13 +87,16 @@ public class Server implements Runnable {
     private void startPlatformUtilities(TrackerPlatform trackerPlatform) {
         ManagedObjectRepresentation agent = trackerContext.getOrCreateAgent(trackerPlatform.getTenantId());
         OperationDispatcher task = new OperationDispatcher(trackerPlatform, agent.getId());
-        operationsExecutor.scheduleWithFixedDelay(task, OperationDispatcher.POLLING_DELAY, OperationDispatcher.POLLING_INTERVAL, TimeUnit.SECONDS);
-        //new TracelogDriver(trackerPlatform, agent);        
+       // operationsExecutor.scheduleWithFixedDelay(task, OperationDispatcher.POLLING_DELAY, OperationDispatcher.POLLING_INTERVAL, TimeUnit.SECONDS);
+        // new TracelogDriver(trackerPlatform, agent);
     }
 
     private void accept() {
         try {
             logger.debug("Waiting for connection on port {}", serverSocket.getLocalPort());
+            if (serverSocket.isClosed()) {
+                return;
+            }
             Socket client = serverSocket.accept();
             logger.debug("Accepted connection from {}, launching worker thread.", client.getRemoteSocketAddress());
 
@@ -104,7 +112,7 @@ public class Server implements Runnable {
         int marker = bis.read();
         bis.reset();
 
-        if (marker >= '0' && marker <= '9') {            
+        if (marker >= '0' && marker <= '9') {
             return new ConnectedTelicTracker(client, bis, trackerAgent);
         } else {
             return new ConnectedGL200Tracker(client, bis, trackerAgent);

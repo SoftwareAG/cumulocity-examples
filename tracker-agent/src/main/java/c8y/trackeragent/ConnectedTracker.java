@@ -53,6 +53,7 @@ public class ConnectedTracker implements Runnable, Executor {
     private OutputStream out;
     private String imei;
     TrackerContext trackerContext = TrackerContext.get();
+    DeviceBootstrapProcessor deviceBootstrapProcessor = DeviceBootstrapProcessor.get();
     
     public ConnectedTracker(Socket client, InputStream bis, char reportSeparator, String fieldSeparator) {
         this.client = client;
@@ -164,7 +165,7 @@ public class ConnectedTracker implements Runnable, Executor {
     private boolean checkIfDeviceRegistered(String imei) {
         boolean registered = trackerContext.isDeviceRegistered(imei);
         if(!registered) {
-            DeviceBootstrapProcessor.get().startBootstaping(imei);
+            deviceBootstrapProcessor.startBootstaping(imei);
         }
         return registered;
     }

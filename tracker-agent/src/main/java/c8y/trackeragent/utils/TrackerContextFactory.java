@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import c8y.trackeragent.TrackerPlatform;
+import c8y.trackeragent.TrackerPlatform.PlatformType;
 import c8y.trackeragent.utils.GroupPropertyAccessor.Group;
 
 import com.cumulocity.model.authentication.CumulocityCredentials;
@@ -21,7 +22,7 @@ class TrackerContextFactory {
 
     TrackerContext createTrackerContext() throws SDKException {
         GroupPropertyAccessor propertyAccessor = new GroupPropertyAccessor(
-                getConfigFilePath(SOURCE_FILE), asList("host", "user", "password"));
+                getConfigFilePath(SOURCE_FILE), asList("host", "user", "password", "type"));
         List<Group> groups = propertyAccessor.refresh().getGroups();
         Map<String, TrackerPlatform> platforms = asPlatforms(groups);
         return new TrackerContext(platforms, propertyAccessor.getSource());
@@ -39,8 +40,9 @@ class TrackerContextFactory {
     }
 
     private TrackerPlatform asPlatform(Group group) {
+        PlatformType platformType = TrackerPlatform.PlatformType.valueOf(group.get("type").toUpperCase());
         CumulocityCredentials credentials = cumulocityCredentials(
                 group.get("user"), group.get("password")).withTenantId(group.getGroupName()).build();
-        return new TrackerPlatform(new PlatformImpl(group.get("host"), credentials));
+        return new TrackerPlatform(new PlatformImpl(group.get("host"), credentials), platformType);
     }
 }

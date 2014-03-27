@@ -33,28 +33,39 @@ public class TrackerContext {
     public static final String DEFAULT_LOCAL_SOCKET_PORT = "9090";
     
     private final Map<String, ManagedObjectRepresentation> tenantToAgent = new HashMap<>();    
-    private final Properties props;
     private final Map<String, TrackerPlatform> tenantIdToPlatform;
-    private final List<TrackerPlatform> platforms;
+    private final List<TrackerPlatform> platforms = new ArrayList<>();
+    private TrackerPlatform bootstrapPlatform;
     private final DeviceCredentialsRepository deviceCredentialsRepository;
+    private int localSocketPort;
     
     private static TrackerContext instance = new TrackerContextFactory().createTrackerContext();
     
-    TrackerContext(Map<String, TrackerPlatform> platforms, Properties props) {
-        this.tenantIdToPlatform = platforms;
-        this.platforms = new ArrayList<>(platforms.values());
-        this.props = props;
+    TrackerContext(Map<String, TrackerPlatform> allPlatforms, Properties props) {
+        for (TrackerPlatform platform : allPlatforms.values()) {
+            if(platform.isBootstrap()) {
+                bootstrapPlatform = platform;
+            } else {
+                this.platforms.add(platform);
+            }
+        }        
+        this.tenantIdToPlatform = allPlatforms;
         this.deviceCredentialsRepository = DeviceCredentialsRepository.instance();
+        this.localSocketPort = parseInt(props.getProperty(LOCAL_SOCKET_PORT_PROP, DEFAULT_LOCAL_SOCKET_PORT));
     }
-    
+        
     public static TrackerContext get() {
         return instance;
     }
  
-    public List<TrackerPlatform> getPlatforms() {
+    public List<TrackerPlatform> getRegularPlatforms() {
         return platforms;
     }
     
+    public TrackerPlatform getBootstrapPlatform() {
+        return bootstrapPlatform;
+    }
+
     public TrackerPlatform getPlatform(String tenantId) {
         TrackerPlatform trackerPlatform = tenantIdToPlatform.get(tenantId);
         if(trackerPlatform == null) {
@@ -69,11 +80,15 @@ public class TrackerContext {
         CumulocityCredentials credentials = cumulocityCredentials(
                 deviceCredentials.getUser(), deviceCredentials.getPassword()).withTenantId(tenantId).build();
         String host = getPlatform(tenantId).getHost();
-        return new TrackerPlatform(new PlatformImpl(host, credentials));
+        return new TrackerPlatform(new PlatformImpl(host, credentials), TrackerPlatform.PlatformType.REGULAR);
     }
     
     public int getLocalSocketPort() {
-        return parseInt(props.getProperty(LOCAL_SOCKET_PORT_PROP, DEFAULT_LOCAL_SOCKET_PORT));
+        return localSocketPort;
+    }
+    
+    public void setLocalSocketPort(int localSocketPort) {
+        this.localSocketPort = localSocketPort;
     }
     
     public ManagedObjectRepresentation getOrCreateAgent(String tenantId) {
