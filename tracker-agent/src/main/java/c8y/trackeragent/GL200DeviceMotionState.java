@@ -36,7 +36,7 @@ import com.cumulocity.sdk.client.SDKException;
  * +RESP:GTSTT,02010B,135790246811220,,41,0,4.3,92,70.0,121.354335,31.222073,2009021,4013254,0460,0000,18d8,6141,00,20100214093254,11F0$
  * </pre>
  */
-public class GL200DeviceMotionState implements Parser, Translator {
+public class GL200DeviceMotionState extends GL200Parser implements Translator {
 
     /**
      * Type of report: Device Motion State Indication.
@@ -73,36 +73,32 @@ public class GL200DeviceMotionState implements Parser, Translator {
     }
 
     @Override
-    public String parse(String[] report) throws SDKException {
+    public boolean onParsed(String[] report, String imei) throws SDKException {
         String reportType = report[0];
-
         if (MOTION_ACK.equals(reportType)) {
-            return parseAcknowledgement(report);
+            return onParsedAck(report, imei);
         } else if (MOTION_REPORT.equals(reportType)) {
-            return parseMotionReport(report);
+            return onParsedMotion(report, imei);
         } else {
-            return null;
+            return false;
         }
     }
 
-    private String parseMotionReport(String[] report) throws SDKException {
-        String imei = report[2];
+    private boolean onParsedMotion(String[] report, String imei) throws SDKException {
         boolean motion = MOTION_DETECTED.equals(report[4]);
-
         TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(imei);
         device.motionAlarm(motion);
-        return imei;
+        return true;
     }
 
-    private String parseAcknowledgement(String[] report) throws SDKException {
-        String imei = report[2];
+    private boolean onParsedAck(String[] report, String imei) throws SDKException {
         short returnedCorr = Short.parseShort(report[4], 16);
         boolean ackedState;
         OperationRepresentation ackOp;
 
         synchronized (this) {
             if (returnedCorr != corrId) {
-                return null;
+                return false;
             }
             ackedState = lastState;
             ackOp = lastOperation;
@@ -114,7 +110,7 @@ public class GL200DeviceMotionState implements Parser, Translator {
         } catch (SDKException x) {
             trackerAgent.fail(imei, ackOp, "Error setting motion tracking", x);
         }
-        return imei;
+        return true;
     }
 
     @Override

@@ -32,7 +32,7 @@ import com.cumulocity.sdk.client.SDKException;
  * wasn't understood. Also, execute a verbatim command that was sent through the
  * configuration widget.
  */
-public class GL200Fallback implements Parser, Translator {
+public class GL200Fallback extends GL200Parser implements Translator {
 
     private final TrackerAgent trackerAgent;
     private final String password;
@@ -43,10 +43,9 @@ public class GL200Fallback implements Parser, Translator {
     }
 
     @Override
-    public String parse(String[] report) throws SDKException {
-        String imei = report[2];
+    public boolean onParsed(String[] report, String imei) throws SDKException {
         trackerAgent.getOrCreateTrackerDevice(imei);
-        return imei;
+        return true;
     }
 
     @Override

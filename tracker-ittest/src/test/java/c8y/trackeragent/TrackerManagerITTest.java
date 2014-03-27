@@ -37,7 +37,6 @@ import c8y.MotionTracking;
 import c8y.Position;
 import c8y.SupportedOperations;
 import c8y.trackeragent.utils.TrackerContext;
-import c8y.trackeragent.utils.TrackerContextFactory;
 
 import com.cumulocity.model.ID;
 import com.cumulocity.model.event.CumulocityAlarmStatuses;
@@ -65,11 +64,10 @@ public class TrackerManagerITTest {
     public static final BigDecimal RADIUS = new BigDecimal(100);
 
     private TrackerPlatform platform;
-    private TrackerContext trackerContext;
+    private TrackerContext trackerContext = TrackerContext.get();
 
     @Before
     public void setup() throws IOException {
-        trackerContext = TrackerContextFactory.createTrackerContext();
         platform = trackerContext.getPlatforms().get(0);
 
         // Clean up previous tests
@@ -96,7 +94,7 @@ public class TrackerManagerITTest {
     }
 
     private GId createTrackerData() throws SDKException, InterruptedException {
-        TrackerAgent trackerAgent = new TrackerAgent(trackerContext);
+        TrackerAgent trackerAgent = new TrackerAgent();
         TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(IMEI);
 
         Geofence fence = new Geofence();

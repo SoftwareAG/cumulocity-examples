@@ -79,29 +79,27 @@ public class GL200Geofence extends GL200LocationReport implements Translator {
     }
 
     @Override
-    public String parse(String[] report) throws SDKException {
+    public boolean onParsed(String[] report, String imei) throws SDKException {
         String reportType = report[0];
 
         if (GEOFENCE_ACKNOWLEDGE.equals(reportType)) {
-            return parseAcknowledgement(report);
+            return parseAcknowledgement(report, imei);
         } else if (GEOFENCE_REPORT.equals(reportType)) {
-            return parseFenceReport(report);
+            return parseFenceReport(report, imei);
         } else {
-            return null;
+            return false;
         }
     }
 
-    private String parseFenceReport(String[] report) throws SDKException {
-        String imei = super.parse(report);
+    private boolean parseFenceReport(String[] report, String imei) throws SDKException {
+        super.onParsed(report, imei);
         String type = report[5];
-
         TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(imei);
         device.geofenceAlarm("0".equals(type));
-        return imei;
+        return true;
     }
 
-    private String parseAcknowledgement(String[] report) throws SDKException {
-        String imei = report[2];
+    private boolean parseAcknowledgement(String[] report, String imei) throws SDKException {
         String geoId = report[4];
         short returnedCorr = Short.parseShort(report[5], 16);
         Geofence ackedFence = null;
@@ -109,7 +107,7 @@ public class GL200Geofence extends GL200LocationReport implements Translator {
 
         synchronized (this) {
             if (returnedCorr != corrId || !GEO_ID.equals(geoId) || lastFence == null) {
-                return null;
+                return false;
             }
             ackedFence = lastFence;
             ackOp = lastOperation;
@@ -121,7 +119,7 @@ public class GL200Geofence extends GL200LocationReport implements Translator {
         } catch (SDKException x) {
             trackerAgent.fail(imei, ackOp, "Error setting geofence", x);
         }
-        return imei;
+        return true;
     }
 
     /**

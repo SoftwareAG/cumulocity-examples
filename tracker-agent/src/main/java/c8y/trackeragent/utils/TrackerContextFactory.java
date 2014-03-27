@@ -15,15 +15,11 @@ import com.cumulocity.model.authentication.CumulocityCredentials;
 import com.cumulocity.sdk.client.PlatformImpl;
 import com.cumulocity.sdk.client.SDKException;
 
-public class TrackerContextFactory {
+class TrackerContextFactory {
 
     public static final String SOURCE_FILE = "common.properties";
 
-    public static TrackerContext createTrackerContext() throws SDKException {
-        return new TrackerContextFactory().newTrackerContext();
-    }
-
-    private TrackerContext newTrackerContext() throws SDKException {
+    TrackerContext createTrackerContext() throws SDKException {
         GroupPropertyAccessor propertyAccessor = new GroupPropertyAccessor(
                 getConfigFilePath(SOURCE_FILE), asList("host", "user", "password"));
         List<Group> groups = propertyAccessor.refresh().getGroups();

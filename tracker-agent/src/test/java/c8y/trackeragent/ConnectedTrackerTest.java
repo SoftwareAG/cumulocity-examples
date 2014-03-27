@@ -37,11 +37,15 @@ import java.nio.charset.StandardCharsets;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
+
+import c8y.trackeragent.utils.TrackerContext;
 
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 
 public class ConnectedTrackerTest {
+    
     public static final String REPORT1 = "field1|field2";
     public static final String REPORT2 = "field3|field4";
 
@@ -56,6 +60,7 @@ public class ConnectedTrackerTest {
     public void setup() throws IOException {
         ConnectionRegistry.instance().remove("imei");
         tracker = new ConnectedTracker(client, bis, GL200Constants.REPORT_SEP, GL200Constants.FIELD_SEP);
+        tracker.trackerContext = Mockito.mock(TrackerContext.class);
         tracker.addFragment(translator);
         tracker.addFragment(parser);
         tracker.setOut(out);
@@ -65,10 +70,13 @@ public class ConnectedTrackerTest {
     public void singleReportProcessing() throws SDKException {
         String[] dummyReport = null;
         when(parser.parse(dummyReport)).thenReturn("imei");
+        when(parser.onParsed(dummyReport, "imei")).thenReturn(true);
+        when(tracker.trackerContext.isDeviceRegistered("imei")).thenReturn(true);
 
         tracker.processReport(dummyReport);
 
         verify(parser).parse(dummyReport);
+        verify(parser).onParsed(dummyReport, "imei");
         verifyZeroInteractions(translator);
         assertEquals(tracker, ConnectionRegistry.instance().get("imei"));
     }
@@ -76,7 +84,6 @@ public class ConnectedTrackerTest {
     @Test
     public void reportReading() throws IOException {
         String reports = REPORT1 + GL200Constants.REPORT_SEP + REPORT2 + GL200Constants.REPORT_SEP;
-
         try (ByteArrayInputStream is = new ByteArrayInputStream(reports.getBytes(StandardCharsets.US_ASCII))) {
             String report = tracker.readReport(is);
             assertEquals(REPORT1, report);
@@ -90,6 +97,7 @@ public class ConnectedTrackerTest {
     @Test
     public void continuousReportProcessing() throws IOException, SDKException {
         when(parser.parse(any(String[].class))).thenReturn("imei");
+        when(tracker.trackerContext.isDeviceRegistered("imei")).thenReturn(true);
 
         String reports = REPORT1 + GL200Constants.REPORT_SEP + REPORT2 + GL200Constants.REPORT_SEP;
 

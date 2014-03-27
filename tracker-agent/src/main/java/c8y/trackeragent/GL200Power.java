@@ -46,7 +46,7 @@ import com.cumulocity.sdk.client.SDKException;
  * +RESP:GTEPF,02010B,135790246811220,0,,4.3,92,70.0,121.354335,31.222073,20090214013254,0460,0000,18d8,18d8,6141,00,20100214093254,11F0$
  * 
  */
-public class GL200Power implements  Parser {
+public class GL200Power extends GL200Parser {
     
     /**
      * Type of report: power on or power off.
@@ -62,44 +62,42 @@ public class GL200Power implements  Parser {
     public GL200Power(TrackerAgent trackerAgent) {
         this.trackerAgent = trackerAgent;
     }
-
+    
     @Override
-    public String parse(String[] report) throws SDKException {
+    public boolean onParsed(String[] report, String imei) throws SDKException {
         String reportType = report[0];
-
         if (POWERON_REPORT.equals(reportType)) {
-            return parsePowerOn(report);
+            return parsePowerOn(report, imei);
         } else if (POWEROFF_REPORT.equals(reportType)) {
-            return parsePowerOff(report);
+            return parsePowerOff(report, imei);
         } else if (EXTERNALPOWERON_REPORT.equals(reportType)) {
-            return parseExternalPowerOn(report);
+            return parseExternalPowerOn(report, imei);
         } else if (EXTERNALPOWEROFF_REPORT.equals(reportType)) {
-            return parseExternalPowerOff(report);
+            return parseExternalPowerOff(report, imei);
         } else {
-            return null;
+            return false;
         }
     }
 
-    private String parsePowerOff(String[] report) throws SDKException {
-    	return powerAlarm(report, true, false);
+    private boolean parsePowerOff(String[] report, String imei) throws SDKException {
+    	return powerAlarm(report, imei, true, false);
     }
 
-    private String parsePowerOn(String[] report) throws SDKException {
-    	return powerAlarm(report, false, false);
+    private boolean parsePowerOn(String[] report, String imei) throws SDKException {
+    	return powerAlarm(report, imei, false, false);
     }
     
-    private String parseExternalPowerOff(String[] report) throws SDKException {
-        return powerAlarm(report, true, true);
+    private boolean parseExternalPowerOff(String[] report, String imei) throws SDKException {
+        return powerAlarm(report, imei, true, true);
     }
 
-    private String parseExternalPowerOn(String[] report) throws SDKException {
-        return powerAlarm(report, false, true);
+    private boolean parseExternalPowerOn(String[] report, String imei) throws SDKException {
+        return powerAlarm(report, imei, false, true);
     }
     
-    private String powerAlarm(String[] report, boolean powerLost, boolean external) throws SDKException {
-        String imei = report[2];
+    private boolean powerAlarm(String[] report, String imei, boolean powerLost, boolean external) throws SDKException {
         TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(imei);
         device.powerAlarm(powerLost, external);
-        return imei;
+        return true;
 	}
 }

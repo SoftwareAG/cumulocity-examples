@@ -36,6 +36,7 @@ import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 
 public class GL200GeofenceTest {
+
     public static final String PASSWORD = "gl200";
     public static final String IMEI = "135790246811220";
 
@@ -44,7 +45,7 @@ public class GL200GeofenceTest {
     public static final String[] ACKFENCE = "+ACK:GTGEO,02010B,135790246811220,,0,0001,20100310172830,11F0$".split(GL200Constants.FIELD_SEP);
     public static final String[] REPFENCE = "+RESP:GTGEO,02010B,135790246811220,,0,0,1,1,4.3,92,70.0,121.354335,31.222073,2009 0214013254,0460,0000,18d8,6141,00,,20090214093254,11F0$"
             .split(GL200Constants.FIELD_SEP);
-    
+
     private GL200Geofence gl200gf;
     private TrackerAgent trackerAgent = mock(TrackerAgent.class);
     private TrackerDevice device = mock(TrackerDevice.class);
@@ -52,12 +53,10 @@ public class GL200GeofenceTest {
     private OperationRepresentation operation = new OperationRepresentation();
     private Geofence fence;
 
-
     @Before
     public void setup() throws SDKException {
         fence = new Geofence();
         fence.setLng(new BigDecimal("101.412248"));
-        ;
         fence.setLat(new BigDecimal("21.187891"));
         fence.setRadius(new BigDecimal("1000"));
         fence.setActive(true);
@@ -78,6 +77,7 @@ public class GL200GeofenceTest {
     public void acknowledgeGeofence() throws SDKException {
         gl200gf.translate(operation);
         String imei = gl200gf.parse(ACKFENCE);
+        gl200gf.onParsed(ACKFENCE, imei);
 
         assertEquals(IMEI, imei);
         verify(trackerAgent).getOrCreateTrackerDevice(IMEI);
@@ -98,6 +98,7 @@ public class GL200GeofenceTest {
     @Test
     public void reportGeofence() throws SDKException {
         String imei = gl200gf.parse(REPFENCE);
+        gl200gf.onParsed(REPFENCE, imei);
 
         assertEquals(IMEI, imei);
         verify(trackerAgent, times(2)).getOrCreateTrackerDevice(IMEI);

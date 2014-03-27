@@ -49,6 +49,7 @@ public class TelicLocationReportTest {
     @Test
     public void report() {
         String imei = telic.parse(REPORT);
+        telic.onParsed(REPORT, imei);
         assertEquals(IMEI, imei);
         verifyReport();
     }

@@ -64,6 +64,7 @@ public class GL200LocationReportTest {
 	@Test
 	public void fixedReport() throws SDKException {
 		String imei = gl200fr.parse(FIXEDREP);
+		gl200fr.onParsed(FIXEDREP, imei);
 		
 		assertEquals(IMEI, imei);
 		verify(trackerAgent).getOrCreateTrackerDevice(IMEI);

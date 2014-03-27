@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import c8y.Position;
 import c8y.trackeragent.utils.Positions;
+import c8y.trackeragent.utils.TrackerContext;
 
 public class TrackerServerITTest {
 
@@ -38,7 +39,7 @@ public class TrackerServerITTest {
 
     private void writeToSocket(byte[] bis) throws Exception {
         InetAddress host = InetAddress.getLocalHost();
-        Socket socket = new Socket(host.getHostName(), server.getTrackerContext().getLocalSocketPort());
+        Socket socket = new Socket(host.getHostName(), TrackerContext.get().getLocalSocketPort());
         OutputStream outputStream = socket.getOutputStream();
         outputStream.write(bis);
         outputStream.close();

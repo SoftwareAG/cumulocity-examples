@@ -24,8 +24,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -34,7 +34,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import c8y.trackeragent.utils.TrackerContext;
-import c8y.trackeragent.utils.TrackerContextFactory;
 
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 
@@ -45,18 +44,21 @@ import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
  */
 public class Server implements Runnable {
     
+    private static final int REPORTS_EXECUTOR_POOL_SIZE = 10;
+
     private static final Logger logger = LoggerFactory.getLogger(Server.class);
 
     private final ServerSocket serverSocket;
-    private final TrackerContext trackerContext;
+    private final TrackerContext trackerContext = TrackerContext.get();
     private final TrackerAgent trackerAgent;
-    private final ScheduledExecutorService scheduledExecutor;
+    private final ScheduledExecutorService operationsExecutor;
+    private final ExecutorService reportsExecutor;
 
     public Server() throws IOException {
-        this.trackerContext = TrackerContextFactory.createTrackerContext();
-        this.trackerAgent = new TrackerAgent(trackerContext);
+        this.trackerAgent = new TrackerAgent();
         this.serverSocket = new ServerSocket(trackerContext.getLocalSocketPort());
-        this.scheduledExecutor = Executors.newScheduledThreadPool(trackerContext.getPlatforms().size());
+        this.operationsExecutor = Executors.newScheduledThreadPool(trackerContext.getPlatforms().size());
+        this.reportsExecutor = Executors.newFixedThreadPool(REPORTS_EXECUTOR_POOL_SIZE);
     }
     
     public void init() {
@@ -80,7 +82,7 @@ public class Server implements Runnable {
     private void startPlatformUtilities(TrackerPlatform trackerPlatform) {
         ManagedObjectRepresentation agent = trackerContext.getOrCreateAgent(trackerPlatform.getTenantId());
         OperationDispatcher task = new OperationDispatcher(trackerPlatform, agent.getId());
-        scheduledExecutor.scheduleWithFixedDelay(task, OperationDispatcher.POLLING_DELAY, OperationDispatcher.POLLING_INTERVAL, TimeUnit.SECONDS);
+        operationsExecutor.scheduleWithFixedDelay(task, OperationDispatcher.POLLING_DELAY, OperationDispatcher.POLLING_INTERVAL, TimeUnit.SECONDS);
         //new TracelogDriver(trackerPlatform, agent);        
     }
 
@@ -90,8 +92,7 @@ public class Server implements Runnable {
             Socket client = serverSocket.accept();
             logger.debug("Accepted connection from {}, launching worker thread.", client.getRemoteSocketAddress());
 
-            ConnectedTracker tracker = peekTracker(client);
-            new Thread(tracker).start();
+            reportsExecutor.execute(peekTracker(client));
         } catch (IOException e) {
             logger.warn("Couldn't connect", e);
         }
@@ -117,9 +118,5 @@ public class Server implements Runnable {
 
     public TrackerAgent getTrackerAgent() {
         return trackerAgent;
-    }
-
-    public TrackerContext getTrackerContext() {
-        return trackerContext;
     }
 }

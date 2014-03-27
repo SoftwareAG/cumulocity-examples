@@ -25,4 +25,6 @@ import com.cumulocity.sdk.client.SDKException;
 public interface Parser {
     
 	String parse(String[] report) throws SDKException;
+	
+	boolean onParsed(String[] report, String imei) throws SDKException;
 }

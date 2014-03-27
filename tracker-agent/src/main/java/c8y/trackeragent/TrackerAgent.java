@@ -1,8 +1,5 @@
 package c8y.trackeragent;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import c8y.trackeragent.exception.UnknownTenantException;
 import c8y.trackeragent.utils.TrackerContext;
 
@@ -14,19 +11,11 @@ import com.cumulocity.sdk.client.devicecontrol.DeviceControlApi;
 
 public class TrackerAgent {
 
-    private static final Logger logger = LoggerFactory.getLogger(TrackerAgent.class);
-    
-    private final TrackerContext trackerContext;
-
-    public TrackerAgent(TrackerContext trackerContext) {
-        this.trackerContext = trackerContext;
-    }
-    
     public TrackerDevice getOrCreateTrackerDevice(String imei) throws SDKException {
         TrackerDevice device = ManagedObjectCache.instance().get(imei);
         if (device == null) {
-            TrackerPlatform platform = trackerContext.getDevicePlatform(imei);
-            ManagedObjectRepresentation agent = trackerContext.getOrCreateAgent(platform.getTenantId());
+            TrackerPlatform platform = TrackerContext.get().getDevicePlatform(imei);
+            ManagedObjectRepresentation agent = TrackerContext.get().getOrCreateAgent(platform.getTenantId());
             device = new TrackerDevice(platform, agent.getId(), imei);
             ManagedObjectCache.instance().put(device);
         }
@@ -45,6 +34,6 @@ public class TrackerAgent {
     }
         
     private DeviceControlApi getDeviceControlApi(String deviceImei) {
-        return trackerContext.getDevicePlatform(deviceImei).getDeviceControlApi();
+        return TrackerContext.get().getDevicePlatform(deviceImei).getDeviceControlApi();
     }
 }

@@ -30,6 +30,9 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import c8y.trackeragent.devicebootstrap.DeviceBootstrapProcessor;
+import c8y.trackeragent.utils.TrackerContext;
+
 import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
@@ -49,6 +52,7 @@ public class ConnectedTracker implements Runnable, Executor {
     private List<Object> fragments = new ArrayList<Object>();
     private OutputStream out;
     private String imei;
+    TrackerContext trackerContext = TrackerContext.get();
     
     public ConnectedTracker(Socket client, InputStream bis, char reportSeparator, String fieldSeparator) {
         this.client = client;
@@ -70,11 +74,12 @@ public class ConnectedTracker implements Runnable, Executor {
             logger.warn("Error during communication with client device", e);
         } catch (SDKException e) {
             logger.warn("Error during communication with the platform", e);
-        }
-        try {
-            client.close();
-        } catch (IOException e) {
-            logger.warn("Error during closing socket", e);
+        } finally {
+            try {
+                client.close();
+            } catch (IOException e) {
+                logger.warn("Error during closing socket", e);
+            }
         }
     }
 
@@ -140,12 +145,28 @@ public class ConnectedTracker implements Runnable, Executor {
                 Parser parser = (Parser) fragment;
                 String imei = parser.parse(report);
                 if (imei != null) {
-                    this.imei = imei;
-                    ConnectionRegistry.instance().put(imei, this);
-                    break;
+                    boolean registered = checkIfDeviceRegistered(imei);
+                    if(!registered) {
+                        logger.warn("Device for imei {} not registered yet; skip.", imei);
+                        return;
+                    }
+                    boolean success = parser.onParsed(report, imei);
+                    if(success) {
+                        this.imei = imei;
+                        ConnectionRegistry.instance().put(imei, this);
+                        break;
+                    }
                 }
             }
         }
+    }
+
+    private boolean checkIfDeviceRegistered(String imei) {
+        boolean registered = trackerContext.isDeviceRegistered(imei);
+        if(!registered) {
+            DeviceBootstrapProcessor.get().startBootstaping(imei);
+        }
+        return registered;
     }
 
     @Override

@@ -36,11 +36,19 @@ public class TrackerContext {
     private final Properties props;
     private final Map<String, TrackerPlatform> tenantIdToPlatform;
     private final List<TrackerPlatform> platforms;
-
-    public TrackerContext(Map<String, TrackerPlatform> platforms, Properties props) {
+    private final DeviceCredentialsRepository deviceCredentialsRepository;
+    
+    private static TrackerContext instance = new TrackerContextFactory().createTrackerContext();
+    
+    TrackerContext(Map<String, TrackerPlatform> platforms, Properties props) {
         this.tenantIdToPlatform = platforms;
         this.platforms = new ArrayList<>(platforms.values());
         this.props = props;
+        this.deviceCredentialsRepository = DeviceCredentialsRepository.instance();
+    }
+    
+    public static TrackerContext get() {
+        return instance;
     }
  
     public List<TrackerPlatform> getPlatforms() {
@@ -56,7 +64,7 @@ public class TrackerContext {
     }
     
     public TrackerPlatform getDevicePlatform(String imei) {
-        DeviceCredentials deviceCredentials = DeviceCredentialsRepository.instance().getCredentials(imei);
+        DeviceCredentials deviceCredentials = deviceCredentialsRepository.getCredentials(imei);
         String tenantId = deviceCredentials.getTenantId();
         CumulocityCredentials credentials = cumulocityCredentials(
                 deviceCredentials.getUser(), deviceCredentials.getPassword()).withTenantId(tenantId).build();
@@ -76,6 +84,10 @@ public class TrackerContext {
             tenantToAgent.put(tenantId, agent);
         }
         return agent;
+    }
+    
+    public boolean isDeviceRegistered(String imei) {
+        return deviceCredentialsRepository.hasCredentials(imei);
     }
     
     private ManagedObjectRepresentation createOrUpdateAgent(String tenantId) throws SDKException {
