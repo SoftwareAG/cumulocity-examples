@@ -9,6 +9,7 @@ import c8y.Position;
 public class Positions {
     
     public final static Position ZERO = aPosition(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
+    public final static Position SAMPLE_1 = aPosition(new BigDecimal("48.0332"), new BigDecimal("11.5864"), new BigDecimal("599"));
 
     public static Position aPosition(BigDecimal lat, BigDecimal lng, BigDecimal alt) {
         Position position = new Position();

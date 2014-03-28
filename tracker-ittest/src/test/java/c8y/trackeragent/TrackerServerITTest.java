@@ -1,5 +1,6 @@
 package c8y.trackeragent;
 
+import static c8y.trackeragent.utils.Devices.IMEI_1;
 import static com.cumulocity.rest.representation.operation.DeviceControlMediaType.NEW_DEVICE_REQUEST;
 import static org.fest.assertions.Assertions.assertThat;
 
@@ -11,12 +12,12 @@ import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.fest.assertions.Assertions;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import c8y.Position;
+import c8y.trackeragent.exception.UnknownDeviceException;
 import c8y.trackeragent.repository.DeviceCredentials;
 import c8y.trackeragent.repository.DeviceCredentialsRepository;
 import c8y.trackeragent.utils.Positions;
@@ -29,7 +30,7 @@ import com.cumulocity.sdk.client.RestConnector;
 
 public class TrackerServerITTest {
 
-    private static final String NEW_IMEI = "newImei9";
+    private static final String NEW_IMEI = "newImei200";
 
     private static Random random = new Random();
     
@@ -51,7 +52,7 @@ public class TrackerServerITTest {
 
         server = new Server();
         server.init();
-        trackerDevice = server.getTrackerAgent().getOrCreateTrackerDevice(TelicLocationReportTest.IMEI);
+        trackerDevice = server.getTrackerAgent().getOrCreateTrackerDevice(IMEI_1);
         trackerDevice.setPosition(Positions.ZERO);
         
         executor.submit(server);
@@ -65,28 +66,45 @@ public class TrackerServerITTest {
     
     @Test
     public void shouldChangeDeviceLocation() throws Exception {
-        writeToSocket(TelicLocationReportTest.getTelicReportBytes());
+        byte[] report = Reports.getTelicReportBytes(IMEI_1, Positions.SAMPLE_1);
+        writeToSocket(report);
         
         Thread.sleep(1000);
         Position actualPosition = trackerDevice.getPosition();
-        Positions.assertEqual(actualPosition, TelicLocationReportTest.POS);
+        Positions.assertEqual(actualPosition, Positions.SAMPLE_1);
     }
     
     @Test
     public void shouldBootstrapNewDevice() throws Exception {
         createNewDeviceRequest(NEW_IMEI);
-        byte[] report = Reports.getTelicReportBytes(NEW_IMEI);
+        byte[] report = Reports.getTelicReportBytes(NEW_IMEI, Positions.ZERO);
         
+        //trigger bootstrap
         writeToSocket(report);
-
         Thread.sleep(5000);
-        
         acceptNewDeviceRequest(NEW_IMEI);
-        
         Thread.sleep(5000);
         
-        DeviceCredentials credentials = DeviceCredentialsRepository.instance().getCredentials(NEW_IMEI);        
-        assertThat(credentials).isNotNull();        
+        DeviceCredentials credentials = pollCredentials();
+        assertThat(credentials).isNotNull();  
+        
+        //trigger regular report 
+        report = Reports.getTelicReportBytes(NEW_IMEI, Positions.SAMPLE_1);
+        writeToSocket(report);
+        
+        Thread.sleep(1000);
+        TrackerDevice newDevice = server.getTrackerAgent().getOrCreateTrackerDevice(NEW_IMEI);
+        Position actualPosition = newDevice.getPosition();
+        Positions.assertEqual(actualPosition, Positions.SAMPLE_1);
+    }
+
+    private DeviceCredentials pollCredentials() throws InterruptedException {
+        try {
+            return DeviceCredentialsRepository.instance().getCredentials(NEW_IMEI);
+        } catch (UnknownDeviceException uex) {
+            Thread.sleep(5000);
+            return DeviceCredentialsRepository.instance().getCredentials(NEW_IMEI);
+        }
     }
 
     private void writeToSocket(byte[] bis) throws Exception {
