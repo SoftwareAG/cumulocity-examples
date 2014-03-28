@@ -1,6 +1,5 @@
 package c8y.trackeragent.utils;
 
-import static c8y.trackeragent.utils.ConfigUtils.getConfigFilePath;
 import static com.cumulocity.model.authentication.CumulocityCredentials.Builder.cumulocityCredentials;
 import static java.lang.Integer.parseInt;
 import static java.util.Arrays.asList;
@@ -10,6 +9,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import c8y.trackeragent.TrackerPlatform;
 import c8y.trackeragent.TrackerPlatform.PlatformType;
@@ -21,6 +23,8 @@ import com.cumulocity.sdk.client.SDKException;
 
 class TrackerContextFactory {
     
+    private static final Logger logger = LoggerFactory.getLogger(TrackerContextFactory.class);
+    
     public static final String PLATFORM_HOST_PROP = "platformHost";    
     public static final String LOCAL_SOCKET_PORT_PROP = "localPort";
     public static final String DEFAULT_LOCAL_SOCKET_PORT = "9090";
@@ -28,7 +32,7 @@ class TrackerContextFactory {
     public static final String SOURCE_FILE = "common.properties";
 
     TrackerContext createTrackerContext() throws SDKException {
-        Path configFilePath = getConfigFilePath(SOURCE_FILE);
+        Path configFilePath = ConfigUtils.get().getConfigFilePath(SOURCE_FILE);
         GroupPropertyAccessor propertyAccessor = new GroupPropertyAccessor(configFilePath, asList("user", "password", "type"));
         propertyAccessor.refresh();
         
@@ -41,7 +45,9 @@ class TrackerContextFactory {
         
         List<Group> groups = propertyAccessor.getGroups();
         Map<String, TrackerPlatform> platforms = asPlatforms(groups, host);
-        return new TrackerContext(platforms.values(), port);
+        TrackerContext trackerContext = new TrackerContext(platforms.values(), port);
+        logger.info("Context created: {}.", trackerContext);
+        return trackerContext;
 
     }
 

@@ -1,6 +1,5 @@
 package c8y.trackeragent.repository;
 
-import static c8y.trackeragent.utils.ConfigUtils.getConfigFilePath;
 import static java.util.Arrays.asList;
 
 import java.util.Map;
@@ -10,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import c8y.trackeragent.exception.UnknownDeviceException;
+import c8y.trackeragent.utils.ConfigUtils;
 import c8y.trackeragent.utils.GroupPropertyAccessor;
 import c8y.trackeragent.utils.GroupPropertyAccessor.Group;
 
@@ -33,7 +33,7 @@ public class DeviceCredentialsRepository {
     }
 
     private DeviceCredentialsRepository() {
-        propertyAccessor = new GroupPropertyAccessor(getConfigFilePath(SOURCE_FILE), asList("tenantId", "user", "password"));
+        propertyAccessor = new GroupPropertyAccessor(ConfigUtils.get().getConfigFilePath(SOURCE_FILE), asList("tenantId", "user", "password"));
     }
 
     public boolean hasCredentials(String imei) {

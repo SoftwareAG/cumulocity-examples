@@ -109,4 +109,11 @@ public class TrackerContext {
         deviceManagedObject.createOrUpdate(agentMo, extId, null);
         return agentMo;
     }
+
+    @Override
+    public String toString() {
+        return String.format("TrackerContext [bootstrapPlatform=%s, localSocketPort=%s]", bootstrapPlatform, localSocketPort);
+    }
+    
+    
 }

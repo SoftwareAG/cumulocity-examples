@@ -25,6 +25,8 @@
 		<module>mps-energy-agent</module>
 		<module>mps-energy-app</module>
 		<module>kontron-shock-agent</module>
+		<module>tracker-agent</module>
+		<module>tracker-agent-rpm</module>
 <!-- 		<module>example-packages</module> -->
 	</modules>
 	

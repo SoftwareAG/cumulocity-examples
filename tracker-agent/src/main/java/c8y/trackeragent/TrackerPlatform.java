@@ -97,6 +97,13 @@ public class TrackerPlatform implements Platform {
         BOOTSTRAP;
     }
 
+    @Override
+    public String toString() {
+        return String.format("TrackerPlatform [orig=%s, platformType=%s, getTenantId()=%s, getHost()=%s, getUser()=%s]", orig, platformType, getTenantId(), getHost(), getUser());
+    }
+    
+    
+
 
     
 }
