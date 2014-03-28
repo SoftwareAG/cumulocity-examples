@@ -1,4 +1,4 @@
-package c8y.trackeragent.repository;
+package c8y.trackeragent.devicebootstrap;
 
 public class DeviceCredentials {
 

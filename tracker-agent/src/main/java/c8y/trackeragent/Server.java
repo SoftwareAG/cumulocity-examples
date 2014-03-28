@@ -47,20 +47,24 @@ public class Server implements Runnable {
 
     private static final Logger logger = LoggerFactory.getLogger(Server.class);
 
-    final ServerSocket serverSocket;
+    private ServerSocket serverSocket;
     private final TrackerContext trackerContext = TrackerContext.get();
     private final TrackerAgent trackerAgent;
     private final ScheduledExecutorService operationsExecutor;
     private final ExecutorService reportsExecutor;
 
-    public Server() throws IOException {
+    public Server() {
         this.trackerAgent = new TrackerAgent();
-        this.serverSocket = new ServerSocket(trackerContext.getLocalSocketPort());
         this.operationsExecutor = Executors.newScheduledThreadPool(trackerContext.getRegularPlatforms().size());
         this.reportsExecutor = Executors.newFixedThreadPool(REPORTS_EXECUTOR_POOL_SIZE);
     }
 
     public void init() {
+        try {
+            this.serverSocket = new ServerSocket(trackerContext.getLocalSocketPort());
+        } catch (IOException e) {
+            throw new RuntimeException("Cant init agent tracker server!", e);
+        }
         startPlatformsUtilities();
     }
 

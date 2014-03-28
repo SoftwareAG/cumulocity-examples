@@ -10,12 +10,13 @@
 	<artifactId>tracker-agent</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>Tracker Agent</name>
-    <packaging>war</packaging>
+	<packaging>war</packaging>
 	<description>Server-side agent for tracking device based on TCP</description>
 	<properties>
 		<maven.compiler.source>1.7</maven.compiler.source>
 		<maven.compiler.target>1.7</maven.compiler.target>
-        <rpm.etc.dir>/etc/tracker-agent</rpm.etc.dir> <!-- TODO move to common parent pom for tracker-agent when created to avoid duplication here and in tracker-agent-package -->
+		<rpm.etc.dir>/etc/tracker-agent</rpm.etc.dir> <!-- TODO move to common parent pom for tracker-agent when created to avoid 
+			duplication here and in tracker-agent-package -->
 	</properties>
 	<dependencies>
 		<dependency>
@@ -34,6 +35,12 @@
 			<version>1.0.13</version>
 		</dependency>
 		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>3.0.1</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-all</artifactId>
 			<version>1.9.5</version>
@@ -45,29 +52,29 @@
 			<version>4.11</version>
 			<scope>test</scope>
 		</dependency>
-        <dependency>
-            <groupId>org.easytesting</groupId>
-            <artifactId>fest-assert</artifactId>
+		<dependency>
+			<groupId>org.easytesting</groupId>
+			<artifactId>fest-assert</artifactId>
 			<version>1.4</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
 	<build>
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-                <filtering>true</filtering>
-            </resource>
-        </resources>	
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
 		<plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-war-plugin</artifactId>
-                <version>2.4</version>
-                <configuration>
-                    <failOnMissingWebXml>false</failOnMissingWebXml>
-                </configuration>
-            </plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>2.4</version>
+				<configuration>
+					<failOnMissingWebXml>false</failOnMissingWebXml>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>

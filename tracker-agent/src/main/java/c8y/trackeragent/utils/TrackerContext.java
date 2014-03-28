@@ -11,9 +11,9 @@ import org.slf4j.LoggerFactory;
 
 import c8y.trackeragent.DeviceManagedObject;
 import c8y.trackeragent.TrackerPlatform;
+import c8y.trackeragent.devicebootstrap.DeviceCredentials;
+import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.exception.UnknownTenantException;
-import c8y.trackeragent.repository.DeviceCredentials;
-import c8y.trackeragent.repository.DeviceCredentialsRepository;
 
 import com.cumulocity.model.Agent;
 import com.cumulocity.model.ID;

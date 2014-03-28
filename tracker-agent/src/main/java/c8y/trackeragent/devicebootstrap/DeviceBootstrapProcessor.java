@@ -8,8 +8,6 @@ import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import c8y.trackeragent.repository.DeviceCredentials;
-import c8y.trackeragent.repository.DeviceCredentialsRepository;
 import c8y.trackeragent.utils.TrackerContext;
 
 import com.cumulocity.rest.representation.devicebootstrap.DeviceCredentialsRepresentation;

@@ -17,9 +17,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import c8y.Position;
+import c8y.trackeragent.devicebootstrap.DeviceCredentials;
+import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.exception.UnknownDeviceException;
-import c8y.trackeragent.repository.DeviceCredentials;
-import c8y.trackeragent.repository.DeviceCredentialsRepository;
 import c8y.trackeragent.utils.Positions;
 import c8y.trackeragent.utils.Reports;
 import c8y.trackeragent.utils.TrackerContext;
@@ -30,7 +30,7 @@ import com.cumulocity.sdk.client.RestConnector;
 
 public class TrackerServerITTest {
 
-    private static final String NEW_IMEI = "newImei201";
+    private static final String NEW_IMEI = "newImei202";
     private static Random random = new Random();
     
     private TrackerPlatform platform;
