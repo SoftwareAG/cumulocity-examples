@@ -68,7 +68,7 @@ public class TrackerManagerITTest {
 
     @Before
     public void setup() throws IOException {
-        platform = trackerContext.getRegularPlatforms().get(0);
+        platform = trackerContext.getRegularPlatforms().iterator().next();
 
         // Clean up previous tests
         try {

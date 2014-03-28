@@ -30,8 +30,7 @@ import com.cumulocity.sdk.client.RestConnector;
 
 public class TrackerServerITTest {
 
-    private static final String NEW_IMEI = "newImei200";
-
+    private static final String NEW_IMEI = "newImei201";
     private static Random random = new Random();
     
     private TrackerPlatform platform;
@@ -41,7 +40,6 @@ public class TrackerServerITTest {
     private TrackerDevice trackerDevice;
     private ExecutorService executor = Executors.newFixedThreadPool(1);
     private int port;
-
     
     @Before
     public void setup() throws IOException {
@@ -75,7 +73,7 @@ public class TrackerServerITTest {
     }
     
     @Test
-    public void shouldBootstrapNewDevice() throws Exception {
+    public void shouldBootstrapNewDeviceAndThenChangeItsLocation() throws Exception {
         createNewDeviceRequest(NEW_IMEI);
         byte[] report = Reports.getTelicReportBytes(NEW_IMEI, Positions.ZERO);
         

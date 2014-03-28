@@ -1,13 +1,10 @@
 package c8y.trackeragent.utils;
 
 import static com.cumulocity.model.authentication.CumulocityCredentials.Builder.cumulocityCredentials;
-import static java.lang.Integer.parseInt;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,38 +25,33 @@ import com.cumulocity.sdk.client.SDKException;
 public class TrackerContext {
     
     private static final Logger logger = LoggerFactory.getLogger(TrackerContext.class);
+    private static final TrackerContext instance = new TrackerContextFactory().createTrackerContext();
     
-    public static final String LOCAL_SOCKET_PORT_PROP = "port";
-    public static final String DEFAULT_LOCAL_SOCKET_PORT = "9090";
-    
-    private final Map<String, ManagedObjectRepresentation> tenantToAgent = new HashMap<>();    
-    private final Map<String, TrackerPlatform> tenantIdToPlatform;
-    private final List<TrackerPlatform> platforms = new ArrayList<>();
-    private TrackerPlatform bootstrapPlatform;
-    private final DeviceCredentialsRepository deviceCredentialsRepository;
+    private final Map<String, ManagedObjectRepresentation> tenantIdToAgent = new HashMap<>();    
+    private final Map<String, TrackerPlatform> tenantIdToPlatform = new HashMap<>();
+    private final TrackerPlatform bootstrapPlatform;
+    private final DeviceCredentialsRepository deviceCredentialsRepository = DeviceCredentialsRepository.instance();
     private int localSocketPort;
     
-    private static TrackerContext instance = new TrackerContextFactory().createTrackerContext();
-    
-    TrackerContext(Map<String, TrackerPlatform> allPlatforms, Properties props) {
-        for (TrackerPlatform platform : allPlatforms.values()) {
+    TrackerContext(Collection<TrackerPlatform> platforms, int localSocketPort) {
+        this.localSocketPort = localSocketPort;
+        TrackerPlatform bootstrapPlatformTmp = null;
+        for (TrackerPlatform platform : platforms) {
             if(platform.isBootstrap()) {
-                bootstrapPlatform = platform;
+                bootstrapPlatformTmp = platform;
             } else {
-                this.platforms.add(platform);
+                this.tenantIdToPlatform.put(platform.getTenantId(), platform);
             }
         }        
-        this.tenantIdToPlatform = allPlatforms;
-        this.deviceCredentialsRepository = DeviceCredentialsRepository.instance();
-        this.localSocketPort = parseInt(props.getProperty(LOCAL_SOCKET_PORT_PROP, DEFAULT_LOCAL_SOCKET_PORT));
+        this.bootstrapPlatform = bootstrapPlatformTmp;
     }
         
     public static TrackerContext get() {
         return instance;
     }
  
-    public List<TrackerPlatform> getRegularPlatforms() {
-        return platforms;
+    public Collection<TrackerPlatform> getRegularPlatforms() {
+        return tenantIdToPlatform.values();
     }
     
     public TrackerPlatform getBootstrapPlatform() {
@@ -92,11 +84,11 @@ public class TrackerContext {
     }
     
     public ManagedObjectRepresentation getOrCreateAgent(String tenantId) {
-        ManagedObjectRepresentation agent = tenantToAgent.get(tenantId);
+        ManagedObjectRepresentation agent = tenantIdToAgent.get(tenantId);
         if(agent == null) {
             agent = createOrUpdateAgent(tenantId);
             logger.info("Agent for tenantId {} specified {}.", tenantId, agent.getId());
-            tenantToAgent.put(tenantId, agent);
+            tenantIdToAgent.put(tenantId, agent);
         }
         return agent;
     }
