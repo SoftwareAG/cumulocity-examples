@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -53,7 +52,6 @@ public class Server implements Runnable {
     private final TrackerAgent trackerAgent;
     private final ScheduledExecutorService operationsExecutor;
     private final ExecutorService reportsExecutor;
-    private volatile boolean started = false;
 
     public Server() throws IOException {
         this.trackerAgent = new TrackerAgent();
@@ -68,14 +66,9 @@ public class Server implements Runnable {
 
     @Override
     public void run() {
-        started = true;
-        while (started) {
+        while (true) {
             accept();
         }
-    }
-
-    public void stop() {
-        started = false;
     }
 
     private void startPlatformsUtilities() {
@@ -87,7 +80,7 @@ public class Server implements Runnable {
     private void startPlatformUtilities(TrackerPlatform trackerPlatform) {
         ManagedObjectRepresentation agent = trackerContext.getOrCreateAgent(trackerPlatform.getTenantId());
         OperationDispatcher task = new OperationDispatcher(trackerPlatform, agent.getId());
-       // operationsExecutor.scheduleWithFixedDelay(task, OperationDispatcher.POLLING_DELAY, OperationDispatcher.POLLING_INTERVAL, TimeUnit.SECONDS);
+        operationsExecutor.scheduleWithFixedDelay(task, OperationDispatcher.POLLING_DELAY, OperationDispatcher.POLLING_INTERVAL, TimeUnit.SECONDS);
         // new TracelogDriver(trackerPlatform, agent);
     }
 
