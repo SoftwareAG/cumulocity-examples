@@ -11,15 +11,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import c8y.trackeragent.Server;
+import c8y.trackeragent.utils.ConfigUtils;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.joran.JoranConfigurator;
+import ch.qos.logback.core.joran.spi.JoranException;
 
 @WebListener
 public class TrackerAgentServletContextListener implements ServletContextListener {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(TrackerAgentServletContextListener.class);
-    
+
     private final ExecutorService executorService;
     private final Server server;
-    
 
     public TrackerAgentServletContextListener() {
         executorService = Executors.newFixedThreadPool(1);
@@ -33,8 +36,25 @@ public class TrackerAgentServletContextListener implements ServletContextListene
 
     @Override
     public void contextInitialized(ServletContextEvent event) {
+        configureLogger();
         server.init();
         executorService.submit(server);
         logger.info("Trakcer agent started by web server hook.");
     }
+
+    public static void configureLogger() {
+        String logBackConfigFileName = ConfigUtils.get().getConfigFilePath("tracker-agent-logback.xml").toAbsolutePath().toString();
+        // assume SLF4J is bound to logback in the current environment
+        LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
+
+        try {
+            JoranConfigurator configurator = new JoranConfigurator();
+            configurator.setContext(context);
+            context.reset();
+            configurator.doConfigure(logBackConfigFileName);   
+        } catch (JoranException je) {
+            throw new RuntimeException("Cant configure logger. Are you sure the file " + logBackConfigFileName + " is present?", je);
+        }
+    }
+
 }
