@@ -15,6 +15,7 @@
 
 	<properties>
         <webapps.dir>${project.build.directory}/packages</webapps.dir>
+        <etc.dir>${project.build.outputDirectory}/etc</etc.dir>
         <rpm.version>${project.version}</rpm.version>
         <rpm.tomcat.dir>/var/lib/tomcat7</rpm.tomcat.dir>
         <rpm.webapps.dir>${rpm.tomcat.dir}/vendme-webapps</rpm.webapps.dir>
@@ -86,7 +87,13 @@
                             <directory>${rpm.etc.dir}</directory>
                             <username>root</username>
                             <groupname>tomcat</groupname>
-                        </mapping>
+                            <configuration>noreplace</configuration>
+                            <sources>
+                                <source>
+                                    <location>${etc.dir}</location>
+                                </source>
+                            </sources>
+                        </mapping>                        
                     </mappings>
                     <preinstallScriptlet>
                         <script>echo "Installing Tracker Agent..."</script>
