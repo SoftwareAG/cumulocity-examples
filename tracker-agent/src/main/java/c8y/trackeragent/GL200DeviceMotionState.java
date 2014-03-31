@@ -43,8 +43,11 @@ public class GL200DeviceMotionState extends GL200Parser implements Translator {
      */
     public static final String MOTION_REPORT = "+RESP:GTSTT";
 
+    public static final String MOTION_DETECTED_IGNITION_OFF = "12";
+    public static final String MOTION_DETECTED_IGNITION_ON = "22";
     public static final String MOTION_DETECTED = "42";
-
+    public static final String BEING_TOWED = "16";
+    
     /**
      * Change the event mask to include motion tracking.
      */
@@ -85,7 +88,17 @@ public class GL200DeviceMotionState extends GL200Parser implements Translator {
     }
 
     private boolean onParsedMotion(String[] report, String imei) throws SDKException {
-        boolean motion = MOTION_DETECTED.equals(report[4]);
+        String motionState = report[4];
+        String deviceType = report[1].substring(0, 2);
+        
+        if (GL200Constants.GV500_ID.equals(deviceType)) {
+            motionState = report[5];
+            }
+        
+        boolean motion = MOTION_DETECTED.equals(motionState)
+                || MOTION_DETECTED_IGNITION_OFF.equals(motionState)
+                || MOTION_DETECTED_IGNITION_ON.equals(motionState)
+                || BEING_TOWED.equals(motionState);
         TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(imei);
         device.motionAlarm(motion);
         return true;

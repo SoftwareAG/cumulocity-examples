@@ -14,6 +14,7 @@ import java.util.concurrent.Executors;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import c8y.Position;
@@ -30,7 +31,7 @@ import com.cumulocity.sdk.client.RestConnector;
 
 public class TrackerServerITTest {
 
-    private static final String NEW_IMEI = "newImei202";
+    private static final String NEW_IMEI = "100000";
     private static Random random = new Random();
     
     private TrackerPlatform platform;
@@ -73,6 +74,7 @@ public class TrackerServerITTest {
     }
     
     @Test
+    @Ignore//change NEW_IMEI property to not used value
     public void shouldBootstrapNewDeviceAndThenChangeItsLocation() throws Exception {
         createNewDeviceRequest(NEW_IMEI);
         byte[] report = Reports.getTelicReportBytes(NEW_IMEI, Positions.ZERO);

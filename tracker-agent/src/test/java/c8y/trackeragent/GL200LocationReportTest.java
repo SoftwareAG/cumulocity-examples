@@ -40,13 +40,17 @@ public class GL200LocationReportTest {
 	public static final String CELLID1 = "6141";
 	public static final Position POS2 = new Position();
 	public static final String CELLID2 = "6142";
-	public static final String FIXEDREPSTR = "+RESP:GTFRI,02010B,135790246811220,,0,0,2,1,4.3,92,70.0,121.354335,31.222073,20090 214013254,0460,0000,18d8,6141,00,0,4.3,92,70.0,121.354336,31.222074,20090101000000,04 60,0000,18d8,6142,00,,20090214093254,11F0$";
+	public static final String FIXEDREPSTR = "+RESP:GTFRI,02010B,135790246811220,,0,0,2,1,4.3,92,70.0,121.354335,31.222073,20090214013254,0460,0000,18d8,6141,00,0,4.3,92,70.0,121.354336,31.222074,20090101000000,04 60,0000,18d8,6142,00,,20090214093254,11F0$";	
+
 	public static final String[] FIXEDREP = FIXEDREPSTR
 			.split(GL200Constants.FIELD_SEP);
 
+	public static final String DOGREPSTR = "+RESP:GTDOG,02010B,135790246811220,,0,0,1,1,4.3,92,70.0,121.354335,31.222073,20090214013254,0460,0000,18d8,6141,00,2000.0,20090214093254,11F0$";
+	public static final String[] DOGREP = DOGREPSTR.split(GL200Constants.FIELD_SEP);
+	
 	private TrackerAgent trackerAgent = mock(TrackerAgent.class);
 	private TrackerDevice device = mock(TrackerDevice.class);	
-	private GL200LocationReport gl200fr = new GL200LocationReport(trackerAgent);
+	private GL200LocationReport locationReport = new GL200LocationReport(trackerAgent);
 
 	@Before
 	public void setup() throws SDKException {
@@ -62,9 +66,9 @@ public class GL200LocationReportTest {
 	}
 	
 	@Test
-	public void fixedReport() throws SDKException {
-		String imei = gl200fr.parse(FIXEDREP);
-		gl200fr.onParsed(FIXEDREP, imei);
+	public void testReportWithMultiplePoints() throws SDKException {
+		String imei = locationReport.parse(FIXEDREP);
+		locationReport.onParsed(FIXEDREP, imei);
 		
 		assertEquals(IMEI, imei);
 		verify(trackerAgent).getOrCreateTrackerDevice(IMEI);
@@ -76,20 +80,32 @@ public class GL200LocationReportTest {
 		verify(device).setCellId(LAC + "-" + CELLID2);		
 	}
 	
+	@Test
+	public void testReportWithSinglePoint() throws SDKException {
+	    String imei = locationReport.parse(DOGREP);
+	    locationReport.onParsed(DOGREP, imei);
+	    
+	    assertEquals(IMEI, imei);
+	    verify(trackerAgent).getOrCreateTrackerDevice(IMEI);
+	    
+	    verify(device).setPosition(POS1);
+	    verify(device).setCellId(LAC + "-" + CELLID1);
+	}	
+	
 	@Test 
 	public void otherReports() throws SDKException {
 		String[] nonsenseReport = { "+NONSENSE" }; 
-		String imei = gl200fr.parse(nonsenseReport);
+		String imei = locationReport.parse(nonsenseReport);
 		assertNull(imei);
 		
 		String[] buffReport = FIXEDREPSTR.split(GL200Constants.FIELD_SEP);
 		buffReport[0] = "+BUFF:GTFRI";
-		imei = gl200fr.parse(buffReport);
+		imei = locationReport.parse(buffReport);
 		assertEquals(IMEI, imei);
 
 		String[] pnlReport = FIXEDREPSTR.split(GL200Constants.FIELD_SEP);
 		pnlReport[0] = "+BUFF:GTPNL";
-		imei = gl200fr.parse(pnlReport);
+		imei = locationReport.parse(pnlReport);
 		assertEquals(IMEI, imei);
 		
 	}

@@ -51,9 +51,18 @@ public class GL200LocationReport extends GL200Parser {
 	/**
 	 * Diverse Location reports sent by tracker.
 	 */
-	public static final String[] LOCATION_REPORTS = { "GTFRI", "GTGEO",
-			"GTSPD", "GTSOS", "GTRTL", "GTPNL", "GTNMR", "GTDIS", "GTDOG",
-			"GTIGL" };
+    // @formatter:off
+    public static final String[] LOCATION_REPORTS = {
+        // Common commands
+        "GTGEO", "GTRTL", "GTNMR",
+        // GL200-specific
+        "GTFRI", "GTSPD", "GTSOS", "GTPNL", "GTDIS", "GTDOG", "GTIGL", "GTDOG",
+        // GL500-specific
+        "GTCTN", "GTSTR", 
+        // GV500-specific
+        "GTTOW", "GTHBM"
+    };
+    // @formatter:on
 	
 	protected final TrackerAgent trackerAgent;
 
@@ -75,10 +84,23 @@ public class GL200LocationReport extends GL200Parser {
     }
     
     private boolean processLocationReportOnParsed(String[] report, String imei) throws SDKException {
+        String deviceType = report[1].substring(0, 2);
         TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(imei);
         int reportStart = 7;
-        final int reportLength = 12;
+        int reportLength = 12;
         int reportEnd = reportStart + Integer.parseInt(report[6]) * reportLength;
+        
+        if (GL200Constants.GL500_ID.equals(deviceType)) {
+            reportStart = 9;
+            reportLength = 11;
+            reportEnd = reportStart + reportLength; // Only one report.
+        }
+
+        if (GL200Constants.GV500_ID.equals(deviceType)) {
+            reportStart = 8;
+            reportEnd = reportStart + Integer.parseInt(report[7]) * reportLength;
+        }
+
         for (; reportStart < reportEnd; reportStart += reportLength) {
             processLocationReportOnParsed(device, report, reportStart);
         }
@@ -98,7 +120,7 @@ public class GL200LocationReport extends GL200Parser {
 		}
 		
 		if (report[reportStart + 10].length() > 0) {
-			device.setCellId(report[reportStart + 9 ] + "-" + report[reportStart + 10]);
+			device.setCellId(report[reportStart + 9] + "-" + report[reportStart + 10]);
 		}
 	}
 }

@@ -16,10 +16,13 @@
 	<properties>
         <webapps.dir>${project.build.directory}/packages</webapps.dir>
         <etc.dir>${project.build.outputDirectory}/etc</etc.dir>
+        <context.dir>${project.build.outputDirectory}/context</context.dir>
+        
         <rpm.version>${project.version}</rpm.version>
         <rpm.tomcat.dir>/var/lib/tomcat7</rpm.tomcat.dir>
         <rpm.webapps.dir>${rpm.tomcat.dir}/vendme-webapps</rpm.webapps.dir>
         <rpm.etc.dir>/etc/tracker-agent</rpm.etc.dir>
+        <rpm.webcontext.dir>${rpm.tomcat.dir}/conf/Catalina/localhost</rpm.webcontext.dir>
 	</properties>
 
     <dependencies>
@@ -93,7 +96,17 @@
                                     <location>${etc.dir}</location>
                                 </source>
                             </sources>
-                        </mapping>                        
+                        </mapping>     
+                        <mapping>
+                            <directory>${rpm.webcontext.dir}</directory>
+                            <username>root</username>
+                            <groupname>tomcat</groupname>
+                            <sources>
+                                <source>
+                                    <location>${context.dir}</location>
+                                </source>
+                            </sources>
+                        </mapping>                                           
                     </mappings>
                     <preinstallScriptlet>
                         <script>echo "Installing Tracker Agent..."</script>

@@ -270,6 +270,7 @@ public class TrackerDevice extends DeviceManagedObject {
         msmts.add("c8y_SignalStrength");
         device.set(msmts);
 
+        device.set(new MotionTracking());
         device.set(new IsDevice());
         device.set(new Configuration());
         device.set(new Restart());

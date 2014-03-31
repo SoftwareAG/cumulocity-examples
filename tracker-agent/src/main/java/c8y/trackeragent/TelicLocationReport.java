@@ -31,7 +31,7 @@ public class TelicLocationReport implements Parser {
 
     @Override
     public String parse(String[] report) throws SDKException {
-        return report[0].substring(4, report[0].length() - 2);
+        return report[0].substring(4, 10);   
     }
 
     @Override

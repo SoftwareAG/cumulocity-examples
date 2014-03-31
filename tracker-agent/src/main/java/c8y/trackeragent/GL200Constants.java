@@ -21,6 +21,8 @@
 package c8y.trackeragent;
 
 public interface GL200Constants {
-	static final char REPORT_SEP = '$';
-	static final String FIELD_SEP = ",";
+    static final char REPORT_SEP = '$';
+    static final String FIELD_SEP = ",";
+    static final String GL500_ID = "11";
+    static final String GV500_ID = "1F";
 }
