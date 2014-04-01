@@ -101,6 +101,11 @@ public class DeviceManagedObject {
         mo.setName(returnedMo.getName());
         mo.setSelf(returnedMo.getSelf());
     }
+    
+    public GId getAgentId() {
+        ID agentExternalId = getAgentExternalId();
+        return tryGetBinding(agentExternalId);
+    }
 
     public GId tryGetBinding(ID extId) throws SDKException {
         ExternalIDRepresentation eir = null;
@@ -135,5 +140,11 @@ public class DeviceManagedObject {
     
     public boolean existsDevice(String imei) {
         return tryGetBinding(imeiAsId(imei)) != null;
+    }
+    
+    public static ID getAgentExternalId() {
+        ID extId = new ID("c8y_TrackerAgent");
+        extId.setType("c8y_ServerSideAgent");
+        return extId;
     }
 }

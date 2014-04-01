@@ -104,8 +104,7 @@ public class TrackerContext {
         agentMo.setType("c8y_TrackerAgent");
         agentMo.setName("Tracker agent");
         agentMo.set(new Agent());
-        ID extId = new ID("c8y_TrackerAgent");
-        extId.setType("c8y_ServerSideAgent");
+        ID extId = DeviceManagedObject.getAgentExternalId();
         deviceManagedObject.createOrUpdate(agentMo, extId, null);
         return agentMo;
     }
