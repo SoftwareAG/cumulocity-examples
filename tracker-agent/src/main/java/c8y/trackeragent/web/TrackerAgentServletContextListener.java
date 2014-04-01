@@ -37,10 +37,14 @@ public class TrackerAgentServletContextListener implements ServletContextListene
 
     @Override
     public void contextInitialized(ServletContextEvent event) {
-        configureLogger();
-        server.init();
-        executorService.submit(server);
-        logger.info("Trakcer agent started by web server hook.");
+        try {
+            configureLogger();
+            server.init();
+            executorService.submit(server);
+            logger.info("Trakcer agent started by web server hook.");
+        } catch (Exception  ex) {
+            ex.printStackTrace();
+        }
     }
 
     public static void configureLogger() {
