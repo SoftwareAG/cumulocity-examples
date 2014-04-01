@@ -1,0 +1,16 @@
+<configuration scan="true" scanPeriod="30 seconds">
+	<appender name="FILE" class="ch.qos.logback.core.FileAppender">
+		<file>/var/log/tomcat7/tracker-agent.log</file>
+		<encoder>
+			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
+			</pattern>
+		</encoder>
+	</appender>
+
+	<logger name="c8y" level="DEBUG" />
+
+	<root level="INFO">
+		<appender-ref ref="FILE" />
+	</root>
+</configuration>
+

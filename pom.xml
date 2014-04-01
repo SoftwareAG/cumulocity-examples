@@ -11,8 +11,8 @@
 	
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.source>1.7</maven.compiler.source>
-		<maven.compiler.target>1.7</maven.compiler.target>
+		<maven.compiler.source>1.6</maven.compiler.source>
+		<maven.compiler.target>1.6</maven.compiler.target>
 	    
 	    <c8y.version>5.2.0-SNAPSHOT</c8y.version>
 	    <slf4j.version>1.7.0</slf4j.version>
@@ -24,12 +24,16 @@
 	</properties>
 	
 	<modules>
+		<module>hello-app</module>
 		<module>hello-agent</module>
 		<module>mps-device-emulator</module>
 		<module>mps-device-emulator-rpm</module>
 		<module>mps-energy-agent</module>
+		<module>mps-energy-app</module>
 		<module>kontron-shock-agent</module>
-        <module>linux-agent</module>
+		<module>tracker-agent</module>
+		<module>tracker-agent-rpm</module>
+<!-- 		<module>example-packages</module> -->
 	</modules>
 	
     <licenses>
