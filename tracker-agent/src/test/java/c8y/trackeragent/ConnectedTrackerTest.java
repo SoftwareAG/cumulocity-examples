@@ -35,7 +35,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
@@ -52,6 +52,7 @@ public class ConnectedTrackerTest {
     
     public static final String REPORT1 = "field1|field2";
     public static final String REPORT2 = "field3|field4";
+    private static final Charset CHARSET = Charset.forName("US-ASCII");
 
     private Socket client = mock(Socket.class);
     private BufferedInputStream bis = mock(BufferedInputStream.class);
@@ -105,7 +106,7 @@ public class ConnectedTrackerTest {
         String reports = REPORT1 + GL200Constants.REPORT_SEP + REPORT2 + GL200Constants.REPORT_SEP;
         ByteArrayInputStream is = null;
         try {
-            is = new ByteArrayInputStream(reports.getBytes(StandardCharsets.US_ASCII));
+            is = new ByteArrayInputStream(reports.getBytes(CHARSET));
             String report = tracker.readReport(is);
             assertEquals(REPORT1, report);
             report = tracker.readReport(is);
@@ -126,7 +127,7 @@ public class ConnectedTrackerTest {
 
         ByteArrayInputStream is = null;
         try {
-            is = new ByteArrayInputStream(reports.getBytes(StandardCharsets.US_ASCII));
+            is = new ByteArrayInputStream(reports.getBytes(CHARSET));
             tracker.processReports(is);
         } finally {
             IOUtils.closeQuietly(is);
@@ -148,6 +149,6 @@ public class ConnectedTrackerTest {
 
         verifyZeroInteractions(parser);
         verify(translator).translate(operation);
-        verify(out).write(translation.getBytes(StandardCharsets.US_ASCII));
+        verify(out).write(translation.getBytes(CHARSET));
     }
 }

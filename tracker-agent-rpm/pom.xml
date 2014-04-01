@@ -2,14 +2,13 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>com.cumulocity.example</groupId>
-		<artifactId>cumulocity-examples</artifactId>
-		<version>3.7.0-SNAPSHOT</version>
+		<groupId>c8y.example</groupId>
+		<artifactId>c8y-examples</artifactId>
+		<version>5.2.0-SNAPSHOT</version>
 	</parent>
 
 	<groupId>c8y</groupId>
 	<artifactId>tracker-agent-rpm</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
     <packaging>rpm</packaging>
 	<name>Tracker Agent Package</name>
 
