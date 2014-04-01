@@ -27,8 +27,8 @@ public class TrackerContext {
     private static final Logger logger = LoggerFactory.getLogger(TrackerContext.class);
     private static final TrackerContext instance = new TrackerContextFactory().createTrackerContext();
     
-    private final Map<String, ManagedObjectRepresentation> tenantIdToAgent = new HashMap<>();    
-    private final Map<String, TrackerPlatform> tenantIdToPlatform = new HashMap<>();
+    private final Map<String, ManagedObjectRepresentation> tenantIdToAgent = new HashMap<String, ManagedObjectRepresentation>();    
+    private final Map<String, TrackerPlatform> tenantIdToPlatform = new HashMap<String, TrackerPlatform>();
     private final TrackerPlatform bootstrapPlatform;
     private final DeviceCredentialsRepository deviceCredentialsRepository = DeviceCredentialsRepository.instance();
     private int localSocketPort;

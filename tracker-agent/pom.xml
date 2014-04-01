@@ -13,8 +13,8 @@
 	<packaging>war</packaging>
 	<description>Server-side agent for tracking device based on TCP</description>
 	<properties>
-		<maven.compiler.source>1.7</maven.compiler.source>
-		<maven.compiler.target>1.7</maven.compiler.target>
+		<maven.compiler.source>1.6</maven.compiler.source>
+		<maven.compiler.target>1.6</maven.compiler.target>
 		<rpm.etc.dir>/etc/tracker-agent</rpm.etc.dir> <!-- TODO move to common parent pom for tracker-agent when created to avoid 
 			duplication here and in tracker-agent-package -->
 	</properties>

@@ -27,6 +27,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,7 +69,9 @@ public class ConnectedTracker implements Runnable, Executor {
 
     @Override
     public void run() {
-        try (OutputStream out = client.getOutputStream()) {
+        OutputStream out = null;
+        try {
+            out = client.getOutputStream();
             setOut(out);
             processReports(bis);
         } catch (IOException e) {
@@ -76,6 +79,7 @@ public class ConnectedTracker implements Runnable, Executor {
         } catch (SDKException e) {
             logger.warn("Error during communication with the platform", e);
         } finally {
+            IOUtils.closeQuietly(out);
             try {
                 client.close();
             } catch (IOException e) {

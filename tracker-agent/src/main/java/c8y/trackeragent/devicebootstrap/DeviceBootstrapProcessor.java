@@ -25,7 +25,7 @@ public class DeviceBootstrapProcessor {
     private static DeviceBootstrapProcessor instance = new DeviceBootstrapProcessor();
 
     private final ExecutorService threadPoolExecutor;
-    private Collection<String> duringBootstrap = new HashSet<>();
+    private Collection<String> duringBootstrap = new HashSet<String>();
 
     private DeviceBootstrapProcessor() {
         threadPoolExecutor = Executors.newFixedThreadPool(POOL_SIZE);

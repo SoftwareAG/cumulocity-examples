@@ -37,6 +37,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 
+import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -102,13 +103,17 @@ public class ConnectedTrackerTest {
     @Test
     public void reportReading() throws IOException {
         String reports = REPORT1 + GL200Constants.REPORT_SEP + REPORT2 + GL200Constants.REPORT_SEP;
-        try (ByteArrayInputStream is = new ByteArrayInputStream(reports.getBytes(StandardCharsets.US_ASCII))) {
+        ByteArrayInputStream is = null;
+        try {
+            is = new ByteArrayInputStream(reports.getBytes(StandardCharsets.US_ASCII));
             String report = tracker.readReport(is);
             assertEquals(REPORT1, report);
             report = tracker.readReport(is);
             assertEquals(REPORT2, report);
             report = tracker.readReport(is);
             assertNull(report);
+        } finally {
+            IOUtils.closeQuietly(is);
         }
     }
 
@@ -119,8 +124,12 @@ public class ConnectedTrackerTest {
 
         String reports = REPORT1 + GL200Constants.REPORT_SEP + REPORT2 + GL200Constants.REPORT_SEP;
 
-        try (ByteArrayInputStream is = new ByteArrayInputStream(reports.getBytes(StandardCharsets.US_ASCII))) {
+        ByteArrayInputStream is = null;
+        try {
+            is = new ByteArrayInputStream(reports.getBytes(StandardCharsets.US_ASCII));
             tracker.processReports(is);
+        } finally {
+            IOUtils.closeQuietly(is);
         }
 
         verify(parser).parse(REPORT1.split(GL200Constants.FIELD_SEP));

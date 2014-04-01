@@ -4,7 +4,6 @@ import static com.cumulocity.model.authentication.CumulocityCredentials.Builder.
 import static java.lang.Integer.parseInt;
 import static java.util.Arrays.asList;
 
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,8 +31,7 @@ class TrackerContextFactory {
     public static final String SOURCE_FILE = "common.properties";
 
     TrackerContext createTrackerContext() throws SDKException {
-        Path configFilePath = ConfigUtils.get().getConfigFilePath(SOURCE_FILE);
-        GroupPropertyAccessor propertyAccessor = new GroupPropertyAccessor(configFilePath, asList("user", "password", "type"));
+        GroupPropertyAccessor propertyAccessor = new GroupPropertyAccessor(ConfigUtils.get().getConfigFilePath(SOURCE_FILE), asList("user", "password", "type"));
         propertyAccessor.refresh();
         
         Properties props = propertyAccessor.getSource();
@@ -52,7 +50,7 @@ class TrackerContextFactory {
     }
 
     private Map<String, TrackerPlatform> asPlatforms(List<Group> groups, String host) {
-        Map<String, TrackerPlatform> result = new HashMap<>();
+        Map<String, TrackerPlatform> result = new HashMap<String, TrackerPlatform>();
         for (Group group : groups) {
             if (group.isFullyInitialized()) {
                 result.put(group.getGroupName(), asPlatform(group, host));

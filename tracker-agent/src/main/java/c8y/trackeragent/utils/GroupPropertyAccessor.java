@@ -7,7 +7,6 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -20,6 +19,7 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,11 +34,11 @@ public class GroupPropertyAccessor {
     private final Pattern entryKeyPattern;
     private final File sourceFile;
     private final List<String> groupElementNames;
-    private final HashMap<String, Group> groups = new HashMap<>();
+    private final HashMap<String, Group> groups = new HashMap<String, Group>();
     private Properties source;
 
-    public GroupPropertyAccessor(Path sourcePath, List<String> groupElementNames) {
-        this.sourceFile = sourcePath.toFile();
+    public GroupPropertyAccessor(String sourcePath, List<String> groupElementNames) {
+        this.sourceFile = new File(sourcePath);
         this.groupElementNames = groupElementNames;
         this.entryKeyPattern = createEntryKeyPattern(groupElementNames);
     }
@@ -54,7 +54,9 @@ public class GroupPropertyAccessor {
 
     public void write(Group group) {
         String lineSeparator = System.getProperty("line.separator");
-        try (FileWriter fileWriter = new FileWriter(sourceFile, true)) {
+        FileWriter fileWriter = null;
+        try {
+            fileWriter = new FileWriter(sourceFile, true);
             fileWriter.append(lineSeparator);
             Iterable<String> lines = group.stringify();
             for (String line : lines) {
@@ -63,12 +65,14 @@ public class GroupPropertyAccessor {
             }
         } catch (IOException ioex) {
             throw new SDKException("Can't write to file " + sourceFile.getAbsolutePath(), ioex);
+        } finally {
+            IOUtils.closeQuietly(fileWriter);
         }
         groups.put(group.getGroupName(), group);
     }
 
     public List<Group> getGroups() {
-        return new ArrayList<>(groups.values());
+        return new ArrayList<Group>(groups.values());
     }
 
     public Properties getSource() {
@@ -81,10 +85,14 @@ public class GroupPropertyAccessor {
 
     private void loadSource() throws SDKException {
         source = new Properties();
-        try (InputStream io = new FileInputStream(sourceFile)) {
+        InputStream io = null;
+        try {
+            io = new FileInputStream(sourceFile);
             source.load(io);
         } catch (IOException ioex) {
             throw new SDKException("Can't load configuration from file system " + sourceFile.getAbsolutePath(), ioex);
+        } finally {
+            IOUtils.closeQuietly(io);
         }
     }
 
@@ -121,7 +129,7 @@ public class GroupPropertyAccessor {
     
     public static class Group {
 
-        private final Map<String, String> content = new HashMap<>();
+        private final Map<String, String> content = new HashMap<String, String>();
         private final String groupName;
         private List<String> groupEntryNames;
 
@@ -144,7 +152,7 @@ public class GroupPropertyAccessor {
 
         public Iterable<String> stringify() {
             List<String> result = new ArrayList<String>();
-            SortedSet<String> keys = new TreeSet<>(content.keySet());
+            SortedSet<String> keys = new TreeSet<String>(content.keySet());
             for (String key : keys) {
                 result.add(format(ENTRY_PATTERN, groupName, key, get(key)));
             }
@@ -152,7 +160,7 @@ public class GroupPropertyAccessor {
         }
 
         public boolean isFullyInitialized() {
-            HashSet<String> missingRecords = new HashSet<>(groupEntryNames);
+            HashSet<String> missingRecords = new HashSet<String>(groupEntryNames);
             missingRecords.removeAll(content.keySet());
             boolean valid = missingRecords.isEmpty();
             if (!valid) {

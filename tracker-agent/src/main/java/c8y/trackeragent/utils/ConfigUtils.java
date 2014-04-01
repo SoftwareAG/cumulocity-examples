@@ -1,10 +1,11 @@
 package c8y.trackeragent.utils;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
 import java.util.Properties;
+
+import org.apache.commons.io.IOUtils;
 
 public class ConfigUtils {
     
@@ -26,8 +27,8 @@ public class ConfigUtils {
         return instance;
     }
 
-    public Path getConfigFilePath(String fileName) {
-        return FileSystems.getDefault().getPath(configDir, fileName);
+    public String getConfigFilePath(String fileName) {
+        return configDir + File.separator + fileName;
     }
 
     private static ConfigUtils create() {
@@ -36,10 +37,14 @@ public class ConfigUtils {
     
     private static String getConfigDir() {
         Properties props = new Properties();
-        try (InputStream io = TrackerContextFactory.class.getResourceAsStream("/config.properties")) {
+        InputStream io = null;
+        try {
+            io = TrackerContextFactory.class.getResourceAsStream("/config.properties");
             props.load(io);
         } catch (IOException e) {
             throw new RuntimeException(e);
+        } finally {
+            IOUtils.closeQuietly(io);
         }
         return props.getProperty("configDir");
     }

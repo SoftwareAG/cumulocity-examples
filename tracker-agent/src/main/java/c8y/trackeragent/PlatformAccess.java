@@ -25,6 +25,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Properties;
 
+import org.apache.commons.io.IOUtils;
+
 import com.cumulocity.model.authentication.CumulocityCredentials;
 import com.cumulocity.sdk.client.Platform;
 import com.cumulocity.sdk.client.PlatformImpl;
@@ -42,8 +44,12 @@ public class PlatformAccess {
 
     public PlatformAccess() throws IOException {
         props = new Properties();
-        try (InputStream is = getClass().getResourceAsStream(PROPS); InputStreamReader ir = new InputStreamReader(is)) {
+        InputStream is = null;
+        try {
+            is = getClass().getResourceAsStream(PROPS); InputStreamReader ir = new InputStreamReader(is);
             props.load(ir);
+        } finally {
+            IOUtils.closeQuietly(is);
         }
 
         String host = props.getProperty("host", "http://developer.cumulocity.com");

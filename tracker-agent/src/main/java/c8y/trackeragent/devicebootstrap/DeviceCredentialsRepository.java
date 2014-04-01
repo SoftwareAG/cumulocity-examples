@@ -20,7 +20,7 @@ public class DeviceCredentialsRepository {
     public static final String SOURCE_FILE = "device.properties";
     private static final DeviceCredentialsRepository instance;
 
-    private final Map<String, DeviceCredentials> credentials = new ConcurrentHashMap<>();
+    private final Map<String, DeviceCredentials> credentials = new ConcurrentHashMap<String, DeviceCredentials>();
     private final GroupPropertyAccessor propertyAccessor;
 
     static {

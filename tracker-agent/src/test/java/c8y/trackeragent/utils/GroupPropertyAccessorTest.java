@@ -5,8 +5,6 @@ import static org.fest.assertions.Assertions.assertThat;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
 import java.util.List;
 
 import org.junit.After;
@@ -17,7 +15,7 @@ import c8y.trackeragent.utils.GroupPropertyAccessor.Group;
 
 public class GroupPropertyAccessorTest {
 
-    private File file = aSourcePath().toFile();
+    private File file = new File(aSourcePath());
 
     @Before
     public void init() throws IOException {
@@ -62,9 +60,9 @@ public class GroupPropertyAccessorTest {
         return new GroupPropertyAccessor(aSourcePath(), asList("firstName", "lastName"));
     }
 
-    private Path aSourcePath() {
+    private String aSourcePath() {
         String root = System.getProperty("user.dir");
-        return FileSystems.getDefault().getPath(root, "target", "test.properties");
+        return root + File.separator + "target" + File.separator + "test.properties";
     }
 
 }
