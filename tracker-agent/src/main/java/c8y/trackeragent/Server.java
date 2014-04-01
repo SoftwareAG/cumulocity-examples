@@ -32,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import c8y.trackeragent.logger.TracelogDriver;
 import c8y.trackeragent.utils.TrackerContext;
 
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
@@ -85,7 +86,7 @@ public class Server implements Runnable {
         ManagedObjectRepresentation agent = trackerContext.getOrCreateAgent(trackerPlatform.getTenantId());
         OperationDispatcher task = new OperationDispatcher(trackerPlatform, agent.getId());
         operationsExecutor.scheduleWithFixedDelay(task, OperationDispatcher.POLLING_DELAY, OperationDispatcher.POLLING_INTERVAL, TimeUnit.SECONDS);
-        // new TracelogDriver(trackerPlatform, agent);
+        new TracelogDriver(trackerPlatform, agent);
     }
 
     private void accept() {

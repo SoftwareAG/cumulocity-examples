@@ -56,7 +56,7 @@ public class TrackerAgentServletContextListener implements ServletContextListene
             JoranConfigurator configurator = new JoranConfigurator();
             configurator.setContext(context);
             context.reset();
-            configurator.doConfigure(logBackConfigFileName);   
+            configurator.doConfigure(logBackConfigFileName);
         } catch (JoranException je) {
             throw new RuntimeException("Cant configure logger. Are you sure the file " + logBackConfigFileName + " is present?", je);
         }

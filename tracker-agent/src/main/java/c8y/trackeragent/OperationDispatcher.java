@@ -21,12 +21,12 @@
 package c8y.trackeragent;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import c8y.trackeragent.logger.PlatformLogger;
 
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
-import com.cumulocity.sdk.client.Platform;
 import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.devicecontrol.DeviceControlApi;
 import com.cumulocity.sdk.client.devicecontrol.OperationFilter;
@@ -42,7 +42,7 @@ public class OperationDispatcher implements Runnable {
     public static final long POLLING_DELAY = 5;
     public static final long POLLING_INTERVAL = 5;
     
-    private static Logger logger = LoggerFactory.getLogger(OperationDispatcher.class);
+    private Logger logger;
 
     private DeviceControlApi operations;
     private GId agent;
@@ -58,7 +58,8 @@ public class OperationDispatcher implements Runnable {
      *            the threads communicating with the devices, hence it needs to
      *            be thread-safe.
      */
-    public OperationDispatcher(Platform platform, GId agent) throws SDKException {
+    public OperationDispatcher(TrackerPlatform platform, GId agent) throws SDKException {
+        logger = PlatformLogger.getLogger(platform.getTenantId());
         this.operations = platform.getDeviceControlApi();
         this.agent = agent;
         

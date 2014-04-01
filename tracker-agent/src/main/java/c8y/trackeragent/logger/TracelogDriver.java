@@ -18,12 +18,13 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package c8y.trackeragent;
+package c8y.trackeragent.logger;
 
 import java.util.Date;
 
 import org.slf4j.LoggerFactory;
 
+import c8y.trackeragent.TrackerPlatform;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -34,7 +35,6 @@ import com.cumulocity.model.event.CumulocitySeverities;
 import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
 import com.cumulocity.rest.representation.event.EventRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
-import com.cumulocity.sdk.client.Platform;
 import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.alarm.AlarmApi;
 import com.cumulocity.sdk.client.event.EventApi;
@@ -48,7 +48,7 @@ public class TracelogDriver extends AppenderBase<ILoggingEvent> {
 	public static final String EVENT_LEVEL_PROP = "c8y.log.eventLevel";
 	public static final String DEFAULT_EVENT_LEVEL = "INFO";
 
-	public TracelogDriver(Platform platform, ManagedObjectRepresentation mo) {
+	public TracelogDriver(TrackerPlatform platform, ManagedObjectRepresentation mo) {
 		alarms = platform.getAlarmApi();
 		events = platform.getEventApi();
 
@@ -66,7 +66,8 @@ public class TracelogDriver extends AppenderBase<ILoggingEvent> {
 		
 		LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
 		setContext(lc);
-		lc.getLogger("root").addAppender(this);
+		String loggerName = PlatformLogger.getLoggerName(platform.getTenantId());
+		lc.getLogger(loggerName).addAppender(this);
 		start(); 
 	}
 
@@ -86,8 +87,7 @@ public class TracelogDriver extends AppenderBase<ILoggingEvent> {
 				alarms.create(alarmTemplate);
 			} else if (entry.getLevel().isGreaterOrEqual(eventLevel)) {
 				eventTemplate.setTime(new Date());
-				eventTemplate.setText(entry.getLoggerName() + ": "
-						+ entry.getMessage());
+				eventTemplate.setText(entry.getMessage());
 				events.create(eventTemplate);
 			}
 		} catch (SDKException e) {
