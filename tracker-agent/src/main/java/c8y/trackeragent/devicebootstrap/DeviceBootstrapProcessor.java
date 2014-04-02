@@ -13,6 +13,7 @@ import c8y.trackeragent.utils.TrackerContext;
 import com.cumulocity.rest.representation.devicebootstrap.DeviceCredentialsRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.devicecontrol.DeviceCredentialsApi;
+import com.sun.jersey.api.client.ClientResponse.Status;
 
 public class DeviceBootstrapProcessor {
 
@@ -64,7 +65,8 @@ public class DeviceBootstrapProcessor {
             try {
                 deviceCredentialsApi.hello(imei);
             } catch (SDKException ex) {
-                logger.warn("Hello from device for imei {} failed: {}.", imei, ex.getMessage());
+                boolean notFound = Status.NOT_FOUND.getStatusCode() == ex.getHttpStatus();
+                logger.warn("Hello from device for imei {} failed: {}.", imei, notFound ? "" : ex.getMessage());
                 return;
             }
             logger.info("Successfully sent hello from imei {}.", imei);
