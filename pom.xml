@@ -24,13 +24,12 @@
 	</properties>
 	
 	<modules>
-		<module>hello-app</module>
 		<module>hello-agent</module>
 		<module>mps-device-emulator</module>
 		<module>mps-device-emulator-rpm</module>
 		<module>mps-energy-agent</module>
-		<module>mps-energy-app</module>
 		<module>kontron-shock-agent</module>
+		<module>linux-agent</module>
 		<module>tracker-agent</module>
 		<module>tracker-agent-rpm</module>
 <!-- 		<module>example-packages</module> -->
