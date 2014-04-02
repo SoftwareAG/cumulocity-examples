@@ -17,12 +17,12 @@
 		<dependency>
 			<groupId>c8y</groupId>
 			<artifactId>tracker-agent</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>${c8y.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>c8y</groupId>
 			<artifactId>tracker-agent</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>${c8y.version}</version>
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
