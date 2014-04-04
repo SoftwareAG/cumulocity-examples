@@ -26,10 +26,11 @@ import c8y.trackeragent.utils.TrackerContext;
 
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.devicebootstrap.NewDeviceRequestRepresentation;
+import com.cumulocity.sdk.client.Platform;
 import com.cumulocity.sdk.client.ResponseParser;
 import com.cumulocity.sdk.client.RestConnector;
 
-public class TrackerServerITTest {
+public class TrackerServerIT extends BaseIT {
 
     private static final boolean LOCAL_TEST = true;
     //split into two tests - one connecting to remote platform (functional test) and other starting server (integration test)  
@@ -39,7 +40,7 @@ public class TrackerServerITTest {
     private static final String OLD_IMEI = Devices.IMEI_1;
     private static Random random = new Random();
     
-    private TrackerPlatform platform;
+    private Platform platform;
     private RestConnector restConnector;
     private Server server;    
     private ExecutorService executor = Executors.newFixedThreadPool(1);
@@ -53,20 +54,12 @@ public class TrackerServerITTest {
             port = REMOTE_PORT;
         }
         TrackerContext.get().setLocalSocketPort(port);
-        platform = TrackerContext.get().getPlatform("vaillant");
-        restConnector = new RestConnector(platform.getPlatformParameters(), new ResponseParser());
+        platform = createTrackerPlatform();
+        restConnector = new RestConnector(platformParameters, new ResponseParser());
         server = new Server();
         if(LOCAL_TEST) {
             server.init();
             executor.submit(server);
-        }
-    }
-
-    @After
-    public void tearDown() throws IOException {
-        deleteNewDeviceRequest(NEW_IMEI);
-        if(LOCAL_TEST) {
-            executor.shutdownNow();
         }
     }
     
@@ -82,7 +75,7 @@ public class TrackerServerITTest {
     }
     
     @Test
-    @Ignore//change NEW_IMEI property to not used value
+    //@Ignore//change NEW_IMEI property to not used value
     public void shouldBootstrapNewDeviceAndThenChangeItsLocation() throws Exception {
         createNewDeviceRequest(NEW_IMEI);
         byte[] report = Reports.getTelicReportBytes(NEW_IMEI, Positions.ZERO);
@@ -106,6 +99,14 @@ public class TrackerServerITTest {
         TrackerDevice newDevice = getTrackerDevice(NEW_IMEI);
         Position actualPosition = newDevice.getPosition();
         Positions.assertEqual(actualPosition, Positions.SAMPLE_1);
+    }
+    
+    @After
+    public void tearDown() throws IOException {
+        deleteNewDeviceRequest(NEW_IMEI);
+        if(LOCAL_TEST) {
+            executor.shutdownNow();
+        }
     }
 
     private DeviceCredentials pollCredentials() throws InterruptedException {
@@ -138,7 +139,7 @@ public class TrackerServerITTest {
     }
 
     private String newDeviceRequestsUri() {
-        return platform.getHost() + "devicecontrol/newDeviceRequests";
+        return host + "devicecontrol/newDeviceRequests";
     }
 
     private String newDeviceRequestUri(String deviceId) {

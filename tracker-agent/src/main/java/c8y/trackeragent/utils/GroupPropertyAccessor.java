@@ -2,11 +2,8 @@ package c8y.trackeragent.utils;
 
 import static java.lang.String.format;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -38,19 +35,19 @@ public class GroupPropertyAccessor {
     private static final String ENTRY_PATTERN = "%s.%s=%s";
 
     private final Pattern entryKeyPattern;
-    private final File sourceFile;
+    private final String sourceFilePath;
     private final List<String> groupElementNames;
     private final HashMap<String, Group> groups = new HashMap<String, Group>();
     private Properties source;
 
-    public GroupPropertyAccessor(String sourcePath, List<String> groupElementNames) {
-        this.sourceFile = new File(sourcePath);
+    public GroupPropertyAccessor(String sourceFilePath, List<String> groupElementNames) {
+        this.sourceFilePath = sourceFilePath;
         this.groupElementNames = groupElementNames;
         this.entryKeyPattern = createEntryKeyPattern(groupElementNames);
     }
 
     public GroupPropertyAccessor refresh() {
-        loadSource();
+        source = ConfigUtils.get().getProperties(sourceFilePath);
         groups.clear();
         for (Object entry : source.keySet()) {
             tryReadEntry(String.valueOf(entry));
@@ -62,7 +59,7 @@ public class GroupPropertyAccessor {
         String lineSeparator = System.getProperty("line.separator");
         FileWriter fileWriter = null;
         try {
-            fileWriter = new FileWriter(sourceFile, true);
+            fileWriter = new FileWriter(sourceFilePath, true);
             fileWriter.append(lineSeparator);
             Iterable<String> lines = group.stringify();
             for (String line : lines) {
@@ -70,11 +67,11 @@ public class GroupPropertyAccessor {
                 fileWriter.append(line);
             }
         } catch (IOException ioex) {
-            throw new SDKException("Can't write to file " + sourceFile.getAbsolutePath(), ioex);
+            throw new SDKException("Can't write to file " + sourceFilePath, ioex);
         } finally {
             IOUtils.closeQuietly(fileWriter);
         }
-        groups.put(group.getGroupName(), group);
+        groups.put(group.getName(), group);
     }
 
     public List<Group> getGroups() {
@@ -87,19 +84,6 @@ public class GroupPropertyAccessor {
 
     public Group createEmptyGroup(String groupName) {
         return new Group(groupName, groupElementNames);
-    }
-
-    private void loadSource() throws SDKException {
-        source = new Properties();
-        InputStream io = null;
-        try {
-            io = new FileInputStream(sourceFile);
-            source.load(io);
-        } catch (IOException ioex) {
-            throw new SDKException("Can't load configuration from file system " + sourceFile.getAbsolutePath(), ioex);
-        } finally {
-            IOUtils.closeQuietly(io);
-        }
     }
 
     private void tryReadEntry(String entry) {
@@ -136,16 +120,16 @@ public class GroupPropertyAccessor {
     public static class Group {
 
         private final Map<String, String> content = new HashMap<String, String>();
-        private final String groupName;
-        private List<String> groupEntryNames;
+        private final String name;
+        private List<String> entryNames;
 
-        public Group(String groupName, List<String> groupEntryNames) {
-            this.groupName = groupName;
-            this.groupEntryNames = groupEntryNames;
+        public Group(String name, List<String> entryNames) {
+            this.name = name;
+            this.entryNames = entryNames;
         }
 
-        public String getGroupName() {
-            return groupName;
+        public String getName() {
+            return name;
         }
 
         public String get(Object key) {
@@ -160,17 +144,17 @@ public class GroupPropertyAccessor {
             List<String> result = new ArrayList<String>();
             SortedSet<String> keys = new TreeSet<String>(content.keySet());
             for (String key : keys) {
-                result.add(format(ENTRY_PATTERN, groupName, key, get(key)));
+                result.add(format(ENTRY_PATTERN, name, key, get(key)));
             }
             return result;
         }
 
         public boolean isFullyInitialized() {
-            HashSet<String> missingRecords = new HashSet<String>(groupEntryNames);
+            HashSet<String> missingRecords = new HashSet<String>(entryNames);
             missingRecords.removeAll(content.keySet());
             boolean valid = missingRecords.isEmpty();
             if (!valid) {
-                logger.error("Missing properties {} for key {}.", missingRecords, groupName);
+                logger.error("Missing properties {} for key {}.", missingRecords, name);
             }
             return valid;
         }
@@ -180,7 +164,7 @@ public class GroupPropertyAccessor {
             final int prime = 31;
             int result = 1;
             result = prime * result + ((content == null) ? 0 : content.hashCode());
-            result = prime * result + ((groupName == null) ? 0 : groupName.hashCode());
+            result = prime * result + ((name == null) ? 0 : name.hashCode());
             return result;
         }
 
@@ -198,17 +182,17 @@ public class GroupPropertyAccessor {
                     return false;
             } else if (!content.equals(other.content))
                 return false;
-            if (groupName == null) {
-                if (other.groupName != null)
+            if (name == null) {
+                if (other.name != null)
                     return false;
-            } else if (!groupName.equals(other.groupName))
+            } else if (!name.equals(other.name))
                 return false;
             return true;
         }
 
         @Override
         public String toString() {
-            return String.format("Group [content=%s, groupName=%s]", content, groupName);
+            return String.format("Group [content=%s, groupName=%s]", content, name);
         }
     }
 }

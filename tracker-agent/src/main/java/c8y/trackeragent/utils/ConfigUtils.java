@@ -1,11 +1,14 @@
 package c8y.trackeragent.utils;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
 import org.apache.commons.io.IOUtils;
+
+import com.cumulocity.sdk.client.SDKException;
 
 public class ConfigUtils {
     
@@ -29,6 +32,20 @@ public class ConfigUtils {
 
     public String getConfigFilePath(String fileName) {
         return configDir + File.separator + fileName;
+    }
+    
+    public Properties getProperties(String path) throws SDKException {
+        Properties source = new Properties();
+        InputStream io = null;
+        try {
+            io = new FileInputStream(path);
+            source.load(io);
+            return source;
+        } catch (IOException ioex) {
+            throw new SDKException("Can't load configuration from file system " + path, ioex);
+        } finally {
+            IOUtils.closeQuietly(io);
+        }
     }
 
     private static ConfigUtils create() {

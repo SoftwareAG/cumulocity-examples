@@ -11,16 +11,12 @@ public class TrackerContextFactoryTest {
     
     @Test
     public void shouldCreateTrackerContextBasingOnConfiguration() throws Exception {
-        TrackerContext trackerContext = TrackerContext.get();
+        TrackerContext trackerContext = TrackerContext.get();        
         
-        assertThat(trackerContext.getRegularPlatforms()).hasSize(1);        
-        TrackerPlatform platform = trackerContext.getPlatform("vaillant");
-        assertThat(platform.getUser().equals("admin"));
-        assertThat(platform.getPlatformType()).isEqualTo(TrackerPlatform.PlatformType.REGULAR);
-        assertThat(platform.getPassword()).isNotEmpty();
-        assertThat(trackerContext.getLocalSocketPort()).isEqualTo(9090);
-        
-        platform = trackerContext.getBootstrapPlatform();
+        TrackerPlatform platform = trackerContext.getBootstrapPlatform();        
         assertThat(platform.getPlatformType()).isEqualTo(TrackerPlatform.PlatformType.BOOTSTRAP);
+        assertThat(platform.getTenantId()).isEqualTo("management");
+        assertThat(platform.getUser().equals("devicebootstrap"));
+        assertThat(platform.getPassword().equals("secret123"));
     }
 }

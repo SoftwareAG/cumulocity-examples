@@ -88,6 +88,7 @@ public class DeviceBootstrapProcessor {
             deviceCredentials.setPassword(credentials.getPassword());
             deviceCredentials.setUser(credentials.getUsername());
             deviceCredentials.setTenantId(credentials.getTenantId());
+            deviceCredentials.setImei(credentials.getId());
             return deviceCredentials;
         }
 

@@ -4,7 +4,6 @@ import c8y.trackeragent.exception.UnknownTenantException;
 import c8y.trackeragent.utils.TrackerContext;
 
 import com.cumulocity.model.operation.OperationStatus;
-import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.devicecontrol.DeviceControlApi;
@@ -15,8 +14,7 @@ public class TrackerAgent {
         TrackerDevice device = ManagedObjectCache.instance().get(imei);
         if (device == null) {
             TrackerPlatform platform = TrackerContext.get().getDevicePlatform(imei);
-            ManagedObjectRepresentation agent = TrackerContext.get().getOrCreateAgent(platform.getTenantId());
-            device = new TrackerDevice(platform, agent.getId(), imei);
+            device = new TrackerDevice(platform, platform.getAgentId(), imei);
             ManagedObjectCache.instance().put(device);
         }
         return device;

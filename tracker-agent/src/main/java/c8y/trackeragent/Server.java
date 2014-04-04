@@ -26,16 +26,13 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import c8y.trackeragent.logger.TracelogDriver;
+import c8y.trackeragent.logger.TracelogAppenders;
+import c8y.trackeragent.operations.OperationDispatchers;
 import c8y.trackeragent.utils.TrackerContext;
-
-import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 
 /**
  * The server listens to connections from devices and starts threads for
@@ -51,13 +48,16 @@ public class Server implements Runnable {
     private ServerSocket serverSocket;
     private final TrackerContext trackerContext = TrackerContext.get();
     private final TrackerAgent trackerAgent;
-    private final ScheduledExecutorService operationsExecutor;
     private final ExecutorService reportsExecutor;
+    private final OperationDispatchers operationDispatchers;
+    private final TracelogAppenders tracelogAppenders;
 
     public Server() {
         this.trackerAgent = new TrackerAgent();
-        this.operationsExecutor = Executors.newScheduledThreadPool(trackerContext.getRegularPlatforms().size());
         this.reportsExecutor = Executors.newFixedThreadPool(REPORTS_EXECUTOR_POOL_SIZE);
+        TrackerContext trackerContext = TrackerContext.get();
+        this.operationDispatchers = new OperationDispatchers(trackerContext, trackerAgent);
+        this.tracelogAppenders = new TracelogAppenders(trackerContext);
     }
 
     public void init() {
@@ -66,7 +66,8 @@ public class Server implements Runnable {
         } catch (IOException e) {
             throw new RuntimeException("Cant init agent tracker server!", e);
         }
-        startPlatformsUtilities();
+        tracelogAppenders.start();
+        operationDispatchers.start();
     }
 
     @Override
@@ -74,20 +75,6 @@ public class Server implements Runnable {
         while (true) {
             accept();
         }
-    }
-
-    private void startPlatformsUtilities() {
-        for (TrackerPlatform trackerPlatform : trackerContext.getRegularPlatforms()) {
-            startPlatformUtilities(trackerPlatform);
-        }
-    }
-
-    private void startPlatformUtilities(TrackerPlatform trackerPlatform) {
-        ManagedObjectRepresentation agent = trackerContext.getOrCreateAgent(trackerPlatform.getTenantId());
-        //Could be replace by device control notifications
-        OperationDispatcher task = new OperationDispatcher(trackerPlatform, agent.getId());
-        operationsExecutor.scheduleWithFixedDelay(task, OperationDispatcher.POLLING_DELAY, OperationDispatcher.POLLING_INTERVAL, TimeUnit.SECONDS);
-        new TracelogDriver(trackerPlatform, agent);
     }
 
     private void accept() {
