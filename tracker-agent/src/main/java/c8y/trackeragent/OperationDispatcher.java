@@ -36,6 +36,7 @@ import com.cumulocity.sdk.client.devicecontrol.OperationFilter;
  * reports back the status. Operations can only be executed on devices that are
  * currently connected to the agent. Operations for devices that are currently
  * not connected are left in the queue on the platform for retry.
+ * 
  */
 public class OperationDispatcher implements Runnable {
     

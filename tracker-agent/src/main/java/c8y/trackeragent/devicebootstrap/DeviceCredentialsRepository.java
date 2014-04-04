@@ -22,13 +22,14 @@ public class DeviceCredentialsRepository {
 
     private final Map<String, DeviceCredentials> credentials = new ConcurrentHashMap<String, DeviceCredentials>();
     private final GroupPropertyAccessor propertyAccessor;
+    private final Object lock = new Object();
 
     static {
         instance = new DeviceCredentialsRepository();
         instance.refresh();
     }
 
-    public static DeviceCredentialsRepository instance() {
+    public static DeviceCredentialsRepository get() {
         return instance;
     }
 
@@ -48,14 +49,16 @@ public class DeviceCredentialsRepository {
         return deviceCredentials.duplicate();
     }
 
-    public synchronized void saveCredentials(String imei, DeviceCredentials newCredentials) {
-        Group group = asGroup(imei, newCredentials);
-        if (!group.isFullyInitialized()) {
-            throw new IllegalArgumentException("Not fully initialized credentials: " + newCredentials);
+    public void saveCredentials(String imei, DeviceCredentials newCredentials) {
+        synchronized (lock) {
+            Group group = asGroup(imei, newCredentials);
+            if (!group.isFullyInitialized()) {
+                throw new IllegalArgumentException("Not fully initialized credentials: " + newCredentials);
+            }
+            propertyAccessor.write(group);
+            credentials.put(imei, newCredentials);
+            logger.info("Credentials from device {} have been written: {}.", imei, newCredentials);
         }
-        propertyAccessor.write(group);
-        credentials.put(imei, newCredentials);
-        logger.info("Credentials from device {} have been written: {}.", imei, newCredentials);
     }
 
     private void refresh() {

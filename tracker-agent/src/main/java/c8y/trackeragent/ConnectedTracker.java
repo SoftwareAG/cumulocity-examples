@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import c8y.trackeragent.devicebootstrap.DeviceBootstrapProcessor;
 import c8y.trackeragent.utils.TrackerContext;
 
+import com.cumulocity.model.builder.EventBuilder;
 import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
@@ -50,7 +51,7 @@ public class ConnectedTracker implements Runnable, Executor {
     private String fieldSeparator;
     private Socket client;
     private InputStream bis;
-    private List<Object> fragments = new ArrayList<Object>();
+    private List<Object> fragments = new ArrayList<Object>();//split into two lists - for Parsers and Translators
     private OutputStream out;
     private String imei;
     TrackerContext trackerContext = TrackerContext.get();
@@ -69,10 +70,8 @@ public class ConnectedTracker implements Runnable, Executor {
 
     @Override
     public void run() {
-        OutputStream out = null;
         try {
             out = client.getOutputStream();
-            setOut(out);
             processReports(bis);
         } catch (IOException e) {
             logger.warn("Error during communication with client device", e);
@@ -169,7 +168,7 @@ public class ConnectedTracker implements Runnable, Executor {
     private boolean checkIfDeviceRegistered(String imei) {
         boolean registered = trackerContext.isDeviceRegistered(imei);
         if(!registered) {
-            deviceBootstrapProcessor.startBootstaping(imei);
+            deviceBootstrapProcessor.startBootstraping(imei);
         }
         return registered;
     }

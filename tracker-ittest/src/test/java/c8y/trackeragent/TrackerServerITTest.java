@@ -32,9 +32,10 @@ import com.cumulocity.sdk.client.RestConnector;
 public class TrackerServerITTest {
 
     private static final boolean LOCAL_TEST = true;
+    //split into two tests - one connecting to remote platform (functional test) and other starting server (integration test)  
     private static final int REMOTE_PORT = 40000;
     
-    private static final String NEW_IMEI = "100000";
+    private static final String NEW_IMEI = "100000";//use random imei
     private static final String OLD_IMEI = Devices.IMEI_1;
     private static Random random = new Random();
     
@@ -109,10 +110,10 @@ public class TrackerServerITTest {
 
     private DeviceCredentials pollCredentials() throws InterruptedException {
         try {
-            return DeviceCredentialsRepository.instance().getCredentials(NEW_IMEI);
+            return DeviceCredentialsRepository.get().getCredentials(NEW_IMEI);
         } catch (UnknownDeviceException uex) {
             Thread.sleep(5000);
-            return DeviceCredentialsRepository.instance().getCredentials(NEW_IMEI);
+            return DeviceCredentialsRepository.get().getCredentials(NEW_IMEI);
         }
     }
 

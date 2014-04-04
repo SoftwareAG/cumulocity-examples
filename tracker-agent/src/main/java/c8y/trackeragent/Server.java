@@ -84,6 +84,7 @@ public class Server implements Runnable {
 
     private void startPlatformUtilities(TrackerPlatform trackerPlatform) {
         ManagedObjectRepresentation agent = trackerContext.getOrCreateAgent(trackerPlatform.getTenantId());
+        //Could be replace by device control notifications
         OperationDispatcher task = new OperationDispatcher(trackerPlatform, agent.getId());
         operationsExecutor.scheduleWithFixedDelay(task, OperationDispatcher.POLLING_DELAY, OperationDispatcher.POLLING_INTERVAL, TimeUnit.SECONDS);
         new TracelogDriver(trackerPlatform, agent);
