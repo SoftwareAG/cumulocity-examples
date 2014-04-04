@@ -34,7 +34,6 @@ import org.slf4j.LoggerFactory;
 import c8y.trackeragent.devicebootstrap.DeviceBootstrapProcessor;
 import c8y.trackeragent.utils.TrackerContext;
 
-import com.cumulocity.model.builder.EventBuilder;
 import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
