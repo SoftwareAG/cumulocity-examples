@@ -27,10 +27,14 @@ public class TrackerContext {
     private static final Logger logger = LoggerFactory.getLogger(TrackerContext.class);
     private static final TrackerContext instance = new TrackerContextFactory().createTrackerContext();
     
+    //TODO use single object for ManagedObjectRepresentation and TrackerPlatform - sth like context
+    //use TrackerPlatform as context
     private final Map<String, ManagedObjectRepresentation> tenantIdToAgent = new HashMap<String, ManagedObjectRepresentation>();    
     private final Map<String, TrackerPlatform> tenantIdToPlatform = new HashMap<String, TrackerPlatform>();
+    
     private final TrackerPlatform bootstrapPlatform;
-    private final DeviceCredentialsRepository deviceCredentialsRepository = DeviceCredentialsRepository.instance();
+    private final DeviceCredentialsRepository deviceCredentialsRepository = DeviceCredentialsRepository.get();
+    private final Object lock = new Object();
     private int localSocketPort;
     
     TrackerContext(Collection<TrackerPlatform> platforms, int localSocketPort) {
@@ -66,6 +70,9 @@ public class TrackerContext {
         return trackerPlatform;
     }
     
+    /**
+     * TODO store trackerPlatforms in cache   
+     */
     public TrackerPlatform getDevicePlatform(String imei) {
         DeviceCredentials deviceCredentials = deviceCredentialsRepository.getCredentials(imei);
         String tenantId = deviceCredentials.getTenantId();
@@ -84,13 +91,15 @@ public class TrackerContext {
     }
     
     public ManagedObjectRepresentation getOrCreateAgent(String tenantId) {
-        ManagedObjectRepresentation agent = tenantIdToAgent.get(tenantId);
-        if(agent == null) {
-            agent = createOrUpdateAgent(tenantId);
-            logger.info("Agent for tenantId {} specified {}.", tenantId, agent.getId());
-            tenantIdToAgent.put(tenantId, agent);
+        synchronized (lock) {
+            ManagedObjectRepresentation agent = tenantIdToAgent.get(tenantId);
+            if(agent == null) {
+                agent = createOrUpdateAgent(tenantId);
+                logger.info("Agent for tenantId {} specified {}.", tenantId, agent.getId());
+                tenantIdToAgent.put(tenantId, agent);
+            }
+            return agent;
         }
-        return agent;
     }
     
     public boolean isDeviceRegistered(String imei) {

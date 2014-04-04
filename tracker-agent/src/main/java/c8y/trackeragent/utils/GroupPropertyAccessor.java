@@ -25,6 +25,12 @@ import org.slf4j.LoggerFactory;
 
 import com.cumulocity.sdk.client.SDKException;
 
+/**
+ * TODO: use JSON format instead key-value format 
+ * 
+ * @author dombiel
+ *
+ */
 public class GroupPropertyAccessor {
 
     private static final Logger logger = LoggerFactory.getLogger(GroupPropertyAccessor.class);

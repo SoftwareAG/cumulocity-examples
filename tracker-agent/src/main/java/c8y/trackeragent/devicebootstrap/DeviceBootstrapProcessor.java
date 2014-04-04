@@ -27,6 +27,7 @@ public class DeviceBootstrapProcessor {
 
     private final ExecutorService threadPoolExecutor;
     private Collection<String> duringBootstrap = new HashSet<String>();
+    private Object lock = new Object();
 
     private DeviceBootstrapProcessor() {
         threadPoolExecutor = Executors.newFixedThreadPool(POOL_SIZE);
@@ -36,17 +37,19 @@ public class DeviceBootstrapProcessor {
         return instance;
     }
 
-    public synchronized void startBootstaping(String imei) {
-        if (duringBootstrap.contains(imei)) {
-            return;
-        }
-        DeviceCredentialsApi deviceCredentialsApi = TrackerContext.get().getBootstrapPlatform().getDeviceCredentialsApi();
-        duringBootstrap.add(imei);
-        try {
-            DeviceBootstrapTask deviceBootstrapTask = new DeviceBootstrapTask(deviceCredentialsApi, imei);
-            threadPoolExecutor.execute(deviceBootstrapTask);
-        } finally {
-            duringBootstrap.remove(imei);
+    public void startBootstraping(String imei) {
+        synchronized (lock) {
+            if (duringBootstrap.contains(imei)) {
+                return;
+            }
+            DeviceCredentialsApi deviceCredentialsApi = TrackerContext.get().getBootstrapPlatform().getDeviceCredentialsApi();
+            duringBootstrap.add(imei);
+            try {
+                DeviceBootstrapTask deviceBootstrapTask = new DeviceBootstrapTask(deviceCredentialsApi, imei);
+                threadPoolExecutor.execute(deviceBootstrapTask);
+            } finally {
+                duringBootstrap.remove(imei);
+            }        
         }
     }
 
@@ -76,7 +79,7 @@ public class DeviceBootstrapProcessor {
             } else {
                 DeviceCredentials credentials = asCredentials(credentialsRepresentation);
                 logger.warn("Credentials for imei {} accessed: {}.", imei, credentials);
-                DeviceCredentialsRepository.instance().saveCredentials(imei, credentials);
+                DeviceCredentialsRepository.get().saveCredentials(imei, credentials);
             }
         }
 

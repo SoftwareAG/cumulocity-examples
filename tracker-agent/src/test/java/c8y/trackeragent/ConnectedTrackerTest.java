@@ -92,12 +92,12 @@ public class ConnectedTrackerTest {
         String[] dummyReport = null;
         when(parser.parse(dummyReport)).thenReturn("imei");
         when(tracker.trackerContext.isDeviceRegistered("imei")).thenReturn(false);
-        doNothing().when(tracker.deviceBootstrapProcessor).startBootstaping("imei");
+        doNothing().when(tracker.deviceBootstrapProcessor).startBootstraping("imei");
         
         tracker.processReport(dummyReport);
         
         assertThat(ConnectionRegistry.instance()).isEmpty();
-        verify(tracker.deviceBootstrapProcessor).startBootstaping("imei");
+        verify(tracker.deviceBootstrapProcessor).startBootstraping("imei");
         verifyZeroInteractions(translator);
     }
 
