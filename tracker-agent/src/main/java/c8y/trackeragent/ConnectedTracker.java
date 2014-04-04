@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import c8y.trackeragent.devicebootstrap.DeviceBootstrapProcessor;
+import c8y.trackeragent.event.TrackerAgentEvents;
 import c8y.trackeragent.utils.TrackerContext;
 
 import com.cumulocity.model.operation.OperationStatus;
@@ -46,21 +47,23 @@ public class ConnectedTracker implements Runnable, Executor {
 
     protected static Logger logger = LoggerFactory.getLogger(ConnectedTracker.class);
     
-    private char reportSeparator;
-    private String fieldSeparator;
-    private Socket client;
-    private InputStream bis;
-    private List<Object> fragments = new ArrayList<Object>();//split into two lists - for Parsers and Translators
+    private final char reportSeparator;
+    private final String fieldSeparator;
+    private final Socket client;
+    private final InputStream bis;
+    private final List<Object> fragments = new ArrayList<Object>();//split into two lists - for Parsers and Translators
+    final TrackerAgent trackerAgent;
+    
     private OutputStream out;
     private String imei;
     TrackerContext trackerContext = TrackerContext.get();
-    DeviceBootstrapProcessor deviceBootstrapProcessor = DeviceBootstrapProcessor.get();
     
-    public ConnectedTracker(Socket client, InputStream bis, char reportSeparator, String fieldSeparator) {
+    public ConnectedTracker(Socket client, InputStream bis, char reportSeparator, String fieldSeparator, TrackerAgent trackerAgent) {
         this.client = client;
         this.bis = bis;
         this.reportSeparator = reportSeparator;
         this.fieldSeparator = fieldSeparator;
+        this.trackerAgent = trackerAgent;
     }
 
     public void addFragment(Object o) {
@@ -167,7 +170,7 @@ public class ConnectedTracker implements Runnable, Executor {
     private boolean checkIfDeviceRegistered(String imei) {
         boolean registered = trackerContext.isDeviceRegistered(imei);
         if(!registered) {
-            deviceBootstrapProcessor.startBootstraping(imei);
+            trackerAgent.sendEvent(new TrackerAgentEvents.NewDeviceEvent(imei));
         }
         return registered;
     }

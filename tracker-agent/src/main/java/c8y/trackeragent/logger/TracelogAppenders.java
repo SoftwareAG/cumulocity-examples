@@ -1,13 +1,16 @@
 package c8y.trackeragent.logger;
 
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.qos.logback.classic.LoggerContext;
 import c8y.trackeragent.TrackerPlatform;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.utils.TrackerContext;
+import ch.qos.logback.classic.LoggerContext;
 
 public class TracelogAppenders {
+    
+    private static Logger logger = LoggerFactory.getLogger(TracelogAppenders.class);
     
     private final TrackerContext trackerContext;
     private LoggerContext loggerContext;
@@ -16,13 +19,7 @@ public class TracelogAppenders {
         this.trackerContext = trackerContext;
         this.loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
     }
-    
-    public void start() {
-        for (DeviceCredentials deviceCredentials : trackerContext.getDeviceCredentials()) {
-            start(deviceCredentials.getImei());
-        }
-    }
-
+        
     /**
      * TODO run after device bootstrapping
      */
@@ -32,5 +29,6 @@ public class TracelogAppenders {
         String loggerName = PlatformLogger.getLoggerName(imei);
         loggerContext.getLogger(loggerName).addAppender(tracelogAppender);
         tracelogAppender.start();
+        logger.info("Started for device {}.", imei);
     }
 }

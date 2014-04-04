@@ -10,7 +10,7 @@ public class ConnectedTelicTracker extends ConnectedTracker {
     public static final int REPORT_SKIP = 4;
 
     public ConnectedTelicTracker(Socket client, InputStream bis, TrackerAgent trackerAgent) throws IOException {
-        super(client, eat(bis, HEADER_LENGTH), TelicConstants.REPORT_SEP, TelicConstants.FIELD_SEP);
+        super(client, eat(bis, HEADER_LENGTH), TelicConstants.REPORT_SEP, TelicConstants.FIELD_SEP, trackerAgent);
         addFragment(new TelicLocationReport(trackerAgent));
     }
 
