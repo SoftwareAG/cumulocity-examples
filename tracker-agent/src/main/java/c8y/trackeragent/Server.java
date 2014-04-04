@@ -30,6 +30,10 @@ import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import c8y.trackeragent.devicebootstrap.DeviceBootstrapProcessor;
+import c8y.trackeragent.devicebootstrap.DeviceCredentials;
+import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
+import c8y.trackeragent.devicebootstrap.DeviceBinder;
 import c8y.trackeragent.logger.TracelogAppenders;
 import c8y.trackeragent.operations.OperationDispatchers;
 import c8y.trackeragent.utils.TrackerContext;
@@ -49,15 +53,18 @@ public class Server implements Runnable {
     private final TrackerContext trackerContext = TrackerContext.get();
     private final TrackerAgent trackerAgent;
     private final ExecutorService reportsExecutor;
-    private final OperationDispatchers operationDispatchers;
-    private final TracelogAppenders tracelogAppenders;
+    private final DeviceBootstrapProcessor deviceBootstrapProcessor;
+    private final DeviceBinder deviceBinder;
 
     public Server() {
         this.trackerAgent = new TrackerAgent();
         this.reportsExecutor = Executors.newFixedThreadPool(REPORTS_EXECUTOR_POOL_SIZE);
         TrackerContext trackerContext = TrackerContext.get();
-        this.operationDispatchers = new OperationDispatchers(trackerContext, trackerAgent);
-        this.tracelogAppenders = new TracelogAppenders(trackerContext);
+        OperationDispatchers operationDispatchers = new OperationDispatchers(trackerContext, trackerAgent);
+        TracelogAppenders tracelogAppenders = new TracelogAppenders(trackerContext);
+        this.deviceBootstrapProcessor = new DeviceBootstrapProcessor(trackerAgent);
+        this.deviceBinder = new DeviceBinder(
+                operationDispatchers, tracelogAppenders, DeviceCredentialsRepository.get());
     }
 
     public void init() {
@@ -66,8 +73,10 @@ public class Server implements Runnable {
         } catch (IOException e) {
             throw new RuntimeException("Cant init agent tracker server!", e);
         }
-        tracelogAppenders.start();
-        operationDispatchers.start();
+        trackerAgent.registerEventListener(deviceBootstrapProcessor, deviceBinder);
+        for (DeviceCredentials deviceCredentials : trackerContext.getDeviceCredentials()) {
+            deviceBinder.bind(deviceCredentials.getImei());
+        }
     }
 
     @Override

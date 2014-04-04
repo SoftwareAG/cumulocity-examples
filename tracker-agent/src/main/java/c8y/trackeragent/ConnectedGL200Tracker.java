@@ -9,7 +9,7 @@ public class ConnectedGL200Tracker extends ConnectedTracker {
 
     public ConnectedGL200Tracker(Socket client, InputStream is, TrackerAgent trackerAgent) {
 
-        super(client, is, GL200Constants.REPORT_SEP, GL200Constants.FIELD_SEP);
+        super(client, is, GL200Constants.REPORT_SEP, GL200Constants.FIELD_SEP, trackerAgent);
 
         addFragment(new GL200Geofence(trackerAgent, PASSWORD));
         addFragment(new GL200Power(trackerAgent));

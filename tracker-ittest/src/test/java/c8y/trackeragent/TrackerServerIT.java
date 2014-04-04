@@ -12,7 +12,6 @@ import java.util.concurrent.Executors;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import c8y.Position;
@@ -36,7 +35,6 @@ public class TrackerServerIT extends BaseIT {
     //split into two tests - one connecting to remote platform (functional test) and other starting server (integration test)  
     private static final int REMOTE_PORT = 40000;
     
-    private static final String NEW_IMEI = "100000";//use random imei
     private static final String OLD_IMEI = Devices.IMEI_1;
     private static Random random = new Random();
     
@@ -75,46 +73,45 @@ public class TrackerServerIT extends BaseIT {
     }
     
     @Test
-    //@Ignore//change NEW_IMEI property to not used value
     public void shouldBootstrapNewDeviceAndThenChangeItsLocation() throws Exception {
-        createNewDeviceRequest(NEW_IMEI);
-        byte[] report = Reports.getTelicReportBytes(NEW_IMEI, Positions.ZERO);
+        String imei = Devices.randomImei();
+        createNewDeviceRequest(imei);
+        byte[] report = Reports.getTelicReportBytes(imei, Positions.ZERO);
         
         //trigger bootstrap
         writeToSocket(report);
         Thread.sleep(5000);
-        acceptNewDeviceRequest(NEW_IMEI);
+        acceptNewDeviceRequest(imei);
         Thread.sleep(5000);
         
         if(LOCAL_TEST) {
-            DeviceCredentials credentials = pollCredentials();
+            DeviceCredentials credentials = pollCredentials(imei);
             assertThat(credentials).isNotNull();  
         }
         
         //trigger regular report 
-        report = Reports.getTelicReportBytes(NEW_IMEI, Positions.SAMPLE_1);
+        report = Reports.getTelicReportBytes(imei, Positions.SAMPLE_1);
         writeToSocket(report);
         
         Thread.sleep(1000);
-        TrackerDevice newDevice = getTrackerDevice(NEW_IMEI);
+        TrackerDevice newDevice = getTrackerDevice(imei);
         Position actualPosition = newDevice.getPosition();
         Positions.assertEqual(actualPosition, Positions.SAMPLE_1);
     }
     
     @After
     public void tearDown() throws IOException {
-        deleteNewDeviceRequest(NEW_IMEI);
         if(LOCAL_TEST) {
             executor.shutdownNow();
         }
     }
 
-    private DeviceCredentials pollCredentials() throws InterruptedException {
+    private DeviceCredentials pollCredentials(String imei) throws InterruptedException {
         try {
-            return DeviceCredentialsRepository.get().getCredentials(NEW_IMEI);
+            return DeviceCredentialsRepository.get().getCredentials(imei);
         } catch (UnknownDeviceException uex) {
             Thread.sleep(5000);
-            return DeviceCredentialsRepository.get().getCredentials(NEW_IMEI);
+            return DeviceCredentialsRepository.get().getCredentials(imei);
         }
     }
 
@@ -131,15 +128,8 @@ public class TrackerServerIT extends BaseIT {
         restConnector.post(newDeviceRequestsUri(), NEW_DEVICE_REQUEST, representation);
     }
 
-    private void deleteNewDeviceRequest(String deviceId) {
-        try {
-            restConnector.delete(newDeviceRequestUri(deviceId));
-        } catch (Exception ex) {
-        }
-    }
-
     private String newDeviceRequestsUri() {
-        return host + "devicecontrol/newDeviceRequests";
+        return host + "/devicecontrol/newDeviceRequests";
     }
 
     private String newDeviceRequestUri(String deviceId) {

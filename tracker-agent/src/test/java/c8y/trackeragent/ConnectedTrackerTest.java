@@ -24,7 +24,6 @@ import static org.fest.assertions.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -42,7 +41,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import c8y.trackeragent.devicebootstrap.DeviceBootstrapProcessor;
+import c8y.trackeragent.event.TrackerAgentEvents;
 import c8y.trackeragent.utils.TrackerContext;
 
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
@@ -59,14 +58,14 @@ public class ConnectedTrackerTest {
     private OutputStream out = mock(OutputStream.class);
     private Translator translator = mock(Translator.class);
     private Parser parser = mock(Parser.class);
+    private TrackerAgent trackerAgent = mock(TrackerAgent.class);
     private ConnectedTracker tracker;
 
     @Before
     public void setup() throws IOException {
         ConnectionRegistry.instance().remove("imei");
-        tracker = new ConnectedTracker(client, bis, GL200Constants.REPORT_SEP, GL200Constants.FIELD_SEP);
+        tracker = new ConnectedTracker(client, bis, GL200Constants.REPORT_SEP, GL200Constants.FIELD_SEP, trackerAgent);
         tracker.trackerContext = Mockito.mock(TrackerContext.class);
-        tracker.deviceBootstrapProcessor = Mockito.mock(DeviceBootstrapProcessor.class);
         tracker.addFragment(translator);
         tracker.addFragment(parser);
         tracker.setOut(out);
@@ -92,12 +91,11 @@ public class ConnectedTrackerTest {
         String[] dummyReport = null;
         when(parser.parse(dummyReport)).thenReturn("imei");
         when(tracker.trackerContext.isDeviceRegistered("imei")).thenReturn(false);
-        doNothing().when(tracker.deviceBootstrapProcessor).startBootstraping("imei");
         
         tracker.processReport(dummyReport);
         
         assertThat(ConnectionRegistry.instance()).isEmpty();
-        verify(tracker.deviceBootstrapProcessor).startBootstraping("imei");
+        verify(tracker.trackerAgent).sendEvent(any(TrackerAgentEvents.NewDeviceEvent.class));
         verifyZeroInteractions(translator);
     }
 

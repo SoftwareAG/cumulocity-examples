@@ -55,15 +55,15 @@ public class DeviceCredentialsRepository {
         return new ArrayList<DeviceCredentials>(credentials.values());
     }
 
-    public void saveCredentials(String imei, DeviceCredentials newCredentials) {
+    public void saveCredentials(DeviceCredentials newCredentials) {
         synchronized (lock) {
-            Group group = asGroup(imei, newCredentials);
+            Group group = asGroup(newCredentials.getImei(), newCredentials);
             if (!group.isFullyInitialized()) {
                 throw new IllegalArgumentException("Not fully initialized credentials: " + newCredentials);
             }
             propertyAccessor.write(group);
-            credentials.put(imei, newCredentials);
-            logger.info("Credentials from device {} have been written: {}.", imei, newCredentials);
+            credentials.put(newCredentials.getImei(), newCredentials);
+            logger.info("Credentials for device {} have been written: {}.", newCredentials.getImei(), newCredentials);
         }
     }
 
