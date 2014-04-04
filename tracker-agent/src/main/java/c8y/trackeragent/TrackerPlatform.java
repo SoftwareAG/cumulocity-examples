@@ -1,5 +1,7 @@
 package c8y.trackeragent;
 
+import com.cumulocity.model.idtype.GId;
+import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.Platform;
 import com.cumulocity.sdk.client.PlatformImpl;
 import com.cumulocity.sdk.client.PlatformParameters;
@@ -18,6 +20,7 @@ public class TrackerPlatform implements Platform {
     
     private final Platform orig;
     private final PlatformType platformType;
+    private ManagedObjectRepresentation agent;
 
     public TrackerPlatform(PlatformImpl orig, PlatformType platformType) {
         this.orig = orig;
@@ -92,6 +95,18 @@ public class TrackerPlatform implements Platform {
         return PlatformType.BOOTSTRAP.equals(platformType);
     }
     
+    public void setAgent(ManagedObjectRepresentation agentMo) {
+        this.agent = agentMo;
+    }
+    
+    public ManagedObjectRepresentation getAgent() {
+        return agent;
+    }
+    
+    public GId getAgentId() {
+        return agent == null ? null : agent.getId();
+    }
+
     public static enum PlatformType {
         REGULAR, 
         BOOTSTRAP;
@@ -99,11 +114,7 @@ public class TrackerPlatform implements Platform {
 
     @Override
     public String toString() {
-        return String.format("TrackerPlatform [orig=%s, platformType=%s, getTenantId()=%s, getHost()=%s, getUser()=%s]", orig, platformType, getTenantId(), getHost(), getUser());
+        return String.format("TrackerPlatform [orig=%s, platformType=%s, getTenantId()=%s, getHost()=%s, getUser()=%s, agentId = %s]", 
+                orig, platformType, getTenantId(), getHost(), getUser(), getAgentId());
     }
-    
-    
-
-
-    
 }

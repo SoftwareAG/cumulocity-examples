@@ -2,6 +2,8 @@ package c8y.trackeragent.devicebootstrap;
 
 import static java.util.Arrays.asList;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -48,6 +50,10 @@ public class DeviceCredentialsRepository {
         }
         return deviceCredentials.duplicate();
     }
+    
+    public List<DeviceCredentials> getAllCredentials() {
+        return new ArrayList<DeviceCredentials>(credentials.values());
+    }
 
     public void saveCredentials(String imei, DeviceCredentials newCredentials) {
         synchronized (lock) {
@@ -66,7 +72,7 @@ public class DeviceCredentialsRepository {
         credentials.clear();
         for (Group group : propertyAccessor.getGroups()) {
             if (group.isFullyInitialized()) {
-                credentials.put(group.getGroupName(), asCredentials(group));
+                credentials.put(group.getName(), asCredentials(group));
             }
         }
     }
@@ -76,6 +82,7 @@ public class DeviceCredentialsRepository {
         credentials.setTenantId(group.get("tenantId"));
         credentials.setUser(group.get("user"));
         credentials.setPassword(group.get("password"));
+        credentials.setImei(group.getName());
         return credentials;
     }
 

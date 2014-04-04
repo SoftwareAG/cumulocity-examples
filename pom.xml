@@ -74,6 +74,11 @@
                 <artifactId>device-capability-model</artifactId>
                 <version>${c8y.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>14.0.1</version>
+            </dependency>            
         </dependencies>
 	</dependencyManagement>
 

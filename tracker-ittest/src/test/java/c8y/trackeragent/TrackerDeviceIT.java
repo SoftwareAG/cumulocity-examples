@@ -36,7 +36,7 @@ import c8y.IsDevice;
 import c8y.MotionTracking;
 import c8y.Position;
 import c8y.SupportedOperations;
-import c8y.trackeragent.utils.TrackerContext;
+import c8y.trackeragent.utils.Devices;
 
 import com.cumulocity.model.ID;
 import com.cumulocity.model.event.CumulocityAlarmStatuses;
@@ -54,22 +54,17 @@ import com.cumulocity.sdk.client.measurement.MeasurementApi;
 import com.cumulocity.sdk.client.measurement.MeasurementCollection;
 import com.cumulocity.sdk.client.measurement.MeasurementFilter;
 
-public class TrackerManagerITTest {
+public class TrackerDeviceIT extends BaseIT {
     
-    public static final String IMEI = "0123456789";
+    public static final String IMEI = Devices.IMEI_1;
     public static final ID extId = new ID(IMEI);
     public static final BigDecimal LATITUDE = new BigDecimal(37.0625);
     public static final BigDecimal LONGITUDE = new BigDecimal(-95.677068);
     public static final BigDecimal ALTITUDE = new BigDecimal(1);
     public static final BigDecimal RADIUS = new BigDecimal(100);
 
-    private TrackerPlatform platform;
-    private TrackerContext trackerContext = TrackerContext.get();
-
     @Before
     public void setup() throws IOException {
-        platform = trackerContext.getRegularPlatforms().iterator().next();
-
         // Clean up previous tests
         try {
             extId.setType("c8y_Imei");
@@ -88,7 +83,7 @@ public class TrackerManagerITTest {
     }
 
     @Test
-    public void test() throws SDKException, InterruptedException {
+    public void shouldSetTrackerData() throws SDKException, InterruptedException {
         GId gid = createTrackerData();
         validateTrackerData(gid);
     }
@@ -177,5 +172,4 @@ public class TrackerManagerITTest {
     private void myAssertEquals(BigDecimal one, BigDecimal two) {
         assertEquals(one.doubleValue(), two.doubleValue(), 0.01);
     }
-
 }

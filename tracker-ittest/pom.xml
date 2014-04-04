@@ -10,14 +10,16 @@
 	<artifactId>tracker-agent-ittest</artifactId>
 	<name>Test cases for Tracker Agent</name>
 	<properties>
-		<maven.compiler.source>1.7</maven.compiler.source>
-		<maven.compiler.target>1.7</maven.compiler.target>
+		<maven.compiler.source>1.6</maven.compiler.source>
+		<maven.compiler.target>1.6</maven.compiler.target>
 	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>c8y</groupId>
 			<artifactId>tracker-agent</artifactId>
 			<version>${c8y.version}</version>
+			<classifier>classes</classifier>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>c8y</groupId>
