@@ -44,17 +44,22 @@ import com.cumulocity.sdk.client.SDKException;
 public class ConnectedTracker implements Runnable, Executor {
 
     protected static Logger logger = LoggerFactory.getLogger(ConnectedTracker.class);
-    
+
     private final char reportSeparator;
     private final String fieldSeparator;
     private final Socket client;
     private final InputStream bis;
-    private final List<Object> fragments = new ArrayList<Object>();//split into two lists - for Parsers and Translators
+    private final List<Object> fragments = new ArrayList<Object>();// split into
+                                                                   // two lists
+                                                                   // - for
+                                                                   // Parsers
+                                                                   // and
+                                                                   // Translators
     final TrackerAgent trackerAgent;
-    
+
     private OutputStream out;
     private String imei;
-    
+
     public ConnectedTracker(Socket client, InputStream bis, char reportSeparator, String fieldSeparator, TrackerAgent trackerAgent) {
         this.client = client;
         this.bis = bis;
@@ -149,16 +154,14 @@ public class ConnectedTracker implements Runnable, Executor {
                 String imei = parser.parse(report);
                 if (imei != null) {
                     boolean registered = checkIfDeviceRegistered(imei);
-                    if(!registered) {
-                        logger.warn("Device for imei {} not registered yet; skip.", imei);
-                        return;
-                    }
-                    boolean success = parser.onParsed(report, imei);
-                    if(success) {
-                        this.imei = imei;
-                        ConnectionRegistry.instance().put(imei, this);
-                        break;
-                    }
+                    if (registered) {
+                        boolean success = parser.onParsed(report, imei);
+                        if (success) {
+                            this.imei = imei;
+                            ConnectionRegistry.instance().put(imei, this);
+                            break;
+                        }
+                    } 
                 }
             }
         }
@@ -166,7 +169,7 @@ public class ConnectedTracker implements Runnable, Executor {
 
     private boolean checkIfDeviceRegistered(String imei) {
         boolean registered = trackerAgent.getContext().isDeviceRegistered(imei);
-        if(!registered) {
+        if (!registered) {
             trackerAgent.sendEvent(new TrackerAgentEvents.NewDeviceEvent(imei));
         }
         return registered;
