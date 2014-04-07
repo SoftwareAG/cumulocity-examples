@@ -33,7 +33,6 @@ import com.cumulocity.model.idtype.GId;
 import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
-import com.cumulocity.sdk.client.devicecontrol.DeviceControlApi;
 import com.cumulocity.sdk.client.devicecontrol.OperationFilter;
 
 /**
@@ -46,8 +45,8 @@ import com.cumulocity.sdk.client.devicecontrol.OperationFilter;
 public class OperationDispatcher implements Runnable {
     
     private final Logger logger;
-    private final DeviceControlApi operations;
     private final TrackerDevice trackerDevice;
+    private TrackerPlatform platform;
 
     /**
      * @param platform
@@ -61,22 +60,22 @@ public class OperationDispatcher implements Runnable {
      *            be thread-safe.
      */
     public OperationDispatcher(TrackerPlatform platform, TrackerDevice trackerDevice) throws SDKException {
+        this.platform = platform;
         this.trackerDevice = trackerDevice;
         this.logger = PlatformLogger.getLogger(trackerDevice.getImei());
-        this.operations = platform.getDeviceControlApi();
         
         finishExecutingOps();
     }
 
     public void finish(OperationRepresentation operation) throws SDKException {
         operation.setStatus(OperationStatus.SUCCESSFUL.toString());
-        operations.update(operation);
+        platform.getDeviceControlApi().update(operation);
     }
 
     public void fail(OperationRepresentation operation, String text, SDKException x) throws SDKException {
         operation.setStatus(OperationStatus.FAILED.toString());
         operation.setFailureReason(text + " " + x.getMessage());
-        operations.update(operation);
+        platform.getDeviceControlApi().update(operation);
     }
 
     /**
@@ -86,7 +85,7 @@ public class OperationDispatcher implements Runnable {
         logger.debug("Cancelling hanging operations");
         for (OperationRepresentation operation : byStatus(OperationStatus.EXECUTING)) {
             operation.setStatus(OperationStatus.FAILED.toString());
-            operations.update(operation);
+            platform.getDeviceControlApi().update(operation);
         }
     }
 
@@ -124,7 +123,7 @@ public class OperationDispatcher implements Runnable {
 
     private void executeOperation(Executor exec, OperationRepresentation operation) throws SDKException {
         operation.setStatus(OperationStatus.EXECUTING.toString());
-        operations.update(operation);
+        platform.getDeviceControlApi().update(operation);
 
         try {
             exec.execute(operation);
@@ -134,12 +133,12 @@ public class OperationDispatcher implements Runnable {
             operation.setStatus(OperationStatus.FAILED.toString());
             operation.setFailureReason(msg + x.getMessage());
         }
-        operations.update(operation);
+        platform.getDeviceControlApi().update(operation);
     }
 
     private Iterable<OperationRepresentation> byStatus(OperationStatus status) throws SDKException {
         OperationFilter opsFilter = new OperationFilter().byDevice(trackerDevice.getGId().getValue()).byStatus(status);
-        return operations.getOperationsByFilter(opsFilter).get().allPages();
+        return platform.getDeviceControlApi().getOperationsByFilter(opsFilter).get().allPages();
         //TODO unregister if device not exists?
     }
 }

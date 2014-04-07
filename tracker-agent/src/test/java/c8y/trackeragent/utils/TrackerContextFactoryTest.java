@@ -14,7 +14,6 @@ public class TrackerContextFactoryTest {
         TrackerContext trackerContext = TrackerContext.get();        
         
         TrackerPlatform platform = trackerContext.getBootstrapPlatform();        
-        assertThat(platform.getPlatformType()).isEqualTo(TrackerPlatform.PlatformType.BOOTSTRAP);
         assertThat(platform.getTenantId()).isEqualTo("management");
         assertThat(platform.getUser().equals("devicebootstrap"));
         assertThat(platform.getPassword().equals("secret123"));

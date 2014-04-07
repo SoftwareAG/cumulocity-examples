@@ -14,7 +14,6 @@ public class ConfigUtils {
     
     private static final ConfigUtils instance = create();
     
-    
     /**
      * Path to the folder with configuration files: common.properties and device.properties
      * On production it's /etc/tracker-agent.

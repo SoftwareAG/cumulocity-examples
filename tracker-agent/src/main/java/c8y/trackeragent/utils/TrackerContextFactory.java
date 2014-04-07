@@ -1,6 +1,5 @@
 package c8y.trackeragent.utils;
 
-import static com.cumulocity.model.authentication.CumulocityCredentials.Builder.cumulocityCredentials;
 import static java.lang.Integer.parseInt;
 
 import java.util.Properties;
@@ -8,11 +7,6 @@ import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import c8y.trackeragent.TrackerPlatform;
-import c8y.trackeragent.TrackerPlatform.PlatformType;
-
-import com.cumulocity.model.authentication.CumulocityCredentials;
-import com.cumulocity.sdk.client.PlatformImpl;
 import com.cumulocity.sdk.client.SDKException;
 
 class TrackerContextFactory {
@@ -34,24 +28,22 @@ class TrackerContextFactory {
         props = ConfigUtils.get().getProperties(sourceFilePath);
     }
 
-    TrackerContext createTrackerContext() throws SDKException {                       
-        String host = getProperty(PLATFORM_HOST_PROP);                
-        int port = parseInt(getProperty(LOCAL_SOCKET_PORT_PROP, DEFAULT_LOCAL_SOCKET_PORT));        
-        TrackerPlatform bootstrapPlatform = createBootstrapPlatform(host);
-        TrackerContext trackerContext = new TrackerContext(bootstrapPlatform, port, host);
-        logger.info("Context created: {}.", trackerContext);
-        return trackerContext;
+    TrackerContext createTrackerContext() throws SDKException {
+        TrackerConfiguration configuration = createConfiguration();
+        return new TrackerContext(configuration);
     }
 
-    private TrackerPlatform createBootstrapPlatform(String host) {
-        String bootstrapUser = getProperty(BOOTSTRAP_USER_PROP);
-        String bootstrapPassword = getProperty(BOOTSTRAP_PASSWORD_PROP);
-        String tenantId = "management";
-        CumulocityCredentials credentials = cumulocityCredentials(bootstrapUser, bootstrapPassword)
-                .withTenantId(tenantId).build();
-        return new TrackerPlatform(new PlatformImpl(host, credentials), PlatformType.BOOTSTRAP);
+    private TrackerConfiguration createConfiguration() {
+        TrackerConfiguration config = new TrackerConfiguration();
+        config.setPlatformHost(getProperty(PLATFORM_HOST_PROP));
+        int port = parseInt(getProperty(LOCAL_SOCKET_PORT_PROP, DEFAULT_LOCAL_SOCKET_PORT));        
+        config.setLocalPort(port);
+        config.setBootstrapUser(getProperty(BOOTSTRAP_USER_PROP));
+        config.setBootstrapPassword(getProperty(BOOTSTRAP_PASSWORD_PROP));
+        config.setBootstrapTenant("management");
+        return config;
     }
-    
+
     private String getProperty(String key) {
         String value = getProperty(key, null);
         if (value == null) {
