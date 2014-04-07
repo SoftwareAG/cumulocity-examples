@@ -30,28 +30,28 @@ import com.cumulocity.sdk.client.ResponseParser;
 import com.cumulocity.sdk.client.RestConnector;
 
 public abstract class TrackerITSupport {
-    
+
     protected static final boolean REMOTE = false;
     protected static final boolean LOCAL = true;
     private static final int REMOTE_PORT = 40000;
     private static final Random random = new Random();
-    
+
     private final boolean local;
     protected TrackerPlatform testPlatform;
     protected TrackerConfiguration config;
     protected RestConnector restConnector;
     private final ExecutorService executor = Executors.newFixedThreadPool(1);
-    
+
     private Server server;
-    private Socket socket;    
-    
+    private Socket socket;
+
     public TrackerITSupport() {
         this(LOCAL);
     }
 
     public TrackerITSupport(boolean local) {
         this.local = local;
-        if(local) {
+        if (local) {
             config = getLocalPlatformConfiguration();
         } else {
             config = getRemotePlatformConfiguration();
@@ -60,21 +60,20 @@ public abstract class TrackerITSupport {
 
     @Before
     public void baseSetUp() throws IOException {
-        if(local) {
-            clearDevices();
+        if (local) {
+            clearPersistedDevices();
         }
-        testPlatform = createTrackerPlatform();        
+        testPlatform = createTrackerPlatform();
         restConnector = new RestConnector(testPlatform.getPlatformParameters(), new ResponseParser());
-        if(local) {
+        if (local) {
             server = new Server(config);
             server.init();
             executor.submit(server);
         }
     }
-    
-    private void clearDevices() throws IOException {
+
+    private void clearPersistedDevices() throws IOException {
         String filePath = ConfigUtils.get().getConfigFilePath(DeviceCredentialsRepository.SOURCE_FILE);
-        System.out.println(filePath);
         File devicesFile = new File(filePath);
         FileUtils.deleteQuietly(devicesFile);
         devicesFile.createNewFile();
@@ -82,14 +81,15 @@ public abstract class TrackerITSupport {
 
     @After
     public void baseTearDown() throws IOException {
-        if(local) {
+        if (local) {
             executor.shutdownNow();
         }
-        if(socket != null && !socket.isClosed()) {
+        if (socket != null && !socket.isClosed()) {
             socket.close();
         }
     }
 
+    //@formatter:off
     private TrackerConfiguration getLocalPlatformConfiguration() {
         return getRemotePlatformConfiguration()
                 .setLocalPort(randomPort())
@@ -99,7 +99,8 @@ public abstract class TrackerITSupport {
         return ConfigUtils.get().loadCommonConfiguration()
                 .setLocalPort(REMOTE_PORT);
     }
-    
+    //@formatter:on
+
     private int randomPort() {
         return random.nextInt(20000) + 40000;
     }
@@ -107,14 +108,17 @@ public abstract class TrackerITSupport {
     protected TrackerPlatform createTrackerPlatform() {
         String testFilePath = ConfigUtils.get().getConfigFilePath("test.properties");
         Properties testProperties = ConfigUtils.get().getProperties(testFilePath);
+        //@formatter:off
         CumulocityCredentials credentials = cumulocityCredentials(
-                testProperties.getProperty("user"), testProperties.getProperty("password"))
+                testProperties.getProperty("user"), 
+                testProperties.getProperty("password"))
                 .withTenantId(testProperties.getProperty("tenant"))
                 .build();
+        //@formatter:on
         PlatformImpl platform = new PlatformImpl(config.getPlatformHost(), credentials);
         return new TrackerPlatform(platform);
     }
-    
+
     protected DeviceCredentials pollCredentials(String imei) throws InterruptedException {
         try {
             return DeviceCredentialsRepository.get().getCredentials(imei);
@@ -130,7 +134,7 @@ public abstract class TrackerITSupport {
         outputStream.write(bis);
         outputStream.close();
     }
-    
+
     protected void createNewDeviceRequest(String deviceId) {
         NewDeviceRequestRepresentation representation = new NewDeviceRequestRepresentation();
         representation.setId(deviceId);
@@ -144,13 +148,13 @@ public abstract class TrackerITSupport {
     protected String newDeviceRequestUri(String deviceId) {
         return newDeviceRequestsUri() + "/" + deviceId;
     }
-    
+
     protected void acceptNewDeviceRequest(String deviceId) {
         NewDeviceRequestRepresentation representation = new NewDeviceRequestRepresentation();
         representation.setStatus("ACCEPTED");
         restConnector.put(newDeviceRequestUri(deviceId), NEW_DEVICE_REQUEST, representation);
     }
-    
+
     protected TrackerDevice getTrackerDevice(String imei) {
         DeviceManagedObject deviceManagedObject = new DeviceManagedObject(testPlatform);
         GId agentId = deviceManagedObject.getAgentId();
