@@ -21,21 +21,21 @@ import com.sun.jersey.api.client.ClientResponse.Status;
 public class DeviceBootstrapProcessor implements TrackerAgentEventListener {
 
     private static final int POOL_SIZE = 2;
-    public static final int POLL_CREDENTIALS_TIMEOUT = 60;
-    public static final int POLL_CREDENTIALS_INTERVAL = 5;
+    private static final int POLL_CREDENTIALS_TIMEOUT = 60;
+    private static final int POLL_CREDENTIALS_INTERVAL = 5;
 
     protected static Logger logger = LoggerFactory.getLogger(DeviceBootstrapProcessor.class);
 
     private final ExecutorService threadPoolExecutor;
-    private Collection<String> duringBootstrap = new HashSet<String>();
-    private Object lock = new Object();
-    private TrackerAgent trackerAgent;
+    private final Collection<String> duringBootstrap = new HashSet<String>();
+    private final Object lock = new Object();
+    private final TrackerAgent trackerAgent;
 
     public DeviceBootstrapProcessor(TrackerAgent trackerAgent) {
         this.trackerAgent = trackerAgent;
         threadPoolExecutor = Executors.newFixedThreadPool(POOL_SIZE);
     }
-    
+
     @Subscribe
     public void listen(TrackerAgentEvents.NewDeviceEvent event) {
         startBootstraping(event.getImei());
@@ -53,7 +53,7 @@ public class DeviceBootstrapProcessor implements TrackerAgentEventListener {
                 threadPoolExecutor.execute(deviceBootstrapTask);
             } finally {
                 duringBootstrap.remove(imei);
-            }        
+            }
         }
     }
 
@@ -81,7 +81,7 @@ public class DeviceBootstrapProcessor implements TrackerAgentEventListener {
             logger.info("Successfully sent hello from imei {}.", imei);
             DeviceCredentialsRepresentation credentialsRepresentation = deviceCredentialsApi.pollCredentials(imei, POLL_CREDENTIALS_INTERVAL, POLL_CREDENTIALS_TIMEOUT);
             if (credentialsRepresentation == null) {
-                logger.info("No credentials accessed for imei {}.", imei);                
+                logger.info("No credentials accessed for imei {}.", imei);
             } else {
                 DeviceCredentials credentials = asCredentials(credentialsRepresentation);
                 logger.warn("Credentials for imei {} accessed: {}.", imei, credentials);
@@ -90,12 +90,13 @@ public class DeviceBootstrapProcessor implements TrackerAgentEventListener {
         }
 
         private static DeviceCredentials asCredentials(DeviceCredentialsRepresentation credentials) {
-            DeviceCredentials deviceCredentials = new DeviceCredentials();
-            deviceCredentials.setPassword(credentials.getPassword());
-            deviceCredentials.setUser(credentials.getUsername());
-            deviceCredentials.setTenantId(credentials.getTenantId());
-            deviceCredentials.setImei(credentials.getId());
-            return deviceCredentials;
+            //@formatter:off
+            return new DeviceCredentials()
+                .setPassword(credentials.getPassword())
+                .setUser(credentials.getUsername())
+                .setTenantId(credentials.getTenantId())
+                .setImei(credentials.getId());
+            //@formatter:on
         }
 
     }
