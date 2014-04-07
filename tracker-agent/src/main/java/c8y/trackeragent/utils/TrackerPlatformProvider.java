@@ -3,7 +3,6 @@ package c8y.trackeragent.utils;
 import static com.cumulocity.model.authentication.CumulocityCredentials.Builder.cumulocityCredentials;
 
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 
 import c8y.trackeragent.DeviceManagedObject;
 import c8y.trackeragent.TrackerPlatform;
@@ -16,7 +15,6 @@ import com.cumulocity.model.ID;
 import com.cumulocity.model.authentication.CumulocityCredentials;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.PlatformImpl;
-import com.cumulocity.sdk.client.SDKException;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
@@ -35,7 +33,7 @@ public class TrackerPlatformProvider {
 
     public TrackerPlatform getDevicePlatform(final String imei) {
         if (imei == null) {
-            return null;
+            throw new IllegalArgumentException("Imei must not be null!");
         }
         return getPlatform(new PlatformKey(imei));
     }
@@ -55,8 +53,7 @@ public class TrackerPlatformProvider {
 
             });
         } catch (Exception e) {
-            throw SDKExceptions.narrow(e, "Can't access device platform for " 
-                        + (key.isBootstrap() ? "bootstrap" : "imei = " + key.getImei()));
+            throw SDKExceptions.narrow(e, "Can't access device platform for " + key);
         }
     }
 
@@ -134,6 +131,11 @@ public class TrackerPlatformProvider {
             } else if (!imei.equals(other.imei))
                 return false;
             return true;
+        }
+        
+        @Override
+        public String toString() {
+            return isBootstrap() ? "bootstrap" : "imei: " + imei;
         }
     }
 }

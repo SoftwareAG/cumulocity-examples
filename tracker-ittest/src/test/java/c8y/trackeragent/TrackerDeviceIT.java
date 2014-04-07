@@ -36,7 +36,8 @@ import c8y.IsDevice;
 import c8y.MotionTracking;
 import c8y.Position;
 import c8y.SupportedOperations;
-import c8y.trackeragent.utils.ConfigUtils;
+import c8y.trackeragent.devicebootstrap.DeviceCredentials;
+import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.utils.Devices;
 import c8y.trackeragent.utils.TrackerContext;
 
@@ -56,8 +57,8 @@ import com.cumulocity.sdk.client.measurement.MeasurementApi;
 import com.cumulocity.sdk.client.measurement.MeasurementCollection;
 import com.cumulocity.sdk.client.measurement.MeasurementFilter;
 
-public class TrackerDeviceIT extends BaseIT {
-    
+public class TrackerDeviceIT extends TrackerITSupport {
+
     public static final String IMEI = Devices.IMEI_1;
     public static final ID extId = new ID(IMEI);
     public static final BigDecimal LATITUDE = new BigDecimal(37.0625);
@@ -70,9 +71,9 @@ public class TrackerDeviceIT extends BaseIT {
         // Clean up previous tests
         try {
             extId.setType("c8y_Imei");
-            ExternalIDRepresentation eir = platform.getIdentityApi().getExternalId(extId);
+            ExternalIDRepresentation eir = testPlatform.getIdentityApi().getExternalId(extId);
             GId gid = eir.getManagedObject().getId();
-            platform.getInventoryApi().delete(gid);
+            testPlatform.getInventoryApi().delete(gid);
         } catch (SDKException e) {
         }
 
@@ -86,12 +87,14 @@ public class TrackerDeviceIT extends BaseIT {
 
     @Test
     public void shouldSetTrackerData() throws SDKException, InterruptedException {
+        bindTestPlatformCredentials(IMEI);
         GId gid = createTrackerData();
         validateTrackerData(gid);
     }
 
     private GId createTrackerData() throws SDKException, InterruptedException {
-        TrackerContext trackerContext = new TrackerContext(ConfigUtils.get().loadCommonConfiguration());
+
+        TrackerContext trackerContext = new TrackerContext(config);
         TrackerAgent trackerAgent = new TrackerAgent(trackerContext);
         TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(IMEI);
 
@@ -133,7 +136,7 @@ public class TrackerDeviceIT extends BaseIT {
     }
 
     private void validateTrackerData(GId gid) throws SDKException {
-        InventoryApi inventory = platform.getInventoryApi();
+        InventoryApi inventory = testPlatform.getInventoryApi();
         ManagedObjectRepresentation mo = inventory.get(gid);
 
         assertNotNull(mo.get(IsDevice.class));
@@ -156,7 +159,7 @@ public class TrackerDeviceIT extends BaseIT {
         assertNotNull(tracking);
         assertTrue(tracking.isActive());
 
-        AlarmApi alarms = platform.getAlarmApi();
+        AlarmApi alarms = testPlatform.getAlarmApi();
 
         AlarmFilter filter = new AlarmFilter();
         filter.bySource(mo.getId());
@@ -164,7 +167,7 @@ public class TrackerDeviceIT extends BaseIT {
             assertEquals(CumulocityAlarmStatuses.CLEARED.toString(), alarm.getStatus());
         }
 
-        MeasurementApi measurements = platform.getMeasurementApi();
+        MeasurementApi measurements = testPlatform.getMeasurementApi();
         MeasurementFilter mf = new MeasurementFilter();
         mf.bySource(mo.getId());
         MeasurementCollection mpcr = measurements.getMeasurementsByFilter(mf);
@@ -174,5 +177,16 @@ public class TrackerDeviceIT extends BaseIT {
 
     private void myAssertEquals(BigDecimal one, BigDecimal two) {
         assertEquals(one.doubleValue(), two.doubleValue(), 0.01);
+    }
+    
+    private void bindTestPlatformCredentials(String imei) {
+        //@formatter:off
+        DeviceCredentials deviceCredentials = new DeviceCredentials()
+            .setTenantId(testPlatform.getTenantId())
+            .setImei(imei)
+            .setUser(testPlatform.getUser())
+            .setPassword(testPlatform.getPassword());
+        DeviceCredentialsRepository.get().saveCredentials(deviceCredentials);
+        //@formatter:on
     }
 }
