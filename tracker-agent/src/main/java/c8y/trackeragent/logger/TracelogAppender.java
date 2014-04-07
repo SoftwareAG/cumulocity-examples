@@ -34,8 +34,6 @@ import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
 import com.cumulocity.rest.representation.event.EventRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.SDKException;
-import com.cumulocity.sdk.client.alarm.AlarmApi;
-import com.cumulocity.sdk.client.event.EventApi;
 
 public class TracelogAppender extends AppenderBase<ILoggingEvent> {
 
@@ -45,16 +43,14 @@ public class TracelogAppender extends AppenderBase<ILoggingEvent> {
     public static final String EVENT_LEVEL_PROP = "c8y.log.eventLevel";
     public static final String DEFAULT_EVENT_LEVEL = "INFO";
 
-    private AlarmApi alarms;
     private AlarmRepresentation alarmTemplate = new AlarmRepresentation();
     private Level alarmLevel = Level.toLevel(DEFAULT_ALARM_LEVEL);
-    private EventApi events;
     private EventRepresentation eventTemplate = new EventRepresentation();
     private Level eventLevel = Level.toLevel(DEFAULT_EVENT_LEVEL);
+    private TrackerPlatform platform;
 
     public TracelogAppender(TrackerPlatform platform, LoggerContext loggerContext) {
-        alarms = platform.getAlarmApi();
-        events = platform.getEventApi();
+        this.platform = platform;
 
         ManagedObjectRepresentation source = new ManagedObjectRepresentation();
         source.setId(platform.getAgent().getId());
@@ -84,11 +80,11 @@ public class TracelogAppender extends AppenderBase<ILoggingEvent> {
                 }
                 alarmTemplate.setTime(new Date());
                 alarmTemplate.setText(msg.toString());
-                alarms.create(alarmTemplate);
+                platform.getAlarmApi().create(alarmTemplate);
             } else if (entry.getLevel().isGreaterOrEqual(eventLevel)) {
                 eventTemplate.setTime(new Date());
                 eventTemplate.setText(entry.getMessage());
-                events.create(eventTemplate);
+                platform.getEventApi().create(eventTemplate);
             }
         } catch (SDKException e) {
             // Tough luck.

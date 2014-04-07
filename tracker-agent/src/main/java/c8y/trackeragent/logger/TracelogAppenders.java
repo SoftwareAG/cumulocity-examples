@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import c8y.trackeragent.TrackerPlatform;
-import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.utils.TrackerContext;
 import ch.qos.logback.classic.LoggerContext;
 

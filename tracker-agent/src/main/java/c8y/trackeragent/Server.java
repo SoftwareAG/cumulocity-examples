@@ -41,7 +41,7 @@ import c8y.trackeragent.utils.TrackerContext;
 /**
  * The server listens to connections from devices and starts threads for
  * handling device communication for particular types of devices. (Currently,
- * only GL200.)
+ * only GL200 and Telic.)
  */
 public class Server implements Runnable {
 
@@ -69,7 +69,7 @@ public class Server implements Runnable {
 
     public void init() {
         try {
-            this.serverSocket = new ServerSocket(trackerContext.getLocalSocketPort());
+            this.serverSocket = new ServerSocket(trackerContext.getConfiguration().getLocalPort());
         } catch (IOException e) {
             throw new RuntimeException("Cant init agent tracker server!", e);
         }

@@ -4,9 +4,6 @@ import static com.cumulocity.model.idtype.GId.asGId;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import org.mockito.Mockito;
-
-import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.alarm.AlarmApi;
@@ -39,7 +36,7 @@ public class MockTrackerPlatform extends TrackerPlatform {
 
     
     public MockTrackerPlatform(String tenantId) {
-        super(null, PlatformType.REGULAR);
+        super(null);
         this.tenantId = tenantId;
         when(agent.getId()).thenReturn(asGId(tenantId + "Agent"));
         when(agent.getSelf()).thenReturn("http://me");
