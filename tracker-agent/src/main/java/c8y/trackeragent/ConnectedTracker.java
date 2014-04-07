@@ -31,9 +31,7 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import c8y.trackeragent.devicebootstrap.DeviceBootstrapProcessor;
 import c8y.trackeragent.event.TrackerAgentEvents;
-import c8y.trackeragent.utils.TrackerContext;
 
 import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
@@ -56,7 +54,6 @@ public class ConnectedTracker implements Runnable, Executor {
     
     private OutputStream out;
     private String imei;
-    TrackerContext trackerContext = TrackerContext.get();
     
     public ConnectedTracker(Socket client, InputStream bis, char reportSeparator, String fieldSeparator, TrackerAgent trackerAgent) {
         this.client = client;
@@ -168,7 +165,7 @@ public class ConnectedTracker implements Runnable, Executor {
     }
 
     private boolean checkIfDeviceRegistered(String imei) {
-        boolean registered = trackerContext.isDeviceRegistered(imei);
+        boolean registered = trackerAgent.getContext().isDeviceRegistered(imei);
         if(!registered) {
             trackerAgent.sendEvent(new TrackerAgentEvents.NewDeviceEvent(imei));
         }

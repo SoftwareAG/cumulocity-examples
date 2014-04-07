@@ -1,5 +1,7 @@
 package c8y.trackeragent.utils;
 
+import static java.lang.Integer.parseInt;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -7,10 +9,21 @@ import java.io.InputStream;
 import java.util.Properties;
 
 import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.cumulocity.sdk.client.SDKException;
 
 public class ConfigUtils {
+    
+    private static final Logger logger = LoggerFactory.getLogger(ConfigUtils.class);
+    
+    private static final String SOURCE_FILE = "common.properties";
+    private static final String PLATFORM_HOST_PROP = "platformHost";    
+    private static final String LOCAL_SOCKET_PORT_PROP = "localPort";
+    private static final String DEFAULT_LOCAL_SOCKET_PORT = "9090";
+    private static final String BOOTSTRAP_USER_PROP = "bootstrap.user";
+    private static final String BOOTSTRAP_PASSWORD_PROP = "bootstrap.password";
     
     private static final ConfigUtils instance = create();
     
@@ -46,6 +59,23 @@ public class ConfigUtils {
             IOUtils.closeQuietly(io);
         }
     }
+    
+    public TrackerConfiguration loadCommonConfiguration() {
+        String sourceFilePath = getConfigFilePath(SOURCE_FILE);
+        Properties props = getProperties(sourceFilePath);
+        int port = parseInt(getProperty(props, LOCAL_SOCKET_PORT_PROP, DEFAULT_LOCAL_SOCKET_PORT));
+        //@formatter:off
+        TrackerConfiguration config = new TrackerConfiguration()
+            .setPlatformHost(getProperty(SOURCE_FILE, props, PLATFORM_HOST_PROP))
+            .setLocalPort(port)
+            .setBootstrapUser(getProperty(SOURCE_FILE, props, BOOTSTRAP_USER_PROP))
+            .setBootstrapPassword(getProperty(SOURCE_FILE, props, BOOTSTRAP_PASSWORD_PROP))
+            .setBootstrapTenant("management");
+        //@formatter:on
+        logger.info("Configuration loaded: " + config);
+        return config;
+
+    }
 
     private static ConfigUtils create() {
         return new ConfigUtils(getConfigDir());
@@ -55,7 +85,7 @@ public class ConfigUtils {
         Properties props = new Properties();
         InputStream io = null;
         try {
-            io = TrackerContextFactory.class.getResourceAsStream("/config.properties");
+            io = ConfigUtils.class.getResourceAsStream("/config.properties");
             props.load(io);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -63,6 +93,19 @@ public class ConfigUtils {
             IOUtils.closeQuietly(io);
         }
         return props.getProperty("configDir");
+    }
+    
+
+    private String getProperty(String path, Properties props, String key) {
+        String value = getProperty(props, key, null);
+        if (value == null) {
+            throw new RuntimeException("Missing property \'" + key + "\' in file " + SOURCE_FILE);
+        }
+        return value;
+    }
+    
+    private String getProperty(Properties props, String key, String defaultValue) {
+        return props.getProperty(key, defaultValue);
     }
 
 }

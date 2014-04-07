@@ -36,7 +36,9 @@ import c8y.IsDevice;
 import c8y.MotionTracking;
 import c8y.Position;
 import c8y.SupportedOperations;
+import c8y.trackeragent.utils.ConfigUtils;
 import c8y.trackeragent.utils.Devices;
+import c8y.trackeragent.utils.TrackerContext;
 
 import com.cumulocity.model.ID;
 import com.cumulocity.model.event.CumulocityAlarmStatuses;
@@ -89,7 +91,8 @@ public class TrackerDeviceIT extends BaseIT {
     }
 
     private GId createTrackerData() throws SDKException, InterruptedException {
-        TrackerAgent trackerAgent = new TrackerAgent();
+        TrackerContext trackerContext = new TrackerContext(ConfigUtils.get().loadCommonConfiguration());
+        TrackerAgent trackerAgent = new TrackerAgent(trackerContext);
         TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(IMEI);
 
         Geofence fence = new Geofence();

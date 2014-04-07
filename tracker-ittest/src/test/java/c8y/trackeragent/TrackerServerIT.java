@@ -18,14 +18,14 @@ import c8y.Position;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.exception.UnknownDeviceException;
+import c8y.trackeragent.utils.ConfigUtils;
 import c8y.trackeragent.utils.Devices;
 import c8y.trackeragent.utils.Positions;
 import c8y.trackeragent.utils.Reports;
-import c8y.trackeragent.utils.TrackerContext;
+import c8y.trackeragent.utils.TrackerConfiguration;
 
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.devicebootstrap.NewDeviceRequestRepresentation;
-import com.cumulocity.sdk.client.Platform;
 import com.cumulocity.sdk.client.ResponseParser;
 import com.cumulocity.sdk.client.RestConnector;
 
@@ -38,7 +38,6 @@ public class TrackerServerIT extends BaseIT {
     private static final String OLD_IMEI = Devices.IMEI_1;
     private static Random random = new Random();
     
-    private Platform platform;
     private RestConnector restConnector;
     private Server server;    
     private ExecutorService executor = Executors.newFixedThreadPool(1);
@@ -51,10 +50,10 @@ public class TrackerServerIT extends BaseIT {
         } else {
             port = REMOTE_PORT;
         }
-        TrackerContext.get().setLocalSocketPort(port);
+        TrackerConfiguration config = ConfigUtils.get().loadCommonConfiguration().setLocalPort(port);
         platform = createTrackerPlatform();
-        restConnector = new RestConnector(platformParameters, new ResponseParser());
-        server = new Server();
+        restConnector = new RestConnector(platform.getPlatformParameters(), new ResponseParser());
+        server = new Server(config);
         if(LOCAL_TEST) {
             server.init();
             executor.submit(server);

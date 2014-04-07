@@ -9,6 +9,7 @@ import c8y.trackeragent.DeviceManagedObject;
 import c8y.trackeragent.TrackerPlatform;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
+import c8y.trackeragent.exception.SDKExceptions;
 
 import com.cumulocity.model.Agent;
 import com.cumulocity.model.ID;
@@ -22,7 +23,7 @@ import com.google.common.cache.CacheBuilder;
 public class TrackerPlatformProvider {
 
     private final DeviceCredentialsRepository deviceCredentialsRepository;
-    private final Cache<String, TrackerPlatform> cache;
+    private final Cache<PlatformKey, TrackerPlatform> cache;
     private final TrackerConfiguration config;
     private final Object lock = new Object();
 
@@ -33,27 +34,38 @@ public class TrackerPlatformProvider {
     }
 
     public TrackerPlatform getDevicePlatform(final String imei) {
-        try {
-            return cache.get(imei, new Callable<TrackerPlatform>() {
-
-                @Override
-                public TrackerPlatform call() throws Exception {
-                    return createDevicePlatform(imei);
-                }
-
-            });
-        } catch (ExecutionException e) {
-            Throwable cause = e.getCause();
-            if (cause != null && cause instanceof SDKException) {
-                throw (SDKException) cause;
-            } else {
-                throw new SDKException("Can't access device platform for imei = " + imei, e);
-            }
+        if (imei == null) {
+            return null;
         }
+        return getPlatform(new PlatformKey(imei));
     }
 
     public TrackerPlatform getBootstrapPlatform() {
-        return createBootstrapPlatform();
+        return getPlatform(new PlatformKey(null));
+    }
+
+    private TrackerPlatform getPlatform(final PlatformKey key) {
+        try {
+            return cache.get(key, new Callable<TrackerPlatform>() {
+
+                @Override
+                public TrackerPlatform call() throws Exception {
+                    return createPlatform(key);
+                }
+
+            });
+        } catch (Exception e) {
+            throw SDKExceptions.narrow(e, "Can't access device platform for " 
+                        + (key.isBootstrap() ? "bootstrap" : "imei = " + key.getImei()));
+        }
+    }
+
+    private TrackerPlatform createPlatform(PlatformKey key) {
+        if (key.isBootstrap()) {
+            return createBootstrapPlatform();
+        } else {
+            return createDevicePlatform(key.getImei());
+        }
     }
 
     private TrackerPlatform createDevicePlatform(String imei) {
@@ -83,4 +95,45 @@ public class TrackerPlatformProvider {
         }
     }
 
+    private static class PlatformKey {
+
+        private final String imei;
+
+        PlatformKey(String imei) {
+            this.imei = imei;
+        }
+
+        String getImei() {
+            return imei;
+        }
+
+        boolean isBootstrap() {
+            return imei == null;
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((imei == null) ? 0 : imei.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            PlatformKey other = (PlatformKey) obj;
+            if (imei == null) {
+                if (other.imei != null)
+                    return false;
+            } else if (!imei.equals(other.imei))
+                return false;
+            return true;
+        }
+    }
 }

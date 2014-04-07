@@ -7,21 +7,22 @@ import c8y.trackeragent.utils.TrackerContext;
 import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
-import com.cumulocity.sdk.client.devicecontrol.DeviceControlApi;
 import com.google.common.eventbus.EventBus;
 
 public class TrackerAgent {
     
     private final EventBus eventBus;
+    private final TrackerContext context;
 
-    public TrackerAgent() {
+    public TrackerAgent(TrackerContext trackerContext) {
+        this.context = trackerContext;
         this.eventBus = new EventBus("tracker-agent");
     }
 
     public TrackerDevice getOrCreateTrackerDevice(String imei) throws SDKException {
         TrackerDevice device = ManagedObjectCache.instance().get(imei);
         if (device == null) {
-            TrackerPlatform platform = TrackerContext.get().getDevicePlatform(imei);
+            TrackerPlatform platform = context.getDevicePlatform(imei);
             device = new TrackerDevice(platform, platform.getAgentId(), imei);
             ManagedObjectCache.instance().put(device);
         }
@@ -30,13 +31,13 @@ public class TrackerAgent {
 
     public void finish(String deviceImei, OperationRepresentation operation) throws UnknownTenantException {
         operation.setStatus(OperationStatus.SUCCESSFUL.toString());
-        getDeviceControlApi(deviceImei).update(operation);
+        context.getDevicePlatform(deviceImei).getDeviceControlApi().update(operation);
     }
 
     public void fail(String deviceImei, OperationRepresentation operation, String text, SDKException ex) {
         operation.setStatus(OperationStatus.FAILED.toString());
         operation.setFailureReason(text + " " + ex.getMessage());
-        getDeviceControlApi(deviceImei).update(operation);
+        context.getDevicePlatform(deviceImei).getDeviceControlApi().update(operation);
     }
     
     public void registerEventListener(TrackerAgentEventListener... eventListeners) {
@@ -45,11 +46,11 @@ public class TrackerAgent {
         }
     }
     
+    public TrackerContext getContext() {
+        return context;
+    }
+
     public void sendEvent(Object event) {
         eventBus.post(event);
-    }
-        
-    private DeviceControlApi getDeviceControlApi(String deviceImei) {
-        return TrackerContext.get().getDevicePlatform(deviceImei).getDeviceControlApi();
     }
 }
