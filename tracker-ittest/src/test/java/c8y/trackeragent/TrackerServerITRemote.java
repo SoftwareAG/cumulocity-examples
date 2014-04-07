@@ -7,9 +7,9 @@ import c8y.trackeragent.utils.Devices;
 import c8y.trackeragent.utils.Positions;
 import c8y.trackeragent.utils.Reports;
 
-public class TrackerServerRemoteIT extends TrackerITSupport {
+public class TrackerServerITRemote extends TrackerITSupport {
     
-    public TrackerServerRemoteIT() {
+    public TrackerServerITRemote() {
         super(REMOTE);
     }
 
