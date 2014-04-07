@@ -1,6 +1,7 @@
 package c8y.trackeragent.utils;
 
 import static java.lang.Integer.parseInt;
+import static java.lang.String.format;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -72,7 +73,7 @@ public class ConfigUtils {
             .setBootstrapPassword(getProperty(SOURCE_FILE, props, BOOTSTRAP_PASSWORD_PROP))
             .setBootstrapTenant("management");
         //@formatter:on
-        logger.info("Configuration loaded: " + config);
+        logger.info(format("Configuration loaded from: %s: %s", sourceFilePath, config));
         return config;
 
     }

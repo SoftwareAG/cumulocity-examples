@@ -1,16 +1,17 @@
 package c8y.trackeragent;
 
-import static org.fest.assertions.Assertions.assertThat;
-
 import org.junit.Test;
 
 import c8y.Position;
-import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.utils.Devices;
 import c8y.trackeragent.utils.Positions;
 import c8y.trackeragent.utils.Reports;
 
-public class TrackerServerIT extends TrackerITSupport {
+public class TrackerServerRemoteIT extends TrackerITSupport {
+    
+    public TrackerServerRemoteIT() {
+        super(REMOTE);
+    }
 
     @Test
     public void shouldBootstrapNewDeviceAndThenChangeItsLocation() throws Exception {
@@ -23,10 +24,7 @@ public class TrackerServerIT extends TrackerITSupport {
         Thread.sleep(5000);
         acceptNewDeviceRequest(imei);
         Thread.sleep(5000);
-        
-        DeviceCredentials credentials = pollCredentials(imei);
-        assertThat(credentials).isNotNull();  
-        
+                
         //trigger regular report 
         report = Reports.getTelicReportBytes(imei, Positions.SAMPLE_1);
         writeToSocket(report);

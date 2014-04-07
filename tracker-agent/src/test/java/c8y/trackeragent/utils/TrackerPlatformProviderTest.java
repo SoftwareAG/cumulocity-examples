@@ -17,7 +17,7 @@ public class TrackerPlatformProviderTest {
         
         TrackerPlatform platform = bean.getBootstrapPlatform();        
         assertThat(platform.getTenantId()).isEqualTo("management");
-        assertThat(platform.getUser().equals("devicebootstrap"));
-        assertThat(platform.getPassword().equals("secret123"));
+        assertThat(platform.getUser()).isEqualTo("devicebootstrap");
+        assertThat(platform.getPassword()).isEqualTo("secret123");
     }
 }

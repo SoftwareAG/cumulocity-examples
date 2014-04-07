@@ -6,48 +6,49 @@ public class DeviceCredentials {
     private String user;
     private String password;
     private String imei;
-    
-    public DeviceCredentials() {}
 
-    public DeviceCredentials(String tenantId, String user, String password, String imei) {
-        this.tenantId = tenantId;
-        this.user = user;
-        this.password = password;
-        this.imei = imei;
-    }
-    
     public DeviceCredentials duplicate() {
-        return new DeviceCredentials(tenantId, user, password, imei);
+        //@formatter:off
+        return new DeviceCredentials()
+            .setTenantId(tenantId)
+            .setUser(user)
+            .setPassword(password)
+            .setImei(imei);
+        //@formatter:on
     }
 
     public String getTenantId() {
         return tenantId;
     }
 
-    public void setTenantId(String tenantId) {
+    public DeviceCredentials setTenantId(String tenantId) {
         this.tenantId = tenantId;
+        return this;
     }
 
     public String getUser() {
         return user;
     }
 
-    public void setUser(String user) {
+    public DeviceCredentials setUser(String user) {
         this.user = user;
+        return this;
     }
 
     public String getPassword() {
         return password;
     }
 
-    public void setPassword(String password) {
+    public DeviceCredentials setPassword(String password) {
         this.password = password;
+        return this;
     }
-    
-    public void setImei(String imei) {
+
+    public DeviceCredentials setImei(String imei) {
         this.imei = imei;
+        return this;
     }
-    
+
     public String getImei() {
         return imei;
     }
