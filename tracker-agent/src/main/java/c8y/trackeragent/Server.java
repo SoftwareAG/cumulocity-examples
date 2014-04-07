@@ -36,6 +36,8 @@ import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.devicebootstrap.DeviceBinder;
 import c8y.trackeragent.logger.TracelogAppenders;
 import c8y.trackeragent.operations.OperationDispatchers;
+import c8y.trackeragent.utils.ConfigUtils;
+import c8y.trackeragent.utils.TrackerConfiguration;
 import c8y.trackeragent.utils.TrackerContext;
 
 /**
@@ -50,21 +52,25 @@ public class Server implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(Server.class);
 
     private ServerSocket serverSocket;
-    private final TrackerContext trackerContext = TrackerContext.get();
+    private final TrackerContext trackerContext;
     private final TrackerAgent trackerAgent;
     private final ExecutorService reportsExecutor;
     private final DeviceBootstrapProcessor deviceBootstrapProcessor;
     private final DeviceBinder deviceBinder;
 
-    public Server() {
-        this.trackerAgent = new TrackerAgent();
+    public Server(TrackerConfiguration commonConfiguration) {
+        this.trackerContext = new TrackerContext(commonConfiguration);
+        this.trackerAgent = new TrackerAgent(trackerContext);
         this.reportsExecutor = Executors.newFixedThreadPool(REPORTS_EXECUTOR_POOL_SIZE);
-        TrackerContext trackerContext = TrackerContext.get();
         OperationDispatchers operationDispatchers = new OperationDispatchers(trackerContext, trackerAgent);
         TracelogAppenders tracelogAppenders = new TracelogAppenders(trackerContext);
         this.deviceBootstrapProcessor = new DeviceBootstrapProcessor(trackerAgent);
         this.deviceBinder = new DeviceBinder(
                 operationDispatchers, tracelogAppenders, DeviceCredentialsRepository.get());
+    }
+    
+    public Server() {
+        this(ConfigUtils.get().loadCommonConfiguration());        
     }
 
     public void init() {

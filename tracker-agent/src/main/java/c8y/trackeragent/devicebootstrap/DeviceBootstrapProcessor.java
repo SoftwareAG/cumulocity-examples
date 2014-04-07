@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.event.TrackerAgentEventListener;
 import c8y.trackeragent.event.TrackerAgentEvents;
-import c8y.trackeragent.utils.TrackerContext;
 
 import com.cumulocity.rest.representation.devicebootstrap.DeviceCredentialsRepresentation;
 import com.cumulocity.sdk.client.SDKException;
@@ -47,7 +46,7 @@ public class DeviceBootstrapProcessor implements TrackerAgentEventListener {
             if (duringBootstrap.contains(imei)) {
                 return;
             }
-            DeviceCredentialsApi deviceCredentialsApi = TrackerContext.get().getBootstrapPlatform().getDeviceCredentialsApi();
+            DeviceCredentialsApi deviceCredentialsApi = trackerAgent.getContext().getBootstrapPlatform().getDeviceCredentialsApi();
             duringBootstrap.add(imei);
             try {
                 DeviceBootstrapTask deviceBootstrapTask = new DeviceBootstrapTask(trackerAgent, deviceCredentialsApi, imei);

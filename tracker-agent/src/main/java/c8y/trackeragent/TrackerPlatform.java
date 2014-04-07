@@ -1,7 +1,8 @@
 package c8y.trackeragent;
 
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
+
+import c8y.trackeragent.exception.SDKExceptions;
 
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
@@ -163,10 +164,6 @@ public class TrackerPlatform implements Platform {
         return agent == null ? null : agent.getId();
     }
 
-    public static enum PlatformType {
-        REGULAR, BOOTSTRAP;
-    }
-
     @Override
     public String toString() {
         return String.format("TrackerPlatform [orig=%s, getTenantId()=%s, getHost()=%s, getUser()=%s, agentId = %s]", orig, getTenantId(), getHost(), getUser(), getAgentId());
@@ -184,13 +181,8 @@ public class TrackerPlatform implements Platform {
         V get() throws SDKException {
             try {
                 return (V) cache.get(cacheKey, this);
-            } catch (ExecutionException e) {
-                Throwable cause = e.getCause();
-                if (cause != null && cause instanceof SDKException) {
-                    throw (SDKException) cause;
-                } else {
-                    throw new SDKException("Cant create api " + cacheKey.getSimpleName(), e);
-                }
+            } catch (Exception e) {
+                throw SDKExceptions.narrow(e, "Cant create api " + cacheKey.getSimpleName());
             }
         }
     }

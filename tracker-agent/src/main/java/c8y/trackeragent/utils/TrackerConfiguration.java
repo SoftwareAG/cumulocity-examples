@@ -12,36 +12,41 @@ public class TrackerConfiguration {
         return platformHost;
     }
 
-    public void setPlatformHost(String platformHost) {
+    public TrackerConfiguration setPlatformHost(String platformHost) {
         this.platformHost = platformHost;
+        return this;
     }
 
     public int getLocalPort() {
         return localPort;
     }
 
-    public void setLocalPort(int localPort) {
+    public TrackerConfiguration setLocalPort(int localPort) {
         this.localPort = localPort;
+        return this;
     }
 
     public String getBootstrapUser() {
         return bootstrapUser;
     }
 
-    public void setBootstrapUser(String bootstrapUser) {
+    public TrackerConfiguration setBootstrapUser(String bootstrapUser) {
         this.bootstrapUser = bootstrapUser;
+        return this;
     }
 
     public String getBootstrapPassword() {
         return bootstrapPassword;
     }
 
-    public void setBootstrapPassword(String bootstrapPassword) {
+    public TrackerConfiguration setBootstrapPassword(String bootstrapPassword) {
         this.bootstrapPassword = bootstrapPassword;
+        return this;
     }
 
-    public void setBootstrapTenant(String bootstrapTenant) {
+    public TrackerConfiguration setBootstrapTenant(String bootstrapTenant) {
         this.bootstrapTenant = bootstrapTenant;
+        return this;
     }
 
     public String getBootstrapTenant() {
