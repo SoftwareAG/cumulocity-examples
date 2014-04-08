@@ -46,7 +46,7 @@ import com.cumulocity.sdk.client.inventory.InventoryApi;
  * in configuration is requested, the current configuration is passed to all
  * drivers that implement the Configurable interface.
  */
-public class ConfigurationDriver implements Driver, OperationExecutor {
+public final class ConfigurationDriver implements Driver, OperationExecutor {
 
     private static Logger logger = LoggerFactory .getLogger(ConfigurationDriver.class);
 

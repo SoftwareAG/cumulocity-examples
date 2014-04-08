@@ -16,7 +16,7 @@ public class TrackerServerIT extends TrackerITSupport {
     public void shouldBootstrapNewDeviceAndThenChangeItsLocation() throws Exception {
         String imei = Devices.randomImei();
         createNewDeviceRequest(imei);
-        byte[] report = Reports.getTelicReportBytes(imei, Positions.ZERO);
+        byte[] report = Reports.getTelicReportBytes(imei, Positions.ZERO, Positions.SAMPLE_1, Positions.SAMPLE_2, Positions.SAMPLE_3);
         
         //trigger bootstrap
         writeToSocket(report);
@@ -28,13 +28,13 @@ public class TrackerServerIT extends TrackerITSupport {
         assertThat(credentials).isNotNull();  
         
         //trigger regular report 
-        report = Reports.getTelicReportBytes(imei, Positions.SAMPLE_1);
+        report = Reports.getTelicReportBytes(imei, Positions.SAMPLE_4);
         writeToSocket(report);
         
         Thread.sleep(1000);
         TrackerDevice newDevice = getTrackerDevice(imei);
         Position actualPosition = newDevice.getPosition();
-        Positions.assertEqual(actualPosition, Positions.SAMPLE_1);
+        Positions.assertEqual(actualPosition, Positions.SAMPLE_4);
     }
     
 

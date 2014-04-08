@@ -10,6 +10,9 @@ public class Positions {
     
     public final static Position ZERO = aPosition(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
     public final static Position SAMPLE_1 = aPosition(new BigDecimal("48.0332"), new BigDecimal("11.5864"), new BigDecimal("599"));
+    public final static Position SAMPLE_2 = aPosition(new BigDecimal("47.0332"), new BigDecimal("10.5864"), new BigDecimal("598"));
+    public final static Position SAMPLE_3 = aPosition(new BigDecimal("46.0332"), new BigDecimal("9.5864"), new BigDecimal("597"));
+    public final static Position SAMPLE_4 = aPosition(new BigDecimal("45.0332"), new BigDecimal("8.5864"), new BigDecimal("596"));
 
     public static Position aPosition(BigDecimal lat, BigDecimal lng, BigDecimal alt) {
         Position position = new Position();

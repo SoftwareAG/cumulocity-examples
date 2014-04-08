@@ -30,10 +30,12 @@ public class DeviceBootstrapProcessor implements TrackerAgentEventListener {
     private final Collection<String> duringBootstrap = new HashSet<String>();
     private final Object lock = new Object();
     private final TrackerAgent trackerAgent;
+    private final DeviceCredentialsApi deviceCredentialsApi;
 
     public DeviceBootstrapProcessor(TrackerAgent trackerAgent) {
         this.trackerAgent = trackerAgent;
-        threadPoolExecutor = Executors.newFixedThreadPool(POOL_SIZE);
+        this.threadPoolExecutor = Executors.newFixedThreadPool(POOL_SIZE);
+        this.deviceCredentialsApi = trackerAgent.getContext().getBootstrapPlatform().getDeviceCredentialsApi();
     }
 
     @Subscribe
@@ -46,31 +48,30 @@ public class DeviceBootstrapProcessor implements TrackerAgentEventListener {
             if (duringBootstrap.contains(imei)) {
                 return;
             }
-            DeviceCredentialsApi deviceCredentialsApi = trackerAgent.getContext().getBootstrapPlatform().getDeviceCredentialsApi();
             duringBootstrap.add(imei);
-            try {
-                DeviceBootstrapTask deviceBootstrapTask = new DeviceBootstrapTask(trackerAgent, deviceCredentialsApi, imei);
-                threadPoolExecutor.execute(deviceBootstrapTask);
-            } finally {
-                duringBootstrap.remove(imei);
-            }
+            DeviceBootstrapTask deviceBootstrapTask = new DeviceBootstrapTask(imei);
+            threadPoolExecutor.execute(deviceBootstrapTask);
         }
     }
 
-    static class DeviceBootstrapTask implements Runnable {
+    private class DeviceBootstrapTask implements Runnable {
 
-        private final DeviceCredentialsApi deviceCredentialsApi;
         private final String imei;
-        private final TrackerAgent trackerAgent;
 
-        public DeviceBootstrapTask(TrackerAgent trackerAgent, DeviceCredentialsApi deviceCredentialsApi, String imei) {
-            this.trackerAgent = trackerAgent;
-            this.deviceCredentialsApi = deviceCredentialsApi;
+        public DeviceBootstrapTask(String imei) {
             this.imei = imei;
         }
 
         @Override
         public void run() {
+            try {
+                doRun();
+            } finally {
+                duringBootstrap.remove(imei);
+            }
+        }
+
+        private void doRun() {
             try {
                 deviceCredentialsApi.hello(imei);
             } catch (SDKException ex) {
@@ -89,7 +90,7 @@ public class DeviceBootstrapProcessor implements TrackerAgentEventListener {
             }
         }
 
-        private static DeviceCredentials asCredentials(DeviceCredentialsRepresentation credentials) {
+        private DeviceCredentials asCredentials(DeviceCredentialsRepresentation credentials) {
             //@formatter:off
             return new DeviceCredentials()
                 .setPassword(credentials.getPassword())
