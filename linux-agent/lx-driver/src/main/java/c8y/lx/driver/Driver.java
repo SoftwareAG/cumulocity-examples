@@ -53,9 +53,15 @@ import com.cumulocity.sdk.client.Platform;
  * </ul>
  */
 public interface Driver {
+    
     /**
-     * Sets up driver and potentially cloud platform connectivity. Errors during
+     * Sets up driver. Errors during
      * setup are reported as exception and send to the log.
+     */
+    void initialize() throws Exception;
+    
+    /**
+     * Initialize platform connectivity.
      */
     void initialize(Platform platform) throws Exception;
 
@@ -67,7 +73,8 @@ public interface Driver {
     /**
      * Provides additional fragments for the managed object representing the
      * device in the inventory. Note: The managed object's representation may
-     * not have a global ID at this stage.
+     * not have a global ID at this stage. 
+     * 
      */
     void initializeInventory(ManagedObjectRepresentation mo);
 

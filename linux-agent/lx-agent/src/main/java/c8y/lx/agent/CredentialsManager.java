@@ -1,5 +1,7 @@
 package c8y.lx.agent;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Properties;
 
 import com.cumulocity.model.authentication.CumulocityCredentials;
@@ -10,34 +12,69 @@ import com.cumulocity.model.authentication.CumulocityCredentials;
  */
 public class CredentialsManager {
 
-    public static final String DEFAULT_PROPS_LOCATION = "./cfg/cumulocity.properties";
+    public static final String COMMON_PROPS_LOCATION = "./cfg/cumulocity.properties";
+    public static final String DEVICE_PROPS_LOCATION = "./cfg/device.properties";
 
     public static CredentialsManager defaultCredentialsManager() {
-        return new CredentialsManager(DEFAULT_PROPS_LOCATION);
+        return new CredentialsManager(COMMON_PROPS_LOCATION, DEVICE_PROPS_LOCATION);
     }
 
     private final String host;
+    private final String devicePropsFile;
 
-    private final CumulocityCredentials credentials;
+    private final CumulocityCredentials deviceCredentials;
+    private final CumulocityCredentials bootstrapCredentials;
 
-    public CredentialsManager(String propsLocation) {
-        this(PropUtils.fromFile(propsLocation));
+    public CredentialsManager(String commonPropsFile, String devicePropsFile) {
+        this.devicePropsFile = devicePropsFile;
+        Properties commonProps = PropUtils.fromFile(commonPropsFile);
+        Properties deviceProps = PropUtils.fromFile(devicePropsFile);
+        this.deviceCredentials = initDeviceCredentials(deviceProps);
+        this.bootstrapCredentials = initBootstrapCredentials(commonProps);
+        this.host = commonProps.getProperty("host", "http://developer.cumulocity.com");
     }
 
-    public CredentialsManager(Properties props) {
-        host = props.getProperty("host", "http://developer.cumulocity.com");
-        credentials = new CumulocityCredentials(
-                props.getProperty("tenant", "demo"),
-                props.getProperty("user"),
-                props.getProperty("password"),
+    private static CumulocityCredentials initBootstrapCredentials(Properties commonProps) {
+        return new CumulocityCredentials(
+                commonProps.getProperty("bootstrap.tenant", "management"),
+                commonProps.getProperty("bootstrap.user", "devicebootstrap"),
+                commonProps.getProperty("bootstrap.password", "Fhdt1bb1f"),
                 null);
+    }
+
+    private static CumulocityCredentials initDeviceCredentials(Properties deviceProps) {
+        String user = deviceProps.getProperty("user");
+        String password = deviceProps.getProperty("password");
+        if(user == null || password == null) {
+            return null;
+        } else {
+            return new CumulocityCredentials(deviceProps.getProperty("tenant", "demo"), user, password, null);
+        }
     }
 
     public String getHost() {
         return host;
     }
 
-    public CumulocityCredentials getCredentials() {
-        return credentials;
+    public CumulocityCredentials getDeviceCredentials() {
+        return deviceCredentials;
+    }
+
+    public CumulocityCredentials getBootstrapCredentials() {
+        return bootstrapCredentials;
+    }
+
+    public void saveDeviceCredentials(CumulocityCredentials cumulocityCredentials) {
+        File file = new File(devicePropsFile);
+        try {
+            file.createNewFile();
+        } catch (IOException ex) {
+            throw new RuntimeException("Cant create file " + devicePropsFile, ex);
+        }
+        Properties props = new Properties();
+        props.setProperty("user", cumulocityCredentials.getUsername());
+        props.setProperty("password", cumulocityCredentials.getPassword());
+        props.setProperty("tenant", cumulocityCredentials.getTenantId());
+        PropUtils.toFile(props, devicePropsFile);
     }
 }

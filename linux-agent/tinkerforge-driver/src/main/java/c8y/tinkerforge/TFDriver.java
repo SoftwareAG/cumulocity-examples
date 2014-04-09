@@ -60,17 +60,24 @@ public class TFDriver implements Driver, DiscoveryFinishedListener, Configurable
 			}
 		}
 	}
+	
+    @Override
+    public void initialize() throws Exception {
+        new BrickConnector(this);
+        
+        synchronized (this) {
+            if (drivers == null) {
+                wait();
+            }
+        }
+        
+        for (Driver driver : drivers) {
+            driver.initialize();
+        }
+    }
 
 	@Override
 	public void initialize(Platform platform) throws Exception {
-        new BrickConnector(this);
-
-        synchronized (this) {
-			if (drivers == null) {
-				wait();
-			}
-		}
-
 		for (Driver driver : drivers) {
 			driver.initialize(platform);
 		}

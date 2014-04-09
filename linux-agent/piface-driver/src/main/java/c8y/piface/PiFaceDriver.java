@@ -70,6 +70,11 @@ public class PiFaceDriver implements Driver, OperationExecutor {
 	private EventRepresentation eventTemplate;
 
 	@Override
+	public void initialize() throws Exception {
+	    // Nothing to do here.
+	}
+	
+	@Override
 	public void initialize(Platform platform) throws Exception {
 		this.platform = platform;
 		dmo = new DeviceManagedObject(platform);		
@@ -84,7 +89,7 @@ public class PiFaceDriver implements Driver, OperationExecutor {
 	public OperationExecutor[] getSupportedOperations() {
 		return new OperationExecutor[] { this };
 	}
-
+	
 	@Override
 	public void initializeInventory(ManagedObjectRepresentation mo) {
 		// Nothing to do here, all items are added as children.

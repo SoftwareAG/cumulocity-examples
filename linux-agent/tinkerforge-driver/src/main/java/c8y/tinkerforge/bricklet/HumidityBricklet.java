@@ -36,6 +36,11 @@ public class HumidityBricklet extends BaseSensorBricklet {
 	public HumidityBricklet(String id, Device device) {
 		super(id, device, "Humidity", new HumiditySensor());
 	}
+	
+    @Override
+    public void initialize() throws Exception {
+        // Nothing to do here.
+    }
 
 	@Override
 	public void run() {
