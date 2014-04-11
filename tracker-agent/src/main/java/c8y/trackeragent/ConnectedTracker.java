@@ -31,8 +31,7 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import c8y.trackeragent.devicebootstrap.DeviceBootstrapProcessor;
-import c8y.trackeragent.utils.TrackerContext;
+import c8y.trackeragent.event.TrackerAgentEvents;
 
 import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
@@ -45,22 +44,28 @@ import com.cumulocity.sdk.client.SDKException;
 public class ConnectedTracker implements Runnable, Executor {
 
     protected static Logger logger = LoggerFactory.getLogger(ConnectedTracker.class);
-    
-    private char reportSeparator;
-    private String fieldSeparator;
-    private Socket client;
-    private InputStream bis;
-    private List<Object> fragments = new ArrayList<Object>();
+
+    private final char reportSeparator;
+    private final String fieldSeparator;
+    private final Socket client;
+    private final InputStream bis;
+    private final List<Object> fragments = new ArrayList<Object>();// split into
+                                                                   // two lists
+                                                                   // - for
+                                                                   // Parsers
+                                                                   // and
+                                                                   // Translators
+    final TrackerAgent trackerAgent;
+
     private OutputStream out;
     private String imei;
-    TrackerContext trackerContext = TrackerContext.get();
-    DeviceBootstrapProcessor deviceBootstrapProcessor = DeviceBootstrapProcessor.get();
-    
-    public ConnectedTracker(Socket client, InputStream bis, char reportSeparator, String fieldSeparator) {
+
+    public ConnectedTracker(Socket client, InputStream bis, char reportSeparator, String fieldSeparator, TrackerAgent trackerAgent) {
         this.client = client;
         this.bis = bis;
         this.reportSeparator = reportSeparator;
         this.fieldSeparator = fieldSeparator;
+        this.trackerAgent = trackerAgent;
     }
 
     public void addFragment(Object o) {
@@ -69,10 +74,8 @@ public class ConnectedTracker implements Runnable, Executor {
 
     @Override
     public void run() {
-        OutputStream out = null;
         try {
             out = client.getOutputStream();
-            setOut(out);
             processReports(bis);
         } catch (IOException e) {
             logger.warn("Error during communication with client device", e);
@@ -151,25 +154,23 @@ public class ConnectedTracker implements Runnable, Executor {
                 String imei = parser.parse(report);
                 if (imei != null) {
                     boolean registered = checkIfDeviceRegistered(imei);
-                    if(!registered) {
-                        logger.warn("Device for imei {} not registered yet; skip.", imei);
-                        return;
-                    }
-                    boolean success = parser.onParsed(report, imei);
-                    if(success) {
-                        this.imei = imei;
-                        ConnectionRegistry.instance().put(imei, this);
-                        break;
-                    }
+                    if (registered) {
+                        boolean success = parser.onParsed(report, imei);
+                        if (success) {
+                            this.imei = imei;
+                            ConnectionRegistry.instance().put(imei, this);
+                            break;
+                        }
+                    } 
                 }
             }
         }
     }
 
     private boolean checkIfDeviceRegistered(String imei) {
-        boolean registered = trackerContext.isDeviceRegistered(imei);
-        if(!registered) {
-            deviceBootstrapProcessor.startBootstaping(imei);
+        boolean registered = trackerAgent.getContext().isDeviceRegistered(imei);
+        if (!registered) {
+            trackerAgent.sendEvent(new TrackerAgentEvents.NewDeviceEvent(imei));
         }
         return registered;
     }

@@ -18,17 +18,21 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package c8y.trackeragent;
+package c8y.trackeragent.operations;
 
 import org.slf4j.Logger;
 
+import c8y.trackeragent.ConnectionRegistry;
+import c8y.trackeragent.Executor;
+import c8y.trackeragent.ManagedObjectCache;
+import c8y.trackeragent.TrackerDevice;
+import c8y.trackeragent.TrackerPlatform;
 import c8y.trackeragent.logger.PlatformLogger;
 
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
-import com.cumulocity.sdk.client.devicecontrol.DeviceControlApi;
 import com.cumulocity.sdk.client.devicecontrol.OperationFilter;
 
 /**
@@ -36,16 +40,13 @@ import com.cumulocity.sdk.client.devicecontrol.OperationFilter;
  * reports back the status. Operations can only be executed on devices that are
  * currently connected to the agent. Operations for devices that are currently
  * not connected are left in the queue on the platform for retry.
+ * 
  */
 public class OperationDispatcher implements Runnable {
     
-    public static final long POLLING_DELAY = 5;
-    public static final long POLLING_INTERVAL = 5;
-    
-    private Logger logger;
-
-    private DeviceControlApi operations;
-    private GId agent;
+    private final Logger logger;
+    private final TrackerDevice trackerDevice;
+    private TrackerPlatform platform;
 
     /**
      * @param platform
@@ -58,23 +59,23 @@ public class OperationDispatcher implements Runnable {
      *            the threads communicating with the devices, hence it needs to
      *            be thread-safe.
      */
-    public OperationDispatcher(TrackerPlatform platform, GId agent) throws SDKException {
-        logger = PlatformLogger.getLogger(platform.getTenantId());
-        this.operations = platform.getDeviceControlApi();
-        this.agent = agent;
+    public OperationDispatcher(TrackerPlatform platform, TrackerDevice trackerDevice) throws SDKException {
+        this.platform = platform;
+        this.trackerDevice = trackerDevice;
+        this.logger = PlatformLogger.getLogger(trackerDevice.getImei());
         
         finishExecutingOps();
     }
 
     public void finish(OperationRepresentation operation) throws SDKException {
         operation.setStatus(OperationStatus.SUCCESSFUL.toString());
-        operations.update(operation);
+        platform.getDeviceControlApi().update(operation);
     }
 
     public void fail(OperationRepresentation operation, String text, SDKException x) throws SDKException {
         operation.setStatus(OperationStatus.FAILED.toString());
         operation.setFailureReason(text + " " + x.getMessage());
-        operations.update(operation);
+        platform.getDeviceControlApi().update(operation);
     }
 
     /**
@@ -84,7 +85,7 @@ public class OperationDispatcher implements Runnable {
         logger.debug("Cancelling hanging operations");
         for (OperationRepresentation operation : byStatus(OperationStatus.EXECUTING)) {
             operation.setStatus(OperationStatus.FAILED.toString());
-            operations.update(operation);
+            platform.getDeviceControlApi().update(operation);
         }
     }
 
@@ -122,7 +123,7 @@ public class OperationDispatcher implements Runnable {
 
     private void executeOperation(Executor exec, OperationRepresentation operation) throws SDKException {
         operation.setStatus(OperationStatus.EXECUTING.toString());
-        operations.update(operation);
+        platform.getDeviceControlApi().update(operation);
 
         try {
             exec.execute(operation);
@@ -132,11 +133,12 @@ public class OperationDispatcher implements Runnable {
             operation.setStatus(OperationStatus.FAILED.toString());
             operation.setFailureReason(msg + x.getMessage());
         }
-        operations.update(operation);
+        platform.getDeviceControlApi().update(operation);
     }
 
     private Iterable<OperationRepresentation> byStatus(OperationStatus status) throws SDKException {
-        OperationFilter opsFilter = new OperationFilter().byAgent(agent.getValue()).byStatus(status);
-        return operations.getOperationsByFilter(opsFilter).get().allPages();
+        OperationFilter opsFilter = new OperationFilter().byDevice(trackerDevice.getGId().getValue()).byStatus(status);
+        return platform.getDeviceControlApi().getOperationsByFilter(opsFilter).get().allPages();
+        //TODO unregister if device not exists?
     }
 }

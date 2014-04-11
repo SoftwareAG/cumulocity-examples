@@ -24,7 +24,6 @@ import static org.fest.assertions.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -40,9 +39,8 @@ import java.nio.charset.Charset;
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 
-import c8y.trackeragent.devicebootstrap.DeviceBootstrapProcessor;
+import c8y.trackeragent.event.TrackerAgentEvents;
 import c8y.trackeragent.utils.TrackerContext;
 
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
@@ -59,14 +57,15 @@ public class ConnectedTrackerTest {
     private OutputStream out = mock(OutputStream.class);
     private Translator translator = mock(Translator.class);
     private Parser parser = mock(Parser.class);
+    private TrackerAgent trackerAgent = mock(TrackerAgent.class);
+    private TrackerContext trackerContext = mock(TrackerContext.class);
     private ConnectedTracker tracker;
 
     @Before
     public void setup() throws IOException {
         ConnectionRegistry.instance().remove("imei");
-        tracker = new ConnectedTracker(client, bis, GL200Constants.REPORT_SEP, GL200Constants.FIELD_SEP);
-        tracker.trackerContext = Mockito.mock(TrackerContext.class);
-        tracker.deviceBootstrapProcessor = Mockito.mock(DeviceBootstrapProcessor.class);
+        when(trackerAgent.getContext()).thenReturn(trackerContext);
+        tracker = new ConnectedTracker(client, bis, GL200Constants.REPORT_SEP, GL200Constants.FIELD_SEP, trackerAgent);
         tracker.addFragment(translator);
         tracker.addFragment(parser);
         tracker.setOut(out);
@@ -77,7 +76,7 @@ public class ConnectedTrackerTest {
         String[] dummyReport = null;
         when(parser.parse(dummyReport)).thenReturn("imei");
         when(parser.onParsed(dummyReport, "imei")).thenReturn(true);
-        when(tracker.trackerContext.isDeviceRegistered("imei")).thenReturn(true);
+        when(trackerContext.isDeviceRegistered("imei")).thenReturn(true);
 
         tracker.processReport(dummyReport);
 
@@ -91,13 +90,12 @@ public class ConnectedTrackerTest {
     public void singleReportProcessingForNewImei() throws SDKException {
         String[] dummyReport = null;
         when(parser.parse(dummyReport)).thenReturn("imei");
-        when(tracker.trackerContext.isDeviceRegistered("imei")).thenReturn(false);
-        doNothing().when(tracker.deviceBootstrapProcessor).startBootstaping("imei");
+        when(trackerContext.isDeviceRegistered("imei")).thenReturn(false);
         
         tracker.processReport(dummyReport);
         
         assertThat(ConnectionRegistry.instance()).isEmpty();
-        verify(tracker.deviceBootstrapProcessor).startBootstaping("imei");
+        verify(tracker.trackerAgent).sendEvent(any(TrackerAgentEvents.NewDeviceEvent.class));
         verifyZeroInteractions(translator);
     }
 
@@ -121,7 +119,7 @@ public class ConnectedTrackerTest {
     @Test
     public void continuousReportProcessing() throws IOException, SDKException {
         when(parser.parse(any(String[].class))).thenReturn("imei");
-        when(tracker.trackerContext.isDeviceRegistered("imei")).thenReturn(true);
+        when(trackerContext.isDeviceRegistered("imei")).thenReturn(true);
 
         String reports = REPORT1 + GL200Constants.REPORT_SEP + REPORT2 + GL200Constants.REPORT_SEP;
 

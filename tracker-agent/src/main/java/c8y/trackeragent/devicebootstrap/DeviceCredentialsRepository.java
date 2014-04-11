@@ -2,6 +2,8 @@ package c8y.trackeragent.devicebootstrap;
 
 import static java.util.Arrays.asList;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -22,13 +24,14 @@ public class DeviceCredentialsRepository {
 
     private final Map<String, DeviceCredentials> credentials = new ConcurrentHashMap<String, DeviceCredentials>();
     private final GroupPropertyAccessor propertyAccessor;
+    private final Object lock = new Object();
 
     static {
         instance = new DeviceCredentialsRepository();
         instance.refresh();
     }
 
-    public static DeviceCredentialsRepository instance() {
+    public static DeviceCredentialsRepository get() {
         return instance;
     }
 
@@ -47,15 +50,21 @@ public class DeviceCredentialsRepository {
         }
         return deviceCredentials.duplicate();
     }
+    
+    public List<DeviceCredentials> getAllCredentials() {
+        return new ArrayList<DeviceCredentials>(credentials.values());
+    }
 
-    public synchronized void saveCredentials(String imei, DeviceCredentials newCredentials) {
-        Group group = asGroup(imei, newCredentials);
-        if (!group.isFullyInitialized()) {
-            throw new IllegalArgumentException("Not fully initialized credentials: " + newCredentials);
+    public void saveCredentials(DeviceCredentials newCredentials) {
+        synchronized (lock) {
+            Group group = asGroup(newCredentials.getImei(), newCredentials);
+            if (!group.isFullyInitialized()) {
+                throw new IllegalArgumentException("Not fully initialized credentials: " + newCredentials);
+            }
+            propertyAccessor.write(group);
+            credentials.put(newCredentials.getImei(), newCredentials);
+            logger.info("Credentials for device {} have been written: {}.", newCredentials.getImei(), newCredentials);
         }
-        propertyAccessor.write(group);
-        credentials.put(imei, newCredentials);
-        logger.info("Credentials from device {} have been written: {}.", imei, newCredentials);
     }
 
     private void refresh() {
@@ -63,7 +72,7 @@ public class DeviceCredentialsRepository {
         credentials.clear();
         for (Group group : propertyAccessor.getGroups()) {
             if (group.isFullyInitialized()) {
-                credentials.put(group.getGroupName(), asCredentials(group));
+                credentials.put(group.getName(), asCredentials(group));
             }
         }
     }
@@ -73,6 +82,7 @@ public class DeviceCredentialsRepository {
         credentials.setTenantId(group.get("tenantId"));
         credentials.setUser(group.get("user"));
         credentials.setPassword(group.get("password"));
+        credentials.setImei(group.getName());
         return credentials;
     }
 

@@ -8,8 +8,8 @@ public class PlatformLogger implements Logger {
     
     private Logger logger;
     
-    public static PlatformLogger getLogger(String tenantId) {
-        String loggerName = getLoggerName(tenantId);
+    public static PlatformLogger getLogger(String imei) {
+        String loggerName = getLoggerName(imei);
         return new PlatformLogger(loggerName);
     }
     
@@ -17,8 +17,8 @@ public class PlatformLogger implements Logger {
         this.logger = LoggerFactory.getLogger(loggerName);
     }
     
-    public static String getLoggerName(String tenantId) {
-        return "logger_" + tenantId;
+    public static String getLoggerName(String imei) {
+        return "logger_" + imei;
     }
 
     @Override

@@ -1,8 +1,10 @@
 package c8y.trackeragent;
 
+import static com.cumulocity.model.idtype.GId.asGId;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-import com.cumulocity.sdk.client.PlatformImpl;
+import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.alarm.AlarmApi;
 import com.cumulocity.sdk.client.audit.AuditRecordApi;
@@ -30,11 +32,14 @@ public class MockTrackerPlatform extends TrackerPlatform {
     private AuditRecordApi auditRecordApi = mock(AuditRecordApi.class);
     private CepApi cepApi = mock(CepApi.class);
     private DeviceCredentialsApi deviceCredentialsApi = mock(DeviceCredentialsApi.class);
+    private ManagedObjectRepresentation agent = mock(ManagedObjectRepresentation.class);
 
     
     public MockTrackerPlatform(String tenantId) {
-        super(null, PlatformType.REGULAR);
+        super(null);
         this.tenantId = tenantId;
+        when(agent.getId()).thenReturn(asGId(tenantId + "Agent"));
+        when(agent.getSelf()).thenReturn("http://me");
     }
 
     public MockTrackerPlatform() {
@@ -104,6 +109,11 @@ public class MockTrackerPlatform extends TrackerPlatform {
     @Override
     public String getPassword() {
         return password ;
+    }
+
+    @Override
+    public ManagedObjectRepresentation getAgent() {
+        return agent;
     }
 
 }

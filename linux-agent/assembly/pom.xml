@@ -6,7 +6,7 @@
 
     <groupId>c8y.example</groupId>
     <artifactId>lx-agent-assembly</artifactId>
-    <version>5.2.0</version>
+    <version>5.2.1</version>
 
     <name>Cumulocity :: Examples :: Linux Agent Base Assembly</name>
     <description>Base assembly package for all environments</description>
