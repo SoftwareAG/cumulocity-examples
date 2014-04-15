@@ -30,6 +30,7 @@ import java.io.Reader;
 import org.junit.Test;
 
 import c8y.Hardware;
+import c8y.lx.driver.HardwareProvider;
 
 public class KontronHardwareDriverTest {
 	public static final String REFERENCE_HWFILE = "/hardware.txt";
@@ -44,6 +45,6 @@ public class KontronHardwareDriverTest {
 		assertEquals(referenceHw, driver.getHardware());
 	}
 
-	private Hardware referenceHw = new Hardware("KM2M810", "00:B3:38:00:01:CE", "Unknown");
+	private Hardware referenceHw = new Hardware("KM2M810", "00:B3:38:00:01:CE", HardwareProvider.UNKNOWN);
 	private KontronHardwareDriver driver = new KontronHardwareDriver();
 }
