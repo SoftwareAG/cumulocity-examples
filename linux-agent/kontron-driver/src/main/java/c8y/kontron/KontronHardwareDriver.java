@@ -33,7 +33,7 @@ public class KontronHardwareDriver implements Driver, OperationExecutor, Hardwar
 			.getLogger(KontronHardwareDriver.class);
 
 	private GId gid;
-	private Hardware hardware = new Hardware("KM2M810", "Unknown", "Unknown");
+	private final Hardware hardware = new Hardware("KM2M810", UNKNOWN, UNKNOWN);
 	
     @Override
     public void initialize() throws Exception {

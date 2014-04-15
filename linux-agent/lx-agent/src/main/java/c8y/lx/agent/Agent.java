@@ -108,9 +108,6 @@ public class Agent {
         CumulocityCredentials credentials = credentialsManager.getDeviceCredentials();
         if (credentials == null) {
             Hardware hardware = specifyHardware();
-            if (hardware == null) {
-                throw new IllegalStateException("Can't specify hardware therefore can't bootstrap device!");
-            }
             credentials = deviceBootstrapProcessor.process(hardware.getSerialNumber());
         }
         if (credentials == null) {
@@ -123,10 +120,13 @@ public class Agent {
         for (Driver driver : drivers) {
             if (driver instanceof HardwareProvider) {
                 logger.info("Hardware provider present " + driver.getClass());
-                return ((HardwareProvider) driver).getHardware();
+                Hardware hardware = ((HardwareProvider) driver).getHardware();
+                if(!HardwareProvider.UNKNOWN.equals(hardware.getSerialNumber())) {
+                    return hardware;
+                }
             }
         }
-        throw new IllegalStateException("None of dirvers implements HardwareProvider interface!");
+        throw new IllegalStateException("None of dirvers implements HardwareProvider interface or there is uninitailized hardware!");
     }
 
     private List<Driver> initializeDrivers(DriversLoader driversLoader) {

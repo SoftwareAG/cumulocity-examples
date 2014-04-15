@@ -36,8 +36,7 @@ public class MacHardwareDriver implements Driver, OperationExecutor, HardwarePro
 			.getLogger(MacHardwareDriver.class);
 
 	private GId gid;
-	private Hardware hardware = new Hardware("Unknown model", "Unknown serial",
-			"Unknown revision");
+	private final Hardware hardware = new Hardware(UNKNOWN, UNKNOWN, UNKNOWN);
 	
     @Override
     public void initialize() throws Exception {

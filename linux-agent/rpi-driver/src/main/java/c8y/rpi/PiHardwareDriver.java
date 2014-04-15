@@ -35,7 +35,7 @@ public class PiHardwareDriver implements Driver, OperationExecutor, HardwareProv
 	private static Logger logger = LoggerFactory.getLogger(PiHardwareDriver.class);
 	
 	private GId gid;
-	private Hardware hardware = new Hardware("unknown-model", "unknown-serial", "unknown-revision");
+	private final Hardware hardware = new Hardware(UNKNOWN, UNKNOWN, UNKNOWN);
 	
     @Override
     public void initialize() throws Exception {
