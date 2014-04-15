@@ -11,6 +11,10 @@ import com.google.common.eventbus.EventBus;
 
 public class TrackerAgent {
     
+    /**
+     * @deprecated
+     * TODO remove and replace with direct invocations 
+     */
     private final EventBus eventBus;
     private final TrackerContext context;
 
