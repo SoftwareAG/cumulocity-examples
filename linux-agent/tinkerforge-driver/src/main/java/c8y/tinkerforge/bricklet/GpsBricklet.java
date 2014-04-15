@@ -63,6 +63,11 @@ public class GpsBricklet extends PollingDriver {
 		this.id = id;
 		this.gps = gps;
 	}
+	
+    @Override
+    public void initialize() throws Exception {
+        // Nothing to do here.
+    }
 
 	@Override
 	public OperationExecutor[] getSupportedOperations() {

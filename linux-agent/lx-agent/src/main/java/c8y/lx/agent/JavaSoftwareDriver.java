@@ -59,19 +59,25 @@ public class JavaSoftwareDriver implements Driver, OperationExecutor {
 	private Software software = new Software();
 
 	private GId deviceId;
+	
+    @Override
+    public void initialize() throws Exception {
+        new File(".").listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String file) {
+                if (file.matches(".*[.]jar$")) {
+                    String[] nameVer = file.split("-[0-9]+[.]");
+                    software.put(nameVer[0], file);
+                }
+                return false;
+            }
+        });
+    }
+
 
 	@Override
 	public void initialize(Platform platform) throws Exception {
-		new File(".").listFiles(new FilenameFilter() {
-			@Override
-			public boolean accept(File dir, String file) {
-				if (file.matches(".*[.]jar$")) {
-					String[] nameVer = file.split("-[0-9]+[.]");
-					software.put(nameVer[0], file);
-				}
-				return false;
-			}
-		});
+	    // Nothing to do here.
 	}
 
 	@Override

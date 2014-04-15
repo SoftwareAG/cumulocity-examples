@@ -54,24 +54,27 @@ public class LinuxModemDriver extends MeasurementPollingDriver {
 	public LinuxModemDriver() {
 		super("c8y_SignalStrength", "c8y.modem", 5000L);
 	}
+	
+    @Override
+    public void initialize() throws Exception {
+        port = new SerialPort(PORT);
+        try {
+            port.openPort();
+            mobile = new Mobile();
+            port.addEventListener(new ResultListener(), SerialPort.MASK_RXCHAR);
+            Thread.sleep(2000);
+            run(GET_IMEI);
+            run(GET_CELLID);
+            run(GET_ICCID);
+        } catch (SerialPortException ex) {
+            logger.info("Cannot connect to modem.");
+            logger.trace("Cannot open modem port", ex);
+        }
+    }
 
 	@Override
 	public void initialize(Platform platform) throws Exception {
 		super.initialize(platform);
-		
-		port = new SerialPort(PORT);
-		try {
-			port.openPort();
-			mobile = new Mobile();
-			port.addEventListener(new ResultListener(), SerialPort.MASK_RXCHAR);
-			Thread.sleep(2000);
-			run(GET_IMEI);
-			run(GET_CELLID);
-			run(GET_ICCID);
-		} catch (SerialPortException ex) {
-			logger.info("Cannot connect to modem.");
-			logger.trace("Cannot open modem port", ex);
-		}
 	}
 
 	@Override

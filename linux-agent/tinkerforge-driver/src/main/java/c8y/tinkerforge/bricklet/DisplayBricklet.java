@@ -67,6 +67,11 @@ public class DisplayBricklet implements Driver {
 		this.display = display;
 	}
 
+    @Override
+    public void initialize() throws Exception {
+        // Nothing to do here.
+    }
+
 	@Override
 	public void initialize(Platform platform) throws Exception {
 		this.platform = platform;

@@ -49,28 +49,32 @@ public class PiFirmwareDriver implements Driver, OperationExecutor {
 	private Platform platform;
 	private Firmware firmware = new Firmware(FILE, "Unknown version", null);
 	private GId gid;
+	
+    @Override
+    public void initialize() throws Exception {
+        String version = "Unknown";
+        
+        Process process = Runtime.getRuntime().exec(FWQUERY);
+        try (InputStream is = process.getInputStream();
+                InputStreamReader isr = new InputStreamReader(is);
+                BufferedReader reader = new BufferedReader(isr)) {
+            
+            String line = null, lastLine = null;
+            while ((line = reader.readLine()) != null) {
+                lastLine = line;
+            }
+            
+            int endOfVersion = lastLine.indexOf(' ', STARTOFVERSION);
+            version = lastLine.substring(STARTOFVERSION, endOfVersion);
+        }
+        
+        firmware = new Firmware(FILE, version, null);
+    }
 
 	@Override
 	public void initialize(Platform platform) throws Exception {
 		this.platform = platform;
 		
-		String version = "Unknown";
-
-		Process process = Runtime.getRuntime().exec(FWQUERY);
-		try (InputStream is = process.getInputStream();
-				InputStreamReader isr = new InputStreamReader(is);
-				BufferedReader reader = new BufferedReader(isr)) {
-
-			String line = null, lastLine = null;
-			while ((line = reader.readLine()) != null) {
-				lastLine = line;
-			}
-
-			int endOfVersion = lastLine.indexOf(' ', STARTOFVERSION);
-			version = lastLine.substring(STARTOFVERSION, endOfVersion);
-		}
-
-		firmware = new Firmware(FILE, version, null);
 	}
 
 	@Override

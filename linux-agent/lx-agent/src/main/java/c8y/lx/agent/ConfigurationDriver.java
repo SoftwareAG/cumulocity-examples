@@ -65,6 +65,11 @@ public final class ConfigurationDriver implements Driver, OperationExecutor {
     public ConfigurationDriver() {
         this.configLocation = System.getProperty("config.location", DEFAULT_CONFIG_LOCATION);
     }
+    
+    @Override
+    public void initialize() throws Exception {
+        // Nothing to do here.
+    }
 
     @Override
 	public void initialize(Platform platform) throws Exception {

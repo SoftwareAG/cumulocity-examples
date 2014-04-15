@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import c8y.Hardware;
+import c8y.lx.driver.HardwareProvider;
 import c8y.lx.driver.Driver;
 import c8y.lx.driver.OperationExecutor;
 import c8y.lx.driver.OpsUtil;
@@ -24,7 +25,7 @@ import com.cumulocity.sdk.client.Platform;
  * A driver that uses the MAC address to fill in the platform. It also enables
  * restarting a device.
  */
-public class KontronHardwareDriver implements Driver, OperationExecutor {
+public class KontronHardwareDriver implements Driver, OperationExecutor, HardwareProvider {
 	public static final String GETINTERFACES = "ifconfig";
 	public static final String PATTERN = "\\s+";
 
@@ -32,11 +33,16 @@ public class KontronHardwareDriver implements Driver, OperationExecutor {
 			.getLogger(KontronHardwareDriver.class);
 
 	private GId gid;
-	private Hardware hardware = new Hardware("KM2M810", "Unknown", "Unknown");
+	private final Hardware hardware = new Hardware("KM2M810", UNKNOWN, UNKNOWN);
+	
+    @Override
+    public void initialize() throws Exception {
+        initializeFromProcess(GETINTERFACES);
+    }
 
 	@Override
 	public void initialize(Platform platform) throws Exception {
-		initializeFromProcess(GETINTERFACES);
+	    // Nothing to do here.
 	}
 
 	private void initializeFromProcess(String process) throws Exception {
@@ -114,6 +120,7 @@ public class KontronHardwareDriver implements Driver, OperationExecutor {
 		}
 	}
 
+	@Override
 	public Hardware getHardware() {
 		return hardware;
 	}

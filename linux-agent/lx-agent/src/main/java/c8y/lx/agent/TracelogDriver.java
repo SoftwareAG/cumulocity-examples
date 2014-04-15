@@ -60,6 +60,11 @@ public class TracelogDriver extends AppenderBase<ILoggingEvent> implements Confi
 	private EventApi events;
 	private EventRepresentation eventTemplate = new EventRepresentation();
 	private Level eventLevel = Level.toLevel(DEFAULT_EVENT_LEVEL);
+	
+    @Override
+    public void initialize() throws Exception {
+        // Nothing to do here.
+    }
 
 	@Override
 	public void initialize(Platform platform) throws Exception {

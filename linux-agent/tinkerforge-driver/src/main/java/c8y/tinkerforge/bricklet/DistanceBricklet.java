@@ -46,6 +46,11 @@ public class DistanceBricklet implements Driver {
 	public OperationExecutor[] getSupportedOperations() {
 		return new OperationExecutor[0];
 	}
+	
+    @Override
+    public void initialize() throws Exception {
+        // Nothing to do here.
+    }
 
 	@Override
 	public void initialize(Platform platform) throws Exception {

@@ -41,6 +41,11 @@ public class AccelerometerDriver extends PollingDriver {
 		this.reader = reader;
 		this.lastAlarm = lastAlarm;
 	}
+	
+    @Override
+    public void initialize() throws Exception {
+        // Nothing to do here.
+    }
 
 	@Override
 	public void addDefaults(Properties props) {

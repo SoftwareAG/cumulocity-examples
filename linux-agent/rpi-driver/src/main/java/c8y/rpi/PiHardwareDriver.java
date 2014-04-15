@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import c8y.Hardware;
 import c8y.lx.driver.Driver;
+import c8y.lx.driver.HardwareProvider;
 import c8y.lx.driver.OperationExecutor;
 import c8y.lx.driver.OpsUtil;
 
@@ -26,7 +27,7 @@ import com.cumulocity.sdk.client.Platform;
  * TODO The restart functionality could probably better go into an OS driver
  * that also reports syslog alerts and enables updating the OS software.
  */
-public class PiHardwareDriver implements Driver, OperationExecutor {
+public class PiHardwareDriver implements Driver, OperationExecutor, HardwareProvider {
 
 	public static final String CPUINFO = "/proc/cpuinfo";
 	public static final String PATTERN = "\\s+:\\s+";
@@ -34,11 +35,16 @@ public class PiHardwareDriver implements Driver, OperationExecutor {
 	private static Logger logger = LoggerFactory.getLogger(PiHardwareDriver.class);
 	
 	private GId gid;
-	private Hardware hardware = new Hardware("unknown-model", "unknown-serial", "unknown-revision");
+	private final Hardware hardware = new Hardware(UNKNOWN, UNKNOWN, UNKNOWN);
+	
+    @Override
+    public void initialize() throws Exception {
+        initializeFromFile(CPUINFO);
+    }
 
 	@Override
 	public void initialize(Platform platform) throws Exception {
-		initializeFromFile(CPUINFO);
+	    // Nothing to do here.
 	}
 	
 	void initializeFromFile(String file) throws IOException {
@@ -109,6 +115,7 @@ public class PiHardwareDriver implements Driver, OperationExecutor {
 		}
 	}
 
+	@Override
 	public Hardware getHardware() {
 		return hardware;
 	}
