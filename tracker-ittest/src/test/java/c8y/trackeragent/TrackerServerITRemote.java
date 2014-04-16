@@ -30,7 +30,7 @@ public class TrackerServerITRemote extends TrackerITSupport {
         writeToSocket(report);
         
         Thread.sleep(1000);
-        TrackerDevice newDevice = getTrackerDevice(imei);
+        TrackerDevice newDevice = getTrackerDevice(imei);//TODO change it!
         Position actualPosition = newDevice.getPosition();
         Positions.assertEqual(actualPosition, Positions.SAMPLE_1);
     }
