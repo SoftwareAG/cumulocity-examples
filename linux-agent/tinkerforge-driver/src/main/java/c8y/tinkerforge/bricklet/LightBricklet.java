@@ -36,6 +36,11 @@ public class LightBricklet extends BaseSensorBricklet {
 	public LightBricklet(String id, Device device) {
 		super(id, device, "Light", new LightSensor());
 	}
+	
+    @Override
+    public void initialize() throws Exception {
+        // Nothing to do here.
+    }
 
 	@Override
 	public void run() {

@@ -37,6 +37,11 @@ public class BarometerBricklet extends BaseSensorBricklet {
 	public BarometerBricklet(String id, Device device) {
 		super(id, device, "Barometer", new Barometer());
 	}
+	
+    @Override
+    public void initialize() throws Exception {
+        // Nothing to do here.
+    }
 
 	@Override
 	public void run() {

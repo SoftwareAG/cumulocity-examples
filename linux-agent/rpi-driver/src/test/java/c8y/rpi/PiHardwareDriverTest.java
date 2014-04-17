@@ -30,9 +30,11 @@ import java.io.Reader;
 import org.junit.Test;
 
 import c8y.Hardware;
+import c8y.lx.driver.HardwareProvider;
 import c8y.rpi.PiHardwareDriver;
 
 public class PiHardwareDriverTest {
+    
 	public static final String REFERENCE_HWFILE = "/hardware.txt";
 
 	@Test

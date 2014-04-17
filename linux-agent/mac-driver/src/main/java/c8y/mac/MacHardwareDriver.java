@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import c8y.Hardware;
 import c8y.lx.driver.Driver;
+import c8y.lx.driver.HardwareProvider;
 import c8y.lx.driver.OperationExecutor;
 import c8y.lx.driver.OpsUtil;
 
@@ -27,7 +28,7 @@ import com.cumulocity.sdk.client.Platform;
  * TODO The restart functionality could probably better go into an OS driver
  * that also reports syslog alerts and enables updating the OS software.
  */
-public class MacHardwareDriver implements Driver, OperationExecutor {
+public class MacHardwareDriver implements Driver, OperationExecutor, HardwareProvider {
 	public static final String MACINFO = "system_profiler SPHardwareDataType";
 	public static final String PATTERN = ":\\s+";
 
@@ -35,12 +36,16 @@ public class MacHardwareDriver implements Driver, OperationExecutor {
 			.getLogger(MacHardwareDriver.class);
 
 	private GId gid;
-	private Hardware hardware = new Hardware("Unknown model", "Unknown serial",
-			"Unknown revision");
+	private final Hardware hardware = new Hardware(UNKNOWN, UNKNOWN, UNKNOWN);
+	
+    @Override
+    public void initialize() throws Exception {
+        initializeFromProcess(MACINFO);
+    }
 
 	@Override
 	public void initialize(Platform platform) throws Exception {
-		initializeFromProcess(MACINFO);
+	    // Nothing to do here.
 	}
 
 	private void initializeFromProcess(String process) throws Exception {
@@ -114,6 +119,7 @@ public class MacHardwareDriver implements Driver, OperationExecutor {
 		}
 	}
 
+	@Override	
 	public Hardware getHardware() {
 		return hardware;
 	}

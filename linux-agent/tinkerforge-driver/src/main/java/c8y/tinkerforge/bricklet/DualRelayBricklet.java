@@ -12,6 +12,11 @@ public class DualRelayBricklet implements Driver {
 	public DualRelayBricklet(String uid, BrickletDualRelay brickletDualRelay) {
 		// TODO Auto-generated constructor stub
 	}
+	
+    @Override
+    public void initialize() throws Exception {
+        // Nothing to do here.
+    }
 
 	@Override
 	public void initialize(Platform platform) throws Exception {

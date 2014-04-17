@@ -35,6 +35,11 @@ public class TemperatureBricklet extends BaseSensorBricklet {
 	public TemperatureBricklet(String id, Device device) {
 		super(id, device, "Temperature", new TemperatureSensor());
 	}
+	
+    @Override
+    public void initialize() throws Exception {
+        // Nothing to do here.
+    }
 
 	@Override
 	public void run() {

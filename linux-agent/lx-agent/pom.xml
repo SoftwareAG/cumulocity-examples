@@ -5,7 +5,7 @@
     <parent>
 		<groupId>c8y.example</groupId>
 		<artifactId>c8y-lx</artifactId>
-        <version>5.2.1</version>
+        <version>5.3.0</version>
 	</parent>
 
 	<artifactId>lx-agent</artifactId>
@@ -32,6 +32,12 @@
 			<artifactId>logback-classic</artifactId>
 			<version>${logback.version}</version>
 		</dependency>
+        <dependency>
+            <groupId>org.easytesting</groupId>
+            <artifactId>fest-assert</artifactId>
+            <version>1.4</version>
+            <scope>test</scope>
+        </dependency>		
 	</dependencies>
 
 </project>

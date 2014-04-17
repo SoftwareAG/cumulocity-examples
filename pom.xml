@@ -6,22 +6,22 @@
 
 	<groupId>c8y.example</groupId>
 	<artifactId>c8y-examples</artifactId>
-	<version>5.2.1</version>
-    <name>Cumulocity :: Examples</name>
+	<version>5.3.0</version>
+	<name>Cumulocity :: Examples</name>
 	<packaging>pom</packaging>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.7</maven.compiler.source>
 		<maven.compiler.target>1.7</maven.compiler.target>
-	    
-	    <c8y.version>5.2.0</c8y.version>
-	    <slf4j.version>1.7.0</slf4j.version>
-	    <spring.version>3.2.6.RELEASE</spring.version>
-	    
-	    <tycho.version>0.19.0</tycho.version>
-	    
-	    <nexus.port>443</nexus.port>
+
+		<c8y.version>5.3.0</c8y.version>
+		<slf4j.version>1.7.0</slf4j.version>
+		<spring.version>3.2.6.RELEASE</spring.version>
+
+		<tycho.version>0.19.0</tycho.version>
+
+		<nexus.port>443</nexus.port>
 	</properties>
 
 	<modules>
