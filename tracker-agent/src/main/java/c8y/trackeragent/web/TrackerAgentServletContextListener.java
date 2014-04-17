@@ -32,6 +32,7 @@ public class TrackerAgentServletContextListener implements ServletContextListene
 
     @Override
     public void contextDestroyed(ServletContextEvent event) {
+        server.destroy();
         logger.info("Trakcer agent stoped by web server hook.");
     }
 
