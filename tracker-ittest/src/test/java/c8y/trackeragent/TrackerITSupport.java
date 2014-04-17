@@ -2,6 +2,7 @@ package c8y.trackeragent;
 
 import static com.cumulocity.model.authentication.CumulocityCredentials.Builder.cumulocityCredentials;
 import static com.cumulocity.rest.representation.operation.DeviceControlMediaType.NEW_DEVICE_REQUEST;
+import static java.lang.Integer.parseInt;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,15 +34,14 @@ public abstract class TrackerITSupport {
 
     protected static final boolean REMOTE = false;
     protected static final boolean LOCAL = true;
-    private static final int REMOTE_PORT = 40000;
     private static final Random random = new Random();
 
     private final boolean local;
     protected TrackerPlatform testPlatform;
-    protected TrackerConfiguration config;
+    protected TrackerConfiguration trackerAgentConfig;
+    protected TestConfiguration testConfig;
     protected RestConnector restConnector;
     private final ExecutorService executor = Executors.newFixedThreadPool(1);
-
     private Server server;
     private Socket socket;
 
@@ -51,22 +51,21 @@ public abstract class TrackerITSupport {
 
     public TrackerITSupport(boolean local) {
         this.local = local;
-        if (local) {
-            config = getLocalPlatformConfiguration();
-        } else {
-            config = getRemotePlatformConfiguration();
-        }
     }
 
     @Before
     public void baseSetUp() throws IOException {
+        testConfig = getTestConfig(local);
+        System.out.println(testConfig);
+        trackerAgentConfig = getPlatformConfiguration();
+        System.out.println(trackerAgentConfig);
         if (local) {
             clearPersistedDevices();
         }
         testPlatform = createTrackerPlatform();
         restConnector = new RestConnector(testPlatform.getPlatformParameters(), new ResponseParser());
         if (local) {
-            server = new Server(config);
+            server = new Server(trackerAgentConfig);
             server.init();
             executor.submit(server);
         }
@@ -89,33 +88,20 @@ public abstract class TrackerITSupport {
         }
     }
 
-    //@formatter:off
-    private TrackerConfiguration getLocalPlatformConfiguration() {
-        return getRemotePlatformConfiguration()
-                .setLocalPort(randomPort())
-                .setPlatformHost("http://localhost:8181");
-    }
-    private TrackerConfiguration getRemotePlatformConfiguration() {
+    private TrackerConfiguration getPlatformConfiguration() {
         return ConfigUtils.get().loadCommonConfiguration()
-                .setLocalPort(REMOTE_PORT);
-    }
-    //@formatter:on
-
-    private int randomPort() {
-        return random.nextInt(20000) + 40000;
+                .setLocalPort(testConfig.getTrackerAgentPort()).setPlatformHost(testConfig.getC8yHost());
     }
 
     protected TrackerPlatform createTrackerPlatform() {
-        String testFilePath = ConfigUtils.get().getConfigFilePath("test.properties");
-        Properties testProperties = ConfigUtils.get().getProperties(testFilePath);
         //@formatter:off
         CumulocityCredentials credentials = cumulocityCredentials(
-                testProperties.getProperty("user"), 
-                testProperties.getProperty("password"))
-                .withTenantId(testProperties.getProperty("tenant"))
+                testConfig.getC8yUser(),
+                testConfig.getC8yPassword())
+                .withTenantId(testConfig.getC8yTenant())
                 .build();
         //@formatter:on
-        PlatformImpl platform = new PlatformImpl(config.getPlatformHost(), credentials);
+        PlatformImpl platform = new PlatformImpl(testConfig.getC8yHost(), credentials);
         return new TrackerPlatform(platform);
     }
 
@@ -129,7 +115,14 @@ public abstract class TrackerITSupport {
     }
 
     protected void writeToSocket(byte[] bis) throws Exception {
-        socket = new Socket("localhost", config.getLocalPort());
+        String socketHost = testConfig.getTrackerAgentHost();
+        int socketPort = testConfig.getTrackerAgentPort();
+        try {
+            socket = new Socket(socketHost, socketPort);
+        } catch (IOException ex) {
+            System.out.println("Cant connect to socket, host = " + socketHost + ", port = " + socketPort);
+            throw ex;
+        }
         OutputStream outputStream = socket.getOutputStream();
         outputStream.write(bis);
         outputStream.close();
@@ -142,7 +135,7 @@ public abstract class TrackerITSupport {
     }
 
     protected String newDeviceRequestsUri() {
-        return config.getPlatformHost() + "/devicecontrol/newDeviceRequests";
+        return testPlatform.getHost() + "devicecontrol/newDeviceRequests";
     }
 
     protected String newDeviceRequestUri(String deviceId) {
@@ -160,5 +153,26 @@ public abstract class TrackerITSupport {
         GId agentId = deviceManagedObject.getAgentId();
         return new TrackerDevice(testPlatform, agentId, imei);
     }
+    
+
+    private static TestConfiguration getTestConfig(boolean local) {
+        String fileName = local ? "test-local.properties" : "test-remote.properties"; 
+        String testFilePath = ConfigUtils.get().getConfigFilePath(fileName);
+        Properties props = ConfigUtils.get().getProperties(testFilePath);
+        //@formatter:off
+        return new TestConfiguration()
+            .setC8yHost(props.getProperty("c8y.host"))
+            .setC8yTenant(props.getProperty("c8y.tenant"))
+            .setC8yUser(props.getProperty("c8y.user"))
+            .setC8yPassword(props.getProperty("c8y.password"))
+            .setTrackerAgentHost(local ? "localhost" : props.getProperty("tracker-agent.host"))
+            .setTrackerAgentPort(local ? randomPort() : parseInt(props.getProperty("tracker-agent.port")));
+        //@formatter:on            
+    }
+    
+    private static int randomPort() {
+        return random.nextInt(20000) + 40000;
+    }
+
 
 }
