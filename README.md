@@ -29,6 +29,10 @@ Building with Maven
               <layout>p2</layout>
               <url>http://resources.cumulocity.com/p2/repository</url>
             </repository>
+            <repository>
+              <id>cumulocity-m2-repo</id>
+              <url>http://download.cumulocity.com/maven/repository</url>
+            </repository>
           </repositories>
         </profile>
       </profiles>
