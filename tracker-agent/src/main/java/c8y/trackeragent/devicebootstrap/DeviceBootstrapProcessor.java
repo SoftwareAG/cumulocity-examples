@@ -24,8 +24,6 @@ import com.sun.jersey.api.client.ClientResponse.Status;
 public class DeviceBootstrapProcessor implements TrackerAgentEventListener {
 
     private static final int POOL_SIZE = 2;
-    private static final Long POLL_CREDENTIALS_TIMEOUT = 60L;
-    private static final Long[] POLL_INTERVALS = new Long[] { 5L, 10L, 20L, 40L, 80L, 160L, 320L, 640L, 1280L, 2560L, 3600L };
 
     protected static Logger logger = LoggerFactory.getLogger(DeviceBootstrapProcessor.class);
 
@@ -83,7 +81,7 @@ public class DeviceBootstrapProcessor implements TrackerAgentEventListener {
                 return;
             }
             logger.info("Successfully sent hello from imei {}.", imei);
-            PollingStrategy strategy = new PollingStrategy(true, POLL_CREDENTIALS_TIMEOUT, SECONDS, POLL_INTERVALS);
+            PollingStrategy strategy = new PollingStrategy();
             DeviceCredentialsRepresentation credentialsRepresentation = deviceCredentialsApi.pollCredentials(imei, strategy);
             if (credentialsRepresentation == null) {
                 logger.info("No credentials accessed for imei {}.", imei);
