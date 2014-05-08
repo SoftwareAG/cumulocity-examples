@@ -14,6 +14,11 @@ public class CredentialsManager {
 
     public static final String COMMON_PROPS_LOCATION = "./cfg/cumulocity.properties";
     public static final String DEVICE_PROPS_LOCATION = "./cfg/device.properties";
+    
+    private static final String DEFAULT_HOST = "http://developer.cumulocity.com";
+    private static final String DEFAULT_BOOTSTRAP_TENANT = "management";
+    private static final String DEFAULT_BOOTSTRAP_USER = "devicebootstrap";
+    private static final String DEFAULT_BOOTSTRAP_PASSWORD = "Fhdt1bb1f";
 
     public static CredentialsManager defaultCredentialsManager() {
         return new CredentialsManager(COMMON_PROPS_LOCATION, DEVICE_PROPS_LOCATION);
@@ -31,14 +36,14 @@ public class CredentialsManager {
         Properties deviceProps = PropUtils.fromFile(devicePropsFile);
         this.deviceCredentials = initDeviceCredentials(deviceProps);
         this.bootstrapCredentials = initBootstrapCredentials(commonProps);
-        this.host = commonProps.getProperty("host", "http://developer.cumulocity.com");
+        this.host = commonProps.getProperty("host", DEFAULT_HOST);
     }
 
     private static CumulocityCredentials initBootstrapCredentials(Properties commonProps) {
         return new CumulocityCredentials(
-                commonProps.getProperty("bootstrap.tenant", "management"),
-                commonProps.getProperty("bootstrap.user", "devicebootstrap"),
-                commonProps.getProperty("bootstrap.password", "Fhdt1bb1f"),
+                commonProps.getProperty("bootstrap.tenant", DEFAULT_BOOTSTRAP_TENANT),
+                commonProps.getProperty("bootstrap.user", DEFAULT_BOOTSTRAP_USER),
+                commonProps.getProperty("bootstrap.password", DEFAULT_BOOTSTRAP_PASSWORD),
                 null);
     }
 

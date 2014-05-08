@@ -57,6 +57,7 @@ public class Server implements Runnable {
     private final ExecutorService reportsExecutor;
     private final DeviceBootstrapProcessor deviceBootstrapProcessor;
     private final DeviceBinder deviceBinder;
+    private volatile boolean running = true;
 
     public Server(TrackerConfiguration commonConfiguration) {
         this.trackerContext = new TrackerContext(commonConfiguration);
@@ -84,10 +85,22 @@ public class Server implements Runnable {
             deviceBinder.bind(deviceCredentials.getImei());
         }
     }
+    
+    public void destroy() {
+        running = false;
+        if(serverSocket != null) {
+            try {
+                serverSocket.close();
+            } catch (IOException e) {
+                logger.warn("Problem occured trying close server socket: " + e.getMessage());
+            }
+        }
+    }
 
     @Override
     public void run() {
-        while (true) {
+        running = true;
+        while (running) {
             accept();
         }
     }
