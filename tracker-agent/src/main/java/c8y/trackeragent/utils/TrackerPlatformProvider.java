@@ -13,6 +13,7 @@ import c8y.trackeragent.exception.SDKExceptions;
 import com.cumulocity.model.Agent;
 import com.cumulocity.model.ID;
 import com.cumulocity.model.authentication.CumulocityCredentials;
+import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.PlatformImpl;
 import com.google.common.cache.Cache;
@@ -21,8 +22,11 @@ import com.google.common.cache.CacheBuilder;
 public class TrackerPlatformProvider {
 
     private final DeviceCredentialsRepository deviceCredentialsRepository;
+
     private final Cache<PlatformKey, TrackerPlatform> cache;
+
     private final TrackerConfiguration config;
+
     private final Object lock = new Object();
 
     public TrackerPlatformProvider(TrackerConfiguration config, DeviceCredentialsRepository deviceCredentialsRepository) {
@@ -68,28 +72,36 @@ public class TrackerPlatformProvider {
     private TrackerPlatform createDevicePlatform(String imei) {
         DeviceCredentials deviceCredentials = deviceCredentialsRepository.getCredentials(imei);
         String tenantId = deviceCredentials.getTenantId();
-        CumulocityCredentials credentials = cumulocityCredentials(deviceCredentials.getUser(), deviceCredentials.getPassword()).withTenantId(tenantId).build();
+        CumulocityCredentials credentials = cumulocityCredentials(deviceCredentials.getUser(), deviceCredentials.getPassword())
+                .withTenantId(tenantId).build();
         TrackerPlatform trackerPlatform = new TrackerPlatform(new PlatformImpl(config.getPlatformHost(), credentials));
         setupAgent(trackerPlatform);
         return trackerPlatform;
     }
 
     private TrackerPlatform createBootstrapPlatform() {
-        CumulocityCredentials credentials = cumulocityCredentials(config.getBootstrapUser(), config.getBootstrapPassword()).withTenantId(config.getBootstrapTenant()).build();
+        CumulocityCredentials credentials = cumulocityCredentials(config.getBootstrapUser(), config.getBootstrapPassword()).withTenantId(
+                config.getBootstrapTenant()).build();
         return new TrackerPlatform(new PlatformImpl(config.getPlatformHost(), credentials));
     }
 
     private void setupAgent(TrackerPlatform platform) {
         synchronized (lock) {
             DeviceManagedObject deviceManagedObject = new DeviceManagedObject(platform);
-            ManagedObjectRepresentation agentMo = new ManagedObjectRepresentation();
-            agentMo.setType("c8y_TrackerAgent");
-            agentMo.setName("Tracker agent");
-            agentMo.set(new Agent());
-            ID extId = DeviceManagedObject.getAgentExternalId();
-            deviceManagedObject.createOrUpdate(agentMo, extId, null);
+            final GId agentId = deviceManagedObject.getAgentId();
+            ManagedObjectRepresentation agentMo =  agentId != null ?  platform.getInventoryApi().get(agentId) : createAgent(deviceManagedObject) ;
             platform.setAgent(agentMo);
         }
+    }
+
+    private ManagedObjectRepresentation createAgent(DeviceManagedObject deviceManagedObject) {
+        ManagedObjectRepresentation agentMo = new ManagedObjectRepresentation();
+        agentMo.setType("c8y_TrackerAgent");
+        agentMo.setName("Tracker agent");
+        agentMo.set(new Agent());
+        ID extId = DeviceManagedObject.getAgentExternalId();
+        deviceManagedObject.createOrUpdate(agentMo, extId, null);
+        return agentMo;
     }
 
     private static class PlatformKey {
@@ -132,7 +144,7 @@ public class TrackerPlatformProvider {
                 return false;
             return true;
         }
-        
+
         @Override
         public String toString() {
             return isBootstrap() ? "bootstrap" : "imei: " + imei;
