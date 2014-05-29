@@ -35,7 +35,6 @@ import c8y.MotionTracking;
 import c8y.Position;
 import c8y.Restart;
 import c8y.SignalStrength;
-import c8y.SupportedMeasurements;
 import c8y.SupportedOperations;
 
 import com.cumulocity.model.ID;
@@ -263,11 +262,6 @@ public class TrackerDevice extends DeviceManagedObject {
         ops.add("c8y_MotionTracking");
         ops.add("c8y_Geofence");
         device.set(ops);
-
-        SupportedMeasurements msmts = new SupportedMeasurements();
-        msmts.add("c8y_Battery");
-        msmts.add("c8y_SignalStrength");
-        device.set(msmts);
 
         device.set(new MotionTracking());
         device.set(new IsDevice());

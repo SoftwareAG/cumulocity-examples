@@ -21,7 +21,6 @@ package c8y.lx.driver;
 
 import java.util.Date;
 
-import c8y.SupportedMeasurements;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
 import com.cumulocity.sdk.client.Platform;
@@ -46,17 +45,6 @@ public abstract class MeasurementPollingDriver extends PollingDriver {
     }
 
     public void setSource(ManagedObjectRepresentation mo) {
-        SupportedMeasurements sm = mo.get(SupportedMeasurements.class);
-
-        if (sm == null) {
-            sm = new SupportedMeasurements();
-            mo.set(sm);
-        }
-
-        if (!sm.contains(measurementRep.getType())) {
-            sm.add(measurementRep.getType());
-        }
-
         measurementRep.setSource(mo);
     }
 
