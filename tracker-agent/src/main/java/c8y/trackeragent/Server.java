@@ -121,6 +121,7 @@ public class Server implements Runnable {
     }
 
     private ConnectedTracker peekTracker(Socket client) throws IOException {
+        logger.debug("peekTracker for new connection...");
         InputStream bis = asInput(client);
         bis.mark(1);
         int marker = bis.read();
