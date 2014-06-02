@@ -107,6 +107,7 @@ public abstract class TrackerITSupport {
 
     protected DeviceCredentials pollCredentials(String imei) throws InterruptedException {
         try {
+            Thread.sleep(5000);
             return DeviceCredentialsRepository.get().getCredentials(imei);
         } catch (UnknownDeviceException uex) {
             Thread.sleep(5000);
