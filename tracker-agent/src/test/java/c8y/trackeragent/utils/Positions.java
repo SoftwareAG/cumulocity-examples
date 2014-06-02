@@ -13,7 +13,7 @@ public class Positions {
     public final static Position SAMPLE_2 = aPosition(new BigDecimal("47.0332"), new BigDecimal("10.5864"), new BigDecimal("598"));
     public final static Position SAMPLE_3 = aPosition(new BigDecimal("46.0332"), new BigDecimal("9.5864"), new BigDecimal("597"));
     public final static Position SAMPLE_4 = aPosition(new BigDecimal("45.0332"), new BigDecimal("8.5864"), new BigDecimal("596"));
-
+    
     public static Position aPosition(BigDecimal lat, BigDecimal lng, BigDecimal alt) {
         Position position = new Position();
         position.setLat(lat);
@@ -27,8 +27,16 @@ public class Positions {
         assertEqualPosProperty(pos1.getLat(), pos2.getLat());
         assertEqualPosProperty(pos1.getAlt(), pos2.getAlt());
     }
+    
+    public static Position random() {
+        Position[] positions = new Position[] {SAMPLE_1, SAMPLE_2, SAMPLE_3, SAMPLE_4};
+        int index = (int) (System.currentTimeMillis() % positions.length);
+        return positions[index];
+    }
 
     private static void assertEqualPosProperty(BigDecimal val1, BigDecimal val2) {
         assertEquals(val1.doubleValue(), val2.doubleValue(), 0.01);
     }
+    
+    
 }

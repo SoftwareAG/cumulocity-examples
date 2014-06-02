@@ -77,6 +77,7 @@ public class Server implements Runnable {
     public void init() {
         try {
             this.serverSocket = new ServerSocket(trackerContext.getConfiguration().getLocalPort());
+            serverSocket.setSoTimeout(3000);
         } catch (IOException e) {
             throw new RuntimeException("Cant init agent tracker server!", e);
         }
