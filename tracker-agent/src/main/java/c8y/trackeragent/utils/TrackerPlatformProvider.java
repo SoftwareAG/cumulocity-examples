@@ -10,8 +10,6 @@ import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.exception.SDKExceptions;
 
-import com.cumulocity.model.Agent;
-import com.cumulocity.model.ID;
 import com.cumulocity.model.authentication.CumulocityCredentials;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.PlatformImpl;
@@ -82,12 +80,7 @@ public class TrackerPlatformProvider {
     private void setupAgent(TrackerPlatform platform) {
         synchronized (lock) {
             DeviceManagedObject deviceManagedObject = new DeviceManagedObject(platform);
-            ManagedObjectRepresentation agentMo = new ManagedObjectRepresentation();
-            agentMo.setType("c8y_TrackerAgent");
-            agentMo.setName("Tracker agent");
-            agentMo.set(new Agent());
-            ID extId = DeviceManagedObject.getAgentExternalId();
-            deviceManagedObject.createOrUpdate(agentMo, extId, null);
+            ManagedObjectRepresentation agentMo = deviceManagedObject.assureTrackerAgentExisting();
             platform.setAgent(agentMo);
         }
     }

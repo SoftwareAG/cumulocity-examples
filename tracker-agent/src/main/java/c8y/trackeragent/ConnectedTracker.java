@@ -74,6 +74,9 @@ public class ConnectedTracker implements Runnable, Executor {
 
     @Override
     public void run() {
+        if(bis == null) {
+            return;
+        }
         try {
             out = client.getOutputStream();
             processReports(bis);
@@ -83,6 +86,7 @@ public class ConnectedTracker implements Runnable, Executor {
             logger.warn("Error during communication with the platform", e);
         } finally {
             IOUtils.closeQuietly(out);
+            IOUtils.closeQuietly(bis);
             try {
                 client.close();
             } catch (IOException e) {

@@ -7,7 +7,6 @@ import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import c8y.trackeragent.utils.Devices;
@@ -86,18 +85,7 @@ public class TrackerStabilityIT extends TrackerITSupport {
         Socket socket = newSocket();
         OutputStream outputStream = socket.getOutputStream();
         outputStream.write(bis);
-        //outputStream.close();
-    }
-    
-    private Socket newSocket() throws IOException {
-        String socketHost = testConfig.getTrackerAgentHost();
-        int socketPort = testConfig.getTrackerAgentPort();
-        try {
-            return new Socket(socketHost, socketPort);
-        } catch (IOException ex) {
-            System.out.println("Cant connect to socket, host = " + socketHost + ", port = " + socketPort);
-            throw ex;
-        }
+        outputStream.close();
     }
 
 }

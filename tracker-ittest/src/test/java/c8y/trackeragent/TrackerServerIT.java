@@ -2,6 +2,8 @@ package c8y.trackeragent;
 
 import static org.fest.assertions.Assertions.assertThat;
 
+import java.io.UnsupportedEncodingException;
+
 import org.junit.Test;
 
 import c8y.Position;
@@ -14,6 +16,10 @@ public class TrackerServerIT extends TrackerITSupport {
 
     @Test
     public void shouldBootstrapNewDeviceAndThenChangeItsLocation() throws Exception {
+        testShouldBootstrapNewDeviceAndThenChangeItsLocation();
+    }
+
+    private void testShouldBootstrapNewDeviceAndThenChangeItsLocation() throws UnsupportedEncodingException, Exception, InterruptedException {
         String imei = Devices.randomImei();
         createNewDeviceRequest(imei);
         byte[] report = Reports.getTelicReportBytes(imei, Positions.ZERO, Positions.SAMPLE_1, Positions.SAMPLE_2, Positions.SAMPLE_3);
@@ -35,6 +41,14 @@ public class TrackerServerIT extends TrackerITSupport {
         TrackerDevice newDevice = getTrackerDevice(imei);
         Position actualPosition = newDevice.getPosition();
         Positions.assertEqual(actualPosition, Positions.SAMPLE_4);
+    }
+    
+    @Test
+    public void shouldHandleTimeoutOnConnection() throws Exception {
+        initSocket();
+        socket.getOutputStream();
+        Thread.sleep(11 * 1000);
+        testShouldBootstrapNewDeviceAndThenChangeItsLocation();
     }
     
 
