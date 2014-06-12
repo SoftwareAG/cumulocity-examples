@@ -8,12 +8,15 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Properties;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
 
@@ -43,7 +46,7 @@ public abstract class TrackerITSupport {
     protected RestConnector restConnector;
     private final ExecutorService executor = Executors.newFixedThreadPool(1);
     private Server server;
-    protected Socket socket;
+    private final Collection<Socket> sockets = new HashSet<Socket>();
 
     public TrackerITSupport() {
         this(LOCAL);
@@ -83,8 +86,10 @@ public abstract class TrackerITSupport {
         if (local) {
             executor.shutdownNow();
         }
-        if (socket != null && !socket.isClosed()) {
-            socket.close();
+        for(Socket socket : sockets) {
+            if (socket != null && !socket.isClosed()) {
+                socket.close();
+            }
         }
     }
 
@@ -114,15 +119,14 @@ public abstract class TrackerITSupport {
         }
     }
 
-    protected void writeToSocket(byte[] bis) throws Exception {
-        initSocket();
-        OutputStream outputStream = socket.getOutputStream();
-        outputStream.write(bis);
-        outputStream.close();
+    protected void writeInNewConnection(Socket socket, byte[] bis) throws Exception {
+        OutputStream out = socket.getOutputStream();
+        out.write(bis);
+        IOUtils.closeQuietly(out);
     }
     
-    protected void initSocket() throws IOException {
-        socket = newSocket();
+    protected void writeInNewConnection(byte[] bis) throws Exception {
+        writeInNewConnection(newSocket(), bis);
     }
     
     protected Socket newSocket() throws IOException {

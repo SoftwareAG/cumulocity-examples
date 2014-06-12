@@ -1,5 +1,7 @@
 package c8y.trackeragent;
 
+import java.net.Socket;
+
 import org.junit.Test;
 
 import c8y.Position;
@@ -15,19 +17,20 @@ public class TrackerServerITRemote extends TrackerITSupport {
 
     @Test
     public void shouldBootstrapNewDeviceAndThenChangeItsLocation() throws Exception {
+        Socket socket = newSocket();
         String imei = Devices.randomImei();
         createNewDeviceRequest(imei);
         byte[] report = Reports.getTelicReportBytes(imei, Positions.ZERO);
         
         //trigger bootstrap
-        writeToSocket(report);
+        writeInNewConnection(socket, report);
         Thread.sleep(5000);
         acceptNewDeviceRequest(imei);
         Thread.sleep(5000);
                 
         //trigger regular report 
         report = Reports.getTelicReportBytes(imei, Positions.SAMPLE_1);
-        writeToSocket(report);
+        writeInNewConnection(socket, report);
         
         Thread.sleep(1000);
         TrackerDevice newDevice = getTrackerDevice(imei);//TODO change it!
