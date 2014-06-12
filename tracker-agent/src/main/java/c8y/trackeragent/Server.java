@@ -47,7 +47,6 @@ import c8y.trackeragent.utils.TrackerContext;
  */
 public class Server implements Runnable {
 
-    private static final int SOCKET_TIMEOUT = 10000;
     private static final int REPORTS_EXECUTOR_POOL_SIZE = 10;
     private static final int REQUESTS_EXECUTOR_POOL_SIZE = 10;
 
@@ -117,7 +116,7 @@ public class Server implements Runnable {
                 return;
             }
             Socket client = serverSocket.accept();
-            client.setSoTimeout(SOCKET_TIMEOUT);
+            client.setSoTimeout(trackerContext.getConfiguration().getClientTimeout());
             logger.debug("Accepted connection from {}, launching worker thread.", client.getRemoteSocketAddress());
             requestsExecutor.execute(new RequestHandler(trackerAgent, reportsExecutor, client));
         } catch (Exception e) {

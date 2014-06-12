@@ -22,13 +22,12 @@ public class TrackerServerIT extends TrackerITSupport {
     }
 
     private void testShouldBootstrapNewDeviceAndThenChangeItsLocation() throws UnsupportedEncodingException, Exception, InterruptedException {
-        Socket socket = newSocket();
         String imei = Devices.randomImei();
         createNewDeviceRequest(imei);
         byte[] report = Reports.getTelicReportBytes(imei, Positions.ZERO, Positions.SAMPLE_1, Positions.SAMPLE_2, Positions.SAMPLE_3);
         
         //trigger bootstrap
-        writeInNewConnection(socket, report);
+        writeInNewConnection(report);
         Thread.sleep(5000);
         acceptNewDeviceRequest(imei);
         Thread.sleep(5000);
@@ -38,7 +37,7 @@ public class TrackerServerIT extends TrackerITSupport {
         
         //trigger regular report 
         report = Reports.getTelicReportBytes(imei, Positions.SAMPLE_4);
-        writeInNewConnection(socket, report);
+        writeInNewConnection(report);
         
         Thread.sleep(1000);
         TrackerDevice newDevice = getTrackerDevice(imei);
@@ -53,9 +52,12 @@ public class TrackerServerIT extends TrackerITSupport {
     }
 
     private void timeoutConnection() throws IOException, InterruptedException {
+        int defaultClientTimeout = trackerAgentConfig.getClientTimeout();
+        trackerAgentConfig.setClientTimeout(1000);
         Socket socket = newSocket();
         socket.getOutputStream();
-        Thread.sleep(11 * 1000);
+        Thread.sleep(2 * 1000);
+        trackerAgentConfig.setClientTimeout(defaultClientTimeout);
     }
     
 

@@ -49,12 +49,7 @@ public class ConnectedTracker implements Runnable, Executor {
     private final String fieldSeparator;
     private final Socket client;
     private final InputStream bis;
-    private final List<Object> fragments = new ArrayList<Object>();// split into
-                                                                   // two lists
-                                                                   // - for
-                                                                   // Parsers
-                                                                   // and
-                                                                   // Translators
+    private final List<Object> fragments = new ArrayList<Object>();
     final TrackerAgent trackerAgent;
 
     private OutputStream out;

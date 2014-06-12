@@ -87,10 +87,11 @@ public abstract class TrackerITSupport {
             executor.shutdownNow();
         }
         for(Socket socket : sockets) {
-            if (socket != null && !socket.isClosed()) {
+            if (!socket.isClosed()) {
                 socket.close();
             }
         }
+        sockets.clear();
     }
 
     private TrackerConfiguration getPlatformConfiguration() {
@@ -133,7 +134,9 @@ public abstract class TrackerITSupport {
         String socketHost = testConfig.getTrackerAgentHost();
         int socketPort = testConfig.getTrackerAgentPort();
         try {
-            return new Socket(socketHost, socketPort);
+            Socket socket = new Socket(socketHost, socketPort);
+            sockets.add(socket);
+            return socket;
         } catch (IOException ex) {
             System.out.println("Cant connect to socket, host = " + socketHost + ", port = " + socketPort);
             throw ex;

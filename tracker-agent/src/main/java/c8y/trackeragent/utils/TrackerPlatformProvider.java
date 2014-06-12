@@ -1,6 +1,7 @@
 package c8y.trackeragent.utils;
 
 import static com.cumulocity.model.authentication.CumulocityCredentials.Builder.cumulocityCredentials;
+import static com.google.common.collect.FluentIterable.from;
 
 import java.util.concurrent.Callable;
 
@@ -13,8 +14,10 @@ import c8y.trackeragent.exception.SDKExceptions;
 import com.cumulocity.model.authentication.CumulocityCredentials;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.PlatformImpl;
+import com.google.common.base.Predicate;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.FluentIterable;
 
 public class TrackerPlatformProvider {
 
@@ -29,6 +32,14 @@ public class TrackerPlatformProvider {
         this.cache = CacheBuilder.newBuilder().build();
     }
 
+    public TrackerPlatform getDevicePlatformForTenant(final String tenantId) {
+        return from(cache.asMap().values()).filter(new Predicate<TrackerPlatform>() {
+            public boolean apply(TrackerPlatform platform) {
+                return tenantId.equals(platform.getTenantId());
+            }
+        }).last().orNull();
+    }
+    
     public TrackerPlatform getDevicePlatform(final String imei) {
         if (imei == null) {
             throw new IllegalArgumentException("Imei must not be null!");
