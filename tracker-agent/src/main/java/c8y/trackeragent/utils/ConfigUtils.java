@@ -25,6 +25,8 @@ public class ConfigUtils {
     private static final String DEFAULT_LOCAL_SOCKET_PORT = "9090";
     private static final String BOOTSTRAP_USER_PROP = "bootstrap.user";
     private static final String BOOTSTRAP_PASSWORD_PROP = "bootstrap.password";
+    private static final String CLIENT_TIMEOUT_PROP = "client.timeout";
+    private static final String DEFAULT_CLIENT_TIMEOUT = String.valueOf(5 * 60 * 1000);
     
     private static final ConfigUtils instance = create();
     
@@ -65,13 +67,15 @@ public class ConfigUtils {
         String sourceFilePath = getConfigFilePath(SOURCE_FILE);
         Properties props = getProperties(sourceFilePath);
         int port = parseInt(getProperty(props, LOCAL_SOCKET_PORT_PROP, DEFAULT_LOCAL_SOCKET_PORT));
+        int clientTimeout = parseInt(getProperty(props, CLIENT_TIMEOUT_PROP, DEFAULT_CLIENT_TIMEOUT));
         //@formatter:off
         TrackerConfiguration config = new TrackerConfiguration()
             .setPlatformHost(getProperty(SOURCE_FILE, props, PLATFORM_HOST_PROP))
             .setLocalPort(port)
             .setBootstrapUser(getProperty(SOURCE_FILE, props, BOOTSTRAP_USER_PROP))
             .setBootstrapPassword(getProperty(SOURCE_FILE, props, BOOTSTRAP_PASSWORD_PROP))
-            .setBootstrapTenant("management");
+            .setBootstrapTenant("management")
+            .setClientTimeout(clientTimeout);
         //@formatter:on
         logger.info(format("Configuration loaded from: %s: %s", sourceFilePath, config));
         return config;

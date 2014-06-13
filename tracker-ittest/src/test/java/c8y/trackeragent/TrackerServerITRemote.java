@@ -20,17 +20,17 @@ public class TrackerServerITRemote extends TrackerITSupport {
         byte[] report = Reports.getTelicReportBytes(imei, Positions.ZERO);
         
         //trigger bootstrap
-        writeToSocket(report);
+        writeInNewConnection(report);
         Thread.sleep(5000);
         acceptNewDeviceRequest(imei);
         Thread.sleep(5000);
                 
         //trigger regular report 
         report = Reports.getTelicReportBytes(imei, Positions.SAMPLE_1);
-        writeToSocket(report);
+        writeInNewConnection(report);
         
         Thread.sleep(1000);
-        TrackerDevice newDevice = getTrackerDevice(imei);//TODO change it!
+        TrackerDevice newDevice = getTrackerDevice(imei);
         Position actualPosition = newDevice.getPosition();
         Positions.assertEqual(actualPosition, Positions.SAMPLE_1);
     }

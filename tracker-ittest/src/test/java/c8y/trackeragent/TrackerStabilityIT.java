@@ -1,13 +1,9 @@
 package c8y.trackeragent;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.Socket;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import c8y.trackeragent.utils.Devices;
@@ -32,13 +28,13 @@ public class TrackerStabilityIT extends TrackerITSupport {
     }
 
     private String executeFirstStep() throws Exception {
-        writeToSocket(new byte[]{});
+        writeInNewConnection(new byte[]{});
         String imei = Devices.randomImei();
         createNewDeviceRequest(imei);
         byte[] report = Reports.getTelicReportBytes(imei, Positions.ZERO, Positions.SAMPLE_1, Positions.SAMPLE_2, Positions.SAMPLE_3);
 
         // trigger bootstrap
-        writeToSocket(report);
+        writeInNewConnection(report);
         Thread.sleep(5000);
         acceptNewDeviceRequest(imei);
         return imei;
@@ -52,7 +48,7 @@ public class TrackerStabilityIT extends TrackerITSupport {
             System.out.println("send empty report");
             report = new byte[]{};
         } 
-        writeToSocket(report);
+        writeInNewConnection(report);
     }
 
     class TrackerTask implements Runnable {
@@ -81,23 +77,4 @@ public class TrackerStabilityIT extends TrackerITSupport {
             step++;
         }
     }
-    
-    protected void writeToSocket(byte[] bis) throws Exception {
-        Socket socket = newSocket();
-        OutputStream outputStream = socket.getOutputStream();
-        outputStream.write(bis);
-        //outputStream.close();
-    }
-    
-    private Socket newSocket() throws IOException {
-        String socketHost = testConfig.getTrackerAgentHost();
-        int socketPort = testConfig.getTrackerAgentPort();
-        try {
-            return new Socket(socketHost, socketPort);
-        } catch (IOException ex) {
-            System.out.println("Cant connect to socket, host = " + socketHost + ", port = " + socketPort);
-            throw ex;
-        }
-    }
-
 }

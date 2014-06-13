@@ -8,12 +8,15 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Properties;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
 
@@ -43,7 +46,7 @@ public abstract class TrackerITSupport {
     protected RestConnector restConnector;
     private final ExecutorService executor = Executors.newFixedThreadPool(1);
     private Server server;
-    private Socket socket;
+    private final Collection<Socket> sockets = new HashSet<Socket>();
 
     public TrackerITSupport() {
         this(LOCAL);
@@ -83,14 +86,16 @@ public abstract class TrackerITSupport {
         if (local) {
             executor.shutdownNow();
         }
-        if (socket != null && !socket.isClosed()) {
-            socket.close();
+        for(Socket socket : sockets) {
+            if (!socket.isClosed()) {
+                socket.close();
+            }
         }
+        sockets.clear();
     }
 
     private TrackerConfiguration getPlatformConfiguration() {
-        return ConfigUtils.get().loadCommonConfiguration()
-                .setLocalPort(testConfig.getTrackerAgentPort()).setPlatformHost(testConfig.getC8yHost());
+        return ConfigUtils.get().loadCommonConfiguration().setLocalPort(testConfig.getTrackerAgentPort()).setPlatformHost(testConfig.getC8yHost());
     }
 
     protected TrackerPlatform createTrackerPlatform() {
@@ -115,21 +120,30 @@ public abstract class TrackerITSupport {
         }
     }
 
-    protected void writeToSocket(byte[] bis) throws Exception {
+    protected void writeInNewConnection(Socket socket, byte[] bis) throws Exception {
+        OutputStream out = socket.getOutputStream();
+        out.write(bis);
+        IOUtils.closeQuietly(out);
+    }
+    
+    protected void writeInNewConnection(byte[] bis) throws Exception {
+        writeInNewConnection(newSocket(), bis);
+    }
+    
+    protected Socket newSocket() throws IOException {
         String socketHost = testConfig.getTrackerAgentHost();
         int socketPort = testConfig.getTrackerAgentPort();
         try {
-            socket = new Socket(socketHost, socketPort);
+            Socket socket = new Socket(socketHost, socketPort);
+            sockets.add(socket);
+            return socket;
         } catch (IOException ex) {
             System.out.println("Cant connect to socket, host = " + socketHost + ", port = " + socketPort);
             throw ex;
         }
-        OutputStream outputStream = socket.getOutputStream();
-        outputStream.write(bis);
-        outputStream.close();
     }
 
-    protected void createNewDeviceRequest(String deviceId) {
+    protected synchronized void createNewDeviceRequest(String deviceId) {
         NewDeviceRequestRepresentation representation = new NewDeviceRequestRepresentation();
         representation.setId(deviceId);
         restConnector.post(newDeviceRequestsUri(), NEW_DEVICE_REQUEST, representation);
@@ -144,9 +158,13 @@ public abstract class TrackerITSupport {
     }
 
     protected void acceptNewDeviceRequest(String deviceId) {
-        NewDeviceRequestRepresentation representation = new NewDeviceRequestRepresentation();
-        representation.setStatus("ACCEPTED");
-        restConnector.put(newDeviceRequestUri(deviceId), NEW_DEVICE_REQUEST, representation);
+        try {
+            NewDeviceRequestRepresentation representation = new NewDeviceRequestRepresentation();
+            representation.setStatus("ACCEPTED");
+            restConnector.put(newDeviceRequestUri(deviceId), NEW_DEVICE_REQUEST, representation);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     protected TrackerDevice getTrackerDevice(String imei) {
@@ -154,10 +172,9 @@ public abstract class TrackerITSupport {
         GId agentId = deviceManagedObject.getAgentId();
         return new TrackerDevice(testPlatform, agentId, imei);
     }
-    
 
     private static TestConfiguration getTestConfig(boolean local) {
-        String fileName = local ? "test-local.properties" : "test-remote.properties"; 
+        String fileName = local ? "test-local.properties" : "test-remote.properties";
         String testFilePath = ConfigUtils.get().getConfigFilePath(fileName);
         Properties props = ConfigUtils.get().getProperties(testFilePath);
         //@formatter:off
@@ -170,10 +187,8 @@ public abstract class TrackerITSupport {
             .setTrackerAgentPort(local ? randomPort() : parseInt(props.getProperty("tracker-agent.port")));
         //@formatter:on            
     }
-    
+
     private static int randomPort() {
         return random.nextInt(20000) + 40000;
     }
-
-
 }
