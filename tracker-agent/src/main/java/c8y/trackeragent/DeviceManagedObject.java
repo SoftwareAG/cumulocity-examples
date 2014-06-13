@@ -20,6 +20,7 @@
 
 package c8y.trackeragent;
 
+import com.cumulocity.model.Agent;
 import com.cumulocity.model.ID;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.identity.ExternalIDRepresentation;
@@ -63,7 +64,22 @@ public class DeviceManagedObject {
 
         return gid == null;
     }
-
+    
+    public ManagedObjectRepresentation assureTrackerAgentExisting() {
+        ID extId = getAgentExternalId();
+        GId gid = tryGetBinding(extId);
+        if(gid == null) {
+            ManagedObjectRepresentation agentMo = new ManagedObjectRepresentation();
+            agentMo.setType("c8y_TrackerAgent");
+            agentMo.setName("Tracker agent");
+            agentMo.set(new Agent());            
+            return create(agentMo, extId, null);
+        } else {
+            return inventory.get(gid);
+        }
+        
+    }
+    
     public boolean updateIfExists(ManagedObjectRepresentation mo, ID extId) throws SDKException {
         GId gid = tryGetBinding(extId);
         if (gid == null) {

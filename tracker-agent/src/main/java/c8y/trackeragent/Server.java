@@ -48,13 +48,16 @@ import c8y.trackeragent.utils.TrackerContext;
 public class Server implements Runnable {
 
     private static final int REPORTS_EXECUTOR_POOL_SIZE = 10;
+    private static final int REQUESTS_EXECUTOR_POOL_SIZE = 10;
 
     private static final Logger logger = LoggerFactory.getLogger(Server.class);
+
 
     private ServerSocket serverSocket;
     private final TrackerContext trackerContext;
     private final TrackerAgent trackerAgent;
     private final ExecutorService reportsExecutor;
+    private final ExecutorService requestsExecutor;
     private final DeviceBootstrapProcessor deviceBootstrapProcessor;
     private final DeviceBinder deviceBinder;
     private volatile boolean running = true;
@@ -63,6 +66,7 @@ public class Server implements Runnable {
         this.trackerContext = new TrackerContext(commonConfiguration);
         this.trackerAgent = new TrackerAgent(trackerContext);
         this.reportsExecutor = Executors.newFixedThreadPool(REPORTS_EXECUTOR_POOL_SIZE);
+        this.requestsExecutor = Executors.newFixedThreadPool(REQUESTS_EXECUTOR_POOL_SIZE);
         OperationDispatchers operationDispatchers = new OperationDispatchers(trackerContext, trackerAgent);
         TracelogAppenders tracelogAppenders = new TracelogAppenders(trackerContext);
         this.deviceBootstrapProcessor = new DeviceBootstrapProcessor(trackerAgent);
@@ -112,30 +116,12 @@ public class Server implements Runnable {
                 return;
             }
             Socket client = serverSocket.accept();
+            client.setSoTimeout(trackerContext.getConfiguration().getClientTimeout());
             logger.debug("Accepted connection from {}, launching worker thread.", client.getRemoteSocketAddress());
-
-            reportsExecutor.execute(peekTracker(client));
-        } catch (IOException e) {
-            logger.warn("Couldn't connect", e);
+            requestsExecutor.execute(new RequestHandler(trackerAgent, reportsExecutor, client));
+        } catch (Exception e) {
+            logger.error("Error while processing:", e);
         }
-    }
-
-    private ConnectedTracker peekTracker(Socket client) throws IOException {
-        InputStream bis = asInput(client);
-        bis.mark(1);
-        int marker = bis.read();
-        bis.reset();
-
-        if (marker >= '0' && marker <= '9') {
-            return new ConnectedTelicTracker(client, bis, trackerAgent);
-        } else {
-            return new ConnectedGL200Tracker(client, bis, trackerAgent);
-        }
-    }
-
-    private InputStream asInput(Socket client) throws IOException {
-        InputStream is = client.getInputStream();
-        return new BufferedInputStream(is);
     }
 
     public TrackerAgent getTrackerAgent() {

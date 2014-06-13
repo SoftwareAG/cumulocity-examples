@@ -4,7 +4,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class ConnectedTelicTracker extends ConnectedTracker {
+    
+    protected static Logger logger = LoggerFactory.getLogger(ConnectedTelicTracker.class);
     
     public static final int HEADER_LENGTH = 28;
     public static final int REPORT_SKIP = 4;
@@ -18,6 +23,7 @@ public class ConnectedTelicTracker extends ConnectedTracker {
         byte[] dummy = new byte[bytesToRead];
         int bytesRead = bis.read(dummy, 0, bytesToRead);
         if (bytesRead < bytesToRead) {
+            logger.warn("{} bytes read from header but expected at least {}, skip this report!", bytesRead, bytesToRead);
             return null;
         }
         return bis;

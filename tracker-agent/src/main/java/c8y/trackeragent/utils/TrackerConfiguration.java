@@ -7,6 +7,7 @@ public class TrackerConfiguration {
     private String bootstrapUser;
     private String bootstrapPassword;
     private String bootstrapTenant;
+    private int clientTimeout;
 
     public String getPlatformHost() {
         return platformHost;
@@ -52,11 +53,20 @@ public class TrackerConfiguration {
     public String getBootstrapTenant() {
         return bootstrapTenant;
     }
+    
+    public int getClientTimeout() {
+        return clientTimeout;
+    }
+
+    public TrackerConfiguration setClientTimeout(int clientTimeout) {
+        this.clientTimeout = clientTimeout;
+        return this;
+    }
 
     @Override
     public String toString() {
-        return String.format("TrackerConfiguration [platformHost=%s, localPort=%s, bootstrapUser=%s, bootstrapPassword=%s, bootstrapTenant=%s]", platformHost, localPort, bootstrapUser,
-                bootstrapPassword, bootstrapTenant);
+        return String.format("TrackerConfiguration [platformHost=%s, localPort=%s, bootstrapUser=%s, bootstrapPassword=%s, bootstrapTenant=%s, clientTimeout=%s]", platformHost, localPort,
+                bootstrapUser, bootstrapPassword, bootstrapTenant, clientTimeout);
     }
     
 }
