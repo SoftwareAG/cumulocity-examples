@@ -35,7 +35,7 @@ public class TrackerStabilityIT extends TrackerITSupport {
 
         // trigger bootstrap
         writeInNewConnection(report);
-        Thread.sleep(5000);
+        Thread.sleep(8000);
         acceptNewDeviceRequest(imei);
         return imei;
     }

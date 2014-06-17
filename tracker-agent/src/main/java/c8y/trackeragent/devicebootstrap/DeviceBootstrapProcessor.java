@@ -1,9 +1,13 @@
 package c8y.trackeragent.devicebootstrap;
 
+import static com.cumulocity.sdk.client.polling.PollingStrategy.DEFAULT_POLL_INTERVALS;
+import static java.util.Arrays.asList;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,7 +73,7 @@ public class DeviceBootstrapProcessor implements TrackerAgentEventListener {
         }
 
         private void doRun() {
-            PollingStrategy strategy = new PollingStrategy();
+            PollingStrategy strategy = new PollingStrategy(TimeUnit.SECONDS, asList(DEFAULT_POLL_INTERVALS));
             DeviceCredentialsRepresentation credentialsRepresentation = deviceCredentialsApi.pollCredentials(imei, strategy);
             if (credentialsRepresentation == null) {
                 logger.info("No credentials accessed for imei {}.", imei);

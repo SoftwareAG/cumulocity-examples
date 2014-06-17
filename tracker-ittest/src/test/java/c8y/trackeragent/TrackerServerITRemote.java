@@ -21,9 +21,9 @@ public class TrackerServerITRemote extends TrackerITSupport {
         
         //trigger bootstrap
         writeInNewConnection(report);
-        Thread.sleep(5000);
+        Thread.sleep(8000);
         acceptNewDeviceRequest(imei);
-        Thread.sleep(5000);
+        Thread.sleep(15000);
                 
         //trigger regular report 
         report = Reports.getTelicReportBytes(imei, Positions.SAMPLE_1);

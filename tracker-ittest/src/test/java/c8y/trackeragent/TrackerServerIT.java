@@ -28,9 +28,9 @@ public class TrackerServerIT extends TrackerITSupport {
         
         //trigger bootstrap
         writeInNewConnection(report);
-        Thread.sleep(5000);
+        Thread.sleep(8000);
         acceptNewDeviceRequest(imei);
-        Thread.sleep(5000);
+        Thread.sleep(15000);
         
         DeviceCredentials credentials = pollCredentials(imei);
         assertThat(credentials).isNotNull();  
