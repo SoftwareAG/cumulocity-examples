@@ -20,9 +20,7 @@
 
 package c8y.trackeragent;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -30,12 +28,9 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
-import c8y.Geofence;
-import c8y.IsDevice;
-import c8y.MotionTracking;
-import c8y.Position;
-import c8y.SupportedOperations;
+import c8y.*;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.utils.Devices;

@@ -44,14 +44,23 @@ public class HelloAgent {
     private static final String PASSWORD = "cumulocity.password";
     private static final String APPLICATION_KEY = "cumulocity.applicationKey";
 
-    private final Properties configuration;
     private final Logger logger = LoggerFactory.getLogger(HelloAgent.class);
+    private final Platform platform ;
 
     public HelloAgent() throws IOException {
         InputStream ps = getClass().getClassLoader()
                 .getResourceAsStream(PROPERTIES_FILENAME);
-        configuration = new Properties();
+        Properties configuration = new Properties();
         configuration.load(ps);
+        platform = new PlatformImpl(
+                configuration.getProperty(PLATFORM_HOST),
+                configuration.getProperty(TENANT),
+                configuration.getProperty(USER),
+                configuration.getProperty(PASSWORD),
+                configuration.getProperty(APPLICATION_KEY));
+    }
+    public HelloAgent(Platform platform)  {
+        this.platform = platform;
     }
 
     public void sayHello() {
@@ -74,13 +83,6 @@ public class HelloAgent {
     }
 
     private InventoryApi getInventoryAPI() {
-        Platform platform = new PlatformImpl(
-                configuration.getProperty(PLATFORM_HOST),
-                configuration.getProperty(TENANT),
-                configuration.getProperty(USER),
-                configuration.getProperty(PASSWORD),
-                configuration.getProperty(APPLICATION_KEY));
-
         return platform.getInventoryApi();
     }
 }

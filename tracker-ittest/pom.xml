@@ -7,7 +7,7 @@
 		<version>5.7.0-SNAPSHOT</version>
 	</parent>
 	<groupId>c8y</groupId>
-	<artifactId>tracker-agent-ittest</artifactId>
+	<artifactId>tracker-agent-integration-test</artifactId>
 	<name>Test cases for Tracker Agent</name>
 	<properties>
 		<maven.compiler.source>1.6</maven.compiler.source>
