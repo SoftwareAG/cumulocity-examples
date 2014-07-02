@@ -1,0 +1,25 @@
+[
+<GetConfig>
+    <External>
+
+        <Bus _="COM3" family="M-Bus" Product="M-Bus Standard"
+            protocol="Meterbus" Mem="123000" baud="2400" handshake="none"
+            type="Master" AddProperties="Name,TimeStamp">
+            <Device _="0" Name="DHZ-1" NameUser="DHZ-1" Pollrate="1s"
+                PrimaryAddr="62">
+                <Energie _="value" Name="Energie" simpleType="meterbus"
+                    ind="1" size="13" exp="-3" acc="R" />
+                <Spannung _="value" Name="Spannung" simpleType="meterbus"
+                    ind="3" size="13" exp="-3" acc="R" format="F.1;" />
+                <Strom _="value" Name="Strom" simpleType="meterbus"
+                    ind="4" size="13" exp="-3" acc="R" format="F.1;" />
+                <Leistung _="value" Name="Leistung" simpleType="meterbus"
+                    ind="5" size="13" acc="R" def="-1" format="{=-1};{};%%" />
+                <Seriennummer _="value" Name="Seriennummer"
+                    simpleType="meterbus" ind="6" size="13" acc="R" />
+            </Device>
+        </Bus>
+
+    </External>
+</GetConfig>
+]
