@@ -1,16 +1,14 @@
 package c8y.lx.agent;
 
+import static com.cumulocity.model.authentication.CumulocityCredentials.Builder.cumulocityCredentials;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.cumulocity.model.authentication.CumulocityCredentials;
 import com.cumulocity.rest.representation.devicebootstrap.DeviceCredentialsRepresentation;
 import com.cumulocity.sdk.client.PlatformImpl;
-import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.devicecontrol.DeviceCredentialsApi;
-import com.sun.jersey.api.client.ClientResponse.Status;
-
-import static com.cumulocity.model.authentication.CumulocityCredentials.Builder.cumulocityCredentials;
 
 public class DeviceBootstrapProcessor {
     
@@ -27,13 +25,6 @@ public class DeviceBootstrapProcessor {
 
     public CumulocityCredentials process(String serialNumber) {
         DeviceCredentialsApi deviceCredentialsApi = getDeviceCredentialsApi();
-        try {
-            deviceCredentialsApi.hello(serialNumber);
-        } catch (SDKException ex) {
-            boolean notFound = Status.NOT_FOUND.getStatusCode() == ex.getHttpStatus();
-            logger.warn("Hello from device for serial number {} failed: {}.", serialNumber, notFound ? "" : ex.getMessage());
-            return null;
-        }
         DeviceCredentialsRepresentation credentialsRepresentation = deviceCredentialsApi.pollCredentials(serialNumber, POLL_CREDENTIALS_INTERVAL, POLL_CREDENTIALS_TIMEOUT);
         if (credentialsRepresentation == null) {
             logger.info("No credentials accessed for serialNumber {}.", serialNumber);
