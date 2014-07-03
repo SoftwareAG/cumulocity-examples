@@ -12,7 +12,6 @@ import org.springframework.context.annotation.Scope;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Scope(value = CONTEXT_SCOPE, proxyMode = TARGET_CLASS)
-@Lazy
 public @interface DeviceContextScope {
     String value() default "";
 }

@@ -6,8 +6,6 @@ import com.google.common.base.Supplier;
 
 public class DeviceBootstrapDeviceCredentialsSupplier implements Supplier<DeviceCredentials> {
 
-    private @Value("${C8Y.appKey}") String appKey;
-
     private @Value("${C8Y.devicebootstrap.tenant}") String tenant;
 
     private @Value("${C8Y.devicebootstrap.user}") String username;
@@ -16,7 +14,7 @@ public class DeviceBootstrapDeviceCredentialsSupplier implements Supplier<Device
 
     @Override
     public DeviceCredentials get() {
-        return new DeviceCredentials(tenant, username, passwrod, appKey, "");
+        return new DeviceCredentials(tenant, username, passwrod, null, null);
     }
 
 }

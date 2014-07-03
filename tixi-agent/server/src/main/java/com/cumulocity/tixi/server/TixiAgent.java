@@ -2,7 +2,6 @@ package com.cumulocity.tixi.server;
 
 import com.cumulocity.agent.server.Server;
 import com.cumulocity.agent.server.ServerBuilder;
-import com.cumulocity.tixi.server.resources.TixiAgentService;
 
 public class TixiAgent {
 
@@ -12,6 +11,8 @@ public class TixiAgent {
                 .loadConfiguration("client")
                 .rest()
                 .scan("com.cumulocity.tixi.server.resources")
+                .scan("com.cumulocity.tixi.server.services")
+                .scan("com.cumulocity.tixi.server.components")
                 .build();
         server.start();
     }

@@ -6,6 +6,6 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @org.springframework.stereotype.Component
-public @interface Component {
+public @interface Named {
     String value() default "";
 }

@@ -53,7 +53,7 @@ public class ContextFilter extends OncePerRequestFilter {
         Optional<DeviceCredentials> deviceCredetials = Optional.absent();
 
         for (DeviceCredentailsResolver<HttpServletRequest> resolver : deviceCredentailsResolvers) {
-            deviceCredetials.or(resolver.get(request));
+            deviceCredetials = deviceCredetials.or(resolver.get(request));
         }
         return deviceCredetials.or(deviceBootstrapDeviceCredentialsSupplier);
 

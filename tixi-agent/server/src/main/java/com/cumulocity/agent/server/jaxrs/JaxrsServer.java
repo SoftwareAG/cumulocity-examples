@@ -30,6 +30,8 @@ public class JaxrsServer implements Server {
 
     private final int port;
 
+    private final String applicationId;
+
     private final ResourceConfig resourceConfig;
 
     private final WebApplicationContext applicationContext;
@@ -40,7 +42,7 @@ public class JaxrsServer implements Server {
         @Override
         protected void doStart() {
             server = HttpServer.createSimpleServer(null, new InetSocketAddress(host, port));
-            WebappContext context = new WebappContext("agent", "/agent");
+            WebappContext context = new WebappContext(applicationId, "/" + applicationId);
             resourceConfig.register(RequestContextFilter.class);
             context.addServlet("jersey-servlet", new ServletContainer(resourceConfig)).addMapping("/*");
             context.addFilter("deviceContextFilter", applicationContext.getBean(ContextFilter.class)).addMappingForServletNames(null,
@@ -61,10 +63,11 @@ public class JaxrsServer implements Server {
     };
 
     @Inject
-    public JaxrsServer(@Value("${server.host:0.0.0.0}") String host, @Value("${server.port:80}") int port, ResourceConfig resourceConfig,
-            WebApplicationContext context) {
+    public JaxrsServer(@Value("${server.host:0.0.0.0}") String host, @Value("${server.port:80}") int port,
+            @Value("${server.id}") String contextPath, ResourceConfig resourceConfig, WebApplicationContext context) {
         this.host = host;
         this.port = port;
+        this.applicationId = contextPath;
         this.resourceConfig = resourceConfig;
         this.applicationContext = context;
     }

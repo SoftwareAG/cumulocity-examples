@@ -2,6 +2,8 @@ package com.cumulocity.agent.server.context;
 
 import java.io.UnsupportedEncodingException;
 
+import com.cumulocity.model.ID;
+import com.cumulocity.rest.representation.devicebootstrap.DeviceCredentialsRepresentation;
 import com.sun.jersey.core.util.Base64;
 
 public class DeviceCredentials {
@@ -24,15 +26,15 @@ public class DeviceCredentials {
 
     private final String appKey;
 
-    private final String deviceId;
+    private final ID deviceId;
 
     private final int pageSize;
 
-    public DeviceCredentials(String tenant, String username, String password, String appKey, String deviceId) {
+    public DeviceCredentials(String tenant, String username, String password, String appKey, ID deviceId) {
         this(tenant, username, password, appKey, deviceId, DEFAULT_PAGE_SIZE);
     }
 
-    public DeviceCredentials(String tenant, String username, String password, String appKey, String deviceId, int pageSize) {
+    public DeviceCredentials(String tenant, String username, String password, String appKey, ID deviceId, int pageSize) {
         this.tenant = tenant;
         this.username = username;
         this.password = password;
@@ -41,9 +43,13 @@ public class DeviceCredentials {
         this.pageSize = pageSize;
     }
 
+    public static DeviceCredentials from(DeviceCredentialsRepresentation credentials) {
+        return new DeviceCredentials(credentials.getTenantId(), credentials.getUsername(), credentials.getPassword(), null, null);
+    }
+
     public static DeviceCredentials from(String authorization, String appKey, int pageSize) {
         if (authorization == null || !authorization.toUpperCase().startsWith(AUTH_PREFIX)) {
-            return new DeviceCredentials(null, "", "", appKey, "", pageSize);
+            return new DeviceCredentials(null, "", "", appKey, null, pageSize);
         }
 
         String[] loginAndPass = decode(authorization);
@@ -51,13 +57,17 @@ public class DeviceCredentials {
         String username = loginAndPass.length > 0 ? loginAndPass[0] : "";
         String password = loginAndPass.length > 1 ? loginAndPass[1] : "";
 
-        String[] tenantAndUsername = username.split(LOGIN_SEPARATOR);
+        String[] tenantAndUsername = splitUsername(username);
         if (tenantAndUsername.length > 1) {
             tenant = tenantAndUsername[0];
             username = tenantAndUsername[1];
         }
 
-        return new DeviceCredentials(tenant, username, password, appKey, "", pageSize);
+        return new DeviceCredentials(tenant, username, password, appKey, null, pageSize);
+    }
+
+    public static String[] splitUsername(String username) {
+        return username.split(LOGIN_SEPARATOR);
     }
 
     public static String[] decode(String authorization) {
@@ -96,7 +106,7 @@ public class DeviceCredentials {
         return appKey;
     }
 
-    public String getDeviceId() {
+    public ID getDeviceId() {
         return deviceId;
     }
 
@@ -116,4 +126,5 @@ public class DeviceCredentials {
     public String toString() {
         return tenant;
     }
+
 }
