@@ -13,10 +13,22 @@
 		<dependency>
 			<groupId>com.nsn.cumulocity.clients-java</groupId>
 			<artifactId>java-client</artifactId>
+			<exclusions>
+				<exclusion>
+					<artifactId>jsr311-api</artifactId>
+					<groupId>javax.ws.rs</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.nsn.cumulocity.model</groupId>
 			<artifactId>device-capability-model</artifactId>
+			<exclusions>
+				<exclusion>
+					<artifactId>jsr311-api</artifactId>
+					<groupId>javax.ws.rs</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.google.guava</groupId>
@@ -27,28 +39,26 @@
 			<artifactId>logback-classic</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.glassfish.jersey.ext</groupId>
+			<artifactId>jersey-spring3</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jersey.media</groupId>
+			<artifactId>jersey-media-json-jackson</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jersey.containers</groupId>
+			<artifactId>jersey-container-grizzly2-servlet</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.grizzly</groupId>
+			<artifactId>grizzly-http-servlet-server</artifactId>
+			<version>2.3.14</version>
+		</dependency>
+		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-all</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.easytesting</groupId>
-			<artifactId>fest-assert</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>io.netty</groupId>
-			<artifactId>netty-codec</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>io.netty</groupId>
-			<artifactId>netty-transport</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>io.netty</groupId>
-			<artifactId>netty-handler</artifactId>
-		</dependency>
+
 	</dependencies>
 </project>
