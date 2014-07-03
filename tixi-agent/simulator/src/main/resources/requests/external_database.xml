@@ -1,25 +1,62 @@
-[
-<GetConfig>
-    <External>
-
-        <Bus _="COM3" family="M-Bus" Product="M-Bus Standard"
-            protocol="Meterbus" Mem="123000" baud="2400" handshake="none"
-            type="Master" AddProperties="Name,TimeStamp">
-            <Device _="0" Name="DHZ-1" NameUser="DHZ-1" Pollrate="1s"
-                PrimaryAddr="62">
-                <Energie _="value" Name="Energie" simpleType="meterbus"
-                    ind="1" size="13" exp="-3" acc="R" />
-                <Spannung _="value" Name="Spannung" simpleType="meterbus"
-                    ind="3" size="13" exp="-3" acc="R" format="F.1;" />
-                <Strom _="value" Name="Strom" simpleType="meterbus"
-                    ind="4" size="13" exp="-3" acc="R" format="F.1;" />
-                <Leistung _="value" Name="Leistung" simpleType="meterbus"
-                    ind="5" size="13" acc="R" def="-1" format="{=-1};{};%%" />
-                <Seriennummer _="value" Name="Seriennummer"
-                    simpleType="meterbus" ind="6" size="13" acc="R" />
-            </Device>
-        </Bus>
-
-    </External>
-</GetConfig>
-]
+<External>
+<Bus Name="M-Bus" _="COM3" family="M-Bus" Product="M-Bus Standard" protocol="Meterbus" Mem="123000" baud="2400" handshake="none" type="Master" AddProperties="Name,TimeStamp">
+<Device Name="DHZ-1" NameUser="DHZ-1" _="0" Pollrate="1s" PrimaryAddr="62">
+<Energie _="value" Name="Energie" simpleType="meterbus" ind="1" size="13" exp="-3" acc="R"/>
+<Spannung _="value" Name="Spannung" simpleType="meterbus" ind="3" size="13" exp="-3" acc="R" format="F.1;"/>
+<Strom _="value" Name="Strom" simpleType="meterbus" ind="4" size="13" exp="-3" acc="R" format="F.1;"/>
+<Leistung _="value" Name="Leistung" simpleType="meterbus" ind="5" size="13" acc="R" def="-1" format="{=-1};{};%%"/>
+<Seriennummer _="value" Name="Seriennummer" simpleType="meterbus" ind="6" size="13" acc="R"/>
+</Device>
+<Device Name="DHZ-2" NameUser="DHZ-2" _="1" Pollrate="1s" PrimaryAddr="8">
+<Energie _="value" Name="Energie" simpleType="meterbus" ind="1" size="13" exp="-3" acc="R"/>
+<Spannung _="value" Name="Spannung" simpleType="meterbus" ind="3" size="13" exp="-3" acc="R" format="F.1;"/>
+<Strom _="value" Name="Strom" simpleType="meterbus" ind="4" size="13" exp="-3" acc="R" format="F.1;"/>
+<Leistung _="value" Name="Leistung" simpleType="meterbus" ind="5" size="13" acc="R" def="-1" format="{=-1};{};%%"/>
+<Seriennummer _="value" Name="Seriennummer" simpleType="meterbus" ind="6" size="13" acc="R"/>
+</Device>
+<Device Name="DHZ-3" NameUser="DHZ-3" _="2" Pollrate="1s" PrimaryAddr="3">
+<Energie _="value" Name="Energie" simpleType="meterbus" ind="1" size="13" exp="-3" acc="R"/>
+<Spannung _="value" Name="Spannung" simpleType="meterbus" ind="3" size="13" exp="-3" acc="R" format="F.1;"/>
+<Strom _="value" Name="Strom" simpleType="meterbus" ind="4" size="13" exp="-3" acc="R" format="F.1;"/>
+<Leistung _="value" Name="Leistung" simpleType="meterbus" ind="5" size="13" acc="R" def="-1" format="{=-1};{};%%"/>
+<Seriennummer _="value" Name="Seriennummer" simpleType="meterbus" ind="6" size="13" acc="R"/>
+</Device>
+<Device Name="WZ" NameUser="WZ" _="3" Pollrate="1s" PrimaryAddr="10">
+<Volumen simpleType="meterbus" acc="R" ind="2" exp="-6" size="13" format="F.3"/>
+<Seriennummer simpleType="meterbus" acc="R" ind="1" size="13"/>
+</Device>
+<Device Name="Temp_Outside" NameUser="Temp_Outside" _="4" Pollrate="1s" SecondaryAddr="25000448">
+<Humidity _="value" Name="Humidity - Outside" simpleType="meterbus" ind="2" size="13" exp="-2" acc="R" format="F,;%% %"/>
+<Temperatur _="value" Name="Temperatur - Outside" simpleType="meterbus" ind="5" size="13" exp="-3" acc="R" format="F,;%%°C"/>
+</Device>
+<Device Name="Temp_Sales" NameUser="Temp_Sales" _="5" Pollrate="1s" SecondaryAddr="54000481">
+<Humidity _="value" Name="Humidity - Sales room" simpleType="meterbus" ind="2" size="13" exp="-2" acc="R" format="F,;%% %"/>
+<Temperatur _="value" Name="Temperatur - Sales room" simpleType="meterbus" ind="5" size="13" exp="-3" acc="R" format="F,;%%°C"/>
+</Device>
+<Device Name="Temp_Meeting" NameUser="Temp_Meeting" _="6" Pollrate="1s" SecondaryAddr="24009165">
+<Humidity _="value" Name="Humidity - Meeting room" simpleType="meterbus" ind="2" size="13" exp="-2" acc="R" format="F,;%% %"/>
+<Temperatur _="value" Name="Temperatur - Meeting room" simpleType="meterbus" ind="5" size="13" exp="-3" acc="R" format="F,;%%°C"/>
+</Device>
+</Bus>
+<Bus _="COM2" Name="COM2" protocol="DIN1107,D0" baud="9600" handshake="none" format="7E1" type="Master" AddProperties="Name,TimeStamp">
+<Device _="1" Name="EHZ-Haupt" NameUser="EHZ-Haupt" Timeout="10s">
+<Eigentumsnummer _="Text" Name="Eigentumsnummer" obis="1-0:0.0.0" acc="R" simpleType="String" size="16"/>
+<Energie _="Count" Name="Energie" obis="1-0:1.8.1" acc="R" simpleType="Double" precision="-3" def="-1" format="{=-1.000000};{}F.3"/>
+</Device>
+</Bus>
+<Bus _="COM1" Name="COM1" protocol="DIN1107,D0" baud="9600" handshake="none" format="7E1" type="Master" AddProperties="Name,TimeStamp">
+<Device _="1" Name="EHZ-EG" NameUser="EHZ-EG" Timeout="10s">
+<Eigentumsnummer _="Text" Name="Eigentumsnummer" obis="1-0:0.0.0" acc="R" simpleType="String" size="16"/>
+<Energie _="Count" Name="Energie" obis="1-0:1.8.1" acc="R" simpleType="Double" precision="-3" def="-1" format="{=-1.000000};{}F.3"/>
+<Spannung_L1 _="Count" Name="Spannung Phase 1" obis="1-0:32.7.255" acc="R" simpleType="Double" def="-1" format="{=-1.000000};{}F.3"/>
+<Spannung_L2 _="Count" Name="Spannung Phase 2" obis="1-0:52.7.255" acc="R" simpleType="Double" def="-1" format="{=-1.000000};{}F.3"/>
+<Spannung_L3 _="Count" Name="Spannung Phase 3" obis="1-0:72.7.255" acc="R" simpleType="Double" def="-1" format="{=-1.000000};{}F.3"/>
+<Strom_L1 _="Count" Name="Strom Phase 1" obis="1-0:31.7.255" acc="R" simpleType="Double" def="-1" format="{=-1.000000};{}F.3"/>
+<Strom_L2 _="Count" Name="Strom Phase 2" obis="1-0:51.7.255" acc="R" simpleType="Double" def="-1" format="{=-1.000000};{}F.3"/>
+<Strom_L3 _="Count" Name="Strom Phase 3" obis="1-0:71.7.255" acc="R" simpleType="Double" def="-1" format="{=-1.000000};{}F.3"/>
+<Leistung_L1 _="Count" Name="Leistung Phase 1" obis="1-0:21.7.255" acc="R" simpleType="Double" def="-1" format="{=-1.000000};{}F.0"/>
+<Leistung_L2 _="Count" Name="Leistung Phase 2" obis="1-0:41.7.255" acc="R" simpleType="Double" def="-1" format="{=-1.000000};{}F.0"/>
+<Leistung_L3 _="Count" Name="Leistung Phase 3" obis="1-0:61.7.255" acc="R" simpleType="Double" def="-1" format="{=-1.000000};{}F.0"/>
+</Device>
+</Bus>
+</External>

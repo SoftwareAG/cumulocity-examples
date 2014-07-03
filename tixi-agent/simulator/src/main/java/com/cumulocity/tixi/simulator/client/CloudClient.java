@@ -69,12 +69,6 @@ public class CloudClient {
         sendMultipartRequest(response, "log_definition.xml");
     }
     
-    public void sendHeartbeat(TixiResponse response) {
-        client.target(baseUrl + String.format(
-                "/Tixi/heartbeat?serial={serial}&deviceID={deviceID}&user={user}&password={password}",
-                DEVICE_SERIAL, credentials.deviceID, credentials.user, credentials.password)).request().get();
-    }
-
     private void sendMultipartRequest(TixiResponse response, String filename) {
         FormDataMultiPart multipart = null;
         try {
