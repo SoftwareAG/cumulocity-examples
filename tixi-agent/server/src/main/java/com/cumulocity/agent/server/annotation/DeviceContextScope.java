@@ -5,12 +5,14 @@ import static org.springframework.context.annotation.ScopedProxyMode.TARGET_CLAS
 
 import java.lang.annotation.*;
 
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 
 @Target({ ElementType.TYPE, ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Scope(value = CONTEXT_SCOPE, proxyMode = TARGET_CLASS)
+@Lazy
 public @interface DeviceContextScope {
     String value() default "";
 }

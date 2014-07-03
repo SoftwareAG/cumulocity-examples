@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 
 import com.cumulocity.agent.server.annotation.DeviceContextScope;
@@ -54,7 +53,7 @@ public class CumulocityClientConfiguration {
 
     @Bean
     @Autowired
-    @DeviceContextScope
+    @Scope(value = CONTEXT_SCOPE, proxyMode = TARGET_CLASS)
     public CumulocityClientFactoryBean cumulocityClient(DeviceContextService contextService) {
         return new CumulocityClientFactoryBean(contextService, cumulocityClientCache());
     }
@@ -62,7 +61,6 @@ public class CumulocityClientConfiguration {
     @Bean
     @Autowired
     @DeviceContextScope
-    @Lazy
     public InventoryApi inventoryApi(Platform platform) throws SDKException {
         return platform.getInventoryApi();
     }
@@ -70,7 +68,6 @@ public class CumulocityClientConfiguration {
     @Bean
     @Autowired
     @DeviceContextScope
-    @Lazy
     public DeviceCredentialsApi deviceCredentialsApi(Platform platform) throws SDKException {
         return platform.getDeviceCredentialsApi();
     }
@@ -78,7 +75,6 @@ public class CumulocityClientConfiguration {
     @Bean
     @Autowired
     @DeviceContextScope
-    @Lazy
     public EventApi eventApi(Platform platform) throws SDKException {
         return platform.getEventApi();
     }
@@ -86,7 +82,6 @@ public class CumulocityClientConfiguration {
     @Bean
     @Autowired
     @DeviceContextScope
-    @Lazy
     public MeasurementApi measurementApi(Platform platform) throws SDKException {
         return platform.getMeasurementApi();
     }
@@ -94,7 +89,6 @@ public class CumulocityClientConfiguration {
     @Bean
     @Autowired
     @DeviceContextScope
-    @Lazy
     public IdentityApi identityApi(Platform platform) throws SDKException {
         return platform.getIdentityApi();
     }
@@ -102,7 +96,6 @@ public class CumulocityClientConfiguration {
     @Bean
     @Autowired
     @DeviceContextScope
-    @Lazy
     public AlarmApi alarmApi(Platform platform) throws SDKException {
         return platform.getAlarmApi();
     }
@@ -110,7 +103,6 @@ public class CumulocityClientConfiguration {
     @Bean
     @Autowired
     @DeviceContextScope
-    @Lazy
     public AuditRecordApi auditRecordApi(Platform platform) throws SDKException {
         return platform.getAuditRecordApi();
     }
@@ -118,7 +110,6 @@ public class CumulocityClientConfiguration {
     @Bean
     @Autowired
     @DeviceContextScope
-    @Lazy
     public DeviceControlApi deviceControlApi(Platform platform) throws SDKException {
         return platform.getDeviceControlApi();
     }
@@ -126,7 +117,6 @@ public class CumulocityClientConfiguration {
     @Bean
     @Autowired
     @DeviceContextScope
-    @Lazy
     public CepApi cepApi(Platform platform) throws SDKException {
         return platform.getCepApi();
     }

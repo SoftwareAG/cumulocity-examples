@@ -10,6 +10,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.glassfish.jersey.server.ResourceConfig;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
@@ -40,9 +41,8 @@ public class RestServerBuilder {
 
     public Server build() {
 
-        GenericApplicationContext parentBeanFactory = new GenericApplicationContext();
-        parentBeanFactory.refresh();
-        parentBeanFactory.getBeanFactory().registerSingleton("resourceConfiguration", new ResourceConfig() {
+        ConfigurableApplicationContext parentContext = builder.getContext();
+        parentContext.getBeanFactory().registerSingleton("resourceConfiguration", new ResourceConfig() {
             {
                 for (Class<?> component : components) {
                     register(component);
@@ -53,15 +53,12 @@ public class RestServerBuilder {
 
         AnnotationConfigWebApplicationContext applicationContext = new AnnotationConfigWebApplicationContext();
 
-        applicationContext.setParent(parentBeanFactory);
-        applicationContext.register(join(annotatedClasses(JaxrsServerConfiguration.class), builder.getAnnotatedClasses()));
+        applicationContext.setParent(parentContext );
+        applicationContext.register(annotatedClasses(JaxrsServerConfiguration.class));
         if (!packages.isEmpty()) {
             applicationContext.scan(from(packages).toArray(String.class));
         }
-        final Properties configuration = new Properties();
-        configuration.setProperty("server.host", builder.address().getHostString());
-        configuration.setProperty("server.port", String.valueOf(builder.address().getPort()));
-        applicationContext.getEnvironment().getPropertySources().addLast(new PropertiesPropertySource("base-configuration", configuration));
+      
         applicationContext.refresh();
         return applicationContext.getBean(Server.class);
     }

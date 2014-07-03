@@ -2,9 +2,11 @@ package com.cumulocity.agent.server.jaxrs;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.EnumSet;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.servlet.DispatcherType;
 
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.grizzly.servlet.WebappContext;
@@ -16,6 +18,7 @@ import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.cumulocity.agent.server.Server;
+import com.cumulocity.agent.server.context.ContextFilter;
 import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.AbstractService;
 import com.google.common.util.concurrent.Service;
@@ -40,6 +43,8 @@ public class JaxrsServer implements Server {
             WebappContext context = new WebappContext("agent", "/agent");
             resourceConfig.register(RequestContextFilter.class);
             context.addServlet("jersey-servlet", new ServletContainer(resourceConfig)).addMapping("/*");
+            context.addFilter("deviceContextFilter", applicationContext.getBean(ContextFilter.class)).addMappingForServletNames(null,
+                    "jersey-servlet");
             context.addListener(new ContextLoaderListener(applicationContext));
             context.deploy(server);
             try {
