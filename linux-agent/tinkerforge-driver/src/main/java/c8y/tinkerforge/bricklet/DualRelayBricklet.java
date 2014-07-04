@@ -44,7 +44,7 @@ public class DualRelayBricklet implements Driver {
 	private static final String SET_STATE_OP_TYPE = "c8y_set_state";
 	
 	private static final Logger logger = LoggerFactory
-			.getLogger(RemoteSwitchBricklet.class);
+			.getLogger(DualRelayBricklet.class);
 	
 	private String id;
 	private BrickletDualRelay dualRelay;
