@@ -38,6 +38,10 @@ public class CloudClient {
     private TixiCredentials credentials;
 
     private ResponseHandlerFactory responseHandlerFactory = new ResponseHandlerFactory();
+    
+    public CloudClient(String baseUrl) {
+        this.baseUrl = baseUrl;
+    }
 
     private Client client = ClientBuilder.newClient().register(JacksonJsonProvider.class).register(MultiPartFeature.class)
             .register(SseFeature.class);
