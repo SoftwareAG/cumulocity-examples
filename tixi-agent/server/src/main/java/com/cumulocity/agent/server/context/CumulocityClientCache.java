@@ -22,7 +22,7 @@ public class CumulocityClientCache extends CacheLoader<DeviceCredentials, Platfo
         this.host = host;
         this.proxy = Optional.fromNullable(proxy);
         this.proxyPort = Optional.fromNullable(proxyPort);
-        this.cache = newBuilder().maximumSize(100).build(this);
+        this.cache = newBuilder().build(this);
     }
 
     public PlatformImpl get(DeviceCredentials login) throws Exception {

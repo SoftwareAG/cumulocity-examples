@@ -1,34 +1,28 @@
 package com.cumulocity.agent.server.repository;
 
-import static com.cumulocity.tixi.server.model.ManagedObjects.asManagedObject;
-
 import javax.inject.Inject;
+import javax.inject.Named;
 
-import com.cumulocity.agent.server.annotation.Named;
 import com.cumulocity.model.ID;
 import com.cumulocity.model.idtype.GId;
-import com.cumulocity.rest.representation.identity.ExternalIDRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
-import com.cumulocity.sdk.client.identity.IdentityApi;
 import com.cumulocity.sdk.client.inventory.InventoryApi;
-import com.cumulocity.tixi.server.model.SerialNumber;
 
 @Named
 public class InventoryRepository {
 
     private final InventoryApi inventoryApi;
 
-    private final IdentityApi identityApi;
+    private final IdentityRepository identityRepository;
 
     @Inject
-    public InventoryRepository(InventoryApi inventoryApi, IdentityApi identityApi) {
+    public InventoryRepository(InventoryApi inventoryApi, IdentityRepository identityRepository) {
         this.inventoryApi = inventoryApi;
-        this.identityApi = identityApi;
+        this.identityRepository = identityRepository;
     }
 
     public ManagedObjectRepresentation findByExternalId(ID externalID) {
-        final ExternalIDRepresentation externalIDRepresentation = identityApi.getExternalId(externalID);
-        return findById(externalIDRepresentation.getManagedObject().getId());
+        return findById(identityRepository.find(externalID));
     }
 
     public ManagedObjectRepresentation findById(GId id) {
@@ -43,11 +37,4 @@ public class InventoryRepository {
         }
     }
 
-    public ExternalIDRepresentation createExternalId(GId id, SerialNumber serialNumber) {
-        ExternalIDRepresentation externalIDRepresentation = new ExternalIDRepresentation();
-        externalIDRepresentation.setExternalId(serialNumber.getValue());
-        externalIDRepresentation.setType(serialNumber.getType());
-        externalIDRepresentation.setManagedObject(asManagedObject(id));
-        return identityApi.create(externalIDRepresentation);
-    }
 }

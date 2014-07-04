@@ -26,7 +26,7 @@ public class DeviceContextServiceImpl implements DeviceContextService {
     }
 
     @Override
-    public DeviceCredentials getCumulocityLogin() {
+    public DeviceCredentials getCredentials() {
         return getContext().getLogin();
     }
 

@@ -1,4 +1,4 @@
-package com.cumulocity.agent.server.annotation;
+package c8y.inject;
 
 import static com.cumulocity.agent.server.context.DeviceContextScope.CONTEXT_SCOPE;
 import static org.springframework.context.annotation.ScopedProxyMode.TARGET_CLASS;

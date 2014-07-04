@@ -6,13 +6,10 @@ import static java.lang.System.arraycopy;
 import static java.util.Arrays.asList;
 
 import java.util.HashSet;
-import java.util.Properties;
 import java.util.Set;
 
 import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 
 import com.cumulocity.agent.server.config.JaxrsServerConfiguration;

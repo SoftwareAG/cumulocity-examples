@@ -6,7 +6,7 @@ public interface DeviceContextService {
 
     DeviceContext getContext();
 
-    DeviceCredentials getCumulocityLogin();
+    DeviceCredentials getCredentials();
 
     void runWithinContext(DeviceContext context, Runnable task);
 

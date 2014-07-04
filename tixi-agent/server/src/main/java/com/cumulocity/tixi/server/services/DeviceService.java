@@ -8,10 +8,10 @@ import static jersey.repackaged.com.google.common.base.Throwables.propagate;
 import java.util.concurrent.Callable;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import c8y.IsDevice;
 
-import com.cumulocity.agent.server.annotation.Named;
 import com.cumulocity.agent.server.context.DeviceContext;
 import com.cumulocity.agent.server.context.DeviceContextService;
 import com.cumulocity.agent.server.context.DeviceCredentials;
@@ -27,7 +27,7 @@ import com.cumulocity.tixi.server.model.SerialNumber;
 import com.cumulocity.tixi.server.model.TixiDeviceCredentails;
 
 @Named
-public class TixiDeviceService {
+public class DeviceService {
 
     private final InventoryRepository inventoryRepository;
 
@@ -38,7 +38,7 @@ public class TixiDeviceService {
     private final DeviceContextService contextService;
 
     @Inject
-    public TixiDeviceService(InventoryRepository inventoryRepository, IdentityRepository identityRepository,
+    public DeviceService(InventoryRepository inventoryRepository, IdentityRepository identityRepository,
             DeviceCredentialsApi deviceCredentials, DeviceContextService contextService) {
         this.inventoryRepository = inventoryRepository;
         this.identityRepository = identityRepository;
@@ -77,7 +77,7 @@ public class TixiDeviceService {
 
         final ManagedObjectRepresentation managedObject = inventoryRepository.save(managedObjectRepresentation);
 
-        inventoryRepository.createExternalId(managedObject.getId(), serialNumber);
+        identityRepository.createExternalId(managedObject.getId(), serialNumber);
         return managedObject;
     }
 

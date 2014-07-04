@@ -1,12 +1,17 @@
 package com.cumulocity.tixi.server.resources;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+
 import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 public class JsonResponse {
+
+    @JsonInclude(NON_NULL)
     private String request;
 
     private Map<String, Object> properties = new HashMap<String, Object>();

@@ -7,7 +7,7 @@ public class TixiAgent {
 
     public static void main(String[] args) {
         final Server server = ServerBuilder.on(8080)
-                .application("tixi")
+                .application("Tixi")
                 .loadConfiguration("client")
                 .rest()
                 .scan("com.cumulocity.tixi.server.resources")

@@ -1,19 +1,22 @@
 package com.cumulocity.agent.server.config;
 
-import static com.cumulocity.agent.server.context.DeviceContextScope.CONTEXT_SCOPE;
-import static org.springframework.context.annotation.ScopedProxyMode.TARGET_CLASS;
+import javax.inject.Named;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
 
-import com.cumulocity.agent.server.annotation.DeviceContextScope;
+import c8y.inject.DeviceContextScope;
+
 import com.cumulocity.agent.server.context.CumulocityClientCache;
 import com.cumulocity.agent.server.context.DeviceContextService;
 import com.cumulocity.agent.server.context.DeviceCredentials;
+import com.cumulocity.agent.server.context.scope.notifications.DeviceControlNotificationsSubscriberSupplier;
+import com.cumulocity.agent.server.context.scope.notifications.NotificationsSubscriberFactoryBean;
+import com.cumulocity.model.idtype.GId;
+import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.Platform;
 import com.cumulocity.sdk.client.PlatformImpl;
 import com.cumulocity.sdk.client.SDKException;
@@ -26,6 +29,8 @@ import com.cumulocity.sdk.client.event.EventApi;
 import com.cumulocity.sdk.client.identity.IdentityApi;
 import com.cumulocity.sdk.client.inventory.InventoryApi;
 import com.cumulocity.sdk.client.measurement.MeasurementApi;
+import com.cumulocity.sdk.client.notification.Subscriber;
+import com.google.common.base.Supplier;
 
 @Configuration
 public class CumulocityClientConfiguration {
@@ -53,7 +58,7 @@ public class CumulocityClientConfiguration {
 
     @Bean
     @Autowired
-    @Scope(value = CONTEXT_SCOPE, proxyMode = TARGET_CLASS)
+    @DeviceContextScope
     public CumulocityClientFactoryBean cumulocityClient(DeviceContextService contextService) {
         return new CumulocityClientFactoryBean(contextService, cumulocityClientCache());
     }
@@ -121,6 +126,19 @@ public class CumulocityClientConfiguration {
         return platform.getCepApi();
     }
 
+    @Bean
+    @Autowired
+    @DeviceContextScope
+    public NotificationsSubscriberFactoryBean<GId, OperationRepresentation> deviceControlNotificationsSubscriber(
+            final DeviceContextService contextService, final DeviceControlApi deviceControlApi) throws SDKException {
+        return subscriberFactory(contextService, new DeviceControlNotificationsSubscriberSupplier(contextService, deviceControlApi));
+    }
+
+    private <I, M> NotificationsSubscriberFactoryBean<I, M> subscriberFactory(final DeviceContextService contextService,
+            Supplier<Subscriber<I, M>> supplier) {
+        return new NotificationsSubscriberFactoryBean<I, M>(contextService, supplier);
+    }
+
     public static class CumulocityClientFactoryBean implements FactoryBean<PlatformImpl> {
 
         private final DeviceContextService contextService;
@@ -134,8 +152,7 @@ public class CumulocityClientConfiguration {
 
         @Override
         public PlatformImpl getObject() throws Exception {
-            DeviceCredentials login = contextService.getCumulocityLogin();
-            return cache.get(login);
+            return cache.get(contextService.getCredentials());
         }
 
         @Override

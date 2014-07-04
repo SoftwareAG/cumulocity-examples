@@ -1,6 +1,5 @@
 package com.cumulocity.agent.server;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.LinkedHashSet;
 import java.util.Properties;
@@ -87,8 +86,8 @@ public class ServerBuilder {
 
     private Properties loadResource(AnnotationConfigApplicationContext applicationContext, String resource) {
         ResourceLoader loader = new DefaultResourceLoader(applicationContext.getClassLoader());
-        PropertiesFactoryBean factoryBean = new PropertiesFactoryBean(applicationId, resource, applicationContext.getEnvironment(), loader,
-                false);
+        PropertiesFactoryBean factoryBean = new PropertiesFactoryBean(applicationId.toLowerCase(), resource,
+                applicationContext.getEnvironment(), loader, false);
         try {
             return factoryBean.getObject();
         } catch (Exception e) {

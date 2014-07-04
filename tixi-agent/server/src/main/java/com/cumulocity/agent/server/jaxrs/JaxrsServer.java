@@ -2,11 +2,9 @@ package com.cumulocity.agent.server.jaxrs;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.EnumSet;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.servlet.DispatcherType;
 
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.grizzly.servlet.WebappContext;

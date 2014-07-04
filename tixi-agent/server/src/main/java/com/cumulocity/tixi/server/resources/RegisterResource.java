@@ -4,26 +4,26 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
-import com.cumulocity.agent.server.annotation.Named;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.tixi.server.model.SerialNumber;
 import com.cumulocity.tixi.server.model.TixiDeviceCredentails;
-import com.cumulocity.tixi.server.services.TixiDeviceService;
+import com.cumulocity.tixi.server.services.DeviceService;
 
 @Path("/register")
 @Named
 public class RegisterResource {
 
-    private final TixiDeviceService deviceService;
+    private final DeviceService deviceService;
 
     @Inject
-    public RegisterResource(TixiDeviceService deviceService) {
+    public RegisterResource(DeviceService deviceService) {
         this.deviceService = deviceService;
     }
 
