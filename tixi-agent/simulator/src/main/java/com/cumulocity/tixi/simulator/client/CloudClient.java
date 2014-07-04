@@ -37,10 +37,8 @@ public class CloudClient {
 
     private ResponseHandlerFactory responseHandlerFactory = new ResponseHandlerFactory();
 
-    private Client client = ClientBuilder.newClient()
-                                .register(JacksonJsonProvider.class)
-                                .register(MultiPartFeature.class)
-                                .register(SseFeature.class);
+    private Client client = ClientBuilder.newClient().register(JacksonJsonProvider.class).register(MultiPartFeature.class)
+            .register(SseFeature.class);
 
     public void sendBootstrapRequest() {
         Response response = client.target(baseUrl + "/Tixi/register?serial=" + DEVICE_SERIAL).request().get();
@@ -64,23 +62,38 @@ public class CloudClient {
     public void postExternalDatabaseData(TixiResponse response) {
         sendMultipartRequest(response, "external_database.xml");
     }
-    
+
     public void postLogDefinitionData(TixiResponse response) {
         sendMultipartRequest(response, "log_definition.xml");
     }
-    
+
+    public void postLogFileData() {
+        sendMultipartRequest("sample_data.xml");
+    }
+
+    private void sendMultipartRequest(String filename) {
+        String requestUrl = baseUrl
+                + String.format("/Tixi/senddata?serial={serial}&deviceID={deviceID}&user={user}&password={password}", DEVICE_SERIAL,
+                        credentials.deviceID, credentials.user, credentials.password);
+        sendMultipartRequest(requestUrl, filename);
+
+    }
+
     private void sendMultipartRequest(TixiResponse response, String filename) {
+        String requestUrl = baseUrl
+                + String.format("/Tixi/senddata?serial={serial}&deviceID={deviceID}&user={user}&password={password}&requestId={requestId}",
+                        DEVICE_SERIAL, credentials.deviceID, credentials.user, credentials.password, response.getRequestId());
+        sendMultipartRequest(requestUrl, filename);
+    }
+
+    private void sendMultipartRequest(String requestUrl, String filename) {
         FormDataMultiPart multipart = null;
         try {
             multipart = new FormDataMultiPart();
-            FileDataBodyPart filePart = new FileDataBodyPart("filename", new File(this.getClass()
-                    .getResource("/requests/" + filename).getFile()));
+            FileDataBodyPart filePart = new FileDataBodyPart("filename", new File(this.getClass().getResource("/requests/" + filename)
+                    .getFile()));
             MultiPart bodyPart = multipart.bodyPart(filePart);
-            WebTarget target = client
-                    .target(baseUrl
-                            + String.format(
-                                    "/Tixi/senddata?serial={serial}&deviceID={deviceID}&user={user}&password={password}&requestId={requestId}",
-                                    DEVICE_SERIAL, credentials.deviceID, credentials.user, credentials.password, response.getRequestId()));
+            WebTarget target = client.target(requestUrl);
             target.request().post(Entity.entity(bodyPart, bodyPart.getMediaType()));
         } finally {
             if (multipart != null) {
