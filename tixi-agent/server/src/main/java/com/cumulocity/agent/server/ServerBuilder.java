@@ -54,7 +54,16 @@ public class ServerBuilder {
     public <T> SingleProtocolServerBuilder protocol(Class<? extends ProtocolDecoder<T>> decoder, Class<? extends ProtocolEncoder<T>> encoder) {
         return new SingleProtocolServerBuilder(decoder, encoder, this);
     }
-
+    /**
+     *  file:/etc/{applicationId}/{resource}-default.properties
+     *  file:/etc/{applicationId}/{resource}.properties
+     *  file:{user.home}/.{applicationId}/{resource}.properties
+     *  classpath:META-INF/{applicationId}/{resource}.properties
+     *  classpath:META-INF/spring/{resource}.properties
+     * 
+     * @param resource
+     * @return
+     */
     public ServerBuilder loadConfiguration(String resource) {
         configurations.add(resource);
         return this;

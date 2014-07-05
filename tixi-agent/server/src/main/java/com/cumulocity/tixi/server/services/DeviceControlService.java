@@ -51,10 +51,7 @@ public class DeviceControlService {
         final Subscription<GId> subscription = repository.subscribe(deviceId, new SubscriptionListener<GId, OperationRepresentation>() {
             @Override
             public void onNotification(final Subscription<GId> subscription, OperationRepresentation notification) {
-                final OperationRepresentation executingOperation = Operations.asOperation(notification.getId());
-                executingOperation.setStatus(OperationStatus.EXECUTING.name());
-                repository.save(executingOperation);
-                messageChannel.send(new SubscriberMessageChannelContext(subscription), executingOperation);
+                execute(messageChannel, subscription, notification);
             }
 
             @Override
@@ -68,9 +65,17 @@ public class DeviceControlService {
 
         for (OperationRepresentation operation : repository.findAllByFilter(new OperationFilter().byDevice(GId.asString(deviceId))
                 .byStatus(PENDING))) {
-            messageChannel.send(new SubscriberMessageChannelContext(subscription), operation);
+            execute(messageChannel, subscription, operation);
         }
 
+    }
+
+    private void execute(final MessageChannel<OperationRepresentation> messageChannel, final Subscription<GId> subscription,
+            OperationRepresentation operation) {
+        final OperationRepresentation executingOperation = Operations.asOperation(operation.getId());
+        executingOperation.setStatus(OperationStatus.EXECUTING.name());
+        repository.save(executingOperation);
+        messageChannel.send(new SubscriberMessageChannelContext(subscription), operation);
     }
 
 }

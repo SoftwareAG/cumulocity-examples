@@ -50,12 +50,12 @@ public class RestServerBuilder {
 
         AnnotationConfigWebApplicationContext applicationContext = new AnnotationConfigWebApplicationContext();
 
-        applicationContext.setParent(parentContext );
+        applicationContext.setParent(parentContext);
         applicationContext.register(annotatedClasses(JaxrsServerConfiguration.class));
         if (!packages.isEmpty()) {
             applicationContext.scan(from(packages).toArray(String.class));
         }
-      
+
         applicationContext.refresh();
         return applicationContext.getBean(Server.class);
     }

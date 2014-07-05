@@ -35,7 +35,8 @@ public class JaxrsServer implements Server {
     private final WebApplicationContext applicationContext;
 
     private final Service service = new AbstractService() {
-        HttpServer server;
+
+       private HttpServer server;
 
         @Override
         protected void doStart() {
@@ -50,7 +51,7 @@ public class JaxrsServer implements Server {
             try {
                 server.start();
             } catch (IOException e) {
-                Throwables.propagate(e);
+                throw Throwables.propagate(e);
             }
         }
 

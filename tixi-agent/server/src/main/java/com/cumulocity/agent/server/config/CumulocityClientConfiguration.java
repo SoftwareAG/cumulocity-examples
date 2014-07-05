@@ -1,7 +1,5 @@
 package com.cumulocity.agent.server.config;
 
-import javax.inject.Named;
-
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,7 +10,6 @@ import c8y.inject.DeviceContextScope;
 
 import com.cumulocity.agent.server.context.CumulocityClientCache;
 import com.cumulocity.agent.server.context.DeviceContextService;
-import com.cumulocity.agent.server.context.DeviceCredentials;
 import com.cumulocity.agent.server.context.scope.notifications.DeviceControlNotificationsSubscriberSupplier;
 import com.cumulocity.agent.server.context.scope.notifications.NotificationsSubscriberFactoryBean;
 import com.cumulocity.model.idtype.GId;

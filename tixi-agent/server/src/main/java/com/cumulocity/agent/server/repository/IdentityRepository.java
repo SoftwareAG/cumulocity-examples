@@ -9,7 +9,6 @@ import com.cumulocity.model.ID;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.identity.ExternalIDRepresentation;
 import com.cumulocity.sdk.client.identity.IdentityApi;
-import com.cumulocity.tixi.server.model.SerialNumber;
 
 @Named
 public class IdentityRepository {
@@ -25,10 +24,10 @@ public class IdentityRepository {
         return identityApi.getExternalId(id).getManagedObject().getId();
     }
 
-    public ExternalIDRepresentation createExternalId(GId id, SerialNumber serialNumber) {
+    public ExternalIDRepresentation save(GId id, ID externalId) {
         ExternalIDRepresentation externalIDRepresentation = new ExternalIDRepresentation();
-        externalIDRepresentation.setExternalId(serialNumber.getValue());
-        externalIDRepresentation.setType(serialNumber.getType());
+        externalIDRepresentation.setExternalId(externalId.getValue());
+        externalIDRepresentation.setType(externalId.getType());
         externalIDRepresentation.setManagedObject(asManagedObject(id));
         return identityApi.create(externalIDRepresentation);
     }

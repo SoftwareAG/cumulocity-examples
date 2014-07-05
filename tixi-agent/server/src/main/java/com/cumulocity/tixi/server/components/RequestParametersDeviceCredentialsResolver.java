@@ -16,7 +16,6 @@ public class RequestParametersDeviceCredentialsResolver implements DeviceCredent
         final Optional<String> username = Optional.fromNullable(input.getParameter("user"));
         final Optional<String> password = Optional.fromNullable(input.getParameter("password"));
         final Optional<String> deviceId = Optional.fromNullable(input.getParameter("deviceID"));
-        final Optional<String> serial = Optional.fromNullable(input.getParameter("serial"));
         if (!username.isPresent()) {
             return Optional.<DeviceCredentials> absent();
         }

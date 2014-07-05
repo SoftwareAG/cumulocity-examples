@@ -77,7 +77,7 @@ public class DeviceService {
 
         final ManagedObjectRepresentation managedObject = inventoryRepository.save(managedObjectRepresentation);
 
-        identityRepository.createExternalId(managedObject.getId(), serialNumber);
+        identityRepository.save(managedObject.getId(), serialNumber);
         return managedObject;
     }
 
