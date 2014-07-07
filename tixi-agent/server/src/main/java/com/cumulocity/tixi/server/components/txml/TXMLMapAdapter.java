@@ -1,6 +1,5 @@
 package com.cumulocity.tixi.server.components.txml;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,11 +7,11 @@ import java.util.Map;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 import com.cumulocity.tixi.server.components.txml.TXMLMapAdapter.AdaptedMap;
-import com.cumulocity.tixi.server.model.txml.HasId;
+import com.cumulocity.tixi.server.model.txml.BaseItem;
 
-public class TXMLMapAdapter<E extends HasId, M extends AdaptedMap<E>> extends XmlAdapter<M, Map<String, E>> {
+public class TXMLMapAdapter<E extends BaseItem, M extends AdaptedMap<E>> extends XmlAdapter<M, Map<String, E>> {
 
-	public static interface AdaptedMap<K extends HasId> {
+	public static interface AdaptedMap<K extends BaseItem> {
 		
 		public abstract List<K> getItems();
 	}

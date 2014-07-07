@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElements;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -14,7 +13,7 @@ import com.cumulocity.tixi.server.components.txml.TXMLMapAdapter;
 import com.cumulocity.tixi.server.components.txml.TXMLMapAdapter.AdaptedMap;
 
 @XmlRootElement(name = "DataLogging")
-public class LogDefinitionItemSet implements HasId {
+public class LogDefinitionItemSet extends BaseItem {
 
 	public static class LogDefinitionItemAdaptedMap implements AdaptedMap<LogDefinitionItem> {
 
@@ -30,9 +29,6 @@ public class LogDefinitionItemSet implements HasId {
 		extends TXMLMapAdapter<LogDefinitionItem, LogDefinitionItemAdaptedMap> {
 	}
 
-	@XmlAttribute
-	private String id;
-
 	@XmlElement(name = "DataloggingItems")
 	@XmlJavaTypeAdapter(LogDefinitionItemMapAdapter.class)
 	private Map<String, LogDefinitionItem> items = new HashMap<>();
@@ -41,14 +37,6 @@ public class LogDefinitionItemSet implements HasId {
 	}
 
 	public LogDefinitionItemSet(String id) {
-		this.id = id;
-	}
-
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
 		this.id = id;
 	}
 

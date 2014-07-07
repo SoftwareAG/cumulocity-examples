@@ -7,11 +7,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import com.cumulocity.tixi.server.components.txml.LogDefinitionItemPathAdapter;
 
 @XmlRootElement(name = "DataLoggingItem")
-public class LogDefinitionItem implements HasId {
+public class LogDefinitionItem extends BaseItem {
 	
-	@XmlAttribute
-	private String id;
-
 	@XmlAttribute(name = "Name")
 	private String name;
 
@@ -69,14 +66,6 @@ public class LogDefinitionItem implements HasId {
 
 	public void setFormat(String format) {
 		this.format = format;
-	}
-
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
 	}
 
 	public LogDefinitionItemPath getPath() {
