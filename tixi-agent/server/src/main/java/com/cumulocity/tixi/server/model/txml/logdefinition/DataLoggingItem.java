@@ -10,7 +10,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class DataLoggingItem {
 	
 	@XmlAttribute
-	private String tagName;
+	private String id;
 
 	@XmlAttribute(name = "Name")
 	private String name;
@@ -70,12 +70,12 @@ public class DataLoggingItem {
 		this.format = format;
 	}
 
-	public String getTagName() {
-		return tagName;
+	public String getId() {
+		return id;
 	}
 
-	public void setTagName(String tagName) {
-		this.tagName = tagName;
+	public void setId(String id) {
+		this.id = id;
 	}
 
 	public String getPath() {
@@ -88,8 +88,7 @@ public class DataLoggingItem {
 
 	@Override
     public String toString() {
-	    return String.format("DataLoggingItem [value=%s, name=%s, type=%s, size=%s, exp=%s, format=%s, path=%s]", tagName, name, type, size,
-	            exp, format, path);
+	    return String.format("DataLoggingItem [id=%s, name=%s, type=%s, size=%s, exp=%s, format=%s, path=%s]", id, name, type, size, exp, format, path);
     }
 
 	@Override
@@ -98,7 +97,7 @@ public class DataLoggingItem {
 	    int result = 1;
 	    result = prime * result + exp;
 	    result = prime * result + ((format == null) ? 0 : format.hashCode());
-	    result = prime * result + ((tagName == null) ? 0 : tagName.hashCode());
+	    result = prime * result + ((id == null) ? 0 : id.hashCode());
 	    result = prime * result + ((name == null) ? 0 : name.hashCode());
 	    result = prime * result + ((path == null) ? 0 : path.hashCode());
 	    result = prime * result + size;
@@ -122,10 +121,10 @@ public class DataLoggingItem {
 			    return false;
 	    } else if (!format.equals(other.format))
 		    return false;
-	    if (tagName == null) {
-		    if (other.tagName != null)
+	    if (id == null) {
+		    if (other.id != null)
 			    return false;
-	    } else if (!tagName.equals(other.tagName))
+	    } else if (!id.equals(other.id))
 		    return false;
 	    if (name == null) {
 		    if (other.name != null)

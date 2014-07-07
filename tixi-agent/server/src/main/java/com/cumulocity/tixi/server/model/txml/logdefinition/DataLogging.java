@@ -15,17 +15,17 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class DataLogging {
 	
 	@XmlAttribute
-	private String tagName;
+	private String id;
 	
 	@XmlElements({ @XmlElement(name = "DataloggingItem") })
 	private List<DataLoggingItem> items = new ArrayList<>();
 
-	public String getTagName() {
-		return tagName;
+	public String getId() {
+		return id;
 	}
 
-	public void setTagName(String tagName) {
-		this.tagName = tagName;
+	public void setId(String id) {
+		this.id = id;
 	}
 
 	public List<DataLoggingItem> getItems() {
@@ -38,7 +38,7 @@ public class DataLogging {
 
 	@Override
     public String toString() {
-	    return String.format("DataLogging [tagName=%s, items=%s]", tagName, items);
+	    return String.format("DataLogging [id=%s, items=%s]", id, items);
     }
 
 	@Override
@@ -46,7 +46,7 @@ public class DataLogging {
 	    final int prime = 31;
 	    int result = 1;
 	    result = prime * result + ((items == null) ? 0 : items.hashCode());
-	    result = prime * result + ((tagName == null) ? 0 : tagName.hashCode());
+	    result = prime * result + ((id == null) ? 0 : id.hashCode());
 	    return result;
     }
 
@@ -64,10 +64,10 @@ public class DataLogging {
 			    return false;
 	    } else if (!items.equals(other.items))
 		    return false;
-	    if (tagName == null) {
-		    if (other.tagName != null)
+	    if (id == null) {
+		    if (other.id != null)
 			    return false;
-	    } else if (!tagName.equals(other.tagName))
+	    } else if (!id.equals(other.id))
 		    return false;
 	    return true;
     }

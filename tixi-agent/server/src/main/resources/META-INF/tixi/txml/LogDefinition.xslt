@@ -6,13 +6,13 @@
 			<Records>
 				<xsl:for-each select="LogDefinition/Records/*">
 					<Datalogging>
-						<xsl:attribute name="tagName">
+						<xsl:attribute name="id">
 		                  <xsl:value-of select="name()" />
 		                </xsl:attribute>
 						<xsl:for-each select="current()/*">
 							<DataloggingItem>
 								<xsl:copy-of select="@*" />
-								<xsl:attribute name="tagName">
+								<xsl:attribute name="id">
 				                  <xsl:value-of select="name()" />
 				              </xsl:attribute>
 							</DataloggingItem>

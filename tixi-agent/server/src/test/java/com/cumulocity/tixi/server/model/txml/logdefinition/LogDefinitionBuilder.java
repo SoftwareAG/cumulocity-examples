@@ -9,9 +9,9 @@ public class LogDefinitionBuilder {
 		return new LogDefinitionBuilder();
 	}
 
-	public LogDefinitionBuilder withNewDatalogging(String tagName) {
+	public LogDefinitionBuilder withNewDatalogging(String id) {
 		dataLogging = new DataLogging();
-		dataLogging.setTagName(tagName);
+		dataLogging.setId(id);
 		logDefinition.getDataLoggings().add(dataLogging);
 		return this;
 	}
