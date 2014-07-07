@@ -17,10 +17,6 @@
             <groupId>c8y.example</groupId>
             <artifactId>lx-driver</artifactId>
         </dependency>
-        <dependency>
-            <groupId>c8y.example</groupId>
-            <artifactId>lx-agent</artifactId>
-        </dependency>
     </dependencies>
 
 </project>

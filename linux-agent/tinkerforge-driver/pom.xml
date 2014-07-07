@@ -18,10 +18,6 @@
             <artifactId>lx-driver</artifactId>
         </dependency>
         <dependency>
-            <groupId>c8y.example</groupId>
-            <artifactId>lx-agent</artifactId>
-        </dependency>
-        <dependency>
 			<groupId>com.tinkerforge</groupId>
 			<artifactId>tinkerforge</artifactId>
 			<version>${tinkerforge.version}</version>
