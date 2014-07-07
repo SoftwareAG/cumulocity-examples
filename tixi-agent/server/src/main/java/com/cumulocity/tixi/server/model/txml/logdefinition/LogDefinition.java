@@ -1,28 +1,47 @@
 package com.cumulocity.tixi.server.model.txml.logdefinition;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlElements;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
+import com.cumulocity.tixi.server.components.txml.TXMLMapAdapter;
+import com.cumulocity.tixi.server.components.txml.TXMLMapAdapter.AdaptedMap;
 
 @XmlRootElement(name = "LogDefinition")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class LogDefinition {
+	
+	@XmlAccessorType(XmlAccessType.FIELD)
+	public static class LogDefinitionItemSetAdaptedMap implements AdaptedMap<LogDefinitionItemSet> {
 
-	@XmlElementWrapper(name = "Records")
-	@XmlElements({ @XmlElement(name = "Datalogging", type = LogDefinitionItemSet.class) })
-	private List<LogDefinitionItemSet> itemSets = new ArrayList<>();
+		@XmlElements({ @XmlElement(name = "Datalogging") })
+		private List<LogDefinitionItemSet> items;
+		
+		public List<LogDefinitionItemSet> getItems() {
+			return items;
+		}
+	}
+	
+	public static class LogDefinitionItemSetMapAdapter 
+		extends TXMLMapAdapter<LogDefinitionItemSet, LogDefinitionItemSetAdaptedMap> {
+	}
 
-	public List<LogDefinitionItemSet> getItemSets() {
+	@XmlElement(name = "Records")
+	@XmlJavaTypeAdapter(LogDefinitionItemSetMapAdapter.class)
+	private Map<String, LogDefinitionItemSet> itemSets = new HashMap<>();
+
+	public Map<String, LogDefinitionItemSet> getItemSets() {
 		return itemSets;
 	}
 
-	public void setItemSets(List<LogDefinitionItemSet> dataLoggings) {
+	public void setItemSets(Map<String, LogDefinitionItemSet> dataLoggings) {
 		this.itemSets = dataLoggings;
 	}
 	

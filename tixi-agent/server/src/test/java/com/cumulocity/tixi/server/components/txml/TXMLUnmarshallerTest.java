@@ -49,6 +49,8 @@ public class TXMLUnmarshallerTest {
 		// @formatter:on
 		
 		assertThat(actualLogDefinition).isEqualTo(expectedLogDefinition);
+		
+		System.out.println(actualLogDefinition);
     }
 	
 	@Test

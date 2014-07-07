@@ -38,8 +38,8 @@ public class LogDefinitionItemSet implements HasId {
 	@XmlAttribute
 	private String id;
 
-	@XmlJavaTypeAdapter(LogDefinitionItemMapAdapter.class)
 	@XmlElement(name = "DataloggingItems")
+	@XmlJavaTypeAdapter(LogDefinitionItemMapAdapter.class)
 	private Map<String, LogDefinitionItem> items = new HashMap<>();
 
 	public LogDefinitionItemSet() {

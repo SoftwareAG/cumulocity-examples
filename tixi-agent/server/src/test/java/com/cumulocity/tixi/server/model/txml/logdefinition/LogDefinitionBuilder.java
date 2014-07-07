@@ -11,7 +11,7 @@ public class LogDefinitionBuilder {
 
 	public LogDefinitionBuilder withNewItemSet(String id) {
 		logDefinitionItemSet = new LogDefinitionItemSet(id);
-		result.getItemSets().add(logDefinitionItemSet);
+		result.getItemSets().put(id, logDefinitionItemSet);
 		return this;
 	}
 
