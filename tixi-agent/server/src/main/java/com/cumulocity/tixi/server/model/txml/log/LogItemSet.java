@@ -1,6 +1,7 @@
 package com.cumulocity.tixi.server.model.txml.log;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -9,6 +10,9 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElements;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
+import com.cumulocity.tixi.server.components.txml.TXMLDateAdapter;
 
 @XmlRootElement(name = "DataloggingItemSet")
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -18,7 +22,8 @@ public class LogItemSet {
 	private String id;
 
 	@XmlAttribute
-	private String dateTime;
+	@XmlJavaTypeAdapter(TXMLDateAdapter.class)
+	private Date dateTime;
 
 	@XmlElements({ @XmlElement(name = "DataloggingItem") })
 	private List<LogItem> items = new ArrayList<>();
@@ -26,7 +31,7 @@ public class LogItemSet {
 	public LogItemSet() {
 	}
 
-	public LogItemSet(String id, String dateTime) {
+	public LogItemSet(String id, Date dateTime) {
 		this.id = id;
 		this.dateTime = dateTime;
 	}
@@ -39,11 +44,11 @@ public class LogItemSet {
 		this.id = id;
 	}
 
-	public String getDateTime() {
+	public Date getDateTime() {
 		return dateTime;
 	}
 
-	public void setDateTime(String dateTime) {
+	public void setDateTime(Date dateTime) {
 		this.dateTime = dateTime;
 	}
 

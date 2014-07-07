@@ -21,27 +21,20 @@ public class TXMLUnmarshaller {
 	private static final String XSLT_HOME = "/META-INF/tixi/txml/";
 
 	public LogDefinition unmarshalLogDefinition(StreamSource source) throws Exception {
-		OutputStream transformerOutput = new FileOutputStream("target/tmp.xml");
-		InputStream unmarshallerInput = new FileInputStream("target/tmp.xml");
-		
-		StreamResult transformerResult = new StreamResult(transformerOutput);
-		StreamSource unmarshallerSource = new StreamSource(unmarshallerInput);
-		Transformer transformer = getTransformer("LogDefinition.xslt");
-		transformer.transform(source, transformerResult);
-		return unmarshall(unmarshallerSource, LogDefinition.class);
-		
+		return unmarshal(source, LogDefinition.class);
 	}
 	
 	public Log unmarshalLog(StreamSource source) throws Exception {
+		return unmarshal(source, Log.class);
+	}
+	
+	public <R> R unmarshal(StreamSource source, Class<R> resultClass) throws Exception {
 		OutputStream transformerOutput = new FileOutputStream("target/tmp.xml");
 		InputStream unmarshallerInput = new FileInputStream("target/tmp.xml");
-		
 		StreamResult transformerResult = new StreamResult(transformerOutput);
 		StreamSource unmarshallerSource = new StreamSource(unmarshallerInput);
-		Transformer transformer = getTransformer("Log.xslt");
-		transformer.transform(source, transformerResult);
-		return unmarshall(unmarshallerSource, Log.class);
-		
+		aTransformer(resultClass).transform(source, transformerResult);
+		return unmarshall(unmarshallerSource, resultClass);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -53,8 +46,8 @@ public class TXMLUnmarshaller {
 		}
 	}
 		
-	private Transformer getTransformer(String xsltPath) throws Exception {
-		InputStream xsltStream = TXMLUnmarshaller.class.getResourceAsStream(XSLT_HOME + xsltPath);
+	private Transformer aTransformer(Class<?> clazz) throws Exception {
+		InputStream xsltStream = TXMLUnmarshaller.class.getResourceAsStream(XSLT_HOME + clazz.getSimpleName() + ".xslt");
 		TransformerFactory transformerFactory = TransformerFactory.newInstance();
 		StreamSource xslt = new StreamSource(xsltStream);
 		return transformerFactory.newTransformer(xslt);
