@@ -1,11 +1,9 @@
-package com.cumulocity.tixi.server.model.txml.logdefinition;
+package com.cumulocity.tixi.server.model.txml;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElements;
@@ -14,13 +12,10 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import com.cumulocity.tixi.server.components.txml.TXMLMapAdapter;
 import com.cumulocity.tixi.server.components.txml.TXMLMapAdapter.AdaptedMap;
-import com.cumulocity.tixi.server.model.txml.HasId;
 
 @XmlRootElement(name = "DataLogging")
-@XmlAccessorType(XmlAccessType.FIELD)
 public class LogDefinitionItemSet implements HasId {
 
-	@XmlAccessorType(XmlAccessType.FIELD)
 	public static class LogDefinitionItemAdaptedMap implements AdaptedMap<LogDefinitionItem> {
 
 		@XmlElements({ @XmlElement(name = "DataloggingItem") })

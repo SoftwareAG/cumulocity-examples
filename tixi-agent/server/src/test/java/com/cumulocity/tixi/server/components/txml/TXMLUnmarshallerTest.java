@@ -1,8 +1,8 @@
 package com.cumulocity.tixi.server.components.txml;
 
-import static com.cumulocity.tixi.server.model.txml.log.LogBuilder.aLog;
-import static com.cumulocity.tixi.server.model.txml.logdefinition.LogDefinitionBuilder.aLogDefinition;
-import static com.cumulocity.tixi.server.model.txml.logdefinition.LogDefinitionItemBuilder.anItem;
+import static com.cumulocity.tixi.server.model.txml.LogBuilder.aLog;
+import static com.cumulocity.tixi.server.model.txml.LogDefinitionBuilder.aLogDefinition;
+import static com.cumulocity.tixi.server.model.txml.LogDefinitionItemBuilder.anItem;
 import static java.math.BigDecimal.valueOf;
 import static org.fest.assertions.Assertions.assertThat;
 
@@ -12,8 +12,8 @@ import javax.xml.transform.stream.StreamSource;
 
 import org.junit.Test;
 
-import com.cumulocity.tixi.server.model.txml.log.Log;
-import com.cumulocity.tixi.server.model.txml.logdefinition.LogDefinition;
+import com.cumulocity.tixi.server.model.txml.Log;
+import com.cumulocity.tixi.server.model.txml.LogDefinition;
 
 public class TXMLUnmarshallerTest {
 	

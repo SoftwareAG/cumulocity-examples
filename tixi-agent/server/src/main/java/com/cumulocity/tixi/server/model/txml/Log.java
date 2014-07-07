@@ -1,17 +1,14 @@
-package com.cumulocity.tixi.server.model.txml.log;
+package com.cumulocity.tixi.server.model.txml;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElements;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "Datalogging")
-@XmlAccessorType(XmlAccessType.FIELD)
 public class Log {
 	
 	@XmlAttribute

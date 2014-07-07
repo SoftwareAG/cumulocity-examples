@@ -1,9 +1,7 @@
-package com.cumulocity.tixi.server.model.txml.log;
+package com.cumulocity.tixi.server.model.txml;
 
 import java.math.BigDecimal;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
@@ -11,7 +9,6 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import com.cumulocity.tixi.server.components.txml.TXMLValueAdaper;
 
 @XmlRootElement(name = "DataloggingItem")
-@XmlAccessorType(XmlAccessType.FIELD)
 public class LogItem {
 
 	@XmlAttribute

@@ -4,7 +4,7 @@ import static org.fest.assertions.Assertions.assertThat;
 
 import org.junit.Test;
 
-import com.cumulocity.tixi.server.model.txml.logdefinition.LogDefinitionItemPath;
+import com.cumulocity.tixi.server.model.txml.LogDefinitionItemPath;
 
 public class LogDefinitionItemPathAdapterTest {
 	

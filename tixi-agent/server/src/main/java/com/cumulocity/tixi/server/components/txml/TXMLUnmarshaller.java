@@ -13,8 +13,8 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
-import com.cumulocity.tixi.server.model.txml.log.Log;
-import com.cumulocity.tixi.server.model.txml.logdefinition.LogDefinition;
+import com.cumulocity.tixi.server.model.txml.Log;
+import com.cumulocity.tixi.server.model.txml.LogDefinition;
 
 public class TXMLUnmarshaller {
 	

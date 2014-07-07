@@ -1,16 +1,12 @@
-package com.cumulocity.tixi.server.model.txml.logdefinition;
+package com.cumulocity.tixi.server.model.txml;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import com.cumulocity.tixi.server.components.txml.LogDefinitionItemPathAdapter;
-import com.cumulocity.tixi.server.model.txml.HasId;
 
 @XmlRootElement(name = "DataLoggingItem")
-@XmlAccessorType(XmlAccessType.FIELD)
 public class LogDefinitionItem implements HasId {
 	
 	@XmlAttribute

@@ -1,8 +1,12 @@
-package com.cumulocity.tixi.server.model.txml.log;
+package com.cumulocity.tixi.server.model.txml;
 
 import static com.cumulocity.tixi.server.components.txml.TXMLDateAdapter.dateFormatter;
 
 import java.math.BigDecimal;
+
+import com.cumulocity.tixi.server.model.txml.Log;
+import com.cumulocity.tixi.server.model.txml.LogItem;
+import com.cumulocity.tixi.server.model.txml.LogItemSet;
 
 public class LogBuilder {
 	

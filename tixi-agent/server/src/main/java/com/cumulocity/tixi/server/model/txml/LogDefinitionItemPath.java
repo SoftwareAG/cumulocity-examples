@@ -1,4 +1,4 @@
-package com.cumulocity.tixi.server.model.txml.logdefinition;
+package com.cumulocity.tixi.server.model.txml;
 
 public class LogDefinitionItemPath {
 

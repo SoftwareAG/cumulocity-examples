@@ -1,6 +1,8 @@
-package com.cumulocity.tixi.server.model.txml.logdefinition;
+package com.cumulocity.tixi.server.model.txml;
 
 import com.cumulocity.tixi.server.components.txml.LogDefinitionItemPathAdapter;
+import com.cumulocity.tixi.server.model.txml.LogDefinitionItem;
+import com.cumulocity.tixi.server.model.txml.LogDefinitionItemPath;
 
 public class LogDefinitionItemBuilder {
 
