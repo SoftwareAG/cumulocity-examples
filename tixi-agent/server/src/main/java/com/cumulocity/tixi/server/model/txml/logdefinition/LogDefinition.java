@@ -15,27 +15,27 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class LogDefinition {
 
 	@XmlElementWrapper(name = "Records")
-	@XmlElements({ @XmlElement(name = "Datalogging", type = DataLogging.class) })
-	private List<DataLogging> dataLoggings = new ArrayList<>();
+	@XmlElements({ @XmlElement(name = "Datalogging", type = LogDefinitionItemSet.class) })
+	private List<LogDefinitionItemSet> itemSets = new ArrayList<>();
 
-	public List<DataLogging> getDataLoggings() {
-		return dataLoggings;
+	public List<LogDefinitionItemSet> getItemSets() {
+		return itemSets;
 	}
 
-	public void setDataLoggings(List<DataLogging> dataLoggings) {
-		this.dataLoggings = dataLoggings;
+	public void setItemSets(List<LogDefinitionItemSet> dataLoggings) {
+		this.itemSets = dataLoggings;
 	}
 	
 	@Override
     public String toString() {
-	    return String.format("LogDefinition [dataLoggings=%s]", dataLoggings);
+	    return String.format("LogDefinition [itemSets=%s]", itemSets);
     }
 
 	@Override
     public int hashCode() {
 	    final int prime = 31;
 	    int result = 1;
-	    result = prime * result + ((dataLoggings == null) ? 0 : dataLoggings.hashCode());
+	    result = prime * result + ((itemSets == null) ? 0 : itemSets.hashCode());
 	    return result;
     }
 
@@ -48,10 +48,10 @@ public class LogDefinition {
 	    if (getClass() != obj.getClass())
 		    return false;
 	    LogDefinition other = (LogDefinition) obj;
-	    if (dataLoggings == null) {
-		    if (other.dataLoggings != null)
+	    if (itemSets == null) {
+		    if (other.itemSets != null)
 			    return false;
-	    } else if (!dataLoggings.equals(other.dataLoggings))
+	    } else if (!itemSets.equals(other.itemSets))
 		    return false;
 	    return true;
     }

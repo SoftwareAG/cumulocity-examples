@@ -2,31 +2,30 @@ package com.cumulocity.tixi.server.model.txml.logdefinition;
 
 public class LogDefinitionBuilder {
 
-	private LogDefinition logDefinition = new LogDefinition();
-	private DataLogging dataLogging;
+	private final LogDefinition result = new LogDefinition();
+	private LogDefinitionItemSet logDefinitionItemSet;
 
 	public static LogDefinitionBuilder aLogDefinition() {
 		return new LogDefinitionBuilder();
 	}
 
-	public LogDefinitionBuilder withNewDatalogging(String id) {
-		dataLogging = new DataLogging();
-		dataLogging.setId(id);
-		logDefinition.getDataLoggings().add(dataLogging);
+	public LogDefinitionBuilder withNewItemSet(String id) {
+		logDefinitionItemSet = new LogDefinitionItemSet(id);
+		result.getItemSets().add(logDefinitionItemSet);
 		return this;
 	}
 
-	public LogDefinitionBuilder withDataloggingItem(DataLoggingItem dataLoggingItem) {
-		dataLogging.getItems().add(dataLoggingItem);
+	public LogDefinitionBuilder withItem(LogDefinitionItem dataLoggingItem) {
+		logDefinitionItemSet.getItems().add(dataLoggingItem);
 		return this;
 	}
 	
-	public LogDefinitionBuilder withDataloggingItem(DataLoggingItemBuilder dataLoggingItem) {
-		return withDataloggingItem(dataLoggingItem.build());
+	public LogDefinitionBuilder withItem(LogDefinitionItemBuilder dataLoggingItem) {
+		return withItem(dataLoggingItem.build());
 	}
 
 	public LogDefinition build() {
-		return logDefinition;
+		return result;
 	}
 
 }

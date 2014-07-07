@@ -1,7 +1,7 @@
 package com.cumulocity.tixi.server.components.txml;
 
 import static com.cumulocity.tixi.server.model.txml.log.LogBuilder.aLog;
-import static com.cumulocity.tixi.server.model.txml.logdefinition.DataLoggingItemBuilder.anItem;
+import static com.cumulocity.tixi.server.model.txml.logdefinition.LogDefinitionItemBuilder.anItem;
 import static com.cumulocity.tixi.server.model.txml.logdefinition.LogDefinitionBuilder.aLogDefinition;
 import static java.math.BigDecimal.valueOf;
 import static org.fest.assertions.Assertions.assertThat;
@@ -28,8 +28,8 @@ public class TXMLUnmarshallerTest {
 				
 		// @formatter:off
 		LogDefinition expectedLogDefinition = aLogDefinition()
-			.withNewDatalogging("Datalogging_1")
-				.withDataloggingItem(anItem()
+			.withNewItemSet("Datalogging_1")
+				.withItem(anItem()
 					.withId("Item_1")
 					.withType("type1")
 					.withName("aName1")
@@ -37,8 +37,8 @@ public class TXMLUnmarshallerTest {
 					.withSize(11)
 					.withExp(12)
 					.withFormat("format1"))
-			.withNewDatalogging("Datalogging_2")
-				.withDataloggingItem(anItem()
+			.withNewItemSet("Datalogging_2")
+				.withItem(anItem()
 					.withId("Item_2")
 					.withType("type2")
 					.withName("aName2")

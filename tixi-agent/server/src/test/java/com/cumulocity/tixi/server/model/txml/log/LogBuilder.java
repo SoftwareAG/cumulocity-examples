@@ -29,10 +29,8 @@ public class LogBuilder {
 		itemSet.getItems().add(logItem);
 		return this;
 	}
-
 	
 	public Log build() {
 		return log;
 	}
-
 }
