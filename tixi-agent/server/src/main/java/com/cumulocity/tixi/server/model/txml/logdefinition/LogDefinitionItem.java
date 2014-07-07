@@ -7,7 +7,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "DataLoggingItem")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class DataLoggingItem {
+public class LogDefinitionItem {
 	
 	@XmlAttribute
 	private String id;
@@ -113,7 +113,7 @@ public class DataLoggingItem {
 		    return false;
 	    if (getClass() != obj.getClass())
 		    return false;
-	    DataLoggingItem other = (DataLoggingItem) obj;
+	    LogDefinitionItem other = (LogDefinitionItem) obj;
 	    if (exp != other.exp)
 		    return false;
 	    if (format == null) {

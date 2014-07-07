@@ -12,13 +12,19 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "DataLogging")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class DataLogging {
+public class LogDefinitionItemSet {
 	
 	@XmlAttribute
 	private String id;
 	
 	@XmlElements({ @XmlElement(name = "DataloggingItem") })
-	private List<DataLoggingItem> items = new ArrayList<>();
+	private List<LogDefinitionItem> items = new ArrayList<>();
+	
+	public LogDefinitionItemSet() {}
+	
+	public LogDefinitionItemSet(String id) {
+	    this.id = id;
+    }
 
 	public String getId() {
 		return id;
@@ -28,11 +34,11 @@ public class DataLogging {
 		this.id = id;
 	}
 
-	public List<DataLoggingItem> getItems() {
+	public List<LogDefinitionItem> getItems() {
 		return items;
 	}
 
-	public void setItems(List<DataLoggingItem> items) {
+	public void setItems(List<LogDefinitionItem> items) {
 		this.items = items;
 	}
 
@@ -58,7 +64,7 @@ public class DataLogging {
 		    return false;
 	    if (getClass() != obj.getClass())
 		    return false;
-	    DataLogging other = (DataLogging) obj;
+	    LogDefinitionItemSet other = (LogDefinitionItemSet) obj;
 	    if (items == null) {
 		    if (other.items != null)
 			    return false;
