@@ -7,10 +7,11 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import com.cumulocity.tixi.server.components.txml.LogDefinitionItemPathAdapter;
+import com.cumulocity.tixi.server.model.txml.HasId;
 
 @XmlRootElement(name = "DataLoggingItem")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class LogDefinitionItem {
+public class LogDefinitionItem implements HasId {
 	
 	@XmlAttribute
 	private String id;
