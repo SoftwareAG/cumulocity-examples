@@ -15,17 +15,17 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class DataLogging {
 	
 	@XmlAttribute
-	private String loggingName;
+	private String tagName;
 	
 	@XmlElements({ @XmlElement(name = "DataloggingItem") })
 	private List<DataLoggingItem> items = new ArrayList<>();
 
-	public String getLoggingName() {
-		return loggingName;
+	public String getTagName() {
+		return tagName;
 	}
 
-	public void setLoggingName(String loggingName) {
-		this.loggingName = loggingName;
+	public void setTagName(String tagName) {
+		this.tagName = tagName;
 	}
 
 	public List<DataLoggingItem> getItems() {
@@ -38,7 +38,7 @@ public class DataLogging {
 
 	@Override
     public String toString() {
-	    return String.format("DataLogging [loggingName=%s, items=%s]", loggingName, items);
+	    return String.format("DataLogging [tagName=%s, items=%s]", tagName, items);
     }
 
 	@Override
@@ -46,7 +46,7 @@ public class DataLogging {
 	    final int prime = 31;
 	    int result = 1;
 	    result = prime * result + ((items == null) ? 0 : items.hashCode());
-	    result = prime * result + ((loggingName == null) ? 0 : loggingName.hashCode());
+	    result = prime * result + ((tagName == null) ? 0 : tagName.hashCode());
 	    return result;
     }
 
@@ -64,10 +64,10 @@ public class DataLogging {
 			    return false;
 	    } else if (!items.equals(other.items))
 		    return false;
-	    if (loggingName == null) {
-		    if (other.loggingName != null)
+	    if (tagName == null) {
+		    if (other.tagName != null)
 			    return false;
-	    } else if (!loggingName.equals(other.loggingName))
+	    } else if (!tagName.equals(other.tagName))
 		    return false;
 	    return true;
     }

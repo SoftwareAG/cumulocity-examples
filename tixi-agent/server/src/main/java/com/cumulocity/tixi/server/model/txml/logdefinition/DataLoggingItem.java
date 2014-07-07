@@ -10,7 +10,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class DataLoggingItem {
 	
 	@XmlAttribute
-	private String loggingItemName;
+	private String tagName;
 
 	@XmlAttribute(name = "Name")
 	private String name;
@@ -29,17 +29,6 @@ public class DataLoggingItem {
 	
 	@XmlAttribute
 	private String path;
-	
-	public DataLoggingItem() {}
-	
-	public DataLoggingItem(String loggingItemName, String name, String type, int size, int exp, String format) {
-		this.loggingItemName = loggingItemName;
-		this.name = name;
-		this.type = type;
-		this.size = size;
-		this.exp = exp;
-		this.format = format;
-	}
 	
 	public String getName() {
 		return name;
@@ -81,12 +70,12 @@ public class DataLoggingItem {
 		this.format = format;
 	}
 
-	public String getLoggingItemName() {
-		return loggingItemName;
+	public String getTagName() {
+		return tagName;
 	}
 
-	public void setLoggingItemName(String loggingItemName) {
-		this.loggingItemName = loggingItemName;
+	public void setTagName(String tagName) {
+		this.tagName = tagName;
 	}
 
 	public String getPath() {
@@ -99,7 +88,7 @@ public class DataLoggingItem {
 
 	@Override
     public String toString() {
-	    return String.format("DataLoggingItem [loggingItemName=%s, name=%s, type=%s, size=%s, exp=%s, format=%s, path=%s]", loggingItemName, name, type, size,
+	    return String.format("DataLoggingItem [value=%s, name=%s, type=%s, size=%s, exp=%s, format=%s, path=%s]", tagName, name, type, size,
 	            exp, format, path);
     }
 
@@ -109,7 +98,7 @@ public class DataLoggingItem {
 	    int result = 1;
 	    result = prime * result + exp;
 	    result = prime * result + ((format == null) ? 0 : format.hashCode());
-	    result = prime * result + ((loggingItemName == null) ? 0 : loggingItemName.hashCode());
+	    result = prime * result + ((tagName == null) ? 0 : tagName.hashCode());
 	    result = prime * result + ((name == null) ? 0 : name.hashCode());
 	    result = prime * result + ((path == null) ? 0 : path.hashCode());
 	    result = prime * result + size;
@@ -133,10 +122,10 @@ public class DataLoggingItem {
 			    return false;
 	    } else if (!format.equals(other.format))
 		    return false;
-	    if (loggingItemName == null) {
-		    if (other.loggingItemName != null)
+	    if (tagName == null) {
+		    if (other.tagName != null)
 			    return false;
-	    } else if (!loggingItemName.equals(other.loggingItemName))
+	    } else if (!tagName.equals(other.tagName))
 		    return false;
 	    if (name == null) {
 		    if (other.name != null)

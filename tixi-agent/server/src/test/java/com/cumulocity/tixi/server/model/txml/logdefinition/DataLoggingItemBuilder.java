@@ -33,8 +33,8 @@ public class DataLoggingItemBuilder {
 		return this;
 	}
 
-	public DataLoggingItemBuilder withLoggingItemName(String loggingItemName) {
-		dataLoggingItem.setLoggingItemName(loggingItemName);
+	public DataLoggingItemBuilder withTagName(String tagName) {
+		dataLoggingItem.setTagName(tagName);
 		return this;
 	}
 	

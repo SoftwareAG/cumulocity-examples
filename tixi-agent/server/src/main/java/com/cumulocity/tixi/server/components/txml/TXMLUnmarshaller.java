@@ -1,6 +1,5 @@
 package com.cumulocity.tixi.server.components.txml;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -18,54 +17,34 @@ import com.cumulocity.tixi.server.model.txml.logdefinition.LogDefinition;
 
 public class TXMLUnmarshaller {
 	
-	@SuppressWarnings("unchecked")
-	@Deprecated
-	public <R> R unmarshall(File xmlFile, Class<R> resultClazz) {
-		R result = null;
-		try {
-			Unmarshaller unmarshaller = createJAXBUnmarshaler(resultClazz);
-			return (R) unmarshaller.unmarshal(xmlFile);
-		} catch (JAXBException e) {
-			e.printStackTrace();
-		}
-		return result;
-	}
-	
 	public LogDefinition unmarshalLogDefinition(StreamSource source) throws Exception {
 		OutputStream transformerOutput = new FileOutputStream("target/tmp.xml");
 		InputStream unmarshallerInput = new FileInputStream("target/tmp.xml");
 		
 		StreamResult transformerResult = new StreamResult(transformerOutput);
 		StreamSource unmarshallerSource = new StreamSource(unmarshallerInput);
-		transform("src/test/resources/txml/LogDefinition.xslt", source, transformerResult);
+		Transformer transformer = getTransformer("src/test/resources/txml/LogDefinition.xslt");
+		transformer.transform(source, transformerResult);
 		return unmarshall(unmarshallerSource, LogDefinition.class);
 		
 	}
 	
 	@SuppressWarnings("unchecked")
-	public <R> R unmarshall(StreamSource source, Class<R> resultClazz) {
-		R result = null;
+	private <R> R unmarshall(StreamSource source, Class<R> resultClazz) {
 		try {
-			Unmarshaller unmarshaller = createJAXBUnmarshaler(resultClazz);
-			return (R) unmarshaller.unmarshal(source);
-		} catch (JAXBException e) {
-			e.printStackTrace();
+			return (R) aJAXBUnmarshaler().unmarshal(source);
+		} catch (JAXBException ex) {
+			throw new RuntimeException("Cannot parse!", ex);
 		}
-		return result;
 	}
-	
-	public void transform(String xsltPath, StreamSource source, StreamResult result) throws Exception {
-		TransformerFactory tf = TransformerFactory.newInstance();
+		
+	private Transformer getTransformer(String xsltPath) throws Exception {
+		TransformerFactory transformerFactory = TransformerFactory.newInstance();
 		StreamSource xslt = new StreamSource(xsltPath);
-		Transformer transformer = tf.newTransformer(xslt);
-		transformer.transform(source, result);
+		return transformerFactory.newTransformer(xslt);
 	}
 	
-	private static <R> Unmarshaller createJAXBUnmarshaler(Class<R> resultClazz) throws JAXBException {
-		return JAXBContext.newInstance(
-				LogDefinition.class
-				).createUnmarshaller();
+	private static Unmarshaller aJAXBUnmarshaler() throws JAXBException {
+		return JAXBContext.newInstance(LogDefinition.class).createUnmarshaller();
 	}
-
-
 }

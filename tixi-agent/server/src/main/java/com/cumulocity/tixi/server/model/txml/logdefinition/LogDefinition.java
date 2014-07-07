@@ -26,7 +26,6 @@ public class LogDefinition {
 		this.dataLoggings = dataLoggings;
 	}
 	
-
 	@Override
     public String toString() {
 	    return String.format("LogDefinition [dataLoggings=%s]", dataLoggings);
