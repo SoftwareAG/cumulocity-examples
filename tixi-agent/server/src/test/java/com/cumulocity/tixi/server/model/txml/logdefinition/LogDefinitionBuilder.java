@@ -16,7 +16,7 @@ public class LogDefinitionBuilder {
 	}
 
 	public LogDefinitionBuilder withItem(LogDefinitionItem dataLoggingItem) {
-		logDefinitionItemSet.getItems().add(dataLoggingItem);
+		logDefinitionItemSet.getItems().put(dataLoggingItem.getId(), dataLoggingItem);
 		return this;
 	}
 	

@@ -1,14 +1,16 @@
 package com.cumulocity.tixi.server.model.txml.logdefinition;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElements;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
+import com.cumulocity.tixi.server.components.txml.MapAdapter;
 
 @XmlRootElement(name = "DataLogging")
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -17,8 +19,10 @@ public class LogDefinitionItemSet {
 	@XmlAttribute
 	private String id;
 	
-	@XmlElements({ @XmlElement(name = "DataloggingItem") })
-	private List<LogDefinitionItem> items = new ArrayList<>();
+	//@XmlElements({ @XmlElement(name = "DataloggingItem") })
+	@XmlJavaTypeAdapter(MapAdapter.class)
+	@XmlElement(name="DataloggingItems")
+	private Map<String, LogDefinitionItem> items = new HashMap<>();
 	
 	public LogDefinitionItemSet() {}
 	
@@ -34,11 +38,11 @@ public class LogDefinitionItemSet {
 		this.id = id;
 	}
 
-	public List<LogDefinitionItem> getItems() {
+	public Map<String, LogDefinitionItem> getItems() {
 		return items;
 	}
 
-	public void setItems(List<LogDefinitionItem> items) {
+	public void setItems(Map<String, LogDefinitionItem> items) {
 		this.items = items;
 	}
 

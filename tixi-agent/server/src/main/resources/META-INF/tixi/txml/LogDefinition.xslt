@@ -10,12 +10,14 @@
 		                  <xsl:value-of select="name()" />
 		                </xsl:attribute>
 						<xsl:for-each select="current()/*">
-							<DataloggingItem>
-								<xsl:copy-of select="@*" />
-								<xsl:attribute name="id">
-				                  <xsl:value-of select="name()" />
-				              </xsl:attribute>
-							</DataloggingItem>
+							<DataloggingItems>
+								<DataloggingItem>
+									<xsl:copy-of select="@*" />
+									<xsl:attribute name="id">
+				                        <xsl:value-of select="name()" />
+				                    </xsl:attribute>
+								</DataloggingItem>
+							</DataloggingItems>
 						</xsl:for-each>
 					</Datalogging>
 				</xsl:for-each>
