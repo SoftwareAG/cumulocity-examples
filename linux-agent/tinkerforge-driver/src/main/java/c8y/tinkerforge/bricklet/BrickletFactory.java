@@ -39,6 +39,7 @@ import com.tinkerforge.BrickletDualRelay;
 import com.tinkerforge.BrickletGPS;
 import com.tinkerforge.BrickletHumidity;
 import com.tinkerforge.BrickletLCD20x4;
+import com.tinkerforge.BrickletMoisture;
 import com.tinkerforge.BrickletMotionDetector;
 import com.tinkerforge.BrickletPTC;
 import com.tinkerforge.BrickletRemoteSwitch;
@@ -130,6 +131,8 @@ public class BrickletFactory {
 			return new PTCBricklet(uid, new BrickletPTC(uid, ipcon));
 		case BrickletSegmentDisplay4x7.DEVICE_IDENTIFIER:
 			return new SegmentDisplay4x7(uid, new BrickletSegmentDisplay4x7(uid, ipcon));
+		case BrickletMoisture.DEVICE_IDENTIFIER:
+			return new MoistureBricklet(uid, new BrickletMoisture(uid, ipcon));
 		default:
 			throw new IllegalArgumentException("Unknown device identifier: "
 					+ deviceIdentifier);
