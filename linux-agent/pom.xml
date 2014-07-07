@@ -29,6 +29,7 @@
         <module>mac-driver</module>
         <module>kontron-driver</module>
         <module>packages</module>
+        <module>win-driver</module>
 	</modules>
 
 	<dependencies>
