@@ -5,8 +5,8 @@
 		<Event size="10240" />
 		<Login size="10240" />
 		<SupportLog size="10240" />
-		<Datalogging_0 record="Datalogging_0" size="102400" contenttype="binary" />
 		<Datalogging_1 record="Datalogging_1" size="102400" contenttype="binary" />
+		<Datalogging_2 record="Datalogging_2" size="102400" contenttype="binary" />
 	</LogFiles>
 	<Records>
 		<Datalogging_1>

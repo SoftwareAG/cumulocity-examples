@@ -3,7 +3,7 @@
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 	<xsl:template match="/*[1]">
 		<Datalogging>
-			<xsl:attribute name="tagName">
+			<xsl:attribute name="id">
                  <xsl:value-of select="name()" />
             </xsl:attribute>
 			<xsl:for-each select="*">

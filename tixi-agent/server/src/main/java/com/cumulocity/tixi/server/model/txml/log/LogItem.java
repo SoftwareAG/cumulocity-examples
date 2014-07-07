@@ -1,32 +1,26 @@
 package com.cumulocity.tixi.server.model.txml.log;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElements;
 import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement(name = "Datalogging")
+@XmlRootElement(name = "DataloggingItem")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class Log {
-	
+public class LogItem {
+
 	@XmlAttribute
 	private String id;
 
-	@XmlElements({ @XmlElement(name = "DataloggingItemSet") })
-	private List<LogItemSet> itemSets = new ArrayList<>();
-
-	public List<LogItemSet> getItemSets() {
-		return itemSets;
-	}
-
-	public void setItemSets(List<LogItemSet> itemSets) {
-		this.itemSets = itemSets;
-	}
+	@XmlAttribute
+	private String value;
+	
+	public LogItem() {}
+	
+	public LogItem(String id, String value) {
+	    this.id = id;
+	    this.value = value;
+    }
 
 	public String getId() {
 		return id;
@@ -36,9 +30,17 @@ public class Log {
 		this.id = id;
 	}
 
+	public String getValue() {
+		return value;
+	}
+
+	public void setValue(String value) {
+		this.value = value;
+	}
+
 	@Override
     public String toString() {
-	    return String.format("Log [id=%s, itemSets=%s]", id, itemSets);
+	    return String.format("LogItem [id=%s, value=%s]", id, value);
     }
 
 	@Override
@@ -46,7 +48,7 @@ public class Log {
 	    final int prime = 31;
 	    int result = 1;
 	    result = prime * result + ((id == null) ? 0 : id.hashCode());
-	    result = prime * result + ((itemSets == null) ? 0 : itemSets.hashCode());
+	    result = prime * result + ((value == null) ? 0 : value.hashCode());
 	    return result;
     }
 
@@ -58,16 +60,16 @@ public class Log {
 		    return false;
 	    if (getClass() != obj.getClass())
 		    return false;
-	    Log other = (Log) obj;
+	    LogItem other = (LogItem) obj;
 	    if (id == null) {
 		    if (other.id != null)
 			    return false;
 	    } else if (!id.equals(other.id))
 		    return false;
-	    if (itemSets == null) {
-		    if (other.itemSets != null)
+	    if (value == null) {
+		    if (other.value != null)
 			    return false;
-	    } else if (!itemSets.equals(other.itemSets))
+	    } else if (!value.equals(other.value))
 		    return false;
 	    return true;
     }

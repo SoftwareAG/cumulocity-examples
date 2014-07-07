@@ -40,14 +40,14 @@ public class TXMLUnmarshaller {
 		StreamSource unmarshallerSource = new StreamSource(unmarshallerInput);
 		Transformer transformer = getTransformer("Log.xslt");
 		transformer.transform(source, transformerResult);
-		return null;
+		return unmarshall(unmarshallerSource, Log.class);
 		
 	}
 	
 	@SuppressWarnings("unchecked")
 	private <R> R unmarshall(StreamSource source, Class<R> resultClazz) {
 		try {
-			return (R) aJAXBUnmarshaler().unmarshal(source);
+			return (R) aJAXBUnmarshaler(resultClazz).unmarshal(source);
 		} catch (JAXBException ex) {
 			throw new RuntimeException("Cannot parse!", ex);
 		}
@@ -60,7 +60,7 @@ public class TXMLUnmarshaller {
 		return transformerFactory.newTransformer(xslt);
 	}
 	
-	private static Unmarshaller aJAXBUnmarshaler() throws JAXBException {
-		return JAXBContext.newInstance(LogDefinition.class).createUnmarshaller();
+	private static Unmarshaller aJAXBUnmarshaler(Class<?> resultClass) throws JAXBException {
+		return JAXBContext.newInstance(resultClass).createUnmarshaller();
 	}
 }
