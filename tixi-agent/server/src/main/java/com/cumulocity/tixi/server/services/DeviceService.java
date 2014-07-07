@@ -49,7 +49,7 @@ public class DeviceService {
     public TixiDeviceCredentails register(final SerialNumber serialNumber) {
 
         final DeviceCredentialsRepresentation credentials = deviceCredentials.pollCredentials(serialNumber.getValue(), new PollingStrategy(
-                SECONDS, asList(10l, 10l, 10l, 120l)));
+                SECONDS, asList(10l)));
 
         final TixiDeviceCredentails tixiCredentials = TixiDeviceCredentails.from(credentials);
 
@@ -61,7 +61,7 @@ public class DeviceService {
                             return registerDeviceManagedObject(serialNumber);
                         }
                     });
-            tixiCredentials.setDeviceId(asString(deviceRepresentation.getId()));
+            tixiCredentials.setDeviceID(asString(deviceRepresentation.getId()));
         } catch (Exception e) {
             propagate(e);
         }

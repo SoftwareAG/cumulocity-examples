@@ -38,15 +38,15 @@ public class RegisterResource {
         // @formatter:off
         return Response.ok(
                 new JsonResponse("REGISTER")
-                .set("user", credentials.getUsername())
+                .set("user", credentials.getUser())
                 .set("password", credentials.getPassword())
-                .set("deviceId", credentials.getDeviceId())
+                .set("deviceID", credentials.getDeviceID())
                 ).build();
         // @formatter:on
     }
 
     private Response standard(final String serial) {
-        return Response.ok(new JsonResponse("REGISTER").set("deviceId", GId.asString(deviceService.findGId(new SerialNumber(serial)))))
+        return Response.ok(new JsonResponse("REGISTER").set("deviceID", GId.asString(deviceService.findGId(new SerialNumber(serial)))))
                 .build();
     }
 }

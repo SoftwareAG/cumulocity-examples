@@ -5,18 +5,18 @@ import com.cumulocity.rest.representation.devicebootstrap.DeviceCredentialsRepre
 public class TixiDeviceCredentails {
     
     
-    private String username;
+    private String user;
 
     private String password;
 
-    private String deviceId;
+    private String deviceID;
 
-    public String getUsername() {
-        return username;
+    public String getUser() {
+        return user;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setUser(String user) {
+        this.user = user;
     }
 
     public String getPassword() {
@@ -27,17 +27,17 @@ public class TixiDeviceCredentails {
         this.password = password;
     }
 
-    public String getDeviceId() {
-        return deviceId;
+    public String getDeviceID() {
+        return deviceID;
     }
 
-    public void setDeviceId(String deviceId) {
-        this.deviceId = deviceId;
+    public void setDeviceID(String deviceID) {
+        this.deviceID = deviceID;
     }
 
     public static TixiDeviceCredentails from(DeviceCredentialsRepresentation credentials) {
         TixiDeviceCredentails tixiCredentails = new TixiDeviceCredentails();
-        tixiCredentails.setUsername(credentials.getTenantId() + "/" + credentials.getUsername());
+        tixiCredentails.setUser(credentials.getTenantId() + "/" + credentials.getUsername());
         tixiCredentails.setPassword(credentials.getPassword());
         return tixiCredentails;
     }
