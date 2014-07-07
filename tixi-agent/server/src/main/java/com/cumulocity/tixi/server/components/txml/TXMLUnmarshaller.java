@@ -17,13 +17,15 @@ import com.cumulocity.tixi.server.model.txml.logdefinition.LogDefinition;
 
 public class TXMLUnmarshaller {
 	
+	private static final String XSLT_HOME = "/META-INF/tixi/txml/";
+
 	public LogDefinition unmarshalLogDefinition(StreamSource source) throws Exception {
 		OutputStream transformerOutput = new FileOutputStream("target/tmp.xml");
 		InputStream unmarshallerInput = new FileInputStream("target/tmp.xml");
 		
 		StreamResult transformerResult = new StreamResult(transformerOutput);
 		StreamSource unmarshallerSource = new StreamSource(unmarshallerInput);
-		Transformer transformer = getTransformer("src/test/resources/txml/LogDefinition.xslt");
+		Transformer transformer = getTransformer("LogDefinition.xslt");
 		transformer.transform(source, transformerResult);
 		return unmarshall(unmarshallerSource, LogDefinition.class);
 		
@@ -39,8 +41,9 @@ public class TXMLUnmarshaller {
 	}
 		
 	private Transformer getTransformer(String xsltPath) throws Exception {
+		InputStream xsltStream = TXMLUnmarshaller.class.getResourceAsStream(XSLT_HOME + xsltPath);
 		TransformerFactory transformerFactory = TransformerFactory.newInstance();
-		StreamSource xslt = new StreamSource(xsltPath);
+		StreamSource xslt = new StreamSource(xsltStream);
 		return transformerFactory.newTransformer(xslt);
 	}
 	
