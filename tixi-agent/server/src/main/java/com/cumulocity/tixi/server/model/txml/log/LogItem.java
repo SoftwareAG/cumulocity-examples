@@ -1,9 +1,14 @@
 package com.cumulocity.tixi.server.model.txml.log;
 
+import java.math.BigDecimal;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
+import com.cumulocity.tixi.server.components.txml.TXMLValueAdaper;
 
 @XmlRootElement(name = "DataloggingItem")
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -13,11 +18,12 @@ public class LogItem {
 	private String id;
 
 	@XmlAttribute
-	private String value;
+	@XmlJavaTypeAdapter(TXMLValueAdaper.class)
+	private BigDecimal value;
 	
 	public LogItem() {}
 	
-	public LogItem(String id, String value) {
+	public LogItem(String id, BigDecimal value) {
 	    this.id = id;
 	    this.value = value;
     }
@@ -30,11 +36,11 @@ public class LogItem {
 		this.id = id;
 	}
 
-	public String getValue() {
+	public BigDecimal getValue() {
 		return value;
 	}
 
-	public void setValue(String value) {
+	public void setValue(BigDecimal value) {
 		this.value = value;
 	}
 

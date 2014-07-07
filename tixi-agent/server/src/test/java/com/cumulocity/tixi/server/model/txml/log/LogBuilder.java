@@ -1,6 +1,8 @@
 package com.cumulocity.tixi.server.model.txml.log;
 
-import static com.cumulocity.tixi.server.components.txml.TXMLDateAdapter.DATE_FORMAT;
+import static com.cumulocity.tixi.server.components.txml.TXMLDateAdapter.dateFormatter;
+
+import java.math.BigDecimal;
 
 public class LogBuilder {
 	
@@ -12,7 +14,7 @@ public class LogBuilder {
 	}
 	
 	public LogBuilder withNewItemSet(String id, String dateTime) throws Exception {
-		itemSet = new LogItemSet(id, DATE_FORMAT.parse(dateTime));
+		itemSet = new LogItemSet(id, dateFormatter().parse(dateTime));
 		log.getItemSets().add(itemSet);
 		return this;
 	}
@@ -22,7 +24,7 @@ public class LogBuilder {
 		return this;
 	}
 	
-	public LogBuilder withItem(String id, String value) {
+	public LogBuilder withItem(String id, BigDecimal value) {
 		LogItem logItem = new LogItem(id, value);
 		itemSet.getItems().add(logItem);
 		return this;

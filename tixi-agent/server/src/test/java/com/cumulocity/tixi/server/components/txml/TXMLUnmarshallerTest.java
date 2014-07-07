@@ -3,9 +3,11 @@ package com.cumulocity.tixi.server.components.txml;
 import static com.cumulocity.tixi.server.model.txml.log.LogBuilder.aLog;
 import static com.cumulocity.tixi.server.model.txml.logdefinition.DataLoggingItemBuilder.anItem;
 import static com.cumulocity.tixi.server.model.txml.logdefinition.LogDefinitionBuilder.aLogDefinition;
+import static java.math.BigDecimal.valueOf;
 import static org.fest.assertions.Assertions.assertThat;
 
 import java.io.File;
+import java.math.BigDecimal;
 
 import javax.xml.transform.stream.StreamSource;
 
@@ -55,16 +57,15 @@ public class TXMLUnmarshallerTest {
 		StreamSource streamSource = new StreamSource(new File("src/test/resources/txml/Log.xml"));
 		
 		Log actualLog = txmlUnmarshaller.unmarshalLog(streamSource);
-		
 		// @formatter:off
 		Log expectedLog = aLog()
 				.withId("Datalogging_1")
 				.withNewItemSet("ID_1", "2014/07/07,12:00:00")
-					.withItem("Item_1", "11")
-					.withItem("Item_2", "12")
+					.withItem("Item_1", valueOf(11))
+					.withItem("Item_2", valueOf(12))
 				.withNewItemSet("ID_2", "2014/07/07,12:15:00")
-					.withItem("Item_1", "21")
-					.withItem("Item_2", "22")
+					.withItem("Item_1", valueOf(21))
+					.withItem("Item_2", valueOf(22))
 				.build();
 		// @formatter:on
 		
