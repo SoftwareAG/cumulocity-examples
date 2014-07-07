@@ -10,6 +10,7 @@ import javax.xml.transform.stream.StreamSource;
 
 import org.junit.Test;
 
+import com.cumulocity.tixi.server.model.txml.log.Log;
 import com.cumulocity.tixi.server.model.txml.logdefinition.LogDefinition;
 
 public class TXMLUnmarshallerTest {
@@ -20,7 +21,7 @@ public class TXMLUnmarshallerTest {
     public void shouldUmnarshalLogDefinitionFile() throws Exception {
 		StreamSource streamSource = new StreamSource(new File("src/test/resources/txml/LogDefinition.xml"));
 		
-		LogDefinition actualdLogDefinition = txmlUnmarshaller.unmarshalLogDefinition(streamSource);
+		LogDefinition actualLogDefinition = txmlUnmarshaller.unmarshalLogDefinition(streamSource);
 				
 		// @formatter:off
 		LogDefinition expectedLogDefinition = aLogDefinition()
@@ -44,7 +45,14 @@ public class TXMLUnmarshallerTest {
 					.withFormat("format2"))
 			.build();
 		// @formatter:on
-		assertThat(actualdLogDefinition).isEqualTo(expectedLogDefinition);
-		
+		assertThat(actualLogDefinition).isEqualTo(expectedLogDefinition);
     }
+	
+	@Test
+	public void shouldUmnarshalLogFile() throws Exception {
+		StreamSource streamSource = new StreamSource(new File("src/test/resources/txml/Log.xml"));
+		
+		Log actualdLog = txmlUnmarshaller.unmarshalLog(streamSource);
+		
+	}
 }

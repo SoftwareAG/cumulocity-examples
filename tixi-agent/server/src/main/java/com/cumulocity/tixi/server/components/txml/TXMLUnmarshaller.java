@@ -13,6 +13,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
+import com.cumulocity.tixi.server.model.txml.log.Log;
 import com.cumulocity.tixi.server.model.txml.logdefinition.LogDefinition;
 
 public class TXMLUnmarshaller {
@@ -28,6 +29,18 @@ public class TXMLUnmarshaller {
 		Transformer transformer = getTransformer("LogDefinition.xslt");
 		transformer.transform(source, transformerResult);
 		return unmarshall(unmarshallerSource, LogDefinition.class);
+		
+	}
+	
+	public Log unmarshalLog(StreamSource source) throws Exception {
+		OutputStream transformerOutput = new FileOutputStream("target/tmp.xml");
+		InputStream unmarshallerInput = new FileInputStream("target/tmp.xml");
+		
+		StreamResult transformerResult = new StreamResult(transformerOutput);
+		StreamSource unmarshallerSource = new StreamSource(unmarshallerInput);
+		Transformer transformer = getTransformer("Log.xslt");
+		transformer.transform(source, transformerResult);
+		return null;
 		
 	}
 	
