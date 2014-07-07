@@ -4,6 +4,9 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
+import com.cumulocity.tixi.server.components.txml.LogDefinitionItemPathAdapter;
 
 @XmlRootElement(name = "DataLoggingItem")
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -28,7 +31,8 @@ public class LogDefinitionItem {
 	private String format;
 	
 	@XmlAttribute
-	private String path;
+	@XmlJavaTypeAdapter(value = LogDefinitionItemPathAdapter.class)
+	private LogDefinitionItemPath path;
 	
 	public String getName() {
 		return name;
@@ -78,11 +82,11 @@ public class LogDefinitionItem {
 		this.id = id;
 	}
 
-	public String getPath() {
+	public LogDefinitionItemPath getPath() {
 		return path;
 	}
 
-	public void setPath(String path) {
+	public void setPath(LogDefinitionItemPath path) {
 		this.path = path;
 	}
 

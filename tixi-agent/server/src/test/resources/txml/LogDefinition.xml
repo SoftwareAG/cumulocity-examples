@@ -11,11 +11,11 @@
 	<Records>
 		<Datalogging_1>
 			<Item_1 _="type1" 
-                Name="aName1" path="aPath1" size="11" exp="12" format="format1" />
+                Name="aName1" path="/Process/M-Bus/Device-1/Temperature" size="11" exp="12" format="format1" />
 		</Datalogging_1>
 		<Datalogging_2>
 			<Item_2 _="type2" 
-                Name="aName2" path="aPath2" size="21" exp="22" format="format2" />
+                Name="aName2" path="/Process/M-Bus/Device-2/Temperature" size="21" exp="22" format="format2" />
 		</Datalogging_2>
 	</Records>
 </LogDefinition>

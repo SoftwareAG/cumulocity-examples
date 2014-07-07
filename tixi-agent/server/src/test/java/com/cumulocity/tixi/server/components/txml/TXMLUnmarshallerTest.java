@@ -1,13 +1,12 @@
 package com.cumulocity.tixi.server.components.txml;
 
 import static com.cumulocity.tixi.server.model.txml.log.LogBuilder.aLog;
-import static com.cumulocity.tixi.server.model.txml.logdefinition.LogDefinitionItemBuilder.anItem;
 import static com.cumulocity.tixi.server.model.txml.logdefinition.LogDefinitionBuilder.aLogDefinition;
+import static com.cumulocity.tixi.server.model.txml.logdefinition.LogDefinitionItemBuilder.anItem;
 import static java.math.BigDecimal.valueOf;
 import static org.fest.assertions.Assertions.assertThat;
 
 import java.io.File;
-import java.math.BigDecimal;
 
 import javax.xml.transform.stream.StreamSource;
 
@@ -33,7 +32,7 @@ public class TXMLUnmarshallerTest {
 					.withId("Item_1")
 					.withType("type1")
 					.withName("aName1")
-					.withPath("aPath1")
+					.withPath("/Process/M-Bus/Device-1/Temperature")
 					.withSize(11)
 					.withExp(12)
 					.withFormat("format1"))
@@ -42,7 +41,7 @@ public class TXMLUnmarshallerTest {
 					.withId("Item_2")
 					.withType("type2")
 					.withName("aName2")
-					.withPath("aPath2")
+					.withPath("/Process/M-Bus/Device-2/Temperature")
 					.withSize(21)
 					.withExp(22)
 					.withFormat("format2"))

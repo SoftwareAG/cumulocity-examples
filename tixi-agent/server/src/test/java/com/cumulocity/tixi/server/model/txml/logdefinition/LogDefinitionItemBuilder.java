@@ -1,8 +1,11 @@
 package com.cumulocity.tixi.server.model.txml.logdefinition;
 
+import com.cumulocity.tixi.server.components.txml.LogDefinitionItemPathAdapter;
+
 public class LogDefinitionItemBuilder {
 
 	private final LogDefinitionItem result = new LogDefinitionItem();
+	private final LogDefinitionItemPathAdapter itemPathAdapter = new LogDefinitionItemPathAdapter();
 
 	public static LogDefinitionItemBuilder anItem() {
 		return new LogDefinitionItemBuilder();
@@ -38,9 +41,13 @@ public class LogDefinitionItemBuilder {
 		return this;
 	}
 	
-	public LogDefinitionItemBuilder withPath(String path) {
+	public LogDefinitionItemBuilder withPath(LogDefinitionItemPath path) {
 		result.setPath(path);
 		return this;
+	}
+	
+	public LogDefinitionItemBuilder withPath(String path) throws Exception {
+		return withPath(itemPathAdapter.unmarshal(path));
 	}
 
 	public LogDefinitionItem build() {
