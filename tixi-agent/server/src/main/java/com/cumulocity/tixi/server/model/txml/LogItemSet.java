@@ -13,10 +13,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import com.cumulocity.tixi.server.components.txml.TXMLDateAdapter;
 
 @XmlRootElement(name = "DataloggingItemSet")
-public class LogItemSet {
-
-	@XmlAttribute
-	private String id;
+public class LogItemSet extends LogBaseItem {
 
 	@XmlAttribute
 	@XmlJavaTypeAdapter(TXMLDateAdapter.class)
@@ -29,16 +26,8 @@ public class LogItemSet {
 	}
 
 	public LogItemSet(String id, Date dateTime) {
-		this.id = id;
+		super(id);
 		this.dateTime = dateTime;
-	}
-
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
 	}
 
 	public Date getDateTime() {

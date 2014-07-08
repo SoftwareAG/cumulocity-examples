@@ -9,10 +9,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import com.cumulocity.tixi.server.components.txml.TXMLValueAdaper;
 
 @XmlRootElement(name = "DataloggingItem")
-public class LogItem {
-
-	@XmlAttribute
-	private String id;
+public class LogItem extends LogBaseItem {
 
 	@XmlAttribute
 	@XmlJavaTypeAdapter(TXMLValueAdaper.class)
@@ -21,18 +18,10 @@ public class LogItem {
 	public LogItem() {}
 	
 	public LogItem(String id, BigDecimal value) {
-	    this.id = id;
+	    super(id);
 	    this.value = value;
     }
-
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
-	}
-
+	
 	public BigDecimal getValue() {
 		return value;
 	}

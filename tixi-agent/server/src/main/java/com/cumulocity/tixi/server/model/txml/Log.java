@@ -3,17 +3,13 @@ package com.cumulocity.tixi.server.model.txml;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElements;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "Datalogging")
-public class Log {
+public class Log extends LogBaseItem {
 	
-	@XmlAttribute
-	private String id;
-
 	@XmlElements({ @XmlElement(name = "DataloggingItemSet") })
 	private List<LogItemSet> itemSets = new ArrayList<>();
 
@@ -23,14 +19,6 @@ public class Log {
 
 	public void setItemSets(List<LogItemSet> itemSets) {
 		this.itemSets = itemSets;
-	}
-
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
 	}
 
 	@Override

@@ -7,7 +7,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import com.cumulocity.tixi.server.components.txml.LogDefinitionItemPathAdapter;
 
 @XmlRootElement(name = "DataLoggingItem")
-public class LogDefinitionItem extends BaseItem {
+public class LogDefinitionItem extends LogBaseItem {
 	
 	@XmlAttribute(name = "Name")
 	private String name;

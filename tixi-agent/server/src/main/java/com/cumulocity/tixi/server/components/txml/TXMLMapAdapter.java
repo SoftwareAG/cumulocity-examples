@@ -7,11 +7,11 @@ import java.util.Map;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 import com.cumulocity.tixi.server.components.txml.TXMLMapAdapter.AdaptedMap;
-import com.cumulocity.tixi.server.model.txml.BaseItem;
+import com.cumulocity.tixi.server.model.txml.LogBaseItem;
 
-public class TXMLMapAdapter<E extends BaseItem, M extends AdaptedMap<E>> extends XmlAdapter<M, Map<String, E>> {
+public class TXMLMapAdapter<E extends LogBaseItem, M extends AdaptedMap<E>> extends XmlAdapter<M, Map<String, E>> {
 
-	public static interface AdaptedMap<K extends BaseItem> {
+	public static interface AdaptedMap<K extends LogBaseItem> {
 		
 		public abstract List<K> getItems();
 	}

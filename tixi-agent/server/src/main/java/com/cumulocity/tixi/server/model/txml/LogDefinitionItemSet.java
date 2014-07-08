@@ -13,7 +13,7 @@ import com.cumulocity.tixi.server.components.txml.TXMLMapAdapter;
 import com.cumulocity.tixi.server.components.txml.TXMLMapAdapter.AdaptedMap;
 
 @XmlRootElement(name = "DataLogging")
-public class LogDefinitionItemSet extends BaseItem {
+public class LogDefinitionItemSet extends LogBaseItem {
 
 	public static class LogDefinitionItemAdaptedMap implements AdaptedMap<LogDefinitionItem> {
 
@@ -37,7 +37,7 @@ public class LogDefinitionItemSet extends BaseItem {
 	}
 
 	public LogDefinitionItemSet(String id) {
-		this.id = id;
+		super(id);
 	}
 
 	public Map<String, LogDefinitionItem> getItems() {
