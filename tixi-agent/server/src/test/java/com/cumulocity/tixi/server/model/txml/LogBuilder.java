@@ -3,10 +3,7 @@ package com.cumulocity.tixi.server.model.txml;
 import static com.cumulocity.tixi.server.components.txml.TXMLDateAdapter.dateFormatter;
 
 import java.math.BigDecimal;
-
-import com.cumulocity.tixi.server.model.txml.Log;
-import com.cumulocity.tixi.server.model.txml.LogItem;
-import com.cumulocity.tixi.server.model.txml.LogItemSet;
+import java.util.Date;
 
 public class LogBuilder {
 	
@@ -18,7 +15,11 @@ public class LogBuilder {
 	}
 	
 	public LogBuilder withNewItemSet(String id, String dateTime) throws Exception {
-		itemSet = new LogItemSet(id, dateFormatter().parse(dateTime));
+		return withNewItemSet(id, dateFormatter().parse(dateTime));
+	}
+	
+	public LogBuilder withNewItemSet(String id, Date date) throws Exception {
+		itemSet = new LogItemSet(id, date);
 		log.getItemSets().add(itemSet);
 		return this;
 	}
