@@ -44,7 +44,7 @@ public class RestServerBuilder {
                 for (Class<?> component : components) {
                     register(component);
                 }
-                packages(packages.toArray(new String[packages.size()]));
+//                packages(packages.toArray(new String[packages.size()])); does not work 
             }
         });
 

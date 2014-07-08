@@ -3,8 +3,6 @@ package com.cumulocity.agent.server.jaxrs;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
-import javax.inject.Inject;
-
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.grizzly.servlet.WebappContext;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
@@ -16,11 +14,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.multipart.MultipartResolver;
 
 import com.cumulocity.agent.server.Server;
 import com.cumulocity.agent.server.context.ContextFilter;
-import com.cumulocity.tixi.server.resources.SendDataResource;
 import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.AbstractService;
 import com.google.common.util.concurrent.Service;
@@ -49,7 +45,7 @@ public class JaxrsServer implements Server {
             resourceConfig
             .register(RequestContextFilter.class)
             .register(MultiPartFeature.class);
-            System.out.println(resourceConfig.getClasses());
+            resourceConfig.getClasses();
             context.addServlet("jersey-servlet", new ServletContainer(resourceConfig)).addMapping("/*");
             context.addFilter("deviceContextFilter", applicationContext.getBean(ContextFilter.class)).addMappingForServletNames(null,
                     "jersey-servlet");
