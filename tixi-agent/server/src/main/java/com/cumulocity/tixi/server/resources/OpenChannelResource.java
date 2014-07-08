@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
+import com.cumulocity.tixi.server.model.txml.LogDefinition;
 import com.cumulocity.tixi.server.services.*;
 import com.google.common.io.Closeables;
 
@@ -30,12 +31,15 @@ public class OpenChannelResource {
     private final RequestIdFactory requestIdFactory;
 
     private final ScheduledExecutorService executorService; 
+    
+    private final RequestStorage requestStorage;
 
     @Autowired
-    public OpenChannelResource(DeviceControlService deviceControlService, TixiOperationsQueue<JsonResponse> tixiOperationsQueue, RequestIdFactory requestIdFactory) {
+    public OpenChannelResource(DeviceControlService deviceControlService, TixiOperationsQueue<JsonResponse> tixiOperationsQueue, RequestIdFactory requestIdFactory, RequestStorage requestStorage) {
         this.deviceControlService = deviceControlService;
         this.tixiOperationsQueue = tixiOperationsQueue;
         this.requestIdFactory = requestIdFactory;
+        this.requestStorage = requestStorage;
         this.executorService = Executors.newScheduledThreadPool(1);
     }
 
@@ -43,8 +47,8 @@ public class OpenChannelResource {
     @Produces(MediaType.APPLICATION_JSON)
     public ChunkedOutput<JsonResponse> open() {
         tixiOperationsQueue.put(statusOKJson());
-        tixiOperationsQueue.put(getExternalDBJson());
-        tixiOperationsQueue.put(getLogDefinitionJson());
+        tixiOperationsQueue.put(createExternalDBRequest());
+        tixiOperationsQueue.put(createLogDefinitionRequest());
         
         final ChunkedOutput<JsonResponse> output = new ChunkedOutput<JsonResponse>(JsonResponse.class);
         executorService.scheduleAtFixedRate(sendSingleTixiCommand(output), 1, 5, TimeUnit.SECONDS);
@@ -52,12 +56,13 @@ public class OpenChannelResource {
         return output;
     }
 
-    private JsonResponse getLogDefinitionJson() {
-       return new JsonResponse("TiXML").set("requestId", requestIdFactory.get().toString()).set("parameter",
-                "[<GetConfig _=\"LOG/LogDefinition\" ver=\"v\"/>]");
+    private JsonResponse createLogDefinitionRequest() {
+        String requestId = requestIdFactory.get().toString();
+        requestStorage.put(requestId, LogDefinition.class);
+        return new JsonResponse("TiXML").set("requestId", requestId).set("parameter", "[<GetConfig _=\"LOG/LogDefinition\" ver=\"v\"/>]");
     }
 
-    private JsonResponse getExternalDBJson() {
+    private JsonResponse createExternalDBRequest() {
         return new JsonResponse("TiXML").set("requestId", requestIdFactory.get().toString()).set("parameter",
                 "[<GetConfig _=\"PROCCFG/External\" ver=\"v\"/>]");
     }
