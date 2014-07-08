@@ -6,7 +6,11 @@ import static org.apache.commons.io.FileUtils.openOutputStream;
 import static org.apache.commons.io.IOUtils.closeQuietly;
 import static org.apache.commons.io.IOUtils.copy;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 
 import javax.annotation.PostConstruct;
@@ -90,12 +94,6 @@ public class AgentFileSystem {
     
     public File getXsltFile(Class<?> entityClass) {
     	return getFile(xsltPath, entityClass.getSimpleName() + ".xslt");
-    }
-    
-    @Deprecated
-    public File getProcessingFile(Class<?> entityClass) {
-    	String fileName = fromNullable(entityClass.getSimpleName()).or("") + "_" + getTimestamp() + ".xml";
-    	return getFile(xsltProcessedPath, fileName);
     }
     
     public File getIncomingFile(String fileName) {
