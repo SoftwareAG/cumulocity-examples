@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.cumulocity.tixi.server.components.txml.TXMLUnmarshaller;
+import com.cumulocity.tixi.server.services.AgentFileSystem;
 import com.cumulocity.tixi.server.services.RequestStorage;
 import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataParam;
@@ -26,11 +27,14 @@ public class SendDataResource {
     private final TXMLUnmarshaller txmlUnmarshaller;
     
     private final RequestStorage requestStorage; 
+    
+    private final AgentFileSystem agentFileSystem;
 
     @Autowired
-    public SendDataResource(TXMLUnmarshaller txmlUnmarshaller, RequestStorage requestStorage) {
+    public SendDataResource(TXMLUnmarshaller txmlUnmarshaller, RequestStorage requestStorage, AgentFileSystem agentFileSystem) {
         this.txmlUnmarshaller = txmlUnmarshaller;
         this.requestStorage = requestStorage;
+        this.agentFileSystem = agentFileSystem;
     }
 
     @POST
@@ -42,6 +46,7 @@ public class SendDataResource {
             @QueryParam("serial") String serial,
             @QueryParam("user") String user,
             @QueryParam("password") String password) {
+        String fileName = agentFileSystem.writeIncomingFile(requestId, fileInputStream);
         Object requestEntity = getRequestEntity(fileInputStream, requestId);
         return Response.ok(statusOKJson()).build();
     }
