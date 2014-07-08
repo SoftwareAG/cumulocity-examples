@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -27,7 +28,11 @@ public class TXMLUnmarshaller {
     
     private static final String XSLT_HOME = "/META-INF/tixi/txml/";
     
-    private Cache<Class<?>, Transformer> transformers = newBuilder().build();
+    // @formatter:off
+    private Cache<Class<?>, Transformer> transformers = newBuilder()
+    		.expireAfterAccess(1, TimeUnit.HOURS)
+    		.build();
+    // @formatter:on
 
     public <R> R unmarshal(StreamSource source, Class<R> resultClass) throws Exception {
         OutputStream transformerOutput = new FileOutputStream("target/tmp.xml");
