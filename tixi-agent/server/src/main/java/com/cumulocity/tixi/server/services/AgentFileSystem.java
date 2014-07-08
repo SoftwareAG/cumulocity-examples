@@ -29,13 +29,17 @@ public class AgentFileSystem {
     private File incomingPath;
 
     private File processingPath;
+    
+    private File xsltPath;
 
     @Autowired
     public AgentFileSystem(
-            @Value("${TIXI.jsonfiles.incoming}") String incomingPath,
-            @Value("${TIXI.jsonfiles.processing}") String processingPath) {
+            @Value("${TIXI.xml.incoming}") String incomingPath,
+            @Value("${TIXI.xml.processing}") String processingPath,
+            @Value("${TIXI.xslt}") String xsltPath) {
         this.incomingPath = new File(incomingPath);
         this.processingPath = new File(processingPath);
+        this.xsltPath = new File(xsltPath);
     }
 
     @PostConstruct
@@ -81,6 +85,10 @@ public class AgentFileSystem {
             closeQuietly(outputStream);
             closeQuietly(inputStream);
         }
+    }
+    
+    public File getXsltFile(Class<?> entityClass) {
+    	return getFile(xsltPath, entityClass.getSimpleName() + ".xslt");
     }
 }
 

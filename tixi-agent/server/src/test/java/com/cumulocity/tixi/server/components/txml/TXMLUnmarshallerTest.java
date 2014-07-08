@@ -10,18 +10,30 @@ import java.io.File;
 
 import javax.xml.transform.stream.StreamSource;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import com.cumulocity.tixi.server.model.txml.Log;
 import com.cumulocity.tixi.server.model.txml.LogDefinition;
+import com.cumulocity.tixi.server.services.AgentFileSystem;
 
 public class TXMLUnmarshallerTest {
 	
-	TXMLUnmarshaller txmlUnmarshaller = new TXMLUnmarshaller();
+	AgentFileSystem agentFileSystem;
+	TXMLUnmarshaller txmlUnmarshaller;
+	
+	private static final String SAMPLE_DIR = "src/test/resources/txml/sample/";
+	private static final String XSLT_DIR = "src/test/resources/txml/xslt/";
+	
+	@Before
+	public void init() {
+		agentFileSystem = new AgentFileSystem("sth", "sth", XSLT_DIR);
+		txmlUnmarshaller = new TXMLUnmarshaller(agentFileSystem);
+	}
 	
 	@Test
     public void shouldUmnarshalLogDefinitionFile() throws Exception {
-		StreamSource streamSource = new StreamSource(new File("src/test/resources/txml/LogDefinition.xml"));
+		StreamSource streamSource = new StreamSource(new File(SAMPLE_DIR + "LogDefinition.xml"));
 		
 		LogDefinition actualLogDefinition = txmlUnmarshaller.unmarshal(streamSource, LogDefinition.class);
 				
@@ -55,7 +67,7 @@ public class TXMLUnmarshallerTest {
 	
 	@Test
 	public void shouldUmnarshalLogFile() throws Exception {
-		StreamSource streamSource = new StreamSource(new File("src/test/resources/txml/Log.xml"));
+		StreamSource streamSource = new StreamSource(new File(SAMPLE_DIR + "Log.xml"));
 		
 		Log actualLog = txmlUnmarshaller.unmarshal(streamSource, Log.class);
 		// @formatter:off

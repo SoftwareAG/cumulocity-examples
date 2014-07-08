@@ -2,6 +2,7 @@ package com.cumulocity.tixi.server.components.txml;
 
 import static com.google.common.cache.CacheBuilder.newBuilder;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -17,23 +18,31 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.cumulocity.tixi.server.model.txml.Log;
 import com.cumulocity.tixi.server.model.txml.LogDefinition;
+import com.cumulocity.tixi.server.services.AgentFileSystem;
 import com.google.common.cache.Cache;
 
 @Component
 public class TXMLUnmarshaller {
     
-    private static final String XSLT_HOME = "/META-INF/tixi/txml/";
+    private final AgentFileSystem agentFileSystem;
+    private final TransformerFactory transformerFactory = TransformerFactory.newInstance();
     
     // @formatter:off
-    private Cache<Class<?>, Transformer> transformers = newBuilder()
+    private final Cache<Class<?>, Transformer> transformers = newBuilder()
     		.expireAfterAccess(1, TimeUnit.HOURS)
     		.build();
     // @formatter:on
 
+    @Autowired
+    public TXMLUnmarshaller(AgentFileSystem agentFileSystem) {
+    	this.agentFileSystem = agentFileSystem;
+    }
+    
     public <R> R unmarshal(StreamSource source, Class<R> resultClass) throws Exception {
         OutputStream transformerOutput = new FileOutputStream("target/tmp.xml");
         InputStream unmarshallerInput = new FileInputStream("target/tmp.xml");
@@ -42,8 +51,8 @@ public class TXMLUnmarshaller {
         aTransformer(resultClass).transform(source, transformerResult);
         return unmarshall(unmarshallerSource, resultClass);
     }
-    
-    @SuppressWarnings("unchecked")
+
+	@SuppressWarnings("unchecked")
     private <R> R unmarshall(StreamSource source, Class<R> resultClazz) {
         try {
             return (R) aJAXBUnmarshaler().unmarshal(source);
@@ -57,9 +66,8 @@ public class TXMLUnmarshaller {
 
 			@Override
             public Transformer call() throws Exception {
-				InputStream xsltStream = TXMLUnmarshaller.class.getResourceAsStream(XSLT_HOME + clazz.getSimpleName() + ".xslt");
-				TransformerFactory transformerFactory = TransformerFactory.newInstance();
-				return transformerFactory.newTransformer(new StreamSource(xsltStream));
+				File xsltFile = agentFileSystem.getXsltFile(clazz);
+				return transformerFactory.newTransformer(new StreamSource(xsltFile));
             }
 		});
     }
