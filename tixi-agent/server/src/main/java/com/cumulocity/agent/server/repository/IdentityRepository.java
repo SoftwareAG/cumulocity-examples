@@ -2,20 +2,20 @@ package com.cumulocity.agent.server.repository;
 
 import static com.cumulocity.tixi.server.model.ManagedObjects.asManagedObject;
 
-import javax.inject.Inject;
-import javax.inject.Named;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.cumulocity.model.ID;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.identity.ExternalIDRepresentation;
 import com.cumulocity.sdk.client.identity.IdentityApi;
 
-@Named
+@Component
 public class IdentityRepository {
 
     private final IdentityApi identityApi;
 
-    @Inject
+    @Autowired
     public IdentityRepository(IdentityApi identityApi) {
         this.identityApi = identityApi;
     }

@@ -4,14 +4,15 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.grizzly.servlet.WebappContext;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.spring.scope.RequestContextFilter;
 import org.glassfish.jersey.servlet.ServletContainer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -21,7 +22,7 @@ import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.AbstractService;
 import com.google.common.util.concurrent.Service;
 
-@Named("jaxrsServer")
+@Component("jaxrsServer")
 public class JaxrsServer implements Server {
 
     private final String host;
@@ -61,7 +62,7 @@ public class JaxrsServer implements Server {
         }
     };
 
-    @Inject
+    @Autowired
     public JaxrsServer(@Value("${server.host:0.0.0.0}") String host, @Value("${server.port:80}") int port,
             @Value("${server.id}") String contextPath, ResourceConfig resourceConfig, WebApplicationContext context) {
         this.host = host;

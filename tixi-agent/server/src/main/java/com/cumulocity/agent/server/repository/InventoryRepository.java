@@ -1,21 +1,21 @@
 package com.cumulocity.agent.server.repository;
 
-import javax.inject.Inject;
-import javax.inject.Named;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.cumulocity.model.ID;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.inventory.InventoryApi;
 
-@Named
+@Component
 public class InventoryRepository {
 
     private final InventoryApi inventoryApi;
 
     private final IdentityRepository identityRepository;
 
-    @Inject
+    @Autowired
     public InventoryRepository(InventoryApi inventoryApi, IdentityRepository identityRepository) {
         this.inventoryApi = inventoryApi;
         this.identityRepository = identityRepository;

@@ -7,8 +7,8 @@ import static jersey.repackaged.com.google.common.base.Throwables.propagate;
 
 import java.util.concurrent.Callable;
 
-import javax.inject.Inject;
-import javax.inject.Named;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import c8y.IsDevice;
 
@@ -26,7 +26,7 @@ import com.cumulocity.sdk.client.polling.PollingStrategy;
 import com.cumulocity.tixi.server.model.SerialNumber;
 import com.cumulocity.tixi.server.model.TixiDeviceCredentails;
 
-@Named
+@Component
 public class DeviceService {
 
     private final InventoryRepository inventoryRepository;
@@ -37,7 +37,7 @@ public class DeviceService {
 
     private final DeviceContextService contextService;
 
-    @Inject
+    @Autowired
     public DeviceService(InventoryRepository inventoryRepository, IdentityRepository identityRepository,
             DeviceCredentialsApi deviceCredentials, DeviceContextService contextService) {
         this.inventoryRepository = inventoryRepository;

@@ -1,9 +1,11 @@
 package com.cumulocity.agent.server.repository;
 
-import javax.inject.Inject;
 import javax.inject.Named;
 
 import jersey.repackaged.com.google.common.collect.Iterables;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
@@ -14,14 +16,14 @@ import com.cumulocity.sdk.client.notification.Subscriber;
 import com.cumulocity.sdk.client.notification.Subscription;
 import com.cumulocity.sdk.client.notification.SubscriptionListener;
 
-@Named
+@Component
 public class DeviceControlRepository {
 
     private final DeviceControlApi deviceControlApi;
 
     private Subscriber<GId, OperationRepresentation> subscriber;
 
-    @Inject
+    @Autowired
     public DeviceControlRepository(DeviceControlApi deviceControlApi,
             @Named("deviceControlNotificationsSubscriber") Subscriber<GId, OperationRepresentation> subscriber) {
         this.deviceControlApi = deviceControlApi;

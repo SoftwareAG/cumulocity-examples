@@ -41,4 +41,8 @@ public class JsonResponse {
         properties.put(key, value);
         return this;
     }
+    
+    public static JsonResponse statusOKJson() {
+        return new JsonResponse().set("status", 0l);
+    }
 }

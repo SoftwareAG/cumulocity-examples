@@ -3,13 +3,14 @@ package com.cumulocity.tixi.server.resources;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
-import javax.inject.Inject;
-import javax.inject.Named;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.tixi.server.model.SerialNumber;
@@ -17,12 +18,12 @@ import com.cumulocity.tixi.server.model.TixiDeviceCredentails;
 import com.cumulocity.tixi.server.services.DeviceService;
 
 @Path("/register")
-@Named
+@Component
 public class RegisterResource {
 
     private final DeviceService deviceService;
 
-    @Inject
+    @Autowired
     public RegisterResource(DeviceService deviceService) {
         this.deviceService = deviceService;
     }

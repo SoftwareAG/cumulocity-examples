@@ -4,8 +4,8 @@ import static com.cumulocity.model.operation.OperationStatus.PENDING;
 
 import java.io.IOException;
 
-import javax.inject.Inject;
-import javax.inject.Named;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.cumulocity.agent.server.context.DeviceContextService;
 import com.cumulocity.agent.server.repository.DeviceControlRepository;
@@ -17,7 +17,7 @@ import com.cumulocity.sdk.client.notification.Subscription;
 import com.cumulocity.sdk.client.notification.SubscriptionListener;
 import com.cumulocity.tixi.server.model.Operations;
 
-@Named
+@Component
 public class DeviceControlService {
 
     private static final class SubscriberMessageChannelContext implements MessageChannelContext {
@@ -39,7 +39,7 @@ public class DeviceControlService {
 
     private final DeviceContextService contextService;
 
-    @Inject
+    @Autowired
     public DeviceControlService(DeviceControlRepository repository, DeviceContextService contextService) {
         this.repository = repository;
         this.contextService = contextService;

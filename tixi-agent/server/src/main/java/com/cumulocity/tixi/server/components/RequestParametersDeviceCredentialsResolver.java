@@ -1,14 +1,15 @@
 package com.cumulocity.tixi.server.components;
 
-import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.stereotype.Component;
 
 import com.cumulocity.agent.server.context.DeviceCredentailsResolver;
 import com.cumulocity.agent.server.context.DeviceCredentials;
 import com.cumulocity.model.idtype.GId;
 import com.google.common.base.Optional;
 
-@Named
+@Component
 public class RequestParametersDeviceCredentialsResolver implements DeviceCredentailsResolver<HttpServletRequest> {
 
     @Override
