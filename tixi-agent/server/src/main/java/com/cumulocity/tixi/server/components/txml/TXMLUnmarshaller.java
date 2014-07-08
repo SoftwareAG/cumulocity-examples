@@ -3,10 +3,6 @@ package com.cumulocity.tixi.server.components.txml;
 import static com.google.common.cache.CacheBuilder.newBuilder;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
