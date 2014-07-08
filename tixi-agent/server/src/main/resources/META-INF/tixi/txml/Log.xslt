@@ -2,12 +2,12 @@
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 	<xsl:template match="/*[1]">
-		<Datalogging>
+		<Log>
 			<xsl:attribute name="id">
                  <xsl:value-of select="name()" />
             </xsl:attribute>
 			<xsl:for-each select="*">
-				<DataloggingItemSet>
+				<LogItemSet>
 					<xsl:attribute name="id">
                         <xsl:value-of select="name()" />
                     </xsl:attribute>
@@ -15,18 +15,18 @@
                         <xsl:value-of select="@_" />
                     </xsl:attribute>
 					<xsl:for-each select="*">
-						<DataloggingItem>
+						<LogItem>
 							<xsl:attribute name="id">
 	                        <xsl:value-of select="name()" />
 	                    </xsl:attribute>
 							<xsl:attribute name="value">
 	                        <xsl:value-of select="@_" />
 	                    </xsl:attribute>
-						</DataloggingItem>
+						</LogItem>
 					</xsl:for-each>
-				</DataloggingItemSet>
+				</LogItemSet>
 			</xsl:for-each>
-		</Datalogging>
+		</Log>
 	</xsl:template>
 </xsl:stylesheet>
 

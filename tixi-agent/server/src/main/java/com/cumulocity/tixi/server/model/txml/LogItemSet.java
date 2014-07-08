@@ -12,14 +12,14 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import com.cumulocity.tixi.server.components.txml.TXMLDateAdapter;
 
-@XmlRootElement(name = "DataloggingItemSet")
+@XmlRootElement(name = "LogItemSet")
 public class LogItemSet extends LogBaseItem {
 
 	@XmlAttribute
 	@XmlJavaTypeAdapter(TXMLDateAdapter.class)
 	private Date dateTime;
 
-	@XmlElements({ @XmlElement(name = "DataloggingItem") })
+	@XmlElements({ @XmlElement(name = "LogItem") })
 	private List<LogItem> items = new ArrayList<>();
 
 	public LogItemSet() {

@@ -23,7 +23,7 @@ public class TXMLUnmarshallerTest {
     public void shouldUmnarshalLogDefinitionFile() throws Exception {
 		StreamSource streamSource = new StreamSource(new File("src/test/resources/txml/LogDefinition.xml"));
 		
-		LogDefinition actualLogDefinition = txmlUnmarshaller.unmarshalLogDefinition(streamSource);
+		LogDefinition actualLogDefinition = txmlUnmarshaller.unmarshal(streamSource, LogDefinition.class);
 				
 		// @formatter:off
 		LogDefinition expectedLogDefinition = aLogDefinition()
@@ -57,7 +57,7 @@ public class TXMLUnmarshallerTest {
 	public void shouldUmnarshalLogFile() throws Exception {
 		StreamSource streamSource = new StreamSource(new File("src/test/resources/txml/Log.xml"));
 		
-		Log actualLog = txmlUnmarshaller.unmarshalLog(streamSource);
+		Log actualLog = txmlUnmarshaller.unmarshal(streamSource, Log.class);
 		// @formatter:off
 		Log expectedLog = aLog()
 				.withId("Datalogging_1")

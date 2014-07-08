@@ -17,7 +17,7 @@ public class LogDefinition {
 	
 	public static class LogDefinitionItemSetAdaptedMap implements AdaptedMap<LogDefinitionItemSet> {
 
-		@XmlElements({ @XmlElement(name = "Datalogging") })
+		@XmlElements({ @XmlElement(name = "LogDefinitionItemSet") })
 		private List<LogDefinitionItemSet> items;
 		
 		public List<LogDefinitionItemSet> getItems() {

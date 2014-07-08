@@ -5,21 +5,21 @@
 		<LogDefinition>
 			<Records>
 				<xsl:for-each select="LogDefinition/Records/*">
-					<Datalogging>
+					<LogDefinitionItemSet>
 						<xsl:attribute name="id">
 		                  <xsl:value-of select="name()" />
 		                </xsl:attribute>
 						<xsl:for-each select="current()/*">
-							<DataloggingItems>
-								<DataloggingItem>
+							<LogDefinitionItems>
+								<LogDefinitionItem>
 									<xsl:copy-of select="@*" />
 									<xsl:attribute name="id">
 				                        <xsl:value-of select="name()" />
 				                    </xsl:attribute>
-								</DataloggingItem>
-							</DataloggingItems>
+								</LogDefinitionItem>
+							</LogDefinitionItems>
 						</xsl:for-each>
-					</Datalogging>
+					</LogDefinitionItemSet>
 				</xsl:for-each>
 			</Records>
 		</LogDefinition>

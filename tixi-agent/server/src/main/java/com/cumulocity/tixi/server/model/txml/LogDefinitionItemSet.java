@@ -12,12 +12,12 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import com.cumulocity.tixi.server.components.txml.TXMLMapAdapter;
 import com.cumulocity.tixi.server.components.txml.TXMLMapAdapter.AdaptedMap;
 
-@XmlRootElement(name = "DataLogging")
+@XmlRootElement(name = "LogDefinitionItemSet")
 public class LogDefinitionItemSet extends LogBaseItem {
 
 	public static class LogDefinitionItemAdaptedMap implements AdaptedMap<LogDefinitionItem> {
 
-		@XmlElements({ @XmlElement(name = "DataloggingItem") })
+		@XmlElements({ @XmlElement(name = "LogDefinitionItem") })
 		private List<LogDefinitionItem> items;
 		
 		public List<LogDefinitionItem> getItems() {
@@ -29,7 +29,7 @@ public class LogDefinitionItemSet extends LogBaseItem {
 		extends TXMLMapAdapter<LogDefinitionItem, LogDefinitionItemAdaptedMap> {
 	}
 
-	@XmlElement(name = "DataloggingItems")
+	@XmlElement(name = "LogDefinitionItems")
 	@XmlJavaTypeAdapter(LogDefinitionItemMapAdapter.class)
 	private Map<String, LogDefinitionItem> items = new HashMap<>();
 

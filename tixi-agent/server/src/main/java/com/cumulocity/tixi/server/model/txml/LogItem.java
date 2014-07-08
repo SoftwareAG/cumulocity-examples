@@ -8,7 +8,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import com.cumulocity.tixi.server.components.txml.TXMLValueAdaper;
 
-@XmlRootElement(name = "DataloggingItem")
+@XmlRootElement(name = "LogItem")
 public class LogItem extends LogBaseItem {
 
 	@XmlAttribute

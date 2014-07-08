@@ -7,10 +7,10 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElements;
 import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement(name = "Datalogging")
+@XmlRootElement(name = "Log")
 public class Log extends LogBaseItem {
 	
-	@XmlElements({ @XmlElement(name = "DataloggingItemSet") })
+	@XmlElements({ @XmlElement(name = "LogItemSet") })
 	private List<LogItemSet> itemSets = new ArrayList<>();
 
 	public List<LogItemSet> getItemSets() {
