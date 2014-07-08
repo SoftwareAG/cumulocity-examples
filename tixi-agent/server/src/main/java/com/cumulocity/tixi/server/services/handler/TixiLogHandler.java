@@ -1,6 +1,9 @@
 package com.cumulocity.tixi.server.services.handler;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +23,6 @@ import com.cumulocity.tixi.server.model.SerialNumber;
 import com.cumulocity.tixi.server.model.txml.Log;
 import com.cumulocity.tixi.server.model.txml.LogDefinition;
 import com.cumulocity.tixi.server.model.txml.LogDefinitionItem;
-import com.cumulocity.tixi.server.model.txml.LogDefinitionItemPath;
 import com.cumulocity.tixi.server.model.txml.LogItem;
 import com.cumulocity.tixi.server.model.txml.LogItemSet;
 
@@ -34,53 +36,136 @@ public class TixiLogHandler extends TixiHandler<Log> {
             MeasurementApi measurementApi, LogDefinitionRegister logDefinitionRegister) {
 	    super(deviceContextService, identityRepository, inventoryRepository, measurementApi, logDefinitionRegister);
     }
+	
+	private Map<MeasurementKey, MeasurementRepresentation> measurements = new HashMap<>();
+	private LogDefinition logDefinition;
+	private Log log;
 
 	@Override
 	public void handle(Log log) {
-		LogDefinition logDefinition = logDefinitionRegister.getLogDefinition();
+		this.log = log;
+		logDefinition = logDefinitionRegister.getLogDefinition();
 		if(logDefinition == null) {
 			return;
 		}
-		String logDefinitionId = log.getId();
-		for (LogItemSet logItemSet : log.getItemSets()) {
-			Date date = logItemSet.getDateTime();
-			for (LogItem logItem : logItemSet.getItems()) {
-				LogDefinitionItem logDefinitionItem = logDefinition.getItem(logDefinitionId, logItem.getId());
-				if(logDefinitionItem == null) {
-					logger.warn("There is no log definition item for itemSetId: {}," +
-							" itemId: {}; skip this log.", logDefinitionId, logItem.getId());
-					continue;
-				}
-				if(!isDevicePath(logDefinitionItem)) {
-					logger.warn("Log definition item has no device path variable " +
-							"itemSetId: {} itemId: {}; skip this log.", logDefinitionId, logItem.getId());					
-				}
-				
-				handleLogItem(date, logDefinitionItem, logItem);
-            }
+		for (LogItemSet itemSet : log.getItemSets()) {
+			handleItemSet(itemSet);
         }
+		saveMeasurements();
 	}
 
-	private void handleLogItem(Date date, LogDefinitionItem logDefinitionItem, LogItem logItem) {
-		LogDefinitionItemPath path = logDefinitionItem.getPath();
-		String deviceId = path.getDeviceId();
-		MeasurementRepresentation measurement = new MeasurementRepresentation();
-		measurement.setTime(date);
-		ManagedObjectRepresentation source;
-		SerialNumber deviceIdSerial = new SerialNumber(deviceId);
-		try {
-			source = inventoryRepository.findByExternalId(deviceIdSerial);
-		} catch (SDKException ex) {
-			logger.warn("Cannot find source for {}.", deviceIdSerial);
-			return;
-		}
-		measurement.setSource(source);
-		MeasurementValue measurementValue = new MeasurementValue();
+	private void handleItemSet(LogItemSet itemSet) {
+		String logDefinitionId = log.getId();
+	    for (LogItem item : itemSet.getItems()) {
+	    	LogDefinitionItem itemDef = getLogDefinitionItem(item);
+	    	if(itemDef == null) {
+	    		logger.warn("There is no log definition item for itemSetId: {}," +
+	    				" itemId: {}; skip this log.", logDefinitionId, item.getId());
+	    		continue;
+	    	}
+	    	if(!isDevicePath(itemDef)) {
+	    		logger.warn("Log definition item has no device path variable " +
+	    				"itemSetId: {} itemId: {}; skip this log.", logDefinitionId, item.getId());
+	    		continue;
+	    	}
+	    	
+	    	handleLogItem(item, itemDef, itemSet.getDateTime());
+	    }
+    }
+
+	private LogDefinitionItem getLogDefinitionItem(LogItem logItem) {
+	    return logDefinition.getItem(log.getId(), logItem.getId());
+    }
+	
+	private void handleLogItem(LogItem item, LogDefinitionItem itemDef, Date date) {
+		String deviceId = itemDef.getPath().getDeviceId();
+		MeasurementRepresentation measurement = getMeasurement(new MeasurementKey(deviceId, date));
+		measurement.setProperty(asFragmentName(itemDef), asFragment(item));
+	}
+
+	private void saveMeasurements() {
+	    for (Entry<MeasurementKey, MeasurementRepresentation> entry : measurements.entrySet()) {
+	        MeasurementRepresentation measurement = entry.getValue();
+	        String deviceId = entry.getKey().getDeviceId();
+			SerialNumber deviceIdSerial = new SerialNumber(deviceId);
+			try {
+				ManagedObjectRepresentation source = inventoryRepository.findByExternalId(deviceIdSerial);
+				measurement.setSource(source);
+			} catch (SDKException ex) {
+				logger.warn("Cannot find source for {}.", deviceIdSerial);
+				continue;
+			}
+			measurementApi.create(measurement);
+        }
+    }
+
+
+	private static MeasurementValue asFragment(LogItem logItem) {
+	    MeasurementValue measurementValue = new MeasurementValue();
 		measurementValue.setValue(logItem.getValue());
-		measurement.setProperty("c8y_" + path.getName(), measurementValue);
-		measurementApi.create(measurement);
+	    return measurementValue;
+    }
+	
+	private static String asFragmentName(LogDefinitionItem itemDef) {
+	    return "c8y_" + itemDef.getPath().getName();
+    }
+		
+	private MeasurementRepresentation getMeasurement(MeasurementKey key) {
+		MeasurementRepresentation result = measurements.get(key);
+		if(result == null) {
+			result = new MeasurementRepresentation();
+			result.setTime(key.getDate());
+			measurements.put(key, result);
+		}
+		return result;
 	}
 	
+	private static class MeasurementKey {
+		private String deviceId;
+		private Date date;
+		
+		public MeasurementKey(String deviceId, Date date) {
+	        this.deviceId = deviceId;
+	        this.date = date;
+        }
+		
+		public String getDeviceId() {
+			return deviceId;
+		}
 
+		public Date getDate() {
+			return date;
+		}
+		
+		@Override
+        public int hashCode() {
+	        final int prime = 31;
+	        int result = 1;
+	        result = prime * result + ((date == null) ? 0 : date.hashCode());
+	        result = prime * result + ((deviceId == null) ? 0 : deviceId.hashCode());
+	        return result;
+        }
 
+		@Override
+        public boolean equals(Object obj) {
+	        if (this == obj)
+		        return true;
+	        if (obj == null)
+		        return false;
+	        if (getClass() != obj.getClass())
+		        return false;
+	        MeasurementKey other = (MeasurementKey) obj;
+	        if (date == null) {
+		        if (other.date != null)
+			        return false;
+	        } else if (!date.equals(other.date))
+		        return false;
+	        if (deviceId == null) {
+		        if (other.deviceId != null)
+			        return false;
+	        } else if (!deviceId.equals(other.deviceId))
+		        return false;
+	        return true;
+        }
+	}
 }

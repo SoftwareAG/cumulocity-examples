@@ -3,6 +3,7 @@ package com.cumulocity.tixi.server.services.handler;
 import static com.cumulocity.tixi.server.model.txml.LogBuilder.aLog;
 import static com.cumulocity.tixi.server.model.txml.LogDefinitionBuilder.aLogDefinition;
 import static com.cumulocity.tixi.server.model.txml.LogDefinitionItemBuilder.anItem;
+import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -14,6 +15,7 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
+import com.cumulocity.model.measurement.MeasurementValue;
 import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
 import com.cumulocity.tixi.server.model.txml.Log;
 import com.cumulocity.tixi.server.model.txml.LogDefinition;
@@ -53,9 +55,16 @@ public class TixiLogHandlerTest extends BaseTixiHandlerTest {
 		
 		tixiLogHandler.handle(log);
 		
-		verify(measurementApi, Mockito.times(2)).create(measurementCaptor.capture());
-		
-		
+		verify(measurementApi, Mockito.times(1)).create(measurementCaptor.capture());
+		MeasurementRepresentation rep = measurementCaptor.getValue();
+		assertThat(rep.get("c8y_measure1")).isEqualTo(aMeasurementValue(1));
+		assertThat(rep.get("c8y_measure2")).isEqualTo(aMeasurementValue(2));
+	}
+	
+	private static MeasurementValue aMeasurementValue(int value) {
+		MeasurementValue measurementValue = new MeasurementValue();
+		measurementValue.setValue(BigDecimal.valueOf(value));
+		return measurementValue;
 	}
 
 }
