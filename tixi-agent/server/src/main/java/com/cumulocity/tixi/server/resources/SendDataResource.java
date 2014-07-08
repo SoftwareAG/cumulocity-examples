@@ -47,17 +47,17 @@ public class SendDataResource {
             @QueryParam("user") String user,
             @QueryParam("password") String password) {
         String fileName = agentFileSystem.writeIncomingFile(requestId, fileInputStream);
-        Object requestEntity = getRequestEntity(fileInputStream, requestId);
+        Object requestEntity = getRequestEntity(fileName, requestId);
         return Response.ok(statusOKJson()).build();
     }
 
-    private Object getRequestEntity(InputStream fileInputStream, String requestId) {
+    private Object getRequestEntity(String fileName, String requestId) {
         Class<?> entityType = requestStorage.get(requestId);
         if (requestId == null || entityType == null) {
             return null;
         }
         try {
-            return txmlUnmarshaller.unmarshal(new StreamSource(fileInputStream), entityType);
+            return txmlUnmarshaller.unmarshal(fileName, entityType);
         } catch (Exception e) {
             log.error("", e);
         }

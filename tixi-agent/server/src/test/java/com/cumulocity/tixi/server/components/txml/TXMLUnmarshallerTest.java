@@ -6,9 +6,7 @@ import static com.cumulocity.tixi.server.model.txml.LogDefinitionItemBuilder.anI
 import static java.math.BigDecimal.valueOf;
 import static org.fest.assertions.Assertions.assertThat;
 
-import java.io.File;
-
-import javax.xml.transform.stream.StreamSource;
+import java.io.FileInputStream;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -27,15 +25,17 @@ public class TXMLUnmarshallerTest {
 	
 	@Before
 	public void init() {
-		agentFileSystem = new AgentFileSystem("sth", "target/", XSLT_DIR);
+		agentFileSystem = new AgentFileSystem("target/incoming", "target/xsltprocessed", XSLT_DIR);
+		agentFileSystem.init();
 		txmlUnmarshaller = new TXMLUnmarshaller(agentFileSystem);
 	}
 	
 	@Test
     public void shouldUmnarshalLogDefinitionFile() throws Exception {
-		StreamSource streamSource = new StreamSource(new File(SAMPLE_DIR + "LogDefinition.xml"));
 		
-		LogDefinition actualLogDefinition = txmlUnmarshaller.unmarshal(streamSource, LogDefinition.class);
+		String fileName = agentFileSystem.writeIncomingFile("test", new FileInputStream(SAMPLE_DIR + "LogDefinition.xml"));
+		
+		LogDefinition actualLogDefinition = txmlUnmarshaller.unmarshal(fileName, LogDefinition.class);
 				
 		// @formatter:off
 		LogDefinition expectedLogDefinition = aLogDefinition()
@@ -67,9 +67,10 @@ public class TXMLUnmarshallerTest {
 	
 	@Test
 	public void shouldUmnarshalLogFile() throws Exception {
-		StreamSource streamSource = new StreamSource(new File(SAMPLE_DIR + "Log.xml"));
 		
-		Log actualLog = txmlUnmarshaller.unmarshal(streamSource, Log.class);
+		String fileName = agentFileSystem.writeIncomingFile("test", new FileInputStream(SAMPLE_DIR + "Log.xml"));
+		
+		Log actualLog = txmlUnmarshaller.unmarshal(fileName, Log.class);
 		// @formatter:off
 		Log expectedLog = aLog()
 				.withId("Datalogging_1")

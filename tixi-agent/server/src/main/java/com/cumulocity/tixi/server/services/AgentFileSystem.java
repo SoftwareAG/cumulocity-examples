@@ -28,24 +28,24 @@ public class AgentFileSystem {
 
     private File incomingPath;
 
-    private File processingPath;
+    private File xsltProcessedPath;
     
     private File xsltPath;
 
     @Autowired
     public AgentFileSystem(
             @Value("${TIXI.xml.incoming}") String incomingPath,
-            @Value("${TIXI.xml.processing}") String processingPath,
+            @Value("${TIXI.xml.xsltprocessed}") String xsltProcessedPath,
             @Value("${TIXI.xslt}") String xsltPath) {
         this.incomingPath = new File(incomingPath);
-        this.processingPath = new File(processingPath);
+        this.xsltProcessedPath = new File(xsltProcessedPath);
         this.xsltPath = new File(xsltPath);
     }
 
     @PostConstruct
     public void init() {
         incomingPath.mkdirs();
-        processingPath.mkdirs();
+        xsltProcessedPath.mkdirs();
     }
     
     public static File getFile(File parent, String fileName) {
@@ -58,6 +58,7 @@ public class AgentFileSystem {
         return fileName;
     }
     
+    @Deprecated
     public String readFromFile(String filename) {
         FileInputStream stream = null;
         try {
@@ -91,9 +92,19 @@ public class AgentFileSystem {
     	return getFile(xsltPath, entityClass.getSimpleName() + ".xslt");
     }
     
+    @Deprecated
     public File getProcessingFile(Class<?> entityClass) {
     	String fileName = fromNullable(entityClass.getSimpleName()).or("") + "_" + getTimestamp() + ".xml";
-    	return getFile(processingPath, fileName);
+    	return getFile(xsltProcessedPath, fileName);
     }
+    
+    public File getIncomingFile(String fileName) {
+    	return getFile(incomingPath, fileName);
+    }
+    
+    public File getXsltProcessedFile(String fileName) {
+    	return getFile(xsltProcessedPath, fileName);
+    }
+    
 }
 

@@ -39,16 +39,19 @@ public class TXMLUnmarshaller {
     	this.agentFileSystem = agentFileSystem;
     }
     
-    public <R> R unmarshal(StreamSource source, Class<R> resultClass) throws Exception {
-    	File processingFile = agentFileSystem.getProcessingFile(resultClass);
+    
+    public <R> R unmarshal(String fileName, Class<R> resultClass) throws Exception {
+    	File incomingFile = agentFileSystem.getIncomingFile(fileName);
+    	StreamSource source = new StreamSource(incomingFile);
+    	File xsltProcessedFile = agentFileSystem.getXsltProcessedFile(fileName);
     	
-        StreamResult transformerResult = new StreamResult(processingFile);
+        StreamResult transformerResult = new StreamResult(xsltProcessedFile);
         aTransformer(resultClass).transform(source, transformerResult);
         
-        StreamSource unmarshallerSource = new StreamSource(processingFile);
+        StreamSource unmarshallerSource = new StreamSource(xsltProcessedFile);
         return unmarshall(unmarshallerSource, resultClass);
     }
-
+    
 	@SuppressWarnings("unchecked")
     private <R> R unmarshall(StreamSource source, Class<R> resultClazz) {
         try {
