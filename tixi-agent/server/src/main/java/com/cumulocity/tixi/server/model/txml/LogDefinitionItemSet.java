@@ -52,6 +52,14 @@ public class LogDefinitionItemSet extends LogBaseItem {
 	public String toString() {
 		return String.format("DataLogging [id=%s, items=%s]", id, items);
 	}
+	
+	public LogDefinitionItem getItem(String id) {
+		if(items == null) {
+			return null;
+		} else {
+			return items.get(id);
+		}
+	}
 
 	@Override
 	public int hashCode() {

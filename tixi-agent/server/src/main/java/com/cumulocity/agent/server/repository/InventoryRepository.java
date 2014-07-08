@@ -36,5 +36,9 @@ public class InventoryRepository {
             return inventoryApi.update(managedObjectRepresentation);
         }
     }
+    
+    public void bindToAgent(GId agentId, GId deviceId) {
+    	inventoryApi.getManagedObjectApi(agentId).addChildDevice(deviceId);
+    }
 
 }

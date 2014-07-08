@@ -41,6 +41,23 @@ public class LogDefinition {
 		this.itemSets = dataLoggings;
 	}
 	
+	public LogDefinitionItemSet getItemSet(String id) {
+		if(itemSets == null) {
+			return null;
+		} else {
+			return itemSets.get(id);
+		}
+	}
+	
+	public LogDefinitionItem getItem(String itemSetId, String itemId) {
+		LogDefinitionItemSet itemSet = getItemSet(itemSetId);
+		if(itemSet == null) {
+			return null;
+		} else {
+			return itemSet.getItem(itemId);
+		}
+	}
+	
 	@Override
     public String toString() {
 	    return String.format("LogDefinition [itemSets=%s]", itemSets);
