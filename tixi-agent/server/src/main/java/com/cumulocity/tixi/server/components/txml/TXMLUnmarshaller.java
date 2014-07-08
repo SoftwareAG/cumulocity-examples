@@ -44,11 +44,12 @@ public class TXMLUnmarshaller {
     }
     
     public <R> R unmarshal(StreamSource source, Class<R> resultClass) throws Exception {
-        OutputStream transformerOutput = new FileOutputStream("target/tmp.xml");
-        InputStream unmarshallerInput = new FileInputStream("target/tmp.xml");
-        StreamResult transformerResult = new StreamResult(transformerOutput);
-        StreamSource unmarshallerSource = new StreamSource(unmarshallerInput);
+    	File processingFile = agentFileSystem.getProcessingFile(resultClass);
+    	
+        StreamResult transformerResult = new StreamResult(processingFile);
         aTransformer(resultClass).transform(source, transformerResult);
+        
+        StreamSource unmarshallerSource = new StreamSource(processingFile);
         return unmarshall(unmarshallerSource, resultClass);
     }
 

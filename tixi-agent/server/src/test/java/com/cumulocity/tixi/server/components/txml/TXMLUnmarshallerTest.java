@@ -27,7 +27,7 @@ public class TXMLUnmarshallerTest {
 	
 	@Before
 	public void init() {
-		agentFileSystem = new AgentFileSystem("sth", "sth", XSLT_DIR);
+		agentFileSystem = new AgentFileSystem("sth", "target/", XSLT_DIR);
 		txmlUnmarshaller = new TXMLUnmarshaller(agentFileSystem);
 	}
 	

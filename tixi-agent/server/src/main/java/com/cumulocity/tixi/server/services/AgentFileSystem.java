@@ -90,5 +90,10 @@ public class AgentFileSystem {
     public File getXsltFile(Class<?> entityClass) {
     	return getFile(xsltPath, entityClass.getSimpleName() + ".xslt");
     }
+    
+    public File getProcessingFile(Class<?> entityClass) {
+    	String fileName = fromNullable(entityClass.getSimpleName()).or("") + "_" + getTimestamp() + ".xml";
+    	return getFile(processingPath, fileName);
+    }
 }
 
