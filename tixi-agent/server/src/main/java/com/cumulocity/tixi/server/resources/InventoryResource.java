@@ -11,27 +11,23 @@ import javax.ws.rs.core.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.cumulocity.tixi.server.model.RequestType;
-import com.cumulocity.tixi.server.request.util.TixiOperationsQueue;
-import com.cumulocity.tixi.server.services.RequestFactory;
+import com.cumulocity.tixi.server.request.util.Device;
 
 @Path("/inventory")
 public class InventoryResource {
 
-    private final TixiOperationsQueue<TixiJsonResponse> tixiOperationsQueue;
+    private final Device device;
     
-    private final RequestFactory requestFactory;
-
     @Autowired
-    public InventoryResource(TixiOperationsQueue<TixiJsonResponse> tixiOperationsQueue, RequestFactory requestFactory) {
-        this.tixiOperationsQueue = tixiOperationsQueue;
-        this.requestFactory = requestFactory;
+    public InventoryResource(Device device) {
+        this.device = device;
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response open() {
-        tixiOperationsQueue.put(requestFactory.create(RequestType.EXTERNAL_DATABASE));
-        tixiOperationsQueue.put(requestFactory.create(RequestType.LOG_DEFINITION));
+        device.put(RequestType.EXTERNAL_DATABASE);
+        device.put(RequestType.LOG_DEFINITION);
 
         return Response.ok(statusOKJson()).build();
     }

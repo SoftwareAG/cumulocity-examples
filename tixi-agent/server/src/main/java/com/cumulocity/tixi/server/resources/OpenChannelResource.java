@@ -3,9 +3,6 @@ package com.cumulocity.tixi.server.resources;
 import static com.cumulocity.tixi.server.resources.TixiJsonResponse.statusOKJson;
 
 import java.io.IOException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -18,42 +15,33 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.tixi.server.model.RequestType;
-import com.cumulocity.tixi.server.request.util.TixiOperationsQueue;
+import com.cumulocity.tixi.server.request.util.Device;
 import com.cumulocity.tixi.server.services.DeviceControlService;
 import com.cumulocity.tixi.server.services.MessageChannel;
 import com.cumulocity.tixi.server.services.MessageChannelContext;
-import com.cumulocity.tixi.server.services.RequestFactory;
 import com.google.common.io.Closeables;
 
 @Path("/openchannel")
 public class OpenChannelResource {
 
     private final DeviceControlService deviceControlService;
-    
-    private final TixiOperationsQueue<TixiJsonResponse> tixiOperationsQueue;
 
-    private final ScheduledExecutorService executorService; 
-        
-    private final RequestFactory requestFactory;
+    private final Device device;
 
     @Autowired
-    public OpenChannelResource(DeviceControlService deviceControlService, TixiOperationsQueue<TixiJsonResponse> tixiOperationsQueue, RequestFactory requestFactory) {
-        this.deviceControlService = deviceControlService;
-        this.tixiOperationsQueue = tixiOperationsQueue;
-        this.requestFactory = requestFactory;
-        this.executorService = Executors.newScheduledThreadPool(1);
+    public OpenChannelResource(DeviceControlService deviceControlService, Device device) {
+	    this.deviceControlService = deviceControlService;
+	    this.device = device;
     }
 
-    @GET
+	@GET
     @Produces(MediaType.APPLICATION_JSON)
     public ChunkedOutput<TixiJsonResponse> open() {
-        tixiOperationsQueue.put(statusOKJson());
-        tixiOperationsQueue.put(requestFactory.create(RequestType.EXTERNAL_DATABASE));
-        tixiOperationsQueue.put(requestFactory.create(RequestType.LOG_DEFINITION));
-        
+		device.put(statusOKJson());
+        device.put(RequestType.EXTERNAL_DATABASE);
+        device.put(RequestType.LOG_DEFINITION);
         final ChunkedOutput<TixiJsonResponse> output = new ChunkedOutput<TixiJsonResponse>(TixiJsonResponse.class, "\r\n");
-        executorService.scheduleAtFixedRate(sendSingleTixiCommand(output), 1, 5, TimeUnit.SECONDS);
-
+        device.setOutput(output);
         return output;
     }
 
@@ -94,23 +82,5 @@ public class OpenChannelResource {
                 }
             }
         });
-    }
-    
-    private Runnable sendSingleTixiCommand(final ChunkedOutput<TixiJsonResponse> output) {
-        return new Runnable() {
-            
-            @Override
-            public void run() {
-                try {
-                    output.write(tixiOperationsQueue.take());
-                } catch (IOException e) {
-                    try {
-                        Closeables.close(output, true);
-                    } catch (IOException e1) {
-                    }
-                }
-                
-            }
-        };
     }
 }

@@ -44,10 +44,7 @@ public class SendDataResource {
     public Response senddata(
             @FormDataParam("filename") InputStream fileInputStream,
             @FormDataParam("filename") FormDataContentDisposition contentDispositionHeader, 
-            @QueryParam("requestId") String requestId, 
-            @QueryParam("serial") String serial,
-            @QueryParam("user") String user,
-            @QueryParam("password") String password) throws IOException {
+            @QueryParam("requestId") String requestId) {
         handleTixiRequest(fileInputStream, requestId);
         return Response.ok(statusOKJson()).build();
     }

@@ -1,13 +1,11 @@
 package com.cumulocity.tixi.server.services;
 
 import static com.google.common.base.Optional.fromNullable;
-import static org.apache.commons.io.FileUtils.openInputStream;
 import static org.apache.commons.io.FileUtils.openOutputStream;
 import static org.apache.commons.io.IOUtils.closeQuietly;
 import static org.apache.commons.io.IOUtils.copy;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,7 +13,6 @@ import java.text.SimpleDateFormat;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.io.IOUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
