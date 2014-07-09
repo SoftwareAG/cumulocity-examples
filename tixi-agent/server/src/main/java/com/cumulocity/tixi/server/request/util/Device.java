@@ -40,6 +40,7 @@ public class Device implements InitializingBean {
     }
 
 	public void put(TixiJsonResponse jsonResponse) {
+		logger.debug("Enqueued response {}.", jsonResponse);
 		tixiOperationsQueue.put(jsonResponse);
 	}
 
@@ -48,6 +49,7 @@ public class Device implements InitializingBean {
 	}
 
 	public void setOutput(ChunkedOutput<TixiJsonResponse> output) {
+		logger.info("Setup new output.");
 		this.output = output;
 	}
 
@@ -57,7 +59,9 @@ public class Device implements InitializingBean {
 				return;
 			}
 			try {
-				output.write(tixiOperationsQueue.take());
+				TixiJsonResponse jsonResponse = tixiOperationsQueue.take();
+				logger.debug("Send new tixi response {}.", jsonResponse);
+				output.write(jsonResponse);
 			} catch (IOException e) {
 				try {
 					Closeables.close(output, true);
