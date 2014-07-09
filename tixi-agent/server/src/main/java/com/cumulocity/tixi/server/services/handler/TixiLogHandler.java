@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -32,6 +33,7 @@ public class TixiLogHandler extends TixiHandler<Log> {
 	
 	private static final Logger logger = LoggerFactory.getLogger(TixiLogHandler.class);
 
+	@Autowired
 	public TixiLogHandler(DeviceContextService deviceContextService, IdentityRepository identityRepository, InventoryRepository inventoryRepository,
             MeasurementApi measurementApi, LogDefinitionRegister logDefinitionRegister) {
 	    super(deviceContextService, identityRepository, inventoryRepository, measurementApi, logDefinitionRegister);
