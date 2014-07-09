@@ -3,29 +3,21 @@ package com.cumulocity.tixi.server.services.handler;
 import static com.cumulocity.tixi.server.model.txml.LogDefinitionBuilder.aLogDefinition;
 import static com.cumulocity.tixi.server.model.txml.LogDefinitionItemBuilder.anItem;
 import static org.fest.assertions.Assertions.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 
-import com.cumulocity.model.idtype.GId;
 import com.cumulocity.tixi.server.model.SerialNumber;
 import com.cumulocity.tixi.server.model.txml.LogDefinition;
 
 public class TixiLogDefinitionHandlerTest extends BaseTixiHandlerTest {
 	
 	private TixiLogDefinitionHandler handler;
-	
-	private ArgumentCaptor<SerialNumber> snCaptor; 
 	private FakeInventoryRepository inventoryRepository = new FakeInventoryRepository();
 
 	@Before
 	public void init() {
 		handler = new TixiLogDefinitionHandler(deviceContextService, identityRepository, inventoryRepository, measurementApi, logDefinitionRegister);
-		snCaptor = ArgumentCaptor.forClass(SerialNumber.class);
 	}
 	
 	@Test
@@ -50,8 +42,7 @@ public class TixiLogDefinitionHandlerTest extends BaseTixiHandlerTest {
 		
 		handler.handle(logDefinition);
 		
-		verify(identityRepository, times(5)).save(any(GId.class), snCaptor.capture());
-		assertThat(snCaptor.getAllValues()).containsOnly(
+		assertThat(inventoryRepository.getAllExternalIds()).containsOnly(
 				// @formatter:off
 				new SerialNumber("agent1"),
 				new SerialNumber("device11"),

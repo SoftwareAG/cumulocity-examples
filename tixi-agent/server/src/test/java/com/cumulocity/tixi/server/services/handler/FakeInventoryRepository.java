@@ -11,6 +11,8 @@ import com.cumulocity.agent.server.repository.InventoryRepository;
 import com.cumulocity.model.ID;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
+import com.cumulocity.sdk.client.SDKException;
+import com.cumulocity.tixi.server.model.SerialNumber;
 
 public class FakeInventoryRepository extends InventoryRepository {
 	
@@ -26,12 +28,12 @@ public class FakeInventoryRepository extends InventoryRepository {
 
 	@Override
     public ManagedObjectRepresentation findByExternalId(ID externalID) {
-	    return extIdToMo.get(externalID);
+	    return checkNotNull(extIdToMo.get(externalID));
     }
 
 	@Override
     public ManagedObjectRepresentation findById(GId id) {
-	    return idToMo.get(id);
+	    return checkNotNull(idToMo.get(id));
     }
 
 	@Override
@@ -46,8 +48,26 @@ public class FakeInventoryRepository extends InventoryRepository {
     public void bindToAgent(GId agentId, GId deviceId) {
 		idToAgentId.put(deviceId, agentId);
     }
+		
+    public ManagedObjectRepresentation save(ManagedObjectRepresentation rep, SerialNumber serial) {
+	    rep = save(rep);
+	    extIdToMo.put(serial, rep);
+	    return rep;
+    }
+
+	private static <K> K checkNotNull(K obj) {
+		if (obj == null) {
+			throw new SDKException("NO!");
+		} else {
+			return obj;
+		}
+    }
 	
-	public Collection<ManagedObjectRepresentation> getSaved() {
+	public Collection<ManagedObjectRepresentation> getAllManagedObjects() {
 		return idToMo.values();
+	}
+	
+	public Collection<ID> getAllExternalIds() {
+		return extIdToMo.keySet();
 	}
 }
