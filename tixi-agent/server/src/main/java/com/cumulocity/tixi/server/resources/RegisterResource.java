@@ -38,7 +38,7 @@ public class RegisterResource {
         final TixiDeviceCredentails credentials = deviceService.register(new SerialNumber(serial));
         // @formatter:off
         return Response.ok(
-                new JsonResponse("REGISTER")
+                new TixiJsonResponse("REGISTER")
                 .set("user", credentials.getUser())
                 .set("password", credentials.getPassword())
                 .set("deviceID", credentials.getDeviceID())
@@ -47,7 +47,7 @@ public class RegisterResource {
     }
 
     private Response standard(final String serial) {
-        return Response.ok(new JsonResponse("REGISTER").set("deviceID", GId.asString(deviceService.findGId(new SerialNumber(serial)))))
+        return Response.ok(new TixiJsonResponse("REGISTER").set("deviceID", GId.asString(deviceService.findGId(new SerialNumber(serial)))))
                 .build();
     }
 }

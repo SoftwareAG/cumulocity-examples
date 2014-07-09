@@ -1,6 +1,6 @@
 package com.cumulocity.tixi.server.resources;
 
-import static com.cumulocity.tixi.server.resources.JsonResponse.statusOKJson;
+import static com.cumulocity.tixi.server.resources.TixiJsonResponse.statusOKJson;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,6 +9,8 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,10 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.cumulocity.tixi.server.model.txml.Log;
 import com.cumulocity.tixi.server.request.util.RequestStorage;
 import com.cumulocity.tixi.server.services.AgentFileSystem;
-
-import org.apache.commons.io.IOUtils;
-import org.glassfish.jersey.media.multipart.FormDataParam;
-import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import com.cumulocity.tixi.server.services.handler.TixiXmlService;
 
 @Path("/senddata")
 public class SendDataResource {
@@ -30,8 +29,11 @@ public class SendDataResource {
     
     private final AgentFileSystem agentFileSystem;
 
+    private final TixiXmlService tixiService;
+
     @Autowired
-    public SendDataResource(RequestStorage requestStorage, AgentFileSystem agentFileSystem) {
+    public SendDataResource(TixiXmlService tixiService, RequestStorage requestStorage, AgentFileSystem agentFileSystem) {
+        this.tixiService = tixiService;
         this.requestStorage = requestStorage;
         this.agentFileSystem = agentFileSystem;
     }
@@ -46,12 +48,19 @@ public class SendDataResource {
             @QueryParam("serial") String serial,
             @QueryParam("user") String user,
             @QueryParam("password") String password) throws IOException {
-        String fileName = agentFileSystem.writeIncomingFile(requestId, fileInputStream);
-        Class<?> requestEntityType = getRequestEntity(fileInputStream, requestId);
+        handleTixiRequest(fileInputStream, requestId);
         return Response.ok(statusOKJson()).build();
     }
 
-    private Class<?> getRequestEntity(InputStream fileInputStream, String requestId) {
+    private void handleTixiRequest(InputStream fileInputStream, String requestId) {
+        String fileName = agentFileSystem.writeIncomingFile(requestId, fileInputStream);
+        Class<?> requestEntityType = getRequestEntity(requestId);
+        if (requestEntityType != null) {
+            tixiService.handle(fileName, requestEntityType);
+        }
+    }
+
+    private Class<?> getRequestEntity(String requestId) {
         Class<?> entityType = requestStorage.get(requestId);
         if (requestId == null) {
             return Log.class;

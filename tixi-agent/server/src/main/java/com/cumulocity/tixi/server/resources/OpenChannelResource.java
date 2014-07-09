@@ -1,6 +1,6 @@
 package com.cumulocity.tixi.server.resources;
 
-import static com.cumulocity.tixi.server.resources.JsonResponse.statusOKJson;
+import static com.cumulocity.tixi.server.resources.TixiJsonResponse.statusOKJson;
 
 import java.io.IOException;
 import java.util.concurrent.Executors;
@@ -17,11 +17,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
-import com.cumulocity.tixi.server.model.txml.LogDefinition;
-import com.cumulocity.tixi.server.request.util.RequestIdFactory;
-import com.cumulocity.tixi.server.request.util.RequestStorage;
+import com.cumulocity.tixi.server.model.RequestType;
 import com.cumulocity.tixi.server.request.util.TixiOperationsQueue;
-import com.cumulocity.tixi.server.services.*;
+import com.cumulocity.tixi.server.services.DeviceControlService;
+import com.cumulocity.tixi.server.services.MessageChannel;
+import com.cumulocity.tixi.server.services.MessageChannelContext;
+import com.cumulocity.tixi.server.services.RequestFactory;
 import com.google.common.io.Closeables;
 
 @Path("/openchannel")
@@ -29,48 +30,34 @@ public class OpenChannelResource {
 
     private final DeviceControlService deviceControlService;
     
-    private final TixiOperationsQueue<JsonResponse> tixiOperationsQueue;
-    
-    private final RequestIdFactory requestIdFactory;
+    private final TixiOperationsQueue<TixiJsonResponse> tixiOperationsQueue;
 
     private final ScheduledExecutorService executorService; 
-    
-    private final RequestStorage requestStorage;
+        
+    private final RequestFactory requestFactory;
 
     @Autowired
-    public OpenChannelResource(DeviceControlService deviceControlService, TixiOperationsQueue<JsonResponse> tixiOperationsQueue, RequestIdFactory requestIdFactory, RequestStorage requestStorage) {
+    public OpenChannelResource(DeviceControlService deviceControlService, TixiOperationsQueue<TixiJsonResponse> tixiOperationsQueue, RequestFactory requestFactory) {
         this.deviceControlService = deviceControlService;
         this.tixiOperationsQueue = tixiOperationsQueue;
-        this.requestIdFactory = requestIdFactory;
-        this.requestStorage = requestStorage;
+        this.requestFactory = requestFactory;
         this.executorService = Executors.newScheduledThreadPool(1);
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public ChunkedOutput<JsonResponse> open() {
+    public ChunkedOutput<TixiJsonResponse> open() {
         tixiOperationsQueue.put(statusOKJson());
-        tixiOperationsQueue.put(createExternalDBRequest());
-        tixiOperationsQueue.put(createLogDefinitionRequest());
+        tixiOperationsQueue.put(requestFactory.create(RequestType.EXTERNAL_DATABASE));
+        tixiOperationsQueue.put(requestFactory.create(RequestType.LOG_DEFINITION));
         
-        final ChunkedOutput<JsonResponse> output = new ChunkedOutput<JsonResponse>(JsonResponse.class, "\r\n");
+        final ChunkedOutput<TixiJsonResponse> output = new ChunkedOutput<TixiJsonResponse>(TixiJsonResponse.class, "\r\n");
         executorService.scheduleAtFixedRate(sendSingleTixiCommand(output), 1, 5, TimeUnit.SECONDS);
 
         return output;
     }
 
-    private JsonResponse createLogDefinitionRequest() {
-        String requestId = requestIdFactory.get().toString();
-        requestStorage.put(requestId, LogDefinition.class);
-        return new JsonResponse("TiXML").set("requestId", requestId).set("parameter", "[<GetConfig _=\"LOG/LogDefinition\" ver=\"v\"/>]");
-    }
-
-    private JsonResponse createExternalDBRequest() {
-        return new JsonResponse("TiXML").set("requestId", requestIdFactory.get().toString()).set("parameter",
-                "[<GetConfig _=\"PROCCFG/External\" ver=\"v\"/>]");
-    }
-
-    private void subscribeOnOperation(final ChunkedOutput<JsonResponse> output) {
+    private void subscribeOnOperation(final ChunkedOutput<TixiJsonResponse> output) {
         deviceControlService.subscirbe(new MessageChannel<OperationRepresentation>() {
             boolean initialized = false;
 
@@ -83,18 +70,18 @@ public class OpenChannelResource {
                 send(output, asJsonResponse(message), context);
             }
 
-            private JsonResponse asJsonResponse(OperationRepresentation message) {
-                return new JsonResponse("TiXML").set("requestId", GId.asString(message.getId())).set("parameter",
+            private TixiJsonResponse asJsonResponse(OperationRepresentation message) {
+                return new TixiJsonResponse("TiXML").set("requestId", GId.asString(message.getId())).set("parameter",
                         message.get("tixi_command"));
             }
 
             @Override
             public void close() {
-                final JsonResponse response = new JsonResponse().set("status", 1l);
+                final TixiJsonResponse response = new TixiJsonResponse().set("status", 1l);
                 send(output, response, null);
             }
 
-            private void send(final ChunkedOutput<JsonResponse> output, final JsonResponse response, MessageChannelContext context) {
+            private void send(final ChunkedOutput<TixiJsonResponse> output, final TixiJsonResponse response, MessageChannelContext context) {
                 try {
 
                     output.write(response);
@@ -109,7 +96,7 @@ public class OpenChannelResource {
         });
     }
     
-    private Runnable sendSingleTixiCommand(final ChunkedOutput<JsonResponse> output) {
+    private Runnable sendSingleTixiCommand(final ChunkedOutput<TixiJsonResponse> output) {
         return new Runnable() {
             
             @Override

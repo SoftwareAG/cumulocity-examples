@@ -125,7 +125,7 @@ public class DeviceCredentials {
 
     @Override
     public String toString() {
-        return tenant;
+        return tenant + " " + username + " " + password;
     }
 
 }

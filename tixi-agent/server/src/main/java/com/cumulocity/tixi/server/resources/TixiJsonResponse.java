@@ -5,21 +5,22 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.cumulocity.tixi.server.model.txml.LogDefinition;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-public class JsonResponse {
+public class TixiJsonResponse {
 
     @JsonInclude(NON_NULL)
     private String request;
 
     private Map<String, Object> properties = new HashMap<String, Object>();
 
-    public JsonResponse() {
+    public TixiJsonResponse() {
     }
 
-    public JsonResponse(String request) {
+    public TixiJsonResponse(String request) {
         this.request = request;
     }
 
@@ -37,12 +38,21 @@ public class JsonResponse {
     }
 
     @JsonAnySetter
-    public JsonResponse set(String key, Object value) {
+    public TixiJsonResponse set(String key, Object value) {
         properties.put(key, value);
         return this;
     }
     
-    public static JsonResponse statusOKJson() {
-        return new JsonResponse().set("status", 0l);
+    public static TixiJsonResponse statusOKJson() {
+        return new TixiJsonResponse().set("status", 0l);
+    }
+    
+    public static TixiJsonResponse createLogDefinitionRequest(String requestId) {
+        return new TixiJsonResponse("TiXML").set("requestId", requestId).set("parameter", "[<GetConfig _=\"LOG/LogDefinition\" ver=\"v\"/>]");
+    }
+
+    public static  TixiJsonResponse createExternalDBRequest(String requestId) {
+        return new TixiJsonResponse("TiXML").set("requestId", requestId).set("parameter",
+                "[<GetConfig _=\"PROCCFG/External\" ver=\"v\"/>]");
     }
 }

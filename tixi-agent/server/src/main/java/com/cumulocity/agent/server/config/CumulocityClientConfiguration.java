@@ -1,12 +1,14 @@
 package com.cumulocity.agent.server.config;
 
+import static com.cumulocity.agent.server.context.DeviceContextScope.CONTEXT_SCOPE;
+import static org.springframework.context.annotation.ScopedProxyMode.TARGET_CLASS;
+
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import c8y.inject.DeviceContextScope;
+import org.springframework.context.annotation.Scope;
 
 import com.cumulocity.agent.server.context.CumulocityClientCache;
 import com.cumulocity.agent.server.context.DeviceContextService;
@@ -55,77 +57,77 @@ public class CumulocityClientConfiguration {
 
     @Bean
     @Autowired
-    @DeviceContextScope
+    @Scope(value = CONTEXT_SCOPE, proxyMode = TARGET_CLASS)
     public CumulocityClientFactoryBean cumulocityClient(DeviceContextService contextService) {
         return new CumulocityClientFactoryBean(contextService, cumulocityClientCache());
     }
 
     @Bean
     @Autowired
-    @DeviceContextScope
+    @Scope(value = CONTEXT_SCOPE, proxyMode = TARGET_CLASS)
     public InventoryApi inventoryApi(Platform platform) throws SDKException {
         return platform.getInventoryApi();
     }
 
     @Bean
     @Autowired
-    @DeviceContextScope
+    @Scope(value = CONTEXT_SCOPE, proxyMode = TARGET_CLASS)
     public DeviceCredentialsApi deviceCredentialsApi(Platform platform) throws SDKException {
         return platform.getDeviceCredentialsApi();
     }
 
     @Bean
     @Autowired
-    @DeviceContextScope
+    @Scope(value = CONTEXT_SCOPE, proxyMode = TARGET_CLASS)
     public EventApi eventApi(Platform platform) throws SDKException {
         return platform.getEventApi();
     }
 
     @Bean
     @Autowired
-    @DeviceContextScope
+    @Scope(value = CONTEXT_SCOPE, proxyMode = TARGET_CLASS)
     public MeasurementApi measurementApi(Platform platform) throws SDKException {
         return platform.getMeasurementApi();
     }
 
     @Bean
     @Autowired
-    @DeviceContextScope
+    @Scope(value = CONTEXT_SCOPE, proxyMode = TARGET_CLASS)
     public IdentityApi identityApi(Platform platform) throws SDKException {
         return platform.getIdentityApi();
     }
 
     @Bean
     @Autowired
-    @DeviceContextScope
+    @Scope(value = CONTEXT_SCOPE, proxyMode = TARGET_CLASS)
     public AlarmApi alarmApi(Platform platform) throws SDKException {
         return platform.getAlarmApi();
     }
 
     @Bean
     @Autowired
-    @DeviceContextScope
+    @Scope(value = CONTEXT_SCOPE, proxyMode = TARGET_CLASS)
     public AuditRecordApi auditRecordApi(Platform platform) throws SDKException {
         return platform.getAuditRecordApi();
     }
 
     @Bean
     @Autowired
-    @DeviceContextScope
+    @Scope(value = CONTEXT_SCOPE, proxyMode = TARGET_CLASS)
     public DeviceControlApi deviceControlApi(Platform platform) throws SDKException {
         return platform.getDeviceControlApi();
     }
 
     @Bean
     @Autowired
-    @DeviceContextScope
+    @Scope(value = CONTEXT_SCOPE, proxyMode = TARGET_CLASS)
     public CepApi cepApi(Platform platform) throws SDKException {
         return platform.getCepApi();
     }
 
     @Bean
     @Autowired
-    @DeviceContextScope
+    @Scope(value = CONTEXT_SCOPE, proxyMode = TARGET_CLASS)
     public NotificationsSubscriberFactoryBean<GId, OperationRepresentation> deviceControlNotificationsSubscriber(
             final DeviceContextService contextService, final DeviceControlApi deviceControlApi) throws SDKException {
         return subscriberFactory(contextService, new DeviceControlNotificationsSubscriberSupplier(contextService, deviceControlApi));

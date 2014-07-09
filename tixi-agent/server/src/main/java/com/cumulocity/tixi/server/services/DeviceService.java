@@ -52,7 +52,6 @@ public class DeviceService {
                 SECONDS, asList(10l)));
 
         final TixiDeviceCredentails tixiCredentials = TixiDeviceCredentails.from(credentials);
-
         try {
             ManagedObjectRepresentation deviceRepresentation = contextService.callWithinContext(
                     new DeviceContext(DeviceCredentials.from(credentials)), new Callable<ManagedObjectRepresentation>() {
