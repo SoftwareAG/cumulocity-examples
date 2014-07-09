@@ -15,6 +15,7 @@ public class TixiAgent {
                 .rest()
                 .scan("com.cumulocity.tixi.server.resources")
                 .scan("com.cumulocity.tixi.server.services")
+                .scan("com.cumulocity.tixi.server.request")
                 .scan("com.cumulocity.tixi.server.components")
                 .component(RegisterResource.class)
                 .component(SendDataResource.class)

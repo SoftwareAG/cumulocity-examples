@@ -18,6 +18,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.tixi.server.model.txml.LogDefinition;
+import com.cumulocity.tixi.server.request.util.RequestIdFactory;
+import com.cumulocity.tixi.server.request.util.RequestStorage;
+import com.cumulocity.tixi.server.request.util.TixiOperationsQueue;
 import com.cumulocity.tixi.server.services.*;
 import com.google.common.io.Closeables;
 

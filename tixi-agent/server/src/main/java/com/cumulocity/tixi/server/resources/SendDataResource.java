@@ -14,8 +14,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.cumulocity.tixi.server.model.txml.Log;
+import com.cumulocity.tixi.server.request.util.RequestStorage;
 import com.cumulocity.tixi.server.services.AgentFileSystem;
-import com.cumulocity.tixi.server.services.RequestStorage;
 
 import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.media.multipart.FormDataParam;

@@ -1,4 +1,4 @@
-package com.cumulocity.tixi.server.services;
+package com.cumulocity.tixi.server.request.util;
 
 import static com.google.common.cache.CacheBuilder.newBuilder;
 
