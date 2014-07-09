@@ -116,6 +116,7 @@ public class TixiLogHandler extends TixiHandler<Log> {
 		MeasurementRepresentation result = measurements.get(key);
 		if(result == null) {
 			result = new MeasurementRepresentation();
+			result.setType("c8y_tixiMeasurement");
 			result.setTime(key.getDate());
 			measurements.put(key, result);
 		}

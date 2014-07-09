@@ -92,7 +92,7 @@ public class TixiLogDefinitionHandler extends TixiHandler<LogDefinition> {
 		logger.debug("Register device: {}", serial);
 		ManagedObjectRepresentation managedObjectRepresentation = new ManagedObjectRepresentation();
 		managedObjectRepresentation.set(new IsDevice());
-		managedObjectRepresentation.setName(serial.getName());
+		managedObjectRepresentation.setName(serial.getValue());
 		return inventoryRepository.save(managedObjectRepresentation, serial);
 	}
 
@@ -101,7 +101,7 @@ public class TixiLogDefinitionHandler extends TixiHandler<LogDefinition> {
 		ManagedObjectRepresentation managedObjectRepresentation = new ManagedObjectRepresentation();
 		managedObjectRepresentation.set(new IsDevice());
 		managedObjectRepresentation.set(new Agent());
-		managedObjectRepresentation.setName(serial.getName());
+		managedObjectRepresentation.setName(serial.getValue());
 		return inventoryRepository.save(managedObjectRepresentation, serial);
 	}
 }
