@@ -35,20 +35,29 @@ public class TixiLogDefinitionHandlerTest extends BaseTixiHandlerTest {
 			.withNewItemSet("itemSet_1")
 			.withItem(anItem()
 				.withId("item_1")
-				.withPath("/Process/agent1/device1/measure"))
+				.withPath("/Process/agent1/device11/measure"))
 			.withItem(anItem()
 				.withId("item_2")
-				.withPath("/Process/agent1/device2/measure"))
+				.withPath("/Process/agent1/device12/measure"))
+			.withItem(anItem()
+				.withId("item_3")
+				.withPath("/Process/agent2/device21/measure"))
+			.withItem(anItem()
+				.withId("item_4")
+				.withPath("/Process/agent2/device21/measure"))
 			.build();
 		// @formatter:on
 		
 		handler.handle(logDefinition);
 		
-		verify(identityRepository, times(4)).save(any(GId.class), snCaptor.capture());
-		assertThat(snCaptor.getAllValues()).containsExactly(
+		verify(identityRepository, times(5)).save(any(GId.class), snCaptor.capture());
+		assertThat(snCaptor.getAllValues()).containsOnly(
+				// @formatter:off
 				new SerialNumber("agent1"),
-				new SerialNumber("device1"),
-				new SerialNumber("agent1"),
-				new SerialNumber("device2"));
+				new SerialNumber("device11"),
+				new SerialNumber("device12"),
+				new SerialNumber("agent2"),
+				new SerialNumber("device21"));
+				// @formatter:on
     }
 }

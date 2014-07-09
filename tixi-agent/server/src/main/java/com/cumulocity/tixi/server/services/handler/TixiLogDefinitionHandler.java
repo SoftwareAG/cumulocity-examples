@@ -1,5 +1,8 @@
 package com.cumulocity.tixi.server.services.handler;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +29,9 @@ import com.cumulocity.tixi.server.model.txml.LogDefinitionItemSet;
 public class TixiLogDefinitionHandler extends TixiHandler<LogDefinition> {
 
 	private static final Logger logger = LoggerFactory.getLogger(TixiLogDefinitionHandler.class);
+	
+	private final Map<SerialNumber, ManagedObjectRepresentation> persistedAgents = new HashMap<>();
+	private final Map<SerialNumber, ManagedObjectRepresentation> persistedDevices = new HashMap<>();
 
 	@Autowired
 	public TixiLogDefinitionHandler(DeviceContextService deviceContextService, IdentityRepository identityRepository, InventoryRepository inventoryRepository,
@@ -47,33 +53,41 @@ public class TixiLogDefinitionHandler extends TixiHandler<LogDefinition> {
 	private void handleDeviceItem(LogDefinitionItem logDefinitionItem) {
 		String agentId = logDefinitionItem.getPath().getAgentId();
 		SerialNumber agentSerial = new SerialNumber(agentId);
-		GId agentGId = identityRepository.find(agentSerial);
-		if (agentGId == null) {
-			agentGId = registerAgent(agentSerial);
+		ManagedObjectRepresentation agent = persistedAgents.get(agentSerial);
+		if(agent == null) {
+			agent = inventoryRepository.findByExternalId(agentSerial);
+			if (agent == null) {
+				agent = registerAgent(agentSerial);
+			}
+			persistedAgents.put(agentSerial, agent);
 		}
 		String deviceId = logDefinitionItem.getPath().getDeviceId();
 		SerialNumber deviceSerial = new SerialNumber(deviceId);
-		GId deviceGId = identityRepository.find(deviceSerial);
-		if (deviceGId == null) {
-			deviceGId = registerDevice(agentGId, deviceSerial);
+		ManagedObjectRepresentation device = persistedDevices.get(deviceSerial);
+		if(device == null) {
+			device = inventoryRepository.findByExternalId(deviceSerial);
+			if(device == null) {
+				device = registerDevice(agent.getId(), deviceSerial);
+			}
+			persistedDevices.put(deviceSerial, device);
 		}
 	}
 
-	private GId registerDevice(GId agentId, SerialNumber deviceSerial) {
+	private ManagedObjectRepresentation registerDevice(GId agentId, SerialNumber deviceSerial) {
 		ManagedObjectRepresentation managedObjectRepresentation = new ManagedObjectRepresentation();
 		managedObjectRepresentation.set(new IsDevice());
 		final ManagedObjectRepresentation managedObject = inventoryRepository.save(managedObjectRepresentation);
 		identityRepository.save(managedObject.getId(), deviceSerial);
 		inventoryRepository.bindToAgent(agentId, managedObject.getId());
-		return managedObject.getId();
+		return managedObject;
 	}
 
-	private GId registerAgent(SerialNumber agentSerial) {
+	private ManagedObjectRepresentation registerAgent(SerialNumber agentSerial) {
 		ManagedObjectRepresentation managedObjectRepresentation = new ManagedObjectRepresentation();
 		managedObjectRepresentation.set(new IsDevice());
 		managedObjectRepresentation.set(new Agent());
 		final ManagedObjectRepresentation managedObject = inventoryRepository.save(managedObjectRepresentation);
 		identityRepository.save(managedObject.getId(), agentSerial);
-		return managedObject.getId();
+		return managedObject;
 	}
 }
