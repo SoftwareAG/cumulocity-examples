@@ -25,7 +25,7 @@ public class TixiXmlService {
 	}
 
 	public void handle(String fileName, Class<?> entityType) {
-		logger.info("Process file " + fileName + " with expected entity " + entityType);
+		logger.info("Process file " + fileName + " with expected entity " + entityType.getSimpleName());
 		Object unmarshaled = txmlUnmarshaller.unmarshal(fileName, entityType);
 		if (unmarshaled instanceof Log) {
 			TixiLogHandler handler = beanFactory.getBean(TixiLogHandler.class);
@@ -36,6 +36,6 @@ public class TixiXmlService {
 		} else {
 			throw new RuntimeException("Can't handle class " + unmarshaled.getClass());
 		}
-		logger.info("File " + fileName + " with expected entity " + entityType + " processed.");
+		logger.info("File " + fileName + " with expected entity " + entityType.getSimpleName() + " processed.");
 	}
 }

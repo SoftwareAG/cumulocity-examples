@@ -23,6 +23,7 @@ import com.cumulocity.sdk.client.measurement.MeasurementApi;
 import com.cumulocity.tixi.server.model.SerialNumber;
 import com.cumulocity.tixi.server.model.txml.LogDefinition;
 import com.cumulocity.tixi.server.model.txml.LogDefinitionItem;
+import com.cumulocity.tixi.server.model.txml.LogDefinitionItemPath;
 import com.cumulocity.tixi.server.model.txml.LogDefinitionItemSet;
 
 @Component
@@ -57,8 +58,8 @@ public class TixiLogDefinitionHandler extends TixiHandler<LogDefinition> {
 
 	private void handleDeviceItem(LogDefinitionItem logDefinitionItem) {
 		logger.debug("Process log definition item: {}", logDefinitionItem);
-		String agentId = logDefinitionItem.getPath().getAgentId();
-		SerialNumber agentSerial = new SerialNumber(agentId);
+		LogDefinitionItemPath path = logDefinitionItem.getPath();
+		SerialNumber agentSerial = new SerialNumber(path.getAgentId());
 		ManagedObjectRepresentation agent = persistedAgents.get(agentSerial);
 		if (agent == null) {
 			agent = findMoOrNull(agentSerial);
@@ -67,8 +68,7 @@ public class TixiLogDefinitionHandler extends TixiHandler<LogDefinition> {
 			}
 			persistedAgents.put(agentSerial, agent);
 		}
-		String deviceId = logDefinitionItem.getPath().getDeviceId();
-		SerialNumber deviceSerial = new SerialNumber(deviceId);
+		SerialNumber deviceSerial = new SerialNumber(path.getDeviceId());
 		ManagedObjectRepresentation device = persistedDevices.get(deviceSerial);
 		if (device == null) {
 			device = findMoOrNull(deviceSerial);
@@ -88,18 +88,20 @@ public class TixiLogDefinitionHandler extends TixiHandler<LogDefinition> {
 		}
 	}
 
-	private ManagedObjectRepresentation registerDevice(GId agentId, SerialNumber deviceSerial) {
-		logger.debug("Register device: {}", deviceSerial);
+	private ManagedObjectRepresentation registerDevice(GId agentId, SerialNumber serial) {
+		logger.debug("Register device: {}", serial);
 		ManagedObjectRepresentation managedObjectRepresentation = new ManagedObjectRepresentation();
 		managedObjectRepresentation.set(new IsDevice());
-		return inventoryRepository.save(managedObjectRepresentation, deviceSerial);
+		managedObjectRepresentation.setName(serial.getName());
+		return inventoryRepository.save(managedObjectRepresentation, serial);
 	}
 
-	private ManagedObjectRepresentation registerAgent(SerialNumber agentSerial) {
-		logger.debug("Register agent: {}", agentSerial);
+	private ManagedObjectRepresentation registerAgent(SerialNumber serial) {
+		logger.debug("Register agent: {}", serial);
 		ManagedObjectRepresentation managedObjectRepresentation = new ManagedObjectRepresentation();
 		managedObjectRepresentation.set(new IsDevice());
 		managedObjectRepresentation.set(new Agent());
-		return inventoryRepository.save(managedObjectRepresentation, agentSerial);
+		managedObjectRepresentation.setName(serial.getName());
+		return inventoryRepository.save(managedObjectRepresentation, serial);
 	}
 }
