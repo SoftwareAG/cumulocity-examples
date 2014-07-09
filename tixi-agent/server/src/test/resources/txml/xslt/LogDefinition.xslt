@@ -9,16 +9,16 @@
 						<xsl:attribute name="id">
 		                  <xsl:value-of select="name()" />
 		                </xsl:attribute>
-						<xsl:for-each select="current()/*">
-							<LogDefinitionItems>
+						<LogDefinitionItems>
+							<xsl:for-each select="current()/*">
 								<LogDefinitionItem>
 									<xsl:copy-of select="@*" />
 									<xsl:attribute name="id">
 				                        <xsl:value-of select="name()" />
 				                    </xsl:attribute>
 								</LogDefinitionItem>
-							</LogDefinitionItems>
-						</xsl:for-each>
+							</xsl:for-each>
+						</LogDefinitionItems>
 					</LogDefinitionItemSet>
 				</xsl:for-each>
 			</Records>

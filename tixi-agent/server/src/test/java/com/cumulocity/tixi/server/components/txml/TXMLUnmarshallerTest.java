@@ -61,9 +61,18 @@ public class TXMLUnmarshallerTest {
 		// @formatter:on
 		
 		assertThat(actualLogDefinition).isEqualTo(expectedLogDefinition);
+	}
 		
-		System.out.println(actualLogDefinition);
-    }
+	
+	@Test
+	public void shouldUmnarshalBigLogDefinitionFile() throws Exception {
+		
+		String fileName = agentFileSystem.writeIncomingFile("test", new FileInputStream(SAMPLE_DIR + "LogDefinition2.xml"));
+		
+		LogDefinition actualLogDefinition = txmlUnmarshaller.unmarshal(fileName, LogDefinition.class);
+				
+		//TODO add assertions
+	}
 	
 	@Test
 	public void shouldUmnarshalLogFile() throws Exception {
