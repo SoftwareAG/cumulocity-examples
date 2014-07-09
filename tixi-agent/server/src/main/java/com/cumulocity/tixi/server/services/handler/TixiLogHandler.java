@@ -41,11 +41,10 @@ public class TixiLogHandler extends TixiHandler<Log> {
 	
 	private Map<MeasurementKey, MeasurementRepresentation> measurements = new HashMap<>();
 	private LogDefinition logDefinition;
-	private Log log;
-
+	private String logId;
 	@Override
 	public void handle(Log log) {
-		this.log = log;
+		this.logId = log.getId();
 		this.logDefinition = logDefinitionRegister.getLogDefinition();
 		System.out.println("LOG = " + log);
 		System.out.println("LOG DEFITNIION = " + logDefinition);
@@ -59,17 +58,16 @@ public class TixiLogHandler extends TixiHandler<Log> {
 	}
 
 	private void handleItemSet(LogItemSet itemSet) {
-		String logDefinitionId = log.getId();
 	    for (LogItem item : itemSet.getItems()) {
-	    	LogDefinitionItem itemDef = logDefinition.getItem(log.getId(), item.getId());
+	    	LogDefinitionItem itemDef = logDefinition.getItem(logId, item.getId());
 	    	if(itemDef == null) {
 	    		logger.warn("There is no log definition item for itemSetId: {}," +
-	    				" itemId: {}; skip this log.", logDefinitionId, item.getId());
+	    				" itemId: {}; skip this log.", logId, item.getId());
 	    		continue;
 	    	}
 	    	if(!isDevicePath(itemDef)) {
 	    		logger.warn("Log definition item has no device path variable " +
-	    				"itemSetId: {} itemId: {}; skip this log.", logDefinitionId, item.getId());
+	    				"itemSetId: {} itemId: {}; skip this log.", logId, item.getId());
 	    		continue;
 	    	}
 	    	
