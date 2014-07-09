@@ -61,11 +61,10 @@ public class SendDataResource {
     }
 
     private Class<?> getRequestEntity(String requestId) {
-        Class<?> entityType = requestStorage.get(requestId);
         if (requestId == null) {
             return Log.class;
         }
-        return entityType;
+        return requestStorage.get(requestId);
     }
 
 }

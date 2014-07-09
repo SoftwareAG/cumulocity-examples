@@ -5,6 +5,8 @@ import static com.cumulocity.tixi.simulator.model.TixiCredentials.DEVICE_SERIAL;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -55,13 +57,19 @@ public class CloudClient {
                         DEVICE_SERIAL, credentials.deviceID, credentials.user, credentials.password)).request().get();
         final ChunkedInput<TixiResponse> chunkedInput =
                 response.readEntity(new GenericType<ChunkedInput<TixiResponse>>() {});
-        TixiResponse chunk;
-        /*ChunkParser parser = ChunkedInput.createParser(" ");
-        chunkedInput.setParser(parser);*/
-        while ((chunk = chunkedInput.read()) != null) {
-            responseHandlerFactory.getHandler(chunk).handle(CloudClient.this, chunk);
-        }
-        //        eventSource.close();
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.execute(new Runnable() {
+            
+            @Override
+            public void run() {
+                TixiResponse chunk;
+                /*ChunkParser parser = ChunkedInput.createParser(" ");
+                chunkedInput.setParser(parser);*/
+                while ((chunk = chunkedInput.read()) != null) {
+                    responseHandlerFactory.getHandler(chunk).handle(CloudClient.this, chunk);
+                }
+            }
+        });
     }
 
     public void postExternalDatabaseData(TixiResponse response) {

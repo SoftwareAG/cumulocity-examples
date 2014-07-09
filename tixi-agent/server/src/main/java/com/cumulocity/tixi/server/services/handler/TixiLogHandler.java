@@ -46,8 +46,6 @@ public class TixiLogHandler extends TixiHandler<Log> {
 	public void handle(Log log) {
 		this.logId = log.getId();
 		this.logDefinition = logDefinitionRegister.getLogDefinition();
-		System.out.println("LOG = " + log);
-		System.out.println("LOG DEFITNIION = " + logDefinition);
 		if(logDefinition == null) {
 			return;
 		}
