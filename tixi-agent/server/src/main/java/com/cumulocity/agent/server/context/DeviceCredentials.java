@@ -2,9 +2,10 @@ package com.cumulocity.agent.server.context;
 
 import java.io.UnsupportedEncodingException;
 
+import org.glassfish.jersey.internal.util.Base64;
+
 import com.cumulocity.model.ID;
 import com.cumulocity.rest.representation.devicebootstrap.DeviceCredentialsRepresentation;
-import com.sun.jersey.core.util.Base64;
 
 public class DeviceCredentials {
 
@@ -72,7 +73,7 @@ public class DeviceCredentials {
 
     public static String[] decode(String authorization) {
         try {
-            return new String(Base64.decode(authorization.substring(AUTH_PREFIX.length())), AUTH_ENCODING).split(AUTH_SEPARATOR, 2);
+            return new String(Base64.decode(authorization.substring(AUTH_PREFIX.length()).getBytes()), AUTH_ENCODING).split(AUTH_SEPARATOR, 2);
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
@@ -84,7 +85,7 @@ public class DeviceCredentials {
 
     public static String encode(String login, String password) {
         try {
-            return AUTH_PREFIX + new String(Base64.encode(login + AUTH_SEPARATOR + password), AUTH_ENCODING);
+            return AUTH_PREFIX + new String(Base64.encode((login + AUTH_SEPARATOR + password).getBytes()), AUTH_ENCODING);
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }

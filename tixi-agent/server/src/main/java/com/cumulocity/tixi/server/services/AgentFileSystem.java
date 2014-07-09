@@ -62,19 +62,6 @@ public class AgentFileSystem {
         return fileName;
     }
     
-    @Deprecated
-    public String readFromFile(String filename) {
-        FileInputStream stream = null;
-        try {
-            stream = openInputStream(new File(incomingPath, filename));
-            return IOUtils.toString(stream, "UTF-8");
-        } catch (IOException e) {
-            throw new RuntimeException("I/O error!", e);
-        } finally {
-            closeQuietly(stream);
-        }
-    }
-
     public static String getTimestamp() {
         return TIMESTAMP_FORMAT.format(new DateTime().toDate());
     }

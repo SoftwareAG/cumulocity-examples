@@ -50,7 +50,7 @@ public class OpenChannelResource {
         tixiOperationsQueue.put(createExternalDBRequest());
         tixiOperationsQueue.put(createLogDefinitionRequest());
         
-        final ChunkedOutput<JsonResponse> output = new ChunkedOutput<JsonResponse>(JsonResponse.class);
+        final ChunkedOutput<JsonResponse> output = new ChunkedOutput<JsonResponse>(JsonResponse.class, "\r\n");
         executorService.scheduleAtFixedRate(sendSingleTixiCommand(output), 1, 5, TimeUnit.SECONDS);
 
         return output;

@@ -34,5 +34,10 @@ public class TixiResponse {
     public void setParameter(String parameter) {
         this.parameter = parameter;
     }
+    
+    @Override
+    public String toString() {
+        return "TixiResponse [status=" + status + ", request=" + request + ", requestId=" + requestId + ", parameter=" + parameter + "]";
+    }
 
 }

@@ -17,6 +17,9 @@ import org.springframework.web.context.WebApplicationContext;
 
 import com.cumulocity.agent.server.Server;
 import com.cumulocity.agent.server.context.ContextFilter;
+import com.cumulocity.tixi.server.resources.OpenChannelResource;
+import com.cumulocity.tixi.server.resources.RegisterResource;
+import com.cumulocity.tixi.server.resources.SendDataResource;
 import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.AbstractService;
 import com.google.common.util.concurrent.Service;
@@ -42,9 +45,7 @@ public class JaxrsServer implements Server {
         protected void doStart() {
             server = HttpServer.createSimpleServer(null, new InetSocketAddress(host, port));
             WebappContext context = new WebappContext(applicationId, "/" + applicationId);
-            resourceConfig
-            .register(RequestContextFilter.class)
-            .register(MultiPartFeature.class);
+            resourceConfig.registerClasses(RequestContextFilter.class, MultiPartFeature.class);
             resourceConfig.getClasses();
             context.addServlet("jersey-servlet", new ServletContainer(resourceConfig)).addMapping("/*");
             context.addFilter("deviceContextFilter", applicationContext.getBean(ContextFilter.class)).addMappingForServletNames(null,
