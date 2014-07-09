@@ -34,6 +34,8 @@ import c8y.tinkerforge.bricklet.TemperatureBricklet;
 import com.tinkerforge.BrickMaster;
 import com.tinkerforge.BrickletAmbientLight;
 import com.tinkerforge.BrickletBarometer;
+import com.tinkerforge.BrickletCurrent12;
+import com.tinkerforge.BrickletCurrent25;
 import com.tinkerforge.BrickletDistanceIR;
 import com.tinkerforge.BrickletDualRelay;
 import com.tinkerforge.BrickletGPS;
@@ -68,10 +70,6 @@ public class BrickletFactory {
 			return new BrickletAnalogIn(uid, ipcon);
 		case BrickletAnalogOut.DEVICE_IDENTIFIER:
 			return new BrickletAnalogOut(uid, ipcon);
-		case BrickletCurrent12.DEVICE_IDENTIFIER:
-			return new BrickletCurrent12(uid, ipcon);
-		case BrickletCurrent25.DEVICE_IDENTIFIER:
-			return new BrickletCurrent25(uid, ipcon);
 		case BrickletIndustrialDigitalIn4.DEVICE_IDENTIFIER:
 			return new BrickletIndustrialDigitalIn4(uid, ipcon);
 		case BrickletIndustrialDigitalOut4.DEVICE_IDENTIFIER:
@@ -133,6 +131,10 @@ public class BrickletFactory {
 			return new SegmentDisplay4x7(uid, new BrickletSegmentDisplay4x7(uid, ipcon));
 		case BrickletMoisture.DEVICE_IDENTIFIER:
 			return new MoistureBricklet(uid, new BrickletMoisture(uid, ipcon));
+		case BrickletCurrent12.DEVICE_IDENTIFIER:
+			return new Current12Bricklet(uid, new BrickletCurrent12(uid, ipcon));
+		case BrickletCurrent25.DEVICE_IDENTIFIER:
+			return new Current25Bricklet(uid, new BrickletCurrent25(uid, ipcon));
 		default:
 			throw new IllegalArgumentException("Unknown device identifier: "
 					+ deviceIdentifier);
