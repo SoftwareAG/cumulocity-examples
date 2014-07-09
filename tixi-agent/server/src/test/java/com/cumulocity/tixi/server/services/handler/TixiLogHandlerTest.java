@@ -59,6 +59,7 @@ public class TixiLogHandlerTest extends BaseTixiHandlerTest {
 		MeasurementRepresentation rep = measurementCaptor.getValue();
 		assertThat(rep.get("c8y_measure1")).isEqualTo(aMeasurementValue(1));
 		assertThat(rep.get("c8y_measure2")).isEqualTo(aMeasurementValue(2));
+		assertThat(rep.getType()).isEqualTo("c8y_tixiMeasurement");
 	}
 	
 	private static MeasurementValue aMeasurementValue(int value) {

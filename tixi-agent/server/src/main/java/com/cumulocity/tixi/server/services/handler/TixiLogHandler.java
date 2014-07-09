@@ -46,7 +46,9 @@ public class TixiLogHandler extends TixiHandler<Log> {
 	@Override
 	public void handle(Log log) {
 		this.log = log;
-		logDefinition = logDefinitionRegister.getLogDefinition();
+		this.logDefinition = logDefinitionRegister.getLogDefinition();
+		System.out.println("LOG = " + log);
+		System.out.println("LOG DEFITNIION = " + logDefinition);
 		if(logDefinition == null) {
 			return;
 		}
@@ -59,7 +61,7 @@ public class TixiLogHandler extends TixiHandler<Log> {
 	private void handleItemSet(LogItemSet itemSet) {
 		String logDefinitionId = log.getId();
 	    for (LogItem item : itemSet.getItems()) {
-	    	LogDefinitionItem itemDef = getLogDefinitionItem(item);
+	    	LogDefinitionItem itemDef = logDefinition.getItem(log.getId(), item.getId());
 	    	if(itemDef == null) {
 	    		logger.warn("There is no log definition item for itemSetId: {}," +
 	    				" itemId: {}; skip this log.", logDefinitionId, item.getId());
@@ -75,10 +77,6 @@ public class TixiLogHandler extends TixiHandler<Log> {
 	    }
     }
 
-	private LogDefinitionItem getLogDefinitionItem(LogItem logItem) {
-	    return logDefinition.getItem(log.getId(), logItem.getId());
-    }
-	
 	private void handleLogItem(LogItem item, LogDefinitionItem itemDef, Date date) {
 		String deviceId = itemDef.getPath().getDeviceId();
 		MeasurementRepresentation measurement = getMeasurement(new MeasurementKey(deviceId, date));
