@@ -16,12 +16,12 @@ import com.cumulocity.tixi.server.request.util.Device;
 public class InventoryResourceTest {
 	
 	Device device = mock(Device.class);
-	InventoryResource bean  = new InventoryResource(device);
+	InventoryResource inventoryResource  = new InventoryResource(device);
 	ArgumentCaptor<RequestType> reqTypeCaptor = ArgumentCaptor.forClass(RequestType.class);
 	
 	@Test
-    public void testName() throws Exception {
-	    Response response = bean.open();
+    public void shouldRequestXmlFiles() throws Exception {
+	    Response response = inventoryResource.open();
 	    
 	    verify(device, times(2)).put(reqTypeCaptor.capture());
 	    

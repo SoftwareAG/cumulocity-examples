@@ -30,7 +30,7 @@ public class RegisterResource {
 
     @Produces(APPLICATION_JSON)
     @GET
-    public Response get(@QueryParam("serial") final String serial, @QueryParam("user") final String user) throws Exception {
+    public Response get(@QueryParam("serial") final String serial, @QueryParam("user") final String user) {
         return isNullOrEmpty(user) ? bootstrap(serial) : standard(serial);
     }
 

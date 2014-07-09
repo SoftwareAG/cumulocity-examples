@@ -4,12 +4,20 @@ import com.cumulocity.rest.representation.devicebootstrap.DeviceCredentialsRepre
 
 public class TixiDeviceCredentails {
     
-    
     private String user;
 
     private String password;
 
     private String deviceID;
+
+    public TixiDeviceCredentails() {
+    }
+    
+    public TixiDeviceCredentails(String user, String password, String deviceID) {
+        this.user = user;
+        this.password = password;
+        this.deviceID = deviceID;
+    }
 
     public String getUser() {
         return user;
