@@ -20,7 +20,7 @@ public class InventoryResourceTest {
 	ArgumentCaptor<RequestType> reqTypeCaptor = ArgumentCaptor.forClass(RequestType.class);
 	
 	@Test
-    public void shouldRequestXmlFiles() throws Exception {
+    public void shouldEnqueuCorrectTixiResponsesAndReturnOK() throws Exception {
 	    Response response = inventoryResource.open();
 	    
 	    verify(device, times(2)).put(reqTypeCaptor.capture());

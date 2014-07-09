@@ -45,6 +45,7 @@ public class TixiLogHandler extends TixiHandler<Log> {
 	@Override
 	public void handle(Log log) {
 		this.logId = log.getId();
+		logger.info("Proccess log with id {}.", logId);
 		this.logDefinition = logDefinitionRegister.getLogDefinition();
 		if(logDefinition == null) {
 			return;
@@ -53,9 +54,11 @@ public class TixiLogHandler extends TixiHandler<Log> {
 			handleItemSet(itemSet);
         }
 		saveMeasurements();
+		logger.info("Log with id {} proccessed.", logId);
 	}
 
 	private void handleItemSet(LogItemSet itemSet) {
+		logger.info("Proccess log item set with id {} and date {}.", itemSet.getId(), itemSet.getDateTime());
 	    for (LogItem item : itemSet.getItems()) {
 	    	LogDefinitionItem itemDef = logDefinition.getItem(logId, item.getId());
 	    	if(itemDef == null) {
@@ -71,12 +74,15 @@ public class TixiLogHandler extends TixiHandler<Log> {
 	    	
 	    	handleLogItem(item, itemDef, itemSet.getDateTime());
 	    }
+	    logger.info("Proccess log item set with id {} and date {}.", itemSet.getId(), itemSet.getDateTime());
     }
 
 	private void handleLogItem(LogItem item, LogDefinitionItem itemDef, Date date) {
+		logger.debug("Proccess log {} item with id.", item.getId());
 		String deviceId = itemDef.getPath().getDeviceId();
 		MeasurementRepresentation measurement = getMeasurement(new MeasurementKey(deviceId, date));
 		measurement.setProperty(asFragmentName(itemDef), asFragment(item));
+		logger.debug("Item with id {} processed.", item.getId());
 	}
 
 	private void saveMeasurements() {
@@ -91,6 +97,7 @@ public class TixiLogHandler extends TixiHandler<Log> {
 				logger.warn("Cannot find source for {}.", deviceIdSerial);
 				continue;
 			}
+			logger.debug("Create measurement {}.", measurement);
 			measurementApi.create(measurement);
         }
     }

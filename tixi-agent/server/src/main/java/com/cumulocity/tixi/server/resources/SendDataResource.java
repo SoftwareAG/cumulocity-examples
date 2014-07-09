@@ -2,10 +2,13 @@ package com.cumulocity.tixi.server.resources;
 
 import static com.cumulocity.tixi.server.resources.TixiJsonResponse.statusOKJson;
 
-import java.io.IOException;
 import java.io.InputStream;
 
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -22,46 +25,45 @@ import com.cumulocity.tixi.server.services.handler.TixiXmlService;
 
 @Path("/senddata")
 public class SendDataResource {
-    
-    private static final Logger log = LoggerFactory.getLogger(SendDataResource.class);
 
-    private final RequestStorage requestStorage; 
-    
-    private final AgentFileSystem agentFileSystem;
+	private static final Logger log = LoggerFactory.getLogger(SendDataResource.class);
 
-    private final TixiXmlService tixiService;
+	private final RequestStorage requestStorage;
 
-    @Autowired
-    public SendDataResource(TixiXmlService tixiService, RequestStorage requestStorage, AgentFileSystem agentFileSystem) {
-        this.tixiService = tixiService;
-        this.requestStorage = requestStorage;
-        this.agentFileSystem = agentFileSystem;
-    }
+	private final AgentFileSystem agentFileSystem;
 
-    @POST
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response senddata(
-            @FormDataParam("filename") InputStream fileInputStream,
-            @FormDataParam("filename") FormDataContentDisposition contentDispositionHeader, 
-            @QueryParam("requestId") String requestId) {
-        handleTixiRequest(fileInputStream, requestId);
-        return Response.ok(statusOKJson()).build();
-    }
+	private final TixiXmlService tixiService;
 
-    private void handleTixiRequest(InputStream fileInputStream, String requestId) {
-        String fileName = agentFileSystem.writeIncomingFile(requestId, fileInputStream);
-        Class<?> requestEntityType = getRequestEntity(requestId);
-        if (requestEntityType != null) {
-            tixiService.handle(fileName, requestEntityType);
-        }
-    }
+	@Autowired
+	public SendDataResource(TixiXmlService tixiService, RequestStorage requestStorage, AgentFileSystem agentFileSystem) {
+		this.tixiService = tixiService;
+		this.requestStorage = requestStorage;
+		this.agentFileSystem = agentFileSystem;
+	}
 
-    private Class<?> getRequestEntity(String requestId) {
-        if (requestId == null) {
-            return Log.class;
-        }
-        return requestStorage.get(requestId);
-    }
+	@POST
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response senddata(@FormDataParam("filename") InputStream fileInputStream,
+	        @FormDataParam("filename") FormDataContentDisposition contentDispositionHeader, 
+	        @QueryParam("requestId") String requestId) {
+		handleTixiRequest(fileInputStream, requestId);
+		return Response.ok(statusOKJson()).build();
+	}
+
+	private void handleTixiRequest(InputStream fileInputStream, String requestId) {
+		String fileName = agentFileSystem.writeIncomingFile(requestId, fileInputStream);
+		Class<?> requestEntityType = getRequestEntity(requestId);
+		if (requestEntityType != null) {
+			tixiService.handle(fileName, requestEntityType);
+		}
+	}
+
+	private Class<?> getRequestEntity(String requestId) {
+		if (requestId == null) {
+			return Log.class;
+		}
+		return requestStorage.get(requestId);
+	}
 
 }
