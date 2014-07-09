@@ -45,7 +45,7 @@ public class TixiLogDefinitionHandler extends TixiHandler<LogDefinition> {
 	}
 
 	private void handleDeviceItem(LogDefinitionItem logDefinitionItem) {
-		String agentId = logDefinitionItem.getPath().getDeviceId();
+		String agentId = logDefinitionItem.getPath().getAgentId();
 		SerialNumber agentSerial = new SerialNumber(agentId);
 		GId agentGId = identityRepository.find(agentSerial);
 		if (agentGId == null) {
