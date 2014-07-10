@@ -9,13 +9,14 @@ import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
-import com.cumulocity.model.measurement.MeasurementValue;
 import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
 import com.cumulocity.tixi.server.model.txml.Log;
 import com.cumulocity.tixi.server.model.txml.LogDefinition;
@@ -62,9 +63,9 @@ public class TixiLogHandlerTest extends BaseTixiHandlerTest {
 		assertThat(rep.getType()).isEqualTo("c8y_tixiMeasurement");
 	}
 	
-	private static MeasurementValue aMeasurementValue(int value) {
-		MeasurementValue measurementValue = new MeasurementValue();
-		measurementValue.setValue(BigDecimal.valueOf(value));
+	private static Map<String, BigDecimal> aMeasurementValue(int value) {
+		Map<String, BigDecimal> measurementValue = new HashMap<>();
+		measurementValue.put("value", BigDecimal.valueOf(value));
 		return measurementValue;
 	}
 
