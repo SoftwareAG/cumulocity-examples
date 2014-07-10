@@ -7,7 +7,7 @@
         <version>5.8.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>simulator</artifactId>
+    <artifactId>tixi-simulator</artifactId>
     <name>Cumulocity :: Examples :: Tixi Agent :: Simulator</name>
     <description>Simulator Module of Tixi Agent</description>
 
