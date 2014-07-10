@@ -93,7 +93,9 @@ public class TixiLogDefinitionHandler extends TixiHandler<LogDefinition> {
 		ManagedObjectRepresentation managedObjectRepresentation = new ManagedObjectRepresentation();
 		managedObjectRepresentation.set(new IsDevice());
 		managedObjectRepresentation.setName(serial.getValue());
-		return inventoryRepository.save(managedObjectRepresentation, serial);
+		managedObjectRepresentation = inventoryRepository.save(managedObjectRepresentation, serial);
+		inventoryRepository.bindToAgent(agentId, managedObjectRepresentation.getId());
+		return managedObjectRepresentation;
 	}
 
 	private ManagedObjectRepresentation registerAgent(SerialNumber serial) {
