@@ -1,5 +1,6 @@
 package com.cumulocity.tixi.server.services.handler;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,7 +16,6 @@ import org.springframework.stereotype.Component;
 import com.cumulocity.agent.server.context.DeviceContextService;
 import com.cumulocity.agent.server.repository.IdentityRepository;
 import com.cumulocity.agent.server.repository.InventoryRepository;
-import com.cumulocity.model.measurement.MeasurementValue;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
 import com.cumulocity.sdk.client.SDKException;
@@ -103,9 +103,9 @@ public class TixiLogHandler extends TixiHandler<Log> {
     }
 
 
-	private static MeasurementValue asFragment(LogItem logItem) {
-	    MeasurementValue measurementValue = new MeasurementValue();
-		measurementValue.setValue(logItem.getValue());
+	private static Map<String, BigDecimal> asFragment(LogItem logItem) {
+		Map<String, BigDecimal> measurementValue = new HashMap<>();
+		measurementValue.put("value", logItem.getValue());
 	    return measurementValue;
     }
 	
