@@ -10,18 +10,15 @@
 	<groupId>c8y</groupId>
 	<artifactId>tixi-rpm</artifactId>
     <packaging>rpm</packaging>
-	<name>Tixi Agent Package</name>
+	<name>Cumulocity :: Examples :: Tixi Agent :: RPM</name>
 
 	<properties>
-        <webapps.dir>${project.build.directory}/packages</webapps.dir>
+        <app.dir>${project.build.directory}/app</app.dir>
         <etc.dir>${project.build.outputDirectory}/etc</etc.dir>
-        <context.dir>${project.build.outputDirectory}/context</context.dir>
         
         <rpm.version>${project.version}</rpm.version>
-        <rpm.tomcat.dir>/var/lib/tomcat7</rpm.tomcat.dir>
-        <rpm.webapps.dir>${rpm.tomcat.dir}/vendme-webapps</rpm.webapps.dir>
-        <rpm.etc.dir>/etc/tracker-agent</rpm.etc.dir>
-        <rpm.webcontext.dir>${rpm.tomcat.dir}/conf/Catalina/localhost</rpm.webcontext.dir>
+        <rpm.app.dir>/var/lib/tixi-agent</rpm.app.dir>
+        <rpm.etc.dir>/etc/tixi-agent</rpm.etc.dir>
 	</properties>
 
     <dependencies>
@@ -53,9 +50,9 @@
                             <goal>copy-dependencies</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${webapps.dir}</outputDirectory>
+                            <outputDirectory>${app.dir}</outputDirectory>
                             <excludeTransitive>true</excludeTransitive>
-                            <includeTypes>war</includeTypes>
+                            <includeTypes>jar</includeTypes>
                         </configuration>
                     </execution>
                 </executions>
@@ -69,49 +66,28 @@
                     <copyright>(C) 2013 Cumulocity GmbH</copyright>
                     <distribution>Cumulocity 2043</distribution>
                     <packager>Cumulocity</packager>
-                    <name>tracker-agent</name>
+                    <name>tixi-agent</name>
                     <group>C8Y/Agent</group>
                     <requires>
                         <require>tomcat7 &gt; 7.0.34-1</require>
                     </requires>
                     <mappings>
                         <mapping>
-                            <directory>${rpm.webapps.dir}</directory>
+                            <directory>${rpm.app.dir}</directory>
                             <username>root</username>
                             <groupname>tomcat</groupname>
                             <sources>
                                 <source>
-                                    <location>${webapps.dir}</location>
+                                    <location>${app.dir}</location>
                                 </source>
                             </sources>
-                        </mapping>
-                        <mapping>
-                            <directory>${rpm.etc.dir}</directory>
-                            <username>root</username>
-                            <groupname>tomcat</groupname>
-                            <configuration>noreplace</configuration>
-                            <sources>
-                                <source>
-                                    <location>${etc.dir}</location>
-                                </source>
-                            </sources>
-                        </mapping>     
-                        <mapping>
-                            <directory>${rpm.webcontext.dir}</directory>
-                            <username>root</username>
-                            <groupname>tomcat</groupname>
-                            <sources>
-                                <source>
-                                    <location>${context.dir}</location>
-                                </source>
-                            </sources>
-                        </mapping>                                           
+                        </mapping>                                        
                     </mappings>
                     <preinstallScriptlet>
-                        <script>echo "Installing Tracker Agent..."</script>
+                        <script>echo "Installing Tixi Agent..."</script>
                     </preinstallScriptlet>
                     <postremoveScriptlet>
-                        <script>echo "Tracker Agent has been removed."</script>
+                        <script>echo "Tixi Agent has been removed."</script>
                     </postremoveScriptlet>
                 </configuration>
             </plugin>
