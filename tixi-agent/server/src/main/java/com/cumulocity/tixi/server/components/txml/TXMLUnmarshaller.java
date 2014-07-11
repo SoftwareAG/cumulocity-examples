@@ -1,0 +1,72 @@
+package com.cumulocity.tixi.server.components.txml;
+
+import static com.google.common.cache.CacheBuilder.newBuilder;
+
+import java.io.File;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.cumulocity.tixi.server.model.txml.Log;
+import com.cumulocity.tixi.server.model.txml.LogDefinition;
+import com.cumulocity.tixi.server.services.AgentFileSystem;
+import com.google.common.cache.Cache;
+
+@Component
+public class TXMLUnmarshaller {
+
+	private final AgentFileSystem agentFileSystem;
+	private final TransformerFactory transformerFactory = TransformerFactory.newInstance();
+
+	// @formatter:off
+	private final Cache<Class<?>, Transformer> transformers = newBuilder()
+			.expireAfterAccess(1, TimeUnit.HOURS).build();
+	// @formatter:on
+
+	@Autowired
+	public TXMLUnmarshaller(AgentFileSystem agentFileSystem) {
+		this.agentFileSystem = agentFileSystem;
+	}
+
+	@SuppressWarnings("unchecked")
+	public <R> R unmarshal(String fileName, Class<R> resultClass) {
+		try {
+			File incomingFile = agentFileSystem.getIncomingFile(fileName);
+			StreamSource source = new StreamSource(incomingFile);
+			File xsltProcessedFile = agentFileSystem.getXsltProcessedFile(fileName);
+
+			StreamResult transformerResult = new StreamResult(xsltProcessedFile);
+			aTransformer(resultClass).transform(source, transformerResult);
+
+			StreamSource unmarshallerSource = new StreamSource(xsltProcessedFile);
+			return (R) aJAXBUnmarshaler().unmarshal(unmarshallerSource);
+		} catch (Exception ex) {
+			throw new RuntimeException("Cant unmarshal resource from file " + fileName + " to entity " + resultClass, ex);
+		}
+	}
+
+	private Transformer aTransformer(final Class<?> clazz) throws Exception {
+		return transformers.get(clazz, new Callable<Transformer>() {
+
+			@Override
+			public Transformer call() throws Exception {
+				File xsltFile = agentFileSystem.getXsltFile(clazz);
+				return transformerFactory.newTransformer(new StreamSource(xsltFile));
+			}
+		});
+	}
+
+	private static Unmarshaller aJAXBUnmarshaler() throws JAXBException {
+		return JAXBContext.newInstance(LogDefinition.class, Log.class).createUnmarshaller();
+	}
+}
