@@ -15,10 +15,12 @@
 	<properties>
         <app.dir>${project.build.directory}/app</app.dir>
         <etc.dir>${project.build.outputDirectory}/etc</etc.dir>
+        <mnt.dir>${project.build.outputDirectory}/mnt</mnt.dir>
         
         <rpm.version>${project.version}</rpm.version>
-        <rpm.app.dir>/var/lib/tixi-agent</rpm.app.dir>
-        <rpm.etc.dir>/etc/tixi-agent</rpm.etc.dir>
+        <rpm.app.dir>/var/lib/tixi</rpm.app.dir>
+        <rpm.etc.dir>/etc/tixi</rpm.etc.dir>
+        <rpm.mnt.dir>/mnt/tixi</rpm.mnt.dir>
 	</properties>
 
     <dependencies>
@@ -66,7 +68,7 @@
                     <copyright>(C) 2013 Cumulocity GmbH</copyright>
                     <distribution>Cumulocity 2043</distribution>
                     <packager>Cumulocity</packager>
-                    <name>tixi-agent</name>
+                    <name>tixi</name>
                     <group>C8Y/Agent</group>
                     <requires>
                         <require>tomcat7 &gt; 7.0.34-1</require>
@@ -75,10 +77,30 @@
                         <mapping>
                             <directory>${rpm.app.dir}</directory>
                             <username>root</username>
-                            <groupname>tomcat</groupname>
+                            <groupname>java</groupname>
                             <sources>
                                 <source>
                                     <location>${app.dir}</location>
+                                </source>
+                            </sources>
+                        </mapping>                                        
+                        <mapping>
+                            <directory>${rpm.etc.dir}</directory>
+                            <username>root</username>
+                            <groupname>java</groupname>
+                            <sources>
+                                <source>
+                                    <location>${etc.dir}</location>
+                                </source>
+                            </sources>
+                        </mapping>                                        
+                        <mapping>
+                            <directory>${rpm.mnt.dir}</directory>
+                            <username>root</username>
+                            <groupname>java</groupname>
+                            <sources>
+                                <source>
+                                    <location>${mnt.dir}</location>
                                 </source>
                             </sources>
                         </mapping>                                        

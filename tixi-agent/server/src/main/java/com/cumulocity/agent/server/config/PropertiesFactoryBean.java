@@ -65,9 +65,12 @@ public class PropertiesFactoryBean implements FactoryBean<Properties> {
     }
 
     private Properties loadFromStandardLocations(String id, String userHome, String fileName) {
-        return loadFromLocations(format("file:/etc/%s/%s-default.properties", id, fileName),
-                format("file:/etc/%s/%s.properties", id, fileName), format("file:%s/.%s/%s.properties", userHome, id, fileName),
-                format("classpath:META-INF/%s/%s.properties", id, fileName), format("classpath:META-INF/spring/%s.properties", fileName));
+        return loadFromLocations(
+        		format("file:/etc/%s/%s-default.properties", id, fileName),
+                format("file:/etc/%s/%s.properties", id, fileName), 
+                format("file:%s/.%s/%s.properties", userHome, id, fileName),
+                format("classpath:META-INF/%s/%s.properties", id, fileName), 
+                format("classpath:META-INF/spring/%s.properties", fileName));
     }
 
     private Properties loadFromLocations(String... locations) {
@@ -87,7 +90,7 @@ public class PropertiesFactoryBean implements FactoryBean<Properties> {
                 properties.clear();
             }
             try {
-                fileName = resource.getFile().getAbsolutePath();
+                fileName = resource.getURI().getPath();
                 properties.load(resource.getInputStream());
             } catch (IOException e) {
                 throw new RuntimeException("Error loading properties!", e);

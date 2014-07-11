@@ -58,7 +58,7 @@ public class TixiLogHandler extends TixiHandler<Log> {
 	}
 
 	private void handleItemSet(LogItemSet itemSet) {
-		logger.info("Proccess log item set with id {} and date {}.", itemSet.getId(), itemSet.getDateTime());
+		logger.debug("Proccess log item set with id {} and date {}.", itemSet.getId(), itemSet.getDateTime());
 	    for (LogItem item : itemSet.getItems()) {
 	    	LogDefinitionItem itemDef = logDefinition.getItem(logId, item.getId());
 	    	if(itemDef == null) {
@@ -74,7 +74,7 @@ public class TixiLogHandler extends TixiHandler<Log> {
 	    	
 	    	handleLogItem(item, itemDef, itemSet.getDateTime());
 	    }
-	    logger.info("Proccess log item set with id {} and date {}.", itemSet.getId(), itemSet.getDateTime());
+	    logger.debug("Proccess log item set with id {} and date {}.", itemSet.getId(), itemSet.getDateTime());
     }
 
 	private void handleLogItem(LogItem item, LogDefinitionItem itemDef, Date date) {
