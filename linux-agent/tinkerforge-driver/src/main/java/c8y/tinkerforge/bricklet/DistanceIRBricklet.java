@@ -19,15 +19,15 @@ import com.tinkerforge.BrickletDistanceIR.DistanceListener;
 import com.tinkerforge.NotConnectedException;
 import com.tinkerforge.TimeoutException;
 
-public class DistanceBricklet implements Driver {
+public class DistanceIRBricklet implements Driver {
 
-	public static final String TYPE = "Distance";
+	public static final String TYPE = "DistanceIR";
 	public static final long DIST_POLLING = 1000;
 	public static final long SLACK_TIME = 10000;
 	public static final String EVENT_TYPE = "c8y_EntranceEvent";
 
 	private static final Logger logger = LoggerFactory
-			.getLogger(DistanceBricklet.class);
+			.getLogger(DistanceIRBricklet.class);
 
 	private Platform platform;
 	private ManagedObjectRepresentation mo = new ManagedObjectRepresentation();
@@ -37,7 +37,7 @@ public class DistanceBricklet implements Driver {
 	private BrickletDistanceIR distance;
 	private Date lastTriggered = new Date();
 
-	public DistanceBricklet(String id, BrickletDistanceIR distance) {
+	public DistanceIRBricklet(String id, BrickletDistanceIR distance) {
 		this.id = id;
 		this.distance = distance;
 	}
@@ -97,12 +97,15 @@ public class DistanceBricklet implements Driver {
 						+ SLACK_TIME) {
 					logger.debug("Sending distance event");
 					event.setTime(currentTime);
+					event.setProperty("Distance", distance);
 					try {
 						platform.getEventApi().create(event);
 						lastTriggered = currentTime;
 					} catch (SDKException e) {
 						logger.warn("Cannot send entrance event", e);
-					}
+					} 
+				} else {
+					logger.debug("Event not send: slacking...");
 				}
 			}
 		});

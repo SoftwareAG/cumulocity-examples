@@ -22,21 +22,22 @@
 package c8y.tinkerforge.bricklet;
 
 import c8y.lx.driver.Driver;
-
 import c8y.tinkerforge.bricklet.BarometerBricklet;
 import c8y.tinkerforge.bricklet.DisplayBricklet;
-import c8y.tinkerforge.bricklet.DistanceBricklet;
+import c8y.tinkerforge.bricklet.DistanceIRBricklet;
 import c8y.tinkerforge.bricklet.DualRelayBricklet;
 import c8y.tinkerforge.bricklet.GpsBricklet;
 import c8y.tinkerforge.bricklet.HumidityBricklet;
 import c8y.tinkerforge.bricklet.LightBricklet;
 import c8y.tinkerforge.bricklet.TemperatureBricklet;
+
 import com.tinkerforge.BrickMaster;
 import com.tinkerforge.BrickletAmbientLight;
 import com.tinkerforge.BrickletBarometer;
 import com.tinkerforge.BrickletCurrent12;
 import com.tinkerforge.BrickletCurrent25;
 import com.tinkerforge.BrickletDistanceIR;
+import com.tinkerforge.BrickletDistanceUS;
 import com.tinkerforge.BrickletDualRelay;
 import com.tinkerforge.BrickletGPS;
 import com.tinkerforge.BrickletHumidity;
@@ -110,7 +111,7 @@ public class BrickletFactory {
 		case BrickletBarometer.DEVICE_IDENTIFIER:
 			return new BarometerBricklet(uid, new BrickletBarometer(uid, ipcon));
 		case BrickletDistanceIR.DEVICE_IDENTIFIER:
-			return new DistanceBricklet(uid, new BrickletDistanceIR(uid, ipcon));
+			return new DistanceIRBricklet(uid, new BrickletDistanceIR(uid, ipcon));
 		case BrickletDualRelay.DEVICE_IDENTIFIER:
 			return new DualRelayBricklet(uid, new BrickletDualRelay(uid, ipcon));
 		case BrickletGPS.DEVICE_IDENTIFIER:
@@ -135,6 +136,8 @@ public class BrickletFactory {
 			return new Current12Bricklet(uid, new BrickletCurrent12(uid, ipcon));
 		case BrickletCurrent25.DEVICE_IDENTIFIER:
 			return new Current25Bricklet(uid, new BrickletCurrent25(uid, ipcon));
+		case BrickletDistanceUS.DEVICE_IDENTIFIER:
+			return new DistanceUSBricklet(uid, new BrickletDistanceUS(uid, ipcon));
 		default:
 			throw new IllegalArgumentException("Unknown device identifier: "
 					+ deviceIdentifier);
