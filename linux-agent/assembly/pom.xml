@@ -29,6 +29,7 @@
                         <configuration>
                             <descriptors>
                                 <descriptor>src/main/assembly/base-tar.xml</descriptor>
+                                <descriptor>src/main/assembly/base-win.xml</descriptor>
                                 <descriptor>src/main/assembly/base-rpm.xml</descriptor>
                                 <descriptor>src/main/assembly/base-deb.xml</descriptor>
                             </descriptors>
