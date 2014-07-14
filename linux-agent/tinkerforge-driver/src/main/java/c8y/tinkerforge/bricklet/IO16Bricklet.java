@@ -29,6 +29,7 @@ import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.Platform;
 import com.cumulocity.sdk.client.SDKException;
 import com.tinkerforge.BrickletDualRelay;
+import com.tinkerforge.BrickletIO16;
 import com.tinkerforge.NotConnectedException;
 import com.tinkerforge.TimeoutException;
 
@@ -38,39 +39,38 @@ import c8y.lx.driver.OperationExecutor;
 import c8y.lx.driver.OpsUtil;
 import c8y.tinkerforge.TFIds;
 
-public class DualRelayBricklet implements Driver {
-	
-	private static final String TYPE = "DualRelay";
-	private static final String SET_STATE_OP_TYPE = "c8y_SetState";
+public class IO16Bricklet implements Driver {
+
+	private static final String TYPE = "IO16";
+	private static final String SET_PORT_OP_TYPE = "c8y_SetPort";
 	
 	private static final Logger logger = LoggerFactory
-			.getLogger(DualRelayBricklet.class);
+			.getLogger(IO16Bricklet.class);
 	
 	private String id;
-	private BrickletDualRelay dualRelay;
-	private ManagedObjectRepresentation dualRelayMo = 
+	private BrickletIO16 io16;
+	private ManagedObjectRepresentation io16Mo = 
 			new ManagedObjectRepresentation();
 	private Platform platform;
 	
-
-	public DualRelayBricklet(String uid, BrickletDualRelay brickletDualRelay) {
-		this.id=uid;
-		this.dualRelay=brickletDualRelay;
+	public IO16Bricklet(String uid, BrickletIO16 io16) {
+		this.id = uid;
+		this.io16 = io16;
 	}
 	
-    @Override
-    public void initialize() throws Exception {
-        // Nothing to be done here.
-    }
+	@Override
+	public void initialize() throws Exception {
+		// Nothing to be done here.
+	}
 
 	@Override
 	public void initialize(Platform platform) throws Exception {
-		this.platform=platform;
+		this.platform = platform;
 	}
 
 	@Override
 	public OperationExecutor[] getSupportedOperations() {
-		return new OperationExecutor[] {new SetStateOperationExecutor()};
+		return new OperationExecutor[] { new SetPortOperationExecutor() };
 	}
 
 	@Override
@@ -81,36 +81,36 @@ public class DualRelayBricklet implements Driver {
 	@Override
 	public void discoverChildren(ManagedObjectRepresentation parent) {
 		try {
-			dualRelayMo.set(TFIds.getHardware(dualRelay, TYPE));
+			io16Mo.set(TFIds.getHardware(io16, TYPE));
 		} catch (TimeoutException | NotConnectedException e) {
 			logger.warn("Cannot read hardware parameters", e);
 		}
 		
-		dualRelayMo.setType(TFIds.getType(TYPE));
-		dualRelayMo.setName(TFIds.getDefaultName(parent.getName(), TYPE, id));
+		io16Mo.setType(TFIds.getType(TYPE));
+		io16Mo.setName(TFIds.getDefaultName(parent.getName(), TYPE, id));
 		
 		for(OperationExecutor operation:getSupportedOperations())
-			OpsUtil.addSupportedOperation(dualRelayMo, operation.supportedOperationType());
+			OpsUtil.addSupportedOperation(io16Mo, operation.supportedOperationType());
 		
 		try {
 			DeviceManagedObject dmo = new DeviceManagedObject(platform);
-			dmo.createOrUpdate(dualRelayMo, TFIds.getXtId(id), parent.getId());
+			dmo.createOrUpdate(io16Mo, TFIds.getXtId(id), parent.getId());
 		} catch (SDKException e) {
 			logger.warn("Cannot create remote switch object", e);
 		}
-		
 	}
 
 	@Override
 	public void start() {
-		// Nothing to be done here.
+		// TODO Auto-generated method stub
+		
 	}
 	
-	class SetStateOperationExecutor implements OperationExecutor{
+	class SetPortOperationExecutor implements OperationExecutor{
 
 		@Override
 		public String supportedOperationType() {
-			return SET_STATE_OP_TYPE;
+			return SET_PORT_OP_TYPE;
 		}
 
 		@Override
@@ -119,8 +119,10 @@ public class DualRelayBricklet implements Driver {
 			if (cleanup)
 				operation.setStatus(OperationStatus.FAILED.toString());
 			
-			dualRelay.setState((boolean)operation.getProperty("relay1"), 
-					(boolean)operation.getProperty("relay2"));
+			io16.setPortConfiguration((char)operation.getProperty("port"), 
+					(short)operation.getProperty("selectionMask"), 
+					(char)operation.getProperty("direction"), 
+					(boolean)operation.getProperty("value") );
 			
 			operation.setStatus(OperationStatus.SUCCESSFUL.toString());
 		}
