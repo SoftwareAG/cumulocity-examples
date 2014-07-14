@@ -9,6 +9,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -20,6 +22,8 @@ import com.cumulocity.tixi.server.services.DeviceService;
 @Path("/register")
 @Component
 public class RegisterResource {
+    
+    private static final Logger logger = LoggerFactory.getLogger(RegisterResource.class);
 
     private final DeviceService deviceService;
 
@@ -31,6 +35,7 @@ public class RegisterResource {
     @Produces(APPLICATION_JSON)
     @GET
     public Response get(@QueryParam("serial") final String serial, @QueryParam("user") final String user) {
+        logger.info("Register resource request from: serial " + serial + " user " + user);
         return isNullOrEmpty(user) ? bootstrap(serial) : standard(serial);
     }
 

@@ -7,9 +7,12 @@ import java.io.IOException;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import org.glassfish.jersey.server.ChunkedOutput;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.cumulocity.model.idtype.GId;
@@ -23,6 +26,8 @@ import com.google.common.io.Closeables;
 
 @Path("/openchannel")
 public class OpenChannelResource {
+    
+    private static final Logger logger = LoggerFactory.getLogger(OpenChannelResource.class);
 
     private final DeviceControlService deviceControlService;
 
@@ -36,8 +41,10 @@ public class OpenChannelResource {
 
 	@GET
     @Produces(MediaType.APPLICATION_JSON)
-    public ChunkedOutput<TixiJsonResponse> open() {
-		device.put(statusOKJson());
+    public ChunkedOutput<TixiJsonResponse> open(@QueryParam("serial") final String serial, @QueryParam("user") final String user) {
+	    logger.info("Open channel request from: serial " + serial + " user " + user);
+		
+	    device.put(statusOKJson());
         device.put(RequestType.EXTERNAL_DATABASE);
         device.put(RequestType.LOG_DEFINITION);
         final ChunkedOutput<TixiJsonResponse> output = new ChunkedOutput<TixiJsonResponse>(TixiJsonResponse.class, "\r\n");

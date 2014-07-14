@@ -4,11 +4,7 @@ import static com.cumulocity.tixi.server.resources.TixiJsonResponse.statusOKJson
 
 import java.io.InputStream;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -26,7 +22,7 @@ import com.cumulocity.tixi.server.services.handler.TixiXmlService;
 @Path("/senddata")
 public class SendDataResource {
 
-	private static final Logger log = LoggerFactory.getLogger(SendDataResource.class);
+	private static final Logger logger = LoggerFactory.getLogger(SendDataResource.class);
 
 	private final RequestStorage requestStorage;
 
@@ -46,7 +42,10 @@ public class SendDataResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response senddata(@FormDataParam("filename") InputStream fileInputStream,
 	        @FormDataParam("filename") FormDataContentDisposition contentDispositionHeader, 
-	        @QueryParam("requestId") String requestId) {
+	        @QueryParam("requestId") String requestId,
+	        @QueryParam("serial") String serial) {
+	    logger.info("Send data request from: serial " + serial);
+	    
 		handleTixiRequest(fileInputStream, requestId);
 		return Response.ok(statusOKJson()).build();
 	}
