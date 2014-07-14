@@ -59,7 +59,6 @@ public class TixiAgent {
             throw new RuntimeException("Cant configure logger from " + logbackConfig, je);
         }
         System.out.println("Log configured from file: " + logbackConfig + ".");
-        logger.error("TEST");
     }
 
 }

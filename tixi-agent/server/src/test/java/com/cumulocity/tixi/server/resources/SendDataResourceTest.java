@@ -32,7 +32,7 @@ public class SendDataResourceTest {
     	Mockito.<Class<?>>when(requestStorage.get("requestId")).thenReturn(LogDefinition.class);
     	when(agentFileSystem.writeIncomingFile("requestId", inputStream)).thenReturn("fileName");
     	
-	    bean.senddata(inputStream, null, "requestId");
+	    bean.senddata(inputStream, null, "requestId", "some_serial");
 	    
 	    verify(tixiService).handle("fileName", LogDefinition.class);
     }
@@ -41,7 +41,7 @@ public class SendDataResourceTest {
     public void shouldHandleTixiRequestWithDefaultClass() throws Exception {
     	when(agentFileSystem.writeIncomingFile(null, inputStream)).thenReturn("fileName");
     	
-    	bean.senddata(inputStream, null, null);
+    	bean.senddata(inputStream, null, null, "some_serial");
     	
     	verify(tixiService).handle("fileName", Log.class);
     }

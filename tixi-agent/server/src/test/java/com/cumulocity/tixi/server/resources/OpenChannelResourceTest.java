@@ -18,7 +18,7 @@ public class OpenChannelResourceTest {
         Device device = mock(Device.class);
         OpenChannelResource resource = new OpenChannelResource(null, device);
         
-        resource.open();
+        resource.open("some_serial", "some_user");
         
         verify(device, times(2)).put(reqTypeCaptor.capture());
         assertThat(reqTypeCaptor.getAllValues()).containsExactly(RequestType.EXTERNAL_DATABASE, RequestType.LOG_DEFINITION);
