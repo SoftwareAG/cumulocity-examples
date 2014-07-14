@@ -24,7 +24,7 @@ public class TixiAgent {
 
     public static void main(String[] args) {
     	configureLogger();
-        final Server server = ServerBuilder.on(8080)
+        final Server server = ServerBuilder.on(8088)
                 .application("Tixi")
                 .loadConfiguration("client")
                 .rest()
