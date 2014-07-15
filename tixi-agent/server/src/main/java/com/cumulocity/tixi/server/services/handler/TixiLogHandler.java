@@ -63,12 +63,12 @@ public class TixiLogHandler extends TixiHandler<Log> {
 	    	LogDefinitionItem itemDef = logDefinition.getItem(logId, item.getId());
 	    	if(itemDef == null) {
 	    		logger.warn("There is no log definition item for itemSetId: {}," +
-	    				" itemId: {}; skip this log.", logId, item.getId());
+	    				" itemId: {}; skip this log item.", logId, item.getId());
 	    		continue;
 	    	}
 	    	if(!isDevicePath(itemDef)) {
 	    		logger.debug("Log definition item has no device path variable " +
-	    				"itemSetId: {} itemId: {}; skip this log.", logId, item.getId());
+	    				"itemSetId: {} itemId: {}; skip this log item.", logId, item.getId());
 	    		continue;
 	    	}
 	    	

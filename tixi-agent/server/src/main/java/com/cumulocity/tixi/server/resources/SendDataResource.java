@@ -1,6 +1,6 @@
 package com.cumulocity.tixi.server.resources;
 
-import static com.cumulocity.tixi.server.resources.TixiJsonResponse.statusOKJson;
+import static com.cumulocity.tixi.server.resources.TixiRequest.statusOK;
 
 import java.io.InputStream;
 
@@ -47,7 +47,7 @@ public class SendDataResource {
 	    logger.info("Send data request from: serial " + serial);
 	    
 		handleTixiRequest(fileInputStream, requestId);
-		return Response.ok(statusOKJson()).build();
+		return Response.ok(statusOK()).build();
 	}
 
 	private void handleTixiRequest(InputStream fileInputStream, String requestId) {

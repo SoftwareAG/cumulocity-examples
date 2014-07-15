@@ -14,7 +14,7 @@ import ch.qos.logback.core.joran.spi.JoranException;
 import com.cumulocity.agent.server.Server;
 import com.cumulocity.agent.server.ServerBuilder;
 import com.cumulocity.tixi.server.resources.InventoryResource;
-import com.cumulocity.tixi.server.resources.OpenChannelResource;
+import com.cumulocity.tixi.server.resources.CommandPipeResource;
 import com.cumulocity.tixi.server.resources.RegisterResource;
 import com.cumulocity.tixi.server.resources.SendDataResource;
 
@@ -34,7 +34,7 @@ public class TixiAgent {
                 .scan("com.cumulocity.tixi.server.components")
                 .component(RegisterResource.class)
                 .component(SendDataResource.class)
-                .component(OpenChannelResource.class)
+                .component(CommandPipeResource.class)
                 .component(InventoryResource.class)
                 .build();
         server.start();

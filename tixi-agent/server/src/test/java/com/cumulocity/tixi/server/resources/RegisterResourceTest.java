@@ -23,7 +23,7 @@ public class RegisterResourceTest {
         
         Response response = resource.get("12345", null);
         
-        TixiJsonResponse tixiResponse = (TixiJsonResponse) response.getEntity();
+        TixiRequest tixiResponse = (TixiRequest) response.getEntity();
         assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
         assertThat(tixiResponse.getProperties().get("user")).isEqualTo("user");
     }

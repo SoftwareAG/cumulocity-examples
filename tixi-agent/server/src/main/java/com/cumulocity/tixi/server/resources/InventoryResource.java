@@ -1,6 +1,6 @@
 package com.cumulocity.tixi.server.resources;
 
-import static com.cumulocity.tixi.server.resources.TixiJsonResponse.statusOKJson;
+import static com.cumulocity.tixi.server.resources.TixiRequest.statusOK;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -29,6 +29,6 @@ public class InventoryResource {
         device.put(RequestType.EXTERNAL_DATABASE);
         device.put(RequestType.LOG_DEFINITION);
 
-        return Response.ok(statusOKJson()).build();
+        return Response.ok(statusOK()).build();
     }
 }

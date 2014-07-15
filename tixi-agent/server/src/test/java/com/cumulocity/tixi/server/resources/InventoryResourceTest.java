@@ -26,6 +26,6 @@ public class InventoryResourceTest {
 	    verify(device, times(2)).put(reqTypeCaptor.capture());
 	    
 	    assertThat(reqTypeCaptor.getAllValues()).containsExactly(RequestType.EXTERNAL_DATABASE, RequestType.LOG_DEFINITION);
-	    assertThat(response.getEntity()).isEqualTo(TixiJsonResponse.statusOKJson());
+	    assertThat(response.getEntity()).isEqualTo(TixiRequest.statusOK());
     }
 }
