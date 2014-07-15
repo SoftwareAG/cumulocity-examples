@@ -1,7 +1,5 @@
 package com.cumulocity.tixi.simulator.client;
 
-import static com.cumulocity.tixi.simulator.model.TixiCredentials.DEVICE_SERIAL;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -24,6 +22,7 @@ import org.glassfish.jersey.media.sse.SseFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cumulocity.tixi.simulator.config.Main;
 import com.cumulocity.tixi.simulator.model.ResponseHandlerFactory;
 import com.cumulocity.tixi.simulator.model.TixiCredentials;
 import com.cumulocity.tixi.simulator.model.TixiResponse;
@@ -49,7 +48,7 @@ public class CloudClient {
             .register(SseFeature.class);
 
     public void sendBootstrapRequest() {
-        String uri = baseUrl + "/Tixi/register?serial=" + DEVICE_SERIAL;
+        String uri = baseUrl + "/Tixi/register?serial=" + Main.DEVICE_SERIAL;
         logger.info("Send bootstrap request to {}", uri);
 		Response response = client.target(uri).request().get();
         credentials = response.readEntity(TixiCredentials.class);
@@ -58,7 +57,7 @@ public class CloudClient {
 
     public void sendOpenChannel() {
         String uri = baseUrl + String.format("/Tixi/openchannel?serial=%s&deviceID=%s&user=%s&password=%s",
-                        DEVICE_SERIAL, credentials.deviceID, credentials.user, credentials.password);
+                        Main.DEVICE_SERIAL, credentials.deviceID, credentials.user, credentials.password);
         logger.info("Send open channel request to {}", uri);
         Response response = client.target(uri).request().get();
         final ChunkedInput<TixiResponse> chunkedInput =
@@ -92,7 +91,7 @@ public class CloudClient {
 
     private void sendMultipartRequest(String filename) {
         String requestUrl = baseUrl
-                + String.format("/Tixi/senddata?serial=%s&deviceID=%s&user=%s&password=%s", DEVICE_SERIAL,
+                + String.format("/Tixi/senddata?serial=%s&deviceID=%s&user=%s&password=%s", Main.DEVICE_SERIAL,
                         credentials.deviceID, credentials.user, credentials.password);
         sendMultipartRequest(requestUrl, filename);
 
@@ -101,7 +100,7 @@ public class CloudClient {
     private void sendMultipartRequest(TixiResponse response, String filename) {
         String requestUrl = baseUrl
                 + String.format("/Tixi/senddata?serial=%s&deviceID=%s&user=%s&password=%s&requestId=%s",
-                        DEVICE_SERIAL, credentials.deviceID, credentials.user, credentials.password, response.getRequestId());
+                        Main.DEVICE_SERIAL, credentials.deviceID, credentials.user, credentials.password, response.getRequestId());
         sendMultipartRequest(requestUrl, filename);
     }
 
