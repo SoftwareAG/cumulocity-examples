@@ -31,7 +31,7 @@ import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 
 public class CloudClient {
 
-    private static final Logger LOG = LoggerFactory.getLogger(CloudClient.class);
+    private static final Logger logger = LoggerFactory.getLogger(CloudClient.class);
 
     private String baseUrl;
 
@@ -43,18 +43,24 @@ public class CloudClient {
         this.baseUrl = baseUrl;
     }
 
-    private Client client = ClientBuilder.newClient().register(JacksonJsonProvider.class).register(MultiPartFeature.class)
+    private Client client = ClientBuilder.newClient()
+    		.register(JacksonJsonProvider.class)
+    		.register(MultiPartFeature.class)
             .register(SseFeature.class);
 
     public void sendBootstrapRequest() {
-        Response response = client.target(baseUrl + "/Tixi/register?serial=" + DEVICE_SERIAL).request().get();
+        String uri = baseUrl + "/Tixi/register?serial=" + DEVICE_SERIAL;
+        logger.info("Send bootstrap request to {}", uri);
+		Response response = client.target(uri).request().get();
         credentials = response.readEntity(TixiCredentials.class);
+        logger.info("Bootstraped creentials {}", credentials);
     }
 
     public void sendOpenChannel() {
-        Response response = client.target(baseUrl
-                + String.format("/Tixi/openchannel?serial=%s&deviceID=%s&user=%s&password=%s",
-                        DEVICE_SERIAL, credentials.deviceID, credentials.user, credentials.password)).request().get();
+        String uri = baseUrl + String.format("/Tixi/openchannel?serial=%s&deviceID=%s&user=%s&password=%s",
+                        DEVICE_SERIAL, credentials.deviceID, credentials.user, credentials.password);
+        logger.info("Send open channel request to {}", uri);
+        Response response = client.target(uri).request().get();
         final ChunkedInput<TixiResponse> chunkedInput =
                 response.readEntity(new GenericType<ChunkedInput<TixiResponse>>() {});
         ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -100,6 +106,7 @@ public class CloudClient {
     }
 
     private void sendMultipartRequest(String requestUrl, String filename) {
+    	logger.info("Send request to {} from file: {}.", requestUrl, filename);
         FormDataMultiPart multipart = null;
         try {
             multipart = new FormDataMultiPart();
@@ -112,7 +119,7 @@ public class CloudClient {
                 try {
                     multipart.close();
                 } catch (IOException e) {
-                    LOG.error("", e);
+                	logger.error("", e);
                 }
             }
         }

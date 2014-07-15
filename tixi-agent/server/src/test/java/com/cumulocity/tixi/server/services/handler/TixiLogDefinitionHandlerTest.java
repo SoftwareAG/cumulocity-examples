@@ -17,6 +17,7 @@ public class TixiLogDefinitionHandlerTest extends BaseTixiHandlerTest {
 
 	@Before
 	public void init() {
+		super.init();
 		handler = new TixiLogDefinitionHandler(deviceContextService, identityRepository, inventoryRepository, measurementApi, logDefinitionRegister);
 	}
 	

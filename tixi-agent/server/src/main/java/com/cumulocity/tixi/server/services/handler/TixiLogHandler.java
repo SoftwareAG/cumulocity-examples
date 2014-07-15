@@ -78,11 +78,11 @@ public class TixiLogHandler extends TixiHandler<Log> {
     }
 
 	private void handleLogItem(LogItem item, LogDefinitionItem itemDef, Date date) {
-		logger.debug("Proccess log {} item with id.", item.getId());
+		logger.trace("Proccess log {} item with id.", item.getId());
 		String deviceId = itemDef.getPath().getDeviceId();
 		MeasurementRepresentation measurement = getMeasurement(new MeasurementKey(deviceId, date));
 		measurement.setProperty(asFragmentName(itemDef), asFragment(item));
-		logger.debug("Item with id {} processed.", item.getId());
+		logger.trace("Item with id {} processed.", item.getId());
 	}
 
 	private void saveMeasurements() {

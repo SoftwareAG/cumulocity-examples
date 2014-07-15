@@ -47,6 +47,12 @@ public class TixiDeviceCredentails {
         TixiDeviceCredentails tixiCredentails = new TixiDeviceCredentails();
         tixiCredentails.setUser(credentials.getTenantId() + "/" + credentials.getUsername());
         tixiCredentails.setPassword(credentials.getPassword());
+        tixiCredentails.setDeviceID(credentials.getId());
         return tixiCredentails;
+    }
+
+	@Override
+    public String toString() {
+	    return String.format("TixiDeviceCredentails [user=%s, password=%s, deviceID=%s]", user, password, deviceID);
     }
 }
