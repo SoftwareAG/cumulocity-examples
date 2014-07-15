@@ -12,7 +12,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.cumulocity.tixi.server.model.RequestType;
+import com.cumulocity.tixi.server.model.TixiRequestType;
 import com.cumulocity.tixi.server.resources.TixiRequest;
 import com.cumulocity.tixi.server.services.TixiRequestFactory;
 import com.google.common.io.Closeables;
@@ -44,7 +44,7 @@ public class Device implements InitializingBean {
 		tixiOperationsQueue.put(jsonResponse);
 	}
 
-	public void put(RequestType requestType) {
+	public void put(TixiRequestType requestType) {
 		put(requestFactory.create(requestType));
 	}
 

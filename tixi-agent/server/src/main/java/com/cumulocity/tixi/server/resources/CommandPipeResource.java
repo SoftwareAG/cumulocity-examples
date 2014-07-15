@@ -13,8 +13,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import c8y.MeasurementRequestOperation;
+
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
-import com.cumulocity.tixi.server.model.RequestType;
+import com.cumulocity.tixi.server.model.TixiRequestType;
 import com.cumulocity.tixi.server.request.util.Device;
 import com.cumulocity.tixi.server.services.DeviceControlService;
 import com.cumulocity.tixi.server.services.MessageChannel;
@@ -42,8 +44,8 @@ public class CommandPipeResource {
     public ChunkedOutput<TixiRequest> open(@QueryParam("serial") final String serial, @QueryParam("user") final String user) {
 	    logger.info("Open channel request from: serial " + serial + " user " + user);
 	    device.put(statusOK());
-        device.put(RequestType.EXTERNAL_DATABASE);
-        device.put(RequestType.LOG_DEFINITION);
+        device.put(TixiRequestType.EXTERNAL_DATABASE);
+        device.put(TixiRequestType.LOG_DEFINITION);
         ChunkedOutput<TixiRequest> output = new ChunkedOutput<TixiRequest>(TixiRequest.class, "\r\n");
         device.setOutput(output);
         deviceControlService.subscirbe(new OperationMessageChannel());
@@ -51,19 +53,11 @@ public class CommandPipeResource {
     }
 	
 	private class OperationMessageChannel implements MessageChannel<OperationRepresentation> {
-		public void send(MessageChannelContext context, OperationRepresentation message) {
-			String requestType = (String) message.get("tixi_command");
-			if (requestType == null) {
-				return;
-			}
-			TixiRequest tixiRequest = requestFactory.create(requestType);
+		
+		public void send(MessageChannelContext context, MeasurementRequestOperation measurementRequest) {
+			logger.info("Received measurement request {}.", measurementRequest);
+			TixiRequest tixiRequest = requestFactory.create(measurementRequest.getRequestName());
 			device.put(tixiRequest);
 		}
-
-		@Override
-		public void close() {
-			//do nothing - it has no sense to close command pipe here
-		}
-
 	}
 }

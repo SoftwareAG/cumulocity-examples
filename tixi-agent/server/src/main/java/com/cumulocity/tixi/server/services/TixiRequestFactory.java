@@ -5,7 +5,7 @@ import static com.google.common.base.Enums.getIfPresent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.cumulocity.tixi.server.model.RequestType;
+import com.cumulocity.tixi.server.model.TixiRequestType;
 import com.cumulocity.tixi.server.model.txml.LogDefinition;
 import com.cumulocity.tixi.server.request.util.RequestIdFactory;
 import com.cumulocity.tixi.server.request.util.RequestStorage;
@@ -26,7 +26,7 @@ public class TixiRequestFactory {
     }
     
 	public TixiRequest create(String requestType) {
-		Optional<RequestType> requestTypeObj = getIfPresent(RequestType.class, requestType);
+		Optional<TixiRequestType> requestTypeObj = getIfPresent(TixiRequestType.class, requestType);
 		if(requestTypeObj.isPresent()) {
 			return create(requestTypeObj.get());
 		} else {
@@ -34,11 +34,11 @@ public class TixiRequestFactory {
 		}
     }
     
-    public TixiRequest create(RequestType requestType) {
-        if (requestType == RequestType.EXTERNAL_DATABASE) {
+    public TixiRequest create(TixiRequestType requestType) {
+        if (requestType == TixiRequestType.EXTERNAL_DATABASE) {
             return createExternalDBRequest();
         }
-        if (requestType == RequestType.LOG_DEFINITION) {
+        if (requestType == TixiRequestType.LOG_DEFINITION) {
             return createLogDefinitionRequest();
         }
         throw new RuntimeException("Unknown request type");

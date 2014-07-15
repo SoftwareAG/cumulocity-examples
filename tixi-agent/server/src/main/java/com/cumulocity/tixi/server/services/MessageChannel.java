@@ -1,9 +1,11 @@
 package com.cumulocity.tixi.server.services;
 
-import java.io.Closeable;
+import c8y.MeasurementRequestOperation;
 
-public interface MessageChannel<T> extends Closeable {
 
-    void send(MessageChannelContext context, T message);
+public interface MessageChannel<T> {
 
+    void send(MessageChannelContext context, MeasurementRequestOperation measurementRequest);
+    
 }
+    

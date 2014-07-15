@@ -1,11 +1,16 @@
 package com.cumulocity.tixi.server.services;
 
 import static com.cumulocity.model.operation.OperationStatus.PENDING;
+import static com.cumulocity.tixi.server.model.TixiRequestType.LOG_DEFINITION;
 
 import java.io.IOException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import c8y.MeasurementRequestOperation;
 
 import com.cumulocity.agent.server.context.DeviceContextService;
 import com.cumulocity.agent.server.repository.DeviceControlRepository;
@@ -19,21 +24,24 @@ import com.cumulocity.tixi.server.model.Operations;
 
 @Component
 public class DeviceControlService {
+	
+	private static final Logger logger = LoggerFactory.getLogger(DeviceControlService.class);
 
-    private static final class SubscriberMessageChannelContext implements MessageChannelContext {
-        private final Subscription<GId> subscription;
+	private static final class SubscriberMessageChannelContext implements MessageChannelContext {
+		
+		private final Subscription<GId> subscription;
 
-        private SubscriberMessageChannelContext(Subscription<GId> subscription) {
-            this.subscription = subscription;
-        }
+		private SubscriberMessageChannelContext(Subscription<GId> subscription) {
+			this.subscription = subscription;
+		}
 
-        @Override
-        public void close() throws IOException {
-            if (subscription != null) {
-                subscription.unsubscribe();
-            }
-        }
-    }
+		@Override
+		public void close() throws IOException {
+			if (subscription != null) {
+				subscription.unsubscribe();
+			}
+		}
+	}
 
     private final DeviceControlRepository repository;
 
@@ -51,31 +59,39 @@ public class DeviceControlService {
         final Subscription<GId> subscription = repository.subscribe(deviceId, new SubscriptionListener<GId, OperationRepresentation>() {
             @Override
             public void onNotification(final Subscription<GId> subscription, OperationRepresentation notification) {
+            	logger.debug("Received operation {}.", notification);
                 execute(messageChannel, subscription, notification);
             }
 
             @Override
             public void onError(Subscription<GId> subscription, Throwable ex) {
-                try {
-                    messageChannel.close();
-                } catch (IOException e) {
-                }
+                //do nothing
+            	logger.error("Error occured for operation subscription for deviceId " + subscription.getObject(), ex);
             }
         });
 
-        for (OperationRepresentation operation : repository.findAllByFilter(new OperationFilter().byDevice(GId.asString(deviceId))
-                .byStatus(PENDING))) {
+        for (OperationRepresentation operation : repository.findAllByFilter(
+        		new OperationFilter().byDevice(GId.asString(deviceId)).byStatus(PENDING))) {
             execute(messageChannel, subscription, operation);
         }
-
     }
 
     private void execute(final MessageChannel<OperationRepresentation> messageChannel, final Subscription<GId> subscription,
             OperationRepresentation operation) {
-        final OperationRepresentation executingOperation = Operations.asOperation(operation.getId());
-        executingOperation.setStatus(OperationStatus.EXECUTING.name());
-        repository.save(executingOperation);
-        messageChannel.send(new SubscriberMessageChannelContext(subscription), operation);
+    	MeasurementRequestOperation measurementRequest = operation.get(MeasurementRequestOperation.class);
+    	if(acceptRequest(measurementRequest)) {
+    		logger.debug("Measurement request {} accepted.", operation);
+    		final OperationRepresentation executingOperation = Operations.asOperation(operation.getId());
+    		executingOperation.setStatus(OperationStatus.EXECUTING.name());
+    		repository.save(executingOperation);
+    		messageChannel.send(new SubscriberMessageChannelContext(subscription), measurementRequest);
+    	} else {
+    		logger.debug("Operation {} not supported by tixi agent.", operation);
+    	}
     }
 
+    
+    private static boolean acceptRequest(MeasurementRequestOperation measurementRequest) {
+    	return measurementRequest != null && LOG_DEFINITION.name().equals(measurementRequest.getRequestName());
+    }
 }

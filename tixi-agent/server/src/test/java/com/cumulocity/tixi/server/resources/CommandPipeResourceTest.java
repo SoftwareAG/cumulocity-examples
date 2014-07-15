@@ -8,7 +8,7 @@ import static org.mockito.Mockito.*;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
-import com.cumulocity.tixi.server.model.RequestType;
+import com.cumulocity.tixi.server.model.TixiRequestType;
 import com.cumulocity.tixi.server.request.util.Device;
 import com.cumulocity.tixi.server.services.DeviceControlService;
 import com.cumulocity.tixi.server.services.MessageChannel;
@@ -23,12 +23,12 @@ public class CommandPipeResourceTest {
 
 	@Test
     public void shouldBootstrap() {
-        ArgumentCaptor<RequestType> reqTypeCaptor = ArgumentCaptor.forClass(RequestType.class);
+        ArgumentCaptor<TixiRequestType> reqTypeCaptor = ArgumentCaptor.forClass(TixiRequestType.class);
         
         commandPipe.open("some_serial", "some_user");
         
         verify(device, times(2)).put(reqTypeCaptor.capture());
-        assertThat(reqTypeCaptor.getAllValues()).containsExactly(RequestType.EXTERNAL_DATABASE, RequestType.LOG_DEFINITION);
+        assertThat(reqTypeCaptor.getAllValues()).containsExactly(TixiRequestType.EXTERNAL_DATABASE, TixiRequestType.LOG_DEFINITION);
         verify(device).put(statusOK());
     }
     

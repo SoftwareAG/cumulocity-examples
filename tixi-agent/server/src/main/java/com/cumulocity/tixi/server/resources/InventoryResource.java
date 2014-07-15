@@ -10,7 +10,7 @@ import javax.ws.rs.core.Response;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.cumulocity.tixi.server.model.RequestType;
+import com.cumulocity.tixi.server.model.TixiRequestType;
 import com.cumulocity.tixi.server.request.util.Device;
 
 @Path("/inventory")
@@ -26,8 +26,8 @@ public class InventoryResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response open() {
-        device.put(RequestType.EXTERNAL_DATABASE);
-        device.put(RequestType.LOG_DEFINITION);
+        device.put(TixiRequestType.EXTERNAL_DATABASE);
+        device.put(TixiRequestType.LOG_DEFINITION);
 
         return Response.ok(statusOK()).build();
     }
