@@ -41,6 +41,9 @@ public class TixiRequestFactory {
         if (requestType == TixiRequestType.LOG_DEFINITION) {
             return createLogDefinitionRequest();
         }
+        if (requestType == TixiRequestType.LOG) {
+        	return createLogRequest();
+        }
         throw new RuntimeException("Unknown request type");
     }
     
@@ -57,5 +60,12 @@ public class TixiRequestFactory {
         return new TixiRequest("TiXML")
         	.set("requestId", requestId)
         	.set("parameter", "[<GetConfig _=\"PROCCFG/External\" ver=\"v\"/>]");
+    }
+    
+    private TixiRequest createLogRequest() {
+    	String requestId = requestIdFactory.get().toString();
+    	return new TixiRequest("TiXML")
+	    	.set("requestId", requestId)
+	    	.set("parameter", "[<GetConfig _=\"LOG/EventLogging\" ver=\"v\"/>]");
     }
 }

@@ -14,7 +14,7 @@ import com.cumulocity.tixi.simulator.client.CloudClient;
 
 public class Main {
 	
-	public static final String DEVICE_SERIAL = "2003";
+	public static final String DEVICE_SERIAL = "5100";
 	public static final boolean SCHEDULE_POST_LOG = false;
 	
 	private static final Logger logger = LoggerFactory.getLogger(Main.class);

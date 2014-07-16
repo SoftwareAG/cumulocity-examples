@@ -1,7 +1,7 @@
 package com.cumulocity.tixi.server.services;
 
 import static com.cumulocity.model.operation.OperationStatus.PENDING;
-import static com.cumulocity.tixi.server.model.TixiRequestType.LOG_DEFINITION;
+import static com.cumulocity.tixi.server.model.TixiRequestType.LOG;
 import static java.util.Arrays.asList;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
@@ -139,6 +139,6 @@ public class DeviceControlService {
     }
     
     private static boolean acceptMeasurementRequest(MeasurementRequestOperation measurementRequest) {
-    	return measurementRequest != null && LOG_DEFINITION.name().equals(measurementRequest.getRequestName());
+    	return measurementRequest != null && LOG.name().equals(measurementRequest.getRequestName());
     }
 }
