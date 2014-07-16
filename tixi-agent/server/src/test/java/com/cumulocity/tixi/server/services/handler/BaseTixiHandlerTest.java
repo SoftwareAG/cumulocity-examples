@@ -9,6 +9,7 @@ import org.junit.Before;
 import com.cumulocity.agent.server.context.DeviceContext;
 import com.cumulocity.agent.server.context.DeviceContextService;
 import com.cumulocity.agent.server.context.DeviceCredentials;
+import com.cumulocity.agent.server.repository.DeviceControlRepository;
 import com.cumulocity.agent.server.repository.IdentityRepository;
 import com.cumulocity.agent.server.repository.InventoryRepository;
 import com.cumulocity.sdk.client.measurement.MeasurementApi;
@@ -20,6 +21,7 @@ public abstract class BaseTixiHandlerTest {
 	protected InventoryRepository inventoryRepository = mock(InventoryRepository.class);
 	protected MeasurementApi measurementApi = mock(MeasurementApi.class);
 	protected LogDefinitionRegister logDefinitionRegister = mock(LogDefinitionRegister.class);
+	protected DeviceControlRepository deviceControlRepository = mock(DeviceControlRepository.class);
 	
 	@Before
 	public void init() {

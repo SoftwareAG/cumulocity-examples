@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.cumulocity.agent.server.context.DeviceContextService;
-import com.cumulocity.agent.server.repository.IdentityRepository;
+import com.cumulocity.agent.server.repository.DeviceControlRepository;
 import com.cumulocity.agent.server.repository.InventoryRepository;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
@@ -32,29 +32,39 @@ import com.cumulocity.tixi.server.model.txml.LogItemSet;
 public class TixiLogHandler extends TixiHandler<Log> {
 	
 	private static final Logger logger = LoggerFactory.getLogger(TixiLogHandler.class);
+	private DeviceControlRepository deviceControlRepository;
 
 	@Autowired
-	public TixiLogHandler(DeviceContextService deviceContextService, IdentityRepository identityRepository, InventoryRepository inventoryRepository,
-            MeasurementApi measurementApi, LogDefinitionRegister logDefinitionRegister) {
-	    super(deviceContextService, identityRepository, inventoryRepository, measurementApi, logDefinitionRegister);
+	public TixiLogHandler(DeviceContextService deviceContextService, InventoryRepository inventoryRepository,
+            MeasurementApi measurementApi, LogDefinitionRegister logDefinitionRegister, DeviceControlRepository deviceControlRepository) {
+	    super(deviceContextService, inventoryRepository, measurementApi, logDefinitionRegister);
+		this.deviceControlRepository = deviceControlRepository;
     }
 	
 	private Map<MeasurementKey, MeasurementRepresentation> measurements = new HashMap<>();
 	private LogDefinition logDefinition;
 	private String logId;
+	
 	@Override
 	public void handle(Log log) {
-		this.logId = log.getId();
-		logger.info("Proccess log with id {}.", logId);
-		this.logDefinition = logDefinitionRegister.getLogDefinition();
-		if(logDefinition == null) {
+		try {
+			this.logId = log.getId();
+			logger.info("Proccess log with id {}.", logId);
+			this.logDefinition = logDefinitionRegister.getLogDefinition();
+			if (logDefinition == null) {
+				return;
+			}
+			for (LogItemSet itemSet : log.getItemSets()) {
+				handleItemSet(itemSet);
+			}
+			saveMeasurements();
+			logger.info("Log with id {} proccessed.", logId);
+		} catch (Exception ex) {
+			logger.info("Log with id {} processing failed.", ex);
+			deviceControlRepository.markAllOperationsFailed(agentId);
 			return;
 		}
-		for (LogItemSet itemSet : log.getItemSets()) {
-			handleItemSet(itemSet);
-        }
-		saveMeasurements();
-		logger.info("Log with id {} proccessed.", logId);
+		deviceControlRepository.markAllOperationsSuccess(agentId);
 	}
 
 	private void handleItemSet(LogItemSet itemSet) {

@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.cumulocity.agent.server.context.DeviceContextService;
-import com.cumulocity.agent.server.repository.IdentityRepository;
 import com.cumulocity.agent.server.repository.InventoryRepository;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.measurement.MeasurementApi;
@@ -31,9 +30,9 @@ public class TixiLogDefinitionHandler extends TixiHandler<LogDefinition> {
 	private final Map<SerialNumber, ManagedObjectRepresentation> persistedDevices = new HashMap<>();
 
 	@Autowired
-	public TixiLogDefinitionHandler(DeviceContextService deviceContextService, IdentityRepository identityRepository, InventoryRepository inventoryRepository,
+	public TixiLogDefinitionHandler(DeviceContextService deviceContextService, InventoryRepository inventoryRepository,
 	        MeasurementApi measurementApi, LogDefinitionRegister logDefinitionRegister) {
-		super(deviceContextService, identityRepository, inventoryRepository, measurementApi, logDefinitionRegister);
+		super(deviceContextService, inventoryRepository, measurementApi, logDefinitionRegister);
 	}
 
 	public void handle(LogDefinition logDefinition) {
