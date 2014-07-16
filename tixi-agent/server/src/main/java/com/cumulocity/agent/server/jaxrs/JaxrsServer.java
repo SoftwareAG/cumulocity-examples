@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 
 import org.glassfish.grizzly.http.server.HttpServer;
-import org.glassfish.grizzly.nio.transport.TCPNIOTransport;
-import org.glassfish.grizzly.nio.transport.TCPNIOTransportBuilder;
 import org.glassfish.grizzly.servlet.WebappContext;
 import org.glassfish.grizzly.threadpool.ThreadPoolConfig;
 import org.glassfish.jersey.jackson.JacksonFeature;

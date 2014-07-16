@@ -2,7 +2,9 @@ package com.cumulocity.tixi.server.resources;
 
 import static com.cumulocity.tixi.server.resources.TixiRequest.statusOK;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.util.zip.GZIPInputStream;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -43,10 +45,9 @@ public class SendDataResource {
 	public Response senddata(@FormDataParam("filename") InputStream fileInputStream,
 	        @FormDataParam("filename") FormDataContentDisposition contentDispositionHeader, 
 	        @QueryParam("requestId") String requestId,
-	        @QueryParam("serial") String serial) {
+	        @QueryParam("serial") String serial) throws IOException {
 	    logger.info("Send data request from: serial " + serial);
-	    
-		handleTixiRequest(fileInputStream, requestId);
+		handleTixiRequest(new GZIPInputStream(fileInputStream), requestId);
 		return Response.ok(statusOK()).build();
 	}
 
@@ -64,5 +65,4 @@ public class SendDataResource {
 		}
 		return requestStorage.get(requestId);
 	}
-
 }

@@ -78,15 +78,15 @@ public class CloudClient {
     }
 
     public void postExternalDatabaseData(TixiResponse response) {
-        sendMultipartRequest(response, "external_database.xml");
+        sendMultipartRequest(response, "external_database.xml.gz");
     }
 
     public void postLogDefinitionData(TixiResponse response) {
-        sendMultipartRequest(response, "log_definition.xml");
+        sendMultipartRequest(response, "log_definition.xml.gz");
     }
 
     public void postLogFileData() {
-        sendMultipartRequest("sample_data.xml");
+        sendMultipartRequest("sample_data.xml.gz");
     }
 
     private void sendMultipartRequest(String filename) {
