@@ -76,6 +76,7 @@ public class ConfigurationDriverTest {
 	public void testToString() {
 		String string = PropUtils.toString(referenceProps);
 		string = string.substring(string.indexOf("\n") + 1);
+		string = string.replace("\r", "");
 		assertEquals(REFERENCE_PROPSTR, string);
 	}
 
