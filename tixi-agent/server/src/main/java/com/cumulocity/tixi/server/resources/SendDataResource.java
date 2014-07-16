@@ -47,17 +47,22 @@ public class SendDataResource {
 	        @QueryParam("requestId") String requestId,
 	        @QueryParam("serial") String serial) throws IOException {
 	    logger.info("Send data request from: serial " + serial);
-		handleTixiRequest(contentDispositionHeader.getFileName(), new GZIPInputStream(fileInputStream), requestId);
+		handleTixiRequest(new GZIPInputStream(fileInputStream), requestId);
 		return Response.ok(statusOK()).build();
 	}
 
-	private void handleTixiRequest(String originFileName, InputStream fileInputStream, String requestId) {
-		String fileName = agentFileSystem.writeIncomingFile(originFileName, requestId, fileInputStream);
+	private void handleTixiRequest(InputStream fileInputStream, String requestId) {
 		Class<?> requestEntityType = getRequestEntity(requestId);
+		String fileNamePrefix = asSimpleName(requestEntityType);
+		String fileName = agentFileSystem.writeIncomingFile(fileNamePrefix, requestId, fileInputStream);
 		if (requestEntityType != null) {
 			tixiService.handle(fileName, requestEntityType);
 		}
 	}
+
+	private String asSimpleName(Class<?> requestEntityType) {
+	    return requestEntityType == null ? null : requestEntityType.getSimpleName();
+    }
 
 	private Class<?> getRequestEntity(String requestId) {
 		if (requestId == null) {
