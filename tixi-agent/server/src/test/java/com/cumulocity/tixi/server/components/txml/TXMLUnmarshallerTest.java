@@ -33,7 +33,7 @@ public class TXMLUnmarshallerTest {
 	@Test
     public void shouldUmnarshalLogDefinitionFile() throws Exception {
 		
-		String fileName = agentFileSystem.writeIncomingFile("test", new FileInputStream(SAMPLE_DIR + "LogDefinition.xml"));
+		String fileName = agentFileSystem.writeIncomingFile("testFile", "test", new FileInputStream(SAMPLE_DIR + "LogDefinition.xml"));
 		
 		LogDefinition actualLogDefinition = txmlUnmarshaller.unmarshal(fileName, LogDefinition.class);
 				
@@ -67,7 +67,7 @@ public class TXMLUnmarshallerTest {
 	@Test
 	public void shouldUmnarshalBigLogDefinitionFile() throws Exception {
 		
-		String fileName = agentFileSystem.writeIncomingFile("test", new FileInputStream(SAMPLE_DIR + "LogDefinition2.xml"));
+		String fileName = agentFileSystem.writeIncomingFile("testFile", "test", new FileInputStream(SAMPLE_DIR + "LogDefinition2.xml"));
 		
 		LogDefinition actualLogDefinition = txmlUnmarshaller.unmarshal(fileName, LogDefinition.class);
 				
@@ -77,7 +77,7 @@ public class TXMLUnmarshallerTest {
 	@Test
 	public void shouldUmnarshalLogFile() throws Exception {
 		
-		String fileName = agentFileSystem.writeIncomingFile("test", new FileInputStream(SAMPLE_DIR + "Log.xml"));
+		String fileName = agentFileSystem.writeIncomingFile("testFile", "test", new FileInputStream(SAMPLE_DIR + "Log.xml"));
 		
 		Log actualLog = txmlUnmarshaller.unmarshal(fileName, Log.class);
 		// @formatter:off

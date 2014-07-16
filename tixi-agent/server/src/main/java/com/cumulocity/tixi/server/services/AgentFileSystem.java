@@ -53,8 +53,8 @@ public class AgentFileSystem {
         return new File(parent, fileName);
     }
 
-    public String writeIncomingFile(String requestId, InputStream inputStream) {
-        String fileName = fromNullable(requestId).or("") + "_" + getTimestamp() + ".xml";
+    public String writeIncomingFile(String fileName, String requestId, InputStream inputStream) {
+        fileName = fromNullable(fileName).or("") + "_" + fromNullable(requestId).or("") + "_" + getTimestamp() + ".xml";
         writeToFile(inputStream, getFile(incomingPath, fileName));
         return fileName;
     }
