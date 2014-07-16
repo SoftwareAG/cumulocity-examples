@@ -79,18 +79,6 @@ public class DeviceCredentials {
         }
     }
 
-    public static String encode(String tenant, String username, String password) {
-        return encode(tenant + LOGIN_SEPARATOR + username, password);
-    }
-
-    public static String encode(String login, String password) {
-        try {
-            return AUTH_PREFIX + new String(Base64.encode((login + AUTH_SEPARATOR + password).getBytes()), AUTH_ENCODING);
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     public String getTenant() {
         return tenant;
     }
@@ -113,14 +101,6 @@ public class DeviceCredentials {
 
     public int getPageSize() {
         return pageSize;
-    }
-
-    public String getAuthorization() {
-        if (tenant == null) {
-            return encode(username, password);
-        } else {
-            return encode(tenant, username, password);
-        }
     }
 
     @Override

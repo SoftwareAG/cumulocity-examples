@@ -38,6 +38,7 @@ import com.cumulocity.tixi.server.model.TixiDeviceCredentails;
 @Component
 public class DeviceControlService {
 	
+	private static final long BOOTSTRAP_TIMEOUT_IN_SECONDS = 300L;
 	private static final Logger logger = LoggerFactory.getLogger(DeviceControlService.class);
 	
 
@@ -100,7 +101,7 @@ public class DeviceControlService {
     public TixiDeviceCredentails register(final SerialNumber serialNumber) {
 
         final DeviceCredentialsRepresentation credentials = deviceCredentials.pollCredentials(serialNumber.getValue(), 
-        		new PollingStrategy(SECONDS, asList(10l)));
+        		new PollingStrategy(BOOTSTRAP_TIMEOUT_IN_SECONDS, SECONDS, asList(10L)));
         TixiDeviceCredentails tixiCredentials = TixiDeviceCredentails.from(credentials);
 
         try {
@@ -108,7 +109,7 @@ public class DeviceControlService {
                     new DeviceContext(DeviceCredentials.from(credentials)), new Callable<ManagedObjectRepresentation>() {
                         @Override
                         public ManagedObjectRepresentation call() throws Exception {
-                            return inventoryRepository.saveAgentIfNotExists("c8y_TixiAgent", serialNumber);
+                            return inventoryRepository.saveAgentIfNotExists("c8y_TixiAgent", "c8y_TixiAgent", serialNumber);
                         }
                     });
             tixiCredentials.setDeviceID(GId.asString(deviceRepresentation.getId()));

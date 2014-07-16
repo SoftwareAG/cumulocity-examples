@@ -69,7 +69,7 @@ public class InventoryRepository {
 		return managedObjectRepresentation;
 	}
 	
-	public ManagedObjectRepresentation saveAgentIfNotExists(String type, SerialNumber serial) {
+	public ManagedObjectRepresentation saveAgentIfNotExists(String type, String name, SerialNumber serial) {
 		ManagedObjectRepresentation managedObjectRepresentation  = findMoOrNull(serial);
 		if(managedObjectRepresentation != null) {
 			return managedObjectRepresentation;
@@ -77,7 +77,7 @@ public class InventoryRepository {
 		logger.debug("Create agent for serial: {}.", serial);
 		managedObjectRepresentation = new ManagedObjectRepresentation();
 		managedObjectRepresentation.set(new IsDevice());
-		managedObjectRepresentation.setName(serial.getValue());
+		managedObjectRepresentation.setName(name);
 		managedObjectRepresentation.set(new Agent());
 		managedObjectRepresentation.setType(type);
 		managedObjectRepresentation = save(managedObjectRepresentation, serial);
