@@ -4,7 +4,9 @@ import com.cumulocity.rest.representation.devicebootstrap.DeviceCredentialsRepre
 
 public class TixiDeviceCredentails {
     
-    private String user;
+    public static final String USERNAME_SEPARATOR = "*";
+
+	private String user;
 
     private String password;
 
@@ -45,7 +47,7 @@ public class TixiDeviceCredentails {
 
     public static TixiDeviceCredentails from(DeviceCredentialsRepresentation credentials) {
         TixiDeviceCredentails tixiCredentails = new TixiDeviceCredentails();
-        tixiCredentails.setUser(credentials.getTenantId() + "/" + credentials.getUsername());
+        tixiCredentails.setUser(credentials.getTenantId() + USERNAME_SEPARATOR + credentials.getUsername());
         tixiCredentails.setPassword(credentials.getPassword());
         return tixiCredentails;
     }
