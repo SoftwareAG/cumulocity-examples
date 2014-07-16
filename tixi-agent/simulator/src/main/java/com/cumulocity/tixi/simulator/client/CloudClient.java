@@ -109,7 +109,7 @@ public class CloudClient {
         FormDataMultiPart multipart = null;
         try {
             multipart = new FormDataMultiPart();
-            FileDataBodyPart filePart = new FileDataBodyPart("filename", getFile(filename));
+            FileDataBodyPart filePart = new FileDataBodyPart("sendfile", getFile(filename));
             MultiPart bodyPart = multipart.bodyPart(filePart);
             WebTarget target = client.target(requestUrl);
             target.request().post(Entity.entity(bodyPart, bodyPart.getMediaType()));

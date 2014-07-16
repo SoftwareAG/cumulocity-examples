@@ -42,8 +42,8 @@ public class SendDataResource {
 	@POST
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response senddata(@FormDataParam("filename") InputStream fileInputStream,
-	        @FormDataParam("filename") FormDataContentDisposition contentDispositionHeader, 
+	public Response senddata(@FormDataParam("sendfile") InputStream fileInputStream,
+	        @FormDataParam("sendfile") FormDataContentDisposition contentDispositionHeader, 
 	        @QueryParam("requestId") String requestId,
 	        @QueryParam("serial") String serial) throws IOException {
 	    logger.info("Send data request from: serial " + serial);
