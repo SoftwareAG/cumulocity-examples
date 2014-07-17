@@ -4,7 +4,7 @@
 	<xsl:template match="/">
 		<LogDefinition>
 			<Records>
-				<xsl:for-each select="LogDefinition/Records/*">
+				<xsl:for-each select="GetConfig/LogDefinition/Records/*">
 					<LogDefinitionItemSet>
 						<xsl:attribute name="id">
 		                  <xsl:value-of select="name()" />

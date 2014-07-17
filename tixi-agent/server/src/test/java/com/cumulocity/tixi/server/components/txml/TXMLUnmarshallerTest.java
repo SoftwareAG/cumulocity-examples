@@ -91,20 +91,20 @@ public class TXMLUnmarshallerTest {
 		
 		txmlUnmarshaller.unmarshal(fileName, LogDefinition.class);
 	}
-	
-	@Test
-	public void shouldUmnarshalBigLogDefinitionFile() throws Exception {
 		
-		String fileName = agentFileSystem.writeIncomingFile("testFile", "test", new FileInputStream(SAMPLE_DIR + "LogDefinition2.xml"));
-		
-		txmlUnmarshaller.unmarshal(fileName, LogDefinition.class);
-	}
-	
 	@Test
     public void shouldStripEnclosingBrackets() throws Exception {
 	    String result = TXMLUnmarshaller.stripEnclosingBrackets("<xml>[content[]content] ");
 	    
 	    assertThat(result).isEqualTo("<xml>content[]content");
     }
+	
+	@Test
+	public void shouldUmnarshalNewFile() throws Exception {
+		
+		String fileName = agentFileSystem.writeIncomingFile("testFile", "test", new FileInputStream(SAMPLE_DIR + "LogDefinition_10_20140717132044325.xml"));
+		
+		txmlUnmarshaller.unmarshal(fileName, LogDefinition.class);
+	}
 }
 
