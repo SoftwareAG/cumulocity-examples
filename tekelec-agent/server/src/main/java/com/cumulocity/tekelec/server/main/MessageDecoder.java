@@ -1,4 +1,4 @@
-package com.cumulocity.tixi.server.main;
+package com.cumulocity.tekelec.server.main;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;

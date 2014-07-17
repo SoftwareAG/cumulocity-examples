@@ -1,4 +1,4 @@
-package com.cumulocity.tixi.server.main;
+package com.cumulocity.tekelec.server.main;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -8,7 +8,12 @@ import io.netty.util.ReferenceCountUtil;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class MessageHandler extends ChannelInboundHandlerAdapter {
+    
+    private static final Logger logger = LoggerFactory.getLogger(MessageHandler.class);
 
     private String[] contactReasons = { "DynLim2 Status", "DymLin1 Status", "TSP Requested", "Re-boot", "Manual", "Server Requested",
             "Alarm", "Scheduled" };
@@ -20,7 +25,12 @@ public class MessageHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
         ByteBuf in = (ByteBuf) msg;
         try {
-            if (in.readableBytes() >= 15) {
+            if (in.readableBytes() >= 30) {
+                ByteBuf copy = in.copy();
+                while(copy.isReadable()) {
+                    logger.info(Character.toString((char) copy.readByte()));
+                }
+                
                 int productType = readInt(in);
                 int hardwareRevision = readInt(in);
                 int firmwareRevision = readInt(in);
@@ -37,22 +47,29 @@ public class MessageHandler extends ChannelInboundHandlerAdapter {
                 in.skipBytes(11);
                 int auxRssi = readInt(in);
                 int tempInCelsius = (readInt(in) >> 1) - 30;
-                int sonitResultCode;
-//                System.out.println(productType);
-//                System.out.println(hardwareRevision);
-//                System.out.println(firmwareRevision);
-//                System.out.println(contactReason);
-//                System.out.println(alarmAndStatus);
-//                System.out.println(gsmRssi);
-//                System.out.println(battery);
-//                System.out.println(imei);
-//                System.out.flush();
+                byte byte1 = in.readByte();
+                byte shifted = (byte) (byte1 >> 2);
+                int sonitResultCode = extractRightBits(shifted, 4);
+                int distance = extractRightBits(byte1, 1)*256 + readInt(in);
+                
+                logger.info("productType " + productType);
+                logger.info("hardwareRevision " + hardwareRevision);
+                logger.info("firmwareRevision " + firmwareRevision);
+                logger.info("contactReason " + contactReason);
+                logger.info("alarmAndStatus " + alarmAndStatus);
+                logger.info("gsmRssi " + gsmRssi);
+                logger.info("battery " + battery);
+                logger.info("imei " + imei);
+                logger.info("auxRssi " + auxRssi);
+                logger.info("tempInCelsius " + tempInCelsius);
+                logger.info("sonitResultCode " + sonitResultCode);
+                logger.info("distance " + distance);
             }
         } finally {
             ReferenceCountUtil.release(msg);
         }
     }
-
+    
     private int readInt(ByteBuf in) {
         return (int) in.readByte() & 0xff;
     }

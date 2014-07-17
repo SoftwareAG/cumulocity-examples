@@ -1,4 +1,5 @@
-package com.cumulocity.tixi.server;
+package com.cumulocity.tekelec.server;
+
 
 import java.io.DataOutputStream;
 import java.net.Socket;
@@ -22,14 +23,4 @@ public class HandlerTest {
             out.flush();
         }
     }
-    
-
-    //        byte b1 = (byte) 251;
-    //        String s1 = String.format("%8s", Integer.toBinaryString(b1 & 0xFF)).replace(' ', '0');
-    //        System.out.println(s1); // 10000001
-    //
-    //        int anUnsignedByte = (int) b1 & 0xff;
-    //        System.out.println(anUnsignedByte);
-    //    }
-
 }
