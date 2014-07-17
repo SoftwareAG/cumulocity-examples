@@ -1,11 +1,6 @@
 package com.cumulocity.tekelec.server.main;
 
-import com.cumulocity.model.authentication.CumulocityCredentials;
-import com.cumulocity.sdk.client.Platform;
-import com.cumulocity.sdk.client.PlatformImpl;
-
 import io.netty.bootstrap.ServerBootstrap;
-
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
@@ -45,7 +40,6 @@ public class Main {
     }
 
     public static void main(String[] args) throws Exception {
-        Platform platform = new PlatformImpl("http://integration.cumulocity.com", new CumulocityCredentials("bootstrap", ""));
         new Main().run();
     }
 }

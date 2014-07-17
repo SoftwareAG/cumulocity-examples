@@ -5,11 +5,21 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.ReferenceCountUtil;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import c8y.*;
+
+import com.cumulocity.model.measurement.MeasurementValue;
+import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
+import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
+import com.cumulocity.tekelec.TEK586MO;
+import com.cumulocity.tekelec.TEK586Measurement;
 
 public class MessageHandler extends ChannelInboundHandlerAdapter {
     
@@ -20,6 +30,8 @@ public class MessageHandler extends ChannelInboundHandlerAdapter {
 
     private String[] alarmAndStatuses = { "GO Active", "BOR Reset", "WDT Reset", "Limp Along RTC", "Bund Status Closed", "Limits 3 Status",
             "Limits 2 Status", "Limits 1 Status" };
+    
+    private DeviceService deviceService = new DeviceService();
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
@@ -64,10 +76,48 @@ public class MessageHandler extends ChannelInboundHandlerAdapter {
                 logger.info("tempInCelsius " + tempInCelsius);
                 logger.info("sonitResultCode " + sonitResultCode);
                 logger.info("distance " + distance);
+                
+                ManagedObjectRepresentation device = deviceService.register(imei);
+                device.set(new Hardware("TEK586", imei, String.valueOf(hardwareRevision)));
+                device.set(new Firmware("TEK586", String.valueOf(firmwareRevision), null));
+                device.setProperty("c8y_TEK586", new TEK586MO(contactReason, alarmAndStatus));
+                deviceService.update(device);
+                
+                MeasurementRepresentation measurement = new MeasurementRepresentation();
+                measurement.setTime(new Date());
+                measurement.setSource(device);
+                measurement.setType("c8y_TekelecMeasurement");
+                measurement.set(distanceMeasurement(distance));
+                measurement.set(temperatureMeasurement(tempInCelsius));
+                measurement.set(batteryMeasurement(battery));
+                measurement.setProperty("c8y_TEK586", new TEK586Measurement(auxRssi));
             }
         } finally {
             ReferenceCountUtil.release(msg);
         }
+    }
+
+    private Battery batteryMeasurement(float batteryValue) {
+        Battery battery = new Battery();
+        MeasurementValue level = new MeasurementValue();
+        level.setValue(BigDecimal.valueOf(batteryValue));
+        level.setUnit("V");
+        battery.setLevel(level);
+        return battery;
+    }
+
+    private TemperatureMeasurement temperatureMeasurement(int value) {
+        TemperatureMeasurement temperatureMeasurement = new TemperatureMeasurement();
+        temperatureMeasurement.setTemperature(BigDecimal.valueOf(value));
+        return temperatureMeasurement;
+    }
+
+    private DistanceMeasurement distanceMeasurement(int value) {
+        DistanceMeasurement distanceMeasurement = new DistanceMeasurement();
+        MeasurementValue measurement = new MeasurementValue("m");
+        measurement.setValue(BigDecimal.valueOf(value));
+        distanceMeasurement.setDistance(measurement);
+        return distanceMeasurement;
     }
     
     private int readInt(ByteBuf in) {
