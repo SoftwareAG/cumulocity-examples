@@ -11,19 +11,19 @@ import org.junit.Test;
 
 import com.cumulocity.tixi.server.model.SerialNumber;
 import com.cumulocity.tixi.server.model.TixiDeviceCredentails;
-import com.cumulocity.tixi.server.services.DeviceService;
+import com.cumulocity.tixi.server.services.DeviceControlService;
 
 public class RegisterResourceTest {
 
     @Test
     public void shouldBootstrap() {
-        DeviceService deviceService = mock(DeviceService.class);
+        DeviceControlService deviceService = mock(DeviceControlService.class);
         RegisterResource resource = new RegisterResource(deviceService);
         when(deviceService.register(new SerialNumber("12345"))).thenReturn(new TixiDeviceCredentails("user", "pass", "id"));
         
         Response response = resource.get("12345", null);
         
-        TixiJsonResponse tixiResponse = (TixiJsonResponse) response.getEntity();
+        TixiRequest tixiResponse = (TixiRequest) response.getEntity();
         assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
         assertThat(tixiResponse.getProperties().get("user")).isEqualTo("user");
     }

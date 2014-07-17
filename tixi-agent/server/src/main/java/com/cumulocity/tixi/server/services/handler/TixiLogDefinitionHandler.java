@@ -10,15 +10,9 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import c8y.IsDevice;
-
 import com.cumulocity.agent.server.context.DeviceContextService;
-import com.cumulocity.agent.server.repository.IdentityRepository;
 import com.cumulocity.agent.server.repository.InventoryRepository;
-import com.cumulocity.model.Agent;
-import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
-import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.measurement.MeasurementApi;
 import com.cumulocity.tixi.server.model.SerialNumber;
 import com.cumulocity.tixi.server.model.txml.LogDefinition;
@@ -36,9 +30,9 @@ public class TixiLogDefinitionHandler extends TixiHandler<LogDefinition> {
 	private final Map<SerialNumber, ManagedObjectRepresentation> persistedDevices = new HashMap<>();
 
 	@Autowired
-	public TixiLogDefinitionHandler(DeviceContextService deviceContextService, IdentityRepository identityRepository, InventoryRepository inventoryRepository,
+	public TixiLogDefinitionHandler(DeviceContextService deviceContextService, InventoryRepository inventoryRepository,
 	        MeasurementApi measurementApi, LogDefinitionRegister logDefinitionRegister) {
-		super(deviceContextService, identityRepository, inventoryRepository, measurementApi, logDefinitionRegister);
+		super(deviceContextService, inventoryRepository, measurementApi, logDefinitionRegister);
 	}
 
 	public void handle(LogDefinition logDefinition) {
@@ -62,48 +56,15 @@ public class TixiLogDefinitionHandler extends TixiHandler<LogDefinition> {
 		SerialNumber agentSerial = new SerialNumber(path.getAgentId());
 		ManagedObjectRepresentation agent = persistedAgents.get(agentSerial);
 		if (agent == null) {
-			agent = findMoOrNull(agentSerial);
-			if (agent == null) {
-				agent = registerAgent(agentSerial);
-			}
+			agent = inventoryRepository.saveAgentIfNotExists(agentSerial.getValue(), agentSerial.getValue(), agentSerial);
 			persistedAgents.put(agentSerial, agent);
 		}
 		SerialNumber deviceSerial = new SerialNumber(path.getDeviceId());
 		ManagedObjectRepresentation device = persistedDevices.get(deviceSerial);
 		if (device == null) {
-			device = findMoOrNull(deviceSerial);
-			if (device == null) {
-				device = registerDevice(agent.getId(), deviceSerial);
-			}
+			device = inventoryRepository.saveDeviceIfNotExists(deviceSerial, agent.getId());
 			persistedDevices.put(deviceSerial, device);
 		}
 		logger.debug("Log definition item processed.");
-	}
-
-	private ManagedObjectRepresentation findMoOrNull(SerialNumber agentSerial) {
-		try {
-			return inventoryRepository.findByExternalId(agentSerial);
-		} catch (SDKException sdkEx) {
-			return null;
-		}
-	}
-
-	private ManagedObjectRepresentation registerDevice(GId agentId, SerialNumber serial) {
-		logger.debug("Register device: {}", serial);
-		ManagedObjectRepresentation managedObjectRepresentation = new ManagedObjectRepresentation();
-		managedObjectRepresentation.set(new IsDevice());
-		managedObjectRepresentation.setName(serial.getValue());
-		managedObjectRepresentation = inventoryRepository.save(managedObjectRepresentation, serial);
-		inventoryRepository.bindToAgent(agentId, managedObjectRepresentation.getId());
-		return managedObjectRepresentation;
-	}
-
-	private ManagedObjectRepresentation registerAgent(SerialNumber serial) {
-		logger.debug("Register agent: {}", serial);
-		ManagedObjectRepresentation managedObjectRepresentation = new ManagedObjectRepresentation();
-		managedObjectRepresentation.set(new IsDevice());
-		managedObjectRepresentation.set(new Agent());
-		managedObjectRepresentation.setName(serial.getValue());
-		return inventoryRepository.save(managedObjectRepresentation, serial);
 	}
 }

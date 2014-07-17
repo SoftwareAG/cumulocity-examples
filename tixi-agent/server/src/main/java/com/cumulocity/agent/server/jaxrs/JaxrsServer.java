@@ -5,6 +5,7 @@ import java.net.InetSocketAddress;
 
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.grizzly.servlet.WebappContext;
+import org.glassfish.grizzly.threadpool.ThreadPoolConfig;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -42,6 +43,12 @@ public class JaxrsServer implements Server {
         @Override
         protected void doStart() {
             server = HttpServer.createSimpleServer(null, new InetSocketAddress(host, port));
+            
+            server.getListener("grizzly").getTransport().setWorkerThreadPoolConfig(ThreadPoolConfig.defaultConfig()
+                    .setPoolName("Grizzly-worker")
+                    .setCorePoolSize(10)
+                    .setMaxPoolSize(10));
+                        
             WebappContext context = new WebappContext(applicationId, "/" + applicationId);
             resourceConfig.registerClasses(RequestContextFilter.class, JacksonFeature.class, MultiPartFeature.class);
             resourceConfig.getClasses();

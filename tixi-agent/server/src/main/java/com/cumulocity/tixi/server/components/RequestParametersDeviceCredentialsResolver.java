@@ -26,10 +26,9 @@ public class RequestParametersDeviceCredentialsResolver implements DeviceCredent
         	logger.debug("there is no username in request parameter!");
             return Optional.<DeviceCredentials> absent();
         }
-        final String[] splited = username.get().split(TixiDeviceCredentails.USERNAME_SEPARATOR);
+        final String[] splited = username.get().split("\\" + TixiDeviceCredentails.USERNAME_SEPARATOR);
         DeviceCredentials deviceCredentials = new DeviceCredentials(splited[0], splited[1], password.get(), null, GId.asGId(deviceId.orNull()));
         logger.debug("Device credentials created: {}", deviceCredentials);
 		return Optional.of(deviceCredentials);
     }
-
 }

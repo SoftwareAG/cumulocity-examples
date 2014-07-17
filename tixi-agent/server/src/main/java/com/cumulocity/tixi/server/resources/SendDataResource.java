@@ -1,8 +1,10 @@
 package com.cumulocity.tixi.server.resources;
 
-import static com.cumulocity.tixi.server.resources.TixiJsonResponse.statusOKJson;
+import static com.cumulocity.tixi.server.resources.TixiRequest.statusOK;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.util.zip.GZIPInputStream;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -40,23 +42,27 @@ public class SendDataResource {
 	@POST
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response senddata(@FormDataParam("filename") InputStream fileInputStream,
-	        @FormDataParam("filename") FormDataContentDisposition contentDispositionHeader, 
+	public Response senddata(@FormDataParam("sendfile") InputStream fileInputStream,
+	        @FormDataParam("sendfile") FormDataContentDisposition contentDispositionHeader, 
 	        @QueryParam("requestId") String requestId,
-	        @QueryParam("serial") String serial) {
+	        @QueryParam("serial") String serial) throws IOException {
 	    logger.info("Send data request from: serial " + serial);
-	    
-		handleTixiRequest(fileInputStream, requestId);
-		return Response.ok(statusOKJson()).build();
+		handleTixiRequest(new GZIPInputStream(fileInputStream), requestId);
+		return Response.ok(statusOK()).build();
 	}
 
 	private void handleTixiRequest(InputStream fileInputStream, String requestId) {
-		String fileName = agentFileSystem.writeIncomingFile(requestId, fileInputStream);
 		Class<?> requestEntityType = getRequestEntity(requestId);
+		String fileNamePrefix = asSimpleName(requestEntityType);
+		String fileName = agentFileSystem.writeIncomingFile(fileNamePrefix, requestId, fileInputStream);
 		if (requestEntityType != null) {
 			tixiService.handle(fileName, requestEntityType);
 		}
 	}
+
+	private String asSimpleName(Class<?> requestEntityType) {
+	    return requestEntityType == null ? null : requestEntityType.getSimpleName();
+    }
 
 	private Class<?> getRequestEntity(String requestId) {
 		if (requestId == null) {
@@ -64,5 +70,4 @@ public class SendDataResource {
 		}
 		return requestStorage.get(requestId);
 	}
-
 }
