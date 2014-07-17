@@ -63,17 +63,6 @@ public class TXMLUnmarshallerTest {
 		assertThat(actualLogDefinition).isEqualTo(expectedLogDefinition);
 	}
 		
-	
-	@Test
-	public void shouldUmnarshalBigLogDefinitionFile() throws Exception {
-		
-		String fileName = agentFileSystem.writeIncomingFile("testFile", "test", new FileInputStream(SAMPLE_DIR + "LogDefinition2.xml"));
-		
-		LogDefinition actualLogDefinition = txmlUnmarshaller.unmarshal(fileName, LogDefinition.class);
-				
-		//TODO add assertions
-	}
-	
 	@Test
 	public void shouldUmnarshalLogFile() throws Exception {
 		
@@ -94,4 +83,28 @@ public class TXMLUnmarshallerTest {
 		
 		assertThat(actualLog).isEqualTo(expectedLog);
 	}
+	
+	@Test
+	public void shouldUmnarshalLogDefinitionWithBrackets() throws Exception {
+		
+		String fileName = agentFileSystem.writeIncomingFile("testFile", "test", new FileInputStream(SAMPLE_DIR + "LogDefinition_withbrackets.xml"));
+		
+		txmlUnmarshaller.unmarshal(fileName, LogDefinition.class);
+	}
+	
+	@Test
+	public void shouldUmnarshalBigLogDefinitionFile() throws Exception {
+		
+		String fileName = agentFileSystem.writeIncomingFile("testFile", "test", new FileInputStream(SAMPLE_DIR + "LogDefinition2.xml"));
+		
+		txmlUnmarshaller.unmarshal(fileName, LogDefinition.class);
+	}
+	
+	@Test
+    public void shouldStripEnclosingBrackets() throws Exception {
+	    String result = TXMLUnmarshaller.stripEnclosingBrackets("<xml>[content[]content] ");
+	    
+	    assertThat(result).isEqualTo("<xml>content[]content");
+    }
 }
+
