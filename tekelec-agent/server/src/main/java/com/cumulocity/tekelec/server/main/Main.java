@@ -27,7 +27,7 @@ public class Main {
              .option(ChannelOption.SO_BACKLOG, 128)
              .childOption(ChannelOption.SO_KEEPALIVE, true);
 
-            ChannelFuture f = b.bind(8088).sync();
+            ChannelFuture f = b.bind(8282).sync();
 
             // Wait until the server socket is closed.
             // In this example, this does not happen, but you can do that to gracefully

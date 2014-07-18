@@ -13,7 +13,7 @@ public class HandlerTestIT {
 
     @Test
     public void test() throws Exception {
-        Socket socket = new Socket("localhost", 8088);
+        Socket socket = new Socket("integration.cumulocity.com", 8282);
         DataOutputStream out = new DataOutputStream(socket.getOutputStream());
         for (byte i : bytes) {
             out.writeByte(i);

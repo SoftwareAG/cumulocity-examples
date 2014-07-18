@@ -79,10 +79,12 @@ public class MessageHandler extends ChannelInboundHandlerAdapter {
                 logger.info("distance " + distance);
                 
                 ManagedObjectRepresentation device = deviceService.register(imei);
-                device.set(new Hardware("TEK586", imei, String.valueOf(hardwareRevision)));
-                device.set(new Firmware("TEK586", String.valueOf(firmwareRevision), null));
-                device.setProperty("c8y_TEK586", new TEK586MO(contactReason, alarmAndStatus));
-                deviceService.update(device);
+                ManagedObjectRepresentation update = new ManagedObjectRepresentation();
+                update.setId(device.getId());
+                update.set(new Hardware("TEK586", imei, String.valueOf(hardwareRevision)));
+                update.set(new Firmware("TEK586", String.valueOf(firmwareRevision), null));
+                update.setProperty("c8y_TEK586", new TEK586MO(contactReason, alarmAndStatus));
+                deviceService.update(update);
                 
                 MeasurementRepresentation measurement = new MeasurementRepresentation();
                 measurement.setTime(new Date());

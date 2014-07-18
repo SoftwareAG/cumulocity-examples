@@ -31,7 +31,12 @@ public class DeviceService {
 
     public DeviceService() {
         credentialsManager = CredentialsManager.defaultCredentialsManager();
+        CumulocityCredentials deviceCredentials = credentialsManager.getDeviceCredentials();
         bootstrapPlatform = new PlatformImpl(credentialsManager.getHost(), credentialsManager.getBootstrapCredentials());
+        if (deviceCredentials != null) {
+            devicePlatform = new PlatformImpl(credentialsManager.getHost(), new CumulocityCredentials(deviceCredentials.getTenantId(),
+                    deviceCredentials.getUsername(), deviceCredentials.getPassword(), null));
+        }
     }
     
     public ManagedObjectRepresentation register(String imei) {
