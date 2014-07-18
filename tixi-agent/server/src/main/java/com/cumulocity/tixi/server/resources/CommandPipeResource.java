@@ -17,11 +17,13 @@ import c8y.MeasurementRequestOperation;
 
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.tixi.server.model.TixiRequestType;
+import com.cumulocity.tixi.server.model.txml.LogDefinition;
 import com.cumulocity.tixi.server.request.util.Device;
 import com.cumulocity.tixi.server.services.DeviceControlService;
 import com.cumulocity.tixi.server.services.MessageChannel;
 import com.cumulocity.tixi.server.services.MessageChannelContext;
 import com.cumulocity.tixi.server.services.TixiRequestFactory;
+import com.cumulocity.tixi.server.services.handler.LogDefinitionRegister;
 
 @Path("/openchannel")
 public class CommandPipeResource {
@@ -31,12 +33,14 @@ public class CommandPipeResource {
     private final Device device;
     private final DeviceControlService deviceControlService;
     private final TixiRequestFactory requestFactory;
+    private final LogDefinitionRegister LogDefinitionRegister;
 
     @Autowired
-    public CommandPipeResource(Device device, DeviceControlService deviceControlService, TixiRequestFactory requestFactory) {
+    public CommandPipeResource(Device device, DeviceControlService deviceControlService, TixiRequestFactory requestFactory, LogDefinitionRegister LogDefinitionRegister) {
 	    this.device = device;
 	    this.deviceControlService = deviceControlService;
 		this.requestFactory = requestFactory;
+		this.LogDefinitionRegister = LogDefinitionRegister;
     }
 
 	@GET
@@ -56,7 +60,17 @@ public class CommandPipeResource {
 		
 		public void send(MessageChannelContext context, MeasurementRequestOperation measurementRequest) {
 			logger.info("Received measurement request {}.", measurementRequest);
-			TixiRequest tixiRequest = requestFactory.create(measurementRequest.getRequestName());
+			LogDefinition logDefinition = LogDefinitionRegister.getLogDefinition();
+			if(logDefinition == null) {
+				logger.info("Log definition not availablel skip measurement request.");
+				return;
+			}
+			if(logDefinition.getRecordIds().isEmpty()) {
+				logger.warn("Log definition %s has no records!", logDefinition);
+				return;
+			}
+			String recordId = logDefinition.getRecordIds().get(0).getId();
+			TixiRequest tixiRequest = requestFactory.createLogRequest(recordId);
 			device.put(tixiRequest);
 		}
 	}

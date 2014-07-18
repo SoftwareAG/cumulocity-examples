@@ -39,9 +39,9 @@ public class Device implements InitializingBean {
 		executorService.scheduleAtFixedRate(new WriteResponseCommand(), 1, 5, TimeUnit.SECONDS);
 	}
 
-	public void put(TixiRequest jsonResponse) {
-		logger.debug("Enqueued response {}.", jsonResponse);
-		tixiOperationsQueue.put(jsonResponse);
+	public void put(TixiRequest tixiRequest) {
+		logger.debug("Enqueued tixiRequest {}.", tixiRequest);
+		tixiOperationsQueue.put(tixiRequest);
 	}
 
 	public void put(TixiRequestType requestType) {

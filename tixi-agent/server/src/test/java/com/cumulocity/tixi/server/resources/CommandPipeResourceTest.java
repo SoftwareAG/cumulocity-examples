@@ -13,13 +13,15 @@ import com.cumulocity.tixi.server.request.util.Device;
 import com.cumulocity.tixi.server.services.DeviceControlService;
 import com.cumulocity.tixi.server.services.MessageChannel;
 import com.cumulocity.tixi.server.services.TixiRequestFactory;
+import com.cumulocity.tixi.server.services.handler.LogDefinitionRegister;
 
 public class CommandPipeResourceTest {
 
     Device device = mock(Device.class);
     DeviceControlService deviceControlService = mock(DeviceControlService.class);
     TixiRequestFactory tixiRequestFactory = mock(TixiRequestFactory.class);
-    CommandPipeResource commandPipe = new CommandPipeResource(device, deviceControlService, tixiRequestFactory);
+    LogDefinitionRegister logDefinitionRegister = mock(LogDefinitionRegister.class);
+    CommandPipeResource commandPipe = new CommandPipeResource(device, deviceControlService, tixiRequestFactory, logDefinitionRegister);
 
 	@Test
     public void shouldBootstrap() {
