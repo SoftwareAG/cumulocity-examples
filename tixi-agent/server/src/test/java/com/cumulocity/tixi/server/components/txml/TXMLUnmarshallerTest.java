@@ -37,7 +37,7 @@ public class TXMLUnmarshallerTest {
 		
 		LogDefinition actualLogDefinition = txmlUnmarshaller.unmarshal(fileName, LogDefinition.class);
 		
-		System.out.println(actualLogDefinition.getRecordDefs());
+		System.out.println(actualLogDefinition.getRecordIds());
 		
 		// @formatter:off
 		LogDefinition expectedLogDefinition = aLogDefinition()

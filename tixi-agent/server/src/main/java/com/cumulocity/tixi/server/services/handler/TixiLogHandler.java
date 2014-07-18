@@ -23,7 +23,7 @@ import com.cumulocity.sdk.client.measurement.MeasurementApi;
 import com.cumulocity.tixi.server.model.SerialNumber;
 import com.cumulocity.tixi.server.model.txml.Log;
 import com.cumulocity.tixi.server.model.txml.LogDefinition;
-import com.cumulocity.tixi.server.model.txml.LogDefinitionItem;
+import com.cumulocity.tixi.server.model.txml.RecordItemDefinition;
 import com.cumulocity.tixi.server.model.txml.LogItem;
 import com.cumulocity.tixi.server.model.txml.LogItemSet;
 
@@ -70,7 +70,7 @@ public class TixiLogHandler extends TixiHandler<Log> {
 	private void handleItemSet(LogItemSet itemSet) {
 		logger.debug("Proccess log item set with id {} and date {}.", itemSet.getId(), itemSet.getDateTime());
 	    for (LogItem item : itemSet.getItems()) {
-	    	LogDefinitionItem itemDef = logDefinition.getItem(logId, item.getId());
+	    	RecordItemDefinition itemDef = logDefinition.getRecordItemDefinition(logId, item.getId());
 	    	if(itemDef == null) {
 	    		logger.warn("There is no log definition item for itemSetId: {}," +
 	    				" itemId: {}; skip this log item.", logId, item.getId());
@@ -87,7 +87,7 @@ public class TixiLogHandler extends TixiHandler<Log> {
 	    logger.debug("Proccess log item set with id {} and date {}.", itemSet.getId(), itemSet.getDateTime());
     }
 
-	private void handleLogItem(LogItem item, LogDefinitionItem itemDef, Date date) {
+	private void handleLogItem(LogItem item, RecordItemDefinition itemDef, Date date) {
 		logger.trace("Proccess log {} item with id.", item.getId());
 		String deviceId = itemDef.getPath().getDeviceId();
 		MeasurementRepresentation measurement = getMeasurement(new MeasurementKey(deviceId, date));
@@ -119,7 +119,7 @@ public class TixiLogHandler extends TixiHandler<Log> {
 	    return measurementValue;
     }
 	
-	private static String asFragmentName(LogDefinitionItem itemDef) {
+	private static String asFragmentName(RecordItemDefinition itemDef) {
 	    return "c8y_" + itemDef.getPath().getName();
     }
 		

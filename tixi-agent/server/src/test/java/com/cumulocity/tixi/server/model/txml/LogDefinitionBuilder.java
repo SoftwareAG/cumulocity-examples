@@ -4,21 +4,21 @@ package com.cumulocity.tixi.server.model.txml;
 public class LogDefinitionBuilder {
 
 	private final LogDefinition result = new LogDefinition();
-	private LogDefinitionItemSet logDefinitionItemSet;
+	private RecordDefinition logDefinitionItemSet;
 
 	public static LogDefinitionBuilder aLogDefinition() {
 		return new LogDefinitionBuilder();
 	}
 
 	public LogDefinitionBuilder withNewItemSet(String id) {
-		logDefinitionItemSet = new LogDefinitionItemSet(id);
-		result.getItemSets().put(id, logDefinitionItemSet);
-		result.getRecordDefs().add(new LogBaseItem(id));
+		logDefinitionItemSet = new RecordDefinition(id);
+		result.getRecordDefinitions().put(id, logDefinitionItemSet);
+		result.getRecordIds().add(new LogBaseItem(id));
 		return this;
 	}
 	
-	public LogDefinitionBuilder withItem(LogDefinitionItem dataLoggingItem) {
-		logDefinitionItemSet.getItems().put(dataLoggingItem.getId(), dataLoggingItem);
+	public LogDefinitionBuilder withItem(RecordItemDefinition dataLoggingItem) {
+		logDefinitionItemSet.getRecordItemDefinitions().put(dataLoggingItem.getId(), dataLoggingItem);
 		return this;
 	}
 	

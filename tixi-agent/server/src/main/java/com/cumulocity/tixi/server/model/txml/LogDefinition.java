@@ -17,72 +17,72 @@ import com.cumulocity.tixi.server.components.txml.TXMLMapAdapter.AdaptedMap;
 @XmlRootElement(name = "LogDefinition")
 public class LogDefinition {
 	
-	public static class LogDefinitionItemSetAdaptedMap implements AdaptedMap<LogDefinitionItemSet> {
+	public static class RecordDefinitionAdaptedMap implements AdaptedMap<RecordDefinition> {
 
-		@XmlElements({ @XmlElement(name = "LogDefinitionItemSet") })
-		private List<LogDefinitionItemSet> items;
+		@XmlElements({ @XmlElement(name = "RecordDefinition") })
+		private List<RecordDefinition> elements;
 		
-		public List<LogDefinitionItemSet> getItems() {
-			return items;
+		public List<RecordDefinition> getElements() {
+			return elements;
 		}
 	}
 
-	public static class LogDefinitionItemSetMapAdapter 
-		extends TXMLMapAdapter<LogDefinitionItemSet, LogDefinitionItemSetAdaptedMap> {
+	public static class RecordDefinitionMapAdapter 
+		extends TXMLMapAdapter<RecordDefinition, RecordDefinitionAdaptedMap> {
 	}
 	
-	@XmlElementWrapper(name = "RecordDefs")
-	@XmlElement(name = "RecordDef")
-	private List<LogBaseItem> recordDefs = new ArrayList<>();
+	@XmlElementWrapper(name = "RecordIds")
+	@XmlElement(name = "RecordId")
+	private List<LogBaseItem> recordIds = new ArrayList<>();
 
-	@XmlElement(name = "Records")
-	@XmlJavaTypeAdapter(LogDefinitionItemSetMapAdapter.class)
-	private Map<String, LogDefinitionItemSet> itemSets = new HashMap<>();
+	@XmlElement(name = "RecordDefinitions")
+	@XmlJavaTypeAdapter(RecordDefinitionMapAdapter.class)
+	private Map<String, RecordDefinition> recordDefinitions = new HashMap<>();
 
-	public Map<String, LogDefinitionItemSet> getItemSets() {
-		return itemSets;
+	public Map<String, RecordDefinition> getRecordDefinitions() {
+		return recordDefinitions;
 	}
 
-	public void setItemSets(Map<String, LogDefinitionItemSet> dataLoggings) {
-		this.itemSets = dataLoggings;
+	public void setRecordDefinitions(Map<String, RecordDefinition> recordDefinitions) {
+		this.recordDefinitions = recordDefinitions;
 	}
 	
-	public List<LogBaseItem> getRecordDefs() {
-		return recordDefs;
+	public List<LogBaseItem> getRecordIds() {
+		return recordIds;
 	}
 
-	public void setRecordDefs(List<LogBaseItem> recordDefs) {
-		this.recordDefs = recordDefs;
+	public void setRecordIds(List<LogBaseItem> recordIds) {
+		this.recordIds = recordIds;
 	}
 
-	public LogDefinitionItemSet getItemSet(String id) {
-		if(itemSets == null) {
+	public RecordDefinition getRecordDefinition(String recordId) {
+		if(recordDefinitions == null) {
 			return null;
 		} else {
-			return itemSets.get(id);
+			return recordDefinitions.get(recordId);
 		}
 	}
 	
-	public LogDefinitionItem getItem(String itemSetId, String itemId) {
-		LogDefinitionItemSet itemSet = getItemSet(itemSetId);
-		if(itemSet == null) {
+	public RecordItemDefinition getRecordItemDefinition(String recordId, String recordItemId) {
+		RecordDefinition recordDefinition = getRecordDefinition(recordId);
+		if(recordDefinition == null) {
 			return null;
 		} else {
-			return itemSet.getItem(itemId);
+			return recordDefinition.getRecordItemDefinition(recordItemId);
 		}
 	}
 
 	@Override
     public String toString() {
-	    return String.format("LogDefinition [recordDefs=%s, itemSets=%s]", recordDefs, itemSets);
+	    return String.format("LogDefinition [recordIds=%s, recordDefinitions=%s]", recordIds, recordDefinitions);
     }
 
 	@Override
     public int hashCode() {
 	    final int prime = 31;
 	    int result = 1;
-	    result = prime * result + ((itemSets == null) ? 0 : itemSets.hashCode());
-	    result = prime * result + ((recordDefs == null) ? 0 : recordDefs.hashCode());
+	    result = prime * result + ((recordDefinitions == null) ? 0 : recordDefinitions.hashCode());
+	    result = prime * result + ((recordIds == null) ? 0 : recordIds.hashCode());
 	    return result;
     }
 
@@ -95,15 +95,15 @@ public class LogDefinition {
 	    if (getClass() != obj.getClass())
 		    return false;
 	    LogDefinition other = (LogDefinition) obj;
-	    if (itemSets == null) {
-		    if (other.itemSets != null)
+	    if (recordDefinitions == null) {
+		    if (other.recordDefinitions != null)
 			    return false;
-	    } else if (!itemSets.equals(other.itemSets))
+	    } else if (!recordDefinitions.equals(other.recordDefinitions))
 		    return false;
-	    if (recordDefs == null) {
-		    if (other.recordDefs != null)
+	    if (recordIds == null) {
+		    if (other.recordIds != null)
 			    return false;
-	    } else if (!recordDefs.equals(other.recordDefs))
+	    } else if (!recordIds.equals(other.recordIds))
 		    return false;
 	    return true;
     }

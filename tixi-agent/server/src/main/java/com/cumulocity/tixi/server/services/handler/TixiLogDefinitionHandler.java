@@ -16,9 +16,9 @@ import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.measurement.MeasurementApi;
 import com.cumulocity.tixi.server.model.SerialNumber;
 import com.cumulocity.tixi.server.model.txml.LogDefinition;
-import com.cumulocity.tixi.server.model.txml.LogDefinitionItem;
-import com.cumulocity.tixi.server.model.txml.LogDefinitionItemPath;
-import com.cumulocity.tixi.server.model.txml.LogDefinitionItemSet;
+import com.cumulocity.tixi.server.model.txml.RecordItemDefinition;
+import com.cumulocity.tixi.server.model.txml.RecordItemPath;
+import com.cumulocity.tixi.server.model.txml.RecordDefinition;
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -38,9 +38,9 @@ public class TixiLogDefinitionHandler extends TixiHandler<LogDefinition> {
 	public void handle(LogDefinition logDefinition) {
 		logger.info("Process log definition.");
 		logDefinitionRegister.register(logDefinition);
-		for (LogDefinitionItemSet itemSet : logDefinition.getItemSets().values()) {
+		for (RecordDefinition itemSet : logDefinition.getRecordDefinitions().values()) {
 			logger.info("Process log definition item set with id {}", itemSet.getId());
-			for (LogDefinitionItem logDefinitionItem : itemSet.getItems().values()) {
+			for (RecordItemDefinition logDefinitionItem : itemSet.getRecordItemDefinitions().values()) {
 				if (isDevicePath(logDefinitionItem)) {
 					handleDeviceItem(logDefinitionItem);
 				}
@@ -50,9 +50,9 @@ public class TixiLogDefinitionHandler extends TixiHandler<LogDefinition> {
 		logger.info("Log definition processed.");
 	}
 
-	private void handleDeviceItem(LogDefinitionItem logDefinitionItem) {
+	private void handleDeviceItem(RecordItemDefinition logDefinitionItem) {
 		logger.debug("Process log definition item: {}", logDefinitionItem);
-		LogDefinitionItemPath path = logDefinitionItem.getPath();
+		RecordItemPath path = logDefinitionItem.getPath();
 		SerialNumber agentSerial = new SerialNumber(path.getAgentId());
 		ManagedObjectRepresentation agent = persistedAgents.get(agentSerial);
 		if (agent == null) {

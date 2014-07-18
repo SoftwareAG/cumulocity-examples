@@ -4,35 +4,35 @@
 	<xsl:template match="/">
 		<LogDefinition>
 			<xsl:for-each select="GetConfig/LogDefinition/LogFiles">
-				<RecordDefs>
+				<RecordIds>
 					<xsl:for-each select="current()/*[@record]">
-						<RecordDef>
+						<RecordId>
 							<xsl:attribute name="id">
 	                            <xsl:value-of select="@record" />
 	                        </xsl:attribute>
-						</RecordDef>
+						</RecordId>
 					</xsl:for-each>
-				</RecordDefs>
+				</RecordIds>
 			</xsl:for-each>
-			<Records>
+			<RecordDefinitions>
 				<xsl:for-each select="GetConfig/LogDefinition/Records/*">
-					<LogDefinitionItemSet>
+					<RecordDefinition>
 						<xsl:attribute name="id">
 		                  <xsl:value-of select="name()" />
 		                </xsl:attribute>
-						<LogDefinitionItems>
+						<RecordDefinitionItems>
 							<xsl:for-each select="current()/*">
-								<LogDefinitionItem>
+								<RecordDefinitionItem>
 									<xsl:copy-of select="@*" />
 									<xsl:attribute name="id">
 				                        <xsl:value-of select="name()" />
 				                    </xsl:attribute>
-								</LogDefinitionItem>
+								</RecordDefinitionItem>
 							</xsl:for-each>
-						</LogDefinitionItems>
-					</LogDefinitionItemSet>
+						</RecordDefinitionItems>
+					</RecordDefinition>
 				</xsl:for-each>
-			</Records>
+			</RecordDefinitions>
 		</LogDefinition>
 	</xsl:template>
 </xsl:stylesheet>

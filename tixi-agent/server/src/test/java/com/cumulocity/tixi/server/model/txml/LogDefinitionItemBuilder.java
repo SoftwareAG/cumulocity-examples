@@ -1,13 +1,13 @@
 package com.cumulocity.tixi.server.model.txml;
 
-import com.cumulocity.tixi.server.components.txml.LogDefinitionItemPathAdapter;
-import com.cumulocity.tixi.server.model.txml.LogDefinitionItem;
-import com.cumulocity.tixi.server.model.txml.LogDefinitionItemPath;
+import com.cumulocity.tixi.server.components.txml.RecordItemPathAdapter;
+import com.cumulocity.tixi.server.model.txml.RecordItemDefinition;
+import com.cumulocity.tixi.server.model.txml.RecordItemPath;
 
 public class LogDefinitionItemBuilder {
 
-	private final LogDefinitionItem result = new LogDefinitionItem();
-	private final LogDefinitionItemPathAdapter itemPathAdapter = new LogDefinitionItemPathAdapter();
+	private final RecordItemDefinition result = new RecordItemDefinition();
+	private final RecordItemPathAdapter itemPathAdapter = new RecordItemPathAdapter();
 
 	public static LogDefinitionItemBuilder anItem() {
 		return new LogDefinitionItemBuilder();
@@ -43,7 +43,7 @@ public class LogDefinitionItemBuilder {
 		return this;
 	}
 	
-	public LogDefinitionItemBuilder withPath(LogDefinitionItemPath path) {
+	public LogDefinitionItemBuilder withPath(RecordItemPath path) {
 		result.setPath(path);
 		return this;
 	}
@@ -52,7 +52,7 @@ public class LogDefinitionItemBuilder {
 		return withPath(itemPathAdapter.unmarshal(path));
 	}
 
-	public LogDefinitionItem build() {
+	public RecordItemDefinition build() {
 		return result;
 	}
 }
