@@ -37,10 +37,9 @@ public class MessageHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
         ByteBuf in = (ByteBuf) msg;
         try {
-            if (in.readableBytes() >= 30) {
                 ByteBuf copy = in.copy();
                 while(copy.isReadable()) {
-                    logger.info(Character.toString((char) copy.readByte()));
+                    logger.info("" + readInt(copy));
                 }
                 
                 int productType = readInt(in);
@@ -56,7 +55,9 @@ public class MessageHandler extends ChannelInboundHandlerAdapter {
                 for (int i = 0 ; i < 8 ; i++) {
                     imei += String.format("%02X", readInt(in));
                 }
-                in.skipBytes(11);
+                byte messageType = in.readByte();
+                byte payloadLength = in.readByte();
+                in.skipBytes(9);
                 int auxRssi = readInt(in);
                 int tempInCelsius = (readInt(in) >> 1) - 30;
                 byte byte1 = in.readByte();
@@ -91,7 +92,6 @@ public class MessageHandler extends ChannelInboundHandlerAdapter {
                 measurement.set(temperatureMeasurement(tempInCelsius));
                 measurement.set(batteryMeasurement(battery));
                 measurement.setProperty("c8y_TEK586", new TEK586Measurement(auxRssi));
-            }
         } finally {
             ReferenceCountUtil.release(msg);
         }
