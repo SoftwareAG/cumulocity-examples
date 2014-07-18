@@ -1,10 +1,12 @@
 package com.cumulocity.tixi.server.model.txml;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlElements;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
@@ -24,10 +26,14 @@ public class LogDefinition {
 			return items;
 		}
 	}
-	
+
 	public static class LogDefinitionItemSetMapAdapter 
 		extends TXMLMapAdapter<LogDefinitionItemSet, LogDefinitionItemSetAdaptedMap> {
 	}
+	
+	@XmlElementWrapper(name = "RecordDefs")
+	@XmlElement(name = "RecordDef")
+	private List<LogBaseItem> recordDefs = new ArrayList<>();
 
 	@XmlElement(name = "Records")
 	@XmlJavaTypeAdapter(LogDefinitionItemSetMapAdapter.class)
@@ -41,6 +47,14 @@ public class LogDefinition {
 		this.itemSets = dataLoggings;
 	}
 	
+	public List<LogBaseItem> getRecordDefs() {
+		return recordDefs;
+	}
+
+	public void setRecordDefs(List<LogBaseItem> recordDefs) {
+		this.recordDefs = recordDefs;
+	}
+
 	public LogDefinitionItemSet getItemSet(String id) {
 		if(itemSets == null) {
 			return null;
@@ -57,10 +71,10 @@ public class LogDefinition {
 			return itemSet.getItem(itemId);
 		}
 	}
-	
+
 	@Override
     public String toString() {
-	    return String.format("LogDefinition [itemSets=%s]", itemSets);
+	    return String.format("LogDefinition [recordDefs=%s, itemSets=%s]", recordDefs, itemSets);
     }
 
 	@Override
@@ -68,6 +82,7 @@ public class LogDefinition {
 	    final int prime = 31;
 	    int result = 1;
 	    result = prime * result + ((itemSets == null) ? 0 : itemSets.hashCode());
+	    result = prime * result + ((recordDefs == null) ? 0 : recordDefs.hashCode());
 	    return result;
     }
 
@@ -84,6 +99,11 @@ public class LogDefinition {
 		    if (other.itemSets != null)
 			    return false;
 	    } else if (!itemSets.equals(other.itemSets))
+		    return false;
+	    if (recordDefs == null) {
+		    if (other.recordDefs != null)
+			    return false;
+	    } else if (!recordDefs.equals(other.recordDefs))
 		    return false;
 	    return true;
     }

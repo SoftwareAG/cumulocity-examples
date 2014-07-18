@@ -3,6 +3,17 @@
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 	<xsl:template match="/">
 		<LogDefinition>
+			<xsl:for-each select="GetConfig/LogDefinition/LogFiles">
+				<RecordDefs>
+					<xsl:for-each select="current()/*[@record]">
+						<RecordDef>
+							<xsl:attribute name="id">
+	                            <xsl:value-of select="@record" />
+	                        </xsl:attribute>
+						</RecordDef>
+					</xsl:for-each>
+				</RecordDefs>
+			</xsl:for-each>
 			<Records>
 				<xsl:for-each select="GetConfig/LogDefinition/Records/*">
 					<LogDefinitionItemSet>

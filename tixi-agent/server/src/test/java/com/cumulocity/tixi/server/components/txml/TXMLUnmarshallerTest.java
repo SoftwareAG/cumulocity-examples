@@ -36,7 +36,9 @@ public class TXMLUnmarshallerTest {
 		String fileName = agentFileSystem.writeIncomingFile("testFile", "test", new FileInputStream(SAMPLE_DIR + "LogDefinition.xml"));
 		
 		LogDefinition actualLogDefinition = txmlUnmarshaller.unmarshal(fileName, LogDefinition.class);
-				
+		
+		System.out.println(actualLogDefinition.getRecordDefs());
+		
 		// @formatter:off
 		LogDefinition expectedLogDefinition = aLogDefinition()
 			.withNewItemSet("Datalogging_1")

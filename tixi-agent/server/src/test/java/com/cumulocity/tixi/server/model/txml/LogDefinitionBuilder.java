@@ -1,8 +1,5 @@
 package com.cumulocity.tixi.server.model.txml;
 
-import com.cumulocity.tixi.server.model.txml.LogDefinition;
-import com.cumulocity.tixi.server.model.txml.LogDefinitionItem;
-import com.cumulocity.tixi.server.model.txml.LogDefinitionItemSet;
 
 public class LogDefinitionBuilder {
 
@@ -16,9 +13,10 @@ public class LogDefinitionBuilder {
 	public LogDefinitionBuilder withNewItemSet(String id) {
 		logDefinitionItemSet = new LogDefinitionItemSet(id);
 		result.getItemSets().put(id, logDefinitionItemSet);
+		result.getRecordDefs().add(new LogBaseItem(id));
 		return this;
 	}
-
+	
 	public LogDefinitionBuilder withItem(LogDefinitionItem dataLoggingItem) {
 		logDefinitionItemSet.getItems().put(dataLoggingItem.getId(), dataLoggingItem);
 		return this;
