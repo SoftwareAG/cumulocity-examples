@@ -31,16 +31,12 @@ public class CredentialsManager {
         Properties commonProps = PropUtils.fromFile(commonPropsFile);
         Properties deviceProps = PropUtils.fromFile(devicePropsFile);
         this.deviceCredentials = initDeviceCredentials(deviceProps);
-        this.bootstrapCredentials = initBootstrapCredentials(commonProps);
+        this.bootstrapCredentials = initBootstrapCredentials();
         this.host = commonProps.getProperty("host", DEFAULT_HOST);
     }
 
-    private static CumulocityCredentials initBootstrapCredentials(Properties commonProps) {
-        return new CumulocityCredentials(
-                commonProps.getProperty("bootstrap.tenant", DEFAULT_BOOTSTRAP_TENANT),
-                commonProps.getProperty("bootstrap.user", DEFAULT_BOOTSTRAP_USER),
-                commonProps.getProperty("bootstrap.password", DEFAULT_BOOTSTRAP_PASSWORD),
-                null);
+    private static CumulocityCredentials initBootstrapCredentials() {
+        return new CumulocityCredentials(DEFAULT_BOOTSTRAP_TENANT, DEFAULT_BOOTSTRAP_USER, DEFAULT_BOOTSTRAP_PASSWORD, null);
     }
 
     private static CumulocityCredentials initDeviceCredentials(Properties deviceProps) {

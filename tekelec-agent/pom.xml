@@ -12,6 +12,7 @@
     <description>Server-side agent for Tekelec Device based on TCP</description>
     <modules>
         <module>server</module>
+	<module>rpm</module>
     </modules>
     <properties>
         <netty.version>4.0.20.Final</netty.version>

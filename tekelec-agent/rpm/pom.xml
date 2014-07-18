@@ -1,0 +1,102 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>c8y.example</groupId>
+		<artifactId>tekelec-agent</artifactId>
+		<version>5.8.0-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>tekelec-rpm</artifactId>
+    <packaging>rpm</packaging>
+	<name>Cumulocity :: Examples :: Tekelec Agent :: RPM</name>
+
+	<properties>
+        <app.dir>${project.build.directory}/app</app.dir>
+        <etc.dir>${project.build.outputDirectory}/etc</etc.dir>
+        
+        <rpm.version>${project.version}</rpm.version>
+        <rpm.app.dir>/var/lib/tekelec</rpm.app.dir>
+        <rpm.etc.dir>/etc/tekelec</rpm.etc.dir>
+	</properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>c8y.example</groupId>
+            <artifactId>tekelec-agent-server</artifactId>
+            <version>${project.version}</version>
+            <type>jar</type>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-rpm-contents</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${app.dir}</outputDirectory>
+                            <excludeTransitive>true</excludeTransitive>
+                            <includeTypes>jar</includeTypes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>rpm-maven-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <projversion>${rpm.version}</projversion>
+                    <copyright>(C) 2013 Cumulocity GmbH</copyright>
+                    <distribution>Cumulocity 2043</distribution>
+                    <packager>Cumulocity</packager>
+                    <name>tekelec</name>
+                    <group>C8Y/Agent</group>
+                    <mappings>
+                        <mapping>
+                            <directory>${rpm.app.dir}</directory>
+                            <username>root</username>
+                            <groupname>java</groupname>
+                            <sources>
+                                <source>
+                                    <location>${app.dir}</location>
+                                </source>
+                            </sources>
+                        </mapping>                                        
+                        <mapping>
+                            <directory>${rpm.etc.dir}</directory>
+                            <username>root</username>
+                            <groupname>java</groupname>
+                            <sources>
+                                <source>
+                                    <location>${etc.dir}</location>
+                                </source>
+                            </sources>
+                        </mapping>                                        
+                    </mappings>
+                    <preinstallScriptlet>
+                        <script>echo "Installing Tekelec Agent..."</script>
+                    </preinstallScriptlet>
+                    <postremoveScriptlet>
+                        <script>echo "Tekelec Agent has been removed."</script>
+                    </postremoveScriptlet>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
