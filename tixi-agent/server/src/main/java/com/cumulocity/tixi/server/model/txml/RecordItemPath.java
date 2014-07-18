@@ -1,14 +1,14 @@
 package com.cumulocity.tixi.server.model.txml;
 
-public class LogDefinitionItemPath {
+public class RecordItemPath {
 
 	private String agentId;
 	private String deviceId;
 	private String name;
 	
-	public LogDefinitionItemPath() {}
+	public RecordItemPath() {}
 
-	public LogDefinitionItemPath(String agentId, String deviceId, String name) {
+	public RecordItemPath(String agentId, String deviceId, String name) {
 	    this.agentId = agentId;
 	    this.deviceId = deviceId;
 	    this.name = name;
@@ -61,7 +61,7 @@ public class LogDefinitionItemPath {
 		    return false;
 	    if (getClass() != obj.getClass())
 		    return false;
-	    LogDefinitionItemPath other = (LogDefinitionItemPath) obj;
+	    RecordItemPath other = (RecordItemPath) obj;
 	    if (agentId == null) {
 		    if (other.agentId != null)
 			    return false;

@@ -9,15 +9,15 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.cumulocity.tixi.server.model.txml.LogDefinitionItemPath;
+import com.cumulocity.tixi.server.model.txml.RecordItemPath;
 import com.google.common.base.Splitter;
 
-public class LogDefinitionItemPathAdapter extends XmlAdapter<String, LogDefinitionItemPath> {
+public class RecordItemPathAdapter extends XmlAdapter<String, RecordItemPath> {
 
 	private static final Logger log = LoggerFactory.getLogger(TXMLDateAdapter.class);
 
 	@Override
-	public LogDefinitionItemPath unmarshal(String value) throws Exception {
+	public RecordItemPath unmarshal(String value) throws Exception {
 		List<String> parts = newArrayList(Splitter.on("/").omitEmptyStrings().split(value));
 		if (isDevicePath(parts)) {
 			return unmarshalDevicePath(parts);
@@ -36,8 +36,8 @@ public class LogDefinitionItemPathAdapter extends XmlAdapter<String, LogDefiniti
 		return parts.size() == 3 && "PV".equals(parts.get(1));
 	}
 
-	private LogDefinitionItemPath unmarshalDevicePath(List<String> parts) {
-		LogDefinitionItemPath result = new LogDefinitionItemPath();
+	private RecordItemPath unmarshalDevicePath(List<String> parts) {
+		RecordItemPath result = new RecordItemPath();
 		int index = parts.size() - 1;
 		result.setName(parts.get(index--));
 		result.setDeviceId(parts.get(index--));
@@ -45,14 +45,14 @@ public class LogDefinitionItemPathAdapter extends XmlAdapter<String, LogDefiniti
 		return result;
 	}
 
-	private LogDefinitionItemPath unmarshalProcessVariable(List<String> parts) {
+	private RecordItemPath unmarshalProcessVariable(List<String> parts) {
 		// skip now
 		return null;
 	}
 
 	@Override
-	public String marshal(LogDefinitionItemPath value) throws Exception {
-		throw new UnsupportedOperationException("Marshaling of " + LogDefinitionItemPath.class + " not implemented!");
+	public String marshal(RecordItemPath value) throws Exception {
+		throw new UnsupportedOperationException("Marshaling of " + RecordItemPath.class + " not implemented!");
 	}
 
 }
