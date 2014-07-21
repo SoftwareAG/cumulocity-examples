@@ -24,7 +24,7 @@ import com.google.common.base.Joiner;
 @Component
 public class AgentFileSystem {
 
-    private static final Logger log = LoggerFactory.getLogger(AgentFileSystem.class);
+    private static final Logger logger = LoggerFactory.getLogger(AgentFileSystem.class);
 
     public static final SimpleDateFormat TIMESTAMP_FORMAT = new SimpleDateFormat("yyyyMMddHHmmssSSS");
 
@@ -75,6 +75,7 @@ public class AgentFileSystem {
             closeQuietly(outputStream);
             closeQuietly(inputStream);
         }
+        logger.info("Written to file: %s.", file.getPath());
     }
     
     public File getXsltFile(Class<?> entityClass) {

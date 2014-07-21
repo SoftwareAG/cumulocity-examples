@@ -53,6 +53,7 @@ public class SendDataResource {
 
 	private void handleTixiRequest(InputStream fileInputStream, String requestId) {
 		Class<?> requestEntityType = getRequestEntity(requestId);
+		logger.info("Handled request with id: %s and entity type: %s.", requestId, requestEntityType);
 		String fileNamePrefix = asSimpleName(requestEntityType);
 		String fileName = agentFileSystem.writeIncomingFile(fileNamePrefix, requestId, fileInputStream);
 		if (requestEntityType != null) {
