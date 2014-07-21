@@ -69,7 +69,7 @@ public class TixiLogHandler extends TixiHandler {
 	private void handleItemSet(LogItemSet itemSet, String recordName) {
 		logger.debug("Proccess log item set with id {} and date {}.", itemSet.getId(), itemSet.getDateTime());
 	    for (LogItem item : itemSet.getItems()) {
-	    	RecordItemDefinition itemDef = logDefinition.getItem(item.getId());
+	    	RecordItemDefinition itemDef = logDefinition.getItem(recordName, item.getId());
 	    	if(itemDef == null) {
 	    		logger.warn("There is no log definition item for record: {}, itemSetId: {}," +
 	    				" itemId: {}; skip this log item.", recordName, logId, item.getId());
