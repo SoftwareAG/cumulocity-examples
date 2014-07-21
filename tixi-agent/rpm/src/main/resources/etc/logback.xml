@@ -29,6 +29,8 @@
 			<level>WARN</level>
 		</filter>
 	</appender>
+	
+    <logger name="com.cumulocity.tixi" level="DEBUG" />
 
 	<root level="INFO">
 		<appender-ref ref="FILE" />

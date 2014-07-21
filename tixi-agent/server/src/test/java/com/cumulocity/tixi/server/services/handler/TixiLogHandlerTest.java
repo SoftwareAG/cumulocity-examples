@@ -28,7 +28,8 @@ public class TixiLogHandlerTest extends BaseTixiHandlerTest {
 
 	@Before
 	public void init() {
-		tixiLogHandler = new TixiLogHandler(deviceContextService, identityRepository, inventoryRepository, measurementApi, logDefinitionRegister);
+		tixiLogHandler = new TixiLogHandler(deviceContextService, inventoryRepository, 
+				measurementApi, logDefinitionRegister, deviceControlRepository);
 		measurementCaptor = ArgumentCaptor.forClass(MeasurementRepresentation.class);
 	}
 

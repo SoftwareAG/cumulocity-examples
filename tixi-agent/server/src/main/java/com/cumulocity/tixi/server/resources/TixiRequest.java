@@ -5,24 +5,24 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.cumulocity.tixi.server.model.txml.LogDefinition;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-public class TixiJsonResponse {
+public class TixiRequest {
 
-    public static final Long STATUS_OK = 0l;
+    public static final Long STATUS_OK = 0L;
+    public static final Long STATUS_KO = -1L;
 
 	@JsonInclude(NON_NULL)
     private String request;
 
     private Map<String, Object> properties = new HashMap<String, Object>();
 
-    public TixiJsonResponse() {
+    public TixiRequest() {
     }
 
-    public TixiJsonResponse(String request) {
+    public TixiRequest(String request) {
         this.request = request;
     }
 
@@ -40,24 +40,19 @@ public class TixiJsonResponse {
     }
 
     @JsonAnySetter
-    public TixiJsonResponse set(String key, Object value) {
+    public TixiRequest set(String key, Object value) {
         properties.put(key, value);
         return this;
     }
     
-    public static TixiJsonResponse statusOKJson() {
-        return new TixiJsonResponse().set("status", STATUS_OK);
+    public static TixiRequest statusOK() {
+        return new TixiRequest().set("status", STATUS_OK);
     }
     
-    public static TixiJsonResponse createLogDefinitionRequest(String requestId) {
-        return new TixiJsonResponse("TiXML").set("requestId", requestId).set("parameter", "[<GetConfig _=\"LOG/LogDefinition\" ver=\"v\"/>]");
+    public static TixiRequest statusKO() {
+    	return new TixiRequest().set("status", STATUS_KO);
     }
-
-    public static  TixiJsonResponse createExternalDBRequest(String requestId) {
-        return new TixiJsonResponse("TiXML").set("requestId", requestId).set("parameter",
-                "[<GetConfig _=\"PROCCFG/External\" ver=\"v\"/>]");
-    }
-
+    
 	@Override
     public int hashCode() {
 	    final int prime = 31;
@@ -75,7 +70,7 @@ public class TixiJsonResponse {
 		    return false;
 	    if (getClass() != obj.getClass())
 		    return false;
-	    TixiJsonResponse other = (TixiJsonResponse) obj;
+	    TixiRequest other = (TixiRequest) obj;
 	    if (properties == null) {
 		    if (other.properties != null)
 			    return false;

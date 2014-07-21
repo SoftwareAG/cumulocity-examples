@@ -37,14 +37,14 @@ public class RestServerBuilder {
     }
 
     public Server build() {
-
+    	
         ConfigurableApplicationContext parentContext = builder.getContext();
         parentContext.getBeanFactory().registerSingleton("resourceConfiguration", new ResourceConfig() {
             {
                 for (Class<?> component : components) {
                     register(component);
                 }
-//                packages(packages.toArray(new String[packages.size()])); does not work 
+//                packages(packages.toArray(new String[packages.size()])); does not work
             }
         });
 

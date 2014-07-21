@@ -1,6 +1,5 @@
 package com.cumulocity.tixi.server.services;
 
-import static com.google.common.base.Optional.fromNullable;
 import static org.apache.commons.io.FileUtils.openOutputStream;
 import static org.apache.commons.io.IOUtils.closeQuietly;
 import static org.apache.commons.io.IOUtils.copy;
@@ -19,6 +18,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import com.google.common.base.Joiner;
 
 @Component
 public class AgentFileSystem {
@@ -53,8 +54,8 @@ public class AgentFileSystem {
         return new File(parent, fileName);
     }
 
-    public String writeIncomingFile(String requestId, InputStream inputStream) {
-        String fileName = fromNullable(requestId).or("") + "_" + getTimestamp() + ".xml";
+    public String writeIncomingFile(String fileName, String requestId, InputStream inputStream) {
+    	fileName = Joiner.on("_").skipNulls().join(fileName, requestId, getTimestamp()) + ".xml";
         writeToFile(inputStream, getFile(incomingPath, fileName));
         return fileName;
     }
@@ -87,6 +88,5 @@ public class AgentFileSystem {
     public File getXsltProcessedFile(String fileName) {
     	return getFile(xsltProcessedPath, fileName);
     }
-    
 }
 

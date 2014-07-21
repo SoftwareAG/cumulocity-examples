@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.tixi.server.model.SerialNumber;
 import com.cumulocity.tixi.server.model.TixiDeviceCredentails;
-import com.cumulocity.tixi.server.services.DeviceService;
+import com.cumulocity.tixi.server.services.DeviceControlService;
 
 @Path("/register")
 @Component
@@ -25,10 +25,10 @@ public class RegisterResource {
     
     private static final Logger logger = LoggerFactory.getLogger(RegisterResource.class);
 
-    private final DeviceService deviceService;
+    private final DeviceControlService deviceService;
 
     @Autowired
-    public RegisterResource(DeviceService deviceService) {
+    public RegisterResource(DeviceControlService deviceService) {
         this.deviceService = deviceService;
     }
 
@@ -41,9 +41,10 @@ public class RegisterResource {
 
     private Response bootstrap(final String serial) {
         final TixiDeviceCredentails credentials = deviceService.register(new SerialNumber(serial));
+        logger.info("Device for serial {} registerd: {}.", serial, credentials);
         // @formatter:off
         return Response.ok(
-                new TixiJsonResponse("REGISTER")
+                new TixiRequest("REGISTER")
                 .set("user", credentials.getUser())
                 .set("password", credentials.getPassword())
                 .set("deviceID", credentials.getDeviceID())
@@ -52,7 +53,11 @@ public class RegisterResource {
     }
 
     private Response standard(final String serial) {
-        return Response.ok(new TixiJsonResponse("REGISTER").set("deviceID", GId.asString(deviceService.findGId(new SerialNumber(serial)))))
+    	// @formatter:off
+        return Response.ok(
+        		new TixiRequest("REGISTER")
+        		.set("deviceID", GId.asString(deviceService.findGId(new SerialNumber(serial)))))
                 .build();
+        // @formatter:on
     }
 }
