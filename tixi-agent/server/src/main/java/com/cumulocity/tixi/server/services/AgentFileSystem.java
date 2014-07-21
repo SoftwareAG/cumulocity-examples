@@ -75,7 +75,7 @@ public class AgentFileSystem {
             closeQuietly(outputStream);
             closeQuietly(inputStream);
         }
-        logger.info("Written to file: %s.", file.getPath());
+        logger.info("Written to file: {}.", file.getPath());
     }
     
     public File getXsltFile(Class<?> entityClass) {

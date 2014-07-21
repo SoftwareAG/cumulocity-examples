@@ -5,7 +5,7 @@ import org.springframework.util.Assert;
 
 import com.cumulocity.agent.server.context.DeviceContextService;
 import com.cumulocity.agent.server.repository.InventoryRepository;
-import com.cumulocity.model.ID;
+import com.cumulocity.model.idtype.GId;
 import com.cumulocity.sdk.client.measurement.MeasurementApi;
 import com.cumulocity.tixi.server.model.txml.LogDefinitionItem;
 
@@ -15,7 +15,7 @@ public abstract class TixiHandler<T> implements InitializingBean {
 	protected final InventoryRepository inventoryRepository;
 	protected final MeasurementApi measurementApi;
 	protected final LogDefinitionRegister logDefinitionRegister;
-	protected ID agentId;
+	protected GId agentId;
 
 	public TixiHandler(DeviceContextService contextService, InventoryRepository inventoryRepository,
             MeasurementApi measurementApi, LogDefinitionRegister logDefinitionRegister) {
