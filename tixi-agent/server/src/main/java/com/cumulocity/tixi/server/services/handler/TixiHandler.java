@@ -15,7 +15,7 @@ public abstract class TixiHandler implements InitializingBean {
 	protected final InventoryRepository inventoryRepository;
 	protected final MeasurementApi measurementApi;
 	protected final LogDefinitionRegister logDefinitionRegister;
-	protected GId agentId;
+	protected GId tixiAgentId;
 
 	public TixiHandler(DeviceContextService contextService, InventoryRepository inventoryRepository,
             MeasurementApi measurementApi, LogDefinitionRegister logDefinitionRegister) {
@@ -27,8 +27,8 @@ public abstract class TixiHandler implements InitializingBean {
 	
 	@Override
     public void afterPropertiesSet() throws Exception {
-		agentId = contextService.getCredentials().getDeviceId();
-		Assert.notNull(agentId);
+		tixiAgentId = contextService.getCredentials().getDeviceId();
+		Assert.notNull(tixiAgentId);
     }
 	
 	protected boolean isDevicePath(LogDefinitionItem logDefinitionItem) {

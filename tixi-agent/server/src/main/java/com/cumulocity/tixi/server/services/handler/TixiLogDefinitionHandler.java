@@ -56,7 +56,7 @@ public class TixiLogDefinitionHandler extends TixiHandler {
 		SerialNumber agentSerial = new SerialNumber(path.getAgentId());
 		ManagedObjectRepresentation agent = persistedAgents.get(agentSerial);
 		if (agent == null) {
-			agent = inventoryRepository.saveAgentIfNotExists(agentSerial.getValue(), agentSerial.getValue(), agentSerial, agentId);
+			agent = inventoryRepository.saveAgentIfNotExists(agentSerial.getValue(), agentSerial.getValue(), agentSerial, tixiAgentId);
 			persistedAgents.put(agentSerial, agent);
 		}
 		SerialNumber deviceSerial = new SerialNumber(path.getDeviceId());
