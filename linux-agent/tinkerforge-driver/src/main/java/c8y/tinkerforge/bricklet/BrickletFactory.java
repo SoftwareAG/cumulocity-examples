@@ -49,6 +49,7 @@ import com.tinkerforge.BrickletPTC;
 import com.tinkerforge.BrickletRemoteSwitch;
 import com.tinkerforge.BrickletSegmentDisplay4x7;
 import com.tinkerforge.BrickletTemperature;
+import com.tinkerforge.BrickletVoltageCurrent;
 import com.tinkerforge.IPConnection;
 
 /**
@@ -141,6 +142,8 @@ public class BrickletFactory {
 			return new DistanceUSBricklet(uid, new BrickletDistanceUS(uid, ipcon));
 		case BrickletIO16.DEVICE_IDENTIFIER:
 			return new IO16Bricklet(uid, new BrickletIO16(uid, ipcon));
+		case BrickletVoltageCurrent.DEVICE_IDENTIFIER:
+			return new VoltageCurrentBricklet(uid, new BrickletVoltageCurrent(uid, ipcon));
 		default:
 			throw new IllegalArgumentException("Unknown device identifier: "
 					+ deviceIdentifier);
