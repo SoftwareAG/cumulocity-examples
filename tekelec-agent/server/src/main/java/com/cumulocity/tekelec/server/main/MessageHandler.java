@@ -94,6 +94,7 @@ public class MessageHandler extends ChannelInboundHandlerAdapter {
                 measurement.set(temperatureMeasurement(tempInCelsius));
                 measurement.set(batteryMeasurement(battery));
                 measurement.setProperty("c8y_TEK586", new TEK586Measurement(auxRssi));
+                deviceService.createMeasurement(measurement);
         } finally {
             ReferenceCountUtil.release(msg);
         }

@@ -14,6 +14,7 @@ import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.devicebootstrap.DeviceCredentialsRepresentation;
 import com.cumulocity.rest.representation.identity.ExternalIDRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
+import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
 import com.cumulocity.sdk.client.Platform;
 import com.cumulocity.sdk.client.PlatformImpl;
 import com.cumulocity.sdk.client.polling.PollingStrategy;
@@ -107,5 +108,9 @@ public class DeviceService {
 
     public void update(ManagedObjectRepresentation device) {
         devicePlatform.getInventoryApi().update(device);
+    }
+
+    public void createMeasurement(MeasurementRepresentation measurement) {
+        devicePlatform.getMeasurementApi().create(measurement);
     }
 }
