@@ -1,0 +1,7 @@
+
+
+IdentifyingNumber=1CMCZP1
+Name=Dell System XPS L502X
+
+
+
