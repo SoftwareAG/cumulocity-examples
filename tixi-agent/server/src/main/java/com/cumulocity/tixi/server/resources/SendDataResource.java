@@ -66,7 +66,7 @@ public class SendDataResource {
     }
 
 	private Class<?> getRequestEntity(String requestId) {
-		if (requestId == null) {
+		if (requestId == null || requestId.trim().equals("0")) {
 			return Log.class;
 		}
 		return requestStorage.get(requestId);
