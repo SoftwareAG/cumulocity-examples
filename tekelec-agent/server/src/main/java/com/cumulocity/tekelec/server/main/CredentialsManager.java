@@ -8,16 +8,17 @@ import com.cumulocity.model.authentication.CumulocityCredentials;
 
 public class CredentialsManager {
 
-    public static final String COMMON_PROPS_LOCATION = "/etc/tekelec/cumulocity.properties";
-    public static final String DEVICE_PROPS_LOCATION = "/etc/tekelec/device.properties";
+    private static final String COMMON_PROPS_LOCATION = "/etc/tekelec/cumulocity.properties";
+    private static final String DEVICE_PROPS_LOCATION = "/etc/tekelec/device-%s.properties";
     
     private static final String DEFAULT_HOST = "http://integration.cumulocity.com";
     private static final String DEFAULT_BOOTSTRAP_TENANT = "management";
     private static final String DEFAULT_BOOTSTRAP_USER = "devicebootstrap";
     private static final String DEFAULT_BOOTSTRAP_PASSWORD = "Fhdt1bb1f";
 
-    public static CredentialsManager defaultCredentialsManager() {
-        return new CredentialsManager(COMMON_PROPS_LOCATION, DEVICE_PROPS_LOCATION);
+    public static CredentialsManager credentialsManagerFor(String imei) {
+        String deviceProperties = String.format(DEVICE_PROPS_LOCATION, imei);
+        return new CredentialsManager(COMMON_PROPS_LOCATION, deviceProperties);
     }
 
     private final String host;

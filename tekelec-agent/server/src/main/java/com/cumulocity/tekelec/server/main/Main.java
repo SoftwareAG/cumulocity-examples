@@ -1,5 +1,14 @@
 package com.cumulocity.tekelec.server.main;
 
+import static java.nio.file.Files.exists;
+
+import java.nio.file.FileSystems;
+
+import org.slf4j.LoggerFactory;
+
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.joran.JoranConfigurator;
+import ch.qos.logback.core.joran.spi.JoranException;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -40,6 +49,25 @@ public class Main {
     }
 
     public static void main(String[] args) throws Exception {
+        configureLogger();
         new Main().run();
+    }
+    
+    private static void configureLogger() {
+        String logbackConfig = "/etc/tekelec/logback.xml";
+        if(!exists(FileSystems.getDefault().getPath("/etc/tixi", "logback.xml"))) {
+            System.err.println("No logback configuration found: " + logbackConfig + ".");
+            return;
+        }
+        LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
+        try {
+            JoranConfigurator configurator = new JoranConfigurator();
+            configurator.setContext(context);
+            context.reset();
+            configurator.doConfigure(logbackConfig);
+        } catch (JoranException je) {
+            throw new RuntimeException("Cant configure logger from " + logbackConfig, je);
+        }
+        System.out.println("Log configured from file: " + logbackConfig + ".");
     }
 }

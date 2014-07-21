@@ -6,9 +6,8 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.ReferenceCountUtil;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.math.RoundingMode;
+import java.util.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,16 +30,13 @@ public class MessageHandler extends ChannelInboundHandlerAdapter {
     private String[] alarmAndStatuses = { "GO Active", "BOR Reset", "WDT Reset", "Limp Along RTC", "Bund Status Closed", "Limits 3 Status",
             "Limits 2 Status", "Limits 1 Status" };
     
-    private DeviceService deviceService = new DeviceService();
+    private Map<String, DeviceService> devicesService = new HashMap<String, DeviceService>();
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
         ByteBuf in = (ByteBuf) msg;
         try {
-                ByteBuf copy = in.copy();
-                while(copy.isReadable()) {
-                    logger.info("" + readInt(copy));
-                }
+                printRequest(in);
                 
                 int productType = readInt(in);
                 int hardwareRevision = readInt(in);
@@ -50,14 +46,12 @@ public class MessageHandler extends ChannelInboundHandlerAdapter {
                 byte alarmAndStatusByte = in.readByte();
                 List<String> alarmAndStatus = getMatchingResult(alarmAndStatusByte, alarmAndStatuses);
                 byte gsmRssi = in.readByte();
-                float battery = ((float) extractRightBits(in.readByte(), 5) + 30) / 10;
+                BigDecimal battery = BigDecimal.valueOf(extractRightBits(in.readByte(), 5) + 30).divide(BigDecimal.valueOf(10), 2, RoundingMode.CEILING);
                 String imei = "";
                 for (int i = 0 ; i < 8 ; i++) {
                     imei += String.format("%02X", readInt(in));
                 }
-                byte messageType = in.readByte();
-                byte payloadLength = in.readByte();
-                in.skipBytes(9);
+                in.skipBytes(11);
                 int auxRssi = readInt(in);
                 int tempInCelsius = (readInt(in) >> 1) - 30;
                 byte byte1 = in.readByte();
@@ -78,32 +72,57 @@ public class MessageHandler extends ChannelInboundHandlerAdapter {
                 logger.info("sonitResultCode " + sonitResultCode);
                 logger.info("distance " + distance);
                 
-                ManagedObjectRepresentation device = deviceService.register(imei);
-                ManagedObjectRepresentation update = new ManagedObjectRepresentation();
-                update.setId(device.getId());
-                update.set(new Hardware("TEK586", imei, String.valueOf(hardwareRevision)));
-                update.set(new Firmware("TEK586", String.valueOf(firmwareRevision), null));
-                update.setProperty("c8y_TEK586", new TEK586MO(contactReason, alarmAndStatus));
-                deviceService.update(update);
-                
-                MeasurementRepresentation measurement = new MeasurementRepresentation();
-                measurement.setTime(new Date());
-                measurement.setSource(device);
-                measurement.setType("c8y_TekelecMeasurement");
-                measurement.set(distanceMeasurement(distance));
-                measurement.set(temperatureMeasurement(tempInCelsius));
-                measurement.set(batteryMeasurement(battery));
-                measurement.setProperty("c8y_TEK586", new TEK586Measurement(auxRssi));
-                deviceService.createMeasurement(measurement);
+                registerDeviceService(imei);
+                ManagedObjectRepresentation device = createDevice(hardwareRevision, firmwareRevision, contactReason, alarmAndStatus, imei);
+                createMeasurement(imei, battery, auxRssi, tempInCelsius, distance, device);
         } finally {
             ReferenceCountUtil.release(msg);
         }
     }
 
-    private Battery batteryMeasurement(float batteryValue) {
+    private void printRequest(ByteBuf in) {
+        ByteBuf copy = in.copy();
+        while(copy.isReadable()) {
+            logger.info("" + readInt(copy));
+        }
+    }
+
+    private void createMeasurement(String imei, BigDecimal battery, int auxRssi, int tempInCelsius, int distance, ManagedObjectRepresentation device) {
+        DeviceService deviceService = devicesService.get(imei);
+        MeasurementRepresentation measurement = new MeasurementRepresentation();
+        measurement.setTime(new Date());
+        measurement.setSource(device);
+        measurement.setType("c8y_TekelecMeasurement");
+        measurement.set(distanceMeasurement(distance));
+        measurement.set(temperatureMeasurement(tempInCelsius));
+        measurement.set(batteryMeasurement(battery));
+        measurement.setProperty("c8y_TEK586", new TEK586Measurement(auxRssi));
+        deviceService.createMeasurement(measurement);
+    }
+
+    private ManagedObjectRepresentation createDevice(int hardwareRevision, int firmwareRevision, List<String> contactReason,
+            List<String> alarmAndStatus, String imei) {
+        DeviceService deviceService = devicesService.get(imei);
+        ManagedObjectRepresentation device = deviceService.register(imei);
+        ManagedObjectRepresentation update = new ManagedObjectRepresentation();
+        update.setId(device.getId());
+        update.set(new Hardware("TEK586", imei, String.valueOf(hardwareRevision)));
+        update.set(new Firmware("TEK586", String.valueOf(firmwareRevision), null));
+        update.setProperty("c8y_TEK586", new TEK586MO(contactReason, alarmAndStatus));
+        deviceService.update(update);
+        return device;
+    }
+
+    private void registerDeviceService(String imei) {
+        if (!devicesService.containsKey(imei)) {
+            devicesService.put(imei, new DeviceService(imei));
+        }
+    }
+
+    private Battery batteryMeasurement(BigDecimal batteryValue) {
         Battery battery = new Battery();
         MeasurementValue level = new MeasurementValue();
-        level.setValue(BigDecimal.valueOf(batteryValue));
+        level.setValue(batteryValue);
         level.setUnit("V");
         battery.setLevel(level);
         return battery;

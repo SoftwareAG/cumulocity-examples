@@ -30,8 +30,8 @@ public class DeviceService {
 
     private CredentialsManager credentialsManager;
 
-    public DeviceService() {
-        credentialsManager = CredentialsManager.defaultCredentialsManager();
+    public DeviceService(String imei) {
+        credentialsManager = CredentialsManager.credentialsManagerFor(imei);
         CumulocityCredentials deviceCredentials = credentialsManager.getDeviceCredentials();
         bootstrapPlatform = new PlatformImpl(credentialsManager.getHost(), credentialsManager.getBootstrapCredentials());
         if (deviceCredentials != null) {
@@ -65,7 +65,7 @@ public class DeviceService {
     }
 
     public ManagedObjectRepresentation registerDeviceManagedObject(final Imei imei) {
-        final ManagedObjectRepresentation managedObject = createManagedObject();
+        final ManagedObjectRepresentation managedObject = createManagedObject(imei.getValue());
         registerExternalId(imei, managedObject.getId());
         return managedObject;
     }
@@ -84,10 +84,10 @@ public class DeviceService {
         return managedObjectRepresentation;
     }
 
-    private ManagedObjectRepresentation createManagedObject() {
+    private ManagedObjectRepresentation createManagedObject(String imei) {
         ManagedObjectRepresentation managedObjectRepresentation = new ManagedObjectRepresentation();
 
-        managedObjectRepresentation.setName("Tekelec device");
+        managedObjectRepresentation.setName("Tekelec device " + imei);
         managedObjectRepresentation.set(new IsDevice());
 
         final ManagedObjectRepresentation managedObject = devicePlatform.getInventoryApi().create(managedObjectRepresentation);
