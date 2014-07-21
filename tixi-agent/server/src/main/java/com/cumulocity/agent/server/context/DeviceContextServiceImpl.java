@@ -10,7 +10,7 @@ public class DeviceContextServiceImpl implements DeviceContextService {
 
     private final Logger log = LoggerFactory.getLogger(DeviceContextServiceImpl.class);
 
-    private final ThreadLocal<DeviceContext> localContext = new NamedThreadLocal<DeviceContext>("vendMeLocalContext");
+    private final ThreadLocal<DeviceContext> localContext = new NamedThreadLocal<DeviceContext>("deviceLocalContext");
 
     @Override
     public DeviceContext getContext() {
