@@ -102,11 +102,19 @@ public class TXMLUnmarshallerTest {
     }
 	
 	@Test
-	public void shouldUmnarshalNewFile() throws Exception {
+	public void shouldUmnarshalNewLogDefinitionFile() throws Exception {
 		
 		String fileName = agentFileSystem.writeIncomingFile("testFile", "test", new FileInputStream(SAMPLE_DIR + "LogDefinition_10_20140717132044325.xml"));
 		
 		txmlUnmarshaller.unmarshal(fileName, LogDefinition.class);
+	}
+	
+	@Test
+	public void shouldUmnarshalNewLogFile() throws Exception {
+		
+		String fileName = agentFileSystem.writeIncomingFile("testFile", "test", new FileInputStream(SAMPLE_DIR + "Log_1.xml"));
+		
+		txmlUnmarshaller.unmarshal(fileName, Log.class);
 	}
 }
 
