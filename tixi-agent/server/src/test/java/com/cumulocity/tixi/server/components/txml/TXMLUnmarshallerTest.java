@@ -7,10 +7,15 @@ import static java.math.BigDecimal.valueOf;
 import static org.fest.assertions.Assertions.assertThat;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import com.cumulocity.tixi.server.model.txml.External;
+import com.cumulocity.tixi.server.model.txml.External.Bus;
+import com.cumulocity.tixi.server.model.txml.External.Device;
+import com.cumulocity.tixi.server.model.txml.External.Meter;
 import com.cumulocity.tixi.server.model.txml.Log;
 import com.cumulocity.tixi.server.model.txml.LogDefinition;
 import com.cumulocity.tixi.server.services.AgentFileSystem;
@@ -33,7 +38,7 @@ public class TXMLUnmarshallerTest {
 	@Test
     public void shouldUmnarshalLogDefinitionFile() throws Exception {
 		
-		String fileName = agentFileSystem.writeIncomingFile("testFile", "test", new FileInputStream(SAMPLE_DIR + "LogDefinition.xml"));
+		String fileName = writeIncomingFile("LogDefinition.xml", "LogDefinition");
 		
 		LogDefinition actualLogDefinition = txmlUnmarshaller.unmarshal(fileName, LogDefinition.class);
 		
@@ -68,7 +73,7 @@ public class TXMLUnmarshallerTest {
 	@Test
 	public void shouldUmnarshalLogFile() throws Exception {
 		
-		String fileName = agentFileSystem.writeIncomingFile("testFile", "test", new FileInputStream(SAMPLE_DIR + "Log.xml"));
+		String fileName = writeIncomingFile("Log.xml", "Log");
 		
 		Log actualLog = txmlUnmarshaller.unmarshal(fileName, Log.class);
 		// @formatter:off
@@ -89,7 +94,7 @@ public class TXMLUnmarshallerTest {
 	@Test
 	public void shouldUmnarshalLogDefinitionWithBrackets() throws Exception {
 		
-		String fileName = agentFileSystem.writeIncomingFile("testFile", "test", new FileInputStream(SAMPLE_DIR + "LogDefinition_withbrackets.xml"));
+		String fileName = writeIncomingFile("LogDefinition_withbrackets.xml", "LogDefinition_withbrackets");
 		
 		txmlUnmarshaller.unmarshal(fileName, LogDefinition.class);
 	}
@@ -104,7 +109,7 @@ public class TXMLUnmarshallerTest {
 	@Test
 	public void shouldUmnarshalNewLogDefinitionFile() throws Exception {
 		
-		String fileName = agentFileSystem.writeIncomingFile("testFile", "test", new FileInputStream(SAMPLE_DIR + "LogDefinition_10_20140717132044325.xml"));
+		String fileName = writeIncomingFile("LogDefinition_10_20140717132044325.xml", "LogDefinition_10_20140717132044325");
 		
 		txmlUnmarshaller.unmarshal(fileName, LogDefinition.class);
 	}
@@ -112,9 +117,29 @@ public class TXMLUnmarshallerTest {
 	@Test
 	public void shouldUmnarshalNewLogFile() throws Exception {
 		
-		String fileName = agentFileSystem.writeIncomingFile("testFile", "test", new FileInputStream(SAMPLE_DIR + "Log_1.xml"));
+		String fileName = writeIncomingFile("Log_1.xml", "testFile");
 		
 		txmlUnmarshaller.unmarshal(fileName, Log.class);
 	}
+	
+	@Test
+	public void shouldUmnarshalNewExternalFile() throws Exception {
+		String fileName = writeIncomingFile("External_1.xml", "External_1.xml");
+		
+		External external = txmlUnmarshaller.unmarshal(fileName, External.class);
+		
+		assertThat(external.getBuses()).containsExactly(new Bus("Bus_0"), new Bus("Bus_1"));
+		assertThat(external.getBuses().get(0).getDevices()).containsExactly(new Device("Device_00"));
+		assertThat(external.getBuses().get(0).getDevices().get(0).getMeters()).containsExactly(
+				new Meter("Temperatur_U1"), new Meter("Temperatur_U2"));
+		assertThat(external.getBuses().get(1).getDevices()).containsExactly(
+				new Device("Device_10"), new Device("Device_11"));
+		assertThat(external.getBuses().get(1).getDevices().get(0).getMeters()).containsExactly(new Meter("Energy_100"));
+		assertThat(external.getBuses().get(1).getDevices().get(1).getMeters()).containsExactly(new Meter("Energy_110"));
+	}
+
+	private String writeIncomingFile(String sourceFileName, String targetFileNamePrefix) throws FileNotFoundException {
+	    return agentFileSystem.writeIncomingFile(targetFileNamePrefix, "test", new FileInputStream(SAMPLE_DIR + sourceFileName));
+    }
 }
 
