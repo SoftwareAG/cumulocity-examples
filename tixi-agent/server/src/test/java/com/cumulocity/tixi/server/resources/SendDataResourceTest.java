@@ -11,7 +11,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import com.cumulocity.tixi.server.model.txml.Log;
 import com.cumulocity.tixi.server.model.txml.LogDefinition;
 import com.cumulocity.tixi.server.request.util.RequestStorage;
 import com.cumulocity.tixi.server.services.AgentFileSystem;
@@ -39,7 +38,7 @@ public class SendDataResourceTest {
     	
 	    bean.senddata(inputStream, formDataContentDisposition, "requestId", "some_serial");
 	    
-	    verify(tixiService).handleLogDefinition("fileName", LogDefinition.class);
+	    verify(tixiService).handleLogDefinition("fileName");
     }
     
     @Test
@@ -49,6 +48,6 @@ public class SendDataResourceTest {
     	
     	bean.senddata(inputStream, formDataContentDisposition, null, "some_serial");
     	
-    	verify(tixiService).handleLog("fileName", null, Log.class);
+    	verify(tixiService).handleLog("fileName", null);
     }
 }

@@ -59,7 +59,7 @@ public class TixiLogHandler extends TixiHandler {
 			saveMeasurements();
 			logger.info("Log with id {} proccessed.", logId);
 		} catch (Exception ex) {
-			logger.info("Log with id {} processing failed.", ex);
+			logger.info("Log with id " + logId + " processing failed.", ex);
 			deviceControlRepository.markAllOperationsFailed(agentId);
 			return;
 		}

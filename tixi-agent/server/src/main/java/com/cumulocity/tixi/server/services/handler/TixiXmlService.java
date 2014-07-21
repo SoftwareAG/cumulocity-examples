@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.cumulocity.tixi.server.components.txml.TXMLUnmarshaller;
+import com.cumulocity.tixi.server.model.txml.External;
 import com.cumulocity.tixi.server.model.txml.Log;
 import com.cumulocity.tixi.server.model.txml.LogDefinition;
 
@@ -24,24 +25,30 @@ public class TixiXmlService {
 		this.beanFactory = listableBeanFactory;
 	}
 
-	public void handleLogDefinition(String fileName, Class<?> entityType) {
-		logger.info("Process Log Definition file " + fileName + " with expected entity " + entityType.getSimpleName());
-		Object unmarshaled = txmlUnmarshaller.unmarshal(fileName, entityType);
-		TixiLogDefinitionHandler handler = beanFactory.getBean(TixiLogDefinitionHandler.class);
-		handler.handle((LogDefinition) unmarshaled);
-		logger.info("File " + fileName + " with expected entity " + entityType.getSimpleName() + " processed.");
+	public void handleLogDefinition(String fileName) {
+		LogDefinition unmarshaled = parse(fileName, LogDefinition.class);
+		getBean(TixiLogDefinitionHandler.class).handle(unmarshaled);
+		logger.info("File " + fileName + " with expected entity " + LogDefinition.class.getSimpleName() + " processed.");
 	}
 	
-	public void handleLog(String fileName, String origFileName, Class<?> entityType) {
-        logger.info("Process Log file " + fileName + " with expected entity " + entityType.getSimpleName());
-        Object unmarshaled = txmlUnmarshaller.unmarshal(fileName, entityType);
-        TixiLogHandler handler = beanFactory.getBean(TixiLogHandler.class);
-        handler.handle((Log) unmarshaled, origFileName);
-        logger.info("File " + fileName + " with expected entity " + entityType.getSimpleName() + " processed.");
+	public void handleLog(String fileName, String origFileName) {
+		Log unmarshaled = parse(fileName, Log.class);
+        beanFactory.getBean(TixiLogHandler.class).handle(unmarshaled, origFileName);
+        logger.info("File " + fileName + " with expected entity " + Log.class.getSimpleName() + " processed.");
     }
 	
-	public void handleExternal(String fileName, String origFileName, Class<?> entityType) {
-        logger.info("Process file " + fileName + " with expected entity " + entityType.getSimpleName());
-        logger.info("File " + fileName + " with expected entity " + entityType.getSimpleName() + " processed.");
+	public void handleExternal(String fileName, String origFileName) {
+		External unmarshaled = parse(fileName, External.class);
+		beanFactory.getBean(TixiExternalHandler.class).handle(unmarshaled, origFileName);
+        logger.info("File " + fileName + " with expected entity " + External.class.getSimpleName() + " processed.");
     }
+	
+	private <S> S parse(String fileName, Class<S> expectedType) {
+		logger.info("Process " + fileName + " with expected entity " + expectedType.getSimpleName());
+		return txmlUnmarshaller.unmarshal(fileName, expectedType);
+	}
+	
+	private <T> T getBean(Class<T> clazz) {
+		return beanFactory.getBean(clazz);
+	}
 }

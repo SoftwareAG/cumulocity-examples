@@ -33,7 +33,7 @@ public class TixiXmlHandlerTest {
 		Log log = new Log();
 		when(unmarshaller.unmarshal("anyfile", Log.class)).thenReturn(log);
 		
-		bean.handleLog("anyfile", "DataLogging_0", Log.class);
+		bean.handleLog("anyfile", "DataLogging_0");
 		
 		verify(tixiLogHandler).handle(log, "DataLogging_0");
 	}
@@ -43,7 +43,7 @@ public class TixiXmlHandlerTest {
 		LogDefinition logDefinition = new LogDefinition();
 		when(unmarshaller.unmarshal("anyfile", LogDefinition.class)).thenReturn(logDefinition);
 		
-		bean.handleLogDefinition("anyfile", LogDefinition.class);
+		bean.handleLogDefinition("anyfile");
 		
 		verify(tixiLogDefinitionHandler).handle(logDefinition);
 	}
