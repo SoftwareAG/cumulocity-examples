@@ -22,7 +22,7 @@ import com.cumulocity.tixi.server.model.txml.LogDefinitionItemSet;
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class TixiLogDefinitionHandler extends TixiHandler<LogDefinition> {
+public class TixiLogDefinitionHandler extends TixiHandler {
 
 	private static final Logger logger = LoggerFactory.getLogger(TixiLogDefinitionHandler.class);
 

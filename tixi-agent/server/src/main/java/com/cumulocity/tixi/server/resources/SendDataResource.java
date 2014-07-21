@@ -1,6 +1,7 @@
 package com.cumulocity.tixi.server.resources;
 
 import static com.cumulocity.tixi.server.resources.TixiRequest.statusOK;
+import static org.apache.commons.io.FilenameUtils.removeExtension;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.cumulocity.tixi.server.model.txml.Log;
+import com.cumulocity.tixi.server.model.txml.LogDefinition;
 import com.cumulocity.tixi.server.request.util.RequestStorage;
 import com.cumulocity.tixi.server.services.AgentFileSystem;
 import com.cumulocity.tixi.server.services.handler.TixiXmlService;
@@ -46,18 +48,24 @@ public class SendDataResource {
 	        @FormDataParam("sendfile") FormDataContentDisposition contentDispositionHeader, 
 	        @QueryParam("requestId") String requestId,
 	        @QueryParam("serial") String serial) throws IOException {
-	    logger.info("Send data request from: serial " + serial);
-		handleTixiRequest(new GZIPInputStream(fileInputStream), requestId);
+	    String origFileName = contentDispositionHeader.getFileName();
+        logger.info("Send data request: serial " + serial + " requestId " + requestId + " with file: " + origFileName);
+		handleTixiRequest(new GZIPInputStream(fileInputStream), removeExtension(origFileName), requestId);
 		return Response.ok(statusOK()).build();
 	}
-
-	private void handleTixiRequest(InputStream fileInputStream, String requestId) {
+	
+	private void handleTixiRequest(InputStream fileInputStream, String origFileName, String requestId) {
 		Class<?> requestEntityType = getRequestEntity(requestId);
 		logger.info("Handled request with id: {} and entity type: {}.", requestId, requestEntityType);
 		String fileNamePrefix = asSimpleName(requestEntityType);
-		String fileName = agentFileSystem.writeIncomingFile(fileNamePrefix, requestId, fileInputStream);
-		if (requestEntityType != null) {
-			tixiService.handle(fileName, requestEntityType);
+		String fileName = agentFileSystem.writeIncomingFile(fileNamePrefix, fileInputStream);
+		
+		if (requestEntityType == LogDefinition.class) {
+			tixiService.handleLogDefinition(fileName, requestEntityType);
+		} else if (requestEntityType == Log.class) {
+		    tixiService.handleLog(fileName, origFileName, requestEntityType);
+		} else {
+		    logger.warn("Can't handle request type " + requestEntityType);
 		}
 	}
 

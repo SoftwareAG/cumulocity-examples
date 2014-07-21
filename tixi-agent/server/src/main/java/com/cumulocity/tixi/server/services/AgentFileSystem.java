@@ -54,8 +54,8 @@ public class AgentFileSystem {
         return new File(parent, fileName);
     }
 
-    public String writeIncomingFile(String fileName, String requestId, InputStream inputStream) {
-    	fileName = Joiner.on("_").skipNulls().join(fileName, requestId, getTimestamp()) + ".xml";
+    public String writeIncomingFile(String fileName, InputStream inputStream) {
+    	fileName = Joiner.on("_").skipNulls().join(fileName, getTimestamp()) + ".xml";
         writeToFile(inputStream, getFile(incomingPath, fileName));
         return fileName;
     }

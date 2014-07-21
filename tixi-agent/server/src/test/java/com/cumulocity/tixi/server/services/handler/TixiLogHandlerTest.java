@@ -55,7 +55,7 @@ public class TixiLogHandlerTest extends BaseTixiHandlerTest {
 		// @formatter:on
 		when(logDefinitionRegister.getLogDefinition()).thenReturn(logDefinition);
 		
-		tixiLogHandler.handle(log);
+		tixiLogHandler.handle(log, "itemSet_1");
 		
 		verify(measurementApi, Mockito.times(1)).create(measurementCaptor.capture());
 		MeasurementRepresentation rep = measurementCaptor.getValue();

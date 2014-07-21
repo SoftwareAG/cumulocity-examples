@@ -1,6 +1,5 @@
 package com.cumulocity.tixi.server.model.txml;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,8 +49,8 @@ public class LogDefinition {
 		}
 	}
 	
-	private LogDefinitionItem getItem(String itemSetId, String itemId) {
-		LogDefinitionItemSet itemSet = getItemSet(itemSetId);
+	public LogDefinitionItem getItem(String recordName, String itemId) {
+		LogDefinitionItemSet itemSet = getItemSet(recordName);
 		if(itemSet == null) {
 			return null;
 		} else {
