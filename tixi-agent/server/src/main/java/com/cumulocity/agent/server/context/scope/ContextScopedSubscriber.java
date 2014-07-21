@@ -1,4 +1,4 @@
-package com.cumulocity.agent.server.context.scope.notifications;
+package com.cumulocity.agent.server.context.scope;
 
 import static org.slf4j.LoggerFactory.getLogger;
 

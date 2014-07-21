@@ -53,23 +53,23 @@ public class InventoryRepository {
 	    return managedObjectRepresentation;
     }
 	
-	public ManagedObjectRepresentation saveDeviceIfNotExists(SerialNumber serial, GId agentId) {
+	public ManagedObjectRepresentation saveDeviceIfNotExists(SerialNumber serial, GId parentId) {
 		ManagedObjectRepresentation managedObjectRepresentation  = findMoOrNull(serial);
 		if(managedObjectRepresentation != null) {
 			return managedObjectRepresentation;
 		}
-		logger.debug("Create device for serial: {} and agent: {}.", serial, agentId);
+		logger.debug("Create device for serial: {} and agent: {}.", serial, parentId);
 		managedObjectRepresentation = new ManagedObjectRepresentation();
 		managedObjectRepresentation.set(new IsDevice());
 		managedObjectRepresentation.setName(serial.getValue());
 		managedObjectRepresentation.setType("tixi_device");
 		managedObjectRepresentation = save(managedObjectRepresentation, serial);
-		bindToAgent(agentId, managedObjectRepresentation.getId());
+		bindToAgent(parentId, managedObjectRepresentation.getId());
 		logger.debug("Device for serial: {} created: {}.", serial, managedObjectRepresentation);
 		return managedObjectRepresentation;
 	}
 	
-	public ManagedObjectRepresentation saveAgentIfNotExists(String type, String name, SerialNumber serial) {
+	public ManagedObjectRepresentation saveAgentIfNotExists(String type, String name, SerialNumber serial, GId parentId) {
 		ManagedObjectRepresentation managedObjectRepresentation  = findMoOrNull(serial);
 		if(managedObjectRepresentation != null) {
 			return managedObjectRepresentation;
@@ -81,6 +81,9 @@ public class InventoryRepository {
 		managedObjectRepresentation.set(new Agent());
 		managedObjectRepresentation.setType(type);
 		managedObjectRepresentation = save(managedObjectRepresentation, serial);
+		if(parentId != null) {
+			bindToAgent(parentId, managedObjectRepresentation.getId());
+		}
 		logger.debug("Agent for serial: {} created: {}.", serial, managedObjectRepresentation);
 		return managedObjectRepresentation;
 	}

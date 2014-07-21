@@ -38,7 +38,7 @@ public class TXMLUnmarshallerTest {
 	@Test
     public void shouldUmnarshalLogDefinitionFile() throws Exception {
 		
-		String fileName = writeIncomingFile("LogDefinition.xml", "LogDefinition");
+		String fileName = agentFileSystem.writeIncomingFile("testFile", new FileInputStream(SAMPLE_DIR + "LogDefinition.xml"));
 		
 		LogDefinition actualLogDefinition = txmlUnmarshaller.unmarshal(fileName, LogDefinition.class);
 		
@@ -73,7 +73,7 @@ public class TXMLUnmarshallerTest {
 	@Test
 	public void shouldUmnarshalLogFile() throws Exception {
 		
-		String fileName = writeIncomingFile("Log.xml", "Log");
+		String fileName = agentFileSystem.writeIncomingFile("testFile", new FileInputStream(SAMPLE_DIR + "Log.xml"));
 		
 		Log actualLog = txmlUnmarshaller.unmarshal(fileName, Log.class);
 		// @formatter:off
@@ -94,7 +94,7 @@ public class TXMLUnmarshallerTest {
 	@Test
 	public void shouldUmnarshalLogDefinitionWithBrackets() throws Exception {
 		
-		String fileName = writeIncomingFile("LogDefinition_withbrackets.xml", "LogDefinition_withbrackets");
+		String fileName = agentFileSystem.writeIncomingFile("testFile", new FileInputStream(SAMPLE_DIR + "LogDefinition_withbrackets.xml"));
 		
 		txmlUnmarshaller.unmarshal(fileName, LogDefinition.class);
 	}
@@ -109,7 +109,7 @@ public class TXMLUnmarshallerTest {
 	@Test
 	public void shouldUmnarshalNewLogDefinitionFile() throws Exception {
 		
-		String fileName = writeIncomingFile("LogDefinition_10_20140717132044325.xml", "LogDefinition_10_20140717132044325");
+		String fileName = agentFileSystem.writeIncomingFile("testFile", new FileInputStream(SAMPLE_DIR + "LogDefinition_10_20140717132044325.xml"));
 		
 		txmlUnmarshaller.unmarshal(fileName, LogDefinition.class);
 	}
@@ -139,7 +139,7 @@ public class TXMLUnmarshallerTest {
 	}
 
 	private String writeIncomingFile(String sourceFileName, String targetFileNamePrefix) throws FileNotFoundException {
-	    return agentFileSystem.writeIncomingFile(targetFileNamePrefix, "test", new FileInputStream(SAMPLE_DIR + sourceFileName));
+	    return agentFileSystem.writeIncomingFile(targetFileNamePrefix, new FileInputStream(SAMPLE_DIR + sourceFileName));
     }
 }
 

@@ -35,20 +35,20 @@ public class SendDataResourceTest {
     @Ignore
     public void shouldHandleTixiRequestWithEntityClass() throws Exception {
     	Mockito.<Class<?>>when(requestStorage.get("requestId")).thenReturn(LogDefinition.class);
-    	when(agentFileSystem.writeIncomingFile("testFile", "requestId", inputStream)).thenReturn("fileName");
+    	when(agentFileSystem.writeIncomingFile("testFile", inputStream)).thenReturn("fileName");
     	
 	    bean.senddata(inputStream, formDataContentDisposition, "requestId", "some_serial");
 	    
-	    verify(tixiService).handle("fileName", LogDefinition.class);
+	    verify(tixiService).handleLogDefinition("fileName", LogDefinition.class);
     }
     
     @Test
     @Ignore
     public void shouldHandleTixiRequestWithDefaultClass() throws Exception {
-    	when(agentFileSystem.writeIncomingFile("testFile", "requestId", inputStream)).thenReturn("fileName");
+    	when(agentFileSystem.writeIncomingFile("testFile", inputStream)).thenReturn("fileName");
     	
     	bean.senddata(inputStream, formDataContentDisposition, null, "some_serial");
     	
-    	verify(tixiService).handle("fileName", Log.class);
+    	verify(tixiService).handleLog("fileName", null, Log.class);
     }
 }

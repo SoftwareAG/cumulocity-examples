@@ -63,7 +63,7 @@ public class LogDefinition {
 		}
 	}
 	
-	public RecordItemDefinition getRecordItemDefinition(String recordId, String recordItemId) {
+	private RecordItemDefinition getItem(String recordId, String recordItemId) {
 		RecordDefinition recordDefinition = getRecordDefinition(recordId);
 		if(recordDefinition == null) {
 			return null;
@@ -71,7 +71,18 @@ public class LogDefinition {
 			return recordDefinition.getRecordItemDefinition(recordItemId);
 		}
 	}
-
+	
+	public RecordItemDefinition getItem(String recordItemId) {
+		RecordItemDefinition result = null;
+		for (String recordId : recordDefinitions.keySet()) {
+	        result = getItem(recordId, recordItemId);
+	        if(result != null) {
+	        	break;
+	        }
+        }
+		return result;
+	}
+	
 	@Override
     public String toString() {
 	    return String.format("LogDefinition [recordIds=%s, recordDefinitions=%s]", recordIds, recordDefinitions);

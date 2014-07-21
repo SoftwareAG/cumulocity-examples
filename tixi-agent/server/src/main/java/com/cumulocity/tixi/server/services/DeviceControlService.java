@@ -109,7 +109,7 @@ public class DeviceControlService {
                     new DeviceContext(DeviceCredentials.from(credentials)), new Callable<ManagedObjectRepresentation>() {
                         @Override
                         public ManagedObjectRepresentation call() throws Exception {
-                            return inventoryRepository.saveAgentIfNotExists("c8y_TixiAgent", "c8y_TixiAgent", serialNumber);
+                            return inventoryRepository.saveAgentIfNotExists("c8y_TixiAgent", "c8y_TixiAgent", serialNumber, null);
                         }
                     });
             tixiCredentials.setDeviceID(GId.asString(deviceRepresentation.getId()));

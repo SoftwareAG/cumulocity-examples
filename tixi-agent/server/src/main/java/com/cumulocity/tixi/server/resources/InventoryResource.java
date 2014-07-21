@@ -8,6 +8,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.cumulocity.tixi.server.model.TixiRequestType;
@@ -16,6 +18,8 @@ import com.cumulocity.tixi.server.request.util.Device;
 @Path("/inventory")
 public class InventoryResource {
 
+	private static final Logger logger = LoggerFactory.getLogger(InventoryResource.class);
+	
     private final Device device;
     
     @Autowired
@@ -26,9 +30,9 @@ public class InventoryResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response open() {
+    	logger.info("Inventory request received.");
         device.put(TixiRequestType.EXTERNAL_DATABASE);
         device.put(TixiRequestType.LOG_DEFINITION);
-
         return Response.ok(statusOK()).build();
     }
 }

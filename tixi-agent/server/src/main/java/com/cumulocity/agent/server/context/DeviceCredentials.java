@@ -4,7 +4,7 @@ import java.io.UnsupportedEncodingException;
 
 import org.glassfish.jersey.internal.util.Base64;
 
-import com.cumulocity.model.ID;
+import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.devicebootstrap.DeviceCredentialsRepresentation;
 
 public class DeviceCredentials {
@@ -27,15 +27,15 @@ public class DeviceCredentials {
 
     private final String appKey;
 
-    private final ID deviceId;
+    private final GId deviceId;
 
     private final int pageSize;
 
-    public DeviceCredentials(String tenant, String username, String password, String appKey, ID deviceId) {
+    public DeviceCredentials(String tenant, String username, String password, String appKey, GId deviceId) {
         this(tenant, username, password, appKey, deviceId, DEFAULT_PAGE_SIZE);
     }
 
-    public DeviceCredentials(String tenant, String username, String password, String appKey, ID deviceId, int pageSize) {
+    public DeviceCredentials(String tenant, String username, String password, String appKey, GId deviceId, int pageSize) {
         this.tenant = tenant;
         this.username = username;
         this.password = password;
@@ -95,7 +95,7 @@ public class DeviceCredentials {
         return appKey;
     }
 
-    public ID getDeviceId() {
+    public GId getDeviceId() {
         return deviceId;
     }
 

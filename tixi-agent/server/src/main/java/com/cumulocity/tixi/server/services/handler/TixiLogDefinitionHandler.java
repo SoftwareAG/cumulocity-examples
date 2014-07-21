@@ -22,7 +22,7 @@ import com.cumulocity.tixi.server.model.txml.RecordDefinition;
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class TixiLogDefinitionHandler extends TixiHandler<LogDefinition> {
+public class TixiLogDefinitionHandler extends TixiHandler {
 
 	private static final Logger logger = LoggerFactory.getLogger(TixiLogDefinitionHandler.class);
 
@@ -56,7 +56,7 @@ public class TixiLogDefinitionHandler extends TixiHandler<LogDefinition> {
 		SerialNumber agentSerial = new SerialNumber(path.getAgentId());
 		ManagedObjectRepresentation agent = persistedAgents.get(agentSerial);
 		if (agent == null) {
-			agent = inventoryRepository.saveAgentIfNotExists(agentSerial.getValue(), agentSerial.getValue(), agentSerial);
+			agent = inventoryRepository.saveAgentIfNotExists(agentSerial.getValue(), agentSerial.getValue(), agentSerial, agentId);
 			persistedAgents.put(agentSerial, agent);
 		}
 		SerialNumber deviceSerial = new SerialNumber(path.getDeviceId());
