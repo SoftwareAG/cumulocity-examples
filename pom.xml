@@ -6,7 +6,7 @@
 
 	<groupId>c8y.example</groupId>
 	<artifactId>c8y-examples</artifactId>
-	<version>5.7.0</version>
+	<version>5.8.0</version>
 	<name>Cumulocity :: Examples</name>
 	<packaging>pom</packaging>
 
@@ -15,7 +15,7 @@
 		<maven.compiler.source>1.7</maven.compiler.source>
 		<maven.compiler.target>1.7</maven.compiler.target>
 
-		<c8y.version>5.7.0</c8y.version>
+		<c8y.version>5.8.0</c8y.version>
 		<slf4j.version>1.7.0</slf4j.version>
 		<spring.version>3.2.6.RELEASE</spring.version>
 
@@ -30,7 +30,7 @@
 		<module>linux-agent</module>
 		<module>tracker-agent</module>
 		<module>tracker-agent-rpm</module>
-		<!-- <module>example-packages</module> -->
+		<module>tixi-agent</module>
 	</modules>
 
 	<licenses>
@@ -82,7 +82,6 @@
 				<artifactId>commons-lang</artifactId>
 				<version>2.6</version>
 			</dependency>
-
 		</dependencies>
 	</dependencyManagement>
 

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LogDefinition>
+	<LogFiles>
+		<JobReport size="10240" />
+		<Event size="10240" />
+		<Login size="10240" />
+		<SupportLog size="10240" />
+		<Datalogging_1 record="Datalogging_1" size="102400" contenttype="binary" />
+		<Datalogging_2 record="Datalogging_2" size="102400" contenttype="binary" />
+	</LogFiles>
+	<Records>
+		<Datalogging_1>
+			<Item_1 _="type1" 
+                Name="aName1" path="/Process/M-Bus/Device-1/Temperature" size="11" exp="12" format="format1" />
+		</Datalogging_1>
+		<Datalogging_2>
+			<Item_2 _="type2" 
+                Name="aName2" path="/Process/M-Bus/Device-2/Temperature" size="21" exp="22" format="format2" />
+		</Datalogging_2>
+	</Records>
+</LogDefinition>
