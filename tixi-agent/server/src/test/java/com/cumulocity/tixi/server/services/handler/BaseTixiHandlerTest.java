@@ -1,6 +1,5 @@
 package com.cumulocity.tixi.server.services.handler;
 
-import static com.cumulocity.model.idtype.GId.asGId;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -11,6 +10,7 @@ import com.cumulocity.agent.server.context.DeviceContextService;
 import com.cumulocity.agent.server.context.DeviceCredentials;
 import com.cumulocity.agent.server.repository.IdentityRepository;
 import com.cumulocity.agent.server.repository.MeasurementRepository;
+import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.devicecontrol.DeviceCredentialsApi;
 import com.cumulocity.tixi.server.services.DeviceControlService;
 import com.cumulocity.tixi.server.services.DeviceService;
@@ -30,8 +30,7 @@ public abstract class BaseTixiHandlerTest {
 	@Before
 	public void init() throws Exception {
 		agentRep = new ManagedObjectRepresentation();
-		agentRep.setId(asGId("agentId"));
-		when(inventoryRepositSSSory.findById(agentRep.getId())).thenReturn(agentRep);
+		inventoryRepository.save(agentRep);
 		DeviceCredentials deviceCredentials = new DeviceCredentials("testTenant", "testUsername", "testPasswoerd", "testAppkey", 
 				agentRep.getId());
 		when(deviceContextService.getCredentials()).thenReturn(deviceCredentials);

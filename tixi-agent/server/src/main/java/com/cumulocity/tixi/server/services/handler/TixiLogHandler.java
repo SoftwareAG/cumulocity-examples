@@ -3,12 +3,8 @@ package com.cumulocity.tixi.server.services.handler;
 import static com.cumulocity.tixi.server.model.ManagedObjects.asManagedObject;
 
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TreeSet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,8 +17,6 @@ import com.cumulocity.agent.server.context.DeviceContextService;
 import com.cumulocity.agent.server.repository.MeasurementRepository;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
-import com.cumulocity.sdk.client.SDKException;
-import com.cumulocity.tixi.server.model.ManagedObjects;
 import com.cumulocity.tixi.server.model.SerialNumber;
 import com.cumulocity.tixi.server.model.txml.*;
 import com.cumulocity.tixi.server.services.DeviceControlService;
@@ -80,17 +74,17 @@ public class TixiLogHandler extends TixiHandler {
 		}
     }
 
-	private ProcessedDates createProcessedDates() {
-		ManagedObjectRepresentation agentRep = inventoryRepository.findById(tixiAgentId);
-		Date lastLogFile = (Date) agentRep.getProperty(AGENT_PROP_LAST_LOG_FILE_DATE);
-		return new ProcessedDates(lastLogFile);
-    }
+    private void createProcessedDates() {
+        ManagedObjectRepresentation agentRep = deviceService.find(tixiAgentId);
+        Date lastLogFile = (Date) agentRep.getProperty(AGENT_PROP_LAST_LOG_FILE_DATE);
+       processedDates = new ProcessedDates(lastLogFile);
+     }
 
 	private void saveLastLogFileDateInAgent(Date lastProcessedDate) {
 	    ManagedObjectRepresentation agentRep = new ManagedObjectRepresentation();
 		agentRep.setId(tixiAgentId);
 		agentRep.setProperty(AGENT_PROP_LAST_LOG_FILE_DATE, lastProcessedDate);
-		inventoryRepository.save(agentRep);
+		deviceService.update(agentRep);
     }
 
 	private void handleItemSet(LogItemSet itemSet, String recordName) {

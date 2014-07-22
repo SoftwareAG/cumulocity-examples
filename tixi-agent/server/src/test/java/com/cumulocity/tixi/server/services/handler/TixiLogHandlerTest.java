@@ -2,12 +2,16 @@ package com.cumulocity.tixi.server.services.handler;
 
 import static com.cumulocity.tixi.server.model.txml.LogBuilder.aLog;
 import static com.cumulocity.tixi.server.model.txml.LogDefinitionBuilder.aLogDefinition;
-import static com.cumulocity.tixi.server.model.txml.LogDefinitionItemBuilder.anItem;
+import static com.cumulocity.tixi.server.model.txml.RecordItemDefinitionBuilder.anItem;
+import static com.cumulocity.tixi.server.services.handler.TixiLogHandler.AGENT_PROP_LAST_LOG_FILE_DATE;
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,22 +29,23 @@ import com.cumulocity.tixi.server.model.txml.LogDefinition;
 
 public class TixiLogHandlerTest extends BaseTixiHandlerTest {
 
-	private TixiLogHandler tixiLogHandler;
-	private ArgumentCaptor<MeasurementRepresentation> measurementCaptor;
-	private ArgumentCaptor<ManagedObjectRepresentation> moCaptor;
-	private static DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+    private TixiLogHandler tixiLogHandler;
 
-	@Before
-	public void init() throws Exception {
-		super.init();
-		tixiLogHandler = new TixiLogHandler(deviceContextService, inventoryRepository, 
-				measurementApi, logDefinitionRegister, deviceControlRepository);
-		tixiLogHandler.afterPropertiesSet();
-		measurementCaptor = ArgumentCaptor.forClass(MeasurementRepresentation.class);
-		moCaptor = ArgumentCaptor.forClass(ManagedObjectRepresentation.class);
-	}
+    private ArgumentCaptor<MeasurementRepresentation> measurementCaptor;
 
-	@Test
+
+    private static DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+
+    @Before
+    public void init() throws Exception {
+        super.init();
+        tixiLogHandler = new TixiLogHandler(deviceContextService, deviceService, measurementRepository, logDefinitionRegister,
+                deviceControlService);
+        tixiLogHandler.afterPropertiesSet();
+        measurementCaptor = ArgumentCaptor.forClass(MeasurementRepresentation.class);
+    }
+
+    @Test
 	public void shouldSendCorrectMeasurementsAndUpdateLogFileDate() throws Exception {
 		// @formatter:off
 		LogDefinition logDefinition = aLogDefinition()
@@ -72,7 +77,7 @@ public class TixiLogHandlerTest extends BaseTixiHandlerTest {
 		assertThat(rep.get("c8y_measure2")).isEqualTo(aMeasurementValue(2));
 		assertThat(rep.getType()).isEqualTo("c8y_tixiMeasurement");
 		
-		assertThat(moCaptor.getValue().getProperty(AGENT_PROP_LAST_LOG_FILE_DATE)).isEqualTo(asDate("2000-10-20"));
+		assertThat(inventoryRepository.findById(agentRep.getId()).getProperty(AGENT_PROP_LAST_LOG_FILE_DATE)).isEqualTo(asDate("2000-10-20"));
 	}
 	
 	@Test
@@ -100,7 +105,7 @@ public class TixiLogHandlerTest extends BaseTixiHandlerTest {
         
         tixiLogHandler.handle(log, "itemSet_1");
         
-        verify(measurementApi, Mockito.times(1)).create(measurementCaptor.capture());
+        verify(measurementRepository, Mockito.times(1)).save(measurementCaptor.capture());
         MeasurementRepresentation rep = measurementCaptor.getValue();
         assertThat(rep.get("c8y_EnergieDiff")).isEqualTo(aMeasurementValue(1));
         assertThat(rep.get("c8y_PiValue")).isEqualTo(aMeasurementValue(2));
@@ -134,7 +139,7 @@ public class TixiLogHandlerTest extends BaseTixiHandlerTest {
 		try {
 	        return DATE_FORMAT.parse(date);
         } catch (ParseException e) {
-        	throw new RuntimeException(e);
+            throw new RuntimeException(e);
         }
 	}
 }

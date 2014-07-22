@@ -93,7 +93,6 @@ public class DeviceService {
         }
         logger.debug("Create device for serial: {} and agent: {}.", id, parentId);
         managedObjectRepresentation = new ManagedObjectRepresentation();
-        managedObjectRepresentation.set(new IsDevice());
         managedObjectRepresentation.setName(name);
         managedObjectRepresentation.setType("tixi_device");
         managedObjectRepresentation = inventoryRepository.save(managedObjectRepresentation, id);
@@ -131,6 +130,14 @@ public class DeviceService {
     
     public GId findGId(SerialNumber serialNumber) {
         return identityRepository.find(serialNumber);
+    }
+    
+    public ManagedObjectRepresentation find (GId id ) {
+        return inventoryRepository.findById(id);
+    }
+    
+    public ManagedObjectRepresentation update( ManagedObjectRepresentation managedObjectRepresentation) {
+        return inventoryRepository.save(managedObjectRepresentation);
     }
     
     public ManagedObjectRepresentation find(SerialNumber serial) {

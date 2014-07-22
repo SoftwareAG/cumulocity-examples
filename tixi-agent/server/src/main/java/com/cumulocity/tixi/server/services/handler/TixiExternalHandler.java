@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 import com.cumulocity.agent.server.context.DeviceContextService;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
-import com.cumulocity.sdk.client.measurement.MeasurementApi;
 import com.cumulocity.tixi.server.model.SerialNumber;
 import com.cumulocity.tixi.server.model.txml.External;
 import com.cumulocity.tixi.server.model.txml.External.Bus;
