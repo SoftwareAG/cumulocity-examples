@@ -31,6 +31,10 @@ public class TixiLogHandler extends TixiHandler {
 	private static final Logger logger = LoggerFactory.getLogger(TixiLogHandler.class);
 	private DeviceControlService deviceControlService;
     private MeasurementRepository measurementRepository;
+    
+    private Map<MeasurementKey, MeasurementRepresentation> measurements = new HashMap<>();
+    ProcessedDates processedDates;
+    private RecordDefinition recordDefinition;
 
 	@Autowired
 	public TixiLogHandler(DeviceContextService deviceContextService, DeviceService deviceService,
@@ -40,42 +44,40 @@ public class TixiLogHandler extends TixiHandler {
 		this.deviceControlService = deviceControlService;
     }
 	
-	private Map<MeasurementKey, MeasurementRepresentation> measurements = new HashMap<>();
-	private String logId;
-	ProcessedDates processedDates;
-	private RecordDefinition recordDefinition;
-	
 	public void handle(Log log, String recordName) {
+		logger.info("Proccess log with id {} for record {}.", log.getId(), recordName);
 		createProcessedDates();
 		try {
-			this.logId = log.getId();
-			logger.info("Proccess log with id {} for record {}.", logId, recordName);
-			LogDefinition logDefinition = logDefinitionRegister.getLogDefinition();
-			if (logDefinition == null) {
-				return;
-			}
-			if(logDefinition.getRecordIds().isEmpty()) {
-				logger.info("Log definition has no records {}.", logDefinition);
-				return;
-			}
-			String recordId = logDefinition.getRecordIds().get(0).getId();
-			recordDefinition = logDefinition.getRecordDefinition(recordId);
-			if(recordDefinition == null) {
-				logger.info("Log definition has no recordDefinition for recordId {}.", recordId);
-				return;
-			}			
-			for (Record itemSet : log.getRecords()) {
-				handleItemSet(itemSet);
-			}
+			createMeasurements(log);
 			saveMeasurements();
-			logger.info("Log with id {} proccessed.", logId);
 		} catch (Exception ex) {
-			logger.info("Log with id " + logId + " processing failed.", ex);
+			logger.info("Log with id processing failed.", ex);
 			deviceControlService.markAllOperationsFailed(tixiAgentId);
 			return;
 		}
 		deviceControlService.markAllOperationsSuccess(tixiAgentId);		
         updateProcessedDates();
+        logger.info("Log proccessed.");
+	}
+	
+	private void createMeasurements(Log log) {
+		LogDefinition logDefinition = logDefinitionRegister.getLogDefinition();
+		if (logDefinition == null) {
+			return;
+		}
+		if(logDefinition.getRecordIds().isEmpty()) {
+			logger.info("Log definition has no records {}.", logDefinition);
+			return;
+		}
+		String recordId = logDefinition.getRecordIds().get(0).getId();
+		recordDefinition = logDefinition.getRecordDefinition(recordId);
+		if(recordDefinition == null) {
+			logger.info("Log definition has no recordDefinition for recordId {}.", recordId);
+			return;
+		}			
+		for (Record itemSet : log.getRecords()) {
+			handleItemSet(itemSet);
+		}
 	}
 
     private void updateProcessedDates() {
@@ -84,11 +86,11 @@ public class TixiLogHandler extends TixiHandler {
 		}
     }
 
-    private void createProcessedDates() {
-        ManagedObjectRepresentation agentRep = deviceService.find(tixiAgentId);
-        Date lastLogFile = (Date) agentRep.getProperty(AGENT_PROP_LAST_LOG_FILE_DATE);
-       processedDates = new ProcessedDates(lastLogFile);
-     }
+	private void createProcessedDates() {
+		ManagedObjectRepresentation agentRep = deviceService.find(tixiAgentId);
+		Date lastLogFile = (Date) agentRep.getProperty(AGENT_PROP_LAST_LOG_FILE_DATE);
+		processedDates = new ProcessedDates(lastLogFile);
+	}
 
 	private void saveLastLogFileDateInAgent(Date lastProcessedDate) {
 	    ManagedObjectRepresentation agentRep = new ManagedObjectRepresentation();
@@ -106,13 +108,13 @@ public class TixiLogHandler extends TixiHandler {
 	    for (RecordItem item : itemSet.getRecordItems()) {
 	    	RecordItemDefinition itemDef = recordDefinition.getRecordItemDefinition(item.getId());
 	    	if(itemDef == null) {
-	    		logger.warn("There is no log definition item for logId: {}," +
-	    				" itemId: {}; skip this log item.", logId, item.getId());
+	    		logger.warn("There is no log definition item for " +
+	    				" itemId: {}; skip this log item.", item.getId());
 	    		continue;
 	    	}
 	    	if(itemDef.getPath() == null) {
 	    		logger.debug("Log definition item has no path variable " +
-	    				"logId: {} itemId: {}; skip this log item.", logId, item.getId());
+	    				"itemId: {}; skip this log item.", item.getId());
 	    		continue;
 	    	}
 	    	
@@ -149,8 +151,6 @@ public class TixiLogHandler extends TixiHandler {
 			measurementRepository.save(measurement);
         }
     }
-
-
 
 	private static Map<String, BigDecimal> asFragment(RecordItem logItem) {
 		Map<String, BigDecimal> measurementValue = new HashMap<>();
@@ -249,5 +249,4 @@ public class TixiLogHandler extends TixiHandler {
 			return last;
 		}
 	}
-
 }
