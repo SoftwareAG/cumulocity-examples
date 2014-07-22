@@ -64,7 +64,7 @@ public class TixiLogHandler extends TixiHandler {
 				logger.info("Log definition has no recordDefinition for recordId {}.", recordId);
 				return;
 			}			
-			for (LogItemSet itemSet : log.getItemSets()) {
+			for (Record itemSet : log.getRecords()) {
 				handleItemSet(itemSet);
 			}
 			saveMeasurements();
@@ -97,13 +97,13 @@ public class TixiLogHandler extends TixiHandler {
 		deviceService.update(agentRep);
     }
 
-	private void handleItemSet(LogItemSet itemSet) {
+	private void handleItemSet(Record itemSet) {
 		logger.debug("Proccess log item set with id {} and date {}.", itemSet.getId(), itemSet.getDateTime());
 		if(!processedDates.isNew(itemSet.getDateTime())) {
 			return;
 		}
 		processedDates.add(itemSet.getDateTime());
-	    for (LogItem item : itemSet.getItems()) {
+	    for (RecordItem item : itemSet.getRecordItems()) {
 	    	RecordItemDefinition itemDef = recordDefinition.getRecordItemDefinition(item.getId());
 	    	if(itemDef == null) {
 	    		logger.warn("There is no log definition item for logId: {}," +
@@ -121,7 +121,7 @@ public class TixiLogHandler extends TixiHandler {
 	    logger.debug("Proccess log item set with id {} and date {}.", itemSet.getId(), itemSet.getDateTime());
     }
 	
-	private void handleLogItem(LogItem item, RecordItemDefinition itemDef, Date date) {
+	private void handleLogItem(RecordItem item, RecordItemDefinition itemDef, Date date) {
 		logger.trace("Proccess log {} item with id.", item.getId());
 		String deviceId = getDeviceIdOrDefault(itemDef.getPath());
 		MeasurementRepresentation measurement = getMeasurement(new MeasurementKey(deviceId, date));
@@ -152,7 +152,7 @@ public class TixiLogHandler extends TixiHandler {
 
 
 
-	private static Map<String, BigDecimal> asFragment(LogItem logItem) {
+	private static Map<String, BigDecimal> asFragment(RecordItem logItem) {
 		Map<String, BigDecimal> measurementValue = new HashMap<>();
 		measurementValue.put("value", logItem.getValue());
 	    return measurementValue;

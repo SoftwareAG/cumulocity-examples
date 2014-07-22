@@ -8,7 +8,7 @@ import java.util.Date;
 public class LogBuilder {
 	
 	private final Log log = new Log();
-	private LogItemSet itemSet;
+	private Record itemSet;
 	
 	public static LogBuilder aLog() {
 		return new LogBuilder();
@@ -19,8 +19,8 @@ public class LogBuilder {
 	}
 	
 	public LogBuilder withNewItemSet(String id, Date date) throws Exception {
-		itemSet = new LogItemSet(id, date);
-		log.getItemSets().add(itemSet);
+		itemSet = new Record(id, date);
+		log.getRecords().add(itemSet);
 		return this;
 	}
 	
@@ -30,8 +30,8 @@ public class LogBuilder {
 	}
 	
 	public LogBuilder withItem(String id, BigDecimal value) {
-		LogItem logItem = new LogItem(id, value);
-		itemSet.getItems().add(logItem);
+		RecordItem logItem = new RecordItem(id, value);
+		itemSet.getRecordItems().add(logItem);
 		return this;
 	}
 	

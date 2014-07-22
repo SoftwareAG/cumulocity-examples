@@ -59,7 +59,6 @@ public class TixiLogHandlerTest extends BaseTixiHandlerTest {
 			.build();
 		
 		Log log = aLog()
-			.withId("itemSet_1")
 			.withNewItemSet("sth", asDate("2000-10-15"))
 				.withItem("item_1", BigDecimal.valueOf(1))
 				.withItem("item_2", BigDecimal.valueOf(2))
@@ -94,7 +93,6 @@ public class TixiLogHandlerTest extends BaseTixiHandlerTest {
             .build();
         
         Log log = aLog()
-            .withId("itemSet_1")
             .withNewItemSet("sth", asDate("2000-10-15"))
                 .withItem("EnergieDiff", BigDecimal.valueOf(1))
                 .withItem("PiValue", BigDecimal.valueOf(2))
@@ -125,7 +123,6 @@ public class TixiLogHandlerTest extends BaseTixiHandlerTest {
                 .build();
         
 		Log log = aLog()
-				.withId("dataloggin_1")
 				.withNewItemSet("sth1", asDate("2000-10-15"))
 				.withNewItemSet("sth2", asDate("2000-10-20"))
 				.build();
