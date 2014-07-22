@@ -129,7 +129,16 @@ public class TXMLUnmarshallerTest {
 	
 	@Test
 	public void shouldUmnarshalNewExternalFile() throws Exception {
-		String fileName = writeIncomingFile("External_1.xml", "External_1.xml");
+		shouldUmnarshalNewExternalFile("External_1.xml");
+	}
+	
+	@Test
+	public void shouldUmnarshalNewExternalFileWithNoGetConfigTag() throws Exception {
+		shouldUmnarshalNewExternalFile("External_2.xml");
+	}
+
+	private void shouldUmnarshalNewExternalFile(String sourceFileName) throws FileNotFoundException {
+	    String fileName = writeIncomingFile(sourceFileName, sourceFileName);
 		
 		External external = txmlUnmarshaller.unmarshal(fileName, External.class);
 		
@@ -141,7 +150,7 @@ public class TXMLUnmarshallerTest {
 				new Device("Device_10"), new Device("Device_11"));
 		assertThat(external.getBuses().get(1).getDevices().get(0).getMeters()).containsExactly(new Meter("Energy_100"));
 		assertThat(external.getBuses().get(1).getDevices().get(1).getMeters()).containsExactly(new Meter("Energy_110"));
-	}
+    }
 
 	private String writeIncomingFile(String sourceFileName, String targetFileNamePrefix) throws FileNotFoundException {
 	    return agentFileSystem.writeIncomingFile(targetFileNamePrefix, new FileInputStream(SAMPLE_DIR + sourceFileName));

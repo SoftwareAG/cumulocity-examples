@@ -115,7 +115,7 @@ public class DeviceControlService {
 
     @PostConstruct
     private void initialize() {
-        subscirbe(new OperationMessageChannel());
+        //subscirbe(new OperationMessageChannel());
     }
 
     private class OperationMessageChannel implements MessageChannel<MeasurementRequestOperation> {

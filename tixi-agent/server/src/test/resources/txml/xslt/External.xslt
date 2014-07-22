@@ -3,7 +3,7 @@
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 	<xsl:template match="/">
 		<External>
-			<xsl:for-each select="/GetConfig/External/*">
+			<xsl:for-each select="/GetConfig/External/* | /External/*">
 				<Bus>
 				    <xsl:copy-of select="@*" />
 					<xsl:for-each select="*">

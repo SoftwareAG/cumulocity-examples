@@ -3,7 +3,7 @@
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
     <xsl:template match="/">
         <LogDefinition>
-            <xsl:for-each select="GetConfig/LogDefinition/LogFiles">
+            <xsl:for-each select="/GetConfig/LogDefinition/LogFiles | /LogDefinition/LogFiles">
                 <RecordIds>
                     <xsl:for-each select="current()/*[@record]">
                         <RecordId>
@@ -15,7 +15,7 @@
                 </RecordIds>
             </xsl:for-each>
             <RecordDefinitions>
-                <xsl:for-each select="GetConfig/LogDefinition/Records/*">
+                <xsl:for-each select="GetConfig/LogDefinition/Records/* | /LogDefinition/Records/*">
                     <RecordDefinition>
                         <xsl:attribute name="id">
                           <xsl:value-of select="name()" />
