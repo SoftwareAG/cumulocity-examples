@@ -38,7 +38,7 @@ public class TixiExternalHandlerTest extends BaseTixiHandlerTest {
 					.build();
 		// @formatter:on
 		
-		handler.handle(external, "not important");
+		handler.handle(external);
 		
 		assertThat(inventoryRepository.getAllExternalIds()).containsOnly(
 				// @formatter:off
