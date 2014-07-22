@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.cumulocity.tixi.server.model.TixiRequestType;
+import com.cumulocity.tixi.server.model.txml.External;
 import com.cumulocity.tixi.server.model.txml.LogDefinition;
 import com.cumulocity.tixi.server.request.util.RequestIdFactory;
 import com.cumulocity.tixi.server.request.util.RequestStorage;
@@ -15,7 +16,11 @@ import com.google.common.base.Optional;
 @Component
 public class TixiRequestFactory {
 
-    private final RequestIdFactory requestIdFactory;
+	private static final String EXTERNAL_REQUEST_FORMAT = 			"[<GetConfig _=\"PROCCFG/External\" ver=\"v\"/>]";
+	private static final String LOG_DEFINITION_REQUEST_FORMAT = 	"[<GetConfig _=\"LOG/LogDefinition\" ver=\"v\"/>]";
+    private static final String LOG_REQUEST_FORMAT = 				"[<ReadLog _=\"%s\" ver=\"v\"/>]";
+
+	private final RequestIdFactory requestIdFactory;
     
     private final RequestStorage requestStorage;
     
@@ -33,6 +38,14 @@ public class TixiRequestFactory {
 			throw new RuntimeException("Unknown request type");
 		}
     }
+	
+	public TixiRequest createLogRequest(String recordId) {
+    	String requestId = requestIdFactory.get().toString();
+    	String parameter = String.format(LOG_REQUEST_FORMAT, recordId);
+		return new TixiRequest("TiXML")
+	    	.set("requestId", requestId)
+	    	.set("parameter", parameter);
+	}
     
     public TixiRequest create(TixiRequestType requestType) {
         if (requestType == TixiRequestType.EXTERNAL_DATABASE) {
@@ -42,7 +55,7 @@ public class TixiRequestFactory {
             return createLogDefinitionRequest();
         }
         if (requestType == TixiRequestType.LOG) {
-        	return createLogRequest();
+        	throw new RuntimeException("No record id provided!");
         }
         throw new RuntimeException("Unknown request type");
     }
@@ -52,20 +65,14 @@ public class TixiRequestFactory {
         requestStorage.put(requestId, LogDefinition.class);
         return new TixiRequest("TiXML")
         	.set("requestId", requestId)
-        	.set("parameter", "[<GetConfig _=\"LOG/LogDefinition\" ver=\"v\"/>]");
+        	.set("parameter", LOG_DEFINITION_REQUEST_FORMAT);
     }
 
     private TixiRequest createExternalDBRequest() {
         String requestId = requestIdFactory.get().toString();
+        requestStorage.put(requestId, External.class);
         return new TixiRequest("TiXML")
         	.set("requestId", requestId)
-        	.set("parameter", "[<GetConfig _=\"PROCCFG/External\" ver=\"v\"/>]");
-    }
-    
-    private TixiRequest createLogRequest() {
-    	String requestId = requestIdFactory.get().toString();
-    	return new TixiRequest("TiXML")
-	    	.set("requestId", requestId)
-	    	.set("parameter", "[<GetConfig _=\"LOG/EventLogging\" ver=\"v\"/>]");
+        	.set("parameter", EXTERNAL_REQUEST_FORMAT);
     }
 }

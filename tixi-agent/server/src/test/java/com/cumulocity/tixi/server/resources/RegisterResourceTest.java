@@ -11,13 +11,13 @@ import org.junit.Test;
 
 import com.cumulocity.tixi.server.model.SerialNumber;
 import com.cumulocity.tixi.server.model.TixiDeviceCredentails;
-import com.cumulocity.tixi.server.services.DeviceControlService;
+import com.cumulocity.tixi.server.services.DeviceService;
 
 public class RegisterResourceTest {
 
     @Test
     public void shouldBootstrap() {
-        DeviceControlService deviceService = mock(DeviceControlService.class);
+        DeviceService deviceService = mock(DeviceService.class);
         RegisterResource resource = new RegisterResource(deviceService);
         when(deviceService.register(new SerialNumber("12345"))).thenReturn(new TixiDeviceCredentails("user", "pass", "id"));
         

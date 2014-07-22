@@ -1,13 +1,11 @@
 package com.cumulocity.tixi.server.model.txml;
 
 import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-import com.cumulocity.tixi.server.components.txml.LogDefinitionItemPathAdapter;
+import com.cumulocity.tixi.server.components.txml.RecordItemPathAdapter;
 
-@XmlRootElement(name = "LogDefinitionItem")
-public class LogDefinitionItem extends LogBaseItem {
+public class RecordItemDefinition extends LogBaseItem {
 	
 	@XmlAttribute(name = "Name")
 	private String name;
@@ -25,8 +23,8 @@ public class LogDefinitionItem extends LogBaseItem {
 	private String format;
 	
 	@XmlAttribute
-	@XmlJavaTypeAdapter(value = LogDefinitionItemPathAdapter.class)
-	private LogDefinitionItemPath path;
+	@XmlJavaTypeAdapter(value = RecordItemPathAdapter.class)
+	private RecordItemPath path;
 	
 	public String getName() {
 		return name;
@@ -68,11 +66,11 @@ public class LogDefinitionItem extends LogBaseItem {
 		this.format = format;
 	}
 
-	public LogDefinitionItemPath getPath() {
+	public RecordItemPath getPath() {
 		return path;
 	}
 
-	public void setPath(LogDefinitionItemPath path) {
+	public void setPath(RecordItemPath path) {
 		this.path = path;
 	}
 
@@ -103,7 +101,7 @@ public class LogDefinitionItem extends LogBaseItem {
 		    return false;
 	    if (getClass() != obj.getClass())
 		    return false;
-	    LogDefinitionItem other = (LogDefinitionItem) obj;
+	    RecordItemDefinition other = (RecordItemDefinition) obj;
 	    if (exp != other.exp)
 		    return false;
 	    if (format == null) {

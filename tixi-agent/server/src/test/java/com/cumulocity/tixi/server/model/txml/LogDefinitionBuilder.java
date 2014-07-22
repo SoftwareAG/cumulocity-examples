@@ -1,31 +1,29 @@
 package com.cumulocity.tixi.server.model.txml;
 
-import com.cumulocity.tixi.server.model.txml.LogDefinition;
-import com.cumulocity.tixi.server.model.txml.LogDefinitionItem;
-import com.cumulocity.tixi.server.model.txml.LogDefinitionItemSet;
 
 public class LogDefinitionBuilder {
 
 	private final LogDefinition result = new LogDefinition();
-	private LogDefinitionItemSet logDefinitionItemSet;
+	private RecordDefinition recordDefinition;
 
 	public static LogDefinitionBuilder aLogDefinition() {
 		return new LogDefinitionBuilder();
 	}
 
-	public LogDefinitionBuilder withNewItemSet(String id) {
-		logDefinitionItemSet = new LogDefinitionItemSet(id);
-		result.getItemSets().put(id, logDefinitionItemSet);
-		return this;
-	}
-
-	public LogDefinitionBuilder withItem(LogDefinitionItem dataLoggingItem) {
-		logDefinitionItemSet.getItems().put(dataLoggingItem.getId(), dataLoggingItem);
+	public LogDefinitionBuilder withNewRecordDefinition(String id) {
+		recordDefinition = new RecordDefinition(id);
+		result.getRecordDefinitions().put(id, recordDefinition);
+		result.getRecordIds().add(new LogBaseItem(id));
 		return this;
 	}
 	
-	public LogDefinitionBuilder withItem(LogDefinitionItemBuilder dataLoggingItem) {
-		return withItem(dataLoggingItem.build());
+	public LogDefinitionBuilder withRecordItemDefinition(RecordItemDefinition recordItemDefinition) {
+		recordDefinition.getRecordItemDefinitions().put(recordItemDefinition.getId(), recordItemDefinition);
+		return this;
+	}
+	
+	public LogDefinitionBuilder withRecordItemDefinition(RecordItemDefinitionBuilder dataLoggingItem) {
+		return withRecordItemDefinition(dataLoggingItem.build());
 	}
 
 	public LogDefinition build() {

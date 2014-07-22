@@ -45,23 +45,7 @@ public class DeviceControlRepository {
         return loadByFilter(filter).allPages();
     }
     
-    public void markAllOperationsSuccess(ID agentId) {
-    	markAllOperations(agentId, OperationStatus.EXECUTING, OperationStatus.SUCCESSFUL);
-    }
-    
-    public void markAllOperationsFailed(ID agentId) {
-    	markAllOperations(agentId, OperationStatus.EXECUTING, OperationStatus.FAILED);
-    }
-    
-	private void markAllOperations(ID agentId, OperationStatus from, OperationStatus to) {
-		OperationFilter operationFilter = new OperationFilter().byAgent(agentId.getValue()).byStatus(from);
-		for (OperationRepresentation operation : findAllByFilter(operationFilter)) {
-			logger.info("Change operation with id {} status from {} to {}.", operation.getId(), from, to);
-			operation = Operations.asOperation(operation.getId());
-			operation.setStatus(to.name());
-			deviceControlApi.update(operation);
-		}
-	}
+   
 
     private PagedOperationCollectionRepresentation loadByFilter(OperationFilter filter) {
         return deviceControlApi.getOperationsByFilter(filter).get();

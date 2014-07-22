@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.tixi.server.model.SerialNumber;
 import com.cumulocity.tixi.server.model.TixiDeviceCredentails;
-import com.cumulocity.tixi.server.services.DeviceControlService;
+import com.cumulocity.tixi.server.services.DeviceService;
 
 @Path("/register")
 @Component
@@ -25,10 +25,10 @@ public class RegisterResource {
     
     private static final Logger logger = LoggerFactory.getLogger(RegisterResource.class);
 
-    private final DeviceControlService deviceService;
+    private final DeviceService deviceService;
 
     @Autowired
-    public RegisterResource(DeviceControlService deviceService) {
+    public RegisterResource(DeviceService deviceService) {
         this.deviceService = deviceService;
     }
 
