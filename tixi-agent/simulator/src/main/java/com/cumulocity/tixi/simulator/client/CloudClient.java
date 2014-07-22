@@ -39,7 +39,12 @@ public class CloudClient {
     private ResponseHandlerFactory responseHandlerFactory = new ResponseHandlerFactory();
     
     public CloudClient(String baseUrl) {
+        this(baseUrl,null);
+    }
+    
+    public CloudClient(String baseUrl,TixiCredentials tixiCredentials) {
         this.baseUrl = baseUrl;
+        credentials = tixiCredentials;
     }
 
     private Client client = ClientBuilder.newClient()
@@ -47,17 +52,27 @@ public class CloudClient {
     		.register(MultiPartFeature.class)
             .register(SseFeature.class);
 
-    public void sendBootstrapRequest() {
-        String uri = baseUrl + "/Tixi/register?serial=" + Main.DEVICE_SERIAL;
-        logger.info("Send bootstrap request to {}", uri);
-		Response response = client.target(uri).request().get();
-        credentials = response.readEntity(TixiCredentials.class);
-        logger.info("Bootstraped creentials {}", credentials);
+    public void sendRegisterRequest() {
+        if(credentials ==null) {
+            String uri = baseUrl + "/Tixi/register?serial=" + Main.DEVICE_SERIAL;
+            logger.info("Send bootstrap request to {}", uri);
+    		Response response = client.target(uri).request().get();
+            credentials = response.readEntity(TixiCredentials.class);
+            logger.info("Bootstraped creentials {}", credentials);
+        }else {
+            String uri = baseUrl + String.format("/Tixi/register?serial=%s&deviceID=%s&user=%s&password=%s",
+                    Main.DEVICE_SERIAL, credentials.deviceID, credentials.user, credentials.password);
+            logger.info("Send standard register request to {}", uri);
+            Response response = client.target(uri).request().get();
+            TixiResponse tixiResponse = response.readEntity(TixiResponse.class);
+            credentials.deviceID = tixiResponse.getDeviceID();
+            logger.info("registred {}", tixiResponse);
+        }
     }
 
     public void sendOpenChannel() {
-        String uri = baseUrl + String.format("/Tixi/openchannel?serial=%s&deviceID=%s&user=%s&password=%s",
-                        Main.DEVICE_SERIAL, credentials.deviceID, credentials.user, credentials.password);
+        String uri = baseUrl + String.format("/Tixi/openchannel?serial=%s&user=%s&password=%s",
+                        Main.DEVICE_SERIAL, credentials.user, credentials.password);
         logger.info("Send open channel request to {}", uri);
         Response response = client.target(uri).request().get();
         final ChunkedInput<TixiResponse> chunkedInput =
