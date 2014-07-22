@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.cumulocity.agent.server.context.DeviceContextService;
 import com.cumulocity.agent.server.repository.InventoryRepository;
+import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.measurement.MeasurementApi;
 import com.cumulocity.tixi.server.model.SerialNumber;
@@ -48,13 +49,13 @@ public class TixiExternalHandler extends TixiHandler {
 
 	private void handleDevice(Bus bus, Device device) {
 		logger.debug("Process external device: {} on bus: {}.", device, bus);
-		SerialNumber agentSerial = new SerialNumber(bus.getName() + "_" + tixiAgentId);
+		SerialNumber agentSerial = new SerialNumber(bus.getName() + "_" + GId.asString(tixiAgentId));
 		ManagedObjectRepresentation agentRep = persistedAgents.get(agentSerial);
 		if (agentRep == null) {
 			agentRep = inventoryRepository.saveAgentIfNotExists(agentSerial.getValue(), bus.getName(), agentSerial, tixiAgentId);
 			persistedAgents.put(agentSerial, agentRep);
 		}
-		SerialNumber deviceSerial = new SerialNumber(device.getName() + "_" + tixiAgentId);
+		SerialNumber deviceSerial = new SerialNumber(device.getName() + "_" + GId.asString(tixiAgentId));
 		ManagedObjectRepresentation deviceRep = persistedDevices.get(deviceSerial);
 		if (deviceRep == null) {
 			deviceRep = inventoryRepository.saveDeviceIfNotExists(deviceSerial, device.getName(), agentRep.getId());

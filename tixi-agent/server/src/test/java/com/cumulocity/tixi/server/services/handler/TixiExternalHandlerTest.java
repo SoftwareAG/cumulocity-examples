@@ -2,10 +2,11 @@ package com.cumulocity.tixi.server.services.handler;
 
 import static org.fest.assertions.Assertions.assertThat;
 
+import java.util.Collection;
+
 import org.junit.Before;
 import org.junit.Test;
 
-import com.cumulocity.model.idtype.GId;
 import com.cumulocity.tixi.server.model.SerialNumber;
 import com.cumulocity.tixi.server.model.txml.External;
 import com.cumulocity.tixi.server.model.txml.ExternalBuilder;
@@ -17,10 +18,10 @@ public class TixiExternalHandlerTest extends BaseTixiHandlerTest {
 	private GId agentId = new GId("agentId");
 
 	@Before
-	public void init() {
+	public void init() throws Exception {
 		super.init();
 		handler = new TixiExternalHandler(deviceContextService, inventoryRepository, measurementApi, logDefinitionRegister);
-        handler.setTixiAgentId(agentId);
+		handler.afterPropertiesSet();
 	}
 	
 	@Test
@@ -45,11 +46,16 @@ public class TixiExternalHandlerTest extends BaseTixiHandlerTest {
 		
 		assertThat(inventoryRepository.getAllExternalIds()).containsOnly(
 				// @formatter:off
-				new SerialNumber("Bus_1_" + agentId),
-				new SerialNumber("Device_11_" + agentId),
-				new SerialNumber("Device_12_" + agentId),
-				new SerialNumber("Bus_2_" + agentId),
-				new SerialNumber("Device_21_" + agentId));
+				new SerialNumber("Bus_1"),
+				new SerialNumber("Device_11"),
+				new SerialNumber("Device_12"),
+				new SerialNumber("Bus_2"),
+				new SerialNumber("Device_21"));
 				// @formatter:on
     }
+	
+	private SerialNumber deviceSerial(String deviceName) {
+		return new SerialNumber(deviceName + "_" + agentRep.getId().getValue());
+				
+	}
 }

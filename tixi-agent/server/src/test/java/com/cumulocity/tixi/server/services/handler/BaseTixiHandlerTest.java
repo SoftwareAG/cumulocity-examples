@@ -12,6 +12,7 @@ import com.cumulocity.agent.server.context.DeviceCredentials;
 import com.cumulocity.agent.server.repository.DeviceControlRepository;
 import com.cumulocity.agent.server.repository.IdentityRepository;
 import com.cumulocity.agent.server.repository.InventoryRepository;
+import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.measurement.MeasurementApi;
 
 public abstract class BaseTixiHandlerTest {
@@ -22,10 +23,15 @@ public abstract class BaseTixiHandlerTest {
 	protected MeasurementApi measurementApi = mock(MeasurementApi.class);
 	protected LogDefinitionRegister logDefinitionRegister = mock(LogDefinitionRegister.class);
 	protected DeviceControlRepository deviceControlRepository = mock(DeviceControlRepository.class);
+	protected ManagedObjectRepresentation agentRep;
 	
 	@Before
-	public void init() {
-		DeviceCredentials deviceCredentials = new DeviceCredentials("testTenant", "testUsername", "testPasswoerd", "testAppkey", asGId("testDevice"));
+	public void init() throws Exception {
+		agentRep = new ManagedObjectRepresentation();
+		agentRep.setId(asGId("agentId"));
+		when(inventoryRepository.findById(agentRep.getId())).thenReturn(agentRep);
+		DeviceCredentials deviceCredentials = new DeviceCredentials("testTenant", "testUsername", "testPasswoerd", "testAppkey", 
+				agentRep.getId());
 		when(deviceContextService.getCredentials()).thenReturn(deviceCredentials);
 		when(deviceContextService.getContext()).thenReturn(new DeviceContext(deviceCredentials));
 	}

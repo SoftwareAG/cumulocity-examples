@@ -1,10 +1,13 @@
 package com.cumulocity.tixi.server.services.handler;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +30,7 @@ import com.cumulocity.tixi.server.model.txml.*;
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class TixiLogHandler extends TixiHandler {
 	
+	static final String AGENT_PROP_LAST_LOG_FILE_DATE = "lastLogFile";
 	private static final Logger logger = LoggerFactory.getLogger(TixiLogHandler.class);
 	private DeviceControlRepository deviceControlRepository;
 
@@ -40,8 +44,10 @@ public class TixiLogHandler extends TixiHandler {
 	private Map<MeasurementKey, MeasurementRepresentation> measurements = new HashMap<>();
 	private LogDefinition logDefinition;
 	private String logId;
+	ProcessedDates processedDates;
 	
 	public void handle(Log log, String recordName) {
+		processedDates = createProcessedDates();
 		try {
 			this.logId = log.getId();
 			logger.info("Proccess log with id {} for record {}.", logId, recordName);
@@ -60,10 +66,30 @@ public class TixiLogHandler extends TixiHandler {
 			return;
 		}
 		deviceControlRepository.markAllOperationsSuccess(tixiAgentId);
+		if(processedDates.getLast() != null) {
+			saveLastLogFileDateInAgent(processedDates.getLast());
+		}
 	}
+
+	private ProcessedDates createProcessedDates() {
+		ManagedObjectRepresentation agentRep = inventoryRepository.findById(tixiAgentId);
+		Date lastLogFile = (Date) agentRep.getProperty(AGENT_PROP_LAST_LOG_FILE_DATE);
+		return new ProcessedDates(lastLogFile);
+    }
+
+	private void saveLastLogFileDateInAgent(Date lastProcessedDate) {
+	    ManagedObjectRepresentation agentRep = new ManagedObjectRepresentation();
+		agentRep.setId(tixiAgentId);
+		agentRep.setProperty(AGENT_PROP_LAST_LOG_FILE_DATE, lastProcessedDate);
+		inventoryRepository.save(agentRep);
+    }
 
 	private void handleItemSet(LogItemSet itemSet, String recordName) {
 		logger.debug("Proccess log item set with id {} and date {}.", itemSet.getId(), itemSet.getDateTime());
+		if(!processedDates.isNew(itemSet.getDateTime())) {
+			return;
+		}
+		processedDates.add(itemSet.getDateTime());
 	    for (LogItem item : itemSet.getItems()) {
 	    	RecordItemDefinition itemDef = logDefinition.getItem(recordName, item.getId());
 	    	if(itemDef == null) {
@@ -81,7 +107,7 @@ public class TixiLogHandler extends TixiHandler {
 	    }
 	    logger.debug("Proccess log item set with id {} and date {}.", itemSet.getId(), itemSet.getDateTime());
     }
-
+	
 	private void handleLogItem(LogItem item, RecordItemDefinition itemDef, Date date) {
 		logger.trace("Proccess log {} item with id.", item.getId());
 		String deviceId = getDeviceIdOrDefault(itemDef.getPath());
@@ -204,4 +230,33 @@ public class TixiLogHandler extends TixiHandler {
 	        return true;
         }
 	}
+	
+	static class ProcessedDates {
+
+		private Date last;
+		private Set<Date> processed = new TreeSet<>();
+		
+		ProcessedDates(Date last) {
+	        this.last = last;
+        }
+
+		
+		void add(Date date) {
+			last = date;
+			processed.add(date);
+		}
+		
+		boolean isNew(Date date) {
+			return last == null || last.before(date);
+		}
+
+		Set<Date> getProcessed() {
+			return processed;
+		}
+
+		Date getLast() {
+			return last;
+		}
+	}
+
 }

@@ -12,7 +12,7 @@ public class TixiLogDefinitionHandlerTest extends BaseTixiHandlerTest {
 	private FakeInventoryRepository inventoryRepository = new FakeInventoryRepository();
 
 	@Before
-	public void init() {
+	public void init() throws Exception {
 		super.init();
 		handler = new TixiLogDefinitionHandler(deviceContextService, inventoryRepository, measurementApi, logDefinitionRegister);
 	}
