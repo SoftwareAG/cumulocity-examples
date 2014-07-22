@@ -9,10 +9,12 @@ import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import c8y.MeasurementRequestOperation;
+import c8y.inject.DeviceScope;
 
 import com.cumulocity.agent.server.context.DeviceContextService;
 import com.cumulocity.agent.server.repository.DeviceControlRepository;
@@ -53,9 +55,8 @@ public class DeviceControlService {
         this.contextService = deviceContextService;
     }
 
-    public void subscirbe(final MessageChannel<MeasurementRequestOperation> messageChannel) {
+    private void subscirbe(GId deviceId, final MessageChannel<MeasurementRequestOperation> messageChannel) {
 
-        final GId deviceId = (GId) contextService.getCredentials().getDeviceId();
         logger.info("Try subscribe on operations from device {}.", deviceId);
         final Subscription<GId> subscription = repository.subscribe(deviceId, new SubscriptionListener<GId, OperationRepresentation>() {
             @Override
@@ -113,9 +114,8 @@ public class DeviceControlService {
         return measurementRequest != null && LOG.name().equals(measurementRequest.getRequestName());
     }
 
-    @PostConstruct
-    private void initialize() {
-        subscirbe(new OperationMessageChannel());
+    public void startOperationExecutor(GId deviceId) {
+        subscirbe(deviceId, new OperationMessageChannel());
     }
 
     private class OperationMessageChannel implements MessageChannel<MeasurementRequestOperation> {

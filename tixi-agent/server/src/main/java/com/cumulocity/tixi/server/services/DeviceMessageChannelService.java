@@ -9,6 +9,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -37,6 +38,7 @@ public class DeviceMessageChannelService {
         this.requestFactory = requestFactory;
     }
 
+    @Async
     public void send(TixiRequest tixiRequest) {
         log.debug("Enqueued tixiRequest {}.", tixiRequest);
         try {
@@ -44,8 +46,10 @@ public class DeviceMessageChannelService {
         } catch (InterruptedException e) {
             log.warn("Enqueu  tixi request failed", e);
         }
+        flushRequests();
     }
 
+    @Async
     public void send(TixiRequestType requestType) {
         send(requestFactory.create(requestType));
     }
@@ -55,7 +59,6 @@ public class DeviceMessageChannelService {
         this.output = output;
     }
 
-    @Scheduled(fixedDelay = 1 * MILLIS_PER_SECOND)
     private void flushRequests() {
         if (output == null) {
             log.debug("no output defined");
