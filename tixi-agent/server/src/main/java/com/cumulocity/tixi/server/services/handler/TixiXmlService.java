@@ -24,18 +24,24 @@ public class TixiXmlService {
 		this.beanFactory = listableBeanFactory;
 	}
 
-	public void handle(String fileName, Class<?> entityType) {
-		logger.info("Process file " + fileName + " with expected entity " + entityType.getSimpleName());
+	public void handleLogDefinition(String fileName, Class<?> entityType) {
+		logger.info("Process Log Definition file " + fileName + " with expected entity " + entityType.getSimpleName());
 		Object unmarshaled = txmlUnmarshaller.unmarshal(fileName, entityType);
-		if (unmarshaled instanceof Log) {
-			TixiLogHandler handler = beanFactory.getBean(TixiLogHandler.class);
-			handler.handle((Log) unmarshaled);
-		} else if (unmarshaled instanceof LogDefinition) {
-			TixiLogDefinitionHandler handler = beanFactory.getBean(TixiLogDefinitionHandler.class);
-			handler.handle((LogDefinition) unmarshaled);
-		} else {
-			throw new RuntimeException("Can't handle class " + unmarshaled.getClass());
-		}
+		TixiLogDefinitionHandler handler = beanFactory.getBean(TixiLogDefinitionHandler.class);
+		handler.handle((LogDefinition) unmarshaled);
 		logger.info("File " + fileName + " with expected entity " + entityType.getSimpleName() + " processed.");
 	}
+	
+	public void handleLog(String fileName, String origFileName, Class<?> entityType) {
+        logger.info("Process Log file " + fileName + " with expected entity " + entityType.getSimpleName());
+        Object unmarshaled = txmlUnmarshaller.unmarshal(fileName, entityType);
+        TixiLogHandler handler = beanFactory.getBean(TixiLogHandler.class);
+        handler.handle((Log) unmarshaled, origFileName);
+        logger.info("File " + fileName + " with expected entity " + entityType.getSimpleName() + " processed.");
+    }
+	
+	public void handleExternal(String fileName, String origFileName, Class<?> entityType) {
+        logger.info("Process file " + fileName + " with expected entity " + entityType.getSimpleName());
+        logger.info("File " + fileName + " with expected entity " + entityType.getSimpleName() + " processed.");
+    }
 }

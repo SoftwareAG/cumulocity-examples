@@ -38,7 +38,7 @@ public class JaxrsServer implements Server {
 
     private final Service service = new AbstractService() {
 
-    private HttpServer server;
+        private HttpServer server;
 
         @Override
         protected void doStart() {

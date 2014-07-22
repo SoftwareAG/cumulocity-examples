@@ -29,7 +29,7 @@ import com.cumulocity.tixi.server.model.txml.LogItemSet;
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class TixiLogHandler extends TixiHandler<Log> {
+public class TixiLogHandler extends TixiHandler {
 	
 	private static final Logger logger = LoggerFactory.getLogger(TixiLogHandler.class);
 	private DeviceControlRepository deviceControlRepository;
@@ -45,35 +45,34 @@ public class TixiLogHandler extends TixiHandler<Log> {
 	private LogDefinition logDefinition;
 	private String logId;
 	
-	@Override
-	public void handle(Log log) {
+	public void handle(Log log, String recordName) {
 		try {
 			this.logId = log.getId();
-			logger.info("Proccess log with id {}.", logId);
+			logger.info("Proccess log with id {} for record {}.", logId, recordName);
 			this.logDefinition = logDefinitionRegister.getLogDefinition();
 			if (logDefinition == null) {
 				return;
 			}
 			for (LogItemSet itemSet : log.getItemSets()) {
-				handleItemSet(itemSet);
+				handleItemSet(itemSet, recordName);
 			}
 			saveMeasurements();
 			logger.info("Log with id {} proccessed.", logId);
 		} catch (Exception ex) {
 			logger.info("Log with id {} processing failed.", ex);
-			deviceControlRepository.markAllOperationsFailed(agentId);
+			deviceControlRepository.markAllOperationsFailed(tixiAgentId);
 			return;
 		}
-		deviceControlRepository.markAllOperationsSuccess(agentId);
+		deviceControlRepository.markAllOperationsSuccess(tixiAgentId);
 	}
 
-	private void handleItemSet(LogItemSet itemSet) {
+	private void handleItemSet(LogItemSet itemSet, String recordName) {
 		logger.debug("Proccess log item set with id {} and date {}.", itemSet.getId(), itemSet.getDateTime());
 	    for (LogItem item : itemSet.getItems()) {
-	    	LogDefinitionItem itemDef = logDefinition.getItem(logId, item.getId());
+	    	LogDefinitionItem itemDef = logDefinition.getItem(recordName, item.getId());
 	    	if(itemDef == null) {
-	    		logger.warn("There is no log definition item for itemSetId: {}," +
-	    				" itemId: {}; skip this log item.", logId, item.getId());
+	    		logger.warn("There is no log definition item for record: {}, itemSetId: {}," +
+	    				" itemId: {}; skip this log item.", recordName, logId, item.getId());
 	    		continue;
 	    	}
 	    	if(!isDevicePath(itemDef)) {

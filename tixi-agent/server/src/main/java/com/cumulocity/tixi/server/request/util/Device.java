@@ -12,21 +12,27 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import c8y.inject.DeviceScope;
+
 import com.cumulocity.tixi.server.model.TixiRequestType;
 import com.cumulocity.tixi.server.resources.TixiRequest;
 import com.cumulocity.tixi.server.services.TixiRequestFactory;
 import com.google.common.io.Closeables;
 
 @Component
+@DeviceScope
 public class Device implements InitializingBean {
 
 	private static final Logger logger = LoggerFactory.getLogger(Device.class);
 
-	private final TixiOperationsQueue<TixiRequest> tixiOperationsQueue;
-	private final TixiRequestFactory requestFactory;
-	private final ScheduledExecutorService executorService;
+	private TixiOperationsQueue<TixiRequest> tixiOperationsQueue;
+	private TixiRequestFactory requestFactory;
+	private ScheduledExecutorService executorService;
 	private volatile ChunkedOutput<TixiRequest> output;
 
+	protected Device() {
+    }
+	
 	@Autowired
 	public Device(TixiOperationsQueue<TixiRequest> tixiOperationsQueue, TixiRequestFactory requestFactory) {
 		this.tixiOperationsQueue = tixiOperationsQueue;

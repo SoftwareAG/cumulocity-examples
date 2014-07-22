@@ -49,13 +49,24 @@ public class LogDefinition {
 		}
 	}
 	
-	public LogDefinitionItem getItem(String itemSetId, String itemId) {
-		LogDefinitionItemSet itemSet = getItemSet(itemSetId);
+	public LogDefinitionItem getItem(String recordName, String itemId) {
+		LogDefinitionItemSet itemSet = getItemSet(recordName);
 		if(itemSet == null) {
 			return null;
 		} else {
 			return itemSet.getItem(itemId);
 		}
+	}
+	
+	public LogDefinitionItem getItem(String itemId) {
+		LogDefinitionItem result = null;
+		for (String itemSetId : itemSets.keySet()) {
+	        result = getItem(itemSetId, itemId);
+	        if(result != null) {
+	        	break;
+	        }
+        }
+		return result;
 	}
 	
 	@Override

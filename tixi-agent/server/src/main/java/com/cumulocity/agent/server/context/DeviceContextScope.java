@@ -1,33 +1,18 @@
 package com.cumulocity.agent.server.context;
 
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.util.Assert;
-
 import com.cumulocity.agent.server.context.scope.BaseScope;
 import com.cumulocity.agent.server.context.scope.ScopeContainer;
 
-public class DeviceContextScope extends BaseScope implements InitializingBean {
+public class DeviceContextScope extends BaseScope {
 
-    public static final String CONTEXT_SCOPE = "context";
+    private final DeviceContextService contextService;
 
-    private DeviceContextService contextService;
+    private final ScopeContainerRegistry registry;
 
-    public DeviceContextScope() {
+    public DeviceContextScope(DeviceContextService contextService, ScopeContainerRegistry registry) {
         super(false);
-    }
-
-    public DeviceContextScope(DeviceContextService contextService) {
-        this();
         this.contextService = contextService;
-    }
-
-    public void setContextService(DeviceContextService contextService) {
-        this.contextService = contextService;
-    }
-
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        Assert.notNull(contextService, "ContextService cannot be null!");
+        this.registry = registry;
     }
 
     @Override
@@ -37,6 +22,6 @@ public class DeviceContextScope extends BaseScope implements InitializingBean {
 
     @Override
     protected ScopeContainer getScopeContainer() {
-        return contextService.getContext().getScope();
+        return registry.get(contextService.getContext());
     }
 }

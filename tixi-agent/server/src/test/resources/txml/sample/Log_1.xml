@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ReadLog>
+	<ID_798 _="2014/07/21,10:35:00">
+		<Temperatur_S1 _="29.37" />
+		<Temperatur_S2 _="28.00" />
+		<Temperatur_S3 _="29.48" />
+		<Temperatur_S4 _="0.56" />
+		<Temperatur_S5 _="27.31" />
+		<Temperatur_U1 _="28.87" />
+		<Temperatur_U2 _="29.18" />
+	</ID_798>
+	<ID_797 _="2014/07/21,10:20:00">
+		<Temperatur_S1 _="29.37" />
+		<Temperatur_S2 _="28.00" />
+		<Temperatur_S3 _="29.48" />
+		<Temperatur_S4 _="0.56" />
+		<Temperatur_S5 _="27.31" />
+		<Temperatur_U1 _="28.87" />
+		<Temperatur_U2 _="29.18" />
+	</ID_797>
+</ReadLog>

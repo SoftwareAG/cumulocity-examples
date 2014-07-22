@@ -24,7 +24,7 @@ import com.google.common.base.Joiner;
 @Component
 public class AgentFileSystem {
 
-    private static final Logger log = LoggerFactory.getLogger(AgentFileSystem.class);
+    private static final Logger logger = LoggerFactory.getLogger(AgentFileSystem.class);
 
     public static final SimpleDateFormat TIMESTAMP_FORMAT = new SimpleDateFormat("yyyyMMddHHmmssSSS");
 
@@ -54,8 +54,8 @@ public class AgentFileSystem {
         return new File(parent, fileName);
     }
 
-    public String writeIncomingFile(String fileName, String requestId, InputStream inputStream) {
-    	fileName = Joiner.on("_").skipNulls().join(fileName, requestId, getTimestamp()) + ".xml";
+    public String writeIncomingFile(String fileName, InputStream inputStream) {
+    	fileName = Joiner.on("_").skipNulls().join(fileName, getTimestamp()) + ".xml";
         writeToFile(inputStream, getFile(incomingPath, fileName));
         return fileName;
     }
@@ -75,6 +75,7 @@ public class AgentFileSystem {
             closeQuietly(outputStream);
             closeQuietly(inputStream);
         }
+        logger.info("Written to file: {}.", file.getPath());
     }
     
     public File getXsltFile(Class<?> entityClass) {

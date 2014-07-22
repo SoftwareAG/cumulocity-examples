@@ -14,7 +14,7 @@ import com.cumulocity.agent.server.jaxrs.JaxrsServer;
 
 @Configuration
 @ComponentScan(basePackageClasses = JaxrsServer.class)
-@Import(CommonConfiguration.class)
+@Import({CommonConfiguration.class, ScopesConfiguration.class})
 public class JaxrsServerConfiguration {
 
     @Bean

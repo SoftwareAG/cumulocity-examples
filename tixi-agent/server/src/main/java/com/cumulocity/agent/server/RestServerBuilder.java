@@ -16,7 +16,7 @@ import com.cumulocity.agent.server.config.JaxrsServerConfiguration;
 
 public class RestServerBuilder {
 
-    private final Set<Class<?>> components = new HashSet<Class<?>>();
+    private final Set<Class<?>> resources = new HashSet<Class<?>>();
 
     private final Set<String> packages = new HashSet<String>();
 
@@ -27,7 +27,7 @@ public class RestServerBuilder {
     }
 
     public RestServerBuilder component(Class<?> component) {
-        components.add(component);
+        resources.add(component);
         return this;
     }
 
@@ -41,7 +41,7 @@ public class RestServerBuilder {
         ConfigurableApplicationContext parentContext = builder.getContext();
         parentContext.getBeanFactory().registerSingleton("resourceConfiguration", new ResourceConfig() {
             {
-                for (Class<?> component : components) {
+                for (Class<?> component : resources) {
                     register(component);
                 }
 //                packages(packages.toArray(new String[packages.size()])); does not work
@@ -55,20 +55,12 @@ public class RestServerBuilder {
         if (!packages.isEmpty()) {
             applicationContext.scan(from(packages).toArray(String.class));
         }
-
         applicationContext.refresh();
         return applicationContext.getBean(Server.class);
     }
 
     private Class[] annotatedClasses(Class... classes) {
-        return from(concat(asList(classes), components)).toArray(Class.class);
+        return from(concat(asList(classes), resources)).toArray(Class.class);
     }
 
-    private Class[] join(Class[] first, Class[] second) {
-        Class[] result = new Class[first.length + second.length];
-        arraycopy(first, 0, result, 0, first.length);
-        arraycopy(second, 0, result, first.length, second.length);
-
-        return result;
-    }
 }
