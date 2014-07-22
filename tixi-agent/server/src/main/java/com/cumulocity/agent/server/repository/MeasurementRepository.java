@@ -2,10 +2,12 @@ package com.cumulocity.agent.server.repository;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
 import com.cumulocity.sdk.client.measurement.MeasurementApi;
 
+@Component
 public class MeasurementRepository {
 
     private static final Logger log = LoggerFactory.getLogger(MeasurementRepository.class);
