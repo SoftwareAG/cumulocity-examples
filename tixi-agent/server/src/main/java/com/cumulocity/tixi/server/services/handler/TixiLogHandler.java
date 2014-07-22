@@ -41,21 +41,31 @@ public class TixiLogHandler extends TixiHandler {
     }
 	
 	private Map<MeasurementKey, MeasurementRepresentation> measurements = new HashMap<>();
-	private LogDefinition logDefinition;
 	private String logId;
 	ProcessedDates processedDates;
+	private RecordDefinition recordDefinition;
 	
 	public void handle(Log log, String recordName) {
 		createProcessedDates();
 		try {
 			this.logId = log.getId();
 			logger.info("Proccess log with id {} for record {}.", logId, recordName);
-			this.logDefinition = logDefinitionRegister.getLogDefinition();
+			LogDefinition logDefinition = logDefinitionRegister.getLogDefinition();
 			if (logDefinition == null) {
 				return;
 			}
+			if(logDefinition.getRecordIds().isEmpty()) {
+				logger.info("Log definition has no records {}.", logDefinition);
+				return;
+			}
+			String recordId = logDefinition.getRecordIds().get(0).getId();
+			recordDefinition = logDefinition.getRecordDefinition(recordId);
+			if(recordDefinition == null) {
+				logger.info("Log definition has no recordDefinition for recordId {}.", recordId);
+				return;
+			}			
 			for (LogItemSet itemSet : log.getItemSets()) {
-				handleItemSet(itemSet, recordName);
+				handleItemSet(itemSet);
 			}
 			saveMeasurements();
 			logger.info("Log with id {} proccessed.", logId);
@@ -87,22 +97,22 @@ public class TixiLogHandler extends TixiHandler {
 		deviceService.update(agentRep);
     }
 
-	private void handleItemSet(LogItemSet itemSet, String recordName) {
+	private void handleItemSet(LogItemSet itemSet) {
 		logger.debug("Proccess log item set with id {} and date {}.", itemSet.getId(), itemSet.getDateTime());
 		if(!processedDates.isNew(itemSet.getDateTime())) {
 			return;
 		}
 		processedDates.add(itemSet.getDateTime());
 	    for (LogItem item : itemSet.getItems()) {
-	    	RecordItemDefinition itemDef = logDefinition.getItem(recordName, item.getId());
+	    	RecordItemDefinition itemDef = recordDefinition.getRecordItemDefinition(item.getId());
 	    	if(itemDef == null) {
-	    		logger.warn("There is no log definition item for record: {}, itemSetId: {}," +
-	    				" itemId: {}; skip this log item.", recordName, logId, item.getId());
+	    		logger.warn("There is no log definition item for logId: {}," +
+	    				" itemId: {}; skip this log item.", logId, item.getId());
 	    		continue;
 	    	}
 	    	if(itemDef.getPath() == null) {
 	    		logger.debug("Log definition item has no path variable " +
-	    				"itemSetId: {} itemId: {}; skip this log item.", logId, item.getId());
+	    				"logId: {} itemId: {}; skip this log item.", logId, item.getId());
 	    		continue;
 	    	}
 	    	
