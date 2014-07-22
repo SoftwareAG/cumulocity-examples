@@ -21,11 +21,7 @@ import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.measurement.MeasurementApi;
 import com.cumulocity.tixi.server.model.SerialNumber;
-import com.cumulocity.tixi.server.model.txml.Log;
-import com.cumulocity.tixi.server.model.txml.LogDefinition;
-import com.cumulocity.tixi.server.model.txml.LogItem;
-import com.cumulocity.tixi.server.model.txml.LogItemSet;
-import com.cumulocity.tixi.server.model.txml.RecordItemDefinition;
+import com.cumulocity.tixi.server.model.txml.*;
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -75,8 +71,8 @@ public class TixiLogHandler extends TixiHandler {
 	    				" itemId: {}; skip this log item.", recordName, logId, item.getId());
 	    		continue;
 	    	}
-	    	if(!isDevicePath(itemDef)) {
-	    		logger.debug("Log definition item has no device path variable " +
+	    	if(itemDef.getPath() == null) {
+	    		logger.debug("Log definition item has no path variable " +
 	    				"itemSetId: {} itemId: {}; skip this log item.", logId, item.getId());
 	    		continue;
 	    	}
@@ -88,27 +84,54 @@ public class TixiLogHandler extends TixiHandler {
 
 	private void handleLogItem(LogItem item, RecordItemDefinition itemDef, Date date) {
 		logger.trace("Proccess log {} item with id.", item.getId());
-		String deviceId = itemDef.getPath().getDeviceId();
+		String deviceId = getDeviceIdOrDefault(itemDef.getPath());
 		MeasurementRepresentation measurement = getMeasurement(new MeasurementKey(deviceId, date));
 		measurement.setProperty(asFragmentName(itemDef), asFragment(item));
 		logger.trace("Item with id {} processed.", item.getId());
+	}
+	
+	private String getDeviceIdOrDefault(RecordItemPath recordItemPath) {
+	    if (recordItemPath instanceof DeviceVariablePath) {
+	        return ((DeviceVariablePath) recordItemPath).getDeviceId();
+	    }
+	    return null;
 	}
 
 	private void saveMeasurements() {
 	    for (Entry<MeasurementKey, MeasurementRepresentation> entry : measurements.entrySet()) {
 	        MeasurementRepresentation measurement = entry.getValue();
 	        String deviceId = entry.getKey().getDeviceId();
-			SerialNumber deviceIdSerial = new SerialNumber(deviceId);
-			try {
-				ManagedObjectRepresentation source = inventoryRepository.findByExternalId(deviceIdSerial);
-				measurement.setSource(source);
-			} catch (SDKException ex) {
-				logger.warn("Cannot find source for {}.", deviceIdSerial);
-				continue;
-			}
+	        ManagedObjectRepresentation source = getSource(deviceId);
+	        if (source == null) {
+	            continue;
+	        }
+			measurement.setSource(source);
 			logger.debug("Create measurement {}.", measurement);
 			measurementApi.create(measurement);
         }
+    }
+
+    private ManagedObjectRepresentation getSource(String deviceId) {
+        if (deviceId == null) {
+            return defaultSource();
+        }
+        return getSourceBySerialNumber(deviceId);
+    }
+
+    private ManagedObjectRepresentation getSourceBySerialNumber(String deviceId) {
+        SerialNumber deviceIdSerial = new SerialNumber(deviceId);
+        try {
+        	return inventoryRepository.findByExternalId(deviceIdSerial);
+        } catch (SDKException ex) {
+        	logger.warn("Cannot find source for {}.", deviceIdSerial);
+        }
+        return null;
+    }
+
+    private ManagedObjectRepresentation defaultSource() {
+        ManagedObjectRepresentation source = new ManagedObjectRepresentation();
+        source.setId(tixiAgentId);
+        return source;
     }
 
 

@@ -51,7 +51,7 @@ public class TixiExternalHandler extends TixiHandler {
 		SerialNumber agentSerial = new SerialNumber(bus.getName() + "_" + tixiAgentId);
 		ManagedObjectRepresentation agentRep = persistedAgents.get(agentSerial);
 		if (agentRep == null) {
-			agentRep = inventoryRepository.saveAgentIfNotExists(agentSerial.getValue(), agentSerial.getValue(), agentSerial, tixiAgentId);
+			agentRep = inventoryRepository.saveAgentIfNotExists(agentSerial.getValue(), bus.getName(), agentSerial, tixiAgentId);
 			persistedAgents.put(agentSerial, agentRep);
 		}
 		SerialNumber deviceSerial = new SerialNumber(device.getName() + "_" + tixiAgentId);

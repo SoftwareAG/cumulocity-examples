@@ -17,7 +17,9 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
+import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
+import com.cumulocity.tixi.server.model.SerialNumber;
 import com.cumulocity.tixi.server.model.txml.Log;
 import com.cumulocity.tixi.server.model.txml.LogDefinition;
 
@@ -54,6 +56,7 @@ public class TixiLogHandlerTest extends BaseTixiHandlerTest {
 			.build();
 		// @formatter:on
 		when(logDefinitionRegister.getLogDefinition()).thenReturn(logDefinition);
+		when(inventoryRepository.findByExternalId(new SerialNumber("device1"))).thenReturn(new ManagedObjectRepresentation());
 		
 		tixiLogHandler.handle(log, "itemSet_1");
 		

@@ -7,7 +7,6 @@ import com.cumulocity.agent.server.context.DeviceContextService;
 import com.cumulocity.agent.server.repository.InventoryRepository;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.sdk.client.measurement.MeasurementApi;
-import com.cumulocity.tixi.server.model.txml.RecordItemDefinition;
 
 public abstract class TixiHandler implements InitializingBean {
 	
@@ -31,9 +30,7 @@ public abstract class TixiHandler implements InitializingBean {
 		Assert.notNull(tixiAgentId);
     }
 	
-	protected boolean isDevicePath(RecordItemDefinition logDefinitionItem) {
-		return logDefinitionItem.getPath() != null && logDefinitionItem.getPath().getDeviceId() != null;
+	protected void setTixiAgentId(GId agentId) {
+	    this.tixiAgentId = agentId;
 	}
-
-
 }

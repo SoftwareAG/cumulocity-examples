@@ -9,6 +9,8 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cumulocity.tixi.server.model.txml.DeviceVariablePath;
+import com.cumulocity.tixi.server.model.txml.ProcessVariablePath;
 import com.cumulocity.tixi.server.model.txml.RecordItemPath;
 import com.google.common.base.Splitter;
 
@@ -37,7 +39,7 @@ public class RecordItemPathAdapter extends XmlAdapter<String, RecordItemPath> {
 	}
 
 	private RecordItemPath unmarshalDevicePath(List<String> parts) {
-		RecordItemPath result = new RecordItemPath();
+		DeviceVariablePath result = new DeviceVariablePath();
 		int index = parts.size() - 1;
 		result.setName(parts.get(index--));
 		result.setDeviceId(parts.get(index--));
@@ -46,8 +48,9 @@ public class RecordItemPathAdapter extends XmlAdapter<String, RecordItemPath> {
 	}
 
 	private RecordItemPath unmarshalProcessVariable(List<String> parts) {
-		// skip now
-		return null;
+		ProcessVariablePath result = new ProcessVariablePath();
+		result.setName(parts.get(parts.size() - 1));
+		return result;
 	}
 
 	@Override
