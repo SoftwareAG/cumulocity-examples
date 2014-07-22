@@ -1,7 +1,6 @@
 package com.cumulocity.tixi.server.services.handler;
 
 import java.math.BigDecimal;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,7 +23,13 @@ import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.measurement.MeasurementApi;
 import com.cumulocity.tixi.server.model.SerialNumber;
-import com.cumulocity.tixi.server.model.txml.*;
+import com.cumulocity.tixi.server.model.txml.DeviceVariablePath;
+import com.cumulocity.tixi.server.model.txml.Log;
+import com.cumulocity.tixi.server.model.txml.LogDefinition;
+import com.cumulocity.tixi.server.model.txml.LogItem;
+import com.cumulocity.tixi.server.model.txml.LogItemSet;
+import com.cumulocity.tixi.server.model.txml.RecordItemDefinition;
+import com.cumulocity.tixi.server.model.txml.RecordItemPath;
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)

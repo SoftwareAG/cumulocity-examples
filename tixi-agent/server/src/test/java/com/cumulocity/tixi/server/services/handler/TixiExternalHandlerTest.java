@@ -2,8 +2,6 @@ package com.cumulocity.tixi.server.services.handler;
 
 import static org.fest.assertions.Assertions.assertThat;
 
-import java.util.Collection;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -15,7 +13,6 @@ public class TixiExternalHandlerTest extends BaseTixiHandlerTest {
 	
 	private TixiExternalHandler handler;
 	private FakeInventoryRepository inventoryRepository = new FakeInventoryRepository();
-	private GId agentId = new GId("agentId");
 
 	@Before
 	public void init() throws Exception {
@@ -46,11 +43,11 @@ public class TixiExternalHandlerTest extends BaseTixiHandlerTest {
 		
 		assertThat(inventoryRepository.getAllExternalIds()).containsOnly(
 				// @formatter:off
-				new SerialNumber("Bus_1"),
-				new SerialNumber("Device_11"),
-				new SerialNumber("Device_12"),
-				new SerialNumber("Bus_2"),
-				new SerialNumber("Device_21"));
+				deviceSerial("Bus_1"),
+				deviceSerial("Device_11"),
+				deviceSerial("Device_12"),
+				deviceSerial("Bus_2"),
+				deviceSerial("Device_21"));
 				// @formatter:on
     }
 	
