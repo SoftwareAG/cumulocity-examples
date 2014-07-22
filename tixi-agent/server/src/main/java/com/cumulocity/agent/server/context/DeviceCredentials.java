@@ -114,6 +114,7 @@ public class DeviceCredentials {
         int result = 1;
         result = prime * result + ((appKey == null) ? 0 : appKey.hashCode());
         result = prime * result + ((deviceId == null) ? 0 : deviceId.hashCode());
+        result = prime * result + pageSize;
         result = prime * result + ((password == null) ? 0 : password.hashCode());
         result = prime * result + ((tenant == null) ? 0 : tenant.hashCode());
         result = prime * result + ((username == null) ? 0 : username.hashCode());
@@ -139,6 +140,8 @@ public class DeviceCredentials {
                 return false;
         } else if (!deviceId.equals(other.deviceId))
             return false;
+        if (pageSize != other.pageSize)
+            return false;
         if (password == null) {
             if (other.password != null)
                 return false;
@@ -156,4 +159,8 @@ public class DeviceCredentials {
             return false;
         return true;
     }
+    
+    
+    
+
 }
