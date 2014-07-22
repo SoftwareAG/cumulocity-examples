@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.cumulocity.tixi.server.model.TixiRequestType;
+import com.cumulocity.tixi.server.model.txml.External;
 import com.cumulocity.tixi.server.model.txml.LogDefinition;
 import com.cumulocity.tixi.server.request.util.RequestIdFactory;
 import com.cumulocity.tixi.server.request.util.RequestStorage;
@@ -18,8 +19,6 @@ public class TixiRequestFactory {
 	private static final String EXTERNAL_REQUEST_FORMAT = 			"[<GetConfig _=\"PROCCFG/External\" ver=\"v\"/>]";
 	private static final String LOG_DEFINITION_REQUEST_FORMAT = 	"[<GetConfig _=\"LOG/LogDefinition\" ver=\"v\"/>]";
     private static final String LOG_REQUEST_FORMAT = 				"[<ReadLog _=\"%s\" ver=\"v\"/>]";
-
-
 
 	private final RequestIdFactory requestIdFactory;
     
@@ -71,6 +70,7 @@ public class TixiRequestFactory {
 
     private TixiRequest createExternalDBRequest() {
         String requestId = requestIdFactory.get().toString();
+        requestStorage.put(requestId, External.class);
         return new TixiRequest("TiXML")
         	.set("requestId", requestId)
         	.set("parameter", EXTERNAL_REQUEST_FORMAT);

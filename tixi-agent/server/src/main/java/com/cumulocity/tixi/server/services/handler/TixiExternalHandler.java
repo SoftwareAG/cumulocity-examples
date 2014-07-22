@@ -34,7 +34,7 @@ public class TixiExternalHandler extends TixiHandler {
 		super(contextService, inventoryRepository, measurementApi, logDefinitionRegister);
 	}
 
-	public void handle(External external, String origFileName) {
+	public void handle(External external) {
 		logger.info("Process external file.");
 		for (Bus bus : external.getBuses()) {
 			logger.info("Process bus {}.", bus);
@@ -48,16 +48,16 @@ public class TixiExternalHandler extends TixiHandler {
 
 	private void handleDevice(Bus bus, Device device) {
 		logger.debug("Process external device: {} on bus: {}.", device, bus);
-		SerialNumber agentSerial = new SerialNumber(bus.getName());
+		SerialNumber agentSerial = new SerialNumber(bus.getName() + "_" + tixiAgentId);
 		ManagedObjectRepresentation agentRep = persistedAgents.get(agentSerial);
 		if (agentRep == null) {
-			agentRep = inventoryRepository.saveAgentIfNotExists(agentSerial.getValue(), agentSerial.getValue(), agentSerial, agentId);
+			agentRep = inventoryRepository.saveAgentIfNotExists(agentSerial.getValue(), agentSerial.getValue(), agentSerial, tixiAgentId);
 			persistedAgents.put(agentSerial, agentRep);
 		}
-		SerialNumber deviceSerial = new SerialNumber(device.getName());
+		SerialNumber deviceSerial = new SerialNumber(device.getName() + "_" + tixiAgentId);
 		ManagedObjectRepresentation deviceRep = persistedDevices.get(deviceSerial);
 		if (deviceRep == null) {
-			deviceRep = inventoryRepository.saveDeviceIfNotExists(deviceSerial, agentRep.getId());
+			deviceRep = inventoryRepository.saveDeviceIfNotExists(deviceSerial, device.getName(), agentRep.getId());
 			persistedDevices.put(deviceSerial, deviceRep);
 		}
 		logger.debug("Device processed.");

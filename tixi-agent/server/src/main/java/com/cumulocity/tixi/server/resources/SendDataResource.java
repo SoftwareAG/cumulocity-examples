@@ -66,7 +66,7 @@ public class SendDataResource {
 		} else if (requestEntityType == Log.class) {
 		    tixiService.handleLog(fileName, origFileName);
 		} else if (requestEntityType == External.class) {
-			tixiService.handleExternal(fileName, origFileName);
+			tixiService.handleExternal(fileName);
 		} else {
 		    logger.warn("Can't handle request type " + requestEntityType);
 		}

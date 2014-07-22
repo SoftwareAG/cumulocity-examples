@@ -53,7 +53,7 @@ public class InventoryRepository {
 	    return managedObjectRepresentation;
     }
 	
-	public ManagedObjectRepresentation saveDeviceIfNotExists(SerialNumber serial, GId parentId) {
+	public ManagedObjectRepresentation saveDeviceIfNotExists(SerialNumber serial, String name, GId parentId) {
 		ManagedObjectRepresentation managedObjectRepresentation  = findMoOrNull(serial);
 		if(managedObjectRepresentation != null) {
 			return managedObjectRepresentation;
@@ -61,7 +61,7 @@ public class InventoryRepository {
 		logger.debug("Create device for serial: {} and agent: {}.", serial, parentId);
 		managedObjectRepresentation = new ManagedObjectRepresentation();
 		managedObjectRepresentation.set(new IsDevice());
-		managedObjectRepresentation.setName(serial.getValue());
+		managedObjectRepresentation.setName(name);
 		managedObjectRepresentation.setType("tixi_device");
 		managedObjectRepresentation = save(managedObjectRepresentation, serial);
 		bindToAgent(parentId, managedObjectRepresentation.getId());

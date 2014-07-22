@@ -60,10 +60,10 @@ public class TixiLogHandler extends TixiHandler {
 			logger.info("Log with id {} proccessed.", logId);
 		} catch (Exception ex) {
 			logger.info("Log with id " + logId + " processing failed.", ex);
-			deviceControlRepository.markAllOperationsFailed(agentId);
+			deviceControlRepository.markAllOperationsFailed(tixiAgentId);
 			return;
 		}
-		deviceControlRepository.markAllOperationsSuccess(agentId);
+		deviceControlRepository.markAllOperationsSuccess(tixiAgentId);
 	}
 
 	private void handleItemSet(LogItemSet itemSet, String recordName) {

@@ -37,9 +37,9 @@ public class TixiXmlService {
         logger.info("File " + fileName + " with expected entity " + Log.class.getSimpleName() + " processed.");
     }
 	
-	public void handleExternal(String fileName, String origFileName) {
+	public void handleExternal(String fileName) {
 		External unmarshaled = parse(fileName, External.class);
-		beanFactory.getBean(TixiExternalHandler.class).handle(unmarshaled, origFileName);
+		beanFactory.getBean(TixiExternalHandler.class).handle(unmarshaled);
         logger.info("File " + fileName + " with expected entity " + External.class.getSimpleName() + " processed.");
     }
 	
