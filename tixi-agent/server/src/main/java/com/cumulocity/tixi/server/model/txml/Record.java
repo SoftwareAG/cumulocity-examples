@@ -7,25 +7,23 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElements;
-import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import com.cumulocity.tixi.server.components.txml.TXMLDateAdapter;
 
-@XmlRootElement(name = "LogItemSet")
-public class LogItemSet extends LogBaseItem {
+public class Record extends LogBaseItem {
 
 	@XmlAttribute
 	@XmlJavaTypeAdapter(TXMLDateAdapter.class)
 	private Date dateTime;
 
-	@XmlElements({ @XmlElement(name = "LogItem") })
-	private List<LogItem> items = new ArrayList<>();
+	@XmlElements({ @XmlElement(name = "RecordItem") })
+	private List<RecordItem> recordItems = new ArrayList<>();
 
-	public LogItemSet() {
+	public Record() {
 	}
 
-	public LogItemSet(String id, Date dateTime) {
+	public Record(String id, Date dateTime) {
 		super(id);
 		this.dateTime = dateTime;
 	}
@@ -38,17 +36,17 @@ public class LogItemSet extends LogBaseItem {
 		this.dateTime = dateTime;
 	}
 
-	public List<LogItem> getItems() {
-		return items;
+	public List<RecordItem> getRecordItems() {
+		return recordItems;
 	}
 
-	public void setItems(List<LogItem> items) {
-		this.items = items;
+	public void setRecordItems(List<RecordItem> recordItems) {
+		this.recordItems = recordItems;
 	}
 
 	@Override
 	public String toString() {
-		return String.format("LogItemSet [id=%s, dateTime=%s, items=%s]", id, dateTime, items);
+		return String.format("LogItemSet [id=%s, dateTime=%s, recordItems=%s]", id, dateTime, recordItems);
 	}
 
 	@Override
@@ -57,7 +55,7 @@ public class LogItemSet extends LogBaseItem {
 		int result = 1;
 		result = prime * result + ((dateTime == null) ? 0 : dateTime.hashCode());
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		result = prime * result + ((items == null) ? 0 : items.hashCode());
+		result = prime * result + ((recordItems == null) ? 0 : recordItems.hashCode());
 		return result;
 	}
 
@@ -69,7 +67,7 @@ public class LogItemSet extends LogBaseItem {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		LogItemSet other = (LogItemSet) obj;
+		Record other = (Record) obj;
 		if (dateTime == null) {
 			if (other.dateTime != null)
 				return false;
@@ -80,10 +78,10 @@ public class LogItemSet extends LogBaseItem {
 				return false;
 		} else if (!id.equals(other.id))
 			return false;
-		if (items == null) {
-			if (other.items != null)
+		if (recordItems == null) {
+			if (other.recordItems != null)
 				return false;
-		} else if (!items.equals(other.items))
+		} else if (!recordItems.equals(other.recordItems))
 			return false;
 		return true;
 	}

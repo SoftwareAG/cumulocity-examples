@@ -83,4 +83,9 @@ public class TixiRequest {
 		    return false;
 	    return true;
     }
+
+	@Override
+    public String toString() {
+	    return String.format("TixiRequest [request=%s, properties=%s]", request, properties);
+    }
 }

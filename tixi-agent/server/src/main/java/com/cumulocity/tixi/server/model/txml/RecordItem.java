@@ -3,21 +3,19 @@ package com.cumulocity.tixi.server.model.txml;
 import java.math.BigDecimal;
 
 import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import com.cumulocity.tixi.server.components.txml.TXMLValueAdaper;
 
-@XmlRootElement(name = "LogItem")
-public class LogItem extends LogBaseItem {
+public class RecordItem extends LogBaseItem {
 
 	@XmlAttribute
 	@XmlJavaTypeAdapter(TXMLValueAdaper.class)
 	private BigDecimal value;
 	
-	public LogItem() {}
+	public RecordItem() {}
 	
-	public LogItem(String id, BigDecimal value) {
+	public RecordItem(String id, BigDecimal value) {
 	    super(id);
 	    this.value = value;
     }
@@ -52,7 +50,7 @@ public class LogItem extends LogBaseItem {
 		    return false;
 	    if (getClass() != obj.getClass())
 		    return false;
-	    LogItem other = (LogItem) obj;
+	    RecordItem other = (RecordItem) obj;
 	    if (id == null) {
 		    if (other.id != null)
 			    return false;

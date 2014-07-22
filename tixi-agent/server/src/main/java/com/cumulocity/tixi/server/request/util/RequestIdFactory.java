@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 public class RequestIdFactory {
 
     private AtomicLong requestId = new AtomicLong(1);
-    
+
     public Long get() {
         return requestId.getAndIncrement();
     }

@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.cumulocity.tixi.server.model.txml.External;
 import com.cumulocity.tixi.server.model.txml.Log;
 import com.cumulocity.tixi.server.model.txml.LogDefinition;
 import com.cumulocity.tixi.server.services.AgentFileSystem;
@@ -73,7 +74,7 @@ public class TXMLUnmarshaller {
 	}
 
 	private static Unmarshaller aJAXBUnmarshaler() throws JAXBException {
-		return JAXBContext.newInstance(LogDefinition.class, Log.class).createUnmarshaller();
+		return JAXBContext.newInstance(LogDefinition.class, Log.class, External.class).createUnmarshaller();
 	}
 	
 	static String stripEnclosingBrackets(String source) {

@@ -17,11 +17,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.cumulocity.tixi.server.model.txml.External;
 import com.cumulocity.tixi.server.model.txml.Log;
 import com.cumulocity.tixi.server.model.txml.LogDefinition;
 import com.cumulocity.tixi.server.request.util.RequestStorage;
 import com.cumulocity.tixi.server.services.AgentFileSystem;
-import com.cumulocity.tixi.server.services.handler.TixiXmlService;
+import com.cumulocity.tixi.server.services.TixiXmlService;
 
 @Path("/senddata")
 public class SendDataResource {
@@ -61,9 +62,11 @@ public class SendDataResource {
 		String fileName = agentFileSystem.writeIncomingFile(fileNamePrefix, fileInputStream);
 		
 		if (requestEntityType == LogDefinition.class) {
-			tixiService.handleLogDefinition(fileName, requestEntityType);
+			tixiService.handleLogDefinition(fileName);
 		} else if (requestEntityType == Log.class) {
-		    tixiService.handleLog(fileName, origFileName, requestEntityType);
+		    tixiService.handleLog(fileName, origFileName);
+		} else if (requestEntityType == External.class) {
+			tixiService.handleExternal(fileName);
 		} else {
 		    logger.warn("Can't handle request type " + requestEntityType);
 		}

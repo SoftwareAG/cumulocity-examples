@@ -1,0 +1,26 @@
+<?xml version='1.0' encoding='UTF-8'?>
+[
+<GetConfig>
+    <External>
+        <Bus Name="Bus_0" _="COM2" family="Modbus" Product="RTU" protocol="Modbus,RTU"
+            Mem="123000" baud="19200" handshake="HALF" type="Master" format="8N1">
+            <Device Name="Device_00" NameUser="RTU" _="1" Pollrate="1s"
+                CharTimeout="50ms" Timeout="300ms" Pause="50ms" DWordInc="2"
+                DwordSwap="0" ForceSingleWordWrite="0" UseCache="1">
+                <Temperatur_U1 _="R" simpleType="Uint16" ind="106"
+                    acc="R" exp="-2" />
+                <Temperatur_U2 _="R" simpleType="Uint16" ind="116"
+                    acc="R" exp="-2" />
+            </Device>
+        </Bus>
+        <Bus Name="Bus_1">
+          <Device Name="Device_10">
+              <Energy_100></Energy_100>
+          </Device>
+          <Device Name="Device_11">
+              <Energy_110></Energy_110>
+          </Device>
+        </Bus>
+    </External>
+</GetConfig>
+]

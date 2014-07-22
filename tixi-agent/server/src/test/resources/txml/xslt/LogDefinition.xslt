@@ -3,25 +3,36 @@
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 	<xsl:template match="/">
 		<LogDefinition>
-			<Records>
-				<xsl:for-each select="GetConfig/LogDefinition/Records/*">
-					<LogDefinitionItemSet>
+			<xsl:for-each select="/GetConfig/LogDefinition/LogFiles | /LogDefinition/LogFiles">
+				<RecordIds>
+					<xsl:for-each select="current()/*[@record]">
+						<RecordId>
+							<xsl:attribute name="id">
+	                            <xsl:value-of select="@record" />
+	                        </xsl:attribute>
+						</RecordId>
+					</xsl:for-each>
+				</RecordIds>
+			</xsl:for-each>
+			<RecordDefinitions>
+				<xsl:for-each select="GetConfig/LogDefinition/Records/* | /LogDefinition/Records/*">
+					<RecordDefinition>
 						<xsl:attribute name="id">
 		                  <xsl:value-of select="name()" />
 		                </xsl:attribute>
-						<LogDefinitionItems>
+						<RecordDefinitionItems>
 							<xsl:for-each select="current()/*">
-								<LogDefinitionItem>
+								<RecordDefinitionItem>
 									<xsl:copy-of select="@*" />
 									<xsl:attribute name="id">
 				                        <xsl:value-of select="name()" />
 				                    </xsl:attribute>
-								</LogDefinitionItem>
+								</RecordDefinitionItem>
 							</xsl:for-each>
-						</LogDefinitionItems>
-					</LogDefinitionItemSet>
+						</RecordDefinitionItems>
+					</RecordDefinition>
 				</xsl:for-each>
-			</Records>
+			</RecordDefinitions>
 		</LogDefinition>
 	</xsl:template>
 </xsl:stylesheet>

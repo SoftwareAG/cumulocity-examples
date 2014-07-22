@@ -4,36 +4,32 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
 
 import com.cumulocity.agent.server.context.DeviceContextService;
-import com.cumulocity.agent.server.repository.InventoryRepository;
 import com.cumulocity.model.idtype.GId;
-import com.cumulocity.sdk.client.measurement.MeasurementApi;
-import com.cumulocity.tixi.server.model.txml.LogDefinitionItem;
+import com.cumulocity.tixi.server.services.DeviceService;
 
 public abstract class TixiHandler implements InitializingBean {
-	
-	protected final DeviceContextService contextService;
-	protected final InventoryRepository inventoryRepository;
-	protected final MeasurementApi measurementApi;
-	protected final LogDefinitionRegister logDefinitionRegister;
-	protected GId tixiAgentId;
 
-	public TixiHandler(DeviceContextService contextService, InventoryRepository inventoryRepository,
-            MeasurementApi measurementApi, LogDefinitionRegister logDefinitionRegister) {
-	    this.contextService = contextService;
-	    this.inventoryRepository = inventoryRepository;
-	    this.measurementApi = measurementApi;
-	    this.logDefinitionRegister = logDefinitionRegister;
+    protected final DeviceContextService contextService;
+
+    protected final DeviceService deviceService;
+
+    protected final LogDefinitionRegister logDefinitionRegister;
+
+    protected GId tixiAgentId;
+
+    public TixiHandler(DeviceContextService contextService, DeviceService deviceService, LogDefinitionRegister logDefinitionRegister) {
+        this.contextService = contextService;
+        this.deviceService = deviceService;
+        this.logDefinitionRegister = logDefinitionRegister;
     }
-	
-	@Override
+
+    @Override
     public void afterPropertiesSet() throws Exception {
-		tixiAgentId = contextService.getCredentials().getDeviceId();
-		Assert.notNull(tixiAgentId);
+        tixiAgentId = contextService.getCredentials().getDeviceId();
+        Assert.notNull(tixiAgentId);
     }
 	
-	protected boolean isDevicePath(LogDefinitionItem logDefinitionItem) {
-		return logDefinitionItem.getPath() != null && logDefinitionItem.getPath().getDeviceId() != null;
+	protected void setTixiAgentId(GId agentId) {
+	    this.tixiAgentId = agentId;
 	}
-
-
 }
