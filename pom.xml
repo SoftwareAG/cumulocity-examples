@@ -15,7 +15,7 @@
 		<maven.compiler.source>1.7</maven.compiler.source>
 		<maven.compiler.target>1.7</maven.compiler.target>
 
-		<c8y.version>5.8.0-SNAPSHOT</c8y.version>
+		<c8y.version>5.9.0-SNAPSHOT</c8y.version>
 		<slf4j.version>1.7.0</slf4j.version>
 		<spring.version>3.2.6.RELEASE</spring.version>
 

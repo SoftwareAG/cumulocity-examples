@@ -1,5 +1,7 @@
 package com.cumulocity.tixi.server.services.handler;
 
+import static com.cumulocity.tixi.server.model.ManagedObjects.asManagedObject;
+
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
@@ -16,20 +18,16 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.cumulocity.agent.server.context.DeviceContextService;
-import com.cumulocity.agent.server.repository.DeviceControlRepository;
-import com.cumulocity.agent.server.repository.InventoryRepository;
+import com.cumulocity.agent.server.repository.MeasurementRepository;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
 import com.cumulocity.sdk.client.SDKException;
-import com.cumulocity.sdk.client.measurement.MeasurementApi;
+import com.cumulocity.tixi.server.model.ManagedObjects;
 import com.cumulocity.tixi.server.model.SerialNumber;
-import com.cumulocity.tixi.server.model.txml.DeviceVariablePath;
-import com.cumulocity.tixi.server.model.txml.Log;
-import com.cumulocity.tixi.server.model.txml.LogDefinition;
-import com.cumulocity.tixi.server.model.txml.LogItem;
-import com.cumulocity.tixi.server.model.txml.LogItemSet;
-import com.cumulocity.tixi.server.model.txml.RecordItemDefinition;
-import com.cumulocity.tixi.server.model.txml.RecordItemPath;
+import com.cumulocity.tixi.server.model.txml.*;
+import com.cumulocity.tixi.server.services.DeviceControlService;
+import com.cumulocity.tixi.server.services.DeviceService;
+import com.google.common.base.Optional;
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -37,13 +35,15 @@ public class TixiLogHandler extends TixiHandler {
 	
 	static final String AGENT_PROP_LAST_LOG_FILE_DATE = "lastLogFile";
 	private static final Logger logger = LoggerFactory.getLogger(TixiLogHandler.class);
-	private DeviceControlRepository deviceControlRepository;
+	private DeviceControlService deviceControlService;
+    private MeasurementRepository measurementRepository;
 
 	@Autowired
-	public TixiLogHandler(DeviceContextService deviceContextService, InventoryRepository inventoryRepository,
-            MeasurementApi measurementApi, LogDefinitionRegister logDefinitionRegister, DeviceControlRepository deviceControlRepository) {
-	    super(deviceContextService, inventoryRepository, measurementApi, logDefinitionRegister);
-		this.deviceControlRepository = deviceControlRepository;
+	public TixiLogHandler(DeviceContextService deviceContextService, DeviceService deviceService,
+	        MeasurementRepository measurementRepository, LogDefinitionRegister logDefinitionRegister, DeviceControlService deviceControlService) {
+	    super(deviceContextService, deviceService,  logDefinitionRegister);
+        this.measurementRepository = measurementRepository;
+		this.deviceControlService = deviceControlService;
     }
 	
 	private Map<MeasurementKey, MeasurementRepresentation> measurements = new HashMap<>();
@@ -67,11 +67,11 @@ public class TixiLogHandler extends TixiHandler {
 			logger.info("Log with id {} proccessed.", logId);
 		} catch (Exception ex) {
 			logger.info("Log with id " + logId + " processing failed.", ex);
-			deviceControlRepository.markAllOperationsFailed(tixiAgentId);
+			deviceControlService.markAllOperationsFailed(tixiAgentId);
 			return;
 		}
-		deviceControlRepository.markAllOperationsSuccess(tixiAgentId);
-		updateProcessedDates();
+		deviceControlService.markAllOperationsSuccess(tixiAgentId);		
+        updateProcessedDates();
 	}
 
     private void updateProcessedDates() {
@@ -80,10 +80,10 @@ public class TixiLogHandler extends TixiHandler {
 		}
     }
 
-	private void createProcessedDates() {
+	private ProcessedDates createProcessedDates() {
 		ManagedObjectRepresentation agentRep = inventoryRepository.findById(tixiAgentId);
 		Date lastLogFile = (Date) agentRep.getProperty(AGENT_PROP_LAST_LOG_FILE_DATE);
-		processedDates = new ProcessedDates(lastLogFile);
+		return new ProcessedDates(lastLogFile);
     }
 
 	private void saveLastLogFileDateInAgent(Date lastProcessedDate) {
@@ -136,38 +136,16 @@ public class TixiLogHandler extends TixiHandler {
 	    for (Entry<MeasurementKey, MeasurementRepresentation> entry : measurements.entrySet()) {
 	        MeasurementRepresentation measurement = entry.getValue();
 	        String deviceId = entry.getKey().getDeviceId();
-	        ManagedObjectRepresentation source = getSource(deviceId);
+			ManagedObjectRepresentation source = Optional.fromNullable(deviceService.find(new SerialNumber(deviceId))).or(asManagedObject(tixiAgentId));
 	        if (source == null) {
 	            continue;
 	        }
 			measurement.setSource(source);
 			logger.debug("Create measurement {}.", measurement);
-			measurementApi.create(measurement);
+			measurementRepository.save(measurement);
         }
     }
 
-    private ManagedObjectRepresentation getSource(String deviceId) {
-        if (deviceId == null) {
-            return defaultSource();
-        }
-        return getSourceBySerialNumber(deviceId);
-    }
-
-    private ManagedObjectRepresentation getSourceBySerialNumber(String deviceId) {
-        SerialNumber deviceIdSerial = new SerialNumber(deviceId);
-        try {
-        	return inventoryRepository.findByExternalId(deviceIdSerial);
-        } catch (SDKException ex) {
-        	logger.warn("Cannot find source for {}.", deviceIdSerial);
-        }
-        return null;
-    }
-
-    private ManagedObjectRepresentation defaultSource() {
-        ManagedObjectRepresentation source = new ManagedObjectRepresentation();
-        source.setId(tixiAgentId);
-        return source;
-    }
 
 
 	private static Map<String, BigDecimal> asFragment(LogItem logItem) {

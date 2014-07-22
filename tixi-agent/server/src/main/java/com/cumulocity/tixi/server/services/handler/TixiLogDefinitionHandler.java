@@ -8,9 +8,9 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.cumulocity.agent.server.context.DeviceContextService;
-import com.cumulocity.agent.server.repository.InventoryRepository;
 import com.cumulocity.sdk.client.measurement.MeasurementApi;
 import com.cumulocity.tixi.server.model.txml.LogDefinition;
+import com.cumulocity.tixi.server.services.DeviceService;
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -19,9 +19,9 @@ public class TixiLogDefinitionHandler extends TixiHandler {
 	private static final Logger logger = LoggerFactory.getLogger(TixiLogDefinitionHandler.class);
 
 	@Autowired
-	public TixiLogDefinitionHandler(DeviceContextService deviceContextService, InventoryRepository inventoryRepository,
-	        MeasurementApi measurementApi, LogDefinitionRegister logDefinitionRegister) {
-		super(deviceContextService, inventoryRepository, measurementApi, logDefinitionRegister);
+	public TixiLogDefinitionHandler(DeviceContextService deviceContextService, DeviceService deviceService,
+	         LogDefinitionRegister logDefinitionRegister) {
+		super(deviceContextService, deviceService,  logDefinitionRegister);
 	}
 
 	public void handle(LogDefinition logDefinition) {

@@ -9,12 +9,11 @@ import com.cumulocity.tixi.server.model.txml.LogDefinition;
 public class TixiLogDefinitionHandlerTest extends BaseTixiHandlerTest {
 	
 	private TixiLogDefinitionHandler handler;
-	private FakeInventoryRepository inventoryRepository = new FakeInventoryRepository();
 
 	@Before
 	public void init() throws Exception {
 		super.init();
-		handler = new TixiLogDefinitionHandler(deviceContextService, inventoryRepository, measurementApi, logDefinitionRegister);
+		handler = new TixiLogDefinitionHandler(deviceContextService, deviceService,  logDefinitionRegister);
 	}
 	
 	@Test

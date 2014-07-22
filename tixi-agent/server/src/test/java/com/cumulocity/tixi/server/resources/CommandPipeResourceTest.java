@@ -1,45 +1,28 @@
 package com.cumulocity.tixi.server.resources;
 
-import static com.cumulocity.tixi.server.resources.TixiRequest.statusOK;
-import static org.fest.assertions.Assertions.assertThat;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 
 import com.cumulocity.tixi.server.model.TixiRequestType;
-import com.cumulocity.tixi.server.request.util.Device;
-import com.cumulocity.tixi.server.services.DeviceControlService;
-import com.cumulocity.tixi.server.services.MessageChannel;
-import com.cumulocity.tixi.server.services.TixiRequestFactory;
-import com.cumulocity.tixi.server.services.handler.LogDefinitionRegister;
+import com.cumulocity.tixi.server.services.DeviceMessageChannelService;
 
 public class CommandPipeResourceTest {
 
-    Device device = mock(Device.class);
-    DeviceControlService deviceControlService = mock(DeviceControlService.class);
-    TixiRequestFactory tixiRequestFactory = mock(TixiRequestFactory.class);
-    LogDefinitionRegister logDefinitionRegister = mock(LogDefinitionRegister.class);
-    CommandPipeResource commandPipe = new CommandPipeResource(device, deviceControlService, tixiRequestFactory, logDefinitionRegister);
+    DeviceMessageChannelService device = mock(DeviceMessageChannelService.class);
 
-	@Test
+    CommandPipeResource commandPipe = new CommandPipeResource(device);
+
+    @Test
     public void shouldBootstrap() {
         ArgumentCaptor<TixiRequestType> reqTypeCaptor = ArgumentCaptor.forClass(TixiRequestType.class);
-        
-        commandPipe.open("some_serial", "some_user");
-        
-        verify(device, times(2)).put(reqTypeCaptor.capture());
-        assertThat(reqTypeCaptor.getAllValues()).containsExactly(TixiRequestType.EXTERNAL_DATABASE, TixiRequestType.LOG_DEFINITION);
-        verify(device).put(statusOK());
-    }
-    
-    @SuppressWarnings("unchecked")
-    @Test
-    public void shouldSubscribeOnOperations() {
-    	commandPipe.open("some_serial", "some_user");
 
-    	verify(deviceControlService).subscirbe(any(MessageChannel.class));
+        commandPipe.open("some_serial", "some_user");
+
+        verify(device).registerMessageOutput(Mockito.any(ChunkedOutputMessageChannel.class));
     }
-    
+
 }

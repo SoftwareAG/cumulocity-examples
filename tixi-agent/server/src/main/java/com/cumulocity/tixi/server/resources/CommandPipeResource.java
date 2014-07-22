@@ -1,5 +1,7 @@
 package com.cumulocity.tixi.server.resources;
 
+import static com.cumulocity.tixi.server.model.TixiRequestType.EXTERNAL_DATABASE;
+import static com.cumulocity.tixi.server.model.TixiRequestType.LOG_DEFINITION;
 import static com.cumulocity.tixi.server.resources.TixiRequest.statusOK;
 
 import javax.ws.rs.GET;
@@ -15,14 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import c8y.MeasurementRequestOperation;
 
-import com.cumulocity.rest.representation.operation.OperationRepresentation;
-import com.cumulocity.tixi.server.model.TixiRequestType;
 import com.cumulocity.tixi.server.model.txml.LogDefinition;
-import com.cumulocity.tixi.server.request.util.Device;
-import com.cumulocity.tixi.server.services.DeviceControlService;
-import com.cumulocity.tixi.server.services.MessageChannel;
-import com.cumulocity.tixi.server.services.MessageChannelContext;
-import com.cumulocity.tixi.server.services.TixiRequestFactory;
+import com.cumulocity.tixi.server.services.*;
 import com.cumulocity.tixi.server.services.handler.LogDefinitionRegister;
 
 @Path("/openchannel")
@@ -30,48 +26,21 @@ public class CommandPipeResource {
     
     private static final Logger logger = LoggerFactory.getLogger(CommandPipeResource.class);
 
-    private final Device device;
-    private final DeviceControlService deviceControlService;
-    private final TixiRequestFactory requestFactory;
-    private final LogDefinitionRegister LogDefinitionRegister;
+    private final DeviceMessageChannelService deviceMessageChannel;
 
     @Autowired
-    public CommandPipeResource(Device device, DeviceControlService deviceControlService, TixiRequestFactory requestFactory, LogDefinitionRegister LogDefinitionRegister) {
-	    this.device = device;
-	    this.deviceControlService = deviceControlService;
-		this.requestFactory = requestFactory;
-		this.LogDefinitionRegister = LogDefinitionRegister;
+    public CommandPipeResource(DeviceMessageChannelService deviceMessageChannelService) {
+	    this.deviceMessageChannel = deviceMessageChannelService;
     }
 
 	@GET
     @Produces(MediaType.APPLICATION_JSON)
     public ChunkedOutput<TixiRequest> open(@QueryParam("serial") final String serial, @QueryParam("user") final String user) {
 	    logger.info("Open channel request from: serial " + serial + " user " + user);
-	    ChunkedOutput<TixiRequest> output = new ChunkedOutput<TixiRequest>(TixiRequest.class, "\r\n");
-	    device.setOutput(output);
-	    device.put(statusOK());
-        device.put(TixiRequestType.EXTERNAL_DATABASE);
-        device.put(TixiRequestType.LOG_DEFINITION);
-        deviceControlService.subscirbe(new OperationMessageChannel());
+	    final ChunkedOutput<TixiRequest> output = new ChunkedOutput<TixiRequest>(TixiRequest.class, "\r\n");
+        deviceMessageChannel.registerMessageOutput(new ChunkedOutputMessageChannel<>(output));
         return output;
     }
 	
-	private class OperationMessageChannel implements MessageChannel<OperationRepresentation> {
-		
-		public void send(MessageChannelContext context, MeasurementRequestOperation measurementRequest) {
-			logger.info("Received measurement request {}.", measurementRequest);
-			LogDefinition logDefinition = LogDefinitionRegister.getLogDefinition();
-			if(logDefinition == null) {
-				logger.info("Log definition not availablel skip measurement request.");
-				return;
-			}
-			if(logDefinition.getRecordIds().isEmpty()) {
-				logger.warn("Log definition %s has no records!", logDefinition);
-				return;
-			}
-			String recordId = logDefinition.getRecordIds().get(0).getId();
-			TixiRequest tixiRequest = requestFactory.createLogRequest(recordId);
-			device.put(tixiRequest);
-		}
-	}
+	
 }

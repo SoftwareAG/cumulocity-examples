@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.cumulocity.agent.server.context.DeviceContextService;
-import com.cumulocity.agent.server.repository.InventoryRepository;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.measurement.MeasurementApi;
@@ -19,6 +18,7 @@ import com.cumulocity.tixi.server.model.SerialNumber;
 import com.cumulocity.tixi.server.model.txml.External;
 import com.cumulocity.tixi.server.model.txml.External.Bus;
 import com.cumulocity.tixi.server.model.txml.External.Device;
+import com.cumulocity.tixi.server.services.DeviceService;
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -30,10 +30,9 @@ public class TixiExternalHandler extends TixiHandler {
 	private final Map<SerialNumber, ManagedObjectRepresentation> persistedDevices = new HashMap<>();
 
 	@Autowired
-	public TixiExternalHandler(DeviceContextService contextService, InventoryRepository inventoryRepository,
-	        MeasurementApi measurementApi, LogDefinitionRegister logDefinitionRegister) {
-		super(contextService, inventoryRepository, measurementApi, logDefinitionRegister);
-	}
+    public TixiExternalHandler(DeviceContextService contextService, DeviceService deviceService, LogDefinitionRegister logDefinitionRegister) {
+        super(contextService, deviceService, logDefinitionRegister);
+    }
 
 	public void handle(External external) {
 		logger.info("Process external file.");
@@ -49,16 +48,17 @@ public class TixiExternalHandler extends TixiHandler {
 
 	private void handleDevice(Bus bus, Device device) {
 		logger.debug("Process external device: {} on bus: {}.", device, bus);
-		SerialNumber agentSerial = new SerialNumber(bus.getName() + "_" + GId.asString(tixiAgentId));
+		String id = GId.asString(tixiAgentId);
+		SerialNumber agentSerial = new SerialNumber(bus.getName() + "_" + id);
 		ManagedObjectRepresentation agentRep = persistedAgents.get(agentSerial);
 		if (agentRep == null) {
-			agentRep = inventoryRepository.saveAgentIfNotExists(agentSerial.getValue(), bus.getName(), agentSerial, tixiAgentId);
+			agentRep = deviceService.saveAgentIfNotExists(agentSerial.getValue(), bus.getName(), agentSerial, tixiAgentId);
 			persistedAgents.put(agentSerial, agentRep);
 		}
-		SerialNumber deviceSerial = new SerialNumber(device.getName() + "_" + GId.asString(tixiAgentId));
+		SerialNumber deviceSerial = new SerialNumber(device.getName() + "_" + id);
 		ManagedObjectRepresentation deviceRep = persistedDevices.get(deviceSerial);
 		if (deviceRep == null) {
-			deviceRep = inventoryRepository.saveDeviceIfNotExists(deviceSerial, device.getName(), agentRep.getId());
+			deviceRep = deviceService.saveDeviceIfNotExists(deviceSerial, device.getName(), agentRep.getId());
 			persistedDevices.put(deviceSerial, deviceRep);
 		}
 		logger.debug("Device processed.");

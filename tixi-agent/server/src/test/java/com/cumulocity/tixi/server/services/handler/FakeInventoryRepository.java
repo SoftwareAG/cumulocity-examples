@@ -45,13 +45,14 @@ public class FakeInventoryRepository extends InventoryRepository {
     }
 
 	@Override
-    public void bindToAgent(GId agentId, GId deviceId) {
+    public void bindToParent(GId agentId, GId deviceId) {
 		idToAgentId.put(deviceId, agentId);
     }
 		
-    public ManagedObjectRepresentation save(ManagedObjectRepresentation rep, SerialNumber serial) {
+	@Override
+    public ManagedObjectRepresentation save(ManagedObjectRepresentation rep, ID ... serial) {
 	    rep = save(rep);
-	    extIdToMo.put(serial, rep);
+	    extIdToMo.put(serial[0], rep);
 	    return rep;
     }
 

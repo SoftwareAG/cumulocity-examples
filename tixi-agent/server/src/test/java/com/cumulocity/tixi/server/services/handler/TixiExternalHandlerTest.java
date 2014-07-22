@@ -5,20 +5,20 @@ import static org.fest.assertions.Assertions.assertThat;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.cumulocity.model.idtype.GId;
 import com.cumulocity.tixi.server.model.SerialNumber;
 import com.cumulocity.tixi.server.model.txml.External;
 import com.cumulocity.tixi.server.model.txml.ExternalBuilder;
 
 public class TixiExternalHandlerTest extends BaseTixiHandlerTest {
-	
-	private TixiExternalHandler handler;
-	private FakeInventoryRepository inventoryRepository = new FakeInventoryRepository();
 
-	@Before
-	public void init() throws Exception {
-		super.init();
-		handler = new TixiExternalHandler(deviceContextService, inventoryRepository, measurementApi, logDefinitionRegister);
-		handler.afterPropertiesSet();
+    private TixiExternalHandler handler;
+
+    @Before
+    public void init() {
+        super.init();
+        handler = new TixiExternalHandler(deviceContextService, deviceService, logDefinitionRegister);
+        handler.afterPropertiesSet();
 	}
 	
 	@Test

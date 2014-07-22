@@ -2,16 +2,12 @@ package com.cumulocity.tixi.server.services.handler;
 
 import static com.cumulocity.tixi.server.model.txml.LogBuilder.aLog;
 import static com.cumulocity.tixi.server.model.txml.LogDefinitionBuilder.aLogDefinition;
-import static com.cumulocity.tixi.server.model.txml.RecordItemDefinitionBuilder.anItem;
-import static com.cumulocity.tixi.server.services.handler.TixiLogHandler.AGENT_PROP_LAST_LOG_FILE_DATE;
+import static com.cumulocity.tixi.server.model.txml.LogDefinitionItemBuilder.anItem;
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -66,12 +62,11 @@ public class TixiLogHandlerTest extends BaseTixiHandlerTest {
 			.build();
 		// @formatter:on
 		when(logDefinitionRegister.getLogDefinition()).thenReturn(logDefinition);
-		when(inventoryRepository.findByExternalId(new SerialNumber("device1"))).thenReturn(new ManagedObjectRepresentation());
+		inventoryRepository.save( new ManagedObjectRepresentation() , new SerialNumber("device1"));
 		
 		tixiLogHandler.handle(log, "itemSet_1");
 		
-		verify(inventoryRepository, Mockito.times(1)).save(moCaptor.capture());
-		verify(measurementApi, Mockito.times(1)).create(measurementCaptor.capture());
+		verify(measurementRepository, Mockito.times(1)).save(measurementCaptor.capture());
 		MeasurementRepresentation rep = measurementCaptor.getValue();
 		assertThat(rep.get("c8y_measure1")).isEqualTo(aMeasurementValue(1));
 		assertThat(rep.get("c8y_measure2")).isEqualTo(aMeasurementValue(2));

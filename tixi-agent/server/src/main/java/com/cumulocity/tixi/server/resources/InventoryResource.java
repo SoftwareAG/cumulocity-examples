@@ -13,17 +13,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.cumulocity.tixi.server.model.TixiRequestType;
-import com.cumulocity.tixi.server.request.util.Device;
+import com.cumulocity.tixi.server.services.DeviceMessageChannelService;
 
 @Path("/inventory")
 public class InventoryResource {
 
 	private static final Logger logger = LoggerFactory.getLogger(InventoryResource.class);
 	
-    private final Device device;
+    private final DeviceMessageChannelService device;
     
     @Autowired
-    public InventoryResource(Device device) {
+    public InventoryResource(DeviceMessageChannelService device) {
         this.device = device;
     }
 
@@ -31,8 +31,8 @@ public class InventoryResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response open() {
     	logger.info("Inventory request received.");
-        device.put(TixiRequestType.EXTERNAL_DATABASE);
-        device.put(TixiRequestType.LOG_DEFINITION);
+        device.send(TixiRequestType.EXTERNAL_DATABASE);
+        device.send(TixiRequestType.LOG_DEFINITION);
         return Response.ok(statusOK()).build();
     }
 }
