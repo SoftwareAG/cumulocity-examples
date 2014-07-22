@@ -52,7 +52,7 @@ public class TixiLogHandler extends TixiHandler {
 	ProcessedDates processedDates;
 	
 	public void handle(Log log, String recordName) {
-		processedDates = createProcessedDates();
+		createProcessedDates();
 		try {
 			this.logId = log.getId();
 			logger.info("Proccess log with id {} for record {}.", logId, recordName);
@@ -71,15 +71,19 @@ public class TixiLogHandler extends TixiHandler {
 			return;
 		}
 		deviceControlRepository.markAllOperationsSuccess(tixiAgentId);
-		if(processedDates.getLast() != null) {
-			saveLastLogFileDateInAgent(processedDates.getLast());
-		}
+		updateProcessedDates();
 	}
 
-	private ProcessedDates createProcessedDates() {
+    private void updateProcessedDates() {
+        if(processedDates.getLast() != null) {
+			saveLastLogFileDateInAgent(processedDates.getLast());
+		}
+    }
+
+	private void createProcessedDates() {
 		ManagedObjectRepresentation agentRep = inventoryRepository.findById(tixiAgentId);
 		Date lastLogFile = (Date) agentRep.getProperty(AGENT_PROP_LAST_LOG_FILE_DATE);
-		return new ProcessedDates(lastLogFile);
+		processedDates = new ProcessedDates(lastLogFile);
     }
 
 	private void saveLastLogFileDateInAgent(Date lastProcessedDate) {

@@ -64,6 +64,11 @@ public class TXMLUnmarshallerTest {
 					.withSize(21)
 					.withExp(22)
 					.withFormat("format2"))
+				.withRecordItemDefinition(anItem()
+                    .withId("Item_3")
+                    .withType("float")
+                    .withName("Temp PT1000 1")
+                    .withPath("/Process/PV/PT1000_1"))
 			.build();
 		// @formatter:on
 		

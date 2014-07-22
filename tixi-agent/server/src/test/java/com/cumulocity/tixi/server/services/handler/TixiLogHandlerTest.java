@@ -16,7 +16,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.glassfish.hk2.runlevel.RunLevelException;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -82,6 +81,37 @@ public class TixiLogHandlerTest extends BaseTixiHandlerTest {
 	}
 	
 	@Test
+    public void shouldSendCorrectMeasurementsForProcessVariables() throws Exception {
+        // @formatter:off
+        LogDefinition logDefinition = aLogDefinition()
+            .withNewRecordDefinition("itemSet_1")
+            .withRecordItemDefinition(anItem()
+                .withId("EnergieDiff")
+                .withPath("/Process/PV/EnergieDiff"))
+            .withRecordItemDefinition(anItem()
+                .withId("PiValue")
+                .withPath("/Process/PV/PiValue"))
+            .build();
+        
+        Log log = aLog()
+            .withId("itemSet_1")
+            .withNewItemSet("sth", asDate("2000-10-15"))
+                .withItem("EnergieDiff", BigDecimal.valueOf(1))
+                .withItem("PiValue", BigDecimal.valueOf(2))
+            .withNewItemSet("sth", asDate("2000-10-20"))
+            .build();
+        // @formatter:on
+        when(logDefinitionRegister.getLogDefinition()).thenReturn(logDefinition);
+        
+        tixiLogHandler.handle(log, "itemSet_1");
+        
+        verify(measurementApi, Mockito.times(1)).create(measurementCaptor.capture());
+        MeasurementRepresentation rep = measurementCaptor.getValue();
+        assertThat(rep.get("c8y_EnergieDiff")).isEqualTo(aMeasurementValue(1));
+        assertThat(rep.get("c8y_PiValue")).isEqualTo(aMeasurementValue(2));
+    }
+	
+	@Test
 	public void shouldProcessItemSetsWithLaterDateOnly() throws Exception {
 		// @formatter:off
 		Log log = aLog()
@@ -109,7 +139,7 @@ public class TixiLogHandlerTest extends BaseTixiHandlerTest {
 		try {
 	        return DATE_FORMAT.parse(date);
         } catch (ParseException e) {
-        	throw new RunLevelException(e);
+        	throw new RuntimeException(e);
         }
 	}
 }

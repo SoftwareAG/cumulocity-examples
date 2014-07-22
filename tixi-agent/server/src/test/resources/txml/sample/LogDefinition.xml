@@ -19,6 +19,7 @@
 			<Datalogging_2>
 				<Item_2 _="type2" Name="aName2" path="/Process/M-Bus/Device-2/Temperature"
 					size="21" exp="22" format="format2" />
+                <Item_3 Name="Temp PT1000 1" _="float" path="/Process/PV/PT1000_1"/>
 			</Datalogging_2>
 		</Records>
 	</LogDefinition>
