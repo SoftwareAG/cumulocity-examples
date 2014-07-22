@@ -2,6 +2,7 @@ package com.cumulocity.agent.server.repository;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
@@ -14,6 +15,7 @@ public class MeasurementRepository {
 
     private final MeasurementApi measurementApi;
 
+    @Autowired
     public MeasurementRepository(MeasurementApi measurementApi) {
         this.measurementApi = measurementApi;
     }
