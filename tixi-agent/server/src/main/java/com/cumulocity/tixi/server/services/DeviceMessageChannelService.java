@@ -1,8 +1,5 @@
 package com.cumulocity.tixi.server.services;
 
-import static com.cumulocity.tixi.server.model.TixiRequestType.EXTERNAL_DATABASE;
-import static com.cumulocity.tixi.server.model.TixiRequestType.LOG_DEFINITION;
-import static com.cumulocity.tixi.server.resources.TixiRequest.statusOK;
 import static org.joda.time.DateTimeConstants.MILLIS_PER_SECOND;
 
 import java.io.IOException;
@@ -56,12 +53,9 @@ public class DeviceMessageChannelService {
     public void registerMessageOutput(MessageChannel<TixiRequest> output) {
         log.info("Registred new output");
         this.output = output;
-        send(statusOK());
-        send(EXTERNAL_DATABASE);
-        send(LOG_DEFINITION);
     }
 
-    @Scheduled(fixedDelay = 5 * MILLIS_PER_SECOND)
+    @Scheduled(fixedDelay = 1 * MILLIS_PER_SECOND)
     private void flushRequests() {
         if (output == null) {
             log.debug("no output defined");

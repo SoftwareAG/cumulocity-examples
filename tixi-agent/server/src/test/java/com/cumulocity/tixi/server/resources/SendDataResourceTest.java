@@ -14,7 +14,7 @@ import org.mockito.Mockito;
 import com.cumulocity.tixi.server.model.txml.LogDefinition;
 import com.cumulocity.tixi.server.request.util.RequestStorage;
 import com.cumulocity.tixi.server.services.AgentFileSystem;
-import com.cumulocity.tixi.server.services.handler.TixiXmlService;
+import com.cumulocity.tixi.server.services.TixiXmlService;
 
 public class SendDataResourceTest {
 	

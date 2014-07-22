@@ -11,6 +11,7 @@ import org.springframework.beans.factory.ListableBeanFactory;
 import com.cumulocity.tixi.server.components.txml.TXMLUnmarshaller;
 import com.cumulocity.tixi.server.model.txml.Log;
 import com.cumulocity.tixi.server.model.txml.LogDefinition;
+import com.cumulocity.tixi.server.services.TixiXmlService;
 
 public class TixiXmlHandlerTest {
 	

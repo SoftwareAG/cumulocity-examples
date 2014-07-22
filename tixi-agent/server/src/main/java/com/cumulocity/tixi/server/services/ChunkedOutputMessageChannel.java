@@ -1,11 +1,9 @@
-package com.cumulocity.tixi.server.resources;
+package com.cumulocity.tixi.server.services;
 
 import java.io.IOException;
 
 import org.glassfish.jersey.server.ChunkedOutput;
 
-import com.cumulocity.tixi.server.services.MessageChannel;
-import com.cumulocity.tixi.server.services.MessageChannelContext;
 import com.google.common.io.Closeables;
 
 public class ChunkedOutputMessageChannel<T> implements MessageChannel<T> {

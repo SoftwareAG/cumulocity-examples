@@ -1,11 +1,8 @@
 package com.cumulocity.tixi.server.services;
 
-import static com.cumulocity.model.operation.OperationStatus.PENDING;
-import static com.cumulocity.tixi.server.model.TixiRequestType.LOG;
 import static java.util.Arrays.asList;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
-import java.io.IOException;
 import java.util.concurrent.Callable;
 
 import org.slf4j.Logger;
@@ -14,28 +11,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import c8y.IsDevice;
-import c8y.MeasurementRequestOperation;
 
 import com.cumulocity.agent.server.context.DeviceContext;
 import com.cumulocity.agent.server.context.DeviceContextService;
 import com.cumulocity.agent.server.context.DeviceCredentials;
-import com.cumulocity.agent.server.repository.DeviceControlRepository;
 import com.cumulocity.agent.server.repository.IdentityRepository;
 import com.cumulocity.agent.server.repository.InventoryRepository;
 import com.cumulocity.model.Agent;
 import com.cumulocity.model.ID;
 import com.cumulocity.model.idtype.GId;
-import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.rest.representation.devicebootstrap.DeviceCredentialsRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
-import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.devicecontrol.DeviceCredentialsApi;
-import com.cumulocity.sdk.client.devicecontrol.OperationFilter;
-import com.cumulocity.sdk.client.notification.Subscription;
-import com.cumulocity.sdk.client.notification.SubscriptionListener;
 import com.cumulocity.sdk.client.polling.PollingStrategy;
-import com.cumulocity.tixi.server.model.Operations;
 import com.cumulocity.tixi.server.model.SerialNumber;
 import com.cumulocity.tixi.server.model.TixiDeviceCredentails;
 

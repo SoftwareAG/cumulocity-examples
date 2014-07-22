@@ -15,11 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import c8y.MeasurementRequestOperation;
-
-import com.cumulocity.tixi.server.model.txml.LogDefinition;
-import com.cumulocity.tixi.server.services.*;
-import com.cumulocity.tixi.server.services.handler.LogDefinitionRegister;
+import com.cumulocity.tixi.server.services.ChunkedOutputMessageChannel;
+import com.cumulocity.tixi.server.services.DeviceMessageChannelService;
 
 @Path("/openchannel")
 public class CommandPipeResource {
@@ -39,6 +36,9 @@ public class CommandPipeResource {
 	    logger.info("Open channel request from: serial " + serial + " user " + user);
 	    final ChunkedOutput<TixiRequest> output = new ChunkedOutput<TixiRequest>(TixiRequest.class, "\r\n");
         deviceMessageChannel.registerMessageOutput(new ChunkedOutputMessageChannel<>(output));
+        deviceMessageChannel.send(statusOK());
+        deviceMessageChannel.send(EXTERNAL_DATABASE);
+        deviceMessageChannel.send(LOG_DEFINITION);
         return output;
     }
 	

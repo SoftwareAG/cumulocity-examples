@@ -9,6 +9,8 @@ import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import c8y.MeasurementRequestOperation;
 
@@ -26,6 +28,7 @@ import com.cumulocity.tixi.server.model.txml.LogDefinition;
 import com.cumulocity.tixi.server.resources.TixiRequest;
 import com.cumulocity.tixi.server.services.handler.LogDefinitionRegister;
 
+@Component
 public class DeviceControlService {
 
     private static final Logger logger = LoggerFactory.getLogger(DeviceControlService.class);
@@ -40,6 +43,7 @@ public class DeviceControlService {
 
     private final DeviceContextService contextService;
 
+    @Autowired
     public DeviceControlService(DeviceControlRepository repository, DeviceMessageChannelService deviceMessageChannelService,
             TixiRequestFactory requestFactory, LogDefinitionRegister logDefinitionRegister, DeviceContextService deviceContextService) {
         this.repository = repository;

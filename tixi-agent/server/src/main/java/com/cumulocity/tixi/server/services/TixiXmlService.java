@@ -1,4 +1,4 @@
-package com.cumulocity.tixi.server.services.handler;
+package com.cumulocity.tixi.server.services;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +10,9 @@ import com.cumulocity.tixi.server.components.txml.TXMLUnmarshaller;
 import com.cumulocity.tixi.server.model.txml.External;
 import com.cumulocity.tixi.server.model.txml.Log;
 import com.cumulocity.tixi.server.model.txml.LogDefinition;
+import com.cumulocity.tixi.server.services.handler.TixiExternalHandler;
+import com.cumulocity.tixi.server.services.handler.TixiLogDefinitionHandler;
+import com.cumulocity.tixi.server.services.handler.TixiLogHandler;
 
 @Component
 public class TixiXmlService {

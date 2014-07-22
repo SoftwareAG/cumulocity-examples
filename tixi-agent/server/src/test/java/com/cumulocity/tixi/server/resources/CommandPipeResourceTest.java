@@ -8,6 +8,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import com.cumulocity.tixi.server.model.TixiRequestType;
+import com.cumulocity.tixi.server.services.ChunkedOutputMessageChannel;
 import com.cumulocity.tixi.server.services.DeviceMessageChannelService;
 
 public class CommandPipeResourceTest {
