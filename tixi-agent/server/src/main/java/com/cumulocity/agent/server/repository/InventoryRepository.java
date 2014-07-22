@@ -60,7 +60,6 @@ public class InventoryRepository {
 		}
 		logger.debug("Create device for serial: {} and agent: {}.", serial, parentId);
 		managedObjectRepresentation = new ManagedObjectRepresentation();
-		managedObjectRepresentation.set(new IsDevice());
 		managedObjectRepresentation.setName(name);
 		managedObjectRepresentation.setType("tixi_device");
 		managedObjectRepresentation = save(managedObjectRepresentation, serial);
