@@ -38,7 +38,7 @@ public class CommandPipeResource {
 	@GET
     @Produces(MediaType.APPLICATION_JSON)
     public ChunkedOutput<TixiRequest> open(@QueryParam("serial") final String serial, @QueryParam("user") final String user, @QueryParam("deviceID") final String deviceID) {
-	    logger.info("Open channel request from: serial " + serial + " user " + user);
+	    logger.info("Open channel request from: serial: {}, user: {}, deviceID: {}.", serial, user, deviceID);
 	    final ChunkedOutput<TixiRequest> output = new ChunkedOutput<TixiRequest>(TixiRequest.class, "\r\n");
         deviceMessageChannel.registerMessageOutput(new ChunkedOutputMessageChannel<>(output));
         deviceMessageChannel.send(statusOK());

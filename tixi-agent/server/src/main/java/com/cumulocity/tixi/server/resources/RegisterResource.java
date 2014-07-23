@@ -1,6 +1,5 @@
 package com.cumulocity.tixi.server.resources;
 
-import static com.cumulocity.model.idtype.GId.asGId;
 import static com.cumulocity.model.idtype.GId.asString;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -16,11 +15,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.tixi.server.model.SerialNumber;
 import com.cumulocity.tixi.server.model.TixiDeviceCredentails;
-import com.cumulocity.tixi.server.services.DeviceControlService;
 import com.cumulocity.tixi.server.services.DeviceService;
 
 @Path("/register")
