@@ -1,5 +1,7 @@
 package com.cumulocity.tixi.server.services;
 
+import static com.cumulocity.tixi.server.model.TixiRequestType.HEARTBEAT;
+
 import java.io.IOException;
 import java.util.concurrent.*;
 
@@ -40,6 +42,7 @@ public class DeviceMessageChannelService implements InitializingBean {
     @Override
     public void afterPropertiesSet() throws Exception {
         executorService.scheduleAtFixedRate(new WriteResponseCommand(), 1, 5, TimeUnit.SECONDS);
+        executorService.scheduleAtFixedRate(new SendHeartBeatCommand(), 5, 10, TimeUnit.MINUTES);
     }
 
     public void send(TixiRequest tixiRequest) {
@@ -79,6 +82,16 @@ public class DeviceMessageChannelService implements InitializingBean {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
+        }
+    }
+    
+    private class SendHeartBeatCommand implements Runnable {
+        public void run() {
+            if (output == null) {
+                log.debug("no output defined");
+                return;
+            }
+            send(HEARTBEAT);
         }
     }
 }

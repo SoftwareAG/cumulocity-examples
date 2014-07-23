@@ -4,6 +4,7 @@ public enum TixiRequestType {
 	
     LOG_DEFINITION,
     EXTERNAL_DATABASE, 
-    LOG
+    LOG,
+    HEARTBEAT;
     
 }
