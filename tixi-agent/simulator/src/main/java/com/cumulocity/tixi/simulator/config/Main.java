@@ -10,11 +10,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.cumulocity.tixi.simulator.client.CloudClient;
+import com.cumulocity.tixi.simulator.model.TixiCredentials;
 
 
 public class Main {
 	
-	public static final String DEVICE_SERIAL = "5100";
+	public static final String DEVICE_SERIAL = "5102";
 	public static final boolean SCHEDULE_POST_LOG = false;
 	
 	private static final Logger logger = LoggerFactory.getLogger(Main.class);
@@ -29,12 +30,24 @@ public class Main {
 		props = new Properties();
 		props.load(Main.class.getClassLoader().getResourceAsStream("agent.properties"));
 		logger.info("Configuration: " + props);
-		client = new CloudClient(props.getProperty("agent.baseURL"));
+		
+		
+		client = new CloudClient(props.getProperty("agent.baseURL"), readCredentials(props));
     }
 
-	public void startSimulator() throws IOException {
+	private TixiCredentials readCredentials(Properties props) {
+	    if(props.containsKey("agent.user")) {
+	        TixiCredentials credentials = new TixiCredentials();
+	        credentials.user = props.getProperty("agent.user");
+	        credentials.password = props.getProperty("agent.password");
+	        return credentials;
+	    }
+        return null;
+    }
+
+    public void startSimulator() throws IOException {
 		logger.info("Tixi Simulator starts!");
-		client.sendBootstrapRequest();
+		client.sendRegisterRequest();
 		client.sendOpenChannel();
 		if(SCHEDULE_POST_LOG) {
 			schedulePostLog();

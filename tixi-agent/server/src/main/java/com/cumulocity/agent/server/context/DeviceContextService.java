@@ -12,8 +12,8 @@ public interface DeviceContextService {
 
     <V> V callWithinContext(DeviceContext context, Callable<V> task) throws Exception;
     
-    Runnable withinContext(DeviceContext context,Runnable task);
+    Runnable withinContext(DeviceContext context, Runnable task);
     
-    <V> Callable<V> withinContext(DeviceContext context,Callable<V> task);
+    <V> Callable<V> withinContext(DeviceContext context, Callable<V> task);
 
 }

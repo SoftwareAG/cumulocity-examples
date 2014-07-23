@@ -1,21 +1,19 @@
 package com.cumulocity.tixi.server.services;
 
-import static org.joda.time.DateTimeConstants.MILLIS_PER_SECOND;
-
-import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
 
 import c8y.inject.DeviceScope;
 
 import com.cumulocity.tixi.server.model.TixiRequestType;
 import com.cumulocity.tixi.server.resources.TixiRequest;
+import com.cumulocity.tixi.server.services.MessageChannel.MessageChannelListener;
 
 @Component
 @DeviceScope
@@ -44,6 +42,7 @@ public class DeviceMessageChannelService {
         } catch (InterruptedException e) {
             log.warn("Enqueu  tixi request failed", e);
         }
+        flushRequests();
     }
 
     public void send(TixiRequestType requestType) {
@@ -53,22 +52,29 @@ public class DeviceMessageChannelService {
     public void registerMessageOutput(MessageChannel<TixiRequest> output) {
         log.info("Registred new output");
         this.output = output;
+        flushRequests();
     }
 
-    @Scheduled(fixedDelay = 1 * MILLIS_PER_SECOND)
     private void flushRequests() {
+
         if (output == null) {
             log.debug("no output defined");
             return;
         }
-        TixiRequest request = requestQueue.poll();
-        if (request != null) {
+        TixiRequest request;
+        while ((request = requestQueue.poll()) != null) {
             log.debug("Send new tixi request {}.", request);
-            output.send(new MessageChannelContext() {
+            output.send(new MessageChannelListener<TixiRequest>() {
 
                 @Override
-                public void close() throws IOException {
+                public void close(){
                     output = null;
+                }
+
+                @Override
+                public void failed(TixiRequest message) {
+                    requestQueue.add(message);
+
                 }
             }, request);
         }
