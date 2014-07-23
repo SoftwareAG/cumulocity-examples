@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.cumulocity.model.idtype.GId;
+import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.tixi.server.model.SerialNumber;
 import com.cumulocity.tixi.server.model.TixiDeviceCredentails;
 import com.cumulocity.tixi.server.services.DeviceControlService;
@@ -30,12 +31,9 @@ public class RegisterResource {
 
     private final DeviceService deviceService;
 
-    private final DeviceControlService deviceControlService;
-
     @Autowired
-    public RegisterResource(DeviceService deviceService,DeviceControlService deviceControlService) {
+    public RegisterResource(DeviceService deviceService) {
         this.deviceService = deviceService;
-        this.deviceControlService = deviceControlService;
     }
 
     @Produces(APPLICATION_JSON)
@@ -46,8 +44,7 @@ public class RegisterResource {
     }
 
     private Response bootstrap(final String serial) {
-        final TixiDeviceCredentails credentials = deviceService.register(new SerialNumber(serial));
-        deviceControlService.startOperationExecutor(asGId(credentials.getDeviceID()));
+        final TixiDeviceCredentails credentials = deviceService.bootstrap(new SerialNumber(serial));
         logger.info("Device for serial {} registerd: {}.", serial, credentials);
         // @formatter:off
         return Response.ok(
@@ -61,11 +58,10 @@ public class RegisterResource {
 
     private Response standard(final String serial) {
     	// @formatter:off
-        final GId id = deviceService.findGId(new SerialNumber(serial));
-        deviceControlService.startOperationExecutor(id);
+        final ManagedObjectRepresentation device = deviceService.register(new SerialNumber(serial));
         return Response.ok(
         		new TixiRequest("REGISTER")
-        		.set("deviceID", asString(id)))
+        		.set("deviceID", asString(device.getId())))
                 .build();
         // @formatter:on
     }

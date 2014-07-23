@@ -37,7 +37,7 @@ public class DeviceMessageChannelService implements InitializingBean {
     }
 
     @Autowired
-    public DeviceMessageChannelService(TixiRequestFactory requestFactory,DeviceContextService deviceContextService) {
+    public DeviceMessageChannelService(TixiRequestFactory requestFactory, DeviceContextService deviceContextService) {
         this.requestFactory = requestFactory;
         this.deviceContextService = deviceContextService;
         this.executorService = Executors.newScheduledThreadPool(1);

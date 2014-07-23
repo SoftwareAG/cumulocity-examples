@@ -54,30 +54,11 @@ public class DeviceService {
         this.inventoryRepository = inventoryRepository;
     }
 
-    public TixiDeviceCredentails register(final SerialNumber serialNumber) {
-
-        final DeviceCredentialsRepresentation credentials = deviceCredentials.pollCredentials(serialNumber.getValue(), new PollingStrategy(
-                BOOTSTRAP_TIMEOUT_IN_SECONDS, SECONDS, asList(10L)));
-        TixiDeviceCredentails tixiCredentials = TixiDeviceCredentails.from(credentials);
-
-        try {
-            ManagedObjectRepresentation deviceRepresentation = contextService.callWithinContext(
-                    new DeviceContext(DeviceCredentials.from(credentials)), new Callable<ManagedObjectRepresentation>() {
-                        @Override
-                        public ManagedObjectRepresentation call() throws Exception {
-                            ManagedObjectRepresentation agent = saveAgentIfNotExists("c8y_TixiAgent", "c8y_TixiAgent_" + serialNumber.getValue(),
-                                    serialNumber, null);
-                            setRequiredAvailability(agent);
-                            return agent;
-                        }
-
-                    });
-            tixiCredentials.setDeviceID(GId.asString(deviceRepresentation.getId()));
-        } catch (Exception ex) {
-            throw new RuntimeException("Error creating agent for serial number" + serialNumber, ex);
-        }
-
-        return tixiCredentials;
+    public ManagedObjectRepresentation register(final SerialNumber serialNumber) {
+        ManagedObjectRepresentation agent = saveAgentIfNotExists("c8y_TixiAgent", "c8y_TixiAgent_" + serialNumber.getValue(), serialNumber,
+                null);
+        setRequiredAvailability(agent);
+        return agent;
     }
     
     private void setRequiredAvailability(ManagedObjectRepresentation agent) {
@@ -142,6 +123,28 @@ public class DeviceService {
     
     public ManagedObjectRepresentation find(SerialNumber serial) {
         return findMoOrNull(serial);
+    }
+
+    public TixiDeviceCredentails bootstrap(final SerialNumber serialNumber) {
+        final DeviceCredentialsRepresentation credentials = deviceCredentials.pollCredentials(serialNumber.getValue(), new PollingStrategy(
+                BOOTSTRAP_TIMEOUT_IN_SECONDS, SECONDS, asList(10L)));
+        TixiDeviceCredentails tixiCredentials = TixiDeviceCredentails.from(credentials);
+
+        try {
+            ManagedObjectRepresentation deviceRepresentation = contextService.callWithinContext(
+                    new DeviceContext(DeviceCredentials.from(credentials)), new Callable<ManagedObjectRepresentation>() {
+                        @Override
+                        public ManagedObjectRepresentation call() throws Exception {
+                           return register(serialNumber);
+                        }
+
+                    });
+            tixiCredentials.setDeviceID(GId.asString(deviceRepresentation.getId()));
+        } catch (Exception ex) {
+            throw new RuntimeException("Error creating agent for serial number" + serialNumber, ex);
+        }
+
+        return tixiCredentials;
     }
     
 
