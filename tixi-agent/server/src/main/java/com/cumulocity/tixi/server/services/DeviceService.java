@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import c8y.IsDevice;
 import c8y.RequiredAvailability;
+import c8y.SupportedOperations;
 
 import com.cumulocity.agent.server.context.DeviceContext;
 import com.cumulocity.agent.server.context.DeviceContextService;
@@ -56,11 +57,14 @@ public class DeviceService {
         }
         logger.debug("Create agent for serial: {}.", serialNumber);
         managedObjectRepresentation = new ManagedObjectRepresentation();
-        managedObjectRepresentation.set(new IsDevice());
         managedObjectRepresentation.setName("c8y_TixiAgent_" + serialNumber.getValue());
-        managedObjectRepresentation.set(new Agent());
         managedObjectRepresentation.setType("c8y_TixiAgent");
+        managedObjectRepresentation.set(new Agent());
+        managedObjectRepresentation.set(new IsDevice());
         managedObjectRepresentation.set(new RequiredAvailability(15));
+        SupportedOperations supportedOperations = new SupportedOperations();
+        supportedOperations.add("c8y_MeasurementRequestOperation");
+        managedObjectRepresentation.set(supportedOperations);
         managedObjectRepresentation = inventoryRepository.save(managedObjectRepresentation, serialNumber);
         logger.debug("Agent for serial: {} created: {}.", serialNumber, managedObjectRepresentation);
         return managedObjectRepresentation;
