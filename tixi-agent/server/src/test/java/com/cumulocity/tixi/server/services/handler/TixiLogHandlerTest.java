@@ -3,15 +3,11 @@ package com.cumulocity.tixi.server.services.handler;
 import static com.cumulocity.tixi.server.model.txml.LogBuilder.aLog;
 import static com.cumulocity.tixi.server.model.txml.LogDefinitionBuilder.aLogDefinition;
 import static com.cumulocity.tixi.server.model.txml.RecordItemDefinitionBuilder.anItem;
-import static com.cumulocity.tixi.server.services.handler.TixiLogHandler.AGENT_PROP_LAST_LOG_FILE_DATE;
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,8 +29,6 @@ public class TixiLogHandlerTest extends BaseTixiHandlerTest {
 
     private ArgumentCaptor<MeasurementRepresentation> measurementCaptor;
 
-
-    private static DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
     @Before
     public void init() throws Exception {
@@ -59,10 +53,10 @@ public class TixiLogHandlerTest extends BaseTixiHandlerTest {
 			.build();
 		
 		Log log = aLog()
-			.withNewItemSet("sth", asDate("2000-10-15"))
+			.withNewItemSet("sth", asDate(15))
 				.withItem("item_1", BigDecimal.valueOf(1))
 				.withItem("item_2", BigDecimal.valueOf(2))
-			.withNewItemSet("sth", asDate("2000-10-20"))
+			.withNewItemSet("sth", asDate(20))
 			.build();
 		// @formatter:on
 		when(logDefinitionRegister.getLogDefinition()).thenReturn(logDefinition);
@@ -76,7 +70,7 @@ public class TixiLogHandlerTest extends BaseTixiHandlerTest {
 		assertThat(rep.get("c8y_measure2")).isEqualTo(aMeasurementValue(2));
 		assertThat(rep.getType()).isEqualTo("c8y_tixiMeasurement");
 		
-		assertThat(inventoryRepository.findById(agentRep.getId()).getProperty(AGENT_PROP_LAST_LOG_FILE_DATE)).isEqualTo(asDate("2000-10-20"));
+		assertThat(TixiLogHandler.getLastLogFileDate(inventoryRepository.findById(agentRep.getId()))).isEqualTo(asDate(20));
 	}
 	
 	@Test
@@ -93,10 +87,10 @@ public class TixiLogHandlerTest extends BaseTixiHandlerTest {
             .build();
         
         Log log = aLog()
-            .withNewItemSet("sth", asDate("2000-10-15"))
+            .withNewItemSet("sth", asDate(15))
                 .withItem("EnergieDiff", BigDecimal.valueOf(1))
                 .withItem("PiValue", BigDecimal.valueOf(2))
-            .withNewItemSet("sth", asDate("2000-10-20"))
+            .withNewItemSet("sth", asDate(20))
             .build();
         // @formatter:on
         when(logDefinitionRegister.getLogDefinition()).thenReturn(logDefinition);
@@ -123,16 +117,16 @@ public class TixiLogHandlerTest extends BaseTixiHandlerTest {
                 .build();
         
 		Log log = aLog()
-				.withNewItemSet("sth1", asDate("2000-10-15"))
-				.withNewItemSet("sth2", asDate("2000-10-20"))
+				.withNewItemSet("sth1", asDate(15))
+				.withNewItemSet("sth2", asDate(20))
 				.build();
 		// @formatter:on
 		when(logDefinitionRegister.getLogDefinition()).thenReturn(logDefinition);
-		agentRep.setProperty(AGENT_PROP_LAST_LOG_FILE_DATE, asDate("2000-10-18"));
+		TixiLogHandler.setLastLogFileDate(agentRep, asDate(18));
 		
 		tixiLogHandler.handle(log, "dataloggin_1");
 		
-		assertThat(tixiLogHandler.processedDates.getProcessed()).containsOnly(asDate("2000-10-20"));
+		assertThat(tixiLogHandler.processedDates.getProcessed()).containsOnly(asDate(20));
 	}
 	
 	@Test
@@ -150,9 +144,9 @@ public class TixiLogHandlerTest extends BaseTixiHandlerTest {
 						.build();
 		
         Log log = aLog()
-                .withNewItemSet("itemSet_1", asDate("2000-10-20"))
+                .withNewItemSet("itemSet_1", asDate(20))
                     .withItem("EnergieDiff", BigDecimal.valueOf(1))
-                .withNewItemSet("itemSet_2", asDate("2000-10-20"))
+                .withNewItemSet("itemSet_2", asDate(20))
                     .withItem("PiValue", BigDecimal.valueOf(2))
                 .build();
 		// @formatter:on
@@ -162,7 +156,6 @@ public class TixiLogHandlerTest extends BaseTixiHandlerTest {
 		
         verify(measurementRepository, Mockito.times(1)).save(measurementCaptor.capture());
         MeasurementRepresentation rep = measurementCaptor.getValue();
-        System.out.println(rep.toJSON());
         assertThat(rep.get("c8y_EnergieDiff")).isEqualTo(aMeasurementValue(1));
         assertThat(rep.get("c8y_PiValue")).isNull();
 
@@ -174,11 +167,7 @@ public class TixiLogHandlerTest extends BaseTixiHandlerTest {
 		return measurementValue;
 	}
 	
-	private static Date asDate(String date) {
-		try {
-	        return DATE_FORMAT.parse(date);
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
+	private static Date asDate(int time) {
+        return new Date(time);
 	}
 }

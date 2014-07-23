@@ -15,8 +15,8 @@ import com.cumulocity.tixi.simulator.model.TixiCredentials;
 
 public class Main {
 	
-	public static final String DEVICE_SERIAL = "5103";
-	public static final boolean SCHEDULE_POST_LOG = false;
+	public static final String DEVICE_SERIAL = "tixi_20";
+	public static final boolean SCHEDULE_POST_LOG = true;
 	
 	private static final Logger logger = LoggerFactory.getLogger(Main.class);
 	private final Properties props;

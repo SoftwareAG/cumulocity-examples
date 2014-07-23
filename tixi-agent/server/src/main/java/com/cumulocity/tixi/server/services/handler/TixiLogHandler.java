@@ -3,8 +3,12 @@ package com.cumulocity.tixi.server.services.handler;
 import static com.cumulocity.tixi.server.model.ManagedObjects.asManagedObject;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,10 +19,18 @@ import org.springframework.stereotype.Component;
 
 import com.cumulocity.agent.server.context.DeviceContextService;
 import com.cumulocity.agent.server.repository.MeasurementRepository;
+import com.cumulocity.model.DateConverter;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
 import com.cumulocity.tixi.server.model.SerialNumber;
-import com.cumulocity.tixi.server.model.txml.*;
+import com.cumulocity.tixi.server.model.txml.DeviceVariablePath;
+import com.cumulocity.tixi.server.model.txml.Log;
+import com.cumulocity.tixi.server.model.txml.LogDefinition;
+import com.cumulocity.tixi.server.model.txml.Record;
+import com.cumulocity.tixi.server.model.txml.RecordDefinition;
+import com.cumulocity.tixi.server.model.txml.RecordItem;
+import com.cumulocity.tixi.server.model.txml.RecordItemDefinition;
+import com.cumulocity.tixi.server.model.txml.RecordItemPath;
 import com.cumulocity.tixi.server.services.DeviceControlService;
 import com.cumulocity.tixi.server.services.DeviceService;
 import com.google.common.base.Optional;
@@ -27,7 +39,7 @@ import com.google.common.base.Optional;
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class TixiLogHandler extends TixiHandler {
 	
-	static final String AGENT_PROP_LAST_LOG_FILE_DATE = "lastLogFile";
+	private static final String AGENT_PROP_LAST_LOG_FILE_DATE = "lastLogFile";
 	private static final Logger logger = LoggerFactory.getLogger(TixiLogHandler.class);
 	private DeviceControlService deviceControlService;
     private MeasurementRepository measurementRepository;
@@ -88,14 +100,13 @@ public class TixiLogHandler extends TixiHandler {
 
 	private void createProcessedDates() {
 		ManagedObjectRepresentation agentRep = deviceService.find(tixiAgentId);
-		Date lastLogFile = (Date) agentRep.getProperty(AGENT_PROP_LAST_LOG_FILE_DATE);
-		processedDates = new ProcessedDates(lastLogFile);
+		processedDates = new ProcessedDates(getLastLogFileDate(agentRep));
 	}
-
+	
 	private void saveLastLogFileDateInAgent(Date lastProcessedDate) {
 	    ManagedObjectRepresentation agentRep = new ManagedObjectRepresentation();
 		agentRep.setId(tixiAgentId);
-		agentRep.setProperty(AGENT_PROP_LAST_LOG_FILE_DATE, lastProcessedDate);
+		setLastLogFileDate(agentRep, lastProcessedDate);
 		deviceService.update(agentRep);
     }
 
@@ -220,6 +231,23 @@ public class TixiLogHandler extends TixiHandler {
 		        return false;
 	        return true;
         }
+	}
+	
+	static Date getLastLogFileDate(ManagedObjectRepresentation rep) {
+		Object dateStr = rep.getProperty(AGENT_PROP_LAST_LOG_FILE_DATE);
+		if(dateStr == null) {
+			return null;
+		} else {
+			return DateConverter.string2Date(String.valueOf(dateStr));
+		}
+	}
+	
+	static void setLastLogFileDate(ManagedObjectRepresentation rep, Date date) {
+		String dateStr = null;
+		if(date != null) {
+			dateStr = DateConverter.date2String(date);
+		}
+		rep.setProperty(AGENT_PROP_LAST_LOG_FILE_DATE, dateStr);
 	}
 	
 	static class ProcessedDates {
