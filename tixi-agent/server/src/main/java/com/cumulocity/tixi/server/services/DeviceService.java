@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import c8y.IsDevice;
+import c8y.RequiredAvailability;
 
 import com.cumulocity.agent.server.context.DeviceContext;
 import com.cumulocity.agent.server.context.DeviceContextService;
@@ -25,6 +26,7 @@ import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.devicecontrol.DeviceCredentialsApi;
 import com.cumulocity.sdk.client.polling.PollingStrategy;
+import com.cumulocity.tixi.server.model.ManagedObjects;
 import com.cumulocity.tixi.server.model.SerialNumber;
 import com.cumulocity.tixi.server.model.TixiDeviceCredentails;
 
@@ -63,9 +65,12 @@ public class DeviceService {
                     new DeviceContext(DeviceCredentials.from(credentials)), new Callable<ManagedObjectRepresentation>() {
                         @Override
                         public ManagedObjectRepresentation call() throws Exception {
-                            return saveAgentIfNotExists("c8y_TixiAgent", "c8y_TixiAgent_" + serialNumber.getValue(),
+                            ManagedObjectRepresentation agent = saveAgentIfNotExists("c8y_TixiAgent", "c8y_TixiAgent_" + serialNumber.getValue(),
                                     serialNumber, null);
+                            setRequiredAvailability(agent);
+                            return agent;
                         }
+
                     });
             tixiCredentials.setDeviceID(GId.asString(deviceRepresentation.getId()));
         } catch (Exception ex) {
@@ -75,6 +80,12 @@ public class DeviceService {
         return tixiCredentials;
     }
     
+    private void setRequiredAvailability(ManagedObjectRepresentation agent) {
+        ManagedObjectRepresentation update = ManagedObjects.asManagedObject(agent.getId());
+        update.set(new RequiredAvailability(15));
+        inventoryRepository.save(update);
+    }
+
     public ManagedObjectRepresentation saveDeviceIfNotExists(ID id, String name, GId parentId) {
         ManagedObjectRepresentation managedObjectRepresentation  = findMoOrNull(id);
         if(managedObjectRepresentation != null) {
