@@ -21,4 +21,11 @@ public class DeviceContext {
     public ScopeContainer getScope() {
         return scope;
     }
+
+    @Override
+    public String toString() {
+        return "DeviceContext [login=" + login + "]";
+    }
+    
+    
 }

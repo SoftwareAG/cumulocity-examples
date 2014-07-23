@@ -50,29 +50,6 @@ public class DeviceControlService {
         this.logDefinitionRegister = logDefinitionRegister;
     }
 
-    private void subscirbe(GId deviceId, final MessageChannel<MeasurementRequestOperation> messageChannel) {
-
-        logger.info("Try subscribe on operations from device {}.", deviceId);
-        final Subscription<GId> subscription = repository.subscribe(deviceId, new SubscriptionListener<GId, OperationRepresentation>() {
-            @Override
-            public void onNotification(final Subscription<GId> subscription, OperationRepresentation notification) {
-                logger.debug("Received operation {}.", notification);
-                executeMeasurementReqOperation(messageChannel, subscription, notification);
-            }
-
-            @Override
-            public void onError(Subscription<GId> subscription, Throwable ex) {
-                //do nothing
-                logger.error("Error occured for operation subscription for deviceId " + subscription.getObject(), ex);
-            }
-        });
-
-        for (OperationRepresentation operation : repository.findAllByFilter(new OperationFilter().byDevice(GId.asString(deviceId))
-                .byStatus(PENDING))) {
-            executeMeasurementReqOperation(messageChannel, subscription, operation);
-        }
-    }
-
     public void markAllOperationsSuccess(ID agentId) {
         markAllOperations(agentId, OperationStatus.EXECUTING, OperationStatus.SUCCESSFUL);
     }
@@ -91,7 +68,7 @@ public class DeviceControlService {
         }
     }
 
-    private void executeMeasurementReqOperation(final MessageChannel<MeasurementRequestOperation> messageChannel,
+    private void executeMeasurementReqOperation(
             final Subscription<GId> subscription, OperationRepresentation operation) {
         MeasurementRequestOperation measurementRequest = operation.get(MeasurementRequestOperation.class);
         if (acceptMeasurementRequest(measurementRequest)) {
@@ -99,23 +76,6 @@ public class DeviceControlService {
             final OperationRepresentation executingOperation = Operations.asOperation(operation.getId());
             executingOperation.setStatus(OperationStatus.EXECUTING.name());
             repository.save(executingOperation);
-            messageChannel.send(new SubscriberMessageChannelContext(subscription), measurementRequest);
-        } else {
-            logger.info("Operation with id {} not supported by tixi agent.", operation.getId());
-        }
-    }
-
-    private static boolean acceptMeasurementRequest(MeasurementRequestOperation measurementRequest) {
-        return measurementRequest != null && LOG.name().equals(measurementRequest.getRequestName());
-    }
-
-    public void startOperationExecutor(GId deviceId) {
-        subscirbe(deviceId, new OperationMessageChannel());
-    }
-
-    private class OperationMessageChannel implements MessageChannel<MeasurementRequestOperation> {
-
-        public void send(MessageChannelListener<MeasurementRequestOperation> context, MeasurementRequestOperation measurementRequest) {
             logger.info("Received measurement request {}.", measurementRequest);
             LogDefinition logDefinition = logDefinitionRegister.getLogDefinition();
             if (logDefinition == null) {
@@ -129,27 +89,36 @@ public class DeviceControlService {
             String recordId = logDefinition.getRecordIds().get(0).getId();
             TixiRequest tixiRequest = requestFactory.createLogRequest(recordId);
             deviceMessageChannelService.send(tixiRequest);
+        } else {
+            logger.info("Operation with id {} not supported by tixi agent.", operation.getId());
         }
     }
 
-    private static final class SubscriberMessageChannelContext implements MessageChannelListener<MeasurementRequestOperation> {
+    private static boolean acceptMeasurementRequest(MeasurementRequestOperation measurementRequest) {
+        return measurementRequest != null && LOG.name().equals(measurementRequest.getRequestName());
+    }
 
-        private final Subscription<GId> subscription;
-
-        private SubscriberMessageChannelContext(Subscription<GId> subscription) {
-            this.subscription = subscription;
-        }
-
-        @Override
-        public void close() {
-            if (subscription != null) {
-                subscription.unsubscribe();
+    public void startOperationExecutor(GId deviceId) {
+        logger.info("Try subscribe on operations from device {}.", deviceId);
+        final Subscription<GId> subscription = repository.subscribe(deviceId, new SubscriptionListener<GId, OperationRepresentation>() {
+            @Override
+            public void onNotification(final Subscription<GId> subscription, OperationRepresentation notification) {
+                logger.debug("Received operation {}.", notification);
+                executeMeasurementReqOperation( subscription, notification);
             }
-        }
-
-        @Override
-        public void failed(MeasurementRequestOperation message) {
+        
+            @Override
+            public void onError(Subscription<GId> subscription, Throwable ex) {
+                //do nothing
+                logger.error("Error occured for operation subscription for deviceId " + subscription.getObject(), ex);
+            }
+        });
+        
+        for (OperationRepresentation operation : repository.findAllByFilter(new OperationFilter().byDevice(GId.asString(deviceId))
+                .byStatus(PENDING))) {
+            executeMeasurementReqOperation( subscription, operation);
         }
     }
+
 
 }
