@@ -54,6 +54,9 @@ public class TixiRequestFactory {
         if (requestType == TixiRequestType.LOG_DEFINITION) {
             return createLogDefinitionRequest();
         }
+        if (requestType == TixiRequestType.HEARTBEAT) {
+            return createHeartBeatRequest();
+        }
         if (requestType == TixiRequestType.LOG) {
         	throw new RuntimeException("No record id provided!");
         }
@@ -74,5 +77,9 @@ public class TixiRequestFactory {
         return new TixiRequest("TiXML")
         	.set("requestId", requestId)
         	.set("parameter", EXTERNAL_REQUEST_FORMAT);
+    }
+    
+    private TixiRequest createHeartBeatRequest() {
+        return new TixiRequest("IDLE");
     }
 }

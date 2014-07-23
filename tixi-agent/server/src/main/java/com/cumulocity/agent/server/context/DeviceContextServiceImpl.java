@@ -102,4 +102,14 @@ public class DeviceContextServiceImpl implements DeviceContextService {
             }
         };
     }
+
+    @Override
+    public Runnable withinContext(Runnable task) {
+        return withinContext(getContext(), task);
+    }
+
+    @Override
+    public <V> Callable<V> withinContext(Callable<V> task) {
+        return withinContext(getContext(), task);
+    }
 }

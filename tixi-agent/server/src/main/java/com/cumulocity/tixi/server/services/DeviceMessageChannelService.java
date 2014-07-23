@@ -1,6 +1,7 @@
 package com.cumulocity.tixi.server.services;
 
-import java.io.IOException;
+import static com.cumulocity.tixi.server.model.TixiRequestType.HEARTBEAT;
+
 import java.util.concurrent.*;
 
 import org.slf4j.Logger;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import c8y.inject.DeviceScope;
 
+import com.cumulocity.agent.server.context.DeviceContextService;
 import com.cumulocity.tixi.server.model.TixiRequestType;
 import com.cumulocity.tixi.server.resources.TixiRequest;
 import com.cumulocity.tixi.server.services.MessageChannel.MessageChannelListener;
@@ -29,18 +31,22 @@ public class DeviceMessageChannelService implements InitializingBean {
 
     private volatile MessageChannel<TixiRequest> output;
 
+    private DeviceContextService deviceContextService;
+
     protected DeviceMessageChannelService() {
     }
 
     @Autowired
-    public DeviceMessageChannelService(TixiRequestFactory requestFactory) {
+    public DeviceMessageChannelService(TixiRequestFactory requestFactory,DeviceContextService deviceContextService) {
         this.requestFactory = requestFactory;
+        this.deviceContextService = deviceContextService;
         this.executorService = Executors.newScheduledThreadPool(1);
     }
     
     @Override
     public void afterPropertiesSet() throws Exception {
-        executorService.scheduleAtFixedRate(new WriteResponseCommand(), 1, 5, TimeUnit.SECONDS);
+        executorService.scheduleAtFixedRate(deviceContextService.withinContext(new WriteResponseCommand()), 1, 5, TimeUnit.SECONDS);
+        executorService.scheduleAtFixedRate(deviceContextService.withinContext(new SendHeartBeatCommand()), 5, 10, TimeUnit.MINUTES);
     }
 
     public void send(TixiRequest tixiRequest) {
@@ -86,6 +92,16 @@ public class DeviceMessageChannelService implements InitializingBean {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
+        }
+    }
+    
+    private class SendHeartBeatCommand implements Runnable {
+        public void run() {
+            if (output == null) {
+                log.debug("no output defined");
+                return;
+            }
+            send(HEARTBEAT);
         }
     }
 }

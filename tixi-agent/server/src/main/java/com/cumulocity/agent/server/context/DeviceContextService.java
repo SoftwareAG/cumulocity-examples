@@ -15,5 +15,9 @@ public interface DeviceContextService {
     Runnable withinContext(DeviceContext context, Runnable task);
     
     <V> Callable<V> withinContext(DeviceContext context, Callable<V> task);
+    
+    Runnable withinContext(Runnable task);
+    
+    <V> Callable<V> withinContext(Callable<V> task);
 
 }
