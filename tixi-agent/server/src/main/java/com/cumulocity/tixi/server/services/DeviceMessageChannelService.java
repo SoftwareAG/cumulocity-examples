@@ -45,8 +45,8 @@ public class DeviceMessageChannelService implements InitializingBean {
     
     @Override
     public void afterPropertiesSet() throws Exception {
-        executorService.scheduleAtFixedRate(deviceContextService.withinContext(new WriteResponseCommand()), 1, 5, TimeUnit.SECONDS);
-        executorService.scheduleAtFixedRate(deviceContextService.withinContext(new SendHeartBeatCommand()), 5, 10, TimeUnit.MINUTES);
+        executorService.scheduleAtFixedRate(deviceContextService.withinContext(new SendRequestCommand()), 1, 5, TimeUnit.SECONDS);
+        executorService.scheduleAtFixedRate(deviceContextService.withinContext(new EnqueueHeartBeatRequestCommand()), 5, 10, TimeUnit.MINUTES);
     }
 
     public void send(TixiRequest tixiRequest) {
@@ -67,7 +67,7 @@ public class DeviceMessageChannelService implements InitializingBean {
         this.output = output;
     }
     
-    private class WriteResponseCommand implements Runnable {
+    private class SendRequestCommand implements Runnable {
         public void run() {
             if (output == null) {
                 log.debug("no output defined");
@@ -95,7 +95,7 @@ public class DeviceMessageChannelService implements InitializingBean {
         }
     }
     
-    private class SendHeartBeatCommand implements Runnable {
+    private class EnqueueHeartBeatRequestCommand implements Runnable {
         public void run() {
             if (output == null) {
                 log.debug("no output defined");
