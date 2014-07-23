@@ -13,6 +13,7 @@ import c8y.inject.DeviceScope;
 
 import com.cumulocity.tixi.server.model.TixiRequestType;
 import com.cumulocity.tixi.server.resources.TixiRequest;
+import com.cumulocity.tixi.server.services.MessageChannel.MessageChannelListener;
 
 @Component
 @DeviceScope
@@ -69,13 +70,19 @@ public class DeviceMessageChannelService implements InitializingBean {
             try {
                 TixiRequest request = requestQueue.take();
                 log.debug("Send new tixi request {}.", request);
-                output.send(new MessageChannelContext() {
+                output.send(new MessageChannelListener<TixiRequest>() {
 
-                    @Override
-                    public void close() throws IOException {
-                        output = null;
-                    }
-                }, request);
+                @Override
+                public void close(){
+                    output = null;
+                }
+
+                @Override
+                public void failed(TixiRequest message) {
+                    requestQueue.add(message);
+
+                }
+            }, request);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }

@@ -3,8 +3,12 @@ package com.cumulocity.tixi.server.services;
 
 
 public interface MessageChannel<T> {
-
-    void send(MessageChannelContext context, T message);
+    public interface MessageChannelListener<T> {
+        void failed(T message);
+        void close();
+    }
+    
+    void send(MessageChannelListener<T> context, T message);
     
 }
     
