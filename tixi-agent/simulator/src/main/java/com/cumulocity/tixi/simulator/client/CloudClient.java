@@ -71,8 +71,8 @@ public class CloudClient {
     }
 
     public void sendOpenChannel() {
-        String uri = baseUrl + String.format("/Tixi/openchannel?serial=%s&user=%s&password=%s",
-                        Main.DEVICE_SERIAL, credentials.user, credentials.password);
+        String uri = baseUrl + String.format("/Tixi/openchannel?serial=%s&user=%s&password=%s&deviceID=%s",
+                        Main.DEVICE_SERIAL, credentials.user, credentials.password, credentials.deviceID);
         logger.info("Send open channel request to {}", uri);
         Response response = client.target(uri).request().get();
         final ChunkedInput<TixiResponse> chunkedInput =
