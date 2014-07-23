@@ -56,7 +56,7 @@ public class DeviceService {
 
     private void initCredentials(String imei) {
         final DeviceCredentialsRepresentation credentials = bootstrapPlatform.getDeviceCredentialsApi().pollCredentials(imei,
-                new PollingStrategy(300L, SECONDS, asList(10l)));
+                new PollingStrategy(10*60L, SECONDS, asList(10l)));
         CumulocityCredentials cumulocityCredentials = new CumulocityCredentials(credentials.getTenantId(), credentials.getUsername(),
                 credentials.getPassword(), null);
         credentialsManager.saveDeviceCredentials(cumulocityCredentials);
