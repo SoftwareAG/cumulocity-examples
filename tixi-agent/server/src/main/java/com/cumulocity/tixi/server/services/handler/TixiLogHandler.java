@@ -88,7 +88,7 @@ public class TixiLogHandler extends TixiHandler {
 			return;
 		}			
 		for (Record itemSet : log.getRecords()) {
-			handleItemSet(itemSet);
+			handleRecord(itemSet);
 		}
 	}
 
@@ -110,13 +110,13 @@ public class TixiLogHandler extends TixiHandler {
 		deviceService.update(agentRep);
     }
 
-	private void handleItemSet(Record itemSet) {
-		logger.debug("Proccess log item set with id {} and date {}.", itemSet.getId(), itemSet.getDateTime());
-		if(!processedDates.isNew(itemSet.getDateTime())) {
+	private void handleRecord(Record record) {
+		logger.debug("Proccess log item set with id {} and date {}.", record.getId(), record.getDateTime());
+		if(!processedDates.isNew(record.getDateTime())) {
 			return;
 		}
-		processedDates.add(itemSet.getDateTime());
-	    for (RecordItem item : itemSet.getRecordItems()) {
+		processedDates.add(record.getDateTime());
+	    for (RecordItem item : record.getRecordItems()) {
 	    	RecordItemDefinition itemDef = recordDefinition.getRecordItemDefinition(item.getId());
 	    	if(itemDef == null) {
 	    		logger.warn("There is no log definition item for " +
@@ -129,12 +129,12 @@ public class TixiLogHandler extends TixiHandler {
 	    		continue;
 	    	}
 	    	
-	    	handleLogItem(item, itemDef, itemSet.getDateTime());
+	    	handleRecordItem(item, itemDef, record.getDateTime());
 	    }
-	    logger.debug("Proccess log item set with id {} and date {}.", itemSet.getId(), itemSet.getDateTime());
+	    logger.debug("Proccess log item set with id {} and date {}.", record.getId(), record.getDateTime());
     }
 	
-	private void handleLogItem(RecordItem item, RecordItemDefinition itemDef, Date date) {
+	private void handleRecordItem(RecordItem item, RecordItemDefinition itemDef, Date date) {
 		logger.trace("Proccess log {} item with id.", item.getId());
 		String deviceId = getDeviceIdOrDefault(itemDef.getPath());
 		MeasurementRepresentation measurement = getMeasurement(new MeasurementKey(deviceId, date));
