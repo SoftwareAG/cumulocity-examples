@@ -28,6 +28,7 @@ import com.cumulocity.sdk.client.notification.SubscriptionListener;
 import com.cumulocity.tixi.server.model.Operations;
 import com.cumulocity.tixi.server.model.txml.LogDefinition;
 import com.cumulocity.tixi.server.resources.TixiRequest;
+import com.cumulocity.tixi.server.services.MessageChannel.MessageChannelListener;
 import com.cumulocity.tixi.server.services.handler.LogDefinitionRegister;
 
 @Component
@@ -120,7 +121,7 @@ public class DeviceControlService {
 
     private class OperationMessageChannel implements MessageChannel<MeasurementRequestOperation> {
 
-        public void send(MessageChannelContext context, MeasurementRequestOperation measurementRequest) {
+        public void send(MessageChannelListener<MeasurementRequestOperation> context, MeasurementRequestOperation measurementRequest) {
             logger.info("Received measurement request {}.", measurementRequest);
             LogDefinition logDefinition = logDefinitionRegister.getLogDefinition();
             if (logDefinition == null) {
@@ -137,7 +138,7 @@ public class DeviceControlService {
         }
     }
 
-    private static final class SubscriberMessageChannelContext implements MessageChannelContext {
+    private static final class SubscriberMessageChannelContext implements MessageChannelListener<MeasurementRequestOperation> {
 
         private final Subscription<GId> subscription;
 
@@ -146,10 +147,14 @@ public class DeviceControlService {
         }
 
         @Override
-        public void close() throws IOException {
+        public void close() {
             if (subscription != null) {
                 subscription.unsubscribe();
             }
+        }
+
+        @Override
+        public void failed(MeasurementRequestOperation message) {
         }
     }
 

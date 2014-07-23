@@ -27,7 +27,7 @@ public class PropertiesFactoryBean implements FactoryBean<Properties> {
     private String fileName;
 
     public PropertiesFactoryBean(String id, String fileName, Environment environment, ResourceLoader resourceLoader) {
-        this(id, fileName, environment, resourceLoader, true);
+        this(id, fileName, environment, resourceLoader, false);
     }
 
     public PropertiesFactoryBean(String id, String fileName, Environment environment, ResourceLoader resourceLoader, boolean merge) {
