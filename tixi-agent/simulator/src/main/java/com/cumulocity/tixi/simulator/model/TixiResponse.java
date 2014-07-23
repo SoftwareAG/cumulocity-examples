@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TixiResponse {
     
+    private String deviceID;
     private String status;
     private String request;
     private String requestId;
@@ -35,9 +36,17 @@ public class TixiResponse {
         this.parameter = parameter;
     }
     
+    public String getDeviceID() {
+        return deviceID;
+    }
+    public void setDeviceID(String deviceID) {
+        this.deviceID = deviceID;
+    }
     @Override
     public String toString() {
-        return "TixiResponse [status=" + status + ", request=" + request + ", requestId=" + requestId + ", parameter=" + parameter + "]";
+        return "TixiResponse [deviceID=" + deviceID + ", status=" + status + ", request=" + request + ", requestId=" + requestId
+                + ", parameter=" + parameter + "]";
     }
+    
 
 }

@@ -11,11 +11,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import c8y.IsDevice;
+import c8y.RequiredAvailability;
+import c8y.SupportedOperations;
 
 import com.cumulocity.agent.server.context.DeviceContext;
 import com.cumulocity.agent.server.context.DeviceContextService;
 import com.cumulocity.agent.server.context.DeviceCredentials;
-import com.cumulocity.agent.server.repository.IdentityRepository;
 import com.cumulocity.agent.server.repository.InventoryRepository;
 import com.cumulocity.model.Agent;
 import com.cumulocity.model.ID;
@@ -35,8 +36,6 @@ public class DeviceService {
 
     private static final Logger logger = LoggerFactory.getLogger(DeviceService.class);
 
-    private final IdentityRepository identityRepository;
-
     private final DeviceCredentialsApi deviceCredentials;
 
     private final DeviceContextService contextService;
@@ -44,69 +43,74 @@ public class DeviceService {
     private final InventoryRepository inventoryRepository;
 
     @Autowired
-    public DeviceService(IdentityRepository identityRepository, DeviceCredentialsApi deviceCredentials,
+    public DeviceService(DeviceCredentialsApi deviceCredentials,
             DeviceContextService contextService, InventoryRepository inventoryRepository) {
-        this.identityRepository = identityRepository;
         this.deviceCredentials = deviceCredentials;
         this.contextService = contextService;
         this.inventoryRepository = inventoryRepository;
     }
 
-    public TixiDeviceCredentails register(final SerialNumber serialNumber) {
-
-        final DeviceCredentialsRepresentation credentials = deviceCredentials.pollCredentials(serialNumber.getValue(), new PollingStrategy(
-                BOOTSTRAP_TIMEOUT_IN_SECONDS, SECONDS, asList(10L)));
-        TixiDeviceCredentails tixiCredentials = TixiDeviceCredentails.from(credentials);
-
-        try {
-            ManagedObjectRepresentation deviceRepresentation = contextService.callWithinContext(
-                    new DeviceContext(DeviceCredentials.from(credentials)), new Callable<ManagedObjectRepresentation>() {
-                        @Override
-                        public ManagedObjectRepresentation call() throws Exception {
-                            return saveAgentIfNotExists("c8y_TixiAgent", "c8y_TixiAgent_" + serialNumber.getValue(),
-                                    serialNumber, null);
-                        }
-                    });
-            tixiCredentials.setDeviceID(GId.asString(deviceRepresentation.getId()));
-        } catch (Exception ex) {
-            throw new RuntimeException("Error creating agent for serial number" + serialNumber, ex);
-        }
-
-        return tixiCredentials;
-    }
-    
-    public ManagedObjectRepresentation saveDeviceIfNotExists(ID id, String name, GId parentId) {
-        ManagedObjectRepresentation managedObjectRepresentation  = findMoOrNull(id);
+    public ManagedObjectRepresentation saveTixiAgent(final SerialNumber serialNumber) {
+        ManagedObjectRepresentation managedObjectRepresentation  = findMoOrNull(serialNumber);
         if(managedObjectRepresentation != null) {
             return managedObjectRepresentation;
         }
-        logger.debug("Create device for serial: {} and agent: {}.", id, parentId);
+        logger.debug("Create agent for serial: {}.", serialNumber);
+        managedObjectRepresentation = new ManagedObjectRepresentation();
+        managedObjectRepresentation.setName("c8y_TixiAgent_" + serialNumber.getValue());
+        managedObjectRepresentation.setType("c8y_TixiAgent");
+        managedObjectRepresentation.set(new Agent());
+        managedObjectRepresentation.set(new IsDevice());
+        managedObjectRepresentation.set(new RequiredAvailability(15));
+        SupportedOperations supportedOperations = new SupportedOperations();
+        supportedOperations.add("c8y_MeasurementRequestOperation");
+        managedObjectRepresentation.set(supportedOperations);
+        managedObjectRepresentation = inventoryRepository.save(managedObjectRepresentation, serialNumber);
+        logger.debug("Agent for serial: {} created: {}.", serialNumber, managedObjectRepresentation);
+        return managedObjectRepresentation;
+    }
+
+    public ManagedObjectRepresentation saveDeviceIfNotExists(String deviceId, String name, GId parentId) {
+        SerialNumber serialNumber = new SerialNumber(deviceId + "_" + getTixiAgentIdFromContext()); 
+        ManagedObjectRepresentation managedObjectRepresentation  = findMoOrNull(serialNumber);
+        if(managedObjectRepresentation != null) {
+            return managedObjectRepresentation;
+        }
+        logger.debug("Create device for serial: {} and parent: {}.", serialNumber, parentId);
         managedObjectRepresentation = new ManagedObjectRepresentation();
         managedObjectRepresentation.setName(name);
         managedObjectRepresentation.setType("tixi_device");
-        managedObjectRepresentation = inventoryRepository.save(managedObjectRepresentation, id);
-        inventoryRepository. bindToParent(parentId, managedObjectRepresentation.getId());
-        logger.debug("Device for serial: {} created: {}.", id, managedObjectRepresentation);
+        managedObjectRepresentation = inventoryRepository.save(managedObjectRepresentation, serialNumber);
+        inventoryRepository.bindToParent(parentId, managedObjectRepresentation.getId());
+        logger.debug("Device for serial: {} created: {}.", serialNumber, managedObjectRepresentation);
         return managedObjectRepresentation;
     }
-    
-    public ManagedObjectRepresentation saveAgentIfNotExists(String type, String name, SerialNumber serial, GId parentId) {
-        ManagedObjectRepresentation managedObjectRepresentation  = findMoOrNull(serial);
+
+    public ManagedObjectRepresentation saveAgentIfNotExists(String agentId, String name) {
+        GId tixiAgentId = GId.asGId(getTixiAgentIdFromContext());
+        SerialNumber serialNumber = new SerialNumber(agentId + "_" + tixiAgentId.getValue()); 
+        ManagedObjectRepresentation managedObjectRepresentation  = findMoOrNull(serialNumber);
         if(managedObjectRepresentation != null) {
             return managedObjectRepresentation;
         }
-        logger.debug("Create agent for serial: {}.", serial);
+        logger.debug("Create device for serial: {} and parent: {}.", serialNumber, tixiAgentId);
         managedObjectRepresentation = new ManagedObjectRepresentation();
-        managedObjectRepresentation.set(new IsDevice());
         managedObjectRepresentation.setName(name);
+        managedObjectRepresentation.setType(name);
         managedObjectRepresentation.set(new Agent());
-        managedObjectRepresentation.setType(type);
-        managedObjectRepresentation = inventoryRepository.save(managedObjectRepresentation, serial);
-        if(parentId != null) {
-            inventoryRepository.bindToParent(parentId, managedObjectRepresentation.getId());
-        }
-        logger.debug("Agent for serial: {} created: {}.", serial, managedObjectRepresentation);
+        managedObjectRepresentation.set(new IsDevice());
+        managedObjectRepresentation = inventoryRepository.save(managedObjectRepresentation, serialNumber);
+        inventoryRepository.bindToParent(tixiAgentId, managedObjectRepresentation.getId());
+        logger.debug("Agent for serial: {} created: {}.", serialNumber, managedObjectRepresentation);
         return managedObjectRepresentation;
+    }
+    
+    private String getTixiAgentIdFromContext() {
+        GId tixiAgentId = contextService.getCredentials().getDeviceId();
+        if (tixiAgentId == null) {
+            throw new RuntimeException("Tixi agent id cannot be null during device creation");
+        }
+        return tixiAgentId.getValue();
     }
 
     private ManagedObjectRepresentation findMoOrNull(ID agentSerial) {
@@ -117,20 +121,43 @@ public class DeviceService {
         }
     }
     
-    public GId findGId(SerialNumber serialNumber) {
-        return identityRepository.find(serialNumber);
-    }
-    
-    public ManagedObjectRepresentation find (GId id ) {
+    public ManagedObjectRepresentation find(GId id) {
         return inventoryRepository.findById(id);
     }
     
-    public ManagedObjectRepresentation update( ManagedObjectRepresentation managedObjectRepresentation) {
+    public ManagedObjectRepresentation update(ManagedObjectRepresentation managedObjectRepresentation) {
         return inventoryRepository.save(managedObjectRepresentation);
     }
     
-    public ManagedObjectRepresentation find(SerialNumber serial) {
+    public ManagedObjectRepresentation findDevice(String deviceId) {
+        SerialNumber serialNumber = new SerialNumber(deviceId + "_" + getTixiAgentIdFromContext());
+        return findMoOrNull(serialNumber);
+    }
+    
+    public ManagedObjectRepresentation findTixiAgent(SerialNumber serial) {
         return findMoOrNull(serial);
+    }
+
+    public TixiDeviceCredentails bootstrap(final SerialNumber serialNumber) {
+        final DeviceCredentialsRepresentation credentials = deviceCredentials.pollCredentials(serialNumber.getValue(), new PollingStrategy(
+                BOOTSTRAP_TIMEOUT_IN_SECONDS, SECONDS, asList(10L)));
+        TixiDeviceCredentails tixiCredentials = TixiDeviceCredentails.from(credentials);
+
+        try {
+            ManagedObjectRepresentation deviceRepresentation = contextService.callWithinContext(
+                    new DeviceContext(DeviceCredentials.from(credentials)), new Callable<ManagedObjectRepresentation>() {
+                        @Override
+                        public ManagedObjectRepresentation call() throws Exception {
+                           return saveTixiAgent(serialNumber);
+                        }
+
+                    });
+            tixiCredentials.setDeviceID(GId.asString(deviceRepresentation.getId()));
+        } catch (Exception ex) {
+            throw new RuntimeException("Error creating agent for serial number" + serialNumber, ex);
+        }
+
+        return tixiCredentials;
     }
     
 

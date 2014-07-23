@@ -45,12 +45,14 @@ public class DeviceContextServiceImpl implements DeviceContextService {
     public <V> V callWithinContext(DeviceContext context, Callable<V> task) throws Exception {
         DeviceContext previousContext = doGetContext();
         enterContext(context);
+        log.debug("entering to  {} ", context);
         try {
             return task.call();
         } catch (Exception e) {
             log.warn("execution of task failed within tenant : " + context.getLogin().getTenant());
             throw e;
         } finally {
+            log.debug("leaving from {} ", context);
             leaveContext(previousContext);
         }
     }
@@ -101,5 +103,15 @@ public class DeviceContextServiceImpl implements DeviceContextService {
                 return callWithinContext(context, task);
             }
         };
+    }
+
+    @Override
+    public Runnable withinContext(Runnable task) {
+        return withinContext(getContext(), task);
+    }
+
+    @Override
+    public <V> Callable<V> withinContext(Callable<V> task) {
+        return withinContext(getContext(), task);
     }
 }

@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 import com.cumulocity.agent.server.context.DeviceContextService;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
-import com.cumulocity.tixi.server.model.SerialNumber;
 import com.cumulocity.tixi.server.model.txml.External;
 import com.cumulocity.tixi.server.model.txml.External.Bus;
 import com.cumulocity.tixi.server.model.txml.External.Device;
@@ -25,8 +24,8 @@ public class TixiExternalHandler extends TixiHandler {
 
 	private static final Logger logger = LoggerFactory.getLogger(TixiExternalHandler.class);
 	
-	private final Map<SerialNumber, ManagedObjectRepresentation> persistedAgents = new HashMap<>();
-	private final Map<SerialNumber, ManagedObjectRepresentation> persistedDevices = new HashMap<>();
+	private final Map<String, ManagedObjectRepresentation> persistedAgents = new HashMap<>();
+	private final Map<String, ManagedObjectRepresentation> persistedDevices = new HashMap<>();
 
 	@Autowired
     public TixiExternalHandler(DeviceContextService contextService, DeviceService deviceService, LogDefinitionRegister logDefinitionRegister) {
@@ -47,18 +46,17 @@ public class TixiExternalHandler extends TixiHandler {
 
 	private void handleDevice(Bus bus, Device device) {
 		logger.debug("Process external device: {} on bus: {}.", device, bus);
-		String id = GId.asString(tixiAgentId);
-		SerialNumber agentSerial = new SerialNumber(bus.getName() + "_" + id);
-		ManagedObjectRepresentation agentRep = persistedAgents.get(agentSerial);
+		String agentId = bus.getName();
+		ManagedObjectRepresentation agentRep = persistedAgents.get(agentId);
 		if (agentRep == null) {
-			agentRep = deviceService.saveAgentIfNotExists(agentSerial.getValue(), bus.getName(), agentSerial, tixiAgentId);
-			persistedAgents.put(agentSerial, agentRep);
+			agentRep = deviceService.saveAgentIfNotExists(agentId, bus.getName());
+			persistedAgents.put(agentId, agentRep);
 		}
-		SerialNumber deviceSerial = new SerialNumber(device.getName() + "_" + id);
-		ManagedObjectRepresentation deviceRep = persistedDevices.get(deviceSerial);
+		String deviceId = device.getName();
+		ManagedObjectRepresentation deviceRep = persistedDevices.get(deviceId);
 		if (deviceRep == null) {
-			deviceRep = deviceService.saveDeviceIfNotExists(deviceSerial, device.getName(), agentRep.getId());
-			persistedDevices.put(deviceSerial, deviceRep);
+			deviceRep = deviceService.saveDeviceIfNotExists(deviceId, device.getName(), agentRep.getId());
+			persistedDevices.put(deviceId, deviceRep);
 		}
 		logger.debug("Device processed.");
 	}

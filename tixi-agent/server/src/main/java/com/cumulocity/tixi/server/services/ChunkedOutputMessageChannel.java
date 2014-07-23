@@ -15,13 +15,14 @@ public class ChunkedOutputMessageChannel<T> implements MessageChannel<T> {
     }
 
     @Override
-    public void send(MessageChannelContext context, T message) {
+    public void send(MessageChannelListener<T> listener, T message) {
         try {
             chunkedOutput.write(message);
         } catch (IOException e) {
+            listener.failed(message);
             try {
                 Closeables.close(chunkedOutput, true);
-                Closeables.close(context, true);
+                listener.close();
             } catch (IOException ex) {
             }
         }

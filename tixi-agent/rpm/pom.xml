@@ -3,11 +3,10 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>c8y.example</groupId>
-		<artifactId>c8y-examples</artifactId>
-		<version>5.9.0-SNAPSHOT-SNAPSHOT</version>
+		<artifactId>tixi-agent</artifactId>
+		<version>5.9.0-SNAPSHOT</version>
 	</parent>
 
-	<groupId>c8y</groupId>
 	<artifactId>tixi-rpm</artifactId>
     <packaging>rpm</packaging>
 	<name>Cumulocity :: Examples :: Tixi Agent :: RPM</name>
@@ -25,7 +24,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>c8y</groupId>
+            <groupId>c8y.example</groupId>
             <artifactId>tixi-server</artifactId>
             <version>${project.version}</version>
             <type>jar</type>
