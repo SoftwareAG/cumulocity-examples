@@ -3,12 +3,8 @@ package com.cumulocity.tixi.server.services.handler;
 import static com.cumulocity.tixi.server.model.ManagedObjects.asManagedObject;
 
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TreeSet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,15 +18,7 @@ import com.cumulocity.agent.server.repository.MeasurementRepository;
 import com.cumulocity.model.DateConverter;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
-import com.cumulocity.tixi.server.model.SerialNumber;
-import com.cumulocity.tixi.server.model.txml.DeviceVariablePath;
-import com.cumulocity.tixi.server.model.txml.Log;
-import com.cumulocity.tixi.server.model.txml.LogDefinition;
-import com.cumulocity.tixi.server.model.txml.Record;
-import com.cumulocity.tixi.server.model.txml.RecordDefinition;
-import com.cumulocity.tixi.server.model.txml.RecordItem;
-import com.cumulocity.tixi.server.model.txml.RecordItemDefinition;
-import com.cumulocity.tixi.server.model.txml.RecordItemPath;
+import com.cumulocity.tixi.server.model.txml.*;
 import com.cumulocity.tixi.server.services.DeviceControlService;
 import com.cumulocity.tixi.server.services.DeviceService;
 import com.google.common.base.Optional;
@@ -153,7 +141,7 @@ public class TixiLogHandler extends TixiHandler {
 	    for (Entry<MeasurementKey, MeasurementRepresentation> entry : measurements.entrySet()) {
 	        MeasurementRepresentation measurement = entry.getValue();
 	        String deviceId = entry.getKey().getDeviceId();
-			ManagedObjectRepresentation source = Optional.fromNullable(deviceService.find(deviceId)).or(asManagedObject(tixiAgentId));
+			ManagedObjectRepresentation source = Optional.fromNullable(deviceService.findDevice(deviceId)).or(asManagedObject(tixiAgentId));
 	        if (source == null) {
 	            continue;
 	        }

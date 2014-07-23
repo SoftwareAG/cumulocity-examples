@@ -46,11 +46,10 @@ public class TixiExternalHandler extends TixiHandler {
 
 	private void handleDevice(Bus bus, Device device) {
 		logger.debug("Process external device: {} on bus: {}.", device, bus);
-		String id = GId.asString(tixiAgentId);
 		String agentId = bus.getName();
 		ManagedObjectRepresentation agentRep = persistedAgents.get(agentId);
 		if (agentRep == null) {
-			agentRep = deviceService.saveAgentIfNotExists(agentId, bus.getName(), tixiAgentId);
+			agentRep = deviceService.saveAgentIfNotExists(agentId, bus.getName());
 			persistedAgents.put(agentId, agentRep);
 		}
 		String deviceId = device.getName();

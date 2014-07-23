@@ -3,16 +3,12 @@ package com.cumulocity.tixi.server.services;
 import static com.cumulocity.model.operation.OperationStatus.PENDING;
 import static com.cumulocity.tixi.server.model.TixiRequestType.LOG;
 
-import java.io.IOException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import c8y.MeasurementRequestOperation;
-import c8y.inject.DeviceScope;
 
 import com.cumulocity.agent.server.repository.DeviceControlRepository;
 import com.cumulocity.model.ID;
@@ -25,7 +21,6 @@ import com.cumulocity.sdk.client.notification.SubscriptionListener;
 import com.cumulocity.tixi.server.model.Operations;
 import com.cumulocity.tixi.server.model.txml.LogDefinition;
 import com.cumulocity.tixi.server.resources.TixiRequest;
-import com.cumulocity.tixi.server.services.MessageChannel.MessageChannelListener;
 import com.cumulocity.tixi.server.services.handler.LogDefinitionRegister;
 
 @Component
