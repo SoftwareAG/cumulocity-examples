@@ -153,7 +153,7 @@ public class TixiLogHandler extends TixiHandler {
 	    for (Entry<MeasurementKey, MeasurementRepresentation> entry : measurements.entrySet()) {
 	        MeasurementRepresentation measurement = entry.getValue();
 	        String deviceId = entry.getKey().getDeviceId();
-			ManagedObjectRepresentation source = Optional.fromNullable(deviceService.find(new SerialNumber(deviceId))).or(asManagedObject(tixiAgentId));
+			ManagedObjectRepresentation source = Optional.fromNullable(deviceService.find(deviceId)).or(asManagedObject(tixiAgentId));
 	        if (source == null) {
 	            continue;
 	        }

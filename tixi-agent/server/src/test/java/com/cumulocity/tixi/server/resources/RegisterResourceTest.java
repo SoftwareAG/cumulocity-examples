@@ -34,7 +34,7 @@ public class RegisterResourceTest {
     public void shouldRegister() {
         DeviceService deviceService = mock(DeviceService.class);
         RegisterResource resource = new RegisterResource(deviceService);
-        when(deviceService.register(new SerialNumber("12345"))).thenReturn(ManagedObjects.asManagedObject(asGId("id")));
+        when(deviceService.registerTixiAgent(new SerialNumber("12345"))).thenReturn(ManagedObjects.asManagedObject(asGId("id")));
         
         Response response = resource.get("12345", "username");
         TixiRequest tixiResponse = (TixiRequest) response.getEntity();

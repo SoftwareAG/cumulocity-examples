@@ -58,7 +58,7 @@ public class RegisterResource {
 
     private Response standard(final String serial) {
     	// @formatter:off
-        final ManagedObjectRepresentation device = deviceService.register(new SerialNumber(serial));
+        final ManagedObjectRepresentation device = deviceService.registerTixiAgent(new SerialNumber(serial));
         return Response.ok(
         		new TixiRequest("REGISTER")
         		.set("deviceID", asString(device.getId())))

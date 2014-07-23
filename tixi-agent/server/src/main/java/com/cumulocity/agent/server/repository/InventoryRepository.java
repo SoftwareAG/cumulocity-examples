@@ -51,6 +51,9 @@ public class InventoryRepository {
     }
 
     public void bindToParent(GId parentId, GId childId) {
+        if (parentId == null) {
+            return;
+        }
         logger.debug("Bind child device: {} to parent {}.", childId, parentId);
         inventoryApi.getManagedObjectApi(parentId).addChildDevice(childId);
     }
