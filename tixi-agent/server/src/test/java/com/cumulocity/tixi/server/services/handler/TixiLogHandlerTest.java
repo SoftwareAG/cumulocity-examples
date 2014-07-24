@@ -3,9 +3,12 @@ package com.cumulocity.tixi.server.services.handler;
 import static com.cumulocity.tixi.server.model.txml.LogBuilder.aLog;
 import static com.cumulocity.tixi.server.model.txml.LogDefinitionBuilder.aLogDefinition;
 import static com.cumulocity.tixi.server.model.txml.RecordItemDefinitionBuilder.anItem;
+import static com.cumulocity.tixi.server.services.handler.TixiLogHandler.getLastLogFileDate;
 import static org.fest.assertions.Assertions.assertThat;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static com.cumulocity.tixi.server.services.handler.TixiLogHandler.MeasurementKey;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -22,10 +25,11 @@ import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
 import com.cumulocity.tixi.server.model.SerialNumber;
 import com.cumulocity.tixi.server.model.txml.Log;
 import com.cumulocity.tixi.server.model.txml.LogDefinition;
+import com.cumulocity.tixi.server.services.handler.TixiLogHandler.ProcessedDates;
 
 public class TixiLogHandlerTest extends BaseTixiHandlerTest {
 
-    private TixiLogHandler tixiLogHandler;
+	private TixiLogHandler tixiLogHandler;
 
     private ArgumentCaptor<MeasurementRepresentation> measurementCaptor;
 
@@ -33,8 +37,7 @@ public class TixiLogHandlerTest extends BaseTixiHandlerTest {
     @Before
     public void init() throws Exception {
         super.init();
-        tixiLogHandler = new TixiLogHandler(deviceContextService, deviceService, measurementRepository, logDefinitionRegister,
-                deviceControlService);
+        tixiLogHandler = new TixiLogHandler(deviceContextService, deviceService, measurementRepository, logDefinitionRegister, deviceControlService);
         tixiLogHandler.afterPropertiesSet();
         measurementCaptor = ArgumentCaptor.forClass(MeasurementRepresentation.class);
     }
@@ -43,20 +46,20 @@ public class TixiLogHandlerTest extends BaseTixiHandlerTest {
 	public void shouldSendCorrectMeasurementsAndUpdateLogFileDate() throws Exception {
 		// @formatter:off
 		LogDefinition logDefinition = aLogDefinition()
-			.withNewRecordDefinition("itemSet_1")
-			.withRecordItemDefinition(anItem()
-				.withId("item_1")
-				.withPath("/Process/agent1/device1/measure1"))
-			.withRecordItemDefinition(anItem()
-				.withId("item_2")
-				.withPath("/Process/agent1/device1/measure2"))
+			.withNewRecordDef()
+				.withRecordItemDef(anItem()
+					.withId("item_1")
+					.withPath("/Process/agent1/device1/measure1"))
+				.withRecordItemDef(anItem()
+					.withId("item_2")
+					.withPath("/Process/agent1/device1/measure2"))
 			.build();
 		
 		Log log = aLog()
-			.withNewItemSet("sth", asDate(15))
-				.withItem("item_1", BigDecimal.valueOf(1))
-				.withItem("item_2", BigDecimal.valueOf(2))
-			.withNewItemSet("sth", asDate(20))
+			.withNewRecord(asDate(15))
+				.withRecordItem("item_1", BigDecimal.valueOf(1))
+				.withRecordItem("item_2", BigDecimal.valueOf(2))
+			.withNewRecord(asDate(20))
 			.build();
 		// @formatter:on
 		when(logDefinitionRegister.getLogDefinition()).thenReturn(logDefinition);
@@ -64,33 +67,33 @@ public class TixiLogHandlerTest extends BaseTixiHandlerTest {
 		
 		tixiLogHandler.handle(log, "itemSet_1");
 		
-		verify(measurementRepository, Mockito.times(1)).save(measurementCaptor.capture());
+		verify(measurementRepository, times(1)).save(measurementCaptor.capture());
 		MeasurementRepresentation rep = measurementCaptor.getValue();
 		assertThat(rep.get("c8y_measure1")).isEqualTo(aMeasurementValue(1));
 		assertThat(rep.get("c8y_measure2")).isEqualTo(aMeasurementValue(2));
 		assertThat(rep.getType()).isEqualTo("c8y_tixiMeasurement");
 		
-		assertThat(TixiLogHandler.getLastLogFileDate(inventoryRepository.findById(agentRep.getId()))).isEqualTo(asDate(20));
+		assertThat(getLastLogFileDate(inventoryRepository.findById(agentRep.getId()))).isEqualTo(asDate(20));
 	}
 	
 	@Test
     public void shouldSendCorrectMeasurementsForProcessVariables() throws Exception {
         // @formatter:off
         LogDefinition logDefinition = aLogDefinition()
-            .withNewRecordDefinition("itemSet_1")
-            .withRecordItemDefinition(anItem()
-                .withId("EnergieDiff")
-                .withPath("/Process/PV/EnergieDiff"))
-            .withRecordItemDefinition(anItem()
-                .withId("PiValue")
-                .withPath("/Process/PV/PiValue"))
+            .withNewRecordDef()
+	            .withRecordItemDef(anItem()
+	                .withId("EnergieDiff")
+	                .withPath("/Process/PV/EnergieDiff"))
+	            .withRecordItemDef(anItem()
+	                .withId("PiValue")
+	                .withPath("/Process/PV/PiValue"))
             .build();
         
         Log log = aLog()
-            .withNewItemSet("sth", asDate(15))
-                .withItem("EnergieDiff", BigDecimal.valueOf(1))
-                .withItem("PiValue", BigDecimal.valueOf(2))
-            .withNewItemSet("sth", asDate(20))
+            .withNewRecord(asDate(15))
+                .withRecordItem("EnergieDiff", BigDecimal.valueOf(1))
+                .withRecordItem("PiValue", BigDecimal.valueOf(2))
+            .withNewRecord(asDate(20))
             .build();
         // @formatter:on
         when(logDefinitionRegister.getLogDefinition()).thenReturn(logDefinition);
@@ -106,59 +109,46 @@ public class TixiLogHandlerTest extends BaseTixiHandlerTest {
 	@Test
 	public void shouldProcessItemSetsWithLaterDateOnly() throws Exception {
 		// @formatter:off
-        LogDefinition logDefinition = aLogDefinition()
-                .withNewRecordDefinition("itemSet_1")
-	                .withRecordItemDefinition(anItem()
-	                    .withId("EnergieDiff")
-	                    .withPath("/Process/PV/EnergieDiff"))
-	                .withRecordItemDefinition(anItem()
-	                    .withId("PiValue")
-	                    .withPath("/Process/PV/PiValue"))
-                .build();
-        
-		Log log = aLog()
-				.withNewItemSet("sth1", asDate(15))
-				.withNewItemSet("sth2", asDate(20))
+        Log log = aLog()
+				.withNewRecord(asDate(15))
+				.withNewRecord(asDate(20))
 				.build();
 		// @formatter:on
-		when(logDefinitionRegister.getLogDefinition()).thenReturn(logDefinition);
+		when(logDefinitionRegister.getLogDefinition()).thenReturn(
+				aLogDefinition().withNewRecordDef().build());
 		TixiLogHandler.setLastLogFileDate(agentRep, asDate(18));
 		
-		tixiLogHandler.handle(log, "dataloggin_1");
+		ProcessedDates processedDates = tixiLogHandler.createMeasurements(log);
 		
-		assertThat(tixiLogHandler.processedDates.getProcessed()).containsOnly(asDate(20));
+		assertThat(processedDates.getProcessed()).containsOnly(asDate(20));
 	}
 	
 	@Test
-	public void shouldProcessItemSetsForFirstLogFileOnly() throws Exception {
+	public void shouldProcessItemSetsForFirstRecordOnly() throws Exception {
 		// @formatter:off
 		LogDefinition logDefinition = aLogDefinition()
-				.withNewRecordDefinition("itemSet_1")
-					.withRecordItemDefinition(anItem()
-						.withId("EnergieDiff")
-						.withPath("/Process/PV/EnergieDiff"))
-				.withNewRecordDefinition("itemSet_2")
-					.withRecordItemDefinition(anItem()
-						.withId("PiValue")
-						.withPath("/Process/PV/PiValue"))
-						.build();
+			.withNewRecordDef()
+				.withRecordItemDef(anItem()
+					.withId("EnergieDiff")
+					.withPath("/Process/PV/EnergieDiff"))
+			.withNewRecordDef()
+				.withRecordItemDef(anItem()
+					.withId("PiValue")
+					.withPath("/Process/PV/PiValue"))
+			.build();
 		
         Log log = aLog()
-                .withNewItemSet("itemSet_1", asDate(20))
-                    .withItem("EnergieDiff", BigDecimal.valueOf(1))
-                .withNewItemSet("itemSet_2", asDate(20))
-                    .withItem("PiValue", BigDecimal.valueOf(2))
-                .build();
+            .withNewRecord(asDate(20))
+                .withRecordItem("EnergieDiff", BigDecimal.valueOf(1))
+            .withNewRecord(asDate(25))
+                .withRecordItem("PiValue", BigDecimal.valueOf(2))
+            .build();
 		// @formatter:on
 		when(logDefinitionRegister.getLogDefinition()).thenReturn(logDefinition);
 		
-		tixiLogHandler.handle(log, "recordName");
+		tixiLogHandler.createMeasurements(log);
 		
-        verify(measurementRepository, Mockito.times(1)).save(measurementCaptor.capture());
-        MeasurementRepresentation rep = measurementCaptor.getValue();
-        assertThat(rep.get("c8y_EnergieDiff")).isEqualTo(aMeasurementValue(1));
-        assertThat(rep.get("c8y_PiValue")).isNull();
-
+		assertThat(tixiLogHandler.measurements.keySet()).containsOnly(new MeasurementKey(null, asDate(20)));
 	}
 	
 	private static Map<String, Object> aMeasurementValue(int value) {

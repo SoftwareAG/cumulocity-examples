@@ -46,8 +46,8 @@ public class TXMLUnmarshallerTest {
 		
 		// @formatter:off
 		LogDefinition expectedLogDefinition = aLogDefinition()
-			.withNewRecordDefinition("Datalogging_1")
-				.withRecordItemDefinition(anItem()
+			.withNewRecordDef("Datalogging_1")
+				.withRecordItemDef(anItem()
 					.withId("Item_1")
 					.withType("type1")
 					.withName("aName1")
@@ -55,8 +55,8 @@ public class TXMLUnmarshallerTest {
 					.withSize(11)
 					.withExp(12)
 					.withFormat("format1"))
-			.withNewRecordDefinition("Datalogging_2")
-				.withRecordItemDefinition(anItem()
+			.withNewRecordDef("Datalogging_2")
+				.withRecordItemDef(anItem()
 					.withId("Item_2")
 					.withType("type2")
 					.withName("aName2")
@@ -64,7 +64,7 @@ public class TXMLUnmarshallerTest {
 					.withSize(21)
 					.withExp(22)
 					.withFormat("format2"))
-				.withRecordItemDefinition(anItem()
+				.withRecordItemDef(anItem()
                     .withId("Item_3")
                     .withType("float")
                     .withName("Temp PT1000 1")
@@ -84,12 +84,12 @@ public class TXMLUnmarshallerTest {
 		// @formatter:off
 		Log expectedLog = aLog()
 				.withId("Datalogging_1")
-				.withNewItemSet("ID_1", "2014/07/07,12:00:00")
-					.withItem("Item_1", valueOf(11))
-					.withItem("Item_2", valueOf(12))
-				.withNewItemSet("ID_2", "2014/07/07,12:15:00")
-					.withItem("Item_1", valueOf(21))
-					.withItem("Item_2", valueOf(22))
+				.withNewRecord("ID_1", "2014/07/07,12:00:00")
+					.withRecordItem("Item_1", valueOf(11))
+					.withRecordItem("Item_2", valueOf(12))
+				.withNewRecord("ID_2", "2014/07/07,12:15:00")
+					.withRecordItem("Item_1", valueOf(21))
+					.withRecordItem("Item_2", valueOf(22))
 				.build();
 		// @formatter:on
 		
