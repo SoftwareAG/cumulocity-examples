@@ -76,6 +76,8 @@ public class MessageHandler extends ChannelInboundHandlerAdapter {
                 ManagedObjectRepresentation device = createDevice(hardwareRevision, firmwareRevision, contactReason, alarmAndStatus, imei);
                 createMeasurement(imei, battery, auxRssi, tempInCelsius, distance, device);
         } finally {
+            // probably context should be closed here as well
+            // ctx.close();
             ReferenceCountUtil.release(msg);
         }
     }
