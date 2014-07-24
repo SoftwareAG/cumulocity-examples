@@ -25,12 +25,12 @@ import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
 import com.cumulocity.tixi.server.model.SerialNumber;
 import com.cumulocity.tixi.server.model.txml.Log;
 import com.cumulocity.tixi.server.model.txml.LogDefinition;
+import com.cumulocity.tixi.server.model.txml.LogDefinitionBuilder;
 import com.cumulocity.tixi.server.services.handler.TixiLogHandler.ProcessedDates;
 
 public class TixiLogHandlerTest extends BaseTixiHandlerTest {
 
 	private TixiLogHandler tixiLogHandler;
-
     private ArgumentCaptor<MeasurementRepresentation> measurementCaptor;
 
 
@@ -45,7 +45,7 @@ public class TixiLogHandlerTest extends BaseTixiHandlerTest {
     @Test
 	public void shouldSendCorrectMeasurementsAndUpdateLogFileDate() throws Exception {
 		// @formatter:off
-		LogDefinition logDefinition = aLogDefinition()
+    	registeredLogDefinition()
 			.withNewRecordDef()
 				.withRecordItemDef(anItem()
 					.withId("item_1")
@@ -62,16 +62,15 @@ public class TixiLogHandlerTest extends BaseTixiHandlerTest {
 			.withNewRecordItemSet(asDate(20))
 			.build();
 		// @formatter:on
-		when(logDefinitionRegister.getLogDefinition()).thenReturn(logDefinition);
-		inventoryRepository.save( new ManagedObjectRepresentation() , new SerialNumber("device1"));
+		inventoryRepository.save(new ManagedObjectRepresentation() , new SerialNumber("device1"));
 		
-		tixiLogHandler.handle(log, "itemSet_1");
+		tixiLogHandler.handle(log, "record_1");
 		
 		verify(measurementRepository, times(1)).save(measurementCaptor.capture());
-		MeasurementRepresentation rep = measurementCaptor.getValue();
-		assertThat(rep.get("c8y_measure1")).isEqualTo(aMeasurementValue(1));
-		assertThat(rep.get("c8y_measure2")).isEqualTo(aMeasurementValue(2));
-		assertThat(rep.getType()).isEqualTo("c8y_tixiMeasurement");
+		MeasurementRepresentation actual = measurementCaptor.getValue();
+		assertThat(actual.get("c8y_measure1")).isEqualTo(aMeasurementValue(1));
+		assertThat(actual.get("c8y_measure2")).isEqualTo(aMeasurementValue(2));
+		assertThat(actual.getType()).isEqualTo("c8y_tixiMeasurement");
 		
 		assertThat(getLastLogFileDate(inventoryRepository.findById(agentRep.getId()))).isEqualTo(asDate(20));
 	}
@@ -79,7 +78,7 @@ public class TixiLogHandlerTest extends BaseTixiHandlerTest {
 	@Test
     public void shouldSendCorrectMeasurementsForProcessVariables() throws Exception {
         // @formatter:off
-        LogDefinition logDefinition = aLogDefinition()
+		registeredLogDefinition()
             .withNewRecordDef()
 	            .withRecordItemDef(anItem()
 	                .withId("EnergieDiff")
@@ -96,7 +95,6 @@ public class TixiLogHandlerTest extends BaseTixiHandlerTest {
             .withNewRecordItemSet(asDate(20))
             .build();
         // @formatter:on
-        when(logDefinitionRegister.getLogDefinition()).thenReturn(logDefinition);
         
         tixiLogHandler.handle(log, "itemSet_1");
         
@@ -126,7 +124,7 @@ public class TixiLogHandlerTest extends BaseTixiHandlerTest {
 	@Test
 	public void shouldProcessItemSetsForFirstRecordOnly() throws Exception {
 		// @formatter:off
-		LogDefinition logDefinition = aLogDefinition()
+		registeredLogDefinition()
 			.withNewRecordDef()
 				.withRecordItemDef(anItem()
 					.withId("EnergieDiff")
@@ -144,7 +142,6 @@ public class TixiLogHandlerTest extends BaseTixiHandlerTest {
                 .withRecordItem("PiValue", BigDecimal.valueOf(2))
             .build();
 		// @formatter:on
-		when(logDefinitionRegister.getLogDefinition()).thenReturn(logDefinition);
 		
 		tixiLogHandler.createMeasurements(log);
 		
@@ -159,5 +156,18 @@ public class TixiLogHandlerTest extends BaseTixiHandlerTest {
 	
 	private static Date asDate(int time) {
         return new Date(time);
+	}
+	
+	private LogDefinitionBuilder registeredLogDefinition() {
+		return new LogDefinitionBuilder() {
+
+			@Override
+            public LogDefinition build() {
+	            LogDefinition result = super.build();
+	            when(logDefinitionRegister.getLogDefinition()).thenReturn(result);
+	            return result;
+            }
+			
+		};
 	}
 }

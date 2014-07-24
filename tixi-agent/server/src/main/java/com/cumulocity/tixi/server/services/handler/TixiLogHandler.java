@@ -79,7 +79,6 @@ public class TixiLogHandler extends TixiHandler {
 		}			
 		for (RecordItemSet record : log.getRecordItemSets()) {
 			Date recordDateTime = record.getDateTime();
-			System.out.println(recordDateTime.getTime());
 			if(processedDates.isNew(recordDateTime)) {
 				processedDates.add(record.getDateTime());
 				handleRecord(record);
