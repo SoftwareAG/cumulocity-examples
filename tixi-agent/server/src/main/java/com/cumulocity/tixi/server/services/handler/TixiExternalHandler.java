@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.cumulocity.agent.server.context.DeviceContextService;
-import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.tixi.server.model.txml.External;
 import com.cumulocity.tixi.server.model.txml.External.Bus;

@@ -32,8 +32,6 @@ public class TixiLogHandler extends TixiHandler {
 	private final DeviceControlService deviceControlService;
     private final MeasurementRepository measurementRepository;
     
-    Map<MeasurementKey, MeasurementRepresentation> measurements = new HashMap<>();
-
 	@Autowired
 	public TixiLogHandler(DeviceContextService deviceContextService, DeviceService deviceService,
 	        MeasurementRepository measurementRepository, LogDefinitionRegister logDefinitionRegister, DeviceControlService deviceControlService) {
@@ -44,39 +42,88 @@ public class TixiLogHandler extends TixiHandler {
 	
 	public void handle(Log log, String recordName) {
 		logger.info("Proccess log with id {} for record {}.", log.getId(), recordName);
-		ProcessedDates processedDates = null;
+		Measurements measurements = null;
 		try {
-			processedDates = createMeasurements(log);
-			saveMeasurements();
+			measurements = createMeasurements(log);
+			saveMeasurements(measurements.getMeasurements());
 		} catch (Exception ex) {
 			logger.info("Log with id processing failed.", ex);
 			deviceControlService.markAllOperationsFailed(tixiAgentId);
 			return;
 		}
 		deviceControlService.markAllOperationsSuccess(tixiAgentId);		
-        if(processedDates.getLast() != null) {
-			saveLastLogFileDateInAgent(processedDates.getLast());
+        if(measurements.getLastProcessedDate() != null) {
+			saveLastLogFileDateInAgent(measurements.getLastProcessedDate());
 		}
         logger.info("Log proccessed.");
 	}
 	
-	ProcessedDates createMeasurements(Log log) {
-		ProcessedDates processedDates = createProcessedDates();
+	Measurements createMeasurements(Log log) {
+		Measurements measurements = new Measurements(createProcessedDates());
 		RecordDefinition recordDefinition  = getRecordDefinition();
 		if(recordDefinition == null) {
-			return processedDates;
+			return measurements;
 		}			
-		for (RecordItemSet record : log.getRecordItemSets()) {
-			Date recordDateTime = record.getDateTime();
-			if(processedDates.isNew(recordDateTime)) {
-				processedDates.add(record.getDateTime());
-				handleRecord(record, recordDefinition);
+		for (RecordItemSet recordItemSet : log.getRecordItemSets()) {
+			Date recordDateTime = recordItemSet.getDateTime();
+			if(measurements.isNew(recordDateTime)) {
+				measurements.addProcessedDate(recordItemSet.getDateTime());
+				handleRecordItemSet(measurements, recordItemSet, recordDefinition);
 			} else {
-				logger.debug("Skip record with date {} as it have been already processed.", record.getDateTime());
+				logger.debug("Skip record with date {} as it have been already processed.", recordItemSet.getDateTime());
 			}
 		}
-		return processedDates;
+		return measurements;
 	}
+
+	private void handleRecordItemSet(Measurements measurements, RecordItemSet record, RecordDefinition recordDefinition) {
+		logger.debug("Proccess log item set with id {} and date {}.", record.getId(), record.getDateTime());
+	    for (RecordItem item : record.getRecordItems()) {
+	    	RecordItemDefinition itemDef = recordDefinition.getRecordItemDefinition(item.getId());
+	    	if(itemDef == null) {
+	    		logger.warn("There is no log definition item for " +
+	    				" itemId: {}; skip this log item.", item.getId());
+	    		continue;
+	    	}
+	    	if(itemDef.getPath() == null) {
+	    		logger.debug("Log definition item has no path variable " +
+	    				"itemId: {}; skip this log item.", item.getId());
+	    		continue;
+	    	}
+	    	
+	    	handleRecordItem(measurements, item, itemDef, record.getDateTime());
+	    }
+	    logger.debug("Proccess log item set with id {} and date {}.", record.getId(), record.getDateTime());
+    }
+	
+	private void handleRecordItem(Measurements measurements, RecordItem item, RecordItemDefinition itemDef, Date date) {
+		logger.trace("Proccess log {} item with id.", item.getId());
+		String deviceId = getDeviceIdOrDefault(itemDef.getPath());
+		MeasurementRepresentation measurement = measurements.getOrCreateMeasurement(new MeasurementKey(deviceId, date));
+		measurement.setProperty(asFragmentName(itemDef), asFragment(item));
+		logger.trace("Item with id {} processed.", item.getId());
+	}
+	
+	private String getDeviceIdOrDefault(RecordItemPath recordItemPath) {
+	    if (recordItemPath instanceof DeviceVariablePath) {
+	        return ((DeviceVariablePath) recordItemPath).getDeviceId();
+	    }
+	    return null;
+	}
+
+	private void saveMeasurements(Map<MeasurementKey, MeasurementRepresentation> measurements) {
+	    for (Entry<MeasurementKey, MeasurementRepresentation> entry : measurements.entrySet()) {
+	        MeasurementRepresentation measurement = entry.getValue();
+	        String deviceId = entry.getKey().getDeviceId();
+			ManagedObjectRepresentation source = Optional.fromNullable(deviceService.findDevice(deviceId)).or(asManagedObject(tixiAgentId));
+	        if (source == null) {
+	            continue;
+	        }
+			measurement.setSource(source);
+			logger.debug("Create measurement {}.", measurement);
+			measurementRepository.save(measurement);
+        }
+    }
 	
 	private RecordDefinition getRecordDefinition() {
 		LogDefinition logDefinition = logDefinitionRegister.getLogDefinition();
@@ -93,9 +140,9 @@ public class TixiLogHandler extends TixiHandler {
 		return recordDefinition;
 	}
 
-	private ProcessedDates createProcessedDates() {
+	private Date createProcessedDates() {
 		ManagedObjectRepresentation agentRep = deviceService.find(tixiAgentId);
-		return new ProcessedDates(getLastLogFileDate(agentRep));
+		return getLastLogFileDate(agentRep);
 	}
 	
 	private void saveLastLogFileDateInAgent(Date lastProcessedDate) {
@@ -103,55 +150,6 @@ public class TixiLogHandler extends TixiHandler {
 		agentRep.setId(tixiAgentId);
 		setLastLogFileDate(agentRep, lastProcessedDate);
 		deviceService.update(agentRep);
-    }
-
-	private void handleRecord(RecordItemSet record, RecordDefinition recordDefinition) {
-		logger.debug("Proccess log item set with id {} and date {}.", record.getId(), record.getDateTime());
-	    for (RecordItem item : record.getRecordItems()) {
-	    	RecordItemDefinition itemDef = recordDefinition.getRecordItemDefinition(item.getId());
-	    	if(itemDef == null) {
-	    		logger.warn("There is no log definition item for " +
-	    				" itemId: {}; skip this log item.", item.getId());
-	    		continue;
-	    	}
-	    	if(itemDef.getPath() == null) {
-	    		logger.debug("Log definition item has no path variable " +
-	    				"itemId: {}; skip this log item.", item.getId());
-	    		continue;
-	    	}
-	    	
-	    	handleRecordItem(item, itemDef, record.getDateTime());
-	    }
-	    logger.debug("Proccess log item set with id {} and date {}.", record.getId(), record.getDateTime());
-    }
-	
-	private void handleRecordItem(RecordItem item, RecordItemDefinition itemDef, Date date) {
-		logger.trace("Proccess log {} item with id.", item.getId());
-		String deviceId = getDeviceIdOrDefault(itemDef.getPath());
-		MeasurementRepresentation measurement = getMeasurement(new MeasurementKey(deviceId, date));
-		measurement.setProperty(asFragmentName(itemDef), asFragment(item));
-		logger.trace("Item with id {} processed.", item.getId());
-	}
-	
-	private String getDeviceIdOrDefault(RecordItemPath recordItemPath) {
-	    if (recordItemPath instanceof DeviceVariablePath) {
-	        return ((DeviceVariablePath) recordItemPath).getDeviceId();
-	    }
-	    return null;
-	}
-
-	private void saveMeasurements() {
-	    for (Entry<MeasurementKey, MeasurementRepresentation> entry : measurements.entrySet()) {
-	        MeasurementRepresentation measurement = entry.getValue();
-	        String deviceId = entry.getKey().getDeviceId();
-			ManagedObjectRepresentation source = Optional.fromNullable(deviceService.findDevice(deviceId)).or(asManagedObject(tixiAgentId));
-	        if (source == null) {
-	            continue;
-	        }
-			measurement.setSource(source);
-			logger.debug("Create measurement {}.", measurement);
-			measurementRepository.save(measurement);
-        }
     }
 
 	private static Map<String, BigDecimal> asFragment(RecordItem logItem) {
@@ -163,17 +161,6 @@ public class TixiLogHandler extends TixiHandler {
 	private static String asFragmentName(RecordItemDefinition itemDef) {
 	    return "c8y_" + itemDef.getPath().getName();
     }
-		
-	private MeasurementRepresentation getMeasurement(MeasurementKey key) {
-		MeasurementRepresentation result = measurements.get(key);
-		if(result == null) {
-			result = new MeasurementRepresentation();
-			result.setType("c8y_tixiMeasurement");
-			result.setTime(key.getDate());
-			measurements.put(key, result);
-		}
-		return result;
-	}
 	
 	static void setLastLogFileDate(ManagedObjectRepresentation rep, Date date) {
 		String dateStr = null;
@@ -182,6 +169,53 @@ public class TixiLogHandler extends TixiHandler {
 		}
 		rep.setProperty(AGENT_PROP_LAST_LOG_FILE_DATE, dateStr);
 	}
+	
+	static class Measurements {
+		private Date lastProcessedDate;
+		private Set<Date> processedDates = new TreeSet<>();
+		private final Map<MeasurementKey, MeasurementRepresentation> measurements = new HashMap<>();
+		
+		Measurements(Date lastProcessedDate) {
+	        this.lastProcessedDate = lastProcessedDate;
+        }
+
+		Set<Date> getProcessedDates() {
+			return processedDates;
+		}
+		
+		void addProcessedDate(Date date) {
+			lastProcessedDate = date;
+			processedDates.add(date);
+		}
+		
+		Date getLastProcessedDate() {
+			return lastProcessedDate;
+		}
+
+		boolean isNew(Date date) {
+			return lastProcessedDate == null || lastProcessedDate.before(date);
+		}
+
+		Map<MeasurementKey, MeasurementRepresentation> getMeasurements() {
+			return measurements;
+		}
+		
+		MeasurementRepresentation getMeasurement(MeasurementKey key) {
+			return measurements.get(key);
+		}
+		
+		private MeasurementRepresentation getOrCreateMeasurement(MeasurementKey key) {
+			MeasurementRepresentation result = getMeasurement(key);
+			if(result == null) {
+				result = new MeasurementRepresentation();
+				result.setType("c8y_tixiMeasurement");
+				result.setTime(key.getDate());
+				measurements.put(key, result);
+			}
+			return result;
+		}
+	}
+	
 	
 	static class MeasurementKey {
 		private String deviceId;
@@ -238,35 +272,6 @@ public class TixiLogHandler extends TixiHandler {
 			return null;
 		} else {
 			return DateConverter.string2Date(String.valueOf(dateStr));
-		}
-	}
-	
-	
-	static class ProcessedDates {
-
-		private Date last;
-		private Set<Date> processed = new TreeSet<>();
-		
-		ProcessedDates(Date last) {
-	        this.last = last;
-        }
-
-		
-		void add(Date date) {
-			last = date;
-			processed.add(date);
-		}
-		
-		boolean isNew(Date date) {
-			return last == null || last.before(date);
-		}
-
-		Set<Date> getProcessed() {
-			return processed;
-		}
-
-		Date getLast() {
-			return last;
 		}
 	}
 }

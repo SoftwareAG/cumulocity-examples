@@ -12,7 +12,6 @@ import com.cumulocity.model.ID;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.SDKException;
-import com.cumulocity.tixi.server.model.SerialNumber;
 
 public class FakeInventoryRepository extends InventoryRepository {
 

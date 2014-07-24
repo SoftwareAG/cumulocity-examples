@@ -8,7 +8,6 @@ import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static com.cumulocity.tixi.server.services.handler.TixiLogHandler.MeasurementKey;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -18,7 +17,6 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
 
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
@@ -26,20 +24,18 @@ import com.cumulocity.tixi.server.model.SerialNumber;
 import com.cumulocity.tixi.server.model.txml.Log;
 import com.cumulocity.tixi.server.model.txml.LogDefinition;
 import com.cumulocity.tixi.server.model.txml.LogDefinitionBuilder;
-import com.cumulocity.tixi.server.services.handler.TixiLogHandler.ProcessedDates;
+import com.cumulocity.tixi.server.services.handler.TixiLogHandler.MeasurementKey;
+import com.cumulocity.tixi.server.services.handler.TixiLogHandler.Measurements;
 
 public class TixiLogHandlerTest extends BaseTixiHandlerTest {
 
 	private TixiLogHandler tixiLogHandler;
-    private ArgumentCaptor<MeasurementRepresentation> measurementCaptor;
-
 
     @Before
     public void init() throws Exception {
         super.init();
         tixiLogHandler = new TixiLogHandler(deviceContextService, deviceService, measurementRepository, logDefinitionRegister, deviceControlService);
         tixiLogHandler.afterPropertiesSet();
-        measurementCaptor = ArgumentCaptor.forClass(MeasurementRepresentation.class);
     }
 
     @Test
@@ -63,7 +59,7 @@ public class TixiLogHandlerTest extends BaseTixiHandlerTest {
 			.build();
 		// @formatter:on
 		inventoryRepository.save(new ManagedObjectRepresentation() , new SerialNumber("device1"));
-		
+		ArgumentCaptor<MeasurementRepresentation> measurementCaptor = ArgumentCaptor.forClass(MeasurementRepresentation.class);
 		tixiLogHandler.handle(log, "record_1");
 		
 		verify(measurementRepository, times(1)).save(measurementCaptor.capture());
@@ -96,10 +92,11 @@ public class TixiLogHandlerTest extends BaseTixiHandlerTest {
             .build();
         // @formatter:on
         
-        tixiLogHandler.handle(log, "itemSet_1");
+        Measurements measurements = tixiLogHandler.createMeasurements(log);
         
-        verify(measurementRepository, Mockito.times(1)).save(measurementCaptor.capture());
-        MeasurementRepresentation rep = measurementCaptor.getValue();
+        MeasurementKey measurementKey = new MeasurementKey(null, asDate(15));
+		assertThat(measurements.getMeasurements().keySet()).containsOnly(measurementKey);
+		MeasurementRepresentation rep = measurements.getMeasurement(measurementKey);
         assertThat(rep.get("c8y_EnergieDiff")).isEqualTo(aMeasurementValue(1));
         assertThat(rep.get("c8y_PiValue")).isEqualTo(aMeasurementValue(2));
     }
@@ -116,9 +113,9 @@ public class TixiLogHandlerTest extends BaseTixiHandlerTest {
 				aLogDefinition().withNewRecordDef().build());
 		TixiLogHandler.setLastLogFileDate(agentRep, asDate(18));
 		
-		ProcessedDates processedDates = tixiLogHandler.createMeasurements(log);
+		Measurements measurements = tixiLogHandler.createMeasurements(log);
 		
-		assertThat(processedDates.getProcessed()).containsOnly(asDate(20));
+		assertThat(measurements.getProcessedDates()).containsOnly(asDate(20));
 	}
 	
 	@Test
@@ -143,9 +140,9 @@ public class TixiLogHandlerTest extends BaseTixiHandlerTest {
             .build();
 		// @formatter:on
 		
-		tixiLogHandler.createMeasurements(log);
+		Measurements measurements = tixiLogHandler.createMeasurements(log);
 		
-		assertThat(tixiLogHandler.measurements.keySet()).containsOnly(new MeasurementKey(null, asDate(20)));
+		assertThat(measurements.getMeasurements().keySet()).containsOnly(new MeasurementKey(null, asDate(20)));
 	}
 	
 	private static Map<String, Object> aMeasurementValue(int value) {
