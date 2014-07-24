@@ -73,13 +73,16 @@ public class DeviceMessageChannelService implements InitializingBean {
                 log.debug("no output defined");
                 return;
             }
-            try {
-                TixiRequest request = requestQueue.take();
-                log.debug("Send new tixi request {}.", request);
-                output.send(new MessageChannelListener<TixiRequest>() {
+            TixiRequest request = requestQueue.poll();
+            if (request == null) {
+                return;
+            }
+            
+            log.debug("Send new tixi request {}.", request);
+            output.send(new MessageChannelListener<TixiRequest>() {
 
                 @Override
-                public void close(){
+                public void close() {
                     output = null;
                 }
 
@@ -89,9 +92,6 @@ public class DeviceMessageChannelService implements InitializingBean {
 
                 }
             }, request);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
         }
     }
     
