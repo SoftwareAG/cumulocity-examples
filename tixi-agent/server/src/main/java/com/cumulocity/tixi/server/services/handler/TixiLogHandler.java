@@ -77,7 +77,7 @@ public class TixiLogHandler extends TixiHandler {
 			logger.info("Log definition has no recordDefinition for recordId {}.", recordId);
 			return processedDates;
 		}			
-		for (Record record : log.getRecords()) {
+		for (RecordItemSet record : log.getRecordItemSets()) {
 			Date recordDateTime = record.getDateTime();
 			System.out.println(recordDateTime.getTime());
 			if(processedDates.isNew(recordDateTime)) {
@@ -102,7 +102,7 @@ public class TixiLogHandler extends TixiHandler {
 		deviceService.update(agentRep);
     }
 
-	private void handleRecord(Record record) {
+	private void handleRecord(RecordItemSet record) {
 		logger.debug("Proccess log item set with id {} and date {}.", record.getId(), record.getDateTime());
 	    for (RecordItem item : record.getRecordItems()) {
 	    	RecordItemDefinition itemDef = recordDefinition.getRecordItemDefinition(item.getId());

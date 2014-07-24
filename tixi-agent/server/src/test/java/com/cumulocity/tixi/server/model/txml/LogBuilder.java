@@ -11,23 +11,23 @@ public class LogBuilder {
 	private static final AtomicLong seq = new AtomicLong();
 	
 	private final Log log = new Log();
-	private Record itemSet;
+	private RecordItemSet itemSet;
 	
 	public static LogBuilder aLog() {
 		return new LogBuilder();
 	}
 	
-	public LogBuilder withNewRecord(String id, String dateTime) throws Exception {
-		return withNewRecord(id, dateFormatter().parse(dateTime));
+	public LogBuilder withNewRecordItemSet(String id, String dateTime) throws Exception {
+		return withNewRecordItemSet(id, dateFormatter().parse(dateTime));
 	}
 	
-	public LogBuilder withNewRecord(Date date) throws Exception {
-		return withNewRecord("record_" + seq.getAndIncrement(), date);
+	public LogBuilder withNewRecordItemSet(Date date) throws Exception {
+		return withNewRecordItemSet("record_" + seq.getAndIncrement(), date);
 	}
 	
-	public LogBuilder withNewRecord(String id, Date date) throws Exception {
-		itemSet = new Record(id, date);
-		log.getRecords().add(itemSet);
+	public LogBuilder withNewRecordItemSet(String id, Date date) throws Exception {
+		itemSet = new RecordItemSet(id, date);
+		log.getRecordItemSets().add(itemSet);
 		return this;
 	}
 	

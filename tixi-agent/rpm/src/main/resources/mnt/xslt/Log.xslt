@@ -7,7 +7,7 @@
                  <xsl:value-of select="name()" />
             </xsl:attribute>
             <xsl:for-each select="*">
-                <Record>
+                <RecordItemSet>
                     <xsl:attribute name="id">
                         <xsl:value-of select="name()" />
                     </xsl:attribute>
@@ -24,7 +24,7 @@
                         </xsl:attribute>
                         </RecordItem>
                     </xsl:for-each>
-                </Record>
+                </RecordItemSet>
             </xsl:for-each>
         </Log>
     </xsl:template>

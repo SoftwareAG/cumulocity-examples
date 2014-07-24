@@ -20,16 +20,16 @@
                         <xsl:attribute name="id">
                           <xsl:value-of select="name()" />
                         </xsl:attribute>
-                        <RecordDefinitionItems>
+                        <recordItemDefinitions>
                             <xsl:for-each select="current()/*">
-                                <RecordDefinitionItem>
+                                <RecordItemDefinition>
                                     <xsl:copy-of select="@*" />
                                     <xsl:attribute name="id">
                                         <xsl:value-of select="name()" />
                                     </xsl:attribute>
-                                </RecordDefinitionItem>
+                                </RecordItemDefinition>
                             </xsl:for-each>
-                        </RecordDefinitionItems>
+                        </recordItemDefinitions>
                     </RecordDefinition>
                 </xsl:for-each>
             </RecordDefinitions>

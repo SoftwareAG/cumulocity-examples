@@ -84,10 +84,10 @@ public class TXMLUnmarshallerTest {
 		// @formatter:off
 		Log expectedLog = aLog()
 				.withId("Datalogging_1")
-				.withNewRecord("ID_1", "2014/07/07,12:00:00")
+				.withNewRecordItemSet("ID_1", "2014/07/07,12:00:00")
 					.withRecordItem("Item_1", valueOf(11))
 					.withRecordItem("Item_2", valueOf(12))
-				.withNewRecord("ID_2", "2014/07/07,12:15:00")
+				.withNewRecordItemSet("ID_2", "2014/07/07,12:15:00")
 					.withRecordItem("Item_1", valueOf(21))
 					.withRecordItem("Item_2", valueOf(22))
 				.build();

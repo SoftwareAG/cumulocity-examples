@@ -10,20 +10,20 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "Log")
 public class Log extends LogBaseItem {
 	
-	@XmlElements({ @XmlElement(name = "Record") })
-	private List<Record> records = new ArrayList<>();
+	@XmlElements({ @XmlElement(name = "RecordItemSet") })
+	private List<RecordItemSet> recordItemSets = new ArrayList<>();
 
-	public List<Record> getRecords() {
-		return records;
+	public List<RecordItemSet> getRecordItemSets() {
+		return recordItemSets;
 	}
 
-	public void setRecords(List<Record> records) {
-		this.records = records;
+	public void setRecordItemSets(List<RecordItemSet> recordItemSets) {
+		this.recordItemSets = recordItemSets;
 	}
 
 	@Override
     public String toString() {
-	    return String.format("Log [id=%s, records=%s]", id, records);
+	    return String.format("Log [recordName=%s, recordItemSets=%s]", id, recordItemSets);
     }
 
 	@Override
@@ -31,7 +31,7 @@ public class Log extends LogBaseItem {
 	    final int prime = 31;
 	    int result = 1;
 	    result = prime * result + ((id == null) ? 0 : id.hashCode());
-	    result = prime * result + ((records == null) ? 0 : records.hashCode());
+	    result = prime * result + ((recordItemSets == null) ? 0 : recordItemSets.hashCode());
 	    return result;
     }
 
@@ -49,10 +49,10 @@ public class Log extends LogBaseItem {
 			    return false;
 	    } else if (!id.equals(other.id))
 		    return false;
-	    if (records == null) {
-		    if (other.records != null)
+	    if (recordItemSets == null) {
+		    if (other.recordItemSets != null)
 			    return false;
-	    } else if (!records.equals(other.records))
+	    } else if (!recordItemSets.equals(other.recordItemSets))
 		    return false;
 	    return true;
     }

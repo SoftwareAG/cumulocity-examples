@@ -56,10 +56,10 @@ public class TixiLogHandlerTest extends BaseTixiHandlerTest {
 			.build();
 		
 		Log log = aLog()
-			.withNewRecord(asDate(15))
+			.withNewRecordItemSet(asDate(15))
 				.withRecordItem("item_1", BigDecimal.valueOf(1))
 				.withRecordItem("item_2", BigDecimal.valueOf(2))
-			.withNewRecord(asDate(20))
+			.withNewRecordItemSet(asDate(20))
 			.build();
 		// @formatter:on
 		when(logDefinitionRegister.getLogDefinition()).thenReturn(logDefinition);
@@ -90,10 +90,10 @@ public class TixiLogHandlerTest extends BaseTixiHandlerTest {
             .build();
         
         Log log = aLog()
-            .withNewRecord(asDate(15))
+            .withNewRecordItemSet(asDate(15))
                 .withRecordItem("EnergieDiff", BigDecimal.valueOf(1))
                 .withRecordItem("PiValue", BigDecimal.valueOf(2))
-            .withNewRecord(asDate(20))
+            .withNewRecordItemSet(asDate(20))
             .build();
         // @formatter:on
         when(logDefinitionRegister.getLogDefinition()).thenReturn(logDefinition);
@@ -110,8 +110,8 @@ public class TixiLogHandlerTest extends BaseTixiHandlerTest {
 	public void shouldProcessItemSetsWithLaterDateOnly() throws Exception {
 		// @formatter:off
         Log log = aLog()
-				.withNewRecord(asDate(15))
-				.withNewRecord(asDate(20))
+				.withNewRecordItemSet(asDate(15))
+				.withNewRecordItemSet(asDate(20))
 				.build();
 		// @formatter:on
 		when(logDefinitionRegister.getLogDefinition()).thenReturn(
@@ -138,9 +138,9 @@ public class TixiLogHandlerTest extends BaseTixiHandlerTest {
 			.build();
 		
         Log log = aLog()
-            .withNewRecord(asDate(20))
+            .withNewRecordItemSet(asDate(20))
                 .withRecordItem("EnergieDiff", BigDecimal.valueOf(1))
-            .withNewRecord(asDate(25))
+            .withNewRecordItemSet(asDate(25))
                 .withRecordItem("PiValue", BigDecimal.valueOf(2))
             .build();
 		// @formatter:on
