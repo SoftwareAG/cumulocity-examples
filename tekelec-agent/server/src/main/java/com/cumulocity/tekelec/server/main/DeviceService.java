@@ -1,5 +1,6 @@
 package com.cumulocity.tekelec.server.main;
 
+import static com.cumulocity.sdk.client.polling.PollingStrategy.DEFAULT_POLL_CREDENTIALS_TIMEOUT;
 import static java.util.Arrays.asList;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
@@ -56,7 +57,7 @@ public class DeviceService {
 
     private void initCredentials(String imei) {
         final DeviceCredentialsRepresentation credentials = bootstrapPlatform.getDeviceCredentialsApi().pollCredentials(imei,
-                new PollingStrategy(10*60L, SECONDS, asList(10l)));
+                new PollingStrategy(DEFAULT_POLL_CREDENTIALS_TIMEOUT, SECONDS, asList(10l)));
         CumulocityCredentials cumulocityCredentials = new CumulocityCredentials(credentials.getTenantId(), credentials.getUsername(),
                 credentials.getPassword(), null);
         credentialsManager.saveDeviceCredentials(cumulocityCredentials);

@@ -46,7 +46,7 @@ public class DeviceMessageChannelService implements InitializingBean {
     @Override
     public void afterPropertiesSet() throws Exception {
         executorService.scheduleAtFixedRate(deviceContextService.withinContext(new SendRequestCommand()), 1, 5, TimeUnit.SECONDS);
-        executorService.scheduleAtFixedRate(deviceContextService.withinContext(new EnqueueHeartBeatRequestCommand()), 5, 10, TimeUnit.MINUTES);
+        executorService.scheduleAtFixedRate(deviceContextService.withinContext(new EnqueueHeartBeatRequestCommand()), 1, 1, TimeUnit.MINUTES);
     }
 
     public void send(TixiRequest tixiRequest) {
