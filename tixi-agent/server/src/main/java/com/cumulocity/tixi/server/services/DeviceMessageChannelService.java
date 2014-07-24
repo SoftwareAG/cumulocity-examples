@@ -40,7 +40,7 @@ public class DeviceMessageChannelService implements InitializingBean {
     public DeviceMessageChannelService(TixiRequestFactory requestFactory, DeviceContextService deviceContextService) {
         this.requestFactory = requestFactory;
         this.deviceContextService = deviceContextService;
-        this.executorService = Executors.newScheduledThreadPool(1);
+        this.executorService = Executors.newScheduledThreadPool(2);
     }
     
     @Override
@@ -101,6 +101,7 @@ public class DeviceMessageChannelService implements InitializingBean {
                 log.debug("no output defined");
                 return;
             }
+            log.debug("Sending new tixi idle request.");
             send(HEARTBEAT);
         }
     }
