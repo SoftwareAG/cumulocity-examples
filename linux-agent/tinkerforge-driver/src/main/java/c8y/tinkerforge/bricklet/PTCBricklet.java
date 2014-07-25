@@ -21,41 +21,72 @@
 package c8y.tinkerforge.bricklet;
 
 import java.math.BigDecimal;
+import java.util.Properties;
 
 import c8y.TemperatureMeasurement;
 import c8y.TemperatureSensor;
+import c8y.tinkerforge.TFIds;
 
 import com.tinkerforge.BrickletPTC;
 import com.tinkerforge.Device;
+import com.tinkerforge.NotConnectedException;
+import com.tinkerforge.TimeoutException;
 
 public class PTCBricklet extends BaseSensorBricklet {
 
-	private BrickletPTC ptc;
-	private TemperatureMeasurement temperature;
+	private static final String TYPE="Temperature";
+	private static final short DEFAULT_WIRE_MODE=BrickletPTC.WIRE_MODE_2;
+	private static final String WIRE_MODE_PROP=".wiremode";
+	
+	private String wireModeProp;
+	private short wireMode;
+	
+	private TemperatureMeasurement temperature = new TemperatureMeasurement();
+	
 	
 	public PTCBricklet(String id, Device device) {
-		super(id, device, "Temperature", new TemperatureSensor());
+		super(id, device, TYPE, new TemperatureSensor());
+		wireModeProp=TFIds.getPropertyName(TYPE)+WIRE_MODE_PROP;
+		wireMode=DEFAULT_WIRE_MODE;
+	}
+	
+	@Override
+	public void addDefaults(Properties props) {
+		super.addDefaults(props);
+		props.setProperty(TFIds.getPropertyName(TYPE) + WIRE_MODE_PROP, Short.toString(DEFAULT_WIRE_MODE));
 	}
 
 	@Override
+	public void configurationChanged(Properties props) {
+		super.configurationChanged(props);
+		try {
+            String wireModeStr = props.getProperty(wireModeProp, Short.toString(DEFAULT_WIRE_MODE));
+            changeWireMode(Short.parseShort(wireModeStr));
+        } catch (NumberFormatException x) {
+            logger.warn("Wire mode format issue", x);
+        } catch (TimeoutException | NotConnectedException x) {
+        	logger.warn("Error setting wire mode", x);
+        } 
+	}
+	
+	private void changeWireMode(short newWireMode) throws TimeoutException, NotConnectedException{
+		if(this.wireMode!=newWireMode){
+			if(newWireMode>=2 && newWireMode<=4){
+				this.wireMode=newWireMode;
+				((BrickletPTC)getDevice()).setWireMode(newWireMode);
+			} else throw new IllegalStateException("Wrong value for property "+wireModeProp+" = "+newWireMode);
+		}
+	}
+	
+	@Override
 	public void initialize() throws Exception {
-		ptc=(BrickletPTC)getDevice();
-		// detect wire mode, default wire mode is 2
-		if(!ptc.isSensorConnected()) {
-			ptc.setWireMode(BrickletPTC.WIRE_MODE_3);
-			if(!ptc.isSensorConnected()) {
-				ptc.setWireMode(BrickletPTC.WIRE_MODE_4);
-				if(!ptc.isSensorConnected()) {
-					logger.error("No Pt100/Pt1000 sensor connected, the sensor is connected incorrectly, or the sensor itself is faulty.");
-					throw new Exception("Error initializing PTC Bricklet");
-				} else { logger.info("Pt100/Pt1000 sensor connected in 4-wire mode."); }
-			} else { logger.info("Pt100/Pt1000 sensor connected in 3-wire mode."); }
-		} else { logger.info("Pt100/Pt1000 sensor connected in 2-wire mode."); };
+		// Nothing to be done.
 	}
 
 	@Override
 	public void run() {
 		try {
+			BrickletPTC ptc=(BrickletPTC)getDevice();
 			temperature.setTemperature(new BigDecimal((double)ptc.getTemperature()/100));
 			super.sendMeasurement(temperature);
 		} catch(Exception e) {
