@@ -56,7 +56,7 @@ public class MessageHandler extends ChannelInboundHandlerAdapter {
                 int tempInCelsius = (readInt(in) >> 1) - 30;
                 byte byte1 = in.readByte();
                 byte shifted = (byte) (byte1 >> 2);
-                int sonitResultCode = extractRightBits(shifted, 4);
+                int sonicResultCode = extractRightBits(shifted, 4);
                 int distance = extractRightBits(byte1, 1)*256 + readInt(in);
                 
                 logger.info("productType " + productType);
@@ -69,13 +69,15 @@ public class MessageHandler extends ChannelInboundHandlerAdapter {
                 logger.info("imei " + imei);
                 logger.info("auxRssi " + auxRssi);
                 logger.info("tempInCelsius " + tempInCelsius);
-                logger.info("sonitResultCode " + sonitResultCode);
+                logger.info("sonicResultCode " + sonicResultCode);
                 logger.info("distance " + distance);
                 
                 registerDeviceService(imei);
                 ManagedObjectRepresentation device = createDevice(hardwareRevision, firmwareRevision, contactReason, alarmAndStatus, imei);
                 createMeasurement(imei, battery, auxRssi, tempInCelsius, distance, device);
         } finally {
+            // probably context should be closed here as well
+            // ctx.close();
             ReferenceCountUtil.release(msg);
         }
     }

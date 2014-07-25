@@ -11,7 +11,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import com.cumulocity.tixi.server.components.txml.TXMLDateAdapter;
 
-public class Record extends LogBaseItem {
+public class RecordItemSet extends LogBaseItem {
 
 	@XmlAttribute
 	@XmlJavaTypeAdapter(TXMLDateAdapter.class)
@@ -20,10 +20,10 @@ public class Record extends LogBaseItem {
 	@XmlElements({ @XmlElement(name = "RecordItem") })
 	private List<RecordItem> recordItems = new ArrayList<>();
 
-	public Record() {
+	public RecordItemSet() {
 	}
 
-	public Record(String id, Date dateTime) {
+	public RecordItemSet(String id, Date dateTime) {
 		super(id);
 		this.dateTime = dateTime;
 	}
@@ -67,7 +67,7 @@ public class Record extends LogBaseItem {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Record other = (Record) obj;
+		RecordItemSet other = (RecordItemSet) obj;
 		if (dateTime == null) {
 			if (other.dateTime != null)
 				return false;

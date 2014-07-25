@@ -10,15 +10,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import c8y.IsDevice;
-import c8y.RequiredAvailability;
-import c8y.SupportedOperations;
-
 import com.cumulocity.agent.server.context.DeviceContext;
 import com.cumulocity.agent.server.context.DeviceContextService;
 import com.cumulocity.agent.server.context.DeviceCredentials;
 import com.cumulocity.agent.server.repository.InventoryRepository;
-import com.cumulocity.model.Agent;
 import com.cumulocity.model.ID;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.devicebootstrap.DeviceCredentialsRepresentation;
@@ -26,6 +21,7 @@ import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.devicecontrol.DeviceCredentialsApi;
 import com.cumulocity.sdk.client.polling.PollingStrategy;
+import com.cumulocity.tixi.server.model.ManagedObjects;
 import com.cumulocity.tixi.server.model.SerialNumber;
 import com.cumulocity.tixi.server.model.TixiDeviceCredentails;
 
@@ -56,15 +52,7 @@ public class DeviceService {
             return managedObjectRepresentation;
         }
         logger.debug("Create agent for serial: {}.", serialNumber);
-        managedObjectRepresentation = new ManagedObjectRepresentation();
-        managedObjectRepresentation.setName("c8y_TixiAgent_" + serialNumber.getValue());
-        managedObjectRepresentation.setType("c8y_TixiAgent");
-        managedObjectRepresentation.set(new Agent());
-        managedObjectRepresentation.set(new IsDevice());
-        managedObjectRepresentation.set(new RequiredAvailability(15));
-        SupportedOperations supportedOperations = new SupportedOperations();
-        supportedOperations.add("c8y_MeasurementRequestOperation");
-        managedObjectRepresentation.set(supportedOperations);
+        managedObjectRepresentation = ManagedObjects.tixiAgentManagedObject(serialNumber.getValue());
         managedObjectRepresentation = inventoryRepository.save(managedObjectRepresentation, serialNumber);
         logger.debug("Agent for serial: {} created: {}.", serialNumber, managedObjectRepresentation);
         return managedObjectRepresentation;
@@ -77,9 +65,7 @@ public class DeviceService {
             return managedObjectRepresentation;
         }
         logger.debug("Create device for serial: {} and parent: {}.", serialNumber, parentId);
-        managedObjectRepresentation = new ManagedObjectRepresentation();
-        managedObjectRepresentation.setName(name);
-        managedObjectRepresentation.setType("tixi_device");
+        managedObjectRepresentation = ManagedObjects.deviceManagedObject(name, "tixi_device");
         managedObjectRepresentation = inventoryRepository.save(managedObjectRepresentation, serialNumber);
         inventoryRepository.bindToParent(parentId, managedObjectRepresentation.getId());
         logger.debug("Device for serial: {} created: {}.", serialNumber, managedObjectRepresentation);
@@ -94,11 +80,7 @@ public class DeviceService {
             return managedObjectRepresentation;
         }
         logger.debug("Create device for serial: {} and parent: {}.", serialNumber, tixiAgentId);
-        managedObjectRepresentation = new ManagedObjectRepresentation();
-        managedObjectRepresentation.setName(name);
-        managedObjectRepresentation.setType(name);
-        managedObjectRepresentation.set(new Agent());
-        managedObjectRepresentation.set(new IsDevice());
+        managedObjectRepresentation = ManagedObjects.agentManagedObject(name);
         managedObjectRepresentation = inventoryRepository.save(managedObjectRepresentation, serialNumber);
         inventoryRepository.bindToParent(tixiAgentId, managedObjectRepresentation.getId());
         logger.debug("Agent for serial: {} created: {}.", serialNumber, managedObjectRepresentation);

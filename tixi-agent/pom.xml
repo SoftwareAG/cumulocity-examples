@@ -17,6 +17,8 @@
 	</modules>
 	<properties>
 		<netty.version>4.0.20.Final</netty.version>
+		<grizzly.version>2.3.16</grizzly.version>
+		<jersey.version>2.11</jersey.version>
 	</properties>
 
 	<dependencyManagement>
@@ -55,9 +57,14 @@
 				<scope>test</scope>
 			</dependency>
 			<dependency>
+				<groupId>org.glassfish.grizzly</groupId>
+				<artifactId>grizzly-http-servlet-server</artifactId>
+				<version>${grizzly.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.glassfish.jersey</groupId>
 				<artifactId>jersey-bom</artifactId>
-				<version>2.10</version>
+				<version>${jersey.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>

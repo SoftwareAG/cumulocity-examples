@@ -15,7 +15,7 @@ public class RecordDefinition extends LogBaseItem {
 
 	public static class RecordItemDefinitionAdaptedMap implements AdaptedMap<RecordItemDefinition> {
 
-		@XmlElements({ @XmlElement(name = "RecordDefinitionItem") })
+		@XmlElements({ @XmlElement(name = "RecordItemDefinition") })
 		private List<RecordItemDefinition> elements;
 		
 		public List<RecordItemDefinition> getElements() {
@@ -27,7 +27,7 @@ public class RecordDefinition extends LogBaseItem {
 		extends TXMLMapAdapter<RecordItemDefinition, RecordItemDefinitionAdaptedMap> {
 	}
 
-	@XmlElement(name = "RecordDefinitionItems")
+	@XmlElement(name = "recordItemDefinitions")
 	@XmlJavaTypeAdapter(RecordItemDefinitionMapAdapter.class)
 	private Map<String, RecordItemDefinition> recordItemDefinitions = new HashMap<>();
 
