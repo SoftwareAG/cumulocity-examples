@@ -32,6 +32,9 @@ import com.tinkerforge.BrickletDualRelay;
 import com.tinkerforge.NotConnectedException;
 import com.tinkerforge.TimeoutException;
 
+import c8y.Relay;
+import c8y.Relay.RelayState;
+import c8y.RelayArray;
 import c8y.lx.driver.DeviceManagedObject;
 import c8y.lx.driver.Driver;
 import c8y.lx.driver.OperationExecutor;
@@ -41,7 +44,6 @@ import c8y.tinkerforge.TFIds;
 public class DualRelayBricklet implements Driver {
 	
 	private static final String TYPE = "DualRelay";
-	private static final String SET_STATE_OP_TYPE = "c8y_SetState";
 	
 	private static final Logger logger = LoggerFactory
 			.getLogger(DualRelayBricklet.class);
@@ -70,7 +72,7 @@ public class DualRelayBricklet implements Driver {
 
 	@Override
 	public OperationExecutor[] getSupportedOperations() {
-		return new OperationExecutor[] {new SetStateOperationExecutor()};
+		return new OperationExecutor[] {new SetStateOperationExecutor(), new SetState1OperationExecutor()};
 	}
 
 	@Override
@@ -110,7 +112,7 @@ public class DualRelayBricklet implements Driver {
 
 		@Override
 		public String supportedOperationType() {
-			return SET_STATE_OP_TYPE;
+			return "c8y_RelayArray";
 		}
 
 		@Override
@@ -119,8 +121,31 @@ public class DualRelayBricklet implements Driver {
 			if (cleanup)
 				operation.setStatus(OperationStatus.FAILED.toString());
 			
-			dualRelay.setState((boolean)operation.getProperty("relay1"), 
-					(boolean)operation.getProperty("relay2"));
+			Relay relays[] = operation.get(RelayArray.class).getRelays();
+			
+			dualRelay.setState(relays[0].getRelayState()==RelayState.CLOSED, 
+					relays[1].getRelayState()==RelayState.CLOSED);
+			
+			operation.setStatus(OperationStatus.SUCCESSFUL.toString());
+		}
+		
+	}
+	
+	class SetState1OperationExecutor implements OperationExecutor{
+
+		@Override
+		public String supportedOperationType() {
+			return "c8y_Relay";
+		}
+
+		@Override
+		public void execute(OperationRepresentation operation, boolean cleanup)
+				throws Exception {
+			if (cleanup)
+				operation.setStatus(OperationStatus.FAILED.toString());
+			
+			dualRelay.setState(operation.get(Relay.class).getRelayState()==RelayState.CLOSED, 
+					dualRelay.getState().relay2);
 			
 			operation.setStatus(OperationStatus.SUCCESSFUL.toString());
 		}
