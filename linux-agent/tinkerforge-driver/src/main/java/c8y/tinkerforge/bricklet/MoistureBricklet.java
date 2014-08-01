@@ -47,7 +47,7 @@ public class MoistureBricklet extends BaseSensorBricklet {
 	public void run() {
 		try {
 			BrickletMoisture moistureBricklet = (BrickletMoisture)getDevice();
-			BigDecimal m = new BigDecimal( (double)moistureBricklet.getMoistureValue()/4095 );
+			BigDecimal m = new BigDecimal( (double)100*moistureBricklet.getMoistureValue()/4095 );
 			moisture.setMoistureValue(m);
 			super.sendMeasurement(moisture);
 		} catch (Exception e) {
