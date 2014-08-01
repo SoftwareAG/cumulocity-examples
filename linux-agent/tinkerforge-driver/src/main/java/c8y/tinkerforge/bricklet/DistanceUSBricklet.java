@@ -1,121 +1,94 @@
 package c8y.tinkerforge.bricklet;
 
+import java.math.BigDecimal;
 import java.util.Date;
+import java.util.Properties;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import com.cumulocity.model.measurement.MeasurementValue;
 import com.cumulocity.rest.representation.event.EventRepresentation;
-import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
-import com.cumulocity.sdk.client.Platform;
 import com.cumulocity.sdk.client.SDKException;
 import com.tinkerforge.BrickletDistanceUS;
-import com.tinkerforge.NotConnectedException;
-import com.tinkerforge.TimeoutException;
-import com.tinkerforge.BrickletDistanceUS.DistanceListener;
+import com.tinkerforge.Device;
 
-import c8y.lx.driver.DeviceManagedObject;
-import c8y.lx.driver.Driver;
-import c8y.lx.driver.OperationExecutor;
+import c8y.DistanceMeasurement;
+import c8y.DistanceSensor;
 import c8y.tinkerforge.TFIds;
 
-public class DistanceUSBricklet implements Driver{
+public class DistanceUSBricklet extends BaseSensorBricklet{
+
+	private static final String TYPE = "DistanceUS";
+	private static final String EVENT_TYPE = "c8y_DistanceEvent";
+	private static final String DISTANCE_UNIT="%";
 	
-	public static final String TYPE = "DistanceUS";
-	public static final long DIST_POLLING = 1000;
-	public static final long SLACK_TIME = 10000;
-	public static final String EVENT_TYPE = "c8y_DistanceEvent";
-
-	private static final Logger logger = LoggerFactory
-			.getLogger(DistanceUSBricklet.class);
-
-	private Platform platform;
-	private ManagedObjectRepresentation mo = new ManagedObjectRepresentation();
-	private EventRepresentation event = new EventRepresentation();
-
-	private String id;
-	private BrickletDistanceUS distance;
-	private Date lastTriggered = new Date();
+	private static final String SLACK_PROP = ".eventSlackTime";
+	private static final String TRESHOLD_PROP = ".eventTreshold";
 	
-	public DistanceUSBricklet(String uid, BrickletDistanceUS distance){
-		this.id=uid;
-		this.distance=distance;
+	private static long DEFAULT_EVENT_SLACKTIME = 10000;
+	private static double DEFAULT_EVENT_TRESHOLD = 25;
+	
+	private long actualSlackTime;
+	private double actualEventTreshold;
+	
+	private MeasurementValue measurementValue = new MeasurementValue(DISTANCE_UNIT);
+	
+	BrickletDistanceUS distanceBricklet=(BrickletDistanceUS)getDevice();
+	
+	private Date lastTriggered=new Date();
+	private EventRepresentation entranceEvent=new EventRepresentation();
+	
+	public DistanceUSBricklet(String id, Device device) {
+		super(id, device, TYPE, new DistanceSensor());
+		actualSlackTime=DEFAULT_EVENT_SLACKTIME;
+		actualEventTreshold=DEFAULT_EVENT_TRESHOLD;
+	}
+	
+	@Override
+	public void addDefaults(Properties props) {
+		props.setProperty(TFIds.getPropertyName(TYPE)+SLACK_PROP, Long.toString(DEFAULT_EVENT_SLACKTIME));
+		props.setProperty(TFIds.getPropertyName(TYPE)+TRESHOLD_PROP, Double.toString(DEFAULT_EVENT_TRESHOLD));
+		super.addDefaults(props);
+	}
+	
+	@Override
+	public void configurationChanged(Properties props) {
+		actualSlackTime=Long.parseLong(props.getProperty(TFIds.getPropertyName(TYPE)+SLACK_PROP, Long.toString(DEFAULT_EVENT_SLACKTIME)));
+		actualEventTreshold=Double.parseDouble(props.getProperty(TFIds.getPropertyName(TYPE)+TRESHOLD_PROP, Double.toString(DEFAULT_EVENT_TRESHOLD)));
+		super.configurationChanged(props);
 	}
 	
 	@Override
 	public void initialize() throws Exception {
-		// Nothing to be done.
-		
+		entranceEvent.setSource(getSensorMo());
+		entranceEvent.setType(EVENT_TYPE);
+		entranceEvent.setText("Distance event triggered.");
 	}
-
+	
 	@Override
-	public void initialize(Platform platform) throws Exception {
-		this.platform=platform;
-	}
-
-	@Override
-	public OperationExecutor[] getSupportedOperations() {
-		return new OperationExecutor[] {};
-	}
-
-	@Override
-	public void initializeInventory(ManagedObjectRepresentation mo) {
-		// Nothing to be done.
-		
-	}
-
-	@Override
-	public void discoverChildren(ManagedObjectRepresentation parent) {
+	public void run() {
 		try {
-			mo.set(TFIds.getHardware(distance, TYPE));
-		} catch (TimeoutException | NotConnectedException e) {
-			logger.warn("Cannot read hardware parameters", e);
-		}
-		
-		mo.setType(TFIds.getType(TYPE));
-		mo.setName(TFIds.getDefaultName(parent.getName(), TYPE, id));
-
-		try {
-			DeviceManagedObject dmo = new DeviceManagedObject(platform);
-			dmo.createOrUpdate(mo, TFIds.getXtId(id), parent.getId());
-
-			event.setSource(mo);
-			event.setType(EVENT_TYPE);
-			event.setText("Entrance sensor triggered");
-		} catch (SDKException e) {
-			logger.warn("Cannot create sensor", e);
-		}
-	}
-
-	@Override
-	public void start() {
-		distance.addDistanceListener(new DistanceListener() {
-			@Override
-			public void distance(int distance) {
+			double distancePercentage = (double)100*distanceBricklet.getDistanceValue()/4095;
+			
+			if(distancePercentage<actualEventTreshold){
 				Date currentTime = new Date();
-
-				logger.debug("Distance event " + distance);
-				if (currentTime.getTime() >= lastTriggered.getTime()
-						+ SLACK_TIME) {
+				if(currentTime.getTime()>=lastTriggered.getTime()+actualSlackTime) {
 					logger.debug("Sending distance event");
-					event.setTime(currentTime);
-					event.setProperty("Distance", distance);
+					entranceEvent.setTime(currentTime);
+					entranceEvent.setProperty("distance", distancePercentage);
 					try {
-						platform.getEventApi().create(event);
+						getPlatform().getEventApi().create(entranceEvent);
 						lastTriggered = currentTime;
 					} catch (SDKException e) {
-						logger.warn("Cannot send entrance event", e);
+						logger.warn("Cannot send distance event", e);
 					}
-				} else {
-					logger.debug("Event not send: slacking...");
-				}
-			}
-		});
-		try {
-			distance.setDistanceCallbackPeriod(DIST_POLLING);
-		} catch (TimeoutException | NotConnectedException e) {
-			logger.warn("Cannot start distance sensor polling", e);
+				} else logger.debug("Event not sent: slacking...");
+			} else logger.debug("Event not sent: distance above treshhold...");
+			
+			measurementValue.setValue(new BigDecimal(distancePercentage));
+			super.sendMeasurement(new DistanceMeasurement(measurementValue));
+		} catch(Exception x){
+			logger.warn("Cannot read measurments from bricklet", x);
 		}
+		
 	}
 
 }
