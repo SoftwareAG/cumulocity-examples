@@ -46,8 +46,7 @@ public class MotionDetectorBricklet implements Driver{
 	private String id;
 	private BrickletMotionDetector motionSensor;
 	private ManagedObjectRepresentation motionSensorMo = new ManagedObjectRepresentation();
-	private EventRepresentation eventMotionDetected = new EventRepresentation();
-	private EventRepresentation eventMotionDetectionCycleEnded = new EventRepresentation();
+	private EventRepresentation eventMotion = new EventRepresentation();
 
 	public MotionDetectorBricklet(String id, BrickletMotionDetector motionSensor) {
 		this.motionSensor=motionSensor;
@@ -89,13 +88,8 @@ public class MotionDetectorBricklet implements Driver{
 			DeviceManagedObject dmo = new DeviceManagedObject(platform);
 			dmo.createOrUpdate(motionSensorMo, TFIds.getXtId(id), parent.getId());
 
-			eventMotionDetected.setSource(motionSensorMo);
-			eventMotionDetected.setType(MOTION_DETECTED_EVENT_TYPE);
-			eventMotionDetected.setText("Motion detected");
-			
-			eventMotionDetectionCycleEnded.setSource(motionSensorMo);
-			eventMotionDetectionCycleEnded.setType(MOTION_ENDED_EVENT_TYPE);
-			eventMotionDetectionCycleEnded.setText("Motion ended");
+			eventMotion.setSource(motionSensorMo);
+			eventMotion.setType(MOTION_DETECTED_EVENT_TYPE);
 		} catch (Exception e){
 			logger.warn("Cannot create motion sensor", e);
 		}
@@ -109,8 +103,9 @@ public class MotionDetectorBricklet implements Driver{
 			public void motionDetected() {
 				logger.debug("Motion event");
 				try{
-					eventMotionDetected.setTime(new Date());
-					platform.getEventApi().create(eventMotionDetected);
+					eventMotion.setTime(new Date());
+					eventMotion.setText("Motion detected.");
+					platform.getEventApi().create(eventMotion);
 				} catch (SDKException e) {
 					logger.warn("Cannot send motion event", e);
 				}
@@ -124,8 +119,9 @@ public class MotionDetectorBricklet implements Driver{
 			public void detectionCycleEnded() {
 			logger.debug("Motion event ended");
 				try{
-					eventMotionDetectionCycleEnded.setTime(new Date());
-					platform.getEventApi().create(eventMotionDetectionCycleEnded);
+					eventMotion.setTime(new Date());
+					eventMotion.setText("Motion ended.");
+					platform.getEventApi().create(eventMotion);
 				} catch (SDKException e) {
 					logger.warn("Cannot send motion ended event", e);
 				}
