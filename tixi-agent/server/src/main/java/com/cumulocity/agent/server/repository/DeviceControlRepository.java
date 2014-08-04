@@ -45,8 +45,6 @@ public class DeviceControlRepository {
         return loadByFilter(filter).allPages();
     }
     
-   
-
     private PagedOperationCollectionRepresentation loadByFilter(OperationFilter filter) {
         return deviceControlApi.getOperationsByFilter(filter).get();
     }

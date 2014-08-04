@@ -33,6 +33,7 @@ public class TixiAgent {
                 .component(SendDataResource.class)
                 .component(CommandPipeResource.class)
                 .component(InventoryResource.class)
+                .component(HeartBeatResource.class)
                 .build();
         server.start();
     }
