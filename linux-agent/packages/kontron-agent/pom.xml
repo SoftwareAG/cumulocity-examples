@@ -24,6 +24,11 @@
             <artifactId>kontron-driver</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>c8y.example</groupId>
+            <artifactId>generic-linux-driver</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>

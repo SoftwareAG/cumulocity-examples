@@ -30,6 +30,7 @@
         <module>kontron-driver</module>
         <module>packages</module>
         <module>win-driver</module>
+        <module>generic-linux-driver</module>
 	</modules>
 
 	<dependencies>
