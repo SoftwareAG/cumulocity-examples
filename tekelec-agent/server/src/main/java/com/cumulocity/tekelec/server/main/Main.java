@@ -55,7 +55,7 @@ public class Main {
     
     private static void configureLogger() {
         String logbackConfig = "/etc/tekelec/logback.xml";
-        if(!exists(FileSystems.getDefault().getPath("/etc/tixi", "logback.xml"))) {
+        if(!exists(FileSystems.getDefault().getPath("/etc/tekelec", "logback.xml"))) {
             System.err.println("No logback configuration found: " + logbackConfig + ".");
             return;
         }
