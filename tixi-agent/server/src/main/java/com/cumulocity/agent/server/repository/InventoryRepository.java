@@ -9,13 +9,12 @@ import com.cumulocity.model.ID;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.inventory.InventoryApi;
-import com.cumulocity.tixi.server.model.SerialNumber;
 
 @Component
 public class InventoryRepository {
 
-	private static final Logger logger = LoggerFactory.getLogger(InventoryRepository.class);
-	
+    private static final Logger logger = LoggerFactory.getLogger(InventoryRepository.class);
+
     private final InventoryApi inventoryApi;
 
     private final IdentityRepository identityRepository;
@@ -35,23 +34,28 @@ public class InventoryRepository {
     }
 
     public ManagedObjectRepresentation save(ManagedObjectRepresentation managedObjectRepresentation) {
-    	logger.debug("Save managed object: {}.", managedObjectRepresentation);
+        logger.debug("Save managed object: {}.", managedObjectRepresentation);
         if (managedObjectRepresentation.getId() == null) {
             return inventoryApi.create(managedObjectRepresentation);
         } else {
             return inventoryApi.update(managedObjectRepresentation);
         }
     }
-    
-	public ManagedObjectRepresentation save(ManagedObjectRepresentation managedObjectRepresentation, SerialNumber deviceSerial) {
-		managedObjectRepresentation = save(managedObjectRepresentation);
-		identityRepository.save(managedObjectRepresentation.getId(), deviceSerial);
-	    return managedObjectRepresentation;
+
+    public ManagedObjectRepresentation save(ManagedObjectRepresentation managedObjectRepresentation, ID... ids) {
+        managedObjectRepresentation = save(managedObjectRepresentation);
+        for (ID id : ids) {
+            identityRepository.save(managedObjectRepresentation.getId(), id);
+        }
+        return managedObjectRepresentation;
     }
 
-    public void bindToAgent(GId agentId, GId deviceId) {
-    	logger.debug("Bind device: {} to agentId {}.", deviceId, agentId);
-    	inventoryApi.getManagedObjectApi(agentId).addChildDevice(deviceId);
+    public void bindToParent(GId parentId, GId childId) {
+        if (parentId == null) {
+            return;
+        }
+        logger.debug("Bind child device: {} to parent {}.", childId, parentId);
+        inventoryApi.getManagedObjectApi(parentId).addChildDevice(childId);
     }
 
 }

@@ -3,6 +3,7 @@ package com.cumulocity.tixi.server.components.txml;
 import static com.google.common.cache.CacheBuilder.newBuilder;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
@@ -14,9 +15,13 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
+import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.cumulocity.tixi.server.model.txml.External;
 import com.cumulocity.tixi.server.model.txml.Log;
 import com.cumulocity.tixi.server.model.txml.LogDefinition;
 import com.cumulocity.tixi.server.services.AgentFileSystem;
@@ -27,11 +32,10 @@ public class TXMLUnmarshaller {
 
 	private final AgentFileSystem agentFileSystem;
 	private final TransformerFactory transformerFactory = TransformerFactory.newInstance();
+	private static final Logger log = LoggerFactory.getLogger(TXMLUnmarshaller.class);
 
-	// @formatter:off
 	private final Cache<Class<?>, Transformer> transformers = newBuilder()
 			.expireAfterAccess(1, TimeUnit.HOURS).build();
-	// @formatter:on
 
 	@Autowired
 	public TXMLUnmarshaller(AgentFileSystem agentFileSystem) {
@@ -42,7 +46,10 @@ public class TXMLUnmarshaller {
 	public <R> R unmarshal(String fileName, Class<R> resultClass) {
 		try {
 			File incomingFile = agentFileSystem.getIncomingFile(fileName);
-			StreamSource source = new StreamSource(incomingFile);
+			String input = IOUtils.toString(new FileInputStream(incomingFile), "UTF-8");
+			input = stripEnclosingBrackets(input);
+			
+			StreamSource source = new StreamSource(IOUtils.toInputStream(input, "UTF-8"));
 			File xsltProcessedFile = agentFileSystem.getXsltProcessedFile(fileName);
 
 			StreamResult transformerResult = new StreamResult(xsltProcessedFile);
@@ -67,6 +74,16 @@ public class TXMLUnmarshaller {
 	}
 
 	private static Unmarshaller aJAXBUnmarshaler() throws JAXBException {
-		return JAXBContext.newInstance(LogDefinition.class, Log.class).createUnmarshaller();
+		return JAXBContext.newInstance(LogDefinition.class, Log.class, External.class).createUnmarshaller();
+	}
+	
+	static String stripEnclosingBrackets(String source) {
+		source = source.trim();
+		if (!source.endsWith("]")) {
+			return source;
+		}
+		log.debug("Remove enclosing brackets");
+		source = source.replaceFirst("\\[", "");
+		return source.substring(0, source.length() - 1);
 	}
 }

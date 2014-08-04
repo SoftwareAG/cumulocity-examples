@@ -4,10 +4,14 @@ import javax.inject.Named;
 
 import jersey.repackaged.com.google.common.collect.Iterables;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.cumulocity.model.ID;
 import com.cumulocity.model.idtype.GId;
+import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.devicecontrol.DeviceControlApi;
 import com.cumulocity.sdk.client.devicecontrol.OperationFilter;
@@ -15,9 +19,12 @@ import com.cumulocity.sdk.client.devicecontrol.PagedOperationCollectionRepresent
 import com.cumulocity.sdk.client.notification.Subscriber;
 import com.cumulocity.sdk.client.notification.Subscription;
 import com.cumulocity.sdk.client.notification.SubscriptionListener;
+import com.cumulocity.tixi.server.model.Operations;
 
 @Component
 public class DeviceControlRepository {
+	
+	private static final Logger logger = LoggerFactory.getLogger(DeviceControlRepository.class);
 
     private final DeviceControlApi deviceControlApi;
 
@@ -37,7 +44,7 @@ public class DeviceControlRepository {
     public Iterable<OperationRepresentation> findAllByFilter(OperationFilter filter) {
         return loadByFilter(filter).allPages();
     }
-
+    
     private PagedOperationCollectionRepresentation loadByFilter(OperationFilter filter) {
         return deviceControlApi.getOperationsByFilter(filter).get();
     }

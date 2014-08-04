@@ -1,6 +1,5 @@
 package com.cumulocity.tixi.server.services;
 
-import static com.google.common.base.Optional.fromNullable;
 import static org.apache.commons.io.FileUtils.openOutputStream;
 import static org.apache.commons.io.IOUtils.closeQuietly;
 import static org.apache.commons.io.IOUtils.copy;
@@ -20,10 +19,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Joiner;
+
 @Component
 public class AgentFileSystem {
 
-    private static final Logger log = LoggerFactory.getLogger(AgentFileSystem.class);
+    private static final Logger logger = LoggerFactory.getLogger(AgentFileSystem.class);
 
     public static final SimpleDateFormat TIMESTAMP_FORMAT = new SimpleDateFormat("yyyyMMddHHmmssSSS");
 
@@ -53,8 +54,8 @@ public class AgentFileSystem {
         return new File(parent, fileName);
     }
 
-    public String writeIncomingFile(String requestId, InputStream inputStream) {
-        String fileName = fromNullable(requestId).or("") + "_" + getTimestamp() + ".xml";
+    public String writeIncomingFile(String fileName, InputStream inputStream) {
+    	fileName = Joiner.on("_").skipNulls().join(fileName, getTimestamp()) + ".xml";
         writeToFile(inputStream, getFile(incomingPath, fileName));
         return fileName;
     }
@@ -74,6 +75,7 @@ public class AgentFileSystem {
             closeQuietly(outputStream);
             closeQuietly(inputStream);
         }
+        logger.info("Written to file: {}.", file.getPath());
     }
     
     public File getXsltFile(Class<?> entityClass) {
@@ -87,6 +89,5 @@ public class AgentFileSystem {
     public File getXsltProcessedFile(String fileName) {
     	return getFile(xsltProcessedPath, fileName);
     }
-    
 }
 

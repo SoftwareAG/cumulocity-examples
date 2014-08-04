@@ -4,9 +4,8 @@
 	<parent>
 		<groupId>c8y.example</groupId>
 		<artifactId>c8y-examples</artifactId>
-		<version>5.8.0</version>
+		<version>5.9.0</version>
 	</parent>
-	<groupId>c8y</groupId>
 	<artifactId>tixi-agent</artifactId>
 	<name>Cumulocity :: Examples :: Tixi Agent</name>
 	<packaging>pom</packaging>
@@ -14,9 +13,12 @@
 	<modules>
 		<module>server</module>
 		<module>simulator</module>
+		<module>rpm</module>
 	</modules>
 	<properties>
 		<netty.version>4.0.20.Final</netty.version>
+		<grizzly.version>2.3.16</grizzly.version>
+		<jersey.version>2.11</jersey.version>
 	</properties>
 
 	<dependencyManagement>
@@ -55,9 +57,14 @@
 				<scope>test</scope>
 			</dependency>
 			<dependency>
+				<groupId>org.glassfish.grizzly</groupId>
+				<artifactId>grizzly-http-servlet-server</artifactId>
+				<version>${grizzly.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.glassfish.jersey</groupId>
 				<artifactId>jersey-bom</artifactId>
-				<version>2.10</version>
+				<version>${jersey.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>

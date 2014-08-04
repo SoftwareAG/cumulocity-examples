@@ -6,9 +6,12 @@ import java.util.concurrent.TimeUnit;
 
 import org.springframework.stereotype.Component;
 
+import c8y.inject.DeviceScope;
+
 import com.google.common.cache.Cache;
 
 @Component
+@DeviceScope
 public class RequestStorage {
     
     private Cache<String, Class<?>> cache;

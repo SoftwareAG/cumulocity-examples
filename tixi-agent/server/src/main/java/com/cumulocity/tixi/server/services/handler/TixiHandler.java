@@ -1,33 +1,35 @@
 package com.cumulocity.tixi.server.services.handler;
 
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.util.Assert;
+
 import com.cumulocity.agent.server.context.DeviceContextService;
-import com.cumulocity.agent.server.repository.IdentityRepository;
-import com.cumulocity.agent.server.repository.InventoryRepository;
-import com.cumulocity.sdk.client.measurement.MeasurementApi;
-import com.cumulocity.tixi.server.model.txml.LogDefinitionItem;
+import com.cumulocity.model.idtype.GId;
+import com.cumulocity.tixi.server.services.DeviceService;
 
-public abstract class TixiHandler<T> {
-	
-	protected final DeviceContextService deviceContextService;
-	protected final IdentityRepository identityRepository;
-	protected final InventoryRepository inventoryRepository;
-	protected final MeasurementApi measurementApi;
-	protected final LogDefinitionRegister logDefinitionRegister;
+public abstract class TixiHandler implements InitializingBean {
 
-	public TixiHandler(DeviceContextService deviceContextService, IdentityRepository identityRepository, InventoryRepository inventoryRepository,
-            MeasurementApi measurementApi, LogDefinitionRegister logDefinitionRegister) {
-	    this.deviceContextService = deviceContextService;
-	    this.identityRepository = identityRepository;
-	    this.inventoryRepository = inventoryRepository;
-	    this.measurementApi = measurementApi;
-	    this.logDefinitionRegister = logDefinitionRegister;
+    protected final DeviceContextService contextService;
+
+    protected final DeviceService deviceService;
+
+    protected final LogDefinitionRegister logDefinitionRegister;
+
+    protected GId tixiAgentId;
+
+    public TixiHandler(DeviceContextService contextService, DeviceService deviceService, LogDefinitionRegister logDefinitionRegister) {
+        this.contextService = contextService;
+        this.deviceService = deviceService;
+        this.logDefinitionRegister = logDefinitionRegister;
     }
 
-	public abstract void handle(T element);
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        tixiAgentId = contextService.getCredentials().getDeviceId();
+        Assert.notNull(tixiAgentId);
+    }
 	
-	protected boolean isDevicePath(LogDefinitionItem logDefinitionItem) {
-		return logDefinitionItem.getPath() != null && logDefinitionItem.getPath().getDeviceId() != null;
+	protected void setTixiAgentId(GId agentId) {
+	    this.tixiAgentId = agentId;
 	}
-
-
 }

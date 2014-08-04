@@ -5,6 +5,8 @@ import java.net.InetSocketAddress;
 
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.grizzly.servlet.WebappContext;
+import org.glassfish.grizzly.threadpool.ThreadPoolConfig;
+import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.spring.scope.RequestContextFilter;
@@ -17,9 +19,6 @@ import org.springframework.web.context.WebApplicationContext;
 
 import com.cumulocity.agent.server.Server;
 import com.cumulocity.agent.server.context.ContextFilter;
-import com.cumulocity.tixi.server.resources.OpenChannelResource;
-import com.cumulocity.tixi.server.resources.RegisterResource;
-import com.cumulocity.tixi.server.resources.SendDataResource;
 import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.AbstractService;
 import com.google.common.util.concurrent.Service;
@@ -39,13 +38,19 @@ public class JaxrsServer implements Server {
 
     private final Service service = new AbstractService() {
 
-    private HttpServer server;
+        private HttpServer server;
 
         @Override
         protected void doStart() {
             server = HttpServer.createSimpleServer(null, new InetSocketAddress(host, port));
+            
+            server.getListener("grizzly").getTransport().setWorkerThreadPoolConfig(ThreadPoolConfig.defaultConfig()
+                    .setPoolName("Grizzly-worker")
+                    .setCorePoolSize(10)
+                    .setMaxPoolSize(10));
+                        
             WebappContext context = new WebappContext(applicationId, "/" + applicationId);
-            resourceConfig.registerClasses(RequestContextFilter.class, MultiPartFeature.class);
+            resourceConfig.registerClasses(RequestContextFilter.class, JacksonFeature.class, MultiPartFeature.class);
             resourceConfig.getClasses();
             context.addServlet("jersey-servlet", new ServletContainer(resourceConfig)).addMapping("/*");
             context.addFilter("deviceContextFilter", applicationContext.getBean(ContextFilter.class)).addMappingForServletNames(null,

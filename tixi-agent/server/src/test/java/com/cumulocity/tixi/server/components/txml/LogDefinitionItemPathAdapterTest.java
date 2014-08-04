@@ -4,20 +4,22 @@ import static org.fest.assertions.Assertions.assertThat;
 
 import org.junit.Test;
 
-import com.cumulocity.tixi.server.model.txml.LogDefinitionItemPath;
+import com.cumulocity.tixi.server.model.txml.DeviceVariablePath;
+import com.cumulocity.tixi.server.model.txml.ProcessVariablePath;
 
 public class LogDefinitionItemPathAdapterTest {
 	
-	LogDefinitionItemPathAdapter adapter = new LogDefinitionItemPathAdapter();
+	RecordItemPathAdapter adapter = new RecordItemPathAdapter();
 	
 	@Test
     public void shouldCreateItemPath() throws Exception {
 		assertThat(adapter.unmarshal("/Process/M-Bus/DHZ-2/DeviceState")).isEqualTo(
-				new LogDefinitionItemPath("M-Bus", "DHZ-2", "DeviceState"));
+				new DeviceVariablePath("M-Bus", "DHZ-2", "DeviceState"));
 		
-		assertThat(adapter.unmarshal("/Process/PV/somethink")).isNull();
+		assertThat(adapter.unmarshal("/Process/PV/somethink")).isEqualTo(
+                new ProcessVariablePath("somethink"));
+		
 		assertThat(adapter.unmarshal("...babble....")).isNull();
-	    
     }
 
 }

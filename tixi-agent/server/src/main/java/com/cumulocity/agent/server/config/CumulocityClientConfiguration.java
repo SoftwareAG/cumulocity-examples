@@ -1,19 +1,18 @@
 package com.cumulocity.agent.server.config;
 
-import static com.cumulocity.agent.server.context.DeviceContextScope.CONTEXT_SCOPE;
-import static org.springframework.context.annotation.ScopedProxyMode.TARGET_CLASS;
-
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
 
-import com.cumulocity.agent.server.context.CumulocityClientCache;
+import c8y.inject.ContextScope;
+import c8y.inject.DeviceScope;
+
 import com.cumulocity.agent.server.context.DeviceContextService;
-import com.cumulocity.agent.server.context.scope.notifications.DeviceControlNotificationsSubscriberSupplier;
-import com.cumulocity.agent.server.context.scope.notifications.NotificationsSubscriberFactoryBean;
+import com.cumulocity.agent.server.context.DeviceCredentials;
+import com.cumulocity.agent.server.context.scope.ContextScopedSubscriber;
+import com.cumulocity.model.authentication.CumulocityCredentials;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.Platform;
@@ -29,7 +28,7 @@ import com.cumulocity.sdk.client.identity.IdentityApi;
 import com.cumulocity.sdk.client.inventory.InventoryApi;
 import com.cumulocity.sdk.client.measurement.MeasurementApi;
 import com.cumulocity.sdk.client.notification.Subscriber;
-import com.google.common.base.Supplier;
+import com.google.common.base.Optional;
 
 @Configuration
 public class CumulocityClientConfiguration {
@@ -51,107 +50,127 @@ public class CumulocityClientConfiguration {
 
     @Bean
     @Autowired
-    public CumulocityClientCache cumulocityClientCache() {
-        return new CumulocityClientCache(host, proxy, proxyPort);
-    }
-
-    @Bean
-    @Autowired
-    @Scope(value = CONTEXT_SCOPE, proxyMode = TARGET_CLASS)
+    @DeviceScope
     public CumulocityClientFactoryBean cumulocityClient(DeviceContextService contextService) {
-        return new CumulocityClientFactoryBean(contextService, cumulocityClientCache());
+        return new CumulocityClientFactoryBean(contextService, host, proxy, proxyPort);
     }
 
     @Bean
     @Autowired
-    @Scope(value = CONTEXT_SCOPE, proxyMode = TARGET_CLASS)
+    @ContextScope
     public InventoryApi inventoryApi(Platform platform) throws SDKException {
         return platform.getInventoryApi();
     }
 
     @Bean
     @Autowired
-    @Scope(value = CONTEXT_SCOPE, proxyMode = TARGET_CLASS)
+    @ContextScope
     public DeviceCredentialsApi deviceCredentialsApi(Platform platform) throws SDKException {
         return platform.getDeviceCredentialsApi();
     }
 
     @Bean
     @Autowired
-    @Scope(value = CONTEXT_SCOPE, proxyMode = TARGET_CLASS)
+    @ContextScope
     public EventApi eventApi(Platform platform) throws SDKException {
         return platform.getEventApi();
     }
 
     @Bean
     @Autowired
-    @Scope(value = CONTEXT_SCOPE, proxyMode = TARGET_CLASS)
+    @ContextScope
     public MeasurementApi measurementApi(Platform platform) throws SDKException {
         return platform.getMeasurementApi();
     }
 
     @Bean
     @Autowired
-    @Scope(value = CONTEXT_SCOPE, proxyMode = TARGET_CLASS)
+    @ContextScope
     public IdentityApi identityApi(Platform platform) throws SDKException {
         return platform.getIdentityApi();
     }
 
     @Bean
     @Autowired
-    @Scope(value = CONTEXT_SCOPE, proxyMode = TARGET_CLASS)
+    @ContextScope
     public AlarmApi alarmApi(Platform platform) throws SDKException {
         return platform.getAlarmApi();
     }
 
     @Bean
     @Autowired
-    @Scope(value = CONTEXT_SCOPE, proxyMode = TARGET_CLASS)
+    @ContextScope
     public AuditRecordApi auditRecordApi(Platform platform) throws SDKException {
         return platform.getAuditRecordApi();
     }
 
     @Bean
     @Autowired
-    @Scope(value = CONTEXT_SCOPE, proxyMode = TARGET_CLASS)
+    @ContextScope
     public DeviceControlApi deviceControlApi(Platform platform) throws SDKException {
         return platform.getDeviceControlApi();
     }
 
     @Bean
     @Autowired
-    @Scope(value = CONTEXT_SCOPE, proxyMode = TARGET_CLASS)
+    @ContextScope
     public CepApi cepApi(Platform platform) throws SDKException {
         return platform.getCepApi();
     }
 
-    @Bean
+    @Bean(destroyMethod = "disconnect")
     @Autowired
-    @Scope(value = CONTEXT_SCOPE, proxyMode = TARGET_CLASS)
-    public NotificationsSubscriberFactoryBean<GId, OperationRepresentation> deviceControlNotificationsSubscriber(
-            final DeviceContextService contextService, final DeviceControlApi deviceControlApi) throws SDKException {
-        return subscriberFactory(contextService, new DeviceControlNotificationsSubscriberSupplier(contextService, deviceControlApi));
+    @DeviceScope
+    public Subscriber<GId, OperationRepresentation> deviceControlNotificationsSubscriber(final DeviceContextService contextService,
+            final DeviceControlApi deviceControlApi) throws SDKException {
+        return new ContextScopedSubscriber<GId, OperationRepresentation>(deviceControlApi.getNotificationsSubscriber(), contextService);
     }
 
-    private <I, M> NotificationsSubscriberFactoryBean<I, M> subscriberFactory(final DeviceContextService contextService,
-            Supplier<Subscriber<I, M>> supplier) {
-        return new NotificationsSubscriberFactoryBean<I, M>(contextService, supplier);
+    @Bean(destroyMethod = "disconnect")
+    @Autowired
+    @DeviceScope
+    public Subscriber<String, Object> customNotificationsSubscriber(CepApi cepApi, DeviceContextService contextService) {
+        return new ContextScopedSubscriber<String, Object>(cepApi.getCustomNotificationsSubscriber(), contextService);
     }
 
     public static class CumulocityClientFactoryBean implements FactoryBean<PlatformImpl> {
 
         private final DeviceContextService contextService;
 
-        private final CumulocityClientCache cache;
+        private final String host;
 
-        public CumulocityClientFactoryBean(DeviceContextService contextService, CumulocityClientCache cache) {
+        private final Optional<String> proxy;
+
+        private final Optional<Integer> proxyPort;
+
+        public CumulocityClientFactoryBean(DeviceContextService contextService, String host, String proxy, Integer proxyPort) {
             this.contextService = contextService;
-            this.cache = cache;
+            this.host = host;
+            this.proxy = Optional.fromNullable(proxy);
+            this.proxyPort = Optional.fromNullable(proxyPort);
         }
 
         @Override
         public PlatformImpl getObject() throws Exception {
-            return cache.get(contextService.getCredentials());
+            return create(contextService.getCredentials());
+        }
+
+        private PlatformImpl create(DeviceCredentials login) throws Exception {
+
+            return proxy(new PlatformImpl(host, new CumulocityCredentials(login.getTenant(), login.getUsername(), login.getPassword(),
+                    login.getAppKey()), login.getPageSize()));
+        }
+
+        private PlatformImpl proxy(PlatformImpl platform) {
+            String proxyHost = proxy.or("");
+            if (proxyHost.length() > 0) {
+                platform.setProxyHost(proxyHost);
+            }
+            Integer port = proxyPort.or(0);
+            if (port > 0) {
+                platform.setProxyPort(port);
+            }
+            return platform;
         }
 
         @Override

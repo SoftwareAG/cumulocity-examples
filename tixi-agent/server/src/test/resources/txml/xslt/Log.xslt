@@ -7,7 +7,7 @@
                  <xsl:value-of select="name()" />
             </xsl:attribute>
 			<xsl:for-each select="*">
-				<LogItemSet>
+				<RecordItemSet>
 					<xsl:attribute name="id">
                         <xsl:value-of select="name()" />
                     </xsl:attribute>
@@ -15,16 +15,16 @@
                         <xsl:value-of select="@_" />
                     </xsl:attribute>
 					<xsl:for-each select="*">
-						<LogItem>
+						<RecordItem>
 							<xsl:attribute name="id">
 	                        <xsl:value-of select="name()" />
 	                    </xsl:attribute>
 							<xsl:attribute name="value">
 	                        <xsl:value-of select="@_" />
 	                    </xsl:attribute>
-						</LogItem>
+						</RecordItem>
 					</xsl:for-each>
-				</LogItemSet>
+				</RecordItemSet>
 			</xsl:for-each>
 		</Log>
 	</xsl:template>

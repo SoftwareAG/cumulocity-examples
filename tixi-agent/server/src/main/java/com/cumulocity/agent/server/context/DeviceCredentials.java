@@ -4,7 +4,7 @@ import java.io.UnsupportedEncodingException;
 
 import org.glassfish.jersey.internal.util.Base64;
 
-import com.cumulocity.model.ID;
+import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.devicebootstrap.DeviceCredentialsRepresentation;
 
 public class DeviceCredentials {
@@ -27,15 +27,15 @@ public class DeviceCredentials {
 
     private final String appKey;
 
-    private final ID deviceId;
+    private final GId deviceId;
 
     private final int pageSize;
 
-    public DeviceCredentials(String tenant, String username, String password, String appKey, ID deviceId) {
+    public DeviceCredentials(String tenant, String username, String password, String appKey, GId deviceId) {
         this(tenant, username, password, appKey, deviceId, DEFAULT_PAGE_SIZE);
     }
 
-    public DeviceCredentials(String tenant, String username, String password, String appKey, ID deviceId, int pageSize) {
+    public DeviceCredentials(String tenant, String username, String password, String appKey, GId deviceId, int pageSize) {
         this.tenant = tenant;
         this.username = username;
         this.password = password;
@@ -79,18 +79,6 @@ public class DeviceCredentials {
         }
     }
 
-    public static String encode(String tenant, String username, String password) {
-        return encode(tenant + LOGIN_SEPARATOR + username, password);
-    }
-
-    public static String encode(String login, String password) {
-        try {
-            return AUTH_PREFIX + new String(Base64.encode((login + AUTH_SEPARATOR + password).getBytes()), AUTH_ENCODING);
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     public String getTenant() {
         return tenant;
     }
@@ -107,7 +95,7 @@ public class DeviceCredentials {
         return appKey;
     }
 
-    public ID getDeviceId() {
+    public GId getDeviceId() {
         return deviceId;
     }
 
@@ -115,17 +103,64 @@ public class DeviceCredentials {
         return pageSize;
     }
 
-    public String getAuthorization() {
-        if (tenant == null) {
-            return encode(username, password);
-        } else {
-            return encode(tenant, username, password);
-        }
-    }
-
     @Override
     public String toString() {
         return tenant + " " + username + " " + password;
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((appKey == null) ? 0 : appKey.hashCode());
+        result = prime * result + ((deviceId == null) ? 0 : deviceId.hashCode());
+        result = prime * result + pageSize;
+        result = prime * result + ((password == null) ? 0 : password.hashCode());
+        result = prime * result + ((tenant == null) ? 0 : tenant.hashCode());
+        result = prime * result + ((username == null) ? 0 : username.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        DeviceCredentials other = (DeviceCredentials) obj;
+        if (appKey == null) {
+            if (other.appKey != null)
+                return false;
+        } else if (!appKey.equals(other.appKey))
+            return false;
+        if (deviceId == null) {
+            if (other.deviceId != null)
+                return false;
+        } else if (!deviceId.equals(other.deviceId))
+            return false;
+        if (pageSize != other.pageSize)
+            return false;
+        if (password == null) {
+            if (other.password != null)
+                return false;
+        } else if (!password.equals(other.password))
+            return false;
+        if (tenant == null) {
+            if (other.tenant != null)
+                return false;
+        } else if (!tenant.equals(other.tenant))
+            return false;
+        if (username == null) {
+            if (other.username != null)
+                return false;
+        } else if (!username.equals(other.username))
+            return false;
+        return true;
+    }
+    
+    
+    
 
 }

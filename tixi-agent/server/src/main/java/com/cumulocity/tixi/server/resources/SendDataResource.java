@@ -1,14 +1,13 @@
 package com.cumulocity.tixi.server.resources;
 
-import static com.cumulocity.tixi.server.resources.TixiJsonResponse.statusOKJson;
+import static com.cumulocity.tixi.server.resources.TixiRequest.statusOK;
+import static org.apache.commons.io.FilenameUtils.removeExtension;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.util.zip.GZIPInputStream;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -18,15 +17,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.cumulocity.tixi.server.model.txml.External;
 import com.cumulocity.tixi.server.model.txml.Log;
+import com.cumulocity.tixi.server.model.txml.LogDefinition;
 import com.cumulocity.tixi.server.request.util.RequestStorage;
 import com.cumulocity.tixi.server.services.AgentFileSystem;
-import com.cumulocity.tixi.server.services.handler.TixiXmlService;
+import com.cumulocity.tixi.server.services.TixiXmlService;
 
 @Path("/senddata")
 public class SendDataResource {
 
-	private static final Logger log = LoggerFactory.getLogger(SendDataResource.class);
+	private static final Logger logger = LoggerFactory.getLogger(SendDataResource.class);
 
 	private final RequestStorage requestStorage;
 
@@ -44,26 +45,41 @@ public class SendDataResource {
 	@POST
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response senddata(@FormDataParam("filename") InputStream fileInputStream,
-	        @FormDataParam("filename") FormDataContentDisposition contentDispositionHeader, 
-	        @QueryParam("requestId") String requestId) {
-		handleTixiRequest(fileInputStream, requestId);
-		return Response.ok(statusOKJson()).build();
+	public Response senddata(@FormDataParam("sendfile") InputStream fileInputStream,
+	        @FormDataParam("sendfile") FormDataContentDisposition contentDispositionHeader, 
+	        @QueryParam("requestId") String requestId,
+	        @QueryParam("serial") String serial) throws IOException {
+	    String origFileName = contentDispositionHeader.getFileName();
+        logger.info("Send data request: serial " + serial + " requestId " + requestId + " with file: " + origFileName);
+		handleTixiRequest(new GZIPInputStream(fileInputStream), removeExtension(origFileName), requestId);
+		return Response.ok(statusOK()).build();
 	}
-
-	private void handleTixiRequest(InputStream fileInputStream, String requestId) {
-		String fileName = agentFileSystem.writeIncomingFile(requestId, fileInputStream);
+	
+	private void handleTixiRequest(InputStream fileInputStream, String origFileName, String requestId) {
 		Class<?> requestEntityType = getRequestEntity(requestId);
-		if (requestEntityType != null) {
-			tixiService.handle(fileName, requestEntityType);
+		logger.info("Handled request with id: {} and entity type: {}.", requestId, requestEntityType);
+		String fileNamePrefix = asSimpleName(requestEntityType);
+		String fileName = agentFileSystem.writeIncomingFile(fileNamePrefix, fileInputStream);
+		
+		if (requestEntityType == LogDefinition.class) {
+			tixiService.handleLogDefinition(fileName);
+		} else if (requestEntityType == Log.class) {
+		    tixiService.handleLog(fileName, origFileName);
+		} else if (requestEntityType == External.class) {
+			tixiService.handleExternal(fileName);
+		} else {
+		    logger.warn("Can't handle request type " + requestEntityType);
 		}
 	}
 
+	private String asSimpleName(Class<?> requestEntityType) {
+	    return requestEntityType == null ? null : requestEntityType.getSimpleName();
+    }
+
 	private Class<?> getRequestEntity(String requestId) {
-		if (requestId == null) {
+		if (requestId == null || requestId.trim().equals("0")) {
 			return Log.class;
 		}
 		return requestStorage.get(requestId);
 	}
-
 }

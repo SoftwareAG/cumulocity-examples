@@ -1,7 +1,5 @@
 package com.cumulocity.tixi.simulator.client;
 
-import static com.cumulocity.tixi.simulator.model.TixiCredentials.DEVICE_SERIAL;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -24,6 +22,7 @@ import org.glassfish.jersey.media.sse.SseFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cumulocity.tixi.simulator.config.Main;
 import com.cumulocity.tixi.simulator.model.ResponseHandlerFactory;
 import com.cumulocity.tixi.simulator.model.TixiCredentials;
 import com.cumulocity.tixi.simulator.model.TixiResponse;
@@ -31,7 +30,7 @@ import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 
 public class CloudClient {
 
-    private static final Logger LOG = LoggerFactory.getLogger(CloudClient.class);
+    private static final Logger logger = LoggerFactory.getLogger(CloudClient.class);
 
     private String baseUrl;
 
@@ -40,21 +39,42 @@ public class CloudClient {
     private ResponseHandlerFactory responseHandlerFactory = new ResponseHandlerFactory();
     
     public CloudClient(String baseUrl) {
+        this(baseUrl,null);
+    }
+    
+    public CloudClient(String baseUrl,TixiCredentials tixiCredentials) {
         this.baseUrl = baseUrl;
+        credentials = tixiCredentials;
     }
 
-    private Client client = ClientBuilder.newClient().register(JacksonJsonProvider.class).register(MultiPartFeature.class)
+    private Client client = ClientBuilder.newClient()
+    		.register(JacksonJsonProvider.class)
+    		.register(MultiPartFeature.class)
             .register(SseFeature.class);
 
-    public void sendBootstrapRequest() {
-        Response response = client.target(baseUrl + "/Tixi/register?serial=" + DEVICE_SERIAL).request().get();
-        credentials = response.readEntity(TixiCredentials.class);
+    public void sendRegisterRequest() {
+        if(credentials ==null) {
+            String uri = baseUrl + "/Tixi/register?serial=" + Main.DEVICE_SERIAL;
+            logger.info("Send bootstrap request to {}", uri);
+    		Response response = client.target(uri).request().get();
+            credentials = response.readEntity(TixiCredentials.class);
+            logger.info("Bootstraped creentials {}", credentials);
+        }else {
+            String uri = baseUrl + String.format("/Tixi/register?serial=%s&deviceID=%s&user=%s&password=%s",
+                    Main.DEVICE_SERIAL, credentials.deviceID, credentials.user, credentials.password);
+            logger.info("Send standard register request to {}", uri);
+            Response response = client.target(uri).request().get();
+            TixiResponse tixiResponse = response.readEntity(TixiResponse.class);
+            credentials.deviceID = tixiResponse.getDeviceID();
+            logger.info("registred {}", tixiResponse);
+        }
     }
 
     public void sendOpenChannel() {
-        Response response = client.target(baseUrl
-                + String.format("/Tixi/openchannel?serial=%s&deviceID=%s&user=%s&password=%s",
-                        DEVICE_SERIAL, credentials.deviceID, credentials.user, credentials.password)).request().get();
+        String uri = baseUrl + String.format("/Tixi/openchannel?serial=%s&user=%s&password=%s&deviceID=%s",
+                        Main.DEVICE_SERIAL, credentials.user, credentials.password, credentials.deviceID);
+        logger.info("Send open channel request to {}", uri);
+        Response response = client.target(uri).request().get();
         final ChunkedInput<TixiResponse> chunkedInput =
                 response.readEntity(new GenericType<ChunkedInput<TixiResponse>>() {});
         ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -73,20 +93,20 @@ public class CloudClient {
     }
 
     public void postExternalDatabaseData(TixiResponse response) {
-        sendMultipartRequest(response, "external_database.xml");
+        sendMultipartRequest(response, "external_database.xml.gz");
     }
 
     public void postLogDefinitionData(TixiResponse response) {
-        sendMultipartRequest(response, "log_definition.xml");
+        sendMultipartRequest(response, "log_definition.xml.gz");
     }
 
     public void postLogFileData() {
-        sendMultipartRequest("sample_data.xml");
+        sendMultipartRequest("sample_data.xml.gz");
     }
 
     private void sendMultipartRequest(String filename) {
         String requestUrl = baseUrl
-                + String.format("/Tixi/senddata?serial=%s&deviceID=%s&user=%s&password=%s", DEVICE_SERIAL,
+                + String.format("/Tixi/senddata?serial=%s&deviceID=%s&user=%s&password=%s", Main.DEVICE_SERIAL,
                         credentials.deviceID, credentials.user, credentials.password);
         sendMultipartRequest(requestUrl, filename);
 
@@ -95,15 +115,16 @@ public class CloudClient {
     private void sendMultipartRequest(TixiResponse response, String filename) {
         String requestUrl = baseUrl
                 + String.format("/Tixi/senddata?serial=%s&deviceID=%s&user=%s&password=%s&requestId=%s",
-                        DEVICE_SERIAL, credentials.deviceID, credentials.user, credentials.password, response.getRequestId());
+                        Main.DEVICE_SERIAL, credentials.deviceID, credentials.user, credentials.password, response.getRequestId());
         sendMultipartRequest(requestUrl, filename);
     }
 
     private void sendMultipartRequest(String requestUrl, String filename) {
+    	logger.info("Send request to {} from file: {}.", requestUrl, filename);
         FormDataMultiPart multipart = null;
         try {
             multipart = new FormDataMultiPart();
-            FileDataBodyPart filePart = new FileDataBodyPart("filename", getFile(filename));
+            FileDataBodyPart filePart = new FileDataBodyPart("sendfile", getFile(filename));
             MultiPart bodyPart = multipart.bodyPart(filePart);
             WebTarget target = client.target(requestUrl);
             target.request().post(Entity.entity(bodyPart, bodyPart.getMediaType()));
@@ -112,7 +133,7 @@ public class CloudClient {
                 try {
                     multipart.close();
                 } catch (IOException e) {
-                    LOG.error("", e);
+                	logger.error("", e);
                 }
             }
         }

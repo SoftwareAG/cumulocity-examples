@@ -13,13 +13,13 @@ public class TXMLMapAdapter<E extends LogBaseItem, M extends AdaptedMap<E>> exte
 
 	public static interface AdaptedMap<K extends LogBaseItem> {
 		
-		public abstract List<K> getItems();
+		public abstract List<K> getElements();
 	}
 
 	@Override
     public Map<String, E> unmarshal(M v) throws Exception {
 		Map<String, E> result = new HashMap<>();
-		for (E logDefinitionItem : v.getItems()) {
+		for (E logDefinitionItem : v.getElements()) {
 			result.put(logDefinitionItem.getId(), logDefinitionItem);
 		}
 		return result;
