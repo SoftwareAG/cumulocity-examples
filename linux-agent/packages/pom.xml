@@ -19,7 +19,8 @@
         <module>kontron-agent</module>
         <module>mac-agent</module>
     	<module>win-agent</module>
-  </modules>
+    	<module>linux-agent</module>
+    </modules>
 
     <properties>
         <assembly.output>${project.build.directory}/${project.build.finalName}</assembly.output>

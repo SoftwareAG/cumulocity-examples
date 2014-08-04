@@ -1,2 +1,9 @@
 #!/bin/sh
-java -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=8000 -cp 'cfg/*:lib/*' -Dlogback.configurationFile=cfg/logback.xml c8y.lx.agent.Agent
+(
+while true
+do
+  echo "Running the Cumulocity Linux Agent..."
+  java -cp 'cfg/*:lib/*' -Dlogback.configurationFile=cfg/logback-debug.xml c8y.lx.agent.Agent
+  sleep 1
+done
+) 2>&1 | logger

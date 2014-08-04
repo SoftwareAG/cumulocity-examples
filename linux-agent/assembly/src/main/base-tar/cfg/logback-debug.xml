@@ -9,6 +9,9 @@
   </appender>
 
   <logger name="c8y" level="ALL"/>
+  <logger name="org.apache.commons.httpclient.HttpConnection" level="DEBUG"/>
+  <logger name="httpclient.wire.header" level="DEBUG"/>
+  <logger name="httpclient.wire.content" level="DEBUG"/>
   <logger name="com.cumulocity.sdk.client.polling" level="INFO"/>
 
   <root level="WARN">
