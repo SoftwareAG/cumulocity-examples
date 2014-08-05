@@ -29,7 +29,7 @@ public class LinuxGenericHardwareDriver implements Driver, OperationExecutor, Ha
 			.getLogger(LinuxGenericHardwareDriver.class);
 
 	private GId gid;
-	private final Hardware hardware = new Hardware("KM2M810", UNKNOWN, UNKNOWN);
+	private final Hardware hardware = new Hardware("Linux MAC", UNKNOWN, UNKNOWN);
 	
     @Override
     public void initialize() throws Exception {
@@ -65,7 +65,7 @@ public class LinuxGenericHardwareDriver implements Driver, OperationExecutor, Ha
 
 				for (int i = 0; i < fields.length; i++) {
 					if ("HWaddr".equals(fields[i]) && i + 1 < fields.length) {
-						hardware.setSerialNumber(fields[i + 1]);
+						hardware.setSerialNumber(fields[i + 1].replace(":", ""));
 						return;
 					}
 				}
