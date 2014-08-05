@@ -45,6 +45,6 @@ public class LinuxGenericHardwareProviderTest {
 		assertEquals(referenceHw, driver.getHardware());
 	}
 
-	private Hardware referenceHw = new Hardware("Linux MAC", "00:B3:38:00:01:CE", HardwareProvider.UNKNOWN);
+	private Hardware referenceHw = new Hardware("Linux MAC", "00B3380001CE", HardwareProvider.UNKNOWN);
 	private LinuxGenericHardwareDriver driver = new LinuxGenericHardwareDriver();
 }
