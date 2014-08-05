@@ -138,7 +138,7 @@ public class MessageHandler extends ChannelInboundHandlerAdapter {
 
     private DistanceMeasurement distanceMeasurement(int value) {
         DistanceMeasurement distanceMeasurement = new DistanceMeasurement();
-        MeasurementValue measurement = new MeasurementValue("m");
+        MeasurementValue measurement = new MeasurementValue("cm");
         measurement.setValue(BigDecimal.valueOf(value));
         distanceMeasurement.setDistance(measurement);
         return distanceMeasurement;
