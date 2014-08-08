@@ -1,4 +1,6 @@
 @echo off
+%~d1
+cd "%~p1"
 :loop
 	cls
 	echo "Running the Cumulocity Windows Agent in debug mode..."
