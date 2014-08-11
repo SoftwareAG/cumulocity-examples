@@ -68,6 +68,5 @@ public class DeviceServiceTest {
         assertThat(created.getName()).isEqualTo("M-BUS");
         verify(inventoryRepository).bindToParent(eq(tixiAgentId), any(GId.class));
         assertThat(created.getAttrs().containsKey("com_cumulocity_model_Agent")).isEqualTo(true);
-        assertThat(created.getAttrs().containsKey("c8y_IsDevice")).isEqualTo(true);
     }
 }

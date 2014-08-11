@@ -42,7 +42,6 @@ public class ManagedObjects {
         managedObjectRepresentation.setName(name);
         managedObjectRepresentation.setType(name);
         managedObjectRepresentation.set(new Agent());
-        managedObjectRepresentation.set(new IsDevice());
         return managedObjectRepresentation;
     }
 }
