@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
 
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,6 +20,7 @@ import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
 import com.cumulocity.tekelec.TEK586MO;
 import com.cumulocity.tekelec.TEK586Measurement;
+import com.cumulocity.tekelec.server.main.DeviceService.NotInitizializedException;
 
 public class MessageHandler extends ChannelInboundHandlerAdapter {
     
@@ -51,14 +53,6 @@ public class MessageHandler extends ChannelInboundHandlerAdapter {
                 for (int i = 0 ; i < 8 ; i++) {
                     imei += String.format("%02X", readInt(in));
                 }
-                in.skipBytes(11);
-                int auxRssi = readInt(in);
-                int tempInCelsius = (readInt(in) >> 1) - 30;
-                byte byte1 = in.readByte();
-                byte shifted = (byte) (byte1 >> 2);
-                int sonicResultCode = extractRightBits(shifted, 4);
-                int distance = extractRightBits(byte1, 1)*256 + readInt(in);
-                
                 logger.info("productType " + productType);
                 logger.info("hardwareRevision " + hardwareRevision);
                 logger.info("firmwareRevision " + firmwareRevision);
@@ -67,32 +61,57 @@ public class MessageHandler extends ChannelInboundHandlerAdapter {
                 logger.info("gsmRssi " + gsmRssi);
                 logger.info("battery " + battery);
                 logger.info("imei " + imei);
-                logger.info("auxRssi " + auxRssi);
-                logger.info("tempInCelsius " + tempInCelsius);
-                logger.info("sonicResultCode " + sonicResultCode);
-                logger.info("distance " + distance);
                 
                 registerDeviceService(imei);
                 ManagedObjectRepresentation device = createDevice(hardwareRevision, firmwareRevision, contactReason, alarmAndStatus, imei);
-                createMeasurement(imei, battery, auxRssi, tempInCelsius, distance, device);
+
+                byte messageType = in.readByte();
+                byte payloadLength = in.readByte();
+                in.skipBytes(6);
+                int loggerSpeed = readInt(in); 
+                in.skipBytes(2);
+                
+                payloadLength -= 9; // minus skipped/not_data bytes
+                payloadLength -= 2; // minus last two crc bytes
+                
+                int count = 0;
+                while (payloadLength > 0) {
+                    int auxRssi = readInt(in);
+                    int tempInCelsius = (readInt(in) >> 1) - 30;
+                    byte byte1 = in.readByte();
+                    byte shifted = (byte) (byte1 >> 2);
+                    int sonicResultCode = extractRightBits(shifted, 4);
+                    int distance = extractRightBits(byte1, 1)*256 + readInt(in);
+                    
+                    logger.info("auxRssi " + auxRssi);
+                    logger.info("tempInCelsius " + tempInCelsius);
+                    logger.info("sonicResultCode " + sonicResultCode);
+                    logger.info("distance " + distance);
+                    
+                    createMeasurement(imei, battery, auxRssi, tempInCelsius, distance, device, count * loggerSpeed);
+                    
+                    count++;
+                    payloadLength -= 4; //
+                }
+        } catch (NotInitizializedException e) {
+            logger.info(e.getMessage());
         } finally {
-            // probably context should be closed here as well
-            // ctx.close();
             ReferenceCountUtil.release(msg);
+            ctx.close();
         }
     }
 
     private void printRequest(ByteBuf in) {
         ByteBuf copy = in.copy();
         while(copy.isReadable()) {
-            logger.info("" + readInt(copy));
+            logger.debug("" + readInt(copy));
         }
     }
 
-    private void createMeasurement(String imei, BigDecimal battery, int auxRssi, int tempInCelsius, int distance, ManagedObjectRepresentation device) {
+    private void createMeasurement(String imei, BigDecimal battery, int auxRssi, int tempInCelsius, int distance, ManagedObjectRepresentation device, int timeFromLatest) {
         DeviceService deviceService = devicesService.get(imei);
         MeasurementRepresentation measurement = new MeasurementRepresentation();
-        measurement.setTime(new Date());
+        measurement.setTime(new DateTime().minusSeconds(timeFromLatest).toDate());
         measurement.setSource(device);
         measurement.setType("c8y_TekelecMeasurement");
         measurement.set(distanceMeasurement(distance));
@@ -103,7 +122,7 @@ public class MessageHandler extends ChannelInboundHandlerAdapter {
     }
 
     private ManagedObjectRepresentation createDevice(int hardwareRevision, int firmwareRevision, List<String> contactReason,
-            List<String> alarmAndStatus, String imei) {
+            List<String> alarmAndStatus, String imei) throws NotInitizializedException {
         DeviceService deviceService = devicesService.get(imei);
         ManagedObjectRepresentation device = deviceService.register(imei);
         ManagedObjectRepresentation update = new ManagedObjectRepresentation();
