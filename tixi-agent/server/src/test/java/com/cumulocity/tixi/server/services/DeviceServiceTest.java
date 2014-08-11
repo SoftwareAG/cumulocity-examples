@@ -35,7 +35,7 @@ public class DeviceServiceTest {
         
         verify(inventoryRepository).save(captor.capture(), eq(serialNumber));
         ManagedObjectRepresentation created = captor.getValue();
-        assertThat(created.getName()).isEqualTo("c8y_TixiAgent_12345");
+        assertThat(created.getName()).isEqualTo("Tixi Modem 12345");
         assertThat(created.getAttrs().containsKey("com_cumulocity_model_Agent")).isEqualTo(true);
         assertThat(created.getAttrs().containsKey("c8y_IsDevice")).isEqualTo(true);
         assertThat(created.getAttrs().containsKey("c8y_RequiredAvailability")).isEqualTo(true);

@@ -18,7 +18,7 @@ public class ManagedObjects {
     
     public static ManagedObjectRepresentation tixiAgentManagedObject(String serialNumber) {
         ManagedObjectRepresentation managedObjectRepresentation = new ManagedObjectRepresentation();
-        managedObjectRepresentation.setName("c8y_TixiAgent_" + serialNumber);
+        managedObjectRepresentation.setName("Tixi Modem " + serialNumber);
         managedObjectRepresentation.setType("c8y_TixiAgent");
         managedObjectRepresentation.set(new Agent());
         managedObjectRepresentation.set(new IsDevice());
