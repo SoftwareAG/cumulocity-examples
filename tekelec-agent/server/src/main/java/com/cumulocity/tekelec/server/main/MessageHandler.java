@@ -122,7 +122,7 @@ public class MessageHandler extends ChannelInboundHandlerAdapter {
     private void createMeasurement(String imei, int gsmRssi, BigDecimal battery, int auxRssi, int sonicResultCode, int tempInCelsius, int distance, ManagedObjectRepresentation device, int timeFromLatest) {
         DeviceService deviceService = devicesService.get(imei);
         MeasurementRepresentation measurement = new MeasurementRepresentation();
-        measurement.setTime(new DateTime().minusSeconds(timeFromLatest).toDate());
+        measurement.setTime(new DateTime().minusMinutes(timeFromLatest).toDate());
         measurement.setSource(device);
         measurement.setType("c8y_TekelecMeasurement");
         measurement.set(distanceMeasurement(distance));
