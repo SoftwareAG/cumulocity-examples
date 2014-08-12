@@ -47,7 +47,7 @@ public class MessageHandler extends ChannelInboundHandlerAdapter {
                 List<String> contactReason = getMatchingResult(contactReasonByte, contactReasons);
                 byte alarmAndStatusByte = in.readByte();
                 List<String> alarmAndStatus = getMatchingResult(alarmAndStatusByte, alarmAndStatuses);
-                byte gsmRssi = in.readByte();
+                int gsmRssi = readInt(in);
                 BigDecimal battery = BigDecimal.valueOf(extractRightBits(in.readByte(), 5) + 30).divide(BigDecimal.valueOf(10), 2, RoundingMode.CEILING);
                 String imei = "";
                 for (int i = 0 ; i < 8 ; i++) {
@@ -67,12 +67,15 @@ public class MessageHandler extends ChannelInboundHandlerAdapter {
 
                 byte messageType = in.readByte();
                 byte payloadLength = in.readByte();
+                logger.info("payloadLength " + payloadLength);
                 in.skipBytes(6);
-                int loggerSpeed = readInt(in); 
+                int loggerSpeed = calculateLoggerSpeed(in.readByte()); 
                 in.skipBytes(2);
                 
                 payloadLength -= 9; // minus skipped/not_data bytes
                 payloadLength -= 2; // minus last two crc bytes
+                
+                logger.info("logger speed " + loggerSpeed);
                 
                 int count = 0;
                 while (payloadLength > 0) {
@@ -88,7 +91,7 @@ public class MessageHandler extends ChannelInboundHandlerAdapter {
                     logger.info("sonicResultCode " + sonicResultCode);
                     logger.info("distance " + distance);
                     
-                    createMeasurement(imei, battery, auxRssi, tempInCelsius, distance, device, count * loggerSpeed);
+                    createMeasurement(imei, gsmRssi, battery, auxRssi, sonicResultCode, tempInCelsius, distance, device, count * loggerSpeed);
                     
                     count++;
                     payloadLength -= 4; //
@@ -101,14 +104,22 @@ public class MessageHandler extends ChannelInboundHandlerAdapter {
         }
     }
 
+    private int calculateLoggerSpeed(byte b) {
+        if (b == 0) {
+            return 1;
+        }
+        int loggerSpeed = extractRightBits(b, 7);
+        return loggerSpeed * 15;
+    }
+
     private void printRequest(ByteBuf in) {
         ByteBuf copy = in.copy();
         while(copy.isReadable()) {
             logger.debug("" + readInt(copy));
         }
     }
-
-    private void createMeasurement(String imei, BigDecimal battery, int auxRssi, int tempInCelsius, int distance, ManagedObjectRepresentation device, int timeFromLatest) {
+    
+    private void createMeasurement(String imei, int gsmRssi, BigDecimal battery, int auxRssi, int sonicResultCode, int tempInCelsius, int distance, ManagedObjectRepresentation device, int timeFromLatest) {
         DeviceService deviceService = devicesService.get(imei);
         MeasurementRepresentation measurement = new MeasurementRepresentation();
         measurement.setTime(new DateTime().minusSeconds(timeFromLatest).toDate());
@@ -117,8 +128,15 @@ public class MessageHandler extends ChannelInboundHandlerAdapter {
         measurement.set(distanceMeasurement(distance));
         measurement.set(temperatureMeasurement(tempInCelsius));
         measurement.set(batteryMeasurement(battery));
-        measurement.setProperty("c8y_TEK586", new TEK586Measurement(auxRssi));
+        measurement.set(signalStrengthMeasurement(gsmRssi));
+        measurement.setProperty("c8y_TEK586", new TEK586Measurement(auxRssi, sonicResultCode));
         deviceService.createMeasurement(measurement);
+    }
+
+    private SignalStrength signalStrengthMeasurement(int gsmRssi) {
+        SignalStrength signalStrength = new SignalStrength();
+        signalStrength.setRssiValue(BigDecimal.valueOf(gsmRssi));
+        return signalStrength;
     }
 
     private ManagedObjectRepresentation createDevice(int hardwareRevision, int firmwareRevision, List<String> contactReason,
