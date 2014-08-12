@@ -21,7 +21,7 @@ public class TEK586Measurement {
         return sonicRssi;
     }
 
-    public void setAuxRssi(MeasurementValue sonicRssi) {
+    public void setSonicRssi(MeasurementValue sonicRssi) {
         this.sonicRssi = sonicRssi;
     }
 
