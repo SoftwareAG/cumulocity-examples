@@ -121,10 +121,10 @@ public class DualRelayBricklet implements Driver {
 			if (cleanup)
 				operation.setStatus(OperationStatus.FAILED.toString());
 			
-			Relay relays[] = operation.get(RelayArray.class).getRelays();
+			RelayArray relayArray = operation.get(RelayArray.class);
 			
-			dualRelay.setState(relays[0].getRelayState()==RelayState.CLOSED, 
-					relays[1].getRelayState()==RelayState.CLOSED);
+			dualRelay.setState(relayArray.get(0)==RelayState.CLOSED, 
+					relayArray.get(1)==RelayState.CLOSED);
 			
 			operation.setStatus(OperationStatus.SUCCESSFUL.toString());
 		}

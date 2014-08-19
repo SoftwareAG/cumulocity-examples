@@ -173,7 +173,7 @@ public class IO16Bricklet implements Driver, Configurable {
 				operation.setStatus(OperationStatus.FAILED.toString());
 			
 			RelayArray relayArray = operation.get(RelayArray.class);
-			updatePorts(relayArray.getRelays());
+			updatePorts(relayArray);
 			for(Port p:ports)
 				setPort(p);
 			
@@ -199,13 +199,13 @@ public class IO16Bricklet implements Driver, Configurable {
 	/*
 	 * The idea is to update the values of output pins only(starting from pin A0 to pin B7) using the relay values(CLOSED - logical true).
 	 */
-	private void updatePorts(Relay relays[]){
+	private void updatePorts(RelayArray relayArray){
 		Stack<Boolean> relaysBooleanStack= new Stack<Boolean>();
 		boolean direction[] = createBooleanArray(ports[0].actualConfiguration.directionMask, ports[1].actualConfiguration.directionMask);
 		boolean value[] = createBooleanArray(ports[0].actualConfiguration.valueMask, ports[1].actualConfiguration.valueMask);
 		
-		for(Relay relay:relays)
-			relaysBooleanStack.add(relay.getRelayState()==Relay.RelayState.CLOSED);
+		for(Relay.RelayState relay:relayArray)
+			relaysBooleanStack.add(relay==Relay.RelayState.CLOSED);
 		
 		for(int i=direction.length-1; i>=0; i--){
 			if(!direction[i])
