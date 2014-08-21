@@ -64,8 +64,8 @@ public class TixiLogHandlerTest extends BaseTixiHandlerTest {
 		
 		verify(measurementRepository, times(1)).save(measurementCaptor.capture());
 		MeasurementRepresentation actual = measurementCaptor.getValue();
-		assertThat(actual.get("c8y_measure1")).isEqualTo(aMeasurementValue(1));
-		assertThat(actual.get("c8y_measure2")).isEqualTo(aMeasurementValue(2));
+		assertThat(actual.get("c8y_measure1")).isEqualTo(aMeasurementValue("measure1", 1));
+		assertThat(actual.get("c8y_measure2")).isEqualTo(aMeasurementValue("measure2", 2));
 		assertThat(actual.getType()).isEqualTo("c8y_tixiMeasurement");
 		
 		assertThat(getLastLogFileDate(inventoryRepository.findById(agentRep.getId()))).isEqualTo(asDate(20));
@@ -97,8 +97,8 @@ public class TixiLogHandlerTest extends BaseTixiHandlerTest {
         MeasurementKey measurementKey = new MeasurementKey(null, asDate(15));
 		assertThat(measurements.getMeasurements().keySet()).containsOnly(measurementKey);
 		MeasurementRepresentation rep = measurements.getMeasurement(measurementKey);
-        assertThat(rep.get("c8y_EnergieDiff")).isEqualTo(aMeasurementValue(1));
-        assertThat(rep.get("c8y_PiValue")).isEqualTo(aMeasurementValue(2));
+        assertThat(rep.get("c8y_EnergieDiff")).isEqualTo(aMeasurementValue("EnergieDiff", 1));
+        assertThat(rep.get("c8y_PiValue")).isEqualTo(aMeasurementValue("PiValue", 2));
     }
 	
 	@Test
@@ -145,10 +145,12 @@ public class TixiLogHandlerTest extends BaseTixiHandlerTest {
 		assertThat(measurements.getMeasurements().keySet()).containsOnly(new MeasurementKey(null, asDate(20)));
 	}
 	
-	private static Map<String, Object> aMeasurementValue(int value) {
-		Map<String, Object> measurementValue = new HashMap<>();
+	private static Map<String, Map<String, BigDecimal>> aMeasurementValue(String name, int value) {
+	    Map<String, Map<String, BigDecimal>> measurement = new HashMap<>();
+		Map<String, BigDecimal> measurementValue = new HashMap<>();
 		measurementValue.put("value", BigDecimal.valueOf(value));
-		return measurementValue;
+		measurement.put(name, measurementValue);
+		return measurement;
 	}
 	
 	private static Date asDate(int time) {

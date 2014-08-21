@@ -100,7 +100,7 @@ public class TixiLogHandler extends TixiHandler {
 		logger.trace("Proccess log {} item with id.", item.getId());
 		String deviceId = getDeviceIdOrDefault(itemDef.getPath());
 		MeasurementRepresentation measurement = measurements.getOrCreateMeasurement(new MeasurementKey(deviceId, date));
-		measurement.setProperty(asFragmentName(itemDef), asFragment(item));
+		measurement.setProperty(asFragmentName(itemDef), asFragment(itemDef, item));
 		logger.trace("Item with id {} processed.", item.getId());
 	}
 	
@@ -152,10 +152,12 @@ public class TixiLogHandler extends TixiHandler {
 		deviceService.update(agentRep);
     }
 
-	private static Map<String, BigDecimal> asFragment(RecordItem logItem) {
+	private static Map<String, Map<String, BigDecimal>> asFragment(RecordItemDefinition itemDef, RecordItem logItem) {
+		Map<String, Map<String, BigDecimal>> measurement = new HashMap<>();
 		Map<String, BigDecimal> measurementValue = new HashMap<>();
 		measurementValue.put("value", logItem.getValue());
-	    return measurementValue;
+		measurement.put(itemDef.getPath().getName(), measurementValue);
+	    return measurement;
     }
 	
 	private static String asFragmentName(RecordItemDefinition itemDef) {
