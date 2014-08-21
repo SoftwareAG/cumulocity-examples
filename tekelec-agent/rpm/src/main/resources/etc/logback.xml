@@ -9,14 +9,10 @@
 		</encoder>
 
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<!-- rollover daily -->
-			<fileNamePattern>logs/jboss-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
-			<timeBasedFileNamingAndTriggeringPolicy
-				class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
-				<!-- or whenever the file size reaches 64 MB -->
-				<maxFileSize>64 MB</maxFileSize>
-			</timeBasedFileNamingAndTriggeringPolicy>
-		</rollingPolicy>
+            <!-- rollover daily -->
+            <fileNamePattern>/var/log/tekelec/tekelec-agent.%d.log</fileNamePattern>
+             <maxHistory>7</maxHistory>
+        </rollingPolicy>
 	</appender>
 
 	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
