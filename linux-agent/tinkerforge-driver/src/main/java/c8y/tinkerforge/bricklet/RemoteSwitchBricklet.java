@@ -19,10 +19,13 @@
  */
 package c8y.tinkerforge.bricklet;
 
+import java.util.ArrayList;
+import java.util.Properties;
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.Platform;
@@ -31,19 +34,28 @@ import com.tinkerforge.BrickletRemoteSwitch;
 import com.tinkerforge.NotConnectedException;
 import com.tinkerforge.TimeoutException;
 
+import c8y.RelayArray;
+import c8y.Relay.RelayState;
+import c8y.lx.driver.Configurable;
 import c8y.lx.driver.DeviceManagedObject;
 import c8y.lx.driver.Driver;
 import c8y.lx.driver.OperationExecutor;
 import c8y.lx.driver.OpsUtil;
 import c8y.tinkerforge.TFIds;
 
-public class RemoteSwitchBricklet implements Driver {
+public class RemoteSwitchBricklet implements Driver, Configurable {
 	
 	private static final String TYPE = "RemoteSwitch";
-	private static final String TYPE_A_SWITCH_OP_TYPE = "c8y_typeA_switch";
-	private static final String TYPE_B_SWITCH_OP_TYPE = "c8y_typeB_switch";
-	private static final String TYPE_B_DIM_OP_TYPE = "c8y_typeB_dim";
-	private static final String TYPE_C_SWITCH_OP_TYPE = "c8y_typeC_switch";
+	private static final String TYPE_PROP = ".type";
+	//Type A addressing:
+	private static final String HOUSE_CODE_PROP = ".houseCode";
+	private static final String RECEIVER_CODE_PROP = ".receiverCode";
+	//Type B addressing:
+	private static final String ADDRESS_PROP = ".address";
+	private static final String UNIT_PROP = ".unit"; 
+	//Type C addressing:
+	private static final String SYSTEM_CODE_PROP = ".systemCode";
+	private static final String DEVICE_CODE_PROP = ".deviceCode";
 	
 	private static final Logger logger = LoggerFactory
 			.getLogger(RemoteSwitchBricklet.class);
@@ -54,29 +66,95 @@ public class RemoteSwitchBricklet implements Driver {
 			new ManagedObjectRepresentation();
 	private Platform platform;
 	
+	private ArrayList<RemoteDevice> devices = new ArrayList<RemoteDevice>();
+	private ArrayList<RemoteDevice> exampleDevices = new ArrayList<RemoteDevice>();
+	
 	public RemoteSwitchBricklet(String id, BrickletRemoteSwitch remoteSwitch) {
 		this.id=id;
 		this.remoteSwitch = remoteSwitch;
+		//prepare some example devices to be added as defaults
+		exampleDevices.add(new RemoteDeviceA("exampleDeviceA", (short)0b10001, (short)0b00100));
+		exampleDevices.add(new RemoteDeviceB("exampleDeviceB", 108863, (short)0b0110));
+		exampleDevices.add(new RemoteDeviceC("exampleDeviceC", 'E' , (short)0b1010));
 	}
 	
 	@Override
 	public void initialize() throws Exception {
 		// Nothing to be done here.
+	}
+	
+	@Override
+	public void addDefaults(Properties props) {
+		for(RemoteDevice device:exampleDevices){
+			if(device instanceof RemoteDeviceA){
+				props.setProperty(TFIds.getPropertyName(TYPE)+"."+device.name+TYPE_PROP, "A");
+				props.setProperty(TFIds.getPropertyName(TYPE)+"."+device.name+HOUSE_CODE_PROP, Short.toString(((RemoteDeviceA)device).houseCode));
+				props.setProperty(TFIds.getPropertyName(TYPE)+"."+device.name+RECEIVER_CODE_PROP, Short.toString(((RemoteDeviceA)device).receiverCode));
+			}
+			else if(device instanceof RemoteDeviceB){
+				props.setProperty(TFIds.getPropertyName(TYPE)+"."+device.name+TYPE_PROP, "B");
+				props.setProperty(TFIds.getPropertyName(TYPE)+"."+device.name+ADDRESS_PROP, Long.toString(((RemoteDeviceB)device).address));
+				props.setProperty(TFIds.getPropertyName(TYPE)+"."+device.name+UNIT_PROP, Short.toString(((RemoteDeviceB)device).unit));
+			}
+			else if(device instanceof RemoteDeviceC){
+				props.setProperty(TFIds.getPropertyName(TYPE)+"."+device.name+TYPE_PROP, "C");
+				props.setProperty(TFIds.getPropertyName(TYPE)+"."+device.name+SYSTEM_CODE_PROP, Long.toString(((RemoteDeviceC)device).systemCode));
+				props.setProperty(TFIds.getPropertyName(TYPE)+"."+device.name+DEVICE_CODE_PROP, Short.toString(((RemoteDeviceC)device).deviceCode));
+			}
+		}
+	}
 
+	@Override
+	public void configurationChanged(Properties props) {
+		devices.clear();
+		Set<String> keys = props.stringPropertyNames();
+		ArrayList<String> deviceNames = new ArrayList<String>();
+		for(String key:keys){
+			String keyArray[] = key.split(".");
+			if(TYPE.equalsIgnoreCase(keyArray[1]))
+				if(!deviceNames.contains(keyArray[2]))
+					deviceNames.add(keyArray[2]);
+		}
+		
+		for(String deviceName:deviceNames){
+			try {
+				switch(props.getProperty(TFIds.getPropertyName(TYPE)+"."+deviceName+TYPE_PROP)){
+					case "A":
+					case "a":
+						devices.add(new RemoteDeviceA(deviceName, 
+								Short.parseShort(props.getProperty(TFIds.getPropertyName(TYPE)+"."+deviceName+HOUSE_CODE_PROP)), 
+								Short.parseShort(props.getProperty(TFIds.getPropertyName(TYPE)+"."+deviceName+RECEIVER_CODE_PROP))));
+						break;
+					case "B":
+					case "b":
+						devices.add(new RemoteDeviceB(deviceName, 
+								Long.parseLong(props.getProperty(TFIds.getPropertyName(TYPE)+"."+deviceName+ADDRESS_PROP)), 
+								Short.parseShort(props.getProperty(TFIds.getPropertyName(TYPE)+"."+deviceName+UNIT_PROP))));
+						break;
+					case "C":
+					case "c":
+						devices.add(new RemoteDeviceC(deviceName, 
+								props.getProperty(TFIds.getPropertyName(TYPE)+"."+deviceName+SYSTEM_CODE_PROP).toCharArray()[0],
+								Short.parseShort(props.getProperty(TFIds.getPropertyName(TYPE)+"."+deviceName+DEVICE_CODE_PROP))));
+						break;
+					default:
+						logger.warn("Unknown type for device {}", deviceName);
+				}
+			} catch (NumberFormatException x) {
+				logger.warn("Error reading device configuration for device "+deviceName, x);
+			}
+		}
+		
 	}
 
 	@Override
 	public void initialize(Platform platform) throws Exception {
 		this.platform=platform;
-
 	}
 
 	@Override
 	public OperationExecutor[] getSupportedOperations() {
-		return new OperationExecutor[] { new TypeASocketSwitchOperationExecutor(),
-				new TypeBSocketSwitchOperationExecutor(),
-				new TypeBSocketDimOperationExecutor(),
-				new TypeCSocketSwitchOperationExecutor()};
+		return new OperationExecutor[] { new RelayArrayOperationExecutor() };
 	}
 
 	@Override
@@ -114,94 +192,80 @@ public class RemoteSwitchBricklet implements Driver {
 
 	}
 
-	class TypeASocketSwitchOperationExecutor implements OperationExecutor{
+	class RelayArrayOperationExecutor implements OperationExecutor {
 
 		@Override
 		public String supportedOperationType() {
-			return TYPE_A_SWITCH_OP_TYPE;
+			return "c8y_RelayArray";
 		}
 
 		@Override
 		public void execute(OperationRepresentation operation, boolean cleanup)
 				throws Exception {
-			if (cleanup) 
-				operation.setStatus(OperationStatus.FAILED.toString());
-			
-			remoteSwitch.switchSocketA( (short)operation.getProperty("houseCode"),
-					(short)operation.getProperty("recieverCode"), 
-					(short)operation.getProperty("switchTo"));
-			
-			operation.setStatus(OperationStatus.SUCCESSFUL.toString());
+			RelayArray relayArray = operation.get(RelayArray.class);
+			for(int i=0;i<devices.size()&&i<relayArray.size();i++){
+				devices.get(i).switchDevice((short) (relayArray.get(i)==RelayState.CLOSED?1:0));
+			}
 		}
 		
 	}
-
-	class TypeBSocketSwitchOperationExecutor implements OperationExecutor{
-
-		@Override
-		public String supportedOperationType() {
-			return TYPE_B_SWITCH_OP_TYPE;
+	
+	abstract class RemoteDevice {
+		private String name;
+		public RemoteDevice(String name){
+			this.name=name;
 		}
-
-		@Override
-		public void execute(OperationRepresentation operation, boolean cleanup)
-				throws Exception {
-			if (cleanup)
-				operation.setStatus(OperationStatus.FAILED.toString());
-			
-			
-			remoteSwitch.switchSocketB( (long)operation.getProperty("address"),
-					(short)operation.getProperty("unit"),
-					(short)operation.getProperty("switchTo"));
-			
-			operation.setStatus(OperationStatus.SUCCESSFUL.toString());
-		}
-		
+		public abstract void switchDevice(short switchTo) throws TimeoutException, NotConnectedException;
 	}
-
-	class TypeBSocketDimOperationExecutor implements OperationExecutor{
-
-		@Override
-		public String supportedOperationType() {
-			return TYPE_B_DIM_OP_TYPE;
-		}
-
-		@Override
-		public void execute(OperationRepresentation operation, boolean cleanup)
-				throws Exception {
-			if (cleanup)
-				operation.setStatus(OperationStatus.FAILED.toString());
-			
-			remoteSwitch.dimSocketB((long)operation.getProperty("address"), 
-									(short)operation.getProperty("unit"), 
-									(short)operation.getProperty("dimValue"));
-			
-			operation.setStatus(OperationStatus.SUCCESSFUL.toString());
-		}
-		
+	
+	interface Dimmable {
+		public void dimDevice(short dimValue) throws TimeoutException, NotConnectedException;
 	}
-
-	class TypeCSocketSwitchOperationExecutor implements OperationExecutor{
-
-		@Override
-		public String supportedOperationType() {
-			return TYPE_C_SWITCH_OP_TYPE;
+	
+	class RemoteDeviceA extends RemoteDevice{
+		private short houseCode;
+		private short receiverCode;
+		public RemoteDeviceA(String name, short houseCode, short receiverCode) {
+			super(name);
+			this.houseCode=houseCode;
+			this.receiverCode=receiverCode;
 		}
-		
-		
-
 		@Override
-		public void execute(OperationRepresentation operation, boolean cleanup)
-				throws Exception {
-			if (cleanup)
-				operation.setStatus(OperationStatus.FAILED.toString());
-			
-			remoteSwitch.switchSocketC((char)operation.getProperty("systemCode"), 
-					(short)operation.getProperty("deviceCode"), 
-					(short)operation.getProperty("switchTo"));
-			
-			operation.setStatus(OperationStatus.SUCCESSFUL.toString());
+		public void switchDevice(short switchTo) throws TimeoutException, NotConnectedException {
+			remoteSwitch.switchSocketA(houseCode, receiverCode, switchTo);
 		}
-		
 	}
+	
+	class RemoteDeviceB extends RemoteDevice implements Dimmable{
+		private long address;
+		private short unit;
+		public RemoteDeviceB(String name, long address, short unit){
+			super(name);
+			this.address=address;
+			this.unit=unit;
+		}
+		@Override
+		public void switchDevice(short switchTo) throws TimeoutException, NotConnectedException {
+			remoteSwitch.switchSocketB(switchTo, switchTo, switchTo);
+		}
+		@Override
+		public void dimDevice(short dimValue) throws TimeoutException, NotConnectedException {
+			remoteSwitch.dimSocketB(address, unit, dimValue);
+		}
+	}
+	
+	class RemoteDeviceC extends RemoteDevice{
+		private char systemCode;
+		private short deviceCode;
+		public RemoteDeviceC(String name, char systemCode, short deviceCode){
+			super(name);
+			this.systemCode=Character.toUpperCase(systemCode);
+			this.deviceCode=deviceCode;
+		}
+		@Override
+		public void switchDevice(short switchTo) throws TimeoutException, NotConnectedException {
+			remoteSwitch.switchSocketC(systemCode, deviceCode, switchTo);
+		}
+	}
+	
 }
