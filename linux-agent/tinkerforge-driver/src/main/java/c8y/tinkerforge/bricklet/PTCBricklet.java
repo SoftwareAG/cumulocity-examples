@@ -34,7 +34,7 @@ import com.tinkerforge.TimeoutException;
 
 public class PTCBricklet extends BaseSensorBricklet {
 
-	private static final String TYPE="Temperature";
+	private static final String TYPE="PTC";
 	private static final short DEFAULT_WIRE_MODE=BrickletPTC.WIRE_MODE_2;
 	private static final String WIRE_MODE_PROP=".wiremode";
 	
@@ -42,7 +42,6 @@ public class PTCBricklet extends BaseSensorBricklet {
 	private short wireMode;
 	
 	private TemperatureMeasurement temperature = new TemperatureMeasurement();
-	
 	
 	public PTCBricklet(String id, Device device) {
 		super(id, device, TYPE, new TemperatureSensor());

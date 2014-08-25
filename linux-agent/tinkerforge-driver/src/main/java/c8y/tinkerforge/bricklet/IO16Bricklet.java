@@ -21,7 +21,6 @@
 package c8y.tinkerforge.bricklet;
 
 import java.util.Properties;
-import java.util.Stack;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +35,7 @@ import com.tinkerforge.BrickletIO16.PortConfiguration;
 import com.tinkerforge.NotConnectedException;
 import com.tinkerforge.TimeoutException;
 
-import c8y.Relay;
+import c8y.Relay.RelayState;
 import c8y.RelayArray;
 import c8y.lx.driver.Configurable;
 import c8y.lx.driver.DeviceManagedObject;
@@ -197,20 +196,16 @@ public class IO16Bricklet implements Driver, Configurable {
 		return (short)((short)0b11111111-s);
 	}
 	/*
-	 * The idea is to update the values of output pins only(starting from pin A0 to pin B7) using the relay values(CLOSED - logical true).
+	 * The idea is to update the values of output pins only(starting from pin A0 up to pin B7) using the 
+	 * relay values(CLOSED - logical true).
 	 */
 	private void updatePorts(RelayArray relayArray){
-		Stack<Boolean> relaysBooleanStack= new Stack<Boolean>();
 		boolean direction[] = createBooleanArray(ports[0].actualConfiguration.directionMask, ports[1].actualConfiguration.directionMask);
 		boolean value[] = createBooleanArray(ports[0].actualConfiguration.valueMask, ports[1].actualConfiguration.valueMask);
 		
-		for(Relay.RelayState relay:relayArray)
-			relaysBooleanStack.add(relay==Relay.RelayState.CLOSED);
-		
-		for(int i=direction.length-1; i>=0; i--){
-			if(!direction[i])
-				value[i]=relaysBooleanStack.pop();
-		}
+		for(int i=0; i<direction.length; i++)
+			if(!direction[i]&&!relayArray.isEmpty())
+				value[i]=relayArray.remove(0)==RelayState.CLOSED;
 		
 		int newValueMasks[]=getValueMasks(value);
 		
