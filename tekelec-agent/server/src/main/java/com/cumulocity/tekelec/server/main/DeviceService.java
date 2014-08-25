@@ -30,6 +30,8 @@ public class DeviceService {
     private Platform devicePlatform;
 
     private CredentialsManager credentialsManager;
+    
+    private volatile boolean duringBootstrap = false;
 
     public DeviceService(String imei) {
         credentialsManager = CredentialsManager.credentialsManagerFor(imei);
@@ -41,12 +43,18 @@ public class DeviceService {
         }
     }
     
-    public ManagedObjectRepresentation register(String imei) {
+    public ManagedObjectRepresentation register(String imei) throws NotInitizializedException {
+        if (duringBootstrap) {
+            throw new NotInitizializedException("Device in bootstrap process currently");
+        }
+        
         ManagedObjectRepresentation result = null;
         if (credentialsManager.getDeviceCredentials() == null) {
+            duringBootstrap = true;
             logger.info("Device not registered, starting bootstrap for imei: " + imei);
             initCredentials(imei);
             result = registerDeviceManagedObject(new Imei(imei));
+            duringBootstrap = false;
         } else {
             logger.info("Found device credentials");
             result = findByExternalId(new Imei(imei));
@@ -113,5 +121,13 @@ public class DeviceService {
 
     public void createMeasurement(MeasurementRepresentation measurement) {
         devicePlatform.getMeasurementApi().create(measurement);
+    }
+    
+    public static class NotInitizializedException extends Exception {
+
+        public NotInitizializedException(String message) {
+            super(message);
+        }
+
     }
 }
