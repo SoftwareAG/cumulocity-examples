@@ -103,6 +103,13 @@
                 <type>zip</type>
                 <classifier>win</classifier>
             </dependency>
+            <dependency>
+                <groupId>c8y.example</groupId>
+                <artifactId>lx-agent-assembly</artifactId>
+                <version>${project.version}</version>
+                <type>tar.gz</type>
+                <classifier>mac</classifier>
+            </dependency>
 		</dependencies>
 	</dependencyManagement>
 

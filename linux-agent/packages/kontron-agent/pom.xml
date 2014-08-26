@@ -15,7 +15,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <addembly.descriptor>c8y-lx-agent</addembly.descriptor>
+        <assembly.descriptor>c8y-lx-agent-linux</assembly.descriptor>
     </properties>
 
     <dependencies>

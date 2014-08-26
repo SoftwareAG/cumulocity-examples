@@ -56,6 +56,12 @@
             <type>zip</type>
             <classifier>win</classifier>
         </dependency>
+        <dependency>
+            <groupId>c8y.example</groupId>
+            <artifactId>lx-agent-assembly</artifactId>
+            <type>tar.gz</type>
+            <classifier>mac</classifier>
+        </dependency>
     </dependencies>
 
     <build>
@@ -80,7 +86,7 @@
                             <configuration>
                                 <appendAssemblyId>false</appendAssemblyId>
                                 <descriptorRefs>
-                                    <descriptorRef>${addembly.descriptor}</descriptorRef>
+                                    <descriptorRef>${assembly.descriptor}</descriptorRef>
                                 </descriptorRefs>
                             </configuration>
                         </execution>
