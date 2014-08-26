@@ -20,12 +20,15 @@
 
 package c8y.tinkerforge.bricklet;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.Properties;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.cumulocity.model.operation.OperationStatus;
+import com.cumulocity.rest.representation.event.EventRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.Platform;
@@ -47,11 +50,11 @@ import c8y.tinkerforge.TFIds;
 public class IO16Bricklet implements Driver, Configurable {
 
 	class Port{
-		protected final static String DIRECTION_PROP = ".direction";
-		protected final static String VALUE_PROP= ".value";
-		protected char name;
-		protected PortConfiguration defaultConfiguration;
-		protected PortConfiguration actualConfiguration;
+		private final static String DIRECTION_PROP = ".direction";
+		private final static String VALUE_PROP= ".value";
+		private char name;
+		private PortConfiguration defaultConfiguration = io16.new PortConfiguration();
+		private PortConfiguration actualConfiguration = io16.new PortConfiguration();
 		
 		public Port(char name, short defaultDirection, short defaultValue) {
 			this.name=name;
@@ -61,34 +64,40 @@ public class IO16Bricklet implements Driver, Configurable {
 	}
 	
 	private static final String TYPE = "IO16";
+	private static final String EVENT_TYPE = "c8y_InputChangeEvent";
+	private static final String DEBOUNCE_PERIOD_PROP = ".debouncePeriod";
 	
+	private final long defaultDebouncePeriod = 1000;
+	private long actualDeboncePeriod;
 	private static final Logger logger = LoggerFactory
 			.getLogger(IO16Bricklet.class);
 	
 	private String id;
 	private BrickletIO16 io16;
-	private ManagedObjectRepresentation io16Mo = 
-			new ManagedObjectRepresentation();
+	private ManagedObjectRepresentation io16Mo = new ManagedObjectRepresentation();
+	private EventRepresentation inputChangeEvent = new EventRepresentation();
 	private Platform platform;
+	
+	private Port[] ports;
 	
 	/*
 	 * direction: 0-Output 1-input
 	 * value: OUTPUT: 0,1-logical values INPUT: 0-default 1-pull up
 	 * 
-	 * With this in mind the configuration below does the following:
-	 * Configures all pins on portA as input with pull ups and 
-	 * all pins on portB as output set to 0 logical level.
+	 * With this in mind the configuration in the constructor below
+	 * does the following: Configures all pins on portA as input with 
+	 * pull ups and all pins on portB as output set to 0 logical level.
 	 */
-	private Port[] ports = new Port[]{	new Port('a', (short)0b11111111, (short)0b11111111), 
-										new Port('b', (short)0b00000000, (short)0b00000000)  };
-	
 	public IO16Bricklet(String uid, BrickletIO16 io16) {
 		this.id = uid;
 		this.io16 = io16;
+		ports = new Port[]{	new Port('a', (short)0b11111111, (short)0b11111111), 
+					new Port('b', (short)0b00000000, (short)0b00000000)  };
 	}
 	
 	@Override
 	public void addDefaults(Properties props) {
+		props.setProperty(TFIds.getPropertyName(TYPE)+DEBOUNCE_PERIOD_PROP, Long.toString(defaultDebouncePeriod));
 		for(Port port:ports){
 			props.setProperty(TFIds.getPropertyName(TYPE)+".port"+port.name+Port.DIRECTION_PROP, 
 					Short.toString(port.defaultConfiguration.directionMask));
@@ -99,6 +108,13 @@ public class IO16Bricklet implements Driver, Configurable {
 	
 	@Override
 	public void configurationChanged(Properties props) {
+		actualDeboncePeriod = Long.parseLong(props.getProperty(TFIds.getPropertyName(TYPE)+DEBOUNCE_PERIOD_PROP, 
+											Long.toString(defaultDebouncePeriod)));
+		try {
+			io16.setDebouncePeriod(actualDeboncePeriod);
+		} catch (TimeoutException | NotConnectedException e) {
+			logger.warn("Error setting debounce period", e);
+		}
 		for(Port port:ports){
 			port.actualConfiguration.directionMask=Short.parseShort( props.getProperty(
 					TFIds.getPropertyName(TYPE)+".port"+port.name+Port.DIRECTION_PROP, 
@@ -112,7 +128,8 @@ public class IO16Bricklet implements Driver, Configurable {
 	
 	@Override
 	public void initialize() throws Exception {
-		// Nothing to be done here.
+		inputChangeEvent.setSource(io16Mo);
+		inputChangeEvent.setType(EVENT_TYPE);
 	}
 
 	@Override
@@ -154,8 +171,25 @@ public class IO16Bricklet implements Driver, Configurable {
 
 	@Override
 	public void start() {
-		// Nothing to be done.
-		
+		io16.addInterruptListener(new BrickletIO16.InterruptListener() {
+			
+			@Override
+			public void interrupt(char port, short interruptMask, short valueMask) {
+				inputChangeEvent.setTime(new Date());
+				inputChangeEvent.setProperty("port", Character.toString(port));
+				for(int i=0;i<8;i++){
+					if(interruptMask%2==1){
+						inputChangeEvent.setText("Pin "+Character.toString(port).toUpperCase()+Integer.toString(i)+" changed to "+(valueMask%2==1?"logical 1":"logical 0"));
+						inputChangeEvent.setProperty("pin", i);
+						inputChangeEvent.setProperty("value", valueMask%2);
+						platform.getEventApi().create(inputChangeEvent);
+					}
+					interruptMask=(short)(interruptMask>>1);
+					valueMask=(short)(valueMask>>1);
+				}
+				
+			}
+		});
 	}
 	
 	class RelayArrayOperationExecutor implements OperationExecutor{
@@ -187,6 +221,7 @@ public class IO16Bricklet implements Driver, Configurable {
 			io16.setPortConfiguration(port.name, (short)(port.actualConfiguration.directionMask&negate(port.actualConfiguration.valueMask)), BrickletIO16.DIRECTION_IN, false);
 			io16.setPortConfiguration(port.name, (short)(negate(port.actualConfiguration.directionMask)&port.actualConfiguration.valueMask), BrickletIO16.DIRECTION_OUT, true);
 			io16.setPortConfiguration(port.name, (short)(negate(port.actualConfiguration.directionMask)&negate(port.actualConfiguration.valueMask)), BrickletIO16.DIRECTION_OUT, false);
+			io16.setPortInterrupt(port.name, port.actualConfiguration.directionMask);
 		} catch (Exception x){
 			logger.warn("Error setting port", x);
 		}
@@ -202,10 +237,16 @@ public class IO16Bricklet implements Driver, Configurable {
 	private void updatePorts(RelayArray relayArray){
 		boolean direction[] = createBooleanArray(ports[0].actualConfiguration.directionMask, ports[1].actualConfiguration.directionMask);
 		boolean value[] = createBooleanArray(ports[0].actualConfiguration.valueMask, ports[1].actualConfiguration.valueMask);
-		
+		/*
+		 * TODO: This feels like a naughty hack. Maybe update Relay.RelayState to make it castable to String somehow. 
+		 * Or modify how it is parsed. 
+		 */
+		ArrayList<String> strings = (ArrayList)relayArray;
 		for(int i=0; i<direction.length; i++)
-			if(!direction[i]&&!relayArray.isEmpty())
-				value[i]=relayArray.remove(0)==RelayState.CLOSED;
+			if(!direction[i]&&!relayArray.isEmpty()){
+				System.err.println(i+":"+strings.get(0));
+				value[i]=RelayState.CLOSED.toString().equalsIgnoreCase(strings.remove(0));
+			}
 		
 		int newValueMasks[]=getValueMasks(value);
 		
