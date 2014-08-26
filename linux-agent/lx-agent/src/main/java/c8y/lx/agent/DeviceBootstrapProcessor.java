@@ -15,7 +15,7 @@ public class DeviceBootstrapProcessor {
     private static final Logger logger = LoggerFactory.getLogger(DeviceBootstrapProcessor.class);
     
     public static final int POLL_CREDENTIALS_TIMEOUT = 24 * 3600;
-    public static final int POLL_CREDENTIALS_INTERVAL = 60;
+    public static final int POLL_CREDENTIALS_INTERVAL = 5;
 
     private final CredentialsManager credentialsManager;
 
