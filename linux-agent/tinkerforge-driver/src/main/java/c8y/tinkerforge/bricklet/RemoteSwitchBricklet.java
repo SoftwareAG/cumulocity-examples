@@ -189,7 +189,6 @@ public class RemoteSwitchBricklet implements Driver, Configurable {
 	@Override
 	public void start() {
 		// Nothing to be done here.
-
 	}
 
 	class RelayArrayOperationExecutor implements OperationExecutor {
@@ -202,9 +201,10 @@ public class RemoteSwitchBricklet implements Driver, Configurable {
 		@Override
 		public void execute(OperationRepresentation operation, boolean cleanup)
 				throws Exception {
-			RelayArray relayArray = operation.get(RelayArray.class);
+			// TODO: Fix this hack
+			ArrayList<String> relayArray = (ArrayList)operation.get(RelayArray.class);
 			for(int i=0;i<devices.size()&&i<relayArray.size();i++){
-				devices.get(i).switchDevice((short) (relayArray.get(i)==RelayState.CLOSED?1:0));
+				devices.get(i).switchDevice( (short)(RelayState.CLOSED.toString().equals(relayArray.get(i)) ? 1 : 0) );
 			}
 		}
 		

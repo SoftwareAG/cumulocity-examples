@@ -20,6 +20,8 @@
 
 package c8y.tinkerforge.bricklet;
 
+import java.util.ArrayList;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -121,10 +123,11 @@ public class DualRelayBricklet implements Driver {
 			if (cleanup)
 				operation.setStatus(OperationStatus.FAILED.toString());
 			
-			RelayArray relayArray = operation.get(RelayArray.class);
+			// TODO: Fix this hack
+			ArrayList<String> relayArray = (ArrayList)operation.get(RelayArray.class);
 			
-			dualRelay.setState(relayArray.get(0)==RelayState.CLOSED, 
-					relayArray.get(1)==RelayState.CLOSED);
+			dualRelay.setState(RelayState.CLOSED.toString().equals(relayArray.get(0)), 
+					RelayState.CLOSED.toString().equals(relayArray.get(1)));
 			
 			operation.setStatus(OperationStatus.SUCCESSFUL.toString());
 		}
