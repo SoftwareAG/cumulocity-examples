@@ -28,9 +28,11 @@
                         <phase>package</phase>
                         <configuration>
                             <descriptors>
-                                <descriptor>src/main/assembly/base-tar.xml</descriptor>
+                                <descriptor>src/main/assembly/base-linux.xml</descriptor>
+                                <descriptor>src/main/assembly/base-win.xml</descriptor>
                                 <descriptor>src/main/assembly/base-rpm.xml</descriptor>
                                 <descriptor>src/main/assembly/base-deb.xml</descriptor>
+                                <descriptor>src/main/assembly/base-mac.xml</descriptor>
                             </descriptors>
                         </configuration>
                     </execution>

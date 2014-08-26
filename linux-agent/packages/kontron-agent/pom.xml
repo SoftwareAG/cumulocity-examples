@@ -15,13 +15,18 @@
     <packaging>pom</packaging>
 
     <properties>
-        <addembly.descriptor>c8y-lx-agent</addembly.descriptor>
+        <assembly.descriptor>c8y-lx-agent-linux</assembly.descriptor>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>c8y.example</groupId>
             <artifactId>kontron-driver</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>c8y.example</groupId>
+            <artifactId>generic-linux-driver</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

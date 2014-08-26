@@ -60,7 +60,8 @@ public class TrackerDevice extends DeviceManagedObject {
     // TODO These should really come device-capabilities/sensor library.
     public static final String LU_EVENT_TYPE = "c8y_LocationUpdate";
     public static final String GEO_ALARM_TYPE = "c8y_GeofenceAlarm";
-    public static final String MOT_ALARM_TYPE = "c8y_MotionAlarm";
+    public static final String MOTION_DETECTED_EVENT_TYPE = "c8y_MotionEvent";
+    public static final String MOTION_ENDED_EVENT_TYPE = "c8y_MotionEndedEvent";
     public static final String POWER_ALARM_TYPE = "c8y_PowerAlarm";
     
     private Logger logger = LoggerFactory.getLogger(getClass());
@@ -75,9 +76,10 @@ public class TrackerDevice extends DeviceManagedObject {
     private Mobile mobile;
 
     private EventRepresentation locationUpdate = new EventRepresentation();
+    private EventRepresentation eventMotionDetected = new EventRepresentation();
+    private EventRepresentation eventMotionEnded = new EventRepresentation();
 
     private AlarmRepresentation fenceAlarm = new AlarmRepresentation();
-    private AlarmRepresentation motionAlarm = new AlarmRepresentation();
     private AlarmRepresentation powerAlarm = new AlarmRepresentation();
     private AlarmFilter alarmFilter = new AlarmFilter();
 
@@ -152,9 +154,16 @@ public class TrackerDevice extends DeviceManagedObject {
         getInventory().update(device);
     }
 
-    public void motionAlarm(boolean moving) throws SDKException {
-        logger.debug("{} {}", imei, moving ? "is moving" : "stopped moving");
-        createOrCancelAlarm(moving, motionAlarm);
+    public void motionEvent(boolean moving) throws SDKException {
+    	if(moving){
+    		eventMotionDetected.setTime(new Date());
+    		events.create(eventMotionDetected);
+    		logger.debug("{} is moving", imei);
+    	} else {
+    		eventMotionEnded.setTime(new Date());
+    		events.create(eventMotionEnded);
+    		logger.debug("{} stopped moving", imei);
+    	}
     }
 
     public void powerAlarm(boolean powerLost, boolean external) throws SDKException {
@@ -231,11 +240,14 @@ public class TrackerDevice extends DeviceManagedObject {
         fenceAlarm.setText("Asset left geo fence.");
         fenceAlarm.setSource(source);
 
-        motionAlarm.setType(MOT_ALARM_TYPE);
-        motionAlarm.setSeverity(CumulocitySeverities.MINOR.toString());
-        motionAlarm.setText("Asset was moved.");
-        motionAlarm.setSource(source);
-
+        eventMotionDetected.setSource(source);
+        eventMotionDetected.setType(MOTION_DETECTED_EVENT_TYPE);
+        eventMotionDetected.setText("Motion detected");
+        
+        eventMotionEnded.setSource(source);
+        eventMotionEnded.setType(MOTION_ENDED_EVENT_TYPE);
+        eventMotionEnded.setText("Motion ended");
+        
         powerAlarm.setType(POWER_ALARM_TYPE);
         powerAlarm.setSeverity(CumulocitySeverities.MAJOR.toString());
         powerAlarm.setText("Asset lost power.");

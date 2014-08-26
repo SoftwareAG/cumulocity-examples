@@ -100,7 +100,7 @@ public class GL200DeviceMotionState extends GL200Parser implements Translator {
                 || MOTION_DETECTED_IGNITION_ON.equals(motionState)
                 || BEING_TOWED.equals(motionState);
         TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(imei);
-        device.motionAlarm(motion);
+        device.motionEvent(motion);
         return true;
     }
 

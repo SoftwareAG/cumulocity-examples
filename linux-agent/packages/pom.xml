@@ -18,6 +18,8 @@
         <module>rpi-agent</module>
         <module>kontron-agent</module>
         <module>mac-agent</module>
+    	<module>win-agent</module>
+    	<module>linux-agent</module>
     </modules>
 
     <properties>
@@ -48,6 +50,18 @@
             <type>tar.gz</type>
             <classifier>deb</classifier>
         </dependency>
+        <dependency>
+            <groupId>c8y.example</groupId>
+            <artifactId>lx-agent-assembly</artifactId>
+            <type>zip</type>
+            <classifier>win</classifier>
+        </dependency>
+        <dependency>
+            <groupId>c8y.example</groupId>
+            <artifactId>lx-agent-assembly</artifactId>
+            <type>tar.gz</type>
+            <classifier>mac</classifier>
+        </dependency>
     </dependencies>
 
     <build>
@@ -72,7 +86,7 @@
                             <configuration>
                                 <appendAssemblyId>false</appendAssemblyId>
                                 <descriptorRefs>
-                                    <descriptorRef>${addembly.descriptor}</descriptorRef>
+                                    <descriptorRef>${assembly.descriptor}</descriptorRef>
                                 </descriptorRefs>
                             </configuration>
                         </execution>

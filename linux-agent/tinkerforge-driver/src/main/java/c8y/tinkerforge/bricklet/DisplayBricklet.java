@@ -34,6 +34,7 @@ import c8y.lx.driver.OperationExecutor;
 import c8y.lx.driver.OpsUtil;
 
 import c8y.tinkerforge.TFIds;
+
 import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.rest.representation.event.EventRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
@@ -60,6 +61,7 @@ public class DisplayBricklet implements Driver {
 	private ManagedObjectRepresentation displayMo = new ManagedObjectRepresentation();
 	private EventRepresentation buttonEvent = new EventRepresentation();
 	private String id;
+	private Message msg=new Message();
 	private BrickletLCD20x4 display;
 
 	public DisplayBricklet(String id, BrickletLCD20x4 display) {
@@ -93,12 +95,9 @@ public class DisplayBricklet implements Driver {
 
 		displayMo.setType(TFIds.getType(TYPE));
 		displayMo.setName(TFIds.getDefaultName(parent.getName(), TYPE, id));
-		displayMo.set(new Message()); // Should actually persist the message
-										// between runs
-		OpsUtil.addSupportedOperation(displayMo,
-                getSupportedOperations()[0].supportedOperationType());
-		OpsUtil.addSupportedOperation(displayMo,
-                getSupportedOperations()[1].supportedOperationType());
+
+		for(OperationExecutor operation:getSupportedOperations())
+			OpsUtil.addSupportedOperation(displayMo, operation.supportedOperationType());
 
 		try {
 			DeviceManagedObject dmo = new DeviceManagedObject(platform);
@@ -113,6 +112,14 @@ public class DisplayBricklet implements Driver {
 
 	@Override
 	public void start() {
+		try {
+			msg=displayMo.get(Message.class);
+			if(msg!=null&&msg.getText()!=null)
+				submitText(msg.getText());
+		} catch (TimeoutException | NotConnectedException x) {
+			logger.warn("Error initializing display msg.", x);
+		}
+		
 		display.addButtonPressedListener(new ButtonPressedListener() {
 			@Override
 			public void buttonPressed(short button) {
@@ -145,9 +152,10 @@ public class DisplayBricklet implements Driver {
 				operation.setStatus(OperationStatus.FAILED.toString());
 			}
 
-			String text = operation.get(Message.class).getText();
-			display.backlightOn();
-			submitText(text);
+			msg = operation.get(Message.class);
+			submitText(msg.getText());
+			displayMo.set(msg);
+			platform.getInventoryApi().update(displayMo);
 
 			operation.setStatus(OperationStatus.SUCCESSFUL.toString());
 		}

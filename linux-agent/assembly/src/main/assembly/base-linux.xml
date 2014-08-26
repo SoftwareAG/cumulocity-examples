@@ -13,7 +13,11 @@
     <fileSets>
         <fileSet>
             <outputDirectory>/</outputDirectory>
-            <directory>src/main/base-tar</directory>
+            <directory>src/main/base-linux</directory>
+        </fileSet>
+        <fileSet>
+            <outputDirectory>/</outputDirectory>
+            <directory>src/main/common</directory>
         </fileSet>
     </fileSets>
 

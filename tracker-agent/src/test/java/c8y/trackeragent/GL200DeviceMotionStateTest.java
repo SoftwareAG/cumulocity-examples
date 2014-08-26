@@ -93,15 +93,15 @@ public class GL200DeviceMotionStateTest {
 
         assertEquals(IMEI, imei);
         verify(trackerAgent).getOrCreateTrackerDevice(IMEI);
-        verify(device).motionAlarm(anyBoolean());
-        verify(device).motionAlarm(true);
+        verify(device).motionEvent(anyBoolean());
+        verify(device).motionEvent(true);
 
         String[] repNoMotion = REPMOTIONSTR.split(GL200Constants.FIELD_SEP);
         repNoMotion[4] = "41";
         imei = gl200mot.parse(repNoMotion);
         gl200mot.onParsed(repNoMotion, imei);
-        verify(device, times(2)).motionAlarm(anyBoolean());
-        verify(device).motionAlarm(false);
+        verify(device, times(2)).motionEvent(anyBoolean());
+        verify(device).motionEvent(false);
     }
     
     @Test
@@ -110,7 +110,7 @@ public class GL200DeviceMotionStateTest {
         gl200mot.onParsed(GV500REPMOTION, imei);
         
         assertEquals(IMEI, imei);
-        verify(device).motionAlarm(true);       
+        verify(device).motionEvent(true);       
     }    
 
 }

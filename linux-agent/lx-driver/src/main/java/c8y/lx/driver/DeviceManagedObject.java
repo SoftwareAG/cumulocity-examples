@@ -88,6 +88,7 @@ public class DeviceManagedObject {
         mo.setId(returnedMo.getId());
         mo.setName(returnedMo.getName());
         mo.setSelf(returnedMo.getSelf());
+        mo.setAttrs(returnedMo.getAttrs());
     }
 
     public GId tryGetBinding(ID extId) {

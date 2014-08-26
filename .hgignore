@@ -5,3 +5,5 @@ bin
 .*\.orig
 cucumber.html
 dependency-reduced-pom.xml
+syntax: glob
+linux-agent/lx-agent/cfg/

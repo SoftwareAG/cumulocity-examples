@@ -172,7 +172,7 @@ public class Agent {
             try {
                 driver.initialize(platform);
             } catch (Exception e) {
-                logger.error("Can't initialize driver platform " + driver.getClass());
+                logger.error("Can't initialize driver platform " + driver.getClass(), e);
             }
         }
     }
