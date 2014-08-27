@@ -176,7 +176,7 @@
 		</snapshotRepository>
 		<repository>
 			<id>release</id>
-			<url>https://nexus.cumulocity.com:${nexus.port}/nexus/content/repositories/releases/</url>
+			<url>http://localhost:8080/nexus/content/repositories/releases/</url>
 		</repository>
 	</distributionManagement>
 
