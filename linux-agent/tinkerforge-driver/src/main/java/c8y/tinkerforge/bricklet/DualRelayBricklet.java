@@ -120,6 +120,11 @@ public class DualRelayBricklet implements Driver {
 		@Override
 		public void execute(OperationRepresentation operation, boolean cleanup)
 				throws Exception {
+			if (!dualRelayMo.getId().equals(operation.getDeviceId())) {
+				// Silently ignore the operation if it is not targeted to us,
+				// another driver will (hopefully) care.
+				return;
+			}
 			if (cleanup)
 				operation.setStatus(OperationStatus.FAILED.toString());
 			
@@ -144,6 +149,11 @@ public class DualRelayBricklet implements Driver {
 		@Override
 		public void execute(OperationRepresentation operation, boolean cleanup)
 				throws Exception {
+			if (!dualRelayMo.getId().equals(operation.getDeviceId())) {
+				// Silently ignore the operation if it is not targeted to us,
+				// another driver will (hopefully) care.
+				return;
+			}
 			if (cleanup)
 				operation.setStatus(OperationStatus.FAILED.toString());
 			

@@ -26,6 +26,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.Platform;
@@ -201,12 +202,21 @@ public class RemoteSwitchBricklet implements Driver, Configurable {
 		@Override
 		public void execute(OperationRepresentation operation, boolean cleanup)
 				throws Exception {
+			if (!remoteSwitchMo.getId().equals(operation.getDeviceId())) {
+				// Silently ignore the operation if it is not targeted to us,
+				// another driver will (hopefully) care.
+				return;
+			}
+			if (cleanup)
+				operation.setStatus(OperationStatus.FAILED.toString());
 			// TODO: Fix this hack
 			ArrayList<String> relayArray = (ArrayList)operation.get(RelayArray.class);
 			for(int i=0;i<devices.size()&&i<relayArray.size();i++){
 				devices.get(i).switchDevice( (short)(RelayState.CLOSED.toString().equals(relayArray.get(i)) ? 1 : 0) );
 			}
+			operation.setStatus(OperationStatus.SUCCESSFUL.toString());
 		}
+		
 		
 	}
 	

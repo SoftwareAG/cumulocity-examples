@@ -202,6 +202,11 @@ public class IO16Bricklet implements Driver, Configurable {
 		@Override
 		public void execute(OperationRepresentation operation, boolean cleanup)
 				throws Exception {
+			if (!io16Mo.getId().equals(operation.getDeviceId())) {
+				// Silently ignore the operation if it is not targeted to us,
+				// another driver will (hopefully) care.
+				return;
+			}
 			if (cleanup)
 				operation.setStatus(OperationStatus.FAILED.toString());
 			

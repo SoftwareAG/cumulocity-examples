@@ -22,6 +22,7 @@ package c8y.lx.agent;
 
 import static c8y.lx.agent.CredentialsManager.defaultCredentialsManager;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -98,7 +99,7 @@ public class Agent {
         this.platform = initializePlatform(credentialsManager);
 
         initializeDriverPlatforms();
-        Map<String, OperationExecutor> dispatchMap = initializeInventory();
+        Map<String, ArrayList<OperationExecutor>> dispatchMap = initializeInventory();
         discoverChildren();
         startDrivers();
         new OperationDispatcher(this.platform.getDeviceControlApi(), mo.getId(), dispatchMap);
@@ -177,16 +178,23 @@ public class Agent {
         }
     }
 
-    private Map<String, OperationExecutor> initializeInventory() throws SDKException {
+    private Map<String, ArrayList<OperationExecutor>> initializeInventory() throws SDKException {
         logger.info("Initializing inventory");
 
-        Map<String, OperationExecutor> dispatchMap = new HashMap<>();
+        Map<String, ArrayList<OperationExecutor>> dispatchMap = new HashMap<>();
         for (Driver driver : drivers) {
             driver.initializeInventory(mo);
 
             for (OperationExecutor exec : driver.getSupportedOperations()) {
                 String supportedOp = exec.supportedOperationType();
-                dispatchMap.put(supportedOp, exec);
+                if(dispatchMap.containsKey(supportedOp)){
+                	dispatchMap.get(supportedOp).add(exec);
+                }
+                else {
+                	ArrayList<OperationExecutor> newList = new ArrayList<OperationExecutor>();
+                	newList.add(exec);
+                	dispatchMap.put(supportedOp, newList);
+                }
             }
         }
 

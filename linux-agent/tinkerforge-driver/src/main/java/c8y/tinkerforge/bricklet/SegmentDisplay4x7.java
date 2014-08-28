@@ -136,6 +136,11 @@ public class SegmentDisplay4x7 implements Driver, Configurable{
 		@Override
 		public void execute(OperationRepresentation operation, boolean cleanup)
 				throws Exception {
+			if (!displayMo.getId().equals(operation.getDeviceId())) {
+				// Silently ignore the operation if it is not targeted to us,
+				// another driver will (hopefully) care.
+				return;
+			}
 			if (cleanup)
 				operation.setStatus(OperationStatus.FAILED.toString());
 			
@@ -152,8 +157,6 @@ public class SegmentDisplay4x7 implements Driver, Configurable{
 				operation.setStatus(OperationStatus.SUCCESSFUL.toString());
 			}
 			else operation.setStatus(OperationStatus.FAILED.toString());
-			
-			
 		}
 		
 	} 
