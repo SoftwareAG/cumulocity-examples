@@ -5,6 +5,11 @@
 			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
 			</pattern>
 		</encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                        <!-- rollover daily -->
+            <fileNamePattern>/var/log/tomcat7/tracker-agent.%d.log</fileNamePattern>
+            <maxHistory>7</maxHistory>
+        </rollingPolicy>
 	</appender>
 
 	<logger name="c8y" level="DEBUG" />
