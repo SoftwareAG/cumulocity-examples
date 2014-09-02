@@ -133,7 +133,7 @@ public class CumulocityClientConfiguration {
         return new ContextScopedSubscriber<String, Object>(cepApi.getCustomNotificationsSubscriber(), contextService);
     }
 
-    public static class CumulocityClientFactoryBean implements FactoryBean<PlatformImpl> {
+    public static class CumulocityClientFactoryBean extends AbstractFactoryBean<PlatformImpl> implements FactoryBean<PlatformImpl> {
 
         private final DeviceContextService contextService;
 
@@ -148,10 +148,11 @@ public class CumulocityClientConfiguration {
             this.host = host;
             this.proxy = Optional.fromNullable(proxy);
             this.proxyPort = Optional.fromNullable(proxyPort);
+            setSingleton(true);
         }
 
         @Override
-        public PlatformImpl getObject() throws Exception {
+        protected PlatformImpl createInstance() throws Exception {
             return create(contextService.getCredentials());
         }
 
