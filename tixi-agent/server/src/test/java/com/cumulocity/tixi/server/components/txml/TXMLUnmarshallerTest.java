@@ -107,7 +107,7 @@ public class TXMLUnmarshallerTest {
 		
 	@Test
     public void shouldStripEnclosingBrackets() throws Exception {
-	    String result = TXMLUnmarshaller.stripEnclosingBrackets("<xml>[content[]content] ");
+	    String result = TXMLUnmarshaller.stripEnclosingBrackets("<xml>[content[]content]");
 	    
 	    assertThat(result).isEqualTo("<xml>content[]content");
     }
@@ -137,6 +137,24 @@ public class TXMLUnmarshallerTest {
 	public void shouldUmnarshalNewExternalFileWithNoGetConfigTag() throws Exception {
 		shouldUmnarshalNewExternalFile("External_2.xml");
 	}
+	
+	@Test
+    public void shouldIgnoreEmptyFiles() throws Exception {
+	    String fileName = writeIncomingFile("Empty.xml", "Empty.xml");
+		
+		External external = txmlUnmarshaller.unmarshal(fileName, External.class);
+		
+		assertThat(external).isNull();
+		
+		LogDefinition logDefinition = txmlUnmarshaller.unmarshal(fileName, LogDefinition.class);
+		
+		assertThat(logDefinition).isNull();
+		
+		Log log = txmlUnmarshaller.unmarshal(fileName, Log.class);
+		
+		assertThat(log).isNull();
+
+    }
 
 	private void shouldUmnarshalNewExternalFile(String sourceFileName) throws FileNotFoundException {
 	    String fileName = writeIncomingFile(sourceFileName, sourceFileName);

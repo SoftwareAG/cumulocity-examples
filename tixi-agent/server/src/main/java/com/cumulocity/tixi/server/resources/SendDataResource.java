@@ -22,6 +22,7 @@ import com.cumulocity.tixi.server.model.txml.Log;
 import com.cumulocity.tixi.server.model.txml.LogDefinition;
 import com.cumulocity.tixi.server.request.util.RequestStorage;
 import com.cumulocity.tixi.server.services.AgentFileSystem;
+import com.cumulocity.tixi.server.services.TixiXmlException;
 import com.cumulocity.tixi.server.services.TixiXmlService;
 
 @Path("/senddata")
@@ -61,14 +62,18 @@ public class SendDataResource {
 		String fileNamePrefix = asSimpleName(requestEntityType);
 		String fileName = agentFileSystem.writeIncomingFile(fileNamePrefix, fileInputStream);
 		
-		if (requestEntityType == LogDefinition.class) {
-			tixiService.handleLogDefinition(fileName);
-		} else if (requestEntityType == Log.class) {
-		    tixiService.handleLog(fileName, origFileName);
-		} else if (requestEntityType == External.class) {
-			tixiService.handleExternal(fileName);
-		} else {
-		    logger.warn("Can't handle request type " + requestEntityType);
+		try {
+			if (requestEntityType == LogDefinition.class) {
+				tixiService.handleLogDefinition(fileName);
+			} else if (requestEntityType == Log.class) {
+				tixiService.handleLog(fileName, origFileName);
+			} else if (requestEntityType == External.class) {
+				tixiService.handleExternal(fileName);
+			} else {
+				logger.warn("Can't handle request type " + requestEntityType);
+			}
+		} catch (TixiXmlException tixiXmlEx) {
+			logger.error(tixiXmlEx.getMessage());
 		}
 	}
 
