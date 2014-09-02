@@ -4,11 +4,15 @@
 	<parent>
 		<groupId>c8y.example</groupId>
 		<artifactId>greenbox-agent</artifactId>
-		<version>5.10.0</version>
+		<version>5.11.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>greenbox-agent-server</artifactId>
 	<name>Cumulocity :: Examples :: Greenbox Agent :: Server</name>
 	<description>Server Module of Greenbox Agent</description>
+	<properties>
+		<maven.compiler.source>1.7</maven.compiler.source>
+		<maven.compiler.target>1.7</maven.compiler.target>
+	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>com.nsn.cumulocity.clients-java</groupId>
@@ -31,12 +35,16 @@
 			</exclusions>
 		</dependency>
 		<dependency>
+			<groupId>com.nsn.cumulocity.clients-java</groupId>
+			<artifactId>agent-framework</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-classic</artifactId>
+			<groupId>org.modelmapper</groupId>
+			<artifactId>modelmapper</artifactId>
 		</dependency>
 	</dependencies>
 	<build>
@@ -55,7 +63,7 @@
 							<transformers>
 								<transformer
 									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-									<mainClass>com.cumulocity.tixi.server.TixiAgent</mainClass>
+									<mainClass>com.cumulocity.greenbox.server.GreenBoxAgent</mainClass>
 								</transformer>
 							</transformers>
 						</configuration>

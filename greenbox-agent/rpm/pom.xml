@@ -4,13 +4,13 @@
 	<parent>
 		<groupId>c8y.example</groupId>
 		<artifactId>greenbox-agent</artifactId>
-		<version>5.10.0</version>
+		<version>5.11.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>greenbox-agent-package</artifactId>
-    <packaging>rpm</packaging>
+	<packaging>rpm</packaging>
 	<name>Cumulocity :: Examples :: GreenBox Agent :: RPM</name>
-    
+
 	<properties>
 		<package.name>greenbox-agent-server</package.name>
 		<app.dir>${project.build.directory}/app</app.dir>
@@ -20,7 +20,7 @@
 		<init-d.dir>src/rpm/init.d</init-d.dir>
 		<rpm.version>${project.version}</rpm.version>
 		<rpm.app.dir>/usr/share/${package.name}</rpm.app.dir>
-		<rpm.etc.dir>/etc/vendme</rpm.etc.dir>
+		<rpm.etc.dir>/etc/greenbox</rpm.etc.dir>
 		<rpm.systemd.dir>/usr/lib/systemd/system</rpm.systemd.dir>
 		<rpm.init-d.dir>/etc/init.d</rpm.init-d.dir>
 	</properties>
@@ -61,7 +61,7 @@
 							<artifactItems>
 								<artifactItem>
 									<groupId>${project.groupId}</groupId>
-									<artifactId>${package.name}</artifactId>
+									<artifactId>greenbox-agent-server</artifactId>
 									<version>${project.version}</version>
 									<type>jar</type>
 									<outputDirectory>${app.dir}</outputDirectory>
@@ -79,6 +79,9 @@
 				<configuration>
 					<name>${package.name}</name>
 					<group>C8Y/Agent</group>
+					<copyright>(C) 2013 Cumulocity GmbH</copyright>
+					<distribution>Cumulocity 2043</distribution>
+					<packager>Cumulocity</packager>
 					<requires>
 						<require>java &gt; 1.7</require>
 					</requires>
