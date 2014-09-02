@@ -4,13 +4,13 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class GreenBoxSendRequest extends GreenBoxRequest {
-    private List<Data> data = new LinkedList<>();
+    private List<Measurement> data = new LinkedList<>();
 
-    public List<Data> getData() {
+    public List<Measurement> getData() {
         return data;
     }
 
-    public void setData(List<Data> data) {
+    public void setData(List<Measurement> data) {
         this.data = data;
     }
 

@@ -8,7 +8,7 @@ import com.cumulocity.greenbox.server.model.json.DateTimeConverter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
-public class Data {
+public class Measurement {
 
     @JsonDeserialize(converter = DateTimeConverter.class)
     private DateTime time;
@@ -21,13 +21,13 @@ public class Data {
         this.time = time;
     }
     @JsonProperty("data_points")
-    private List<Value> dataPoints;
+    private List<MeasurementEntry> dataPoints;
 
-    public List<Value> getDataPoints() {
+    public List<MeasurementEntry> getDataPoints() {
         return dataPoints;
     }
 
-    public void setDataPoints(List<Value> dataPoints) {
+    public void setDataPoints(List<MeasurementEntry> dataPoints) {
         this.dataPoints = dataPoints;
     }
 

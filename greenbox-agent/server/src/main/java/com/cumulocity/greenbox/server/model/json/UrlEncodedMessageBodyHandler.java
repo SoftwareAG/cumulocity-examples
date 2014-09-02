@@ -17,7 +17,6 @@ import javax.ws.rs.ext.Provider;
 import org.glassfish.jersey.message.internal.FormMultivaluedMapProvider;
 
 import com.cumulocity.greenbox.server.model.GreenBoxRequest;
-import com.cumulocity.greenbox.server.model.GreenBoxSetupRequest;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

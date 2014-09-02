@@ -4,11 +4,13 @@ import java.math.BigDecimal;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class Value {
+public class MeasurementEntry {
     private int id;
 
     @JsonProperty("val")
     private BigDecimal value;
+
+    private boolean offline;
 
     public int getId() {
         return id;
@@ -24,6 +26,14 @@ public class Value {
 
     public void setValue(BigDecimal value) {
         this.value = value;
+    }
+
+    public boolean isOffline() {
+        return offline;
+    }
+
+    public void setOffline(boolean offline) {
+        this.offline = offline;
     }
 
 }
