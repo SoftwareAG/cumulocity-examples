@@ -1,11 +1,15 @@
 package com.cumulocity.greenbox.server.model;
 
+import java.util.Collections;
+import java.util.Map;
+
+import com.cumulocity.model.measurement.MeasurementValue;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class DataPoint {
 
     @JsonProperty("data_point_id")
-    private int dataPointId;
+    private String dataPointId;
 
     private String description;
 
@@ -14,20 +18,20 @@ public class DataPoint {
     @JsonProperty("reg_type")
     private String regType;
 
-    private int address;
+    private String address;
 
     @JsonProperty("device_id")
-    private int deviceId;
+    private String deviceId;
 
     private String unit;
 
     private String name;
 
-    public int getDataPointId() {
+    public String getDataPointId() {
         return dataPointId;
     }
 
-    public void setDataPointId(int dataPointId) {
+    public void setDataPointId(String dataPointId) {
         this.dataPointId = dataPointId;
     }
 
@@ -55,19 +59,19 @@ public class DataPoint {
         this.regType = reqType;
     }
 
-    public int getAddress() {
+    public String getAddress() {
         return address;
     }
 
-    public void setAddress(int address) {
+    public void setAddress(String  address) {
         this.address = address;
     }
 
-    public int getDeviceId() {
+    public String getDeviceId() {
         return deviceId;
     }
 
-    public void setDeviceId(int deviceId) {
+    public void setDeviceId(String  deviceId) {
         this.deviceId = deviceId;
     }
 
@@ -86,5 +90,6 @@ public class DataPoint {
     public void setName(String name) {
         this.name = name;
     }
+
 
 }

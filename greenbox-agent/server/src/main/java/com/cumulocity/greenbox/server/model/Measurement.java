@@ -20,6 +20,7 @@ public class Measurement {
     public void setTime(DateTime time) {
         this.time = time;
     }
+
     @JsonProperty("data_points")
     private List<MeasurementEntry> dataPoints;
 
@@ -29,6 +30,11 @@ public class Measurement {
 
     public void setDataPoints(List<MeasurementEntry> dataPoints) {
         this.dataPoints = dataPoints;
+    }
+
+    @Override
+    public String toString() {
+        return "Measurement [time=" + time + ", dataPoints=" + dataPoints + "]";
     }
 
 }

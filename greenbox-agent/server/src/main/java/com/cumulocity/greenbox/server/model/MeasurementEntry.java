@@ -5,18 +5,18 @@ import java.math.BigDecimal;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class MeasurementEntry {
-    private int id;
+    private String id;
 
     @JsonProperty("val")
     private BigDecimal value;
 
     private boolean offline;
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -34,6 +34,11 @@ public class MeasurementEntry {
 
     public void setOffline(boolean offline) {
         this.offline = offline;
+    }
+
+    @Override
+    public String toString() {
+        return "MeasurementEntry [id=" + id + ", value=" + value + ", offline=" + offline + "]";
     }
 
 }

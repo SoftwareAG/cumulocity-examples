@@ -1,14 +1,15 @@
 package com.cumulocity.greenbox.server.service;
 
-import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.container.ContainerRequestContext;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import com.cumulocity.agent.server.context.DeviceCredentailsResolver;
 import com.cumulocity.agent.server.context.DeviceCredentials;
-import com.google.common.base.Optional;
 
-public class DefaultCredentialsResolver implements DeviceCredentailsResolver<HttpServletRequest> {
+@Component
+public class DefaultCredentialsResolver implements DeviceCredentailsResolver<ContainerRequestContext> {
 
     @Value("${C8Y.tenant}")
     private String tenant;
@@ -20,8 +21,13 @@ public class DefaultCredentialsResolver implements DeviceCredentailsResolver<Htt
     private String password;
 
     @Override
-    public Optional<DeviceCredentials> get(HttpServletRequest input) {
-        return Optional.of(new DeviceCredentials(tenant, username, password, null, null));
+    public DeviceCredentials get(ContainerRequestContext input) {
+        return new DeviceCredentials(tenant, username, password, null, null);
+    }
+
+    @Override
+    public boolean supports(Object credentialSource) {
+        return true;
     }
 
 }

@@ -1,5 +1,7 @@
 package com.cumulocity.greenbox.server.model.json;
 
+import static com.google.common.collect.Iterables.getFirst;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
@@ -20,6 +22,7 @@ import com.cumulocity.greenbox.server.model.GreenBoxRequest;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Iterables;
 
 @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 @Provider
@@ -40,7 +43,7 @@ public class UrlEncodedMessageBodyHandler implements MessageBodyReader<GreenBoxR
         final MultivaluedMap<String, String> input = formHandler.readFrom(new MultivaluedHashMap<String, String>(), mediaType, true,
                 entityStream);
         final List<String> data = input.get("data");
-        return readRequest(data.isEmpty() ? "" : data.get(0));
+        return readRequest((data == null || data.isEmpty()) ? "" : getFirst(data, null));
     }
 
     protected GreenBoxRequest readRequest(String data) throws IOException, JsonParseException, JsonMappingException {

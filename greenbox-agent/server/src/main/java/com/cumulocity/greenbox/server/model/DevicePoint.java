@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class DevicePoint {
     @JsonProperty("data_point_id")
-    private int dataPointId;
+    private String dataPointId;
 
     @JsonProperty("datatype")
     private String dataType;
@@ -17,11 +17,11 @@ public class DevicePoint {
 
     private String unit;
 
-    public int getDataPointId() {
+    public String getDataPointId() {
         return dataPointId;
     }
 
-    public void setDataPointId(int dataPointId) {
+    public void setDataPointId(String dataPointId) {
         this.dataPointId = dataPointId;
     }
 
