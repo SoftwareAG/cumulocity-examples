@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>c8y.example</groupId>
 		<artifactId>tekelec-agent</artifactId>
-		<version>5.11.0</version>
+		<version>5.12.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>tekelec-rpm</artifactId>
