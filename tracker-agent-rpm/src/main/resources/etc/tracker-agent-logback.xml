@@ -7,8 +7,11 @@
 		</encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
                         <!-- rollover daily -->
-            <fileNamePattern>/var/log/tomcat7/tracker-agent.%d.log</fileNamePattern>
+            <fileNamePattern>/var/log/tomcat7/tracker-agent.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <maxHistory>7</maxHistory>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                 <maxFileSize>50MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
         </rollingPolicy>
 	</appender>
 
