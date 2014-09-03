@@ -1,5 +1,9 @@
 package com.cumulocity.greenbox.server.model;
 
+import static com.google.common.base.Throwables.getRootCause;
+
+import com.google.common.base.Throwables;
+
 public class GreenBoxResponse {
 
     private boolean success;
@@ -32,7 +36,7 @@ public class GreenBoxResponse {
     }
 
     public static GreenBoxResponse failure(Throwable cause) {
-        return new GreenBoxResponse(false, cause.getMessage());
+        return new GreenBoxResponse(false, getRootCause(cause).getMessage());
     }
 
 }

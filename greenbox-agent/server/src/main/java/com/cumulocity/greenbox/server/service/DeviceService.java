@@ -1,34 +1,51 @@
 package com.cumulocity.greenbox.server.service;
 
-import static com.cumulocity.agent.server.repository.ManagedObjects.*;
+import static com.cumulocity.agent.server.repository.ManagedObjects.fromManagedObjectReference;
+import static com.cumulocity.agent.server.repository.ManagedObjects.nameEquals;
 import static com.cumulocity.greenbox.server.model.HubUid.asHubUid;
+import static com.cumulocity.model.event.CumulocityAlarmStatuses.ACTIVE;
+import static com.cumulocity.model.event.CumulocitySeverities.CRITICAL;
 import static com.cumulocity.rest.representation.inventory.ManagedObjects.asManagedObject;
+import static com.google.common.base.Optional.fromNullable;
+import static com.google.common.base.Throwables.propagate;
 import static com.google.common.collect.FluentIterable.from;
+import static java.lang.String.format;
+import static java.util.Collections.singletonMap;
 
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import org.joda.time.DateTime;
+import org.eclipse.jetty.util.log.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import c8y.IsDevice;
 import c8y.RequiredAvailability;
 
+import com.cumulocity.agent.server.repository.AlarmRepository;
 import com.cumulocity.agent.server.repository.InventoryRepository;
 import com.cumulocity.agent.server.repository.MeasurementRepository;
 import com.cumulocity.greenbox.server.model.*;
 import com.cumulocity.model.Agent;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.model.measurement.MeasurementValue;
+import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
-import com.cumulocity.rest.representation.inventory.ManagedObjects;
 import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
 import com.cumulocity.sdk.client.SDKException;
+import com.google.common.base.Optional;
 import com.google.common.base.Supplier;
 import com.google.common.collect.FluentIterable;
 
 @Component
 public class DeviceService {
+
+    private static final Logger log = LoggerFactory.getLogger(DeviceService.class);
 
     private static final int REQUIRED_INTERVAL = 24 * 60;//min
 
@@ -41,43 +58,73 @@ public class DeviceService {
     @Autowired
     private List<MeasurementValuePostProcessor> measurementPostProcessors;
 
-    public void setup(GreenBoxSetupRequest message) {
-        ManagedObjectRepresentation agent = null;
-        try {
-            agent = inventoryRepository.findByExternalId(asHubUid(message.getHubUID()));
-        } catch (SDKException ex) {
-            initializeInventory(message);
-        }
-        if (agent != null) {
-            updateInventory(message, agent);
-        }
+    @Autowired
+    private AlarmRepository alarmRepository;
+
+    public void setup(final GreenBoxSetupRequest message) {
+        ManagedObjectRepresentation agent = findAgent(message).or(createAgent(message));
+        updateInventory(message, agent);
+    }
+
+    private Supplier<ManagedObjectRepresentation> createAgent(final GreenBoxSetupRequest message) {
+        return new Supplier<ManagedObjectRepresentation>() {
+            @Override
+            public ManagedObjectRepresentation get() {
+                log.info("registering new GreenBoxAgent {}", message.getHubUID());
+                return toAgent(message);
+            }
+        };
     }
 
     private void updateInventory(GreenBoxSetupRequest message, ManagedObjectRepresentation agent) {
-        if (isChildDevicesChanged(agent, message) || isDataPointRegistryChanged(agent, message)) {
-            final Map<String, ManagedObjectRepresentation> devices = new HashMap<>();
-            FluentIterable<ManagedObjectRepresentation> childDevices = from(from(agent.getChildDevices()).transform(
-                    fromManagedObjectReference()).toList());
-
-            for (final Device greenboxDevice : message.getDevices()) {
-                final ManagedObjectRepresentation device = childDevices.firstMatch(nameEquals(greenboxDevice.getName())).or(
-                        createChild(agent, greenboxDevice));
-                devices.put(greenboxDevice.getId(), device);
-            }
+        if (isShouldUpdateInventory(agent, message)) {
+            final Map<String, ManagedObjectRepresentation> devicesByGeenboxId = groupChildDevicesByGeenboxId(message, agent);
             agent = asManagedObject(agent.getId());
-            agent.set(createDataPointRegistry(message.getDataPoints(), devices));
-            inventoryRepository.save(agent);
+            agent.set(createDataPointRegistry(message.getDataPoints(), devicesByGeenboxId));
+            save(agent);
+        } else {
+            log.info("inventory not changed for {}", agent.getId());
         }
+    }
+
+    private Map<String, ManagedObjectRepresentation> groupChildDevicesByGeenboxId(GreenBoxSetupRequest message,
+            ManagedObjectRepresentation agent) {
+        final Map<String, ManagedObjectRepresentation> devicesByGeenboxId = new HashMap<>();
+        FluentIterable<ManagedObjectRepresentation> childDevices = from(getChildDevices(agent));
+
+        for (final Device greenboxDevice : message.getDevices()) {
+            final ManagedObjectRepresentation device = findByName(childDevices, greenboxDevice.getName()).or(
+                    createChildDevice(agent, greenboxDevice));
+            devicesByGeenboxId.put(greenboxDevice.getId(), device);
+        }
+        return devicesByGeenboxId;
+    }
+
+    private ManagedObjectRepresentation save(ManagedObjectRepresentation managedObject) {
+        return inventoryRepository.save(managedObject);
+    }
+
+    private boolean isShouldUpdateInventory(ManagedObjectRepresentation agent, GreenBoxSetupRequest message) {
+        return isChildDevicesChanged(agent, message) || isDataPointRegistryChanged(agent, message);
+    }
+
+    private Iterable<ManagedObjectRepresentation> getChildDevices(ManagedObjectRepresentation agent) {
+        return from(agent.getChildDevices()).transform(fromManagedObjectReference()).toList();
+    }
+
+    private Optional<ManagedObjectRepresentation> findByName(FluentIterable<ManagedObjectRepresentation> childDevices, final String name) {
+        return childDevices.firstMatch(nameEquals(name));
     }
 
     private boolean isDataPointRegistryChanged(ManagedObjectRepresentation agent, GreenBoxSetupRequest message) {
         return agent.get(DataPointRegistry.class).size() != message.getDataPoints().size();
     }
 
-    private Supplier<ManagedObjectRepresentation> createChild(final ManagedObjectRepresentation agent, final Device greenboxDevice) {
+    private Supplier<ManagedObjectRepresentation> createChildDevice(final ManagedObjectRepresentation agent, final Device greenboxDevice) {
         return new Supplier<ManagedObjectRepresentation>() {
             @Override
             public ManagedObjectRepresentation get() {
+                log.info("registering new device for {} with name {}", agent.getId(), greenboxDevice.getName());
                 final ManagedObjectRepresentation child = toDevice(greenboxDevice);
                 inventoryRepository.bindToParent(agent.getId(), child.getId());
                 return child;
@@ -87,21 +134,6 @@ public class DeviceService {
 
     private boolean isChildDevicesChanged(final ManagedObjectRepresentation agent, GreenBoxSetupRequest message) {
         return agent.getChildDevices().getReferences().size() != message.getDevices().size();
-    }
-
-    private void initializeInventory(GreenBoxSetupRequest message) {
-        ManagedObjectRepresentation agent = toAgent(message);
-
-        final Map<String, ManagedObjectRepresentation> devices = new HashMap<>();
-        for (Device device : message.getDevices()) {
-            devices.put(device.getId(), toDevice(device));
-        }
-        agent.set(createDataPointRegistry(message.getDataPoints(), devices));
-        agent = inventoryRepository.save(agent, asHubUid(message.getHubUID()));
-        for (ManagedObjectRepresentation device : devices.values()) {
-            inventoryRepository.bindToParent(agent.getId(), device.getId());
-        }
-
     }
 
     private DataPointRegistry createDataPointRegistry(Iterable<DataPoint> dataPoints, final Map<String, ManagedObjectRepresentation> devices) {
@@ -123,7 +155,7 @@ public class DeviceService {
     }
 
     private void ping(GId id) {
-        inventoryRepository.save(ManagedObjects.asManagedObject(id));
+        inventoryRepository.save(asManagedObject(id));
     }
 
     private ManagedObjectRepresentation toAgent(GreenBoxSetupRequest message) {
@@ -134,110 +166,70 @@ public class DeviceService {
         representation.setName(message.getHub());
         representation.set(message.getIpaddresses(), "ipAddresses");
         representation.set(new RequiredAvailability(REQUIRED_INTERVAL));
-        return representation;
+        return save(representation);
     }
 
     public void send(GreenBoxSendRequest message) {
-        final ManagedObjectRepresentation agent = inventoryRepository.findByExternalId(asHubUid(message.getHubUID()));
-        ping(agent.getId());
-        final DataPointRegistry registry = agent.get(DataPointRegistry.class);
-        final Measurements measurements = new Measurements();
+        final ManagedObjectRepresentation agent = findAgent(message).get();
+        final DataPointRegistry registry = fromNullable(agent.get(DataPointRegistry.class)).or(new DataPointRegistry());
+        final UniqueMeasurmentsFactory measurements = new UniqueMeasurmentsFactory();
         for (Measurement data : message.getData()) {
             for (MeasurementEntry value : data.getDataPoints()) {
                 final DataPoint dataPoint = registry.get(value.getId());
-                MeasurementRepresentation measurement = measurements.get(new MeasurementId(dataPoint.getDeviceId(), data.getTime()));
-                measurement.set(Collections.singletonMap(dataPoint.getName(), newMeasurementValue(value, dataPoint)), dataPoint.getName());
+                verifyDataPoint(agent, value, dataPoint);
+                MeasurementRepresentation measurement = measurements.get(bySourceAndTime(data, dataPoint));
+                measurement.set(asMeasurementFragment(value, dataPoint), dataPoint.getName());
             }
         }
+        ping(agent.getId());
         measurementRepository.save(measurements.getMeasurments());
     }
 
-    private MeasurementValue newMeasurementValue(MeasurementEntry entry, final DataPoint dataPoint) {
+    private Map<String, MeasurementValue> asMeasurementFragment(MeasurementEntry value, final DataPoint dataPoint) {
+        return singletonMap(dataPoint.getName(), newMeasurementValue(value, dataPoint));
+    }
 
+    private MeasurementWithSourceAndTime bySourceAndTime(Measurement data, final DataPoint dataPoint) {
+        return new MeasurementWithSourceAndTime(dataPoint.getDeviceId(), data.getTime());
+    }
+
+    private void verifyDataPoint(final ManagedObjectRepresentation agent, MeasurementEntry value, final DataPoint dataPoint) {
+        if (dataPoint == null) {
+            riseAlarm(agent, value.getId());
+            throw new IllegalStateException(format("Data point with id %s is not registed", value.getId()));
+        }
+    }
+
+    private Optional<ManagedObjectRepresentation> findAgent(GreenBoxRequest message) {
+        try {
+            return Optional.of(inventoryRepository.findByExternalId(asHubUid(message.getHubUID())));
+        } catch (SDKException ex) {
+            if (ex.getHttpStatus() == HttpStatus.NOT_FOUND.value()) {
+                log.info("agnet with given UID not found {}", message.getHubUID());
+                return Optional.absent();
+            } else {
+                throw propagate(ex);
+            }
+        }
+    }
+
+    private void riseAlarm(ManagedObjectRepresentation agent, String id) {
+        AlarmRepresentation alarm = new AlarmRepresentation();
+        alarm.setType("c8y_greenbox_DataPointNotRegistred");
+        alarm.setSource(asManagedObject(agent.getId()));
+        alarm.setStatus(ACTIVE.name());
+        alarm.setSeverity(CRITICAL.name());
+        alarm.setTime(new Date());
+        alarm.setText(format("Data point with id %s is not registed", id));
+        alarmRepository.save(alarm);
+    }
+
+    private MeasurementValue newMeasurementValue(MeasurementEntry entry, final DataPoint dataPoint) {
         MeasurementValue value = new MeasurementValue(entry.getValue(), dataPoint.getUnit(), null, null, null);
         for (MeasurementValuePostProcessor measurementValuePostProcessor : measurementPostProcessors) {
             value = measurementValuePostProcessor.process(value);
         }
         return value;
-    }
-
-    class MeasurementId {
-        private final String source;
-
-        private final DateTime time;
-
-        public MeasurementId(String source, DateTime time) {
-            this.source = source;
-            this.time = time;
-        }
-
-        public String getSource() {
-            return source;
-        }
-
-        public DateTime getTime() {
-            return time;
-        }
-
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + getOuterType().hashCode();
-            result = prime * result + ((source == null) ? 0 : source.hashCode());
-            result = prime * result + ((time == null) ? 0 : time.hashCode());
-            return result;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj)
-                return true;
-            if (obj == null)
-                return false;
-            if (getClass() != obj.getClass())
-                return false;
-            MeasurementId other = (MeasurementId) obj;
-            if (!getOuterType().equals(other.getOuterType()))
-                return false;
-            if (source == null) {
-                if (other.source != null)
-                    return false;
-            } else if (!source.equals(other.source))
-                return false;
-            if (time == null) {
-                if (other.time != null)
-                    return false;
-            } else if (!time.equals(other.time))
-                return false;
-            return true;
-        }
-
-        private DeviceService getOuterType() {
-            return DeviceService.this;
-        }
-
-    }
-
-    class Measurements {
-
-        private final Map<MeasurementId, MeasurementRepresentation> storage = new HashMap<MeasurementId, MeasurementRepresentation>();
-
-        public MeasurementRepresentation get(MeasurementId id) {
-            if (!storage.containsKey(id)) {
-                MeasurementRepresentation newMeasurement = new MeasurementRepresentation();
-                newMeasurement.setTime(id.getTime().toDate());
-                newMeasurement.setSource(asManagedObject(GId.asGId(id.getSource())));
-                newMeasurement.setType("c8y_greenbox_Measurment");
-                storage.put(id, newMeasurement);
-            }
-            return storage.get(id);
-        }
-
-        public Collection<MeasurementRepresentation> getMeasurments() {
-            return storage.values();
-        }
-
     }
 
 }
