@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.jetty.util.log.Log;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -177,8 +177,8 @@ public class DeviceService {
             for (MeasurementEntry value : data.getDataPoints()) {
                 final DataPoint dataPoint = registry.get(value.getId());
                 verifyDataPoint(agent, value, dataPoint);
-                MeasurementRepresentation measurement = measurements.get(bySourceAndTime(data, dataPoint));
-                measurement.set(asMeasurementFragment(value, dataPoint), dataPoint.getName());
+                MeasurementRepresentation measurement = measurements.get(bySourceAndTime(dataPoint.getDeviceId(), data.getTime()));
+                measurement.set(asMeasurementFragment(value, dataPoint), "c8y_" + dataPoint.getName());
             }
         }
         ping(agent.getId());
@@ -189,8 +189,8 @@ public class DeviceService {
         return singletonMap(dataPoint.getName(), newMeasurementValue(value, dataPoint));
     }
 
-    private MeasurementWithSourceAndTime bySourceAndTime(Measurement data, final DataPoint dataPoint) {
-        return new MeasurementWithSourceAndTime(dataPoint.getDeviceId(), data.getTime());
+    private MeasurementWithSourceAndTime bySourceAndTime(final String source, final DateTime time) {
+        return new MeasurementWithSourceAndTime(source, time);
     }
 
     private void verifyDataPoint(final ManagedObjectRepresentation agent, MeasurementEntry value, final DataPoint dataPoint) {

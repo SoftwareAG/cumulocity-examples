@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import com.cumulocity.model.measurement.MeasurementValue;
 
 @Component
-public class MilliVoltsToVoltsPostProcessor implements MeasurementValuePostProcessor {
+public class MilliVoltsToVoltsMeasurementPostProcessor implements MeasurementValuePostProcessor {
 
     private static final String VOLTS = "V";
 

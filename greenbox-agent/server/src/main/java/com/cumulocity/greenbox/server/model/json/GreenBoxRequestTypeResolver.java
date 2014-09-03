@@ -1,5 +1,8 @@
 package com.cumulocity.greenbox.server.model.json;
 
+import static com.google.common.base.Functions.toStringFunction;
+import static com.google.common.base.Optional.fromNullable;
+
 import com.cumulocity.greenbox.server.model.CommandType;
 import com.cumulocity.greenbox.server.model.GreenBoxSendRequest;
 import com.cumulocity.greenbox.server.model.GreenBoxSetupRequest;
@@ -21,7 +24,7 @@ public class GreenBoxRequestTypeResolver extends TypeIdResolverBase implements T
 
     @Override
     public String idFromValueAndType(Object value, Class<?> suggestedType) {
-        return Optional.fromNullable(value).transform(Functions.toStringFunction()).get();
+        return fromNullable(value).transform(toStringFunction()).get();
     }
 
 
