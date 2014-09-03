@@ -36,11 +36,11 @@ public class PiHardwareDriverTest {
 	@Test
 	public void hardwareReadingSuccessful() throws IOException {
 		try {
-			driver.initializeFromFile(REFERENCE_HWFILE);
+			driver.initializeFromFile(getClass().getResource(REFERENCE_HWFILE).getPath());
 		} catch (IOException e) {
 			fail(e.toString());
 		}
-
+		
 		assertEquals(referenceHw, driver.getHardware());
 	}
 

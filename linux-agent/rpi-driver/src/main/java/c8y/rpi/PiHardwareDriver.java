@@ -48,7 +48,7 @@ public class PiHardwareDriver implements Driver, OperationExecutor, HardwareProv
 	}
 	
 	void initializeFromFile(String file) throws IOException {
-		try (FileReader fr = new FileReader(CPUINFO)) {
+		try (FileReader fr = new FileReader(file)) {
 			initializeFromReader(fr);
 		}	
 	}
