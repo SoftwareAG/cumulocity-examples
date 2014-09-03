@@ -138,6 +138,7 @@ public final class ConfigurationDriver implements Driver, OperationExecutor {
 
 		logger.info("Configuration set, updating inventory");
 		ManagedObjectRepresentation mo = new ManagedObjectRepresentation();
+		mo.setId(deviceId);
 		mo.set(configuration);
 		inventory.update(mo);
 

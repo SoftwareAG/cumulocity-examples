@@ -7,6 +7,7 @@ import java.io.FileInputStream;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.PostConstruct;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
@@ -32,7 +33,9 @@ public class TXMLUnmarshaller {
 
 	private final AgentFileSystem agentFileSystem;
 	private final TransformerFactory transformerFactory = TransformerFactory.newInstance();
+	private Unmarshaller unmarshaller;
 	private static final Logger log = LoggerFactory.getLogger(TXMLUnmarshaller.class);
+	private final Object monitor = new Object();
 
 	private final Cache<Class<?>, Transformer> transformers = newBuilder()
 			.expireAfterAccess(1, TimeUnit.HOURS).build();
@@ -40,6 +43,15 @@ public class TXMLUnmarshaller {
 	@Autowired
 	public TXMLUnmarshaller(AgentFileSystem agentFileSystem) {
 		this.agentFileSystem = agentFileSystem;
+	}
+	
+	@PostConstruct
+	public void init() {
+		try {
+	        unmarshaller = aJAXBUnmarshaler();
+        } catch (JAXBException e) {
+        	new RuntimeException("Cant create TXMLUnmarshaller instance!", e);
+        }
 	}
 
 	@SuppressWarnings("unchecked")
@@ -54,9 +66,11 @@ public class TXMLUnmarshaller {
 
 			StreamResult transformerResult = new StreamResult(xsltProcessedFile);
 			aTransformer(resultClass).transform(source, transformerResult);
-
-			StreamSource unmarshallerSource = new StreamSource(xsltProcessedFile);
-			return (R) aJAXBUnmarshaler().unmarshal(unmarshallerSource);
+			
+			synchronized (monitor) {
+				StreamSource unmarshallerSource = new StreamSource(xsltProcessedFile);
+				return (R) unmarshaller.unmarshal(unmarshallerSource);
+            }
 		} catch (Exception ex) {
 			throw new RuntimeException("Cant unmarshal resource from file " + fileName + " to entity " + resultClass, ex);
 		}

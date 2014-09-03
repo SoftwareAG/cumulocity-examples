@@ -6,7 +6,7 @@
 
 	<groupId>c8y.example</groupId>
 	<artifactId>c8y-examples</artifactId>
-	<version>5.10.0</version>
+	<version>5.11.0</version>
 	<name>Cumulocity :: Examples</name>
 	<packaging>pom</packaging>
 
@@ -15,7 +15,7 @@
 		<maven.compiler.source>1.7</maven.compiler.source>
 		<maven.compiler.target>1.7</maven.compiler.target>
 
-		<c8y.version>5.10.0</c8y.version>
+		<c8y.version>5.11.0</c8y.version>
 		<slf4j.version>1.7.0</slf4j.version>
 		<spring.version>3.2.6.RELEASE</spring.version>
 
@@ -172,11 +172,11 @@
 	<distributionManagement>
 		<snapshotRepository>
 			<id>snapshot</id>
-			<url>https://nexus.cumulocity.com:${nexus.port}/nexus/content/repositories/snapshots/</url>
+			<url>http://localhost:8080/nexus/content/repositories/snapshots/</url>
 		</snapshotRepository>
 		<repository>
 			<id>release</id>
-			<url>https://nexus.cumulocity.com:${nexus.port}/nexus/content/repositories/releases/</url>
+			<url>http://localhost:8080/nexus/content/repositories/releases/</url>
 		</repository>
 	</distributionManagement>
 

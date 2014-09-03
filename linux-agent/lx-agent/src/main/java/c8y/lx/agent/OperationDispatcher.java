@@ -20,12 +20,14 @@
 
 package c8y.lx.agent;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import c8y.lx.driver.OperationExecutor;
+
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
@@ -50,9 +52,9 @@ public class OperationDispatcher {
 
     private final GId gid;
 
-    private Map<String, OperationExecutor> dispatchMap;
+    private Map<String, ArrayList<OperationExecutor>> dispatchMap;
 
-    public OperationDispatcher(DeviceControlApi deviceControl, GId gid, Map<String, OperationExecutor> dispatchMap) throws SDKException {
+    public OperationDispatcher(DeviceControlApi deviceControl, GId gid, Map<String, ArrayList<OperationExecutor>> dispatchMap) throws SDKException {
         this.deviceControl = deviceControl;
         this.gid = gid;
         this.dispatchMap = dispatchMap;
@@ -126,7 +128,8 @@ public class OperationDispatcher {
             for (String key : operation.getAttrs().keySet()) {
                 if (dispatchMap.containsKey(key)) {
                     logger.info("Executing operation {} cleanup {}", operation, cleanup);
-                    dispatchMap.get(key).execute(operation, cleanup);
+                    for(OperationExecutor exec:dispatchMap.get(key))
+                    	exec.execute(operation, cleanup);
                 }
             }
         } catch (Exception e) {

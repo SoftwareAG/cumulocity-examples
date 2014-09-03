@@ -18,7 +18,7 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package c8y.kontron;
+package c8y.linux;
 
 import static org.junit.Assert.assertEquals;
 
@@ -32,7 +32,7 @@ import org.junit.Test;
 import c8y.Hardware;
 import c8y.lx.driver.HardwareProvider;
 
-public class KontronHardwareDriverTest {
+public class LinuxGenericHardwareProviderTest {
 	public static final String REFERENCE_HWFILE = "/hardware.txt";
 
 	@Test
@@ -45,6 +45,6 @@ public class KontronHardwareDriverTest {
 		assertEquals(referenceHw, driver.getHardware());
 	}
 
-	private Hardware referenceHw = new Hardware("KM2M810", "00:B3:38:00:01:CE", HardwareProvider.UNKNOWN);
-	private KontronHardwareDriver driver = new KontronHardwareDriver();
+	private Hardware referenceHw = new Hardware("Linux MAC", "00B3380001CE", HardwareProvider.UNKNOWN);
+	private LinuxGenericHardwareDriver driver = new LinuxGenericHardwareDriver();
 }

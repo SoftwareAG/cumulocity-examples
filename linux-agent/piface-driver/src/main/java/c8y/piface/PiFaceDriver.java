@@ -71,14 +71,13 @@ public class PiFaceDriver implements Driver, OperationExecutor {
 
 	@Override
 	public void initialize() throws Exception {
-	    // Nothing to do here.
+		piface = new PiFaceDevice(Spi.CHANNEL_0);
 	}
 	
 	@Override
 	public void initialize(Platform platform) throws Exception {
 		this.platform = platform;
 		dmo = new DeviceManagedObject(platform);		
-		piface = new PiFaceDevice(Spi.CHANNEL_0);
 
 		eventTemplate = new EventRepresentation();
 		eventTemplate.setText("Button pressed");

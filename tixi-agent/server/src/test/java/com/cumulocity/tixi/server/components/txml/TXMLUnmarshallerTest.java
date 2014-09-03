@@ -33,6 +33,7 @@ public class TXMLUnmarshallerTest {
 		agentFileSystem = new AgentFileSystem("target/incoming", "target/xsltprocessed", XSLT_DIR);
 		agentFileSystem.init();
 		txmlUnmarshaller = new TXMLUnmarshaller(agentFileSystem);
+		txmlUnmarshaller.init();
 	}
 	
 	@Test
