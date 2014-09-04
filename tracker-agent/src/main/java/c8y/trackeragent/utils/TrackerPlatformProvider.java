@@ -78,14 +78,24 @@ public class TrackerPlatformProvider {
         DeviceCredentials deviceCredentials = deviceCredentialsRepository.getCredentials(imei);
         String tenantId = deviceCredentials.getTenantId();
         CumulocityCredentials credentials = cumulocityCredentials(deviceCredentials.getUser(), deviceCredentials.getPassword()).withTenantId(tenantId).build();
-        TrackerPlatform trackerPlatform = new TrackerPlatform(new PlatformImpl(config.getPlatformHost(), credentials));
+		PlatformImpl platform = new PlatformImpl(config.getPlatformHost(),credentials);
+
+		platform.setProxyHost(config.getProxy());
+		platform.setProxyPort(config.getProxyport());
+		TrackerPlatform trackerPlatform = new TrackerPlatform(platform);
+
         setupAgent(trackerPlatform);
         return trackerPlatform;
     }
 
     private TrackerPlatform createBootstrapPlatform() {
         CumulocityCredentials credentials = cumulocityCredentials(config.getBootstrapUser(), config.getBootstrapPassword()).withTenantId(config.getBootstrapTenant()).build();
-        return new TrackerPlatform(new PlatformImpl(config.getPlatformHost(), credentials));
+		PlatformImpl platform = new PlatformImpl(config.getPlatformHost(),credentials);
+		platform.setProxyHost(config.getProxy());
+		platform.setProxyPort(config.getProxyport());
+
+		return new TrackerPlatform(platform);
+
     }
 
     private void setupAgent(TrackerPlatform platform) {

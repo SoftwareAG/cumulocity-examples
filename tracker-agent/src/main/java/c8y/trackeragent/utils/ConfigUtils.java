@@ -28,6 +28,12 @@ public class ConfigUtils {
     private static final String CLIENT_TIMEOUT_PROP = "client.timeout";
     private static final String DEFAULT_CLIENT_TIMEOUT = String.valueOf(5 * 60 * 1000);
     
+    private static final String PROXY = "proxy";
+    private static final String PROXYPORT = "proxyport";
+    private static final String TENANT = "bootstrap.tenant";
+
+
+    
     private static final ConfigUtils instance = create();
     
     /**
@@ -75,6 +81,11 @@ public class ConfigUtils {
             .setBootstrapUser(getProperty(SOURCE_FILE, props, BOOTSTRAP_USER_PROP))
             .setBootstrapPassword(getProperty(SOURCE_FILE, props, BOOTSTRAP_PASSWORD_PROP))
             .setBootstrapTenant("management")
+            .setBootstrapTenant(getProperty(SOURCE_FILE, props, TENANT))
+            .setProxy(getProperty(SOURCE_FILE, props, PROXY,null))
+            .setProxyport(getProperty(SOURCE_FILE,props,PROXYPORT, null))
+
+
             .setClientTimeout(clientTimeout);
         //@formatter:on
         logger.info(format("Configuration loaded from: %s: %s", sourceFilePath, config));
@@ -100,6 +111,9 @@ public class ConfigUtils {
         return props.getProperty("configDir");
     }
     
+	private String getProperty(String path, Properties props, String key,String defaultValue) {
+		return getProperty(props, key, defaultValue);
+	}
 
     private String getProperty(String path, Properties props, String key) {
         String value = getProperty(props, key, null);

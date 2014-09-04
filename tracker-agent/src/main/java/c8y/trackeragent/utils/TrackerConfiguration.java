@@ -8,6 +8,11 @@ public class TrackerConfiguration {
     private String bootstrapPassword;
     private String bootstrapTenant;
     private int clientTimeout;
+    private String proxy;
+
+    private int proxyport;
+
+
 
     public String getPlatformHost() {
         return platformHost;
@@ -62,6 +67,30 @@ public class TrackerConfiguration {
         this.clientTimeout = clientTimeout;
         return this;
     }
+
+	public String getProxy() {
+		return proxy;
+	}
+
+	public TrackerConfiguration setProxy(String proxy) {
+
+		this.proxy = proxy;
+		return this;
+	}
+
+	public int getProxyport() {
+		return proxyport;
+	}
+
+	public TrackerConfiguration setProxyport(int proxyport) {
+		this.proxyport = proxyport;
+		return this;
+	}
+
+	public TrackerConfiguration setProxyport(String proxyport) {
+		this.proxyport = new Integer(proxyport);
+		return this;
+	}
 
     @Override
     public String toString() {
