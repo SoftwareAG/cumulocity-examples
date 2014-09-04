@@ -1,0 +1,94 @@
+#!/bin/bash
+#
+# greenbox-agent-server      This shell script takes care of starting and stopping Greenbox Agent Driver
+#
+# chkconfig: - 80 20
+#
+### BEGIN INIT INFO
+# Provides: greenbox-agent-server
+# Required-Start: $network $syslog
+# Required-Stop: $network $syslog
+# Default-Start:
+# Default-Stop:
+# Description: Greenbox Agent 
+# Short-Description: start and stop Greenbox Agent 
+### END INIT INFO
+#
+#
+
+
+
+## Source function library.
+. /etc/rc.d/init.d/functions
+# Source LSB function library.
+if [ -r /lib/lsb/init-functions ]; then
+    . /lib/lsb/init-functions
+else
+    exit 1
+fi
+
+prog=greenbox-agent-server
+BIN=/usr/share/greenbox-agent-server
+lockfile=${LOCKFILE-/var/lock/subsys/greenbox-agent-server}
+pidfile=${PIDFILE-/var/run/greenbox-agent-server.pid}
+
+RETVAL=0
+
+start() {
+	JAVA_PATH=`$BIN/detect-java`
+	command="$JAVA_PATH/bin/java -jar $BIN/greenbox-agent-server.jar"
+   	echo -n $"Starting $prog: "
+	nohup ${command} >/dev/null 2>&1 &
+	RETVAL=$?
+	PID=$!
+	[ $RETVAL -eq 0 ] && touch ${lockfile} && success || failure
+	echo
+	echo $PID > ${pidfile}
+	return $RETVAL
+}
+
+stop() {
+    echo -n $"Stopping $prog: "
+    killproc -p ${pidfile} ${prog}
+    RETVAL=$?
+    echo
+    [ $RETVAL = 0 ] && rm -f ${lockfile} ${pidfile}
+}
+
+reload() {
+    echo -n $"Reloading $prog: "
+    killproc -p ${pidfile} ${prog} -HUP
+    RETVAL=$?
+    echo
+}
+
+rh_status() {
+    status -p ${pidfile} ${command}
+}
+
+# See how we were called.
+case "$1" in
+    start)
+        rh_status >/dev/null 2>&1 && exit 0
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    status)
+        rh_status
+        RETVAL=$?
+        ;;
+    restart)
+        stop
+        start
+        ;;
+    force-reload|reload)
+        reload
+        ;;
+    *)
+        echo $"Usage: $prog {start|stop|restart|status|help}"
+        RETVAL=2
+esac
+
+exit $RETVAL

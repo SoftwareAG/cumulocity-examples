@@ -1,0 +1,79 @@
+#!/bin/bash
+# This script attempts to find an existing installation of Java that meets a minimum version
+# requirement on a Linux machine.  If it is successful, it will export a JAVA_PATH environment
+# variable that can be used by another calling script.
+#
+# To specify the required version, set the REQUIRED_VERSION to the major version required, 
+# e.g. 1.3, but not 1.3.1.
+if [ -n "$REQUIRED_VERSION"] 
+then
+	REQUIRED_VERSION=1.7
+fi
+
+
+REQUIRED_VERSION=`echo $REQUIRED_VERSION | sed -e 's;\.;0;g'`
+JAVA_PATH=
+
+function java_version(){
+	$1 -version 2> tmp.ver 1> /dev/null
+	local version=`cat tmp.ver | grep "java version" | awk '{ print substr($3, 2, length($3)-2); }'`
+	rm tmp.ver
+	local result=`echo $version | awk '{ print substr($1, 1, 3); }' | sed -e 's;\.;0;g'`
+	echo $result
+}
+
+function set_java_path(){
+	local version=`java_version $1`
+	if [ $version ]
+	then
+		if [ $version -ge $REQUIRED_VERSION ]
+		then
+			JAVA_PATH=`echo $1 | awk '{ print substr($1, 1, length($1)-9); }'`
+		else
+			JAVA_PATH=
+		fi
+	else
+		JAVA_PATH=
+	fi
+
+}
+
+if [ $JAVA_HOME ]
+then
+	set_java_path $JAVA_HOME/bin/java 
+fi
+
+if ! [ $JAVA_PATH ]
+then
+	for JAVA_EXE in `locate bin/java | grep java$ | xargs echo`
+	do
+		if [ ! $JAVA_PATH ] 
+		then
+			if [ "$JAVA_EXE" != "/usr/bin/java" ]
+			then
+				set_java_path $JAVA_EXE
+			fi
+		fi
+	done
+fi
+
+if [ $JAVA_PATH ]
+then
+	:
+else
+	for JAVA_EXE in `find /usr/lib/jvm/ -name java | grep java$ | xargs echo`
+	do
+		if ! [ $JAVA_PATH ] 
+		then
+			set_java_path $JAVA_EXE
+		fi
+	done
+fi
+
+
+# If the correct Java version is detected, then export the JAVA_PATH environment variable
+if [ $JAVA_PATH ]
+then
+	export JAVA_PATH
+	echo $JAVA_PATH
+fi

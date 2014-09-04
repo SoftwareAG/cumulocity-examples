@@ -23,9 +23,6 @@ package c8y.rpi;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 
 import org.junit.Test;
 
@@ -38,21 +35,13 @@ public class PiHardwareDriverTest {
 
 	@Test
 	public void hardwareReadingSuccessful() throws IOException {
-		try (InputStream is = getClass().getResourceAsStream(REFERENCE_HWFILE);
-				Reader reader = new InputStreamReader(is)) {
-			driver.initializeFromReader(reader);
-		}
-
-		assertEquals(referenceHw, driver.getHardware());
-	}
-
-	@Test
-	public void noProcFilesystemExisting() throws IOException {
 		try {
-			driver.initializeFromFile("the proc filesystem is not existing here");
-		} catch (IOException x) {
+			driver.initializeFromFile(getClass().getResource(REFERENCE_HWFILE).getPath());
+		} catch (IOException e) {
+			fail(e.toString());
 		}
-		assertEquals(new PiHardwareDriver().getHardware(), driver.getHardware());
+		
+		assertEquals(referenceHw, driver.getHardware());
 	}
 
 	private Hardware referenceHw = new Hardware("RaspPi BCM2708", "0000000017b769d5", "000e");
