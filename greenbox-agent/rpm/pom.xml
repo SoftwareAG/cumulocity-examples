@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>c8y.example</groupId>
 		<artifactId>greenbox-agent</artifactId>
-		<version>5.12.0-SNAPSHOT-SNAPSHOT</version>
+		<version>5.12.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>greenbox-agent-package</artifactId>
