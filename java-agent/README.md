@@ -1,5 +1,6 @@
 This repository contains an example Java Agent with support for Raspberry Pi, Linux, Windows and Mac systems. 
 It consists of the following modules: 
+
  * jv-driver: Interface classes for writing hardware drivers and implementing new functionality.
  * jv-agent: The main executable agent including basic device management, should work on all Java platforms.
  * rpi-driver: Hardware driver for the Raspberry Pi.
