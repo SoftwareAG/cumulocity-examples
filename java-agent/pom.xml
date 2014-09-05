@@ -8,8 +8,8 @@
 		<version>5.12.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>c8y-lx</artifactId>
-    <name>Cumulocity :: Examples :: Linux</name>
+	<artifactId>c8y-jv</artifactId>
+    <name>Cumulocity :: Examples :: Java Agent</name>
 	<packaging>pom</packaging>
 
     <properties>
@@ -21,8 +21,8 @@
 
 	<modules>
         <module>assembly</module>
-        <module>lx-driver</module>
-        <module>lx-agent</module>
+        <module>jv-driver</module>
+        <module>jv-agent</module>
         <module>piface-driver</module>
         <module>tinkerforge-driver</module>
         <module>rpi-driver</module>
@@ -44,7 +44,7 @@
 		</dependency>
         <dependency>
             <groupId>c8y.example</groupId>
-            <artifactId>lx-agent-assembly</artifactId>
+            <artifactId>jv-agent-assembly</artifactId>
             <type>tar.gz</type>
             <classifier>tar</classifier>
         </dependency>
@@ -67,45 +67,45 @@
 		<dependencies>
             <dependency>
                 <groupId>c8y.example</groupId>
-                <artifactId>lx-driver</artifactId>
+                <artifactId>jv-driver</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>c8y.example</groupId>
-                <artifactId>lx-agent</artifactId>
+                <artifactId>jv-agent</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>c8y.example</groupId>
-                <artifactId>lx-agent-assembly</artifactId>
+                <artifactId>jv-agent-assembly</artifactId>
                 <version>${project.version}</version>
                 <type>tar.gz</type>
                 <classifier>tar</classifier>
             </dependency>
             <dependency>
                 <groupId>c8y.example</groupId>
-                <artifactId>lx-agent-assembly</artifactId>
+                <artifactId>jv-agent-assembly</artifactId>
                 <version>${project.version}</version>
                 <type>tar.gz</type>
                 <classifier>rpm</classifier>
             </dependency>
             <dependency>
                 <groupId>c8y.example</groupId>
-                <artifactId>lx-agent-assembly</artifactId>
+                <artifactId>jv-agent-assembly</artifactId>
                 <version>${project.version}</version>
                 <type>tar.gz</type>
                 <classifier>deb</classifier>
             </dependency>
             <dependency>
                 <groupId>c8y.example</groupId>
-                <artifactId>lx-agent-assembly</artifactId>
+                <artifactId>jv-agent-assembly</artifactId>
                 <version>${project.version}</version>
                 <type>zip</type>
                 <classifier>win</classifier>
             </dependency>
             <dependency>
                 <groupId>c8y.example</groupId>
-                <artifactId>lx-agent-assembly</artifactId>
+                <artifactId>jv-agent-assembly</artifactId>
                 <version>${project.version}</version>
                 <type>tar.gz</type>
                 <classifier>mac</classifier>
@@ -121,20 +121,20 @@
                     <dependencies>
                         <dependency>
                             <groupId>c8y.example</groupId>
-                            <artifactId>lx-agent-assembly</artifactId>
+                            <artifactId>jv-agent-assembly</artifactId>
                             <version>${project.version}</version>
                         </dependency>
                     </dependencies>
                     <executions>
                         <execution>
-                            <id>c8y-lx-agent-assembly</id>
+                            <id>c8y-jv-agent-assembly</id>
                             <goals>
                                 <goal>single</goal>
                             </goals>
                             <phase>package</phase>
                             <configuration>
                                 <descriptorRefs>
-                                    <descriptorRef>c8y-lx-agent</descriptorRef>
+                                    <descriptorRef>c8y-jv-agent</descriptorRef>
                                 </descriptorRefs>
                             </configuration>
                         </execution>

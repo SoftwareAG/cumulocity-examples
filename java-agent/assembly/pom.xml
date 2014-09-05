@@ -5,10 +5,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>c8y.example</groupId>
-    <artifactId>lx-agent-assembly</artifactId>
+    <artifactId>jv-agent-assembly</artifactId>
     <version>5.12.0-SNAPSHOT</version>
 
-    <name>Cumulocity :: Examples :: Linux Agent Base Assembly</name>
+    <name>Cumulocity :: Examples :: Java Agent Base Assembly</name>
     <description>Base assembly package for all environments</description>
 
     <properties>

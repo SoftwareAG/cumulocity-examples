@@ -17,7 +17,7 @@
             <outputDirectory>/</outputDirectory>
             <scope>provided</scope>
             <includes>
-                <include>c8y.example:lx-agent-assembly:tar.gz:${project.version}</include>
+                <include>c8y.example:jv-agent-assembly:tar.gz:${project.version}</include>
             </includes>
             <unpack>true</unpack>
         </dependencySet>

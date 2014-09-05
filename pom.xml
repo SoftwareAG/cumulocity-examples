@@ -27,7 +27,7 @@
 	<modules>
 		<module>hello-agent</module>
 		<module>kontron-shock-agent</module>
-		<module>linux-agent</module>
+		<module>java-agent</module>
 		<module>tracker-agent</module>
 		<module>tracker-agent-rpm</module>
 		<module>tixi-agent</module>

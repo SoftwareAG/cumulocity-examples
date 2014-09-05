@@ -20,14 +20,14 @@
         <dependencySet>
             <outputDirectory>/bin</outputDirectory>
             <includes>
-                <include>c8y.example:lx-agent-assembly:tar.gz:tar:${project.version}</include>
+                <include>c8y.example:jv-agent-assembly:tar.gz:tar:${project.version}</include>
             </includes>
             <unpack>true</unpack>
         </dependencySet>
         <dependencySet>
             <outputDirectory>/etc</outputDirectory>
             <includes>
-                <include>c8y.example:lx-agent-assembly:tar.gz:rpm:${project.version}</include>
+                <include>c8y.example:jv-agent-assembly:tar.gz:rpm:${project.version}</include>
             </includes>
             <outputFileNameMapping>./</outputFileNameMapping>
             <unpack>true</unpack>

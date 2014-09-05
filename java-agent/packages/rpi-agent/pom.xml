@@ -6,16 +6,16 @@
 
     <parent>
         <groupId>c8y.example</groupId>
-        <artifactId>lx-packages</artifactId>
+        <artifactId>jv-packages</artifactId>
         <version>5.12.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>cumulocity-rpi-agent</artifactId>
-    <name>Cumulocity :: Examples :: Raspberry Pi Package</name>
+    <name>Cumulocity :: Examples :: Raspberry Pi Agent Package</name>
     <packaging>pom</packaging>
 
     <properties>
-        <assembly.descriptor>c8y-lx-agent-deb</assembly.descriptor>
+        <assembly.descriptor>c8y-jv-agent-deb</assembly.descriptor>
     </properties>
 
     <dependencies>
