@@ -42,7 +42,7 @@ public class TekelecRequestBuilder {
         payloadLength -= 9; // minus skipped/not_data bytes
         payloadLength -= 2; // minus last two crc bytes
         
-        while (payloadLength > 0) {
+        while (payloadLength >= 4) {
             PayloadData data = new PayloadData();
             data.setSonicRssi(readInt(dst[i++]));
             data.setTempInCelsius((readInt(dst[i++]) >> 1) - 30);
