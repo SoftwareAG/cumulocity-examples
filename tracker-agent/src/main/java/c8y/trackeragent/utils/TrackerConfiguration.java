@@ -83,12 +83,19 @@ public class TrackerConfiguration {
 	}
 
 	public TrackerConfiguration setProxyport(int proxyport) {
+		
 		this.proxyport = proxyport;
+		
 		return this;
 	}
 
 	public TrackerConfiguration setProxyport(String proxyport) {
-		this.proxyport = new Integer(proxyport);
+		try {
+			this.proxyport = new Integer(proxyport);
+		} catch (NumberFormatException e) {
+			// Proxy Port not configured
+
+		}
 		return this;
 	}
 
