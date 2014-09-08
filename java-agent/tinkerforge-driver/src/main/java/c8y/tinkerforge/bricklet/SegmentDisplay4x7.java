@@ -145,18 +145,11 @@ public class SegmentDisplay4x7 implements Driver, Configurable{
 				operation.setStatus(OperationStatus.FAILED.toString());
 			
 			msg = operation.get(Message.class);
-			if(msg!=null){
-				submitText(msg.getText());
-				try {
-					displayMo.set(msg);
-					displayMo=platform.getInventoryApi().update(displayMo);
-					System.err.println("INVENTORY UPDATED!");
-				} catch (SDKException x) {
-					logger.warn("Cannot update bricklet", x);
-				}
-				operation.setStatus(OperationStatus.SUCCESSFUL.toString());
-			}
-			else operation.setStatus(OperationStatus.FAILED.toString());
+			submitText(msg.getText());
+			displayMo.set(msg);
+			platform.getInventoryApi().update(displayMo);
+			
+			operation.setStatus(OperationStatus.SUCCESSFUL.toString());
 		}
 		
 	} 
