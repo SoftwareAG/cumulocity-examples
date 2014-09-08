@@ -36,6 +36,7 @@ import c8y.Position;
 import c8y.Restart;
 import c8y.SignalStrength;
 import c8y.SupportedOperations;
+import c8y.trackeragent.model.FuelMeasurement;
 
 import com.cumulocity.model.ID;
 import com.cumulocity.model.event.CumulocityAlarmStatuses;
@@ -63,6 +64,7 @@ public class TrackerDevice extends DeviceManagedObject {
     public static final String MOTION_DETECTED_EVENT_TYPE = "c8y_MotionEvent";
     public static final String MOTION_ENDED_EVENT_TYPE = "c8y_MotionEndedEvent";
     public static final String POWER_ALARM_TYPE = "c8y_PowerAlarm";
+    public static final String FUEL_MEASURMENT= "c8y_FuelMeasurment"; 
     
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -87,6 +89,10 @@ public class TrackerDevice extends DeviceManagedObject {
     private Battery battery = new Battery();
     private MeasurementRepresentation gprsSignalMsrmt = new MeasurementRepresentation();
     private SignalStrength gprsSignal = new SignalStrength();
+    
+    private MeasurementRepresentation fuelMsrmR = new MeasurementRepresentation();
+    private FuelMeasurement fuelMsrm = new FuelMeasurement();
+
 
     public TrackerDevice(TrackerPlatform platform, GId agentGid, String imei) throws SDKException {
         super(platform);
@@ -201,6 +207,23 @@ public class TrackerDevice extends DeviceManagedObject {
         getInventory().update(device);
     }
 
+    public void setFuelConsumption(BigDecimal instantFC, BigDecimal averageFC)
+    {
+        logger.info("Updating FuelMeasurment for: {} Instant  :  {}, , imei", instantFC.toString() );
+
+        if (instantFC!=null) {
+                fuelMsrm.setInstantFuelConsumption(instantFC);
+        }
+        if (averageFC!=null) {
+                fuelMsrm.setAverageFuelConsumption(averageFC);
+        }
+        fuelMsrmR.setTime(new Date());
+        measurements.create(fuelMsrmR);
+
+    }
+
+    
+    
     private void createOrCancelAlarm(boolean status, AlarmRepresentation newAlarm) throws SDKException {
         String newStatus = status ? CumulocityAlarmStatuses.ACTIVE.toString() : CumulocityAlarmStatuses.CLEARED.toString();
 
@@ -260,6 +283,11 @@ public class TrackerDevice extends DeviceManagedObject {
         batteryMsrmt.set(battery);
         batteryMsrmt.setSource(source);
 
+        fuelMsrmR.setType(FUEL_MEASURMENT);
+        fuelMsrmR.set(fuelMsrm);
+        fuelMsrmR.setSource(source);
+
+
         gprsSignalMsrmt.setType(SIG_TYPE);
         gprsSignalMsrmt.set(gprsSignal);
         gprsSignalMsrmt.setSource(source);
@@ -273,6 +301,8 @@ public class TrackerDevice extends DeviceManagedObject {
         ops.add("c8y_Configuration");
         ops.add("c8y_MotionTracking");
         ops.add("c8y_Geofence");
+        ops.add("c8y_FuelReport");
+        
         device.set(ops);
 
         device.set(new MotionTracking());

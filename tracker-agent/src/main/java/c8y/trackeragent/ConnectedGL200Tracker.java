@@ -16,5 +16,6 @@ public class ConnectedGL200Tracker extends ConnectedTracker {
         addFragment(new GL200LocationReport(trackerAgent));
         addFragment(new GL200DeviceMotionState(trackerAgent, PASSWORD));
         addFragment(new GL200Fallback(trackerAgent, PASSWORD));
+        addFragment(new GL200FuelReport(trackerAgent,PASSWORD));
     }
 }
