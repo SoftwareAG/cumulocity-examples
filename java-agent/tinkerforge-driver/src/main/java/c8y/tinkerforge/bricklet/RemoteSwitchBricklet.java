@@ -36,7 +36,6 @@ import com.tinkerforge.NotConnectedException;
 import com.tinkerforge.TimeoutException;
 
 import c8y.RelayArray;
-import c8y.Relay.RelayState;
 import c8y.lx.driver.Configurable;
 import c8y.lx.driver.DeviceManagedObject;
 import c8y.lx.driver.Driver;
@@ -209,11 +208,12 @@ public class RemoteSwitchBricklet implements Driver, Configurable {
 			}
 			if (cleanup)
 				operation.setStatus(OperationStatus.FAILED.toString());
-			// TODO: Fix this hack
-			ArrayList<String> relayArray = (ArrayList)operation.get(RelayArray.class);
+
+			RelayArray relayArray = operation.get(RelayArray.class);
 			for(int i=0;i<devices.size()&&i<relayArray.size();i++){
-				devices.get(i).switchDevice( (short)(RelayState.CLOSED.toString().equals(relayArray.get(i)) ? 1 : 0) );
+				devices.get(i).switchDevice( (short)("CLOSED".equals(relayArray.get(i)) ? 1 : 0) );
 			}
+			
 			operation.setStatus(OperationStatus.SUCCESSFUL.toString());
 		}
 		

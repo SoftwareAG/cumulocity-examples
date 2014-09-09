@@ -20,7 +20,7 @@
 
 package c8y.tinkerforge.bricklet;
 
-import java.util.ArrayList;
+
 import java.util.Date;
 import java.util.Properties;
 
@@ -38,7 +38,6 @@ import com.tinkerforge.BrickletIO16.PortConfiguration;
 import com.tinkerforge.NotConnectedException;
 import com.tinkerforge.TimeoutException;
 
-import c8y.Relay.RelayState;
 import c8y.RelayArray;
 import c8y.lx.driver.Configurable;
 import c8y.lx.driver.DeviceManagedObject;
@@ -75,6 +74,7 @@ public class IO16Bricklet implements Driver, Configurable {
 	private String id;
 	private BrickletIO16 io16;
 	private ManagedObjectRepresentation io16Mo = new ManagedObjectRepresentation();
+	private RelayArray state = new RelayArray();
 	private EventRepresentation inputChangeEvent = new EventRepresentation();
 	private Platform platform;
 	
@@ -124,6 +124,26 @@ public class IO16Bricklet implements Driver, Configurable {
 					Short.toString(port.defaultConfiguration.valueMask )));
 			setPort(port);
 		}
+		/*
+		 * Due to the nature of it's modeling, it is possible to change the state of the io16 bricklet through c8y_Configuration.
+		 * To avoid persisting old c8y_RelayArray states after a configuration change an update of the c8y_RelayArray 
+		 * configuration is required.
+		 */
+		if(io16Mo.getId()!=null) {
+			// TODO: clean up
+			System.err.println("configurationChanged(): local state updated, state set in local io16Mo, io16Mo update on cloud");
+			initStateFromConfig();
+			io16Mo.set(state);
+			try {
+				//Needed in order to reduce overhead
+				ManagedObjectRepresentation updateMo = new ManagedObjectRepresentation();
+				updateMo.setId(io16Mo.getId());
+				updateMo.set(state);
+				platform.getInventoryApi().update(updateMo);
+			} catch(SDKException e) {
+				logger.warn("Couldn't update device state on the platform", e);
+			}
+		}
 	}
 	
 	@Override
@@ -163,9 +183,11 @@ public class IO16Bricklet implements Driver, Configurable {
 		
 		try {
 			DeviceManagedObject dmo = new DeviceManagedObject(platform);
+			//TODO: Clean up
+			System.err.println("discoverChildren():io16Mo createOrUpdate");
 			dmo.createOrUpdate(io16Mo, TFIds.getXtId(id), parent.getId());
 		} catch (SDKException e) {
-			logger.warn("Cannot create remote switch object", e);
+			logger.warn("Cannot create or update MO", e);
 		}
 	}
 
@@ -190,6 +212,28 @@ public class IO16Bricklet implements Driver, Configurable {
 				
 			}
 		});
+		
+		/*
+		 * The state is updated.
+		 * If there is no state in the inventory, it's initialized first.
+		 */
+		state = io16Mo.get(RelayArray.class);
+		if(state==null){
+			state = new RelayArray();
+			initStateFromConfig();
+			io16Mo.set(state);
+			try {
+				//Needed in order to reduce overhead
+				ManagedObjectRepresentation updateMo = new ManagedObjectRepresentation();
+				updateMo.setId(io16Mo.getId());
+				updateMo.set(state);
+				platform.getInventoryApi().update(updateMo);
+			} catch(SDKException e) {
+				logger.warn("Couldn't update device state on the platform", e);
+			}
+		}
+		updatePorts();
+		
 	}
 	
 	class RelayArrayOperationExecutor implements OperationExecutor{
@@ -210,10 +254,20 @@ public class IO16Bricklet implements Driver, Configurable {
 			if (cleanup)
 				operation.setStatus(OperationStatus.FAILED.toString());
 			
-			RelayArray relayArray = operation.get(RelayArray.class);
-			updatePorts(relayArray);
-			for(Port p:ports)
-				setPort(p);
+			state = operation.get(RelayArray.class);
+			updatePorts();
+			//TODO: Clean up
+			System.err.println("c8y_RelayArray.execute():update new state, io16mo set new state, update device");
+			
+			/*
+			 * State is persisted after each change.
+			 */
+			io16Mo.set(state);
+			//Needed in order to reduce overhead
+			ManagedObjectRepresentation updateMo = new ManagedObjectRepresentation();
+			updateMo.setId(io16Mo.getId());
+			updateMo.set(state);
+			platform.getInventoryApi().update(updateMo);
 			
 			operation.setStatus(OperationStatus.SUCCESSFUL.toString());
 		}
@@ -239,24 +293,37 @@ public class IO16Bricklet implements Driver, Configurable {
 	 * The idea is to update the values of output pins only(starting from pin A0 up to pin B7) using the 
 	 * relay values(CLOSED - logical true).
 	 */
-	private void updatePorts(RelayArray relayArray){
+	private void updatePorts(){
 		boolean direction[] = createBooleanArray(ports[0].actualConfiguration.directionMask, ports[1].actualConfiguration.directionMask);
 		boolean value[] = createBooleanArray(ports[0].actualConfiguration.valueMask, ports[1].actualConfiguration.valueMask);
 		/*
 		 * TODO: This feels like a naughty hack. Maybe update Relay.RelayState to make it castable to String somehow. 
 		 * Or modify how it is parsed. 
 		 */
-		ArrayList<String> strings = (ArrayList)relayArray;
-		for(int i=0; i<direction.length; i++)
-			if(!direction[i]&&!relayArray.isEmpty()){
-				System.err.println(i+":"+strings.get(0));
-				value[i]=RelayState.CLOSED.toString().equalsIgnoreCase(strings.remove(0));
+		int relayCounter=0;
+		for(int i=0; i<direction.length; i++){
+			if(!direction[i]&&relayCounter<state.size()) {
+				value[i]="CLOSED".equalsIgnoreCase(state.get(relayCounter));
+				relayCounter++;
 			}
+		}
 		
 		int newValueMasks[]=getValueMasks(value);
 		
 		ports[0].actualConfiguration.valueMask=(short) newValueMasks[0];
 		ports[1].actualConfiguration.valueMask=(short) newValueMasks[1];
+		
+		for(Port p:ports)
+			setPort(p);
+	}
+	
+	private void initStateFromConfig(){
+		boolean direction[] = createBooleanArray(ports[0].actualConfiguration.directionMask, ports[1].actualConfiguration.directionMask);
+		boolean value[] = createBooleanArray(ports[0].actualConfiguration.valueMask, ports[1].actualConfiguration.valueMask);
+		state.clear();
+		for(int i=0; i<direction.length; i++)
+			if(!direction[i])
+				state.add(value[i]?"CLOSED":"OPEN");
 	}
 
 	public static boolean[] createBooleanArray(int a, int b){
