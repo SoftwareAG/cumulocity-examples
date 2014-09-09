@@ -4,7 +4,7 @@
     <parent>
         <groupId>c8y.example</groupId>
         <artifactId>c8y-examples</artifactId>
-        <version>5.12.0-SNAPSHOT</version>
+        <version>5.12.0</version>
     </parent>
     <artifactId>tekelec-agent</artifactId>
     <name>Cumulocity :: Examples :: Tekelec Agent</name>
