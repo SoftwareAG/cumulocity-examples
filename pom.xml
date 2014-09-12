@@ -30,8 +30,6 @@
 		<module>java-agent</module>
 		<module>tracker-agent</module>
 		<module>tracker-agent-rpm</module>
-		<module>tixi-agent</module>
-		<module>greenbox-agent</module>
 	</modules>
 
 	<licenses>
