@@ -64,15 +64,13 @@ public class GL200DeviceMotionState extends GL200Parser implements Translator {
     public static final String MOTION_ACK = "+ACK:GTCFG";
 
     private final TrackerAgent trackerAgent;
-    private final String password;
     private short corrId = 0;
     private boolean lastState;
     private OperationRepresentation lastOperation;
 
 
-    public GL200DeviceMotionState(TrackerAgent trackerAgent, String password) {
+    public GL200DeviceMotionState(TrackerAgent trackerAgent) {
         this.trackerAgent = trackerAgent;
-        this.password = password;
     }
 
     @Override
@@ -139,7 +137,9 @@ public class GL200DeviceMotionState extends GL200Parser implements Translator {
             lastState = mTrack.isActive();
             lastOperation = operation;
         }
-
+        String password = trackerAgent.getContext().
+        		getConfiguration().
+        		getDevicePassword();
         return String.format(MOTION_TEMPLATE, password, mTrack.isActive() ? MOTION_ON : MOTION_OFF, corrId);
     }
 }

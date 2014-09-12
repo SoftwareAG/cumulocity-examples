@@ -31,7 +31,7 @@ public class ConfigUtils {
     private static final String PROXY = "proxy";
     private static final String PROXYPORT = "proxyport";
     private static final String TENANT = "bootstrap.tenant";
-
+    private static final String DEVICEPASSWORD="bootstrap.devicepassword";
 
     
     private static final ConfigUtils instance = create();
@@ -82,6 +82,7 @@ public class ConfigUtils {
             .setBootstrapPassword(getProperty(SOURCE_FILE, props, BOOTSTRAP_PASSWORD_PROP))
             .setBootstrapTenant("management")
             .setBootstrapTenant(getProperty(SOURCE_FILE, props, TENANT))
+            .setDevicePassword(getProperty(SOURCE_FILE, props, DEVICEPASSWORD)) 
             .setProxy(getProperty(SOURCE_FILE, props, PROXY,null))
             .setProxyport(getProperty(SOURCE_FILE,props,PROXYPORT, null))
 

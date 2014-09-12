@@ -35,6 +35,7 @@ public class TrackerContext {
         return deviceCredentialsRepository.hasCredentials(imei);
     }
     
+    
     public TrackerConfiguration getConfiguration() {
         return configuration;
     }

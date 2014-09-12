@@ -31,6 +31,8 @@ import org.junit.Test;
 
 import c8y.Geofence;
 import c8y.Position;
+import c8y.trackeragent.utils.TrackerConfiguration;
+import c8y.trackeragent.utils.TrackerContext;
 
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
@@ -50,6 +52,9 @@ public class GL200GeofenceTest {
     private TrackerAgent trackerAgent = mock(TrackerAgent.class);
     private TrackerDevice device = mock(TrackerDevice.class);
 
+    private TrackerContext context = mock(TrackerContext.class);
+    private TrackerConfiguration configuration  = mock(TrackerConfiguration.class);
+    
     private OperationRepresentation operation = new OperationRepresentation();
     private Geofence fence;
 
@@ -62,9 +67,13 @@ public class GL200GeofenceTest {
         fence.setActive(true);
         operation.set(fence);
 
-        gl200gf = new GL200Geofence(trackerAgent, PASSWORD);
+        gl200gf = new GL200Geofence(trackerAgent);
 
         when(trackerAgent.getOrCreateTrackerDevice(anyString())).thenReturn(device);
+        when(trackerAgent.getContext()).thenReturn(context);
+        when(context.getConfiguration()).thenReturn(configuration);
+        when(configuration.getDevicePassword()).thenReturn(PASSWORD);
+        
     }
 
     @Test
@@ -92,7 +101,8 @@ public class GL200GeofenceTest {
         wrongCorrelation[5] = "0002";
         gl200gf.parse(wrongCorrelation);
 
-        verifyZeroInteractions(trackerAgent);
+       // verifyZeroInteractions(trackerAgent);
+        verify(trackerAgent, never()).getOrCreateTrackerDevice(IMEI);
     }
 
     @Test

@@ -68,14 +68,12 @@ public class GL200Geofence extends GL200LocationReport implements Translator {
      */
     public static final String GEOFENCE_REPORT = "+RESP:GTGEO";
 
-    private String password;
     private short corrId = 0;
     private Geofence lastFence = new Geofence();
     private OperationRepresentation lastOperation;
 
-    public GL200Geofence(TrackerAgent trackerAgent, String password) {
+    public GL200Geofence(TrackerAgent trackerAgent) {
         super(trackerAgent);
-        this.password = password;
     }
 
     @Override
@@ -160,7 +158,7 @@ public class GL200Geofence extends GL200LocationReport implements Translator {
             lastFence = geofence;
             lastOperation = operation;
         }
-
+        String password = trackerAgent.getContext().getConfiguration().getDevicePassword(); 
         return String.format(GEO_TEMPLATE, password, lng, lat, radius, checkInterval, corrId);
     }
 }

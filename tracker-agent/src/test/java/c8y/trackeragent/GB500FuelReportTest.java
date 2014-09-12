@@ -22,7 +22,7 @@ import com.cumulocity.sdk.client.SDKException;
 public class GB500FuelReportTest {
 	
 	public static final String IMEI = "864251020004036";
-	public static final String PASSWORD = "GV500";
+	//public static final String PASSWORD = "GV500";
 	public static final FuelMeasurement fm = new FuelMeasurement();
 	
 	 public static final String GV500FRISTR = "+RESP:GTFRI,1F0104,864251020004036,,,,10,1,0,,,,0,0,,0262,0007,18d8,6141,00,0.0,,,,77,420000,1829,6,,20110101180334,001B";
@@ -30,7 +30,7 @@ public class GB500FuelReportTest {
 
 	 private TrackerAgent trackerAgent = mock(TrackerAgent.class);
 	 private TrackerDevice device = mock(TrackerDevice.class);
-	 private GL200FuelReport fuelReport = new GL200FuelReport(trackerAgent,PASSWORD);
+	 private GL200FuelReport fuelReport = new GL200FuelReport(trackerAgent);
 	
 	 @Before
 	    public void setup() throws SDKException {

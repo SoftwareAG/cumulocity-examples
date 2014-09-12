@@ -14,7 +14,7 @@
 	<properties>
 		<maven.compiler.source>1.6</maven.compiler.source>
 		<maven.compiler.target>1.6</maven.compiler.target>
-		<rpm.etc.dir>/etc/tracker-agent</rpm.etc.dir> <!-- TODO move to common parent pom for tracker-agent when created to avoid 
+		<rpm.etc.dir>/home/achestnov/Apps/trackerAgent</rpm.etc.dir> <!-- TODO move to common parent pom for tracker-agent when created to avoid 
 			duplication here and in tracker-agent-package -->
 	</properties>
 	<dependencies>

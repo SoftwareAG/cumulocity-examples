@@ -28,6 +28,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import c8y.MotionTracking;
+import c8y.trackeragent.TrackerAgent;
+import c8y.trackeragent.utils.TrackerConfiguration;
+import c8y.trackeragent.utils.TrackerContext;
 
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
@@ -51,6 +54,9 @@ public class GL200DeviceMotionStateTest {
     private GL200DeviceMotionState gl200mot;
     private TrackerAgent trackerAgent = mock(TrackerAgent.class);
     private TrackerDevice device = mock(TrackerDevice.class);
+    private TrackerContext context = mock(TrackerContext.class);
+    private TrackerConfiguration configuration  = mock(TrackerConfiguration.class);
+    
     private OperationRepresentation operation = new OperationRepresentation();
     private MotionTracking track = new MotionTracking();
 
@@ -58,8 +64,11 @@ public class GL200DeviceMotionStateTest {
     @Before
     public void setup() throws SDKException {
         operation.set(track);
-        gl200mot = new GL200DeviceMotionState(trackerAgent, PASSWORD);
+        gl200mot = new GL200DeviceMotionState(trackerAgent);
         when(trackerAgent.getOrCreateTrackerDevice(anyString())).thenReturn(device);
+        when(trackerAgent.getContext()).thenReturn(context);
+        when(context.getConfiguration()).thenReturn(configuration);
+        when(configuration.getDevicePassword()).thenReturn(PASSWORD);
     }
 
     @Test

@@ -35,11 +35,10 @@ import com.cumulocity.sdk.client.SDKException;
 public class GL200Fallback extends GL200Parser implements Translator {
 
     private final TrackerAgent trackerAgent;
-    private final String password;
+   // private final String password;
 
-    public GL200Fallback(TrackerAgent trackerAgent, String password) {
+    public GL200Fallback(TrackerAgent trackerAgent) {
         this.trackerAgent = trackerAgent;
-        this.password = password;
     }
 
     @Override
@@ -58,6 +57,7 @@ public class GL200Fallback extends GL200Parser implements Translator {
         }
 
         if (operation.get(Restart.class) != null) {
+        	String password = trackerAgent.getContext().getConfiguration().getDevicePassword();
             return String.format("AT+GTRTO=%s,3,,,,,,0001$", password);
         }
 

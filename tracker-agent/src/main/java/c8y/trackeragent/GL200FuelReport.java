@@ -15,16 +15,17 @@ public class GL200FuelReport extends GL200Parser implements Translator {
 
 	
 	 private TrackerAgent trackerAgent;
-	 private String password;
+	
+	 private String imei;
 	
 	 public static final String FUEL_REPORT = "+RESP:GTFRI";
 	 public static final String FUEL_TEMPLATE = "AT+GTCFG=%s,,,,,,,,,,%d,,,,,,,,,,,%04x$";
 	 
 	 private Logger logger = LoggerFactory.getLogger(getClass());
 	 
-	 public GL200FuelReport(TrackerAgent trackerAgent, String password) {
+	 public GL200FuelReport(TrackerAgent trackerAgent) {
 	        this.trackerAgent = trackerAgent;
-	        this.password = password;
+	//        this.password = password;
 	    }
 
 	
@@ -64,6 +65,7 @@ public class GL200FuelReport extends GL200Parser implements Translator {
 	public String translate(OperationRepresentation operation) {
 		//TODO Implement Operations
 		//TODO richtig Implementieren.
+		String password = trackerAgent.getContext().getConfiguration().getDevicePassword();
 		return String.format(FUEL_TEMPLATE, password);
 	}
 

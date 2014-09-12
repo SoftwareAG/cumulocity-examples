@@ -11,7 +11,7 @@ public class TrackerConfiguration {
     private String proxy;
 
     private int proxyport;
-
+    private String devicePassword;
 
 
     public String getPlatformHost() {
@@ -98,8 +98,18 @@ public class TrackerConfiguration {
 		}
 		return this;
 	}
+	
+	
+    public String getDevicePassword() {
+		return devicePassword;
+	}
 
-    @Override
+	public TrackerConfiguration setDevicePassword(String devicePassword) {
+		this.devicePassword = devicePassword;
+		return this;
+	}
+
+	@Override
     public String toString() {
         return String.format("TrackerConfiguration [platformHost=%s, localPort=%s, bootstrapUser=%s, bootstrapPassword=%s, bootstrapTenant=%s, clientTimeout=%s]", platformHost, localPort,
                 bootstrapUser, bootstrapPassword, bootstrapTenant, clientTimeout);
