@@ -127,7 +127,7 @@ public class OperationDispatcher {
         try {
             for (String key : operation.getAttrs().keySet()) {
                 if (dispatchMap.containsKey(key)) {
-                    logger.info("Executing operation {} cleanup {}", operation, cleanup);
+                    logger.info("Executing operation " + key + (cleanup?" cleanup":""));
                     for(OperationExecutor exec:dispatchMap.get(key))
                     	exec.execute(operation, cleanup);
                 }

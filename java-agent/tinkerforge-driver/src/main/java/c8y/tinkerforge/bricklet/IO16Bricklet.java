@@ -130,8 +130,6 @@ public class IO16Bricklet implements Driver, Configurable {
 		 * configuration is required.
 		 */
 		if(io16Mo.getId()!=null) {
-			// TODO: clean up
-			System.err.println("configurationChanged(): local state updated, state set in local io16Mo, io16Mo update on cloud");
 			initStateFromConfig();
 			io16Mo.set(state);
 			try {
@@ -183,8 +181,6 @@ public class IO16Bricklet implements Driver, Configurable {
 		
 		try {
 			DeviceManagedObject dmo = new DeviceManagedObject(platform);
-			//TODO: Clean up
-			System.err.println("discoverChildren():io16Mo createOrUpdate");
 			dmo.createOrUpdate(io16Mo, TFIds.getXtId(id), parent.getId());
 		} catch (SDKException e) {
 			logger.warn("Cannot create or update MO", e);
@@ -256,8 +252,6 @@ public class IO16Bricklet implements Driver, Configurable {
 			
 			state = operation.get(RelayArray.class);
 			updatePorts();
-			//TODO: Clean up
-			System.err.println("c8y_RelayArray.execute():update new state, io16mo set new state, update device");
 			
 			/*
 			 * State is persisted after each change.
