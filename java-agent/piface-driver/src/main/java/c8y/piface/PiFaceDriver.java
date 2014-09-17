@@ -200,9 +200,11 @@ public class PiFaceDriver implements Driver, OperationExecutor {
 				} else {
 					piface.getLed(idx).off();
 				}
+				ManagedObjectRepresentation updateMo = new ManagedObjectRepresentation();
+				updateMo.setId(ledMos[idx].getId());
+				updateMo.set(relayOp);
+				platform.getInventoryApi().update(updateMo);
 				ledMos[idx].set(relayOp);
-				platform.getInventoryApi().getManagedObject(targetGId)
-						.update(ledMos[idx]);
 				operation.setStatus(OperationStatus.SUCCESSFUL.toString());
 				break;
 			}
