@@ -1,0 +1,4 @@
+#!/bin/bash
+BIN=/usr/share/greenbox-agent-server
+JAVA_PATH=`$BIN/detect-java`
+$JAVA_PATH/bin/java -jar $BIN/greenbox-agent-server.jar

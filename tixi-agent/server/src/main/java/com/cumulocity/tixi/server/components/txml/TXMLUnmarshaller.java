@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import com.cumulocity.tixi.server.model.txml.External;
 import com.cumulocity.tixi.server.model.txml.Log;
@@ -59,6 +60,10 @@ public class TXMLUnmarshaller {
 		try {
 			File incomingFile = agentFileSystem.getIncomingFile(fileName);
 			String input = IOUtils.toString(new FileInputStream(incomingFile), "UTF-8");
+			input = input.trim();
+			if(!StringUtils.hasText(input)) {
+				return null;
+			}
 			input = stripEnclosingBrackets(input);
 			
 			StreamSource source = new StreamSource(IOUtils.toInputStream(input, "UTF-8"));
@@ -92,7 +97,6 @@ public class TXMLUnmarshaller {
 	}
 	
 	static String stripEnclosingBrackets(String source) {
-		source = source.trim();
 		if (!source.endsWith("]")) {
 			return source;
 		}

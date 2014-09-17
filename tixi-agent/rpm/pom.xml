@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>c8y.example</groupId>
 		<artifactId>tixi-agent</artifactId>
-		<version>5.11.0</version>
+		<version>5.12.0</version>
 	</parent>
 
 	<artifactId>tixi-rpm</artifactId>
@@ -14,12 +14,10 @@
 	<properties>
         <app.dir>${project.build.directory}/app</app.dir>
         <etc.dir>${project.build.outputDirectory}/etc</etc.dir>
-        <mnt.dir>${project.build.outputDirectory}/mnt</mnt.dir>
         
         <rpm.version>${project.version}</rpm.version>
         <rpm.app.dir>/var/lib/tixi</rpm.app.dir>
         <rpm.etc.dir>/etc/tixi</rpm.etc.dir>
-        <rpm.mnt.dir>/mnt/tixi</rpm.mnt.dir>
 	</properties>
 
     <dependencies>
@@ -90,16 +88,6 @@
                             <sources>
                                 <source>
                                     <location>${etc.dir}</location>
-                                </source>
-                            </sources>
-                        </mapping>                                        
-                        <mapping>
-                            <directory>${rpm.mnt.dir}</directory>
-                            <username>root</username>
-                            <groupname>java</groupname>
-                            <sources>
-                                <source>
-                                    <location>${mnt.dir}</location>
                                 </source>
                             </sources>
                         </mapping>                                        

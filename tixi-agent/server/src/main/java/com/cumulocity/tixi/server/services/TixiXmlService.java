@@ -33,7 +33,7 @@ public class TixiXmlService {
 		getBean(TixiLogDefinitionHandler.class).handle(unmarshaled);
 		logger.info("File " + fileName + " with expected entity " + LogDefinition.class.getSimpleName() + " processed.");
 	}
-	
+		
 	public void handleLog(String fileName, String origFileName) {
 		Log unmarshaled = parse(fileName, Log.class);
         beanFactory.getBean(TixiLogHandler.class).handle(unmarshaled, origFileName);
@@ -48,7 +48,11 @@ public class TixiXmlService {
 	
 	private <S> S parse(String fileName, Class<S> expectedType) {
 		logger.info("Process " + fileName + " with expected entity " + expectedType.getSimpleName());
-		return txmlUnmarshaller.unmarshal(fileName, expectedType);
+		S result = txmlUnmarshaller.unmarshal(fileName, expectedType);
+		if(result == null) {
+			throw new TixiXmlException("Can't parse file " + fileName + " to object " + expectedType + " because file is empty!");
+		}
+		return result;
 	}
 	
 	private <T> T getBean(Class<T> clazz) {

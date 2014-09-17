@@ -1,0 +1,27 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	
+	<parent>
+		<groupId>c8y.example</groupId>
+		<artifactId>c8y-jv</artifactId>
+        <version>5.12.0</version>
+	</parent>
+	
+	<artifactId>tinkerforge-driver</artifactId>
+    <name>Cumulocity :: Examples :: Tinkerforge Driver</name>
+	<description>Cumulocity driver for Tinkerforge bricks/bricklets</description>
+
+	<dependencies>
+        <dependency>
+            <groupId>c8y.example</groupId>
+            <artifactId>jv-driver</artifactId>
+        </dependency>
+        <dependency>
+			<groupId>com.tinkerforge</groupId>
+			<artifactId>tinkerforge</artifactId>
+			<version>${tinkerforge.version}</version>
+		</dependency>
+	</dependencies>
+
+</project>
