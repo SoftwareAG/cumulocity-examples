@@ -62,7 +62,7 @@ public class JavaSoftwareDriver implements Driver, OperationExecutor {
 	
     @Override
     public void initialize() throws Exception {
-        new File(".").listFiles(new FilenameFilter() {
+        new File("./lib").listFiles(new FilenameFilter() {
             @Override
             public boolean accept(File dir, String file) {
                 if (file.matches(".*[.]jar$")) {
