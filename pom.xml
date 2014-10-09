@@ -6,16 +6,52 @@
 
 	<groupId>c8y.example</groupId>
 	<artifactId>c8y-examples</artifactId>
-	<version>5.11.0</version>
+	<version>5.13.0-SNAPSHOT</version>
 	<name>Cumulocity :: Examples</name>
 	<packaging>pom</packaging>
+	
+	<profiles>
+		<profile>
+			<id>develop</id>
+			<properties>
+				<!-- current SNAPSHOT version of c8y-client -->
+				<c8y.version>5.13.0-SNAPSHOT</c8y.version>				
+			</properties>
+			<distributionManagement>
+				<snapshotRepository>
+					<id>snapshot</id>
+					<url>http://localhost:8080/nexus/content/repositories/snapshots/</url>
+				</snapshotRepository>
+			</distributionManagement>			
+		</profile>
+		<profile>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<id>production</id>
+			<properties>
+				<!-- current RELEASE version of c8y-client -->
+				<c8y.version>5.13.0</c8y.version>				
+			</properties>
+			<distributionManagement>
+				<!-- TODO remove snapshotRepository after release -->
+				<snapshotRepository>
+					<id>snapshot</id>
+					<url>http://localhost:8080/nexus/content/repositories/snapshots/</url>
+				</snapshotRepository>
+				<repository>
+					<id>release</id>
+					<url>http://localhost:8080/nexus/content/repositories/releases/</url>
+				</repository>
+			</distributionManagement>			
+		</profile>
+	</profiles>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.7</maven.compiler.source>
 		<maven.compiler.target>1.7</maven.compiler.target>
 
-		<c8y.version>5.11.0</c8y.version>
 		<slf4j.version>1.7.0</slf4j.version>
 		<spring.version>3.2.6.RELEASE</spring.version>
 
@@ -27,11 +63,9 @@
 	<modules>
 		<module>hello-agent</module>
 		<module>kontron-shock-agent</module>
-		<module>linux-agent</module>
+		<module>java-agent</module>
 		<module>tracker-agent</module>
 		<module>tracker-agent-rpm</module>
-		<module>tixi-agent</module>
-		<module>greenbox-agent</module>
 	</modules>
 
 	<licenses>
@@ -174,16 +208,4 @@
 			</plugins>
 		</pluginManagement>
 	</build>
-
-	<distributionManagement>
-		<snapshotRepository>
-			<id>snapshot</id>
-			<url>http://localhost:8080/nexus/content/repositories/snapshots/</url>
-		</snapshotRepository>
-		<repository>
-			<id>release</id>
-			<url>http://localhost:8080/nexus/content/repositories/releases/</url>
-		</repository>
-	</distributionManagement>
-
 </project>

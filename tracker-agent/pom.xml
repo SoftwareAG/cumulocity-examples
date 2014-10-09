@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>c8y.example</groupId>
 		<artifactId>c8y-examples</artifactId>
-		<version>5.11.0</version>
+		<version>5.13.0-SNAPSHOT</version>
 	</parent>
 	<groupId>c8y</groupId>
 	<artifactId>tracker-agent</artifactId>
@@ -14,7 +14,7 @@
 	<properties>
 		<maven.compiler.source>1.6</maven.compiler.source>
 		<maven.compiler.target>1.6</maven.compiler.target>
-		<rpm.etc.dir>/home/achestnov/Apps/trackerAgent</rpm.etc.dir> <!-- TODO move to common parent pom for tracker-agent when created to avoid 
+		<rpm.etc.dir>/etc/tracker-agent</rpm.etc.dir> <!-- TODO move to common parent pom for tracker-agent when created to avoid 
 			duplication here and in tracker-agent-package -->
 	</properties>
 	<dependencies>
