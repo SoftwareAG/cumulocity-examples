@@ -30,7 +30,6 @@
 			</activation>
 			<id>production</id>
 			<properties>
-				<!-- TODO switch to RELEASE version after release -->
 				<!-- current RELEASE version of c8y-client -->
 				<c8y.version>5.13.0</c8y.version>				
 			</properties>

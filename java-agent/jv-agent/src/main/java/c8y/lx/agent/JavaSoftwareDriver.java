@@ -29,6 +29,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Map.Entry;
 
 import org.slf4j.Logger;
@@ -47,13 +49,14 @@ import com.cumulocity.sdk.client.Platform;
 
 /**
  * A software manager that permits remote update of the agent software and
- * drivers from the platform. Works with the jar files installed in the current
+ * drivers from the platform. Works with the jar files installed in the "lib"
  * directory. After a successful update, the driver terminates the agent process
  * and finishes the update at next startup of the agent (through a wrapper script).
  */
 public class JavaSoftwareDriver implements Driver, OperationExecutor {
 
 	private static final String DOWNLOADING = ".download";
+	private static final String SOFTWARE_PATH = "./lib/";
 	private static Logger logger = LoggerFactory.getLogger(JavaSoftwareDriver.class);
 
 	private Software software = new Software();
@@ -62,7 +65,7 @@ public class JavaSoftwareDriver implements Driver, OperationExecutor {
 	
     @Override
     public void initialize() throws Exception {
-        new File("./lib").listFiles(new FilenameFilter() {
+        new File(SOFTWARE_PATH).listFiles(new FilenameFilter() {
             @Override
             public boolean accept(File dir, String file) {
                 if (file.matches(".*[.]jar$")) {
@@ -127,17 +130,21 @@ public class JavaSoftwareDriver implements Driver, OperationExecutor {
 
 		OperationStatus status = OperationStatus.SUCCESSFUL;
 
-		if (shouldBeInstalled.size() != software.size()) {
-			status = OperationStatus.FAILED;
-		} else {
-			for (Entry<String, String> pkg : software.entrySet()) {
-				String isInstalledFile = pkg.getValue();
-				String shouldBeInstalledFile = shouldBeInstalled.get(pkg
-						.getKey());
-				if (!equals(shouldBeInstalledFile, isInstalledFile)) {
-					logger.warn("Software {} was not installed", shouldBeInstalledFile);
+		for (Entry<String, String> shouldBeInstalledEntry : shouldBeInstalled.entrySet()) {
+			try {
+				URL url = new URL(shouldBeInstalledEntry.getValue());
+				String shouldBeInstalledFileName = Paths.get(url.getPath()).getFileName().toString();
+				String installed = software.get(shouldBeInstalledEntry.getKey());
+				
+				if(installed==null||!installed.equals(shouldBeInstalledFileName)){	
 					status = OperationStatus.FAILED;
-					break;
+					logger.warn("Installation of {} failed. URL: {} .", shouldBeInstalledEntry.getKey(), shouldBeInstalledEntry.getValue());
+				}
+			} catch (MalformedURLException e) {
+				String installed = software.get(shouldBeInstalledEntry.getClass());
+				if(installed!=null) {
+					status = OperationStatus.FAILED;
+					logger.warn("{} was not removed.", shouldBeInstalledEntry.getKey(), shouldBeInstalledEntry.getValue());
 				}
 			}
 		}
@@ -150,6 +157,7 @@ public class JavaSoftwareDriver implements Driver, OperationExecutor {
 		Software toBeInstalled = (Software) operation.get(Software.class)
 				.clone();
 		Software toBeRemoved = new Software();
+		Software toBeReplaced = new Software();
 
 		for (Entry<String, String> currentPkg : software.entrySet()) {
 			String software = currentPkg.getKey();
@@ -163,9 +171,10 @@ public class JavaSoftwareDriver implements Driver, OperationExecutor {
 			}
 		}
 
-		download(toBeInstalled);
+		download(toBeInstalled, toBeReplaced);
 		rename(toBeInstalled);
 		remove(toBeRemoved);
+		remove(toBeReplaced);
 		System.exit(0); // Delete files and restart process through watcher
 
 	}
@@ -178,26 +187,47 @@ public class JavaSoftwareDriver implements Driver, OperationExecutor {
 		}
 	}
 
-	private void download(Software toBeInstalled) throws MalformedURLException {
-		for (String pkg : toBeInstalled.values()) {
-			logger.debug("Downloading " + pkg);
-			URL url = new URL(pkg);
-			String file = url.getFile() + DOWNLOADING;
+	private void download(Software toBeInstalled, Software toBeReplaced) {
+		ArrayList<String> downloadFails = new ArrayList<String>();
+		for (Entry<String, String> toBeInstalledEntry : toBeInstalled.entrySet()) {
+			logger.debug("Downloading " + toBeInstalledEntry);
+			
+			URL url=null;
+			try {
+				url = new URL(toBeInstalledEntry.getValue());
+			} catch (MalformedURLException x) {
+				//if malformed url log it, remove it from the list of packages to be installed and continue with next entry
+				logger.warn("Malformed URL: " + toBeInstalledEntry.getValue());
+				downloadFails.add(toBeInstalledEntry.getKey());
+				continue;
+			}
+			String fileName = Paths.get(url.getPath()).getFileName().toString();
+			String filePath = SOFTWARE_PATH + fileName + DOWNLOADING;
+				
 			try (InputStream os = url.openStream();
 					ReadableByteChannel rbc = Channels.newChannel(os);
-					FileOutputStream fos = new FileOutputStream(file);) {
+					FileOutputStream fos = new FileOutputStream(filePath);) {
 				fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+					
+				// If everything went well, replace other versions of the software if they exist.
+				String toBeReplacedValue = software.get(toBeInstalledEntry.getKey()); 
+				if(toBeReplacedValue!=null)
+					toBeReplaced.put(toBeInstalledEntry.getKey(), toBeReplacedValue);
 			} catch (IOException iox) {
-				logger.warn("Failed downloading " + pkg);
+				logger.warn("Failed downloading " + toBeInstalledEntry.getValue());
+				downloadFails.add(toBeInstalledEntry.getKey());
 			}
 		}
+		for(String failed:downloadFails)
+			toBeInstalled.remove(failed);
 	}
 
-	private void rename(Software toBeInstalled) throws MalformedURLException {
+	private void rename(Software toBeInstalled) throws MalformedURLException{
 		for (String pkg : toBeInstalled.values()) {
 			URL url = new URL(pkg);
-			File downloaded = new File(url.getFile() + DOWNLOADING);
-			File target = new File(url.getFile());
+			String fileName = Paths.get(url.getPath()).getFileName().toString();
+			File downloaded = new File(SOFTWARE_PATH + fileName + DOWNLOADING);
+			File target = new File(SOFTWARE_PATH + fileName);
 			downloaded.renameTo(target);
 		}
 	}
@@ -205,7 +235,7 @@ public class JavaSoftwareDriver implements Driver, OperationExecutor {
 	private void remove(Software toBeRemoved) {
 		for (String pkg : toBeRemoved.values()) {
 			logger.debug("Removing " + pkg);
-			new File(pkg).deleteOnExit();
+			new File(SOFTWARE_PATH + pkg).deleteOnExit();
 		}
 	}
 }
