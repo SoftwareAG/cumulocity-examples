@@ -57,7 +57,7 @@ public class SegmentDisplay4x7 implements Driver, Configurable{
 	private Platform platform;
 	private String id;
 	private short actualBrightness;
-	private Message msg = new Message();
+	private Message msg;
 	
 	public SegmentDisplay4x7(String id, BrickletSegmentDisplay4x7 display) {
 		actualBrightness=DEFAULT_BRIGHTNESS;
@@ -74,7 +74,7 @@ public class SegmentDisplay4x7 implements Driver, Configurable{
 	public void configurationChanged(Properties props) {
 		actualBrightness=Short.parseShort(props.getProperty(TFIds.getPropertyName(TYPE)+BRIGHTNESS_PROP, Short.toString(DEFAULT_BRIGHTNESS)));
 		if(msg!=null&&msg.getText()!=null)
-			submitText(msg.getText());
+			updateText();
 	}
 	
 	@Override
@@ -115,15 +115,32 @@ public class SegmentDisplay4x7 implements Driver, Configurable{
 			DeviceManagedObject dmo = new DeviceManagedObject(platform);
 			dmo.createOrUpdate(displayMo, TFIds.getXtId(id), parent.getId());
 		} catch (SDKException e) {
-			logger.warn("Cannot create remote switch object", e);
+			logger.warn("Cannot create or update MO", e);
 		}
 	}
 
 	@Override
 	public void start() {
+		/*
+		 * The state is updated.
+		 * If there is no state in the inventory, it's initialized first.
+		 */
 		msg = displayMo.get(Message.class);
-		if(msg!=null)
-			submitText(msg.getText());
+		if(msg==null){
+			msg = new Message();
+			msg.setText("");
+			displayMo.set(msg);
+			try {
+				//Needed in order to reduce overhead
+				ManagedObjectRepresentation updateMo = new ManagedObjectRepresentation();
+				updateMo.setId(displayMo.getId());
+				updateMo.set(msg);
+				platform.getInventoryApi().update(updateMo);
+			} catch(SDKException e) {
+				logger.warn("Couldn't update device state on the platform", e);
+			}
+		}
+		updateText();
 	}
 	
 	class MessageOperationExecutor implements OperationExecutor{
@@ -145,16 +162,24 @@ public class SegmentDisplay4x7 implements Driver, Configurable{
 				operation.setStatus(OperationStatus.FAILED.toString());
 			
 			msg = operation.get(Message.class);
-			submitText(msg.getText());
+			updateText();
+			
+			/*
+			 * State is persisted after each change.
+			 */
 			displayMo.set(msg);
-			platform.getInventoryApi().update(displayMo);
+			//Needed in order to reduce overhead
+			ManagedObjectRepresentation updateMo = new ManagedObjectRepresentation();
+			updateMo.setId(displayMo.getId());
+			updateMo.set(msg);
+			platform.getInventoryApi().update(updateMo);
 			
 			operation.setStatus(OperationStatus.SUCCESSFUL.toString());
 		}
 		
 	} 
 	
-	private void submitText(String text) {
+	private void updateText() {
 		
 		final short SYMBOL_0 = 0b00111111; 
 		final short SYMBOL_1 = 0b00000110; 
@@ -175,7 +200,7 @@ public class SegmentDisplay4x7 implements Driver, Configurable{
 		final short SYMBOL_UNKNOWN = 0b01000000;
 		final short SYMBOL_EMPTY = 0b00000000;
 		
-		char msgArray[] = text.toCharArray();
+		char msgArray[] = msg.getText().toCharArray();
 		short segments[] = new short[] {SYMBOL_EMPTY, SYMBOL_EMPTY, SYMBOL_EMPTY, SYMBOL_EMPTY};
 		for(int i=0;i<msgArray.length&&i<segments.length;i++){
 			switch(msgArray[i]){

@@ -130,8 +130,8 @@ public class GpsBricklet extends PollingDriver {
 			try {
 				ManagedObjectRepresentation mo = new ManagedObjectRepresentation();
 				mo.set(position);
-				getPlatform().getInventoryApi().getManagedObject(gpsMo.getId())
-						.update(mo);
+				mo.setId(gpsMo.getId());
+				getPlatform().getInventoryApi().update(mo);
 
 				locationUpdate.setTime(new Date());
 				locationUpdate.set(position);

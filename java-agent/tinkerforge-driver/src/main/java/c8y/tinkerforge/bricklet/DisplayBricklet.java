@@ -61,7 +61,8 @@ public class DisplayBricklet implements Driver {
 	private ManagedObjectRepresentation displayMo = new ManagedObjectRepresentation();
 	private EventRepresentation buttonEvent = new EventRepresentation();
 	private String id;
-	private Message msg=new Message();
+	private Message msg = new Message();
+	private Relay backLight = new Relay();
 	private BrickletLCD20x4 display;
 
 	public DisplayBricklet(String id, BrickletLCD20x4 display) {
@@ -112,14 +113,6 @@ public class DisplayBricklet implements Driver {
 
 	@Override
 	public void start() {
-		try {
-			msg=displayMo.get(Message.class);
-			if(msg!=null&&msg.getText()!=null)
-				submitText(msg.getText());
-		} catch (TimeoutException | NotConnectedException x) {
-			logger.warn("Error initializing display msg.", x);
-		}
-		
 		display.addButtonPressedListener(new ButtonPressedListener() {
 			@Override
 			public void buttonPressed(short button) {
@@ -132,6 +125,43 @@ public class DisplayBricklet implements Driver {
 				}
 			}
 		});
+		
+		/*
+		 * The state is updated.
+		 * If there is no state in the inventory, it's initialized first.
+		 */
+		msg=displayMo.get(Message.class);
+		if(msg==null){
+			msg=new Message();
+			msg.setText("");
+			displayMo.set(msg);
+			try{
+				//Needed to avoid updating all fields and reduce overhead
+				ManagedObjectRepresentation updateMo = new ManagedObjectRepresentation();
+				updateMo.setId(displayMo.getId());
+				updateMo.set(msg);
+				platform.getInventoryApi().update(updateMo);
+			} catch (SDKException e){
+				logger.warn("Cannot create or update MO", e);
+			}
+		}
+		updateMsg();
+		backLight=displayMo.get(Relay.class);
+		if(backLight==null){
+			backLight=new Relay();
+			backLight.setRelayState(RelayState.OPEN);
+			displayMo.set(backLight);
+			try{
+				//Needed to avoid updating all fields and reduce overhead
+				ManagedObjectRepresentation updateMo = new ManagedObjectRepresentation();
+				updateMo.setId(displayMo.getId());
+				updateMo.set(backLight);
+				platform.getInventoryApi().update(updateMo);
+			} catch (SDKException e){
+				logger.warn("Couldn't update device state on the platform", e);
+			}
+		}
+		updateBackLight();
 	}
 
 	@Override
@@ -158,9 +188,18 @@ public class DisplayBricklet implements Driver {
 			}
 
 			msg = operation.get(Message.class);
-			submitText(msg.getText());
+			updateMsg();
+			
+			/*
+			 * State is persisted after each change.
+			 * To avoid overhead a clean MO is used.
+			 */
 			displayMo.set(msg);
-			platform.getInventoryApi().update(displayMo);
+			//Needed to avoid updating all fields and reduce overhead
+			ManagedObjectRepresentation updateMo = new ManagedObjectRepresentation();
+			updateMo.setId(displayMo.getId());
+			updateMo.set(msg);
+			platform.getInventoryApi().update(updateMo);
 
 			operation.setStatus(OperationStatus.SUCCESSFUL.toString());
 		}
@@ -184,27 +223,45 @@ public class DisplayBricklet implements Driver {
 				operation.setStatus(OperationStatus.FAILED.toString());
 			}
 
-			RelayState state = operation.get(Relay.class).getRelayState();
-			if (state == RelayState.CLOSED) {
-				display.backlightOn();
-			} else {
-				display.backlightOff();
-			}
+			backLight = operation.get(Relay.class);
+			updateBackLight();
+			
+			/*
+			 * State is persisted after each change.
+			 * To avoid overhead a clean MO is used.
+			 */
+			displayMo.set(backLight);
+			ManagedObjectRepresentation updateMo = new ManagedObjectRepresentation();
+			updateMo.setId(displayMo.getId());
+			updateMo.set(backLight);
+			platform.getInventoryApi().update(updateMo);
 
 			operation.setStatus(OperationStatus.SUCCESSFUL.toString());
 		}
 	}
+	
+	private void updateBackLight(){
+		try {
+			if(RelayState.OPEN.equals(backLight.getRelayState()))
+				display.backlightOff();
+			else display.backlightOn();
+		} catch (TimeoutException | NotConnectedException e){
+			logger.warn("Couldn't update backlight state", e);
+		}
+	}
 
-	private void submitText(String text) throws TimeoutException,
-			NotConnectedException {
+	private void updateMsg(){
+		String text = msg.getText();
 		int length = text.length();
-
-		display.clearDisplay();
-		display.backlightOn();
-		for (short idx = 0, start = 0; idx < LINES && start < length; idx++, start += WIDTH) {
-			String line = text
-					.substring(start, Math.min(length, start + WIDTH));
-			display.writeLine(idx, (short) 0, line);
+		try {
+			display.clearDisplay();
+			for (short idx = 0, start = 0; idx < LINES && start < length; idx++, start += WIDTH) {
+				String line = text
+						.substring(start, Math.min(length, start + WIDTH));
+				display.writeLine(idx, (short) 0, line);
+			}
+		} catch (TimeoutException | NotConnectedException e){
+			logger.warn("Couldn't update message", e);
 		}
 	}
 }

@@ -20,6 +20,8 @@
 package c8y.tinkerforge.bricklet;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Properties;
 import java.util.Set;
 
@@ -36,7 +38,6 @@ import com.tinkerforge.NotConnectedException;
 import com.tinkerforge.TimeoutException;
 
 import c8y.RelayArray;
-import c8y.Relay.RelayState;
 import c8y.lx.driver.Configurable;
 import c8y.lx.driver.DeviceManagedObject;
 import c8y.lx.driver.Driver;
@@ -69,6 +70,7 @@ public class RemoteSwitchBricklet implements Driver, Configurable {
 	
 	private ArrayList<RemoteDevice> devices = new ArrayList<RemoteDevice>();
 	private ArrayList<RemoteDevice> exampleDevices = new ArrayList<RemoteDevice>();
+	private RelayArray state;
 	
 	public RemoteSwitchBricklet(String id, BrickletRemoteSwitch remoteSwitch) {
 		this.id=id;
@@ -111,12 +113,13 @@ public class RemoteSwitchBricklet implements Driver, Configurable {
 		Set<String> keys = props.stringPropertyNames();
 		ArrayList<String> deviceNames = new ArrayList<String>();
 		for(String key:keys){
-			String keyArray[] = key.split(".");
-			if(TYPE.equalsIgnoreCase(keyArray[1]))
+			String keyArray[] = key.split("\\.");
+			if(keyArray.length==4&&"c8y".equalsIgnoreCase(keyArray[0])&&TYPE.equalsIgnoreCase(keyArray[1]))
 				if(!deviceNames.contains(keyArray[2]))
 					deviceNames.add(keyArray[2]);
 		}
 		
+		state = new RelayArray();
 		for(String deviceName:deviceNames){
 			try {
 				switch(props.getProperty(TFIds.getPropertyName(TYPE)+"."+deviceName+TYPE_PROP)){
@@ -141,11 +144,22 @@ public class RemoteSwitchBricklet implements Driver, Configurable {
 					default:
 						logger.warn("Unknown type for device {}", deviceName);
 				}
+				state.add("OPEN");
 			} catch (NumberFormatException x) {
 				logger.warn("Error reading device configuration for device "+deviceName, x);
 			}
+			//TODO: At first startup will this correctly set the state fragment? Test. 
+			remoteSwitchMo.set(state);
+			if(remoteSwitchMo.getId()!=null)
+				persistState();
 		}
-		
+		Collections.sort(devices, new Comparator<RemoteDevice>() {
+
+			@Override
+			public int compare(RemoteDevice o1, RemoteDevice o2) {
+				return o1.name.compareTo(o2.name);
+			}
+		});
 	}
 
 	@Override
@@ -189,7 +203,23 @@ public class RemoteSwitchBricklet implements Driver, Configurable {
 
 	@Override
 	public void start() {
-		// Nothing to be done here.
+		/*
+		 * The state is updated.
+		 * If there is no state in the inventory, it's initialized first.
+		 * TODO: Maybe doing double the work here and configurationChanged. Investigate.
+		 */
+		state = remoteSwitchMo.get(RelayArray.class);
+		if(state == null){
+			state = new RelayArray();
+			for(RemoteDevice d:devices)
+				state.add("OPEN");
+			remoteSwitchMo.set(state);
+		}
+		try {
+			switchDevices();
+		} catch (NotConnectedException | TimeoutException x) {
+			logger.warn("State initialization failed.");
+		}
 	}
 
 	class RelayArrayOperationExecutor implements OperationExecutor {
@@ -209,15 +239,33 @@ public class RemoteSwitchBricklet implements Driver, Configurable {
 			}
 			if (cleanup)
 				operation.setStatus(OperationStatus.FAILED.toString());
-			// TODO: Fix this hack
-			ArrayList<String> relayArray = (ArrayList)operation.get(RelayArray.class);
-			for(int i=0;i<devices.size()&&i<relayArray.size();i++){
-				devices.get(i).switchDevice( (short)(RelayState.CLOSED.toString().equals(relayArray.get(i)) ? 1 : 0) );
-			}
+			
+			state = operation.get(RelayArray.class);
+			switchDevices();
+			persistState();
+			
 			operation.setStatus(OperationStatus.SUCCESSFUL.toString());
 		}
 		
 		
+	}
+	
+	private void switchDevices() throws TimeoutException, NotConnectedException{
+		for(int i=0;i<devices.size()&&i<state.size();i++){
+			devices.get(i).switchDevice( (short)("CLOSED".equals(state.get(i)) ? 1 : 0) );
+		}
+	}
+	
+	void persistState(){
+		try {
+			//Needed in order to reduce overhead
+			ManagedObjectRepresentation updateMo = new ManagedObjectRepresentation();
+			updateMo.setId(remoteSwitchMo.getId());
+			updateMo.set(state);
+			platform.getInventoryApi().update(updateMo);
+		} catch(SDKException e) {
+			logger.warn("Couldn't persist device state on the platform", e);
+		}
 	}
 	
 	abstract class RemoteDevice {
@@ -256,7 +304,7 @@ public class RemoteSwitchBricklet implements Driver, Configurable {
 		}
 		@Override
 		public void switchDevice(short switchTo) throws TimeoutException, NotConnectedException {
-			remoteSwitch.switchSocketB(switchTo, switchTo, switchTo);
+			remoteSwitch.switchSocketB(address, unit, switchTo);
 		}
 		@Override
 		public void dimDevice(short dimValue) throws TimeoutException, NotConnectedException {

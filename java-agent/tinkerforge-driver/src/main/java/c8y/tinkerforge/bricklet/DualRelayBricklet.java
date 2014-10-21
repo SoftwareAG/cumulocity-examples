@@ -20,8 +20,6 @@
 
 package c8y.tinkerforge.bricklet;
 
-import java.util.ArrayList;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,8 +32,6 @@ import com.tinkerforge.BrickletDualRelay;
 import com.tinkerforge.NotConnectedException;
 import com.tinkerforge.TimeoutException;
 
-import c8y.Relay;
-import c8y.Relay.RelayState;
 import c8y.RelayArray;
 import c8y.lx.driver.DeviceManagedObject;
 import c8y.lx.driver.Driver;
@@ -55,7 +51,7 @@ public class DualRelayBricklet implements Driver {
 	private ManagedObjectRepresentation dualRelayMo = 
 			new ManagedObjectRepresentation();
 	private Platform platform;
-	
+	private RelayArray relayState = new RelayArray();
 
 	public DualRelayBricklet(String uid, BrickletDualRelay brickletDualRelay) {
 		this.id=uid;
@@ -74,7 +70,7 @@ public class DualRelayBricklet implements Driver {
 
 	@Override
 	public OperationExecutor[] getSupportedOperations() {
-		return new OperationExecutor[] {new SetStateOperationExecutor(), new SetState1OperationExecutor()};
+		return new OperationExecutor[] {new SetStateOperationExecutor()};
 	}
 
 	@Override
@@ -100,14 +96,32 @@ public class DualRelayBricklet implements Driver {
 			DeviceManagedObject dmo = new DeviceManagedObject(platform);
 			dmo.createOrUpdate(dualRelayMo, TFIds.getXtId(id), parent.getId());
 		} catch (SDKException e) {
-			logger.warn("Cannot create remote switch object", e);
+			logger.warn("Cannot create or update MO", e);
 		}
-		
 	}
 
 	@Override
 	public void start() {
-		// Nothing to be done here.
+		/*
+		 * The state is updated.
+		 * If there is no state in the inventory, it's initialized first.
+		 */
+		relayState=dualRelayMo.get(RelayArray.class);
+		if(relayState==null){
+			relayState=new RelayArray();
+			relayState.add("OPEN");
+			relayState.add("OPEN");
+			try {
+				//Needed to avoid updating all fields and reduce overhead
+				ManagedObjectRepresentation updateMo = new ManagedObjectRepresentation();
+				updateMo.setId(dualRelayMo.getId());
+				updateMo.set(relayState);
+				platform.getInventoryApi().update(updateMo);
+			} catch(SDKException e) {
+				logger.warn("Couldn't update device state on the platform", e);
+			}
+		}	
+		updateState();
 	}
 	
 	class SetStateOperationExecutor implements OperationExecutor{
@@ -128,41 +142,33 @@ public class DualRelayBricklet implements Driver {
 			if (cleanup)
 				operation.setStatus(OperationStatus.FAILED.toString());
 			
-			// TODO: Fix this hack
-			ArrayList<String> relayArray = (ArrayList)operation.get(RelayArray.class);
+			relayState=operation.get(RelayArray.class);
+			while(relayState.size()>2)
+				relayState.remove(relayState.size()-1);
+			updateState();
 			
-			dualRelay.setState(RelayState.CLOSED.toString().equals(relayArray.get(0)), 
-					RelayState.CLOSED.toString().equals(relayArray.get(1)));
+			/*
+			 * State is persisted after each change.
+			 */
+			dualRelayMo.set(relayState);
+			//Needed in order to reduce overhead
+			ManagedObjectRepresentation updateMo = new ManagedObjectRepresentation();
+			updateMo.setId(dualRelayMo.getId());
+			updateMo.set(relayState);
+			platform.getInventoryApi().update(updateMo);
 			
 			operation.setStatus(OperationStatus.SUCCESSFUL.toString());
 		}
 		
 	}
 	
-	class SetState1OperationExecutor implements OperationExecutor{
-
-		@Override
-		public String supportedOperationType() {
-			return "c8y_Relay";
+	private void updateState(){
+		try {
+			dualRelay.setState("CLOSED".equalsIgnoreCase(relayState.get(0)), 
+					"CLOSED".equalsIgnoreCase(relayState.get(1)));
+		} catch (TimeoutException | NotConnectedException e) {
+			logger.warn("Couldn't update state", e);
 		}
-
-		@Override
-		public void execute(OperationRepresentation operation, boolean cleanup)
-				throws Exception {
-			if (!dualRelayMo.getId().equals(operation.getDeviceId())) {
-				// Silently ignore the operation if it is not targeted to us,
-				// another driver will (hopefully) care.
-				return;
-			}
-			if (cleanup)
-				operation.setStatus(OperationStatus.FAILED.toString());
-			
-			dualRelay.setState(operation.get(Relay.class).getRelayState()==RelayState.CLOSED, 
-					dualRelay.getState().relay2);
-			
-			operation.setStatus(OperationStatus.SUCCESSFUL.toString());
-		}
-		
 	}
 
 }

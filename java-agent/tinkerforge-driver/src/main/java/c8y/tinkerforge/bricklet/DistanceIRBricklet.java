@@ -40,8 +40,8 @@ public class DistanceIRBricklet extends BaseSensorBricklet {
 	private static final String EVENT_TYPE = "c8y_EntranceEvent";
 	private static final String DISTANCE_UNIT="mm";
 	
-	private static final String SLACK_PROP = ".entranceEvent.slacktime";
-	private static final String TRESH_PROP = ".entranceEvent.treshhold";
+	private static final String SLACK_PROP = ".eventSlacktime";
+	private static final String TRESH_PROP = ".eventTreshhold";
 	
 	private static long DEFAULT_EVENT_SLACKTIME = 10000;
 	private static short DEFAULT_EVENT_TRESHHOLD = 400;

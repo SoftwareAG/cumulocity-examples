@@ -27,9 +27,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Timer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import c8y.lx.driver.Driver;
 import c8y.lx.driver.RestartableTimerTask;
 import c8y.tinkerforge.bricklet.BrickletFactory;
+
 import com.tinkerforge.IPConnection.EnumerateListener;
 
 /**
@@ -46,6 +50,8 @@ public class Discoverer implements EnumerateListener, Runnable {
 
     }
 
+    private static Logger logger = LoggerFactory.getLogger(Discoverer.class);
+    
     private final BrickletFactory factory;
 
     private final DiscoveryFinishedListener finished;
@@ -70,11 +76,14 @@ public class Discoverer implements EnumerateListener, Runnable {
                 ENUMERATION_TYPE_AVAILABLE == enumerationType) {
 			timeoutTimer.cancel();
 
-			Driver driver = factory.produceDevice(uid, deviceId);
-			if (driver != null) {
-				devices.add(driver);
+			try {
+				Driver driver = factory.produceDevice(uid, deviceId);
+				if (driver != null) {
+					devices.add(driver);
+				}
+			} catch (IllegalArgumentException e) {
+				logger.warn("Unsuported device identifier: "+ deviceId);
 			}
-
 			startTimer();
 		}
 
