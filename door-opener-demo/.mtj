@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mtjMetadata jad="DoorOpenerDemo.jad" version="1.2.2.201304111528">
+   <device group="IMP-NG EHS5 Wireless Toolkit by Cinterion" name="IMP_NG_EHS5_REMOTE1"/>
+   <signing projectSpecific="false" signProject="false">
+      <alias/>
+   </signing>
+   <configurations>
+      <configuration active="true" name="IMP_NG_EHS5_REMOTE1">
+         <device group="IMP-NG EHS5 Wireless Toolkit by Cinterion" name="IMP_NG_EHS5_REMOTE1"/>
+         <symbolSet name="IMP_NG_EHS5_REMOTE1">
+            <symbol name="CWM" value="1.0"/>
+            <symbol name="CLDC" value="1.1"/>
+            <symbol name="descriptor" value="Cinterion IMP-NG EHS5 Remote Module"/>
+            <symbol name="SATSA-CRYPTO" value="1.0"/>
+            <symbol name="version.configuration" value="CLDC-1.1"/>
+            <symbol name="apis.supported" value="CWM-1.0,JSR75-1.0,SATSA-CRYPTO-1.0,JSR280-1.0"/>
+            <symbol name="JSR280" value="1.0"/>
+            <symbol name="version.profile" value="IMP-NG"/>
+            <symbol name="JSR75" value="1.0"/>
+            <symbol name="IMP-NG" value="0.0"/>
+         </symbolSet>
+      </configuration>
+   </configurations>
+</mtjMetadata>
