@@ -1,0 +1,7 @@
+MIDlet-Version: 1.0.0
+MIDlet-Vendor: Cumulocity GmbH
+MIDlet-Jar-URL: DoorOpenerDemo.jar
+MicroEdition-Configuration: CLDC-1.1
+MIDlet-1: DoorOpenerDemo,,com.cumulocity.yawidmaja.DoorOpenerDemo
+MicroEdition-Profile: IMP-NG
+MIDlet-Name: Door Opener Demo
