@@ -7,3 +7,7 @@ cucumber.html
 dependency-reduced-pom.xml
 syntax: glob
 java-agent/jv-agent/cfg/
+door-opener-demo/.mtj.tmp
+door-opener-demo/.settings
+door-opener-demo/bin
+door-opener-demo/deployed
