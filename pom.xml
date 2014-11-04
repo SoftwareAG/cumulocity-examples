@@ -6,7 +6,7 @@
 
 	<groupId>c8y.example</groupId>
 	<artifactId>c8y-examples</artifactId>
-	<version>5.14.0</version>
+	<version>5.15.0</version>
 	<name>Cumulocity :: Examples</name>
 	<packaging>pom</packaging>
 	
@@ -15,7 +15,7 @@
 			<id>develop</id>
 			<properties>
 				<!-- current SNAPSHOT version of c8y-client -->
-				<c8y.version>5.13.1</c8y.version>				
+				<c8y.version>5.15.0</c8y.version>				
 			</properties>
 			<distributionManagement>
 				<snapshotRepository>
@@ -31,7 +31,7 @@
 			<id>production</id>
 			<properties>
 				<!-- current RELEASE version of c8y-client -->
-				<c8y.version>5.14.0</c8y.version>				
+				<c8y.version>5.15.0</c8y.version>				
 			</properties>
 			<distributionManagement>
 				<!-- TODO remove snapshotRepository after release -->
@@ -97,11 +97,6 @@
 
 	<dependencyManagement>
 		<dependencies>
-			<dependency>
-				<groupId>com.nsn.cumulocity.clients-java</groupId>
-				<artifactId>agent-framework</artifactId>
-				<version>${c8y.version}</version>
-			</dependency>
 			<dependency>
 				<groupId>com.nsn.cumulocity.clients-java</groupId>
 				<artifactId>java-client</artifactId>

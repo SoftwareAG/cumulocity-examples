@@ -6,7 +6,7 @@
     <parent>
         <groupId>c8y.example</groupId>
         <artifactId>example-packages</artifactId>
-        <version>5.14.0</version>
+        <version>5.15.0</version>
     </parent>
 
     <artifactId>com.cumulocity.examples-feature</artifactId>
