@@ -69,16 +69,11 @@ public class RemoteSwitchBricklet implements Driver, Configurable {
 	private Platform platform;
 	
 	private ArrayList<RemoteDevice> devices = new ArrayList<RemoteDevice>();
-	private ArrayList<RemoteDevice> exampleDevices = new ArrayList<RemoteDevice>();
 	private RelayArray state;
 	
 	public RemoteSwitchBricklet(String id, BrickletRemoteSwitch remoteSwitch) {
 		this.id=id;
 		this.remoteSwitch = remoteSwitch;
-		//prepare some example devices to be added as defaults
-		exampleDevices.add(new RemoteDeviceA("exampleDeviceA", (short)0b10001, (short)0b00100));
-		exampleDevices.add(new RemoteDeviceB("exampleDeviceB", 108863, (short)0b0110));
-		exampleDevices.add(new RemoteDeviceC("exampleDeviceC", 'E' , (short)0b1010));
 	}
 	
 	@Override
@@ -88,23 +83,7 @@ public class RemoteSwitchBricklet implements Driver, Configurable {
 	
 	@Override
 	public void addDefaults(Properties props) {
-		for(RemoteDevice device:exampleDevices){
-			if(device instanceof RemoteDeviceA){
-				props.setProperty(TFIds.getPropertyName(TYPE)+"."+device.name+TYPE_PROP, "A");
-				props.setProperty(TFIds.getPropertyName(TYPE)+"."+device.name+HOUSE_CODE_PROP, Short.toString(((RemoteDeviceA)device).houseCode));
-				props.setProperty(TFIds.getPropertyName(TYPE)+"."+device.name+RECEIVER_CODE_PROP, Short.toString(((RemoteDeviceA)device).receiverCode));
-			}
-			else if(device instanceof RemoteDeviceB){
-				props.setProperty(TFIds.getPropertyName(TYPE)+"."+device.name+TYPE_PROP, "B");
-				props.setProperty(TFIds.getPropertyName(TYPE)+"."+device.name+ADDRESS_PROP, Long.toString(((RemoteDeviceB)device).address));
-				props.setProperty(TFIds.getPropertyName(TYPE)+"."+device.name+UNIT_PROP, Short.toString(((RemoteDeviceB)device).unit));
-			}
-			else if(device instanceof RemoteDeviceC){
-				props.setProperty(TFIds.getPropertyName(TYPE)+"."+device.name+TYPE_PROP, "C");
-				props.setProperty(TFIds.getPropertyName(TYPE)+"."+device.name+SYSTEM_CODE_PROP, Long.toString(((RemoteDeviceC)device).systemCode));
-				props.setProperty(TFIds.getPropertyName(TYPE)+"."+device.name+DEVICE_CODE_PROP, Short.toString(((RemoteDeviceC)device).deviceCode));
-			}
-		}
+		
 	}
 
 	@Override
@@ -240,11 +219,16 @@ public class RemoteSwitchBricklet implements Driver, Configurable {
 			if (cleanup)
 				operation.setStatus(OperationStatus.FAILED.toString());
 			
-			state = operation.get(RelayArray.class);
-			switchDevices();
-			persistState();
-			
-			operation.setStatus(OperationStatus.SUCCESSFUL.toString());
+			if(remoteSwitch.getSwitchingState()==BrickletRemoteSwitch.SWITCHING_STATE_READY){
+				state = operation.get(RelayArray.class);
+				switchDevices();
+				persistState();
+				operation.setStatus(OperationStatus.SUCCESSFUL.toString());
+				
+			} else {
+				operation.setFailureReason("Bricklet is busy.");
+				operation.setStatus(OperationStatus.FAILED.toString());
+			}
 		}
 		
 		
@@ -252,7 +236,8 @@ public class RemoteSwitchBricklet implements Driver, Configurable {
 	
 	private void switchDevices() throws TimeoutException, NotConnectedException{
 		for(int i=0;i<devices.size()&&i<state.size();i++){
-			devices.get(i).switchDevice( (short)("CLOSED".equals(state.get(i)) ? 1 : 0) );
+			System.err.println("devices.get(i).switchDevice("+("CLOSED".equals(state.get(i)) ? BrickletRemoteSwitch.SWITCH_TO_ON : BrickletRemoteSwitch.SWITCH_TO_OFF)+");");
+			devices.get(i).switchDevice( ("CLOSED".equals(state.get(i)) ? BrickletRemoteSwitch.SWITCH_TO_ON : BrickletRemoteSwitch.SWITCH_TO_OFF) );
 		}
 	}
 	

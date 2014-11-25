@@ -189,7 +189,7 @@ public class PiFaceDriver implements Driver, OperationExecutor {
 	@Override
 	public void execute(OperationRepresentation operation, boolean cleanup) throws Exception {
 		Relay relayOp = operation.get(Relay.class);
-		GId targetGId = operation.getId();
+		GId targetGId = operation.getDeviceId();
 
 		for (int idx = 0; idx < NUMLEDS; idx++) {
 			if (ledMos[idx].getId().equals(targetGId)) {
