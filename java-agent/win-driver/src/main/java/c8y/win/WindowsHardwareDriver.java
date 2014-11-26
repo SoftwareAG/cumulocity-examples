@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +36,7 @@ import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.Platform;
 
+import c8y.Command;
 import c8y.Hardware;
 import c8y.lx.driver.Driver;
 import c8y.lx.driver.HardwareProvider;
@@ -54,6 +56,7 @@ public class WindowsHardwareDriver implements Driver, OperationExecutor, Hardwar
 	private static Logger logger = LoggerFactory.getLogger(WindowsHardwareDriver.class);
 	private GId gid;
 	private final Hardware hardware = new Hardware(UNKNOWN, UNKNOWN, UNKNOWN);
+	private Platform platform;
 	
 	@Override
 	public Hardware getHardware() {
@@ -113,18 +116,61 @@ public class WindowsHardwareDriver implements Driver, OperationExecutor, Hardwar
 	
 	@Override
 	public void initialize(Platform platform) throws Exception {
-		// Nothing to be done.	
+		this.platform = platform;
 	}
 	
 	@Override
 	public OperationExecutor[] getSupportedOperations() {
-		return new OperationExecutor[]{ this };
+		return new OperationExecutor[]{ this, new WindowsCommandOperationExecutor() };
+	}
+	
+	class WindowsCommandOperationExecutor implements OperationExecutor {
+
+		@Override
+		public String supportedOperationType() {
+			return "c8y_Command";
+		}
+
+		@Override
+		public void execute(OperationRepresentation operation, boolean cleanup)
+				throws Exception {
+			if (!gid.equals(operation.getDeviceId())) {
+				// Silently ignore the operation if it is not targeted to us,
+				// another driver will (hopefully) care.
+				return;
+			}
+			if (cleanup) {
+				operation.setStatus(OperationStatus.FAILED.toString());
+			} else {
+				Command cmd = operation.get(Command.class);
+				ProcessBuilder builder = new ProcessBuilder(cmd.getText().split(" "));
+				builder.redirectErrorStream(true);
+				String result = "";
+				Process p = builder.start();
+				p.waitFor(10, TimeUnit.SECONDS);
+				
+				//Read the command's result.
+				BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
+				String line = input.readLine();
+				while(line!=null) {
+					result+="\n"+line;
+					line=input.readLine();
+				}
+				input.close();
+				
+				cmd.setResult(result);
+				operation.set(cmd);
+				operation.setStatus(OperationStatus.SUCCESSFUL.toString());
+			}
+		}
+		
 	}
 	
 	@Override
 	public void initializeInventory(ManagedObjectRepresentation mo) {
 		mo.set(hardware);
-		OpsUtil.addSupportedOperation(mo, supportedOperationType());
+		for(OperationExecutor o : getSupportedOperations())
+			OpsUtil.addSupportedOperation(mo, o.supportedOperationType());
 	}
 	
 	@Override
