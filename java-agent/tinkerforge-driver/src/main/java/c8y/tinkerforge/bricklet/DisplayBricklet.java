@@ -25,6 +25,7 @@ import java.util.Date;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import c8y.Hardware;
 import c8y.Message;
 import c8y.Relay;
 import c8y.Relay.RelayState;
@@ -32,7 +33,6 @@ import c8y.lx.driver.DeviceManagedObject;
 import c8y.lx.driver.Driver;
 import c8y.lx.driver.OperationExecutor;
 import c8y.lx.driver.OpsUtil;
-
 import c8y.tinkerforge.TFIds;
 
 import com.cumulocity.model.operation.OperationStatus;
@@ -102,7 +102,7 @@ public class DisplayBricklet implements Driver {
 
 		try {
 			DeviceManagedObject dmo = new DeviceManagedObject(platform);
-			dmo.createOrUpdate(displayMo, TFIds.getXtId(id), parent.getId());
+			dmo.createOrUpdate(displayMo, TFIds.getXtId(id, parent.get(Hardware.class).getSerialNumber()), parent.getId());
 
 			buttonEvent.setSource(displayMo);
 			buttonEvent.setType("c8y_ButtonPressedEvent");

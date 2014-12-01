@@ -38,6 +38,7 @@ import com.tinkerforge.BrickletIO16.PortConfiguration;
 import com.tinkerforge.NotConnectedException;
 import com.tinkerforge.TimeoutException;
 
+import c8y.Hardware;
 import c8y.RelayArray;
 import c8y.lx.driver.Configurable;
 import c8y.lx.driver.DeviceManagedObject;
@@ -181,7 +182,7 @@ public class IO16Bricklet implements Driver, Configurable {
 		
 		try {
 			DeviceManagedObject dmo = new DeviceManagedObject(platform);
-			dmo.createOrUpdate(io16Mo, TFIds.getXtId(id), parent.getId());
+			dmo.createOrUpdate(io16Mo, TFIds.getXtId(id, parent.get(Hardware.class).getSerialNumber()), parent.getId());
 		} catch (SDKException e) {
 			logger.warn("Cannot create or update MO", e);
 		}
