@@ -40,6 +40,7 @@ import c8y.lx.driver.DeviceManagedObject;
 import c8y.lx.driver.Driver;
 import c8y.lx.driver.OperationExecutor;
 import c8y.lx.driver.OpsUtil;
+import c8y.tinkerforge.TFDriver;
 import c8y.tinkerforge.TFIds;
 
 public class SegmentDisplay4x7 implements Driver, Configurable{
@@ -113,7 +114,7 @@ public class SegmentDisplay4x7 implements Driver, Configurable{
 		
 		try {
 			DeviceManagedObject dmo = new DeviceManagedObject(platform);
-			dmo.createOrUpdate(displayMo, TFIds.getXtId(id, parent.getId().toString()), parent.getId());
+			dmo.createOrUpdate(displayMo, TFIds.getXtId(id, TFDriver.parentExternalID), parent.getId());
 		} catch (SDKException e) {
 			logger.warn("Cannot create or update MO", e);
 		}

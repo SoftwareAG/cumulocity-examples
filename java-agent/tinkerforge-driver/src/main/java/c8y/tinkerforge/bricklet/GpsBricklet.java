@@ -30,8 +30,9 @@ import c8y.Position;
 import c8y.lx.driver.DeviceManagedObject;
 import c8y.lx.driver.OperationExecutor;
 import c8y.lx.driver.PollingDriver;
-
+import c8y.tinkerforge.TFDriver;
 import c8y.tinkerforge.TFIds;
+
 import com.cumulocity.rest.representation.event.EventRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.SDKException;
@@ -87,7 +88,7 @@ public class GpsBricklet extends PollingDriver {
 
 		try {
 			DeviceManagedObject dmo = new DeviceManagedObject(getPlatform());
-			dmo.createOrUpdate(gpsMo, TFIds.getXtId(id, parent.getId().toString()), parent.getId());
+			dmo.createOrUpdate(gpsMo, TFIds.getXtId(id, TFDriver.parentExternalID), parent.getId());
 
 			locationUpdate.setSource(gpsMo);
 			locationUpdate.setType(LU_EVENT_TYPE);

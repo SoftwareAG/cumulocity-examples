@@ -44,6 +44,7 @@ import c8y.lx.driver.DeviceManagedObject;
 import c8y.lx.driver.Driver;
 import c8y.lx.driver.OperationExecutor;
 import c8y.lx.driver.OpsUtil;
+import c8y.tinkerforge.TFDriver;
 import c8y.tinkerforge.TFIds;
 
 public class IO16Bricklet implements Driver, Configurable {
@@ -181,7 +182,7 @@ public class IO16Bricklet implements Driver, Configurable {
 		
 		try {
 			DeviceManagedObject dmo = new DeviceManagedObject(platform);
-			dmo.createOrUpdate(io16Mo, TFIds.getXtId(id, parent.getId().toString()), parent.getId());
+			dmo.createOrUpdate(io16Mo, TFIds.getXtId(id, TFDriver.parentExternalID), parent.getId());
 		} catch (SDKException e) {
 			logger.warn("Cannot create or update MO", e);
 		}
