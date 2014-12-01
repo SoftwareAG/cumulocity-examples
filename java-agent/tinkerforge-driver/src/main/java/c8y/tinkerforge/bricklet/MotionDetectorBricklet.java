@@ -24,10 +24,10 @@ import java.util.Date;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import c8y.Hardware;
 import c8y.lx.driver.DeviceManagedObject;
 import c8y.lx.driver.Driver;
 import c8y.lx.driver.OperationExecutor;
-import c8y.tinkerforge.TFDriver;
 import c8y.tinkerforge.TFIds;
 
 import com.cumulocity.rest.representation.event.EventRepresentation;
@@ -87,7 +87,7 @@ public class MotionDetectorBricklet implements Driver{
 		
 		try{
 			DeviceManagedObject dmo = new DeviceManagedObject(platform);
-			dmo.createOrUpdate(motionSensorMo, TFIds.getXtId(id, TFDriver.parentExternalID), parent.getId());
+			dmo.createOrUpdate(motionSensorMo, TFIds.getXtId(id, parent.get(Hardware.class).getSerialNumber()), parent.getId());
 
 			eventMotion.setSource(motionSensorMo);
 			eventMotion.setType(MOTION_DETECTED_EVENT_TYPE);

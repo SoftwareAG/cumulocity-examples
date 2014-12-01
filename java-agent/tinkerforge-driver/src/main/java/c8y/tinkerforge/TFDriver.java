@@ -40,11 +40,7 @@ import com.cumulocity.sdk.client.Platform;
 public class TFDriver implements Driver, DiscoveryFinishedListener, Configurable {
 
 	private Iterable<Driver> drivers;
-	private Platform platform;
 
-	//used to build the bricklet's external IDs
-	public static String parentExternalID = "null"; 
-	
 	@Override
 	public void addDefaults(Properties props) {
 		for (Driver driver : drivers) {
@@ -82,7 +78,6 @@ public class TFDriver implements Driver, DiscoveryFinishedListener, Configurable
 
 	@Override
 	public void initialize(Platform platform) throws Exception {
-		this.platform=platform;
 		for (Driver driver : drivers) {
 			driver.initialize(platform);
 		}
@@ -106,10 +101,9 @@ public class TFDriver implements Driver, DiscoveryFinishedListener, Configurable
 	}
 
 	@Override
-	public void discoverChildren(ManagedObjectRepresentation parent) {
-		parentExternalID = platform.getIdentityApi().getExternalId(parent.getId()).getExternalId();
+	public void discoverChildren(ManagedObjectRepresentation mo) {
 		for (Driver driver : drivers) {
-			driver.discoverChildren(parent);
+			driver.discoverChildren(mo);
 		}
 	}
 

@@ -26,11 +26,11 @@ import java.util.Date;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import c8y.Hardware;
 import c8y.Position;
 import c8y.lx.driver.DeviceManagedObject;
 import c8y.lx.driver.OperationExecutor;
 import c8y.lx.driver.PollingDriver;
-import c8y.tinkerforge.TFDriver;
 import c8y.tinkerforge.TFIds;
 
 import com.cumulocity.rest.representation.event.EventRepresentation;
@@ -88,7 +88,7 @@ public class GpsBricklet extends PollingDriver {
 
 		try {
 			DeviceManagedObject dmo = new DeviceManagedObject(getPlatform());
-			dmo.createOrUpdate(gpsMo, TFIds.getXtId(id, TFDriver.parentExternalID), parent.getId());
+			dmo.createOrUpdate(gpsMo, TFIds.getXtId(id, parent.get(Hardware.class).getSerialNumber()), parent.getId());
 
 			locationUpdate.setSource(gpsMo);
 			locationUpdate.setType(LU_EVENT_TYPE);

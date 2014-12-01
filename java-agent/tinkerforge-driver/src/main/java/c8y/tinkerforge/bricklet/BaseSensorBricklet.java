@@ -20,9 +20,9 @@
 
 package c8y.tinkerforge.bricklet;
 
+import c8y.Hardware;
 import c8y.lx.driver.DeviceManagedObject;
 import c8y.lx.driver.MeasurementPollingDriver;
-import c8y.tinkerforge.TFDriver;
 import c8y.tinkerforge.TFIds;
 
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
@@ -63,7 +63,7 @@ public abstract class BaseSensorBricklet extends MeasurementPollingDriver {
 
 		DeviceManagedObject dmo = new DeviceManagedObject(getPlatform());
 		try {
-			dmo.createOrUpdate(sensorMo, TFIds.getXtId(id, TFDriver.parentExternalID), parent.getId());
+			dmo.createOrUpdate(sensorMo, TFIds.getXtId(id, parent.get(Hardware.class).getSerialNumber()), parent.getId());
 		} catch (SDKException e) {
 			logger.warn("Cannot create sensor", e);
 		}
