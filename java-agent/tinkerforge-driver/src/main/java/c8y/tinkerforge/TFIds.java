@@ -44,8 +44,8 @@ public class TFIds {
 		return parentName + " " + type + " " + id;
 	}
 
-	public static ID getXtId(String id) {
-        ID extId = new ID("tinkerforge-" + id);
+	public static ID getXtId(String brickletId, String parentId) {
+        ID extId = new ID("tinkerforge-"+ parentId + "-" + brickletId);
         extId.setType(XTIDTYPE);
         return extId;
 	}

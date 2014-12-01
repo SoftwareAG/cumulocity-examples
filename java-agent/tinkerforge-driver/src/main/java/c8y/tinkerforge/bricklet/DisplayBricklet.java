@@ -102,7 +102,7 @@ public class DisplayBricklet implements Driver {
 
 		try {
 			DeviceManagedObject dmo = new DeviceManagedObject(platform);
-			dmo.createOrUpdate(displayMo, TFIds.getXtId(id), parent.getId());
+			dmo.createOrUpdate(displayMo, TFIds.getXtId(id, parent.getId().toString()), parent.getId());
 
 			buttonEvent.setSource(displayMo);
 			buttonEvent.setType("c8y_ButtonPressedEvent");

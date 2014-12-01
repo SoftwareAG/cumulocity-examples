@@ -173,7 +173,7 @@ public class RemoteSwitchBricklet implements Driver, Configurable {
 		
 		try {
 			DeviceManagedObject dmo = new DeviceManagedObject(platform);
-			dmo.createOrUpdate(remoteSwitchMo, TFIds.getXtId(id), parent.getId());
+			dmo.createOrUpdate(remoteSwitchMo, TFIds.getXtId(id, parent.getId().toString()), parent.getId());
 		} catch (SDKException e) {
 			logger.warn("Cannot create remote switch object", e);
 		}

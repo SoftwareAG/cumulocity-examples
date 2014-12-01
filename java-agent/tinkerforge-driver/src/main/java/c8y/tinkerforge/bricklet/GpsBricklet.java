@@ -87,7 +87,7 @@ public class GpsBricklet extends PollingDriver {
 
 		try {
 			DeviceManagedObject dmo = new DeviceManagedObject(getPlatform());
-			dmo.createOrUpdate(gpsMo, TFIds.getXtId(id), parent.getId());
+			dmo.createOrUpdate(gpsMo, TFIds.getXtId(id, parent.getId().toString()), parent.getId());
 
 			locationUpdate.setSource(gpsMo);
 			locationUpdate.setType(LU_EVENT_TYPE);

@@ -62,7 +62,7 @@ public abstract class BaseSensorBricklet extends MeasurementPollingDriver {
 
 		DeviceManagedObject dmo = new DeviceManagedObject(getPlatform());
 		try {
-			dmo.createOrUpdate(sensorMo, TFIds.getXtId(id), parent.getId());
+			dmo.createOrUpdate(sensorMo, TFIds.getXtId(id, parent.getId().toString()), parent.getId());
 		} catch (SDKException e) {
 			logger.warn("Cannot create sensor", e);
 		}

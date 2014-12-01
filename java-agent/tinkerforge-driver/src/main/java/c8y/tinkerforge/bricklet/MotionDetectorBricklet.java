@@ -86,7 +86,7 @@ public class MotionDetectorBricklet implements Driver{
 		
 		try{
 			DeviceManagedObject dmo = new DeviceManagedObject(platform);
-			dmo.createOrUpdate(motionSensorMo, TFIds.getXtId(id), parent.getId());
+			dmo.createOrUpdate(motionSensorMo, TFIds.getXtId(id, parent.getId().toString()), parent.getId());
 
 			eventMotion.setSource(motionSensorMo);
 			eventMotion.setType(MOTION_DETECTED_EVENT_TYPE);

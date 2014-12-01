@@ -181,7 +181,7 @@ public class IO16Bricklet implements Driver, Configurable {
 		
 		try {
 			DeviceManagedObject dmo = new DeviceManagedObject(platform);
-			dmo.createOrUpdate(io16Mo, TFIds.getXtId(id), parent.getId());
+			dmo.createOrUpdate(io16Mo, TFIds.getXtId(id, parent.getId().toString()), parent.getId());
 		} catch (SDKException e) {
 			logger.warn("Cannot create or update MO", e);
 		}

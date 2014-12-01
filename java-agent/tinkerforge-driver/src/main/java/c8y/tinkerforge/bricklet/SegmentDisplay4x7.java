@@ -113,7 +113,7 @@ public class SegmentDisplay4x7 implements Driver, Configurable{
 		
 		try {
 			DeviceManagedObject dmo = new DeviceManagedObject(platform);
-			dmo.createOrUpdate(displayMo, TFIds.getXtId(id), parent.getId());
+			dmo.createOrUpdate(displayMo, TFIds.getXtId(id, parent.getId().toString()), parent.getId());
 		} catch (SDKException e) {
 			logger.warn("Cannot create or update MO", e);
 		}
