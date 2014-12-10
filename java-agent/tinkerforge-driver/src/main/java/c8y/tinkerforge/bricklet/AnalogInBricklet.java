@@ -33,7 +33,7 @@ public class AnalogInBricklet extends BaseSensorBricklet {
 	private VoltageMeasurement voltage = new VoltageMeasurement();
 
 	public AnalogInBricklet(String id, Device device) {
-		super(id, device, "CurrentVoltage", new PowerSensor());
+		super(id, device, "AnalogInVoltage", new PowerSensor());
 	}
 
 	@Override
