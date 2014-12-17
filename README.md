@@ -24,10 +24,6 @@ Building with Maven
         <profile>
           <id>cumulocity</id>
           <repositories>
-	    <repository>
-              <id>cumulocity-m2-repo</id>
-              <url>http://download.cumulocity.com/maven/repository</url>
-            </repository>
             <repository>
               <id>cumulocity-sdk-repo</id>
               <layout>p2</layout>
@@ -48,4 +44,3 @@ To built `example-packages` it may also be necessary to put the current version 
   [2]: http://maven.apache.org/
   [3]: http://www.eclipse.org/tycho/
   [4]: http://www.eclipse.org/equinox/p2/
-
