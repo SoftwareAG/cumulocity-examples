@@ -32,6 +32,7 @@ import com.tinkerforge.BrickletDualRelay;
 import com.tinkerforge.NotConnectedException;
 import com.tinkerforge.TimeoutException;
 
+import c8y.Hardware;
 import c8y.RelayArray;
 import c8y.lx.driver.DeviceManagedObject;
 import c8y.lx.driver.Driver;
@@ -94,7 +95,7 @@ public class DualRelayBricklet implements Driver {
 		
 		try {
 			DeviceManagedObject dmo = new DeviceManagedObject(platform);
-			dmo.createOrUpdate(dualRelayMo, TFIds.getXtId(id), parent.getId());
+			dmo.createOrUpdate(dualRelayMo, TFIds.getXtId(id, parent.get(Hardware.class).getSerialNumber()), parent.getId());
 		} catch (SDKException e) {
 			logger.warn("Cannot create or update MO", e);
 		}

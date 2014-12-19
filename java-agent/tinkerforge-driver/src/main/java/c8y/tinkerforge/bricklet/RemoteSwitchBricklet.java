@@ -37,6 +37,7 @@ import com.tinkerforge.BrickletRemoteSwitch;
 import com.tinkerforge.NotConnectedException;
 import com.tinkerforge.TimeoutException;
 
+import c8y.Hardware;
 import c8y.RelayArray;
 import c8y.lx.driver.Configurable;
 import c8y.lx.driver.DeviceManagedObject;
@@ -173,7 +174,7 @@ public class RemoteSwitchBricklet implements Driver, Configurable {
 		
 		try {
 			DeviceManagedObject dmo = new DeviceManagedObject(platform);
-			dmo.createOrUpdate(remoteSwitchMo, TFIds.getXtId(id), parent.getId());
+			dmo.createOrUpdate(remoteSwitchMo, TFIds.getXtId(id, parent.get(Hardware.class).getSerialNumber()), parent.getId());
 		} catch (SDKException e) {
 			logger.warn("Cannot create remote switch object", e);
 		}
