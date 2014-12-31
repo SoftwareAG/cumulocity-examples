@@ -1,7 +1,5 @@
 package c8y.trackeragent.operations;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
-
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -18,8 +16,6 @@ public class OperationDispatchers {
     private static Logger logger = LoggerFactory.getLogger(OperationDispatchers.class);
 
     private static final int THREAD_POOL_SIZE = 10;
-    private static final long POLLING_DELAY = 5;
-    private static final long POLLING_INTERVAL = 5;
 
     private final TrackerContext trackerContext;
     private final TrackerAgent trackerAgent;
@@ -31,12 +27,12 @@ public class OperationDispatchers {
         this.operationsExecutor = Executors.newScheduledThreadPool(THREAD_POOL_SIZE);
     }
 
-    public void start(String imei) {
+    public void startPollerFor(String imei) {
         TrackerDevice trackerDevice = trackerAgent.getOrCreateTrackerDevice(imei);
         TrackerPlatform devicePlatform = trackerContext.getDevicePlatform(imei);
         // Could be replace by device control notifications
         OperationDispatcher task = new OperationDispatcher(devicePlatform, trackerDevice);
-        operationsExecutor.scheduleWithFixedDelay(task, POLLING_DELAY, POLLING_INTERVAL, SECONDS);
-        logger.info("Started for device {}.", imei);
+        task.startPolling(operationsExecutor);
+        logger.info("Started operation polling for device {}.", imei);
     }
 }

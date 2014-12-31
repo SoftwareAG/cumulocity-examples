@@ -19,9 +19,6 @@ public class TracelogAppenders {
         this.loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
     }
         
-    /**
-     * TODO run after device bootstrapping
-     */
     public void start(String imei) {
         TrackerPlatform devicePlatform = trackerContext.getDevicePlatform(imei);
         TracelogAppender tracelogAppender = new TracelogAppender(devicePlatform, loggerContext);
