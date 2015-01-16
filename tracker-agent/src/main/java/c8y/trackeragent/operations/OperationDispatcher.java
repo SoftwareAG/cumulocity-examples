@@ -20,6 +20,12 @@
 
 package c8y.trackeragent.operations;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
+
+import java.util.Collections;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+
 import org.slf4j.Logger;
 
 import c8y.trackeragent.ConnectionRegistry;
@@ -44,20 +50,19 @@ import com.cumulocity.sdk.client.devicecontrol.OperationFilter;
  */
 public class OperationDispatcher implements Runnable {
     
+    private static final long POLLING_DELAY = 5;
+    private static final long POLLING_INTERVAL = 5;
+    
     private final Logger logger;
     private final TrackerDevice trackerDevice;
     private TrackerPlatform platform;
+    private volatile ScheduledFuture<?> self;
 
     /**
      * @param platform
      *            The connection to the platform.
      * @param agent
      *            The ID of this agent.
-     * @param cfgDriver
-     * @param executers
-     *            A map of currently connected devices. The map is maintained by
-     *            the threads communicating with the devices, hence it needs to
-     *            be thread-safe.
      */
     public OperationDispatcher(TrackerPlatform platform, TrackerDevice trackerDevice) throws SDKException {
         this.platform = platform;
@@ -67,25 +72,18 @@ public class OperationDispatcher implements Runnable {
         finishExecutingOps();
     }
 
-    public void finish(OperationRepresentation operation) throws SDKException {
-        operation.setStatus(OperationStatus.SUCCESSFUL.toString());
-        platform.getDeviceControlApi().update(operation);
-    }
-
-    public void fail(OperationRepresentation operation, String text, SDKException x) throws SDKException {
-        operation.setStatus(OperationStatus.FAILED.toString());
-        operation.setFailureReason(text + " " + x.getMessage());
-        platform.getDeviceControlApi().update(operation);
-    }
-
     /**
      * Clean up operations that are stuck in "executing" state.
      */
     private void finishExecutingOps() throws SDKException {
         logger.debug("Cancelling hanging operations");
-        for (OperationRepresentation operation : byStatus(OperationStatus.EXECUTING)) {
-            operation.setStatus(OperationStatus.FAILED.toString());
-            platform.getDeviceControlApi().update(operation);
+        try {
+            for (OperationRepresentation operation : byStatusAndDeviceId(OperationStatus.EXECUTING)) {
+                operation.setStatus(OperationStatus.FAILED.toString());
+                platform.getDeviceControlApi().update(operation);
+            }
+        } catch (Exception e) {
+            logger.error("Error while finishing executing operations", e);
         }
     }
 
@@ -100,7 +98,7 @@ public class OperationDispatcher implements Runnable {
     }
 
     private void executePendingOps() throws SDKException {
-        for (OperationRepresentation operation : byStatus(OperationStatus.PENDING)) {
+        for (OperationRepresentation operation : byStatusAndDeviceId(OperationStatus.PENDING)) {
             GId gid = operation.getDeviceId();
 
             TrackerDevice device = ManagedObjectCache.instance().get(gid);
@@ -136,9 +134,20 @@ public class OperationDispatcher implements Runnable {
         platform.getDeviceControlApi().update(operation);
     }
 
-    private Iterable<OperationRepresentation> byStatus(OperationStatus status) throws SDKException {
+    private Iterable<OperationRepresentation> byStatusAndDeviceId(OperationStatus status) throws SDKException {
         OperationFilter opsFilter = new OperationFilter().byDevice(trackerDevice.getGId().getValue()).byStatus(status);
-        return platform.getDeviceControlApi().getOperationsByFilter(opsFilter).get().allPages();
-        //TODO unregister if device not exists?
+        Iterable<OperationRepresentation> operationsIterable = Collections.emptyList();
+        try {
+            operationsIterable = platform.getDeviceControlApi().getOperationsByFilter(opsFilter).get().allPages();
+        } catch (SDKException e) {
+            if (e.getHttpStatus() == 404 && self != null) {
+                self.cancel(false);
+            }
+        }
+        return operationsIterable;
+    }
+
+    public void startPolling(ScheduledExecutorService operationsExecutor) {
+        self = operationsExecutor.scheduleWithFixedDelay(this, POLLING_DELAY, POLLING_INTERVAL, SECONDS);
     }
 }

@@ -39,7 +39,7 @@ public class DeviceBinder implements TrackerAgentEventListener {
     }
     
     public void bind(String imei) {
-        operationDispatchers.start(imei);
+        operationDispatchers.startPollerFor(imei);
         tracelogAppenders.start(imei);
     }
 
