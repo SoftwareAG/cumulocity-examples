@@ -140,11 +140,16 @@ public class OperationDispatcher implements Runnable {
         try {
             operationsIterable = platform.getDeviceControlApi().getOperationsByFilter(opsFilter).get().allPages();
         } catch (SDKException e) {
-            if (e.getHttpStatus() == 404 && self != null) {
+            if (hasIncorrectStatus(e) && self != null) {
                 self.cancel(false);
             }
         }
         return operationsIterable;
+    }
+
+    private boolean hasIncorrectStatus(SDKException e) {
+        // 404 - someone deleted device, 401 tenant is disabled
+        return e.getHttpStatus() == 404 || e.getHttpStatus() == 401;
     }
 
     public void startPolling(ScheduledExecutorService operationsExecutor) {
