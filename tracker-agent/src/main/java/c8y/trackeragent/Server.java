@@ -86,7 +86,11 @@ public class Server implements Runnable {
         }
         trackerAgent.registerEventListener(deviceBootstrapProcessor, deviceBinder);
         for (DeviceCredentials deviceCredentials : trackerContext.getDeviceCredentials()) {
-            deviceBinder.bind(deviceCredentials.getImei());
+            try {
+                deviceBinder.bind(deviceCredentials.getImei());
+            } catch (Exception e) {
+                logger.error("Failed to initialize device: " + deviceCredentials.getImei());
+            }
         }
     }
     
