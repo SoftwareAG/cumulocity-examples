@@ -6,11 +6,11 @@ Bundle-Version: 6.0.0.qualifier
 Bundle-Activator: com.cumulocity.helloagent.Activator
 Bundle-Vendor: (C) Cumulocity GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: c8y;version="[5.0,6.0)",
- com.cumulocity.rest.representation;version="[5.0,6.0)",
- com.cumulocity.rest.representation.inventory;version="[5.0,6.0)",
- com.cumulocity.sdk.client;version="[5.0,6.0)",
- com.cumulocity.sdk.client.inventory;version="[5.0,6.0)",
+Import-Package: c8y;version="[6.0,7.0)",
+ com.cumulocity.rest.representation;version="[6.0,7.0)",
+ com.cumulocity.rest.representation.inventory;version="[6.0,7.0)",
+ com.cumulocity.sdk.client;version="[6.0,7.0)",
+ com.cumulocity.sdk.client.inventory;version="[6.0,7.0)",
  org.osgi.framework;version="[1.0,2.0)",
  org.slf4j;version="[1.7,1.8)"
 Bundle-ActivationPolicy: lazy
