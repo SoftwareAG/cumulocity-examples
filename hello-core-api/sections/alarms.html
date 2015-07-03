@@ -1,0 +1,41 @@
+<div ng-controller="SectionCtrl as section">
+  <div class="btn-group alarm-severity" role="group" aria-label="...">
+    <style>
+    .alarm-severity .btn:focus {
+      outline: none;
+    }
+    </style>
+    <button
+      ng-repeat="(severity, cls) in {'Critical': 'btn-danger', 'Major': 'btn-warning', 'Minor': 'btn-primary', 'Warning': 'btn-info'}"
+      ng-init="severityUp = severity.toUpperCase()"
+      class="btn {{cls}}"
+      ng-class="{'active': section.filter.severity === severityUp}"
+      ng-click="section.filter.severity = section.filter.severity !== severityUp ? severityUp : undefined"
+    >
+      {{severity}}
+    </button>
+  </div>
+  <!-- <form ng-submit="section.filter.text = section.textFilter">
+    <div class="input-group">
+      <input type="text" ng-model="section.textFilter" class="form-control" placeholder="Filter with device name...">
+      <span class="input-group-btn">
+        <button type="submit" class="btn btn-default" type="button">Submit</button>
+      </span>
+    </div>
+  </form> -->
+  <p class="text-warning">Page size is 10 by default. See <code>pageSize</code> filter.</p>
+  <table class="table">
+    <tr>
+      <th>ID</th>
+      <th>Type</th>
+      <th>Text</th>
+      <th>Severity</th>
+    </tr>
+    <tr c8y-repeat="a in alarms" filter="section.filter" refresh="section.refresh">
+      <td>{{a.id}}</td>
+      <td>{{a.type}}</td>
+      <td>{{a.text}}</td>
+      <td>{{a.severity}}</td>
+    </tr>
+  </table>
+</div>

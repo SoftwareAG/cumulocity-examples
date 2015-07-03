@@ -1,0 +1,25 @@
+{
+  "name": "hello-core-api",
+  "version": "6.3.0",
+  "authors": [
+    "Cumulocity GmbH"
+  ],
+  "description": "Cumulocity UI Core API examples",
+  "keywords": [
+    "cumulocity",
+    "m2m",
+    "examples",
+    "demo"
+  ],
+  "dependencies": [
+  ],
+  "license": "MIT",
+  "homepage": "http://www.cumulocity.com",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
