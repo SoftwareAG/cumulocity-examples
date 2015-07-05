@@ -11,8 +11,9 @@
     "examples",
     "demo"
   ],
-  "dependencies": [
-  ],
+  "dependencies": {
+    "bootstrap": "~3.3.5"
+  },
   "license": "MIT",
   "homepage": "http://www.cumulocity.com",
   "ignore": [
@@ -21,5 +22,7 @@
     "bower_components",
     "test",
     "tests"
-  ]
+  ],
+  "devDependencies": {    
+  }
 }
