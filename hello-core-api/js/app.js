@@ -40,6 +40,6 @@
     c8yCumulocityProvider
   ) {
     c8yCumulocityProvider.setAppKey('core-application-key');
-    c8yCumulocityProvider.setBaseUrl('https://dev-a.cumulocity.com/');
+    c8yCumulocityProvider.setBaseUrl('https://demos.cumulocity.com/');
   }
 })();
