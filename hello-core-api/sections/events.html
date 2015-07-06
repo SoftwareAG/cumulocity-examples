@@ -1,19 +1,3 @@
-<div class="row-fluid">
-    <button class="btn btn-default pull-right" ng-click="section.refresh" class="margin-bottom:2em">Refresh</button>
-</div>
-<div class="row">
-  <table class="table">
-    <tr>
-      <th>ID</th>
-      <th>Type</th>
-      <th>Text</th>
-      <th>Source</th>
-    </tr>
-    <tr c8y-repeat="e in events" filter="{pageSize: 10}" refresh="section.refresh">
-      <td>{{e.id}}</td>
-      <td>{{e.type}}</td>
-      <td>{{e.text}}</td>
-      <td>{{e.source}}</td>
-    </tr>
-  </table>
+<div>
+  <button class="btn btn-default pull-right" ng-click="main.refresh()" class="margin-bottom:2em">Refresh</button>
 </div>

@@ -20,15 +20,17 @@
     if (!$routeParams.section) {
       $location.path('/devices');
     }
-    
-    this.routeParams = $routeParams;
+
+    this.currentSection = $routeParams.section;
+    this.sections = {
+      Devices: 'devices',
+      Alarms: 'alarms',
+      Events: 'events'
+    };
+    this.filter = {};
 
     this.logout = function () {
       $location.path('/login');
-    };
-
-    this.showDevices = function () {
-      $location.path('/devices');
     };
   }
 })();

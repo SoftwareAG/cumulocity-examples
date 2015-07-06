@@ -12,7 +12,8 @@
     "demo"
   ],
   "dependencies": {
-    "bootstrap": "~3.3.5"
+    "bootstrap": "~3.3.5",
+    "cumulocity-client-javascript": "~6.3.0"
   },
   "license": "MIT",
   "homepage": "http://www.cumulocity.com",
@@ -23,6 +24,6 @@
     "test",
     "tests"
   ],
-  "devDependencies": {    
+  "devDependencies": {
   }
 }
