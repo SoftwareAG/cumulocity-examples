@@ -1,8 +1,7 @@
 (function () {
   'use strict';
   var app = angular.module('helloCoreApi', [
-    'app',
-    'c8y.core',
+    'c8y.sdk',
     'ngRoute',
     'ui.bootstrap'
   ]);
