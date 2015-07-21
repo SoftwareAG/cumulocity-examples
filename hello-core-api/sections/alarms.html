@@ -1,0 +1,14 @@
+<div ng-controller="AlarmsCtrl as alarms" class="btn-group alarm-severity" role="group" aria-label="...">
+  <style>
+  .alarm-severity .btn:focus {
+    outline: none;
+  }
+  </style>
+  <button
+    ng-repeat="severity in alarms.severities"
+    class="btn {{severity.cls}}"
+    ng-class="{'active': alarms.isActive(main.filter, severity)}"
+    ng-click="alarms.onClick(main.filter, severity)">
+    {{severity.name}}
+  </button>
+</div>
