@@ -8,3 +8,4 @@ dependency-reduced-pom.xml
 syntax: glob
 java-agent/jv-agent/cfg/
 hello-core-api/bower_components
+hello-core-api/node_modules
