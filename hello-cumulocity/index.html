@@ -1,0 +1,45 @@
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="bower_components/bootstrap/dist/css/bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="bower_components/bootstrap/dist/css/bootstrap-theme.css">
+
+    <!-- CSS files for hello-core-api example project -->
+    <link href="css/login.css" rel="stylesheet">
+    <link href="css/dashboard.css" rel="stylesheet">
+
+    <!-- c8y.sdk dependencies -->
+    <script src="bower_components/lodash/dist/lodash.js"></script>
+    <script src="bower_components/jquery/dist/jquery.js"></script>
+    <script src="bower_components/moment/moment.js"></script>
+    <script src="bower_components/angular/angular.js"></script>
+    <script src="bower_components/ng-file-upload/angular-file-upload.js"></script>
+
+    <!-- cometd-jquery is required for c8yRealtime service -->
+    <script src="bower_components/cometd-jquery/cometd-javascript/common/src/main/js/org/cometd/cometd-namespace.js"></script>
+    <script src="bower_components/cometd-jquery/cometd-javascript/common/src/main/js/org/cometd/cometd-json.js"></script>
+    <script src="bower_components/cometd-jquery/cometd-javascript/common/src/main/js/org/cometd/Cometd.js"></script>
+    <script src="bower_components/cometd-jquery/cometd-javascript/common/src/main/js/org/cometd/Utils.js"></script>
+    <script src="bower_components/cometd-jquery/cometd-javascript/common/src/main/js/org/cometd/TransportRegistry.js"></script>
+    <script src="bower_components/cometd-jquery/cometd-javascript/common/src/main/js/org/cometd/Transport.js"></script>
+    <script src="bower_components/cometd-jquery/cometd-javascript/common/src/main/js/org/cometd/RequestTransport.js"></script>
+    <script src="bower_components/cometd-jquery/cometd-javascript/common/src/main/js/org/cometd/LongPollingTransport.js"></script>
+    <script src="bower_components/cometd-jquery/cometd-javascript/common/src/main/js/org/cometd/CallbackPollingTransport.js"></script>
+    <script src="bower_components/cometd-jquery/cometd-javascript/common/src/main/js/org/cometd/WebSocketTransport.js"></script>
+    <script src="bower_components/cometd-jquery/cometd-javascript/jquery/src/main/webapp/jquery/jquery.cometd.js"></script>
+
+    <!-- c8y.sdk -->
+    <script src="bower_components/cumulocity-clients-javascript/build/main.js"></script>
+
+    <!-- hello-core-api example project dependencies -->
+    <script src="bower_components/angular-route/angular-route.js"></script>
+    <script src="bower_components/angular-ui-bootstrap-bower/ui-bootstrap.js"></script>
+
+    <!-- hello-core-api JS source files -->
+    <script src="js/app.js"></script>
+    <script src="js/login_ctrl.js"></script>
+    <script src="js/main_ctrl.js"></script>
+ </head>
+  <body ng-app="helloCoreApi">
+    <ng-view />
+  </body>
+</html>
