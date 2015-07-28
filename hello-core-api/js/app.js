@@ -2,6 +2,7 @@
   'use strict';
   var app = angular.module('helloCoreApi', [
     'c8y.sdk',
+    'c8y.ui',
     'ngRoute',
     'ui.bootstrap'
   ]);
@@ -19,17 +20,17 @@
   ) {
     $routeProvider
       .when('/login', {
-        templateUrl: 'login.html',
+        templateUrl: 'views/login.html',
         controller: 'LoginCtrl',
         controllerAs: 'login'
       })
       .when('/', {
-        templateUrl: 'main.html',
+        templateUrl: 'views/main.html',
         controller: 'MainCtrl',
         controllerAs: 'main'
       })
       .when('/:section', {
-        templateUrl: 'main.html',
+        templateUrl: 'views/main.html',
         controller: 'MainCtrl',
         controllerAs: 'main'
       });

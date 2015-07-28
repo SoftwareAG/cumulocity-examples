@@ -17,9 +17,9 @@
       $location.path('/login');
     });
 
-    if (!$routeParams.section) {
-      $location.path('/devices');
-    }
+    // if (!$routeParams.section) {
+    //   $location.path('/devices');
+    // }
 
     this.currentSection = $routeParams.section;
     this.sections = {
