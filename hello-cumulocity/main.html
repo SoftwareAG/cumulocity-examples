@@ -1,0 +1,51 @@
+<div ng-if="c8y.user">
+  <nav class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container-fluid">
+      <div class="navbar-header" ng-init="isCollapsed = true">
+        <button type="button" class="navbar-toggle collapsed" ng-click="isCollapsed = !isCollapsed" aria-expanded="false" aria-controls="navbar">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" ng-href="#/">Cumulocity</a>
+      </div>
+      <div id="navbar" class="navbar-collapse" collapse="isCollapsed">
+        <ul class="nav navbar-nav navbar-right">
+          <li><a href="" ng-click="main.logout()" c8y-logout>Logout</a></li>
+        </ul>
+        <p class="navbar-text navbar-right">Hello {{c8y.user.firstName}}</p>
+      </div>
+    </div>
+  </nav>
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-sm-3 col-md-2 sidebar">
+        <ul class="nav nav-sidebar">
+          <li class="active">
+            <a href="">Devices</a>
+          </li>
+        </ul>
+      </div>
+      <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+        <form ng-submit="main.filter.text = main.textFilter">
+          <div class="input-group">
+            <input type="text" ng-model="main.textFilter" class="form-control" placeholder="Filter with device name...">
+            <span class="input-group-btn">
+              <button type="submit" class="btn btn-default" type="button">Submit</button>
+            </span>
+          </div>
+        </form>
+        <p class="text-warning">Page size is {{main.filter.pageSize}} by default. See <code>pageSize</code> filter.</p>
+        <table class="table">
+          <h2>List</h2>
+          <tr c8y-repeat="x in devices" filter="main.filter" refresh="main.refresh">
+            <td>{{x.id}}</td>
+            <td>{{x.type}}</td>
+            <td>{{x.name}}</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

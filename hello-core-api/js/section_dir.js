@@ -23,7 +23,7 @@
   ) {
     return {
       restrict: 'AE',
-      templateUrl: 'section.html',
+      templateUrl: 'views/section.html',
       controller: 'SectionCtrl',
       controllerAs: 'section',
       transclude: true,

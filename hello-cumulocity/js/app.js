@@ -2,7 +2,6 @@
   'use strict';
   var app = angular.module('helloCoreApi', [
     'c8y.sdk',
-    'c8y.ui',
     'ngRoute',
     'ui.bootstrap'
   ]);
@@ -20,20 +19,15 @@
   ) {
     $routeProvider
       .when('/login', {
-        templateUrl: 'views/login.html',
+        templateUrl: 'login.html',
         controller: 'LoginCtrl',
         controllerAs: 'login'
       })
       .when('/', {
-        templateUrl: 'views/main.html',
+        templateUrl: 'main.html',
         controller: 'MainCtrl',
         controllerAs: 'main'
       })
-      .when('/:section', {
-        templateUrl: 'views/main.html',
-        controller: 'MainCtrl',
-        controllerAs: 'main'
-      });
   }
 
   function configCumulocity(
