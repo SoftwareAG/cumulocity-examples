@@ -1,6 +1,6 @@
 (function () {
   'use strict';
-  var app = angular.module('helloCoreApi', [
+  var app = angular.module('helloCumulocity', [
     'c8y.sdk',
     'ngRoute',
     'ui.bootstrap'

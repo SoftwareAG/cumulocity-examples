@@ -39,7 +39,7 @@
         <p class="text-warning">Page size is {{main.filter.pageSize}} by default. See <code>pageSize</code> filter.</p>
         <table class="table">
           <h2>List</h2>
-          <tr c8y-repeat="x in devices" filter="main.filter" refresh="main.refresh">
+          <tr c8y-repeat="x in devices" filter="main.filter">
             <td>{{x.id}}</td>
             <td>{{x.type}}</td>
             <td>{{x.name}}</td>

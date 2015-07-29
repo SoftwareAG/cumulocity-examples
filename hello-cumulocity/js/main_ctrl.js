@@ -1,15 +1,13 @@
 (function () {
   'use strict';
 
-  angular.module('helloCoreApi').controller('MainCtrl', [
-    '$scope',
+  angular.module('helloCumulocity').controller('MainCtrl', [
     '$location',
     'c8yUser',
      MainCtrl
   ]);
 
   function MainCtrl(
-    $scope,
     $location,
     c8yUser
   ) {
@@ -18,12 +16,6 @@
     });
 
     this.filter = {pageSize: 10};
-
-    $scope.$watch(angular.bind(this, function () {
-      return this.refresh;
-    }), function (val) {
-      this.refresh = val;
-    });
 
     this.logout = function () {
       $location.path('/login');

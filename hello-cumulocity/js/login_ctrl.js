@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  angular.module('helloCoreApi').controller('LoginCtrl', [
+  angular.module('helloCumulocity').controller('LoginCtrl', [
     '$location',
     'c8yUser',
     LoginCtrl
