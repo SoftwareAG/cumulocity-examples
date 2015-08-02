@@ -7,6 +7,10 @@
 
   function AlarmsCtrl(
   ) {
+    this.filter = {
+      pageSize: 10
+    };
+    
     this.severities = [
       {name: 'Critical', value: 'CRITICAL', cls: 'btn-danger'},
       {name: 'Major', value: 'MAJOR', cls: 'btn-warning'},

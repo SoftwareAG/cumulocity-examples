@@ -1,0 +1,7 @@
+<div ng-controller="DeviceDetailCtrl as deviceDetail" class="c8y">
+  <!--
+  Don't display device detail directive until device object is fetched from
+  remote.
+ -->
+  <c8y-device-detail-basic ng-if="deviceDetail.device" device="deviceDetail.device"/>
+</div>

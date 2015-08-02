@@ -2,7 +2,7 @@
   <div class="col-md-9">
     <div class="row" style="margin-bottom:20px;">
       <div class="col-md-12">
-        <button class="btn btn-primary pull-right" ng-click="charts.getMeasurement()">Refresh</button>
+        <button class="btn btn-primary pull-right" ng-click="charts.getMeasurement();charts.getDevice()">Refresh</button>
       </div>
     </div>
     <div class="row">
@@ -38,5 +38,8 @@
     </form>
     <datapoint dp="charts.dp" measurement="charts.measurement">
     </datapoint>
+  </div>
+  <div ng-if="charts.device" class="c8y">
+    <ng-include src="'views/deviceDetail.html'" />
   </div>
 <div>

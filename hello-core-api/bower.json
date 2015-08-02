@@ -16,7 +16,9 @@
     "bootstrap": "~3.3.5",
     "angular-route": "1.2.20",
     "angular-ui-bootstrap-bower": "0.11.0",
-    "d3": "3.5.5"
+    "d3": "3.5.5",
+    "angular-ui-router": "~0.2.15",
+    "angular-leaflet-directive": "0.7.9"
   },
   "license": "MIT",
   "homepage": "http://www.cumulocity.com",

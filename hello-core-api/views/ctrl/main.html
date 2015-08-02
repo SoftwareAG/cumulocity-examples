@@ -1,4 +1,4 @@
-<div ng-if="c8y.user">
+<div ng-if="c8y.user" ng-controller="MainCtrl as main">
   <nav class="navbar navbar-inverse navbar-fixed-top">
     <div class="container-fluid">
       <div class="navbar-header" ng-init="isCollapsed = true">
@@ -22,23 +22,18 @@
     <div class="row">
       <div class="col-sm-3 col-md-2 sidebar">
         <ul class="nav nav-sidebar">
-          <li
-            ng-repeat="(sectionLabel, section) in main.sections"
-            ng-class="{'active': main.currentSection === section}">
-            <a href="" ng-href="#/{{section}}">{{sectionLabel}}</a>
-          </li>
+          <li><a ui-sref="main.alarms">Alarms</a></li>
+          <li><a ui-sref="main.events">Events</a></li>
+          <li><a ui-sref="main.devices">Devices</a></li>
+          <li class="nav-divider"></li>
+          <li><a ui-sref="main.charts">Charts</a></li>
+          <li><a ui-sref="main.deviceList">Device List</a></li>
+          <li><a ui-sref="main.alarmList">Alarm List</a></li>
+          <li><a ui-sref="main.map">Map</a></li>
         </ul>
       </div>
-      <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main" ng-switch="!!main.currentSection">
-        <div ng-switch-when="true">
-          <eg-section service="{{main.currentSection}}" filter="main.filter" refresh="main.refresh">
-            <ng-include src="['views/sections/', main.currentSection, '.html'].join('')">
-            </ng-include>
-          </eg-section>
-        </div>
-        <div ng-switch-when="false">
-          <ng-include src="'views/charts.html'"></ng-include>
-        </div>
+      <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+        <ui-view />
       </div>
     </div>
   </div>

@@ -11,7 +11,7 @@
       scope: {
         dp: '='
       },
-      templateUrl: 'views/datapoint.html'
+      templateUrl: '/views/dir/datapoint.html'
     };
   }
 })();

@@ -1,0 +1,43 @@
+<div ng-controller="AlarmsCtrl as alarms"
+  class="btn-group alarm-severity" role="group" aria-label="...">
+  <style>
+  .alarm-severity .btn:focus {
+    outline: none;
+  }
+  </style>
+  <div class="row">
+    <div class="col-md-12">
+      <button
+        ng-repeat="severity in alarms.severities"
+        class="btn {{severity.cls}}"
+        ng-class="{'active': alarms.isActive(alarms.filter, severity)}"
+        ng-click="alarms.onClick(alarms.filter, severity)">
+        {{severity.name}}
+      </button>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-12">
+      <p class="text-warning">Page size is {{alarms.filter.pageSize}} by default. See <code>pageSize</code> filter.</p>
+      <h2>Alarms</h2>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Type</th>
+            <th>Text</th>
+            <th>Severity</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr c8y-repeat="alarm in alarms" filter="alarms.filter" refresh="alarms.refresh" realtime="true">
+            <td>{{alarm.id}}</td>
+            <td>{{alarm.type}}</td>
+            <td>{{alarm.text}}</td>
+            <td>{{alarm.severity}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,21 @@
+<div ng-controller="EventsCtrl as events">
+  <button class="btn btn-default pull-right" ng-click="events.refresh()" class="margin-bottom:2em">Refresh</button>
+  <p class="text-warning">Page size is {{events.filter.pageSize}} by default. See <code>pageSize</code> filter.</p>
+  <h2>Events</h2>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Type</th>
+        <th>Text</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr c8y-repeat="event in events" filter="events.filter" refresh="events.refresh" realtime="true">
+        <td>{{event.id}}</td>
+        <td>{{event.type}}</td>
+        <td>{{event.text}}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

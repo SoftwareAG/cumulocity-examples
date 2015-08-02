@@ -3,11 +3,12 @@
   var app = angular.module('helloCoreApi', [
     'c8y.sdk',
     'c8y.ui',
-    'ngRoute',
+    'ui.router',
     'ui.bootstrap'
   ]);
   app.config([
-    '$routeProvider',
+    '$stateProvider',
+    '$urlMatcherFactoryProvider',
     configRoutes
   ]);
   app.config([
@@ -16,23 +17,50 @@
   ]);
 
   function configRoutes(
-    $routeProvider
+    $stateProvider,
+    $urlMatcherFactoryProvider
   ) {
-    $routeProvider
-      .when('/login', {
-        templateUrl: 'views/login.html',
-        controller: 'LoginCtrl',
-        controllerAs: 'login'
+    $urlMatcherFactoryProvider.strictMode(false);
+    $stateProvider
+      .state('login', {
+        url: '/login',
+        templateUrl: '/views/ctr/login.html'
       })
-      .when('/', {
-        templateUrl: 'views/main.html',
-        controller: 'MainCtrl',
-        controllerAs: 'main'
+      .state('main', {
+        url: '',
+        templateUrl: '/views/ctrl/main.html'
       })
-      .when('/:section', {
-        templateUrl: 'views/main.html',
-        controller: 'MainCtrl',
-        controllerAs: 'main'
+      .state('main.alarms', {
+        url: '/alarms',
+        templateUrl: '/views/ctrl/alarms.html'
+      })
+      .state('main.events', {
+        url: '/events',
+        templateUrl: '/views/ctrl/events.html'
+      })
+      .state('main.devices', {
+        url: '/devices',
+        templateUrl: '/views/ctrl/devices.html'
+      })
+      .state('main.deviceDetail', {
+          url: '/devices/:deviceId',
+          templateUrl: '/views/ctrl/device_detail.html'
+      })
+      .state('main.charts', {
+        url: '/charts',
+        templateUrl: '/views/ctrl/charts.html'
+      })
+      .state('main.deviceList', {
+        url: '/deviceList',
+        templateUrl: '/views/ctrl/device_list.html'
+      })
+      .state('main.alarmList', {
+        url: '/alarmList',
+        templateUrl: '/views/ctrl/alarm_list.html'
+      })
+      .state('main.map', {
+        url: '/map',
+        templateUrl: '/views/ctrl/map.html'
       });
   }
 
