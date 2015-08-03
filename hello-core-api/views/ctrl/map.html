@@ -1,3 +1,10 @@
+<style>
+  .map-class {
+    width: 100%;
+    height: 600px;
+  }
+</style>
+
 <div ng-controller="MapCtrl as map" class="c8y">
-  <c8y-map device-id="144880600" css-class="widget-map" config="map.config" width="100" height="100"/>
+  <c8y-map device-id="144880600" css-class="map-class" config="map.config" width="100" height="100" multiple-devices="true"/>
 </div>
