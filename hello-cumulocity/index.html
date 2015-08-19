@@ -2,8 +2,8 @@
   <head>
     <link rel="stylesheet" type="text/css" href="bower_components/bootstrap/dist/css/bootstrap.css">
     <link rel="stylesheet" type="text/css" href="bower_components/bootstrap/dist/css/bootstrap-theme.css">
-    <link rel="stylesheet" type="text/css" href="bower_components/cumulocity-clients-javascript/build/main.css">
-    <!-- CSS files for hello-core-api example project -->
+
+    <!-- CSS files for hello-cumulocity example project -->
     <link href="css/login.css" rel="stylesheet">
     <link href="css/dashboard.css" rel="stylesheet">
 
@@ -13,7 +13,6 @@
     <script src="bower_components/moment/moment.js"></script>
     <script src="bower_components/angular/angular.js"></script>
     <script src="bower_components/ng-file-upload/angular-file-upload.js"></script>
-    <script src="bower_components/d3/d3.js"></script>
 
     <!-- cometd-jquery is required for c8yRealtime service -->
     <script src="bower_components/cometd-jquery/cometd-javascript/common/src/main/js/org/cometd/cometd-namespace.js"></script>
@@ -31,23 +30,16 @@
     <!-- c8y.sdk -->
     <script src="bower_components/cumulocity-clients-javascript/build/main.js"></script>
 
-    <!-- hello-core-api example project dependencies -->
-    <script src="bower_components/angular-route/angular-route.min.js"></script>
-    <script src="bower_components/angular-ui-bootstrap-bower/ui-bootstrap.min.js"></script>
-    <script src="bower_components/angular-ui-bootstrap-bower/ui-bootstrap-tpls.min.js"></script>
+    <!-- hello-cumulocity example project dependencies -->
+    <script src="bower_components/angular-route/angular-route.js"></script>
+    <script src="bower_components/angular-ui-bootstrap-bower/ui-bootstrap.js"></script>
 
-    <!-- hello-core-api JS source files -->
+    <!-- hello-cumulocity JS source files -->
     <script src="js/app.js"></script>
     <script src="js/login_ctrl.js"></script>
     <script src="js/main_ctrl.js"></script>
-    <script src="js/section_dir.js"></script>
-    <script src="js/alarms_ctrl.js"></script>
-    <script src="js/datapoint_dir.js"></script>
-    <script src="js/charts_ctrl.js"></</script>
-
-    </script>
-  </head>
-  <body ng-app="helloCoreApi">
+ </head>
+  <body ng-app="helloCumulocity">
     <ng-view />
   </body>
 </html>

@@ -1,0 +1,42 @@
+<div ng-controller="ChartsCtrl as charts" class="row">
+  <div class="col-md-9">
+    <div class="row" style="margin-bottom:20px;">
+      <div class="col-md-12">
+        <button class="btn btn-primary pull-right" ng-click="charts.getMeasurement()">Refresh</button>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="panel c8y" style="padding: 20px;">
+          <h2>Radial Gauge</h2>
+          <div c8y-radial-gauge dp="charts.dp" measurement="charts.measurement">
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="panel c8y" style="padding: 20px;">
+          <h2>Linear Gauge</h2>
+          <c8y-linear-gauge dp="charts.dp" measurement="charts.measurement" />
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <form>
+      <div class="form-group">
+        <label>Device ID</label>
+        <input class="form-control" type="text" ng-model="charts.sourceId" placeholder="Device ID" required>
+      </div>
+      <div class="form-group">
+        <label>Fragment</label>
+        <input class="form-control" type="text" ng-model="charts.fragmentType" placeholder="Fragment" required>
+      </div>
+      <div class="form-group">
+        <label>Series</label>
+        <input class="form-control" type="text" ng-model="charts.series" placeholder="Series" required>
+      </div>
+    </form>
+    <datapoint dp="charts.dp" measurement="charts.measurement">
+    </datapoint>
+  </div>
+<div>

@@ -7,4 +7,7 @@ cucumber.html
 dependency-reduced-pom.xml
 syntax: glob
 java-agent/jv-agent/cfg/
-hello-core-api/bower_components
+
+syntax:regexp
+.*node_modules.*
+.*bower_components.*

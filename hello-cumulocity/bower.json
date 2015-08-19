@@ -1,5 +1,5 @@
 {
-  "name": "hello-core-api",
+  "name": "hello-cumulocity",
   "version": "6.3.0",
   "authors": [
     "Cumulocity GmbH"
@@ -15,8 +15,7 @@
     "cumulocity-clients-javascript": "latest",
     "bootstrap": "~3.3.5",
     "angular-route": "1.2.20",
-    "angular-ui-bootstrap-bower": "0.11.0",
-    "d3": "3.5.5"
+    "angular-ui-bootstrap-bower": "0.11.0"
   },
   "license": "MIT",
   "homepage": "http://www.cumulocity.com",
@@ -27,5 +26,6 @@
     "test",
     "tests"
   ],
-  "devDependencies": {}
+  "devDependencies": {
+  }
 }
