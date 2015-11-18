@@ -26,6 +26,9 @@ public class CobanParser implements Parser {
 
     @Override
     public boolean onParsed(ReportContext reportCtx) throws SDKException {
+        if(reportCtx.getNumberOfEntries() == 2) {
+            return onParsedHeartbeatToServer(reportCtx);
+        }
         String reportType = getReportType(reportCtx);
         if ("A".equals(reportType)) {
             return onParsedDeviceLogonToServer(reportCtx);
@@ -33,6 +36,10 @@ public class CobanParser implements Parser {
         return false;
     }
     
+    private boolean onParsedHeartbeatToServer(ReportContext reportCtx) {
+        return false;
+    }
+
     private boolean onParsedDeviceLogonToServer(ReportContext reportCtx) {
         writeOut(reportCtx, "LOAD"); 
         return true;

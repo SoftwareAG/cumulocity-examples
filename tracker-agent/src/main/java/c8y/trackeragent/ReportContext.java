@@ -30,6 +30,10 @@ public class ReportContext {
     public String getReportEntry(int index) {
         return (index < report.length) ? report[index] : null;
     }
+    
+    public int getNumberOfEntries() {
+        return report.length;
+    }
 
     @Override
     public int hashCode() {
