@@ -28,6 +28,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import c8y.MotionTracking;
+import c8y.trackeragent.GL200Constants;
+import c8y.trackeragent.GL200DeviceMotionState;
+import c8y.trackeragent.TrackerAgent;
+import c8y.trackeragent.TrackerDevice;
 
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;

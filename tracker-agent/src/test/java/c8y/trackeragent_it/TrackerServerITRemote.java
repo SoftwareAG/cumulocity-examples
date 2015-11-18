@@ -1,8 +1,9 @@
-package c8y.trackeragent;
+package c8y.trackeragent_it;
 
 import org.junit.Test;
 
 import c8y.Position;
+import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.utils.Devices;
 import c8y.trackeragent.utils.Positions;
 import c8y.trackeragent.utils.Reports;

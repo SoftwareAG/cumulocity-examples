@@ -13,6 +13,10 @@ import java.net.Socket;
 import org.junit.Before;
 import org.junit.Test;
 
+import c8y.trackeragent.ConnectedTelicTracker;
+import c8y.trackeragent.TelicLocationReport;
+import c8y.trackeragent.TrackerAgent;
+import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.utils.Devices;
 import c8y.trackeragent.utils.Positions;
 import c8y.trackeragent.utils.Reports;

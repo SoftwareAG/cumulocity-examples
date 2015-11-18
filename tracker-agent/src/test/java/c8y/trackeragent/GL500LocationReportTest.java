@@ -32,6 +32,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import c8y.Position;
+import c8y.trackeragent.GL200Constants;
+import c8y.trackeragent.GL200LocationReport;
+import c8y.trackeragent.TrackerAgent;
+import c8y.trackeragent.TrackerDevice;
 
 import com.cumulocity.sdk.client.SDKException;
 

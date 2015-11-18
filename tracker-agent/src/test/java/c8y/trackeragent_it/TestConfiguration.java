@@ -1,4 +1,4 @@
-package c8y.trackeragent;
+package c8y.trackeragent_it;
 
 public class TestConfiguration {
     

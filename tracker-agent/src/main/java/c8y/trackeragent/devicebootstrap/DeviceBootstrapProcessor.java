@@ -75,6 +75,7 @@ public class DeviceBootstrapProcessor implements TrackerAgentEventListener {
         private void doRun() {
             PollingStrategy strategy = new PollingStrategy(TimeUnit.SECONDS, asList(DEFAULT_POLL_INTERVALS));
             DeviceCredentialsRepresentation credentialsRepresentation = deviceCredentialsApi.pollCredentials(imei, strategy);
+            logger.info("Send credentials representation {}.", credentialsRepresentation);
             if (credentialsRepresentation == null) {
                 logger.info("No credentials accessed for imei {}.", imei);
             } else {

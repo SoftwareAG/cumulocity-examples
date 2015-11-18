@@ -1,12 +1,14 @@
-package c8y.trackeragent;
+package c8y.trackeragent_it;
 
 import static com.cumulocity.model.authentication.CumulocityCredentials.Builder.cumulocityCredentials;
 import static com.cumulocity.rest.representation.operation.DeviceControlMediaType.NEW_DEVICE_REQUEST;
 import static java.lang.Integer.parseInt;
+import static org.fest.assertions.Assertions.assertThat;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.util.Collection;
 import java.util.HashSet;
@@ -20,10 +22,16 @@ import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
 
+import c8y.trackeragent.DeviceManagedObject;
+import c8y.trackeragent.Server;
+import c8y.trackeragent.TrackerDevice;
+import c8y.trackeragent.TrackerPlatform;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.exception.UnknownDeviceException;
 import c8y.trackeragent.utils.ConfigUtils;
+import c8y.trackeragent.utils.Positions;
+import c8y.trackeragent.utils.Reports;
 import c8y.trackeragent.utils.TrackerConfiguration;
 
 import com.cumulocity.model.authentication.CumulocityCredentials;
@@ -172,9 +180,24 @@ public abstract class TrackerITSupport {
         GId agentId = deviceManagedObject.getAgentId();
         return new TrackerDevice(testPlatform, agentId, imei);
     }
+    
+    protected void bootstrap(String imei) throws UnsupportedEncodingException, Exception, InterruptedException {
+        createNewDeviceRequest(imei);
+        
+        byte[] report = Reports.getTelicReportBytes(imei, Positions.ZERO);
+        
+        //trigger bootstrap
+        writeInNewConnection(report);
+        Thread.sleep(8000);
+        acceptNewDeviceRequest(imei);
+        Thread.sleep(5000);
+        
+        DeviceCredentials credentials = pollCredentials(imei);
+        assertThat(credentials).isNotNull();
+    }    
 
     private static TestConfiguration getTestConfig(boolean local) {
-        String fileName = local ? "test-local.properties" : "test-remote.properties";
+        String fileName = local ? "it-local.properties" : "it-remote.properties";
         String testFilePath = ConfigUtils.get().getConfigFilePath(fileName);
         Properties props = ConfigUtils.get().getProperties(testFilePath);
         //@formatter:off

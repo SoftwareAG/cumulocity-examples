@@ -40,6 +40,12 @@ import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 
+import c8y.trackeragent.ConnectedTracker;
+import c8y.trackeragent.ConnectionRegistry;
+import c8y.trackeragent.GL200Constants;
+import c8y.trackeragent.Parser;
+import c8y.trackeragent.TrackerAgent;
+import c8y.trackeragent.Translator;
 import c8y.trackeragent.event.TrackerAgentEvents;
 import c8y.trackeragent.utils.TrackerContext;
 

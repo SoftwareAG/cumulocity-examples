@@ -1,4 +1,4 @@
-package c8y.trackeragent;
+package c8y.trackeragent_it;
 
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
