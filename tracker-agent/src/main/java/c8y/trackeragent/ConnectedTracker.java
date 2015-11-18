@@ -154,7 +154,8 @@ public class ConnectedTracker implements Runnable, Executor {
                 if (imei != null) {
                     boolean registered = checkIfDeviceRegistered(imei);
                     if (registered) {
-                        boolean success = parser.onParsed(report, imei);
+                        ReportContext reportContext = new ReportContext(report, imei, out);
+                        boolean success = parser.onParsed(reportContext);
                         if (success) {
                             this.imei = imei;
                             ConnectionRegistry.instance().put(imei, this);

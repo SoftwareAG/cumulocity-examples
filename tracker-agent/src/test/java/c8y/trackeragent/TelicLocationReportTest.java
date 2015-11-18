@@ -45,7 +45,7 @@ public class TelicLocationReportTest {
         String[] report = TelicReports.getTelicReport(Devices.IMEI_1, Positions.SAMPLE_1);
         
         String imei = telic.parse(report);
-        telic.onParsed(report, imei);
+        telic.onParsed(new ReportContext(report, imei, null));
         
         assertEquals(Devices.IMEI_1, imei);
         verifyReport();

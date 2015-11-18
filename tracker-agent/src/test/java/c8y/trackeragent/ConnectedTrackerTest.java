@@ -81,13 +81,13 @@ public class ConnectedTrackerTest {
     public void singleReportProcessing() throws SDKException {
         String[] dummyReport = null;
         when(parser.parse(dummyReport)).thenReturn("imei");
-        when(parser.onParsed(dummyReport, "imei")).thenReturn(true);
+        when(parser.onParsed(new ReportContext(dummyReport, "imei", null))).thenReturn(true);
         when(trackerContext.isDeviceRegistered("imei")).thenReturn(true);
 
         tracker.processReport(dummyReport);
 
         verify(parser).parse(dummyReport);
-        verify(parser).onParsed(dummyReport, "imei");
+        verify(parser).onParsed(new ReportContext(dummyReport, "imei", null));
         verifyZeroInteractions(translator);
         assertEquals(tracker, ConnectionRegistry.instance().get("imei"));
     }

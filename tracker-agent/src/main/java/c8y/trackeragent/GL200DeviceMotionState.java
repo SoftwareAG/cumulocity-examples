@@ -76,12 +76,12 @@ public class GL200DeviceMotionState extends GL200Parser implements Translator {
     }
 
     @Override
-    public boolean onParsed(String[] report, String imei) throws SDKException {
-        String reportType = report[0];
+    public boolean onParsed(ReportContext reportCtx) throws SDKException {
+        String reportType = reportCtx.getReport()[0];
         if (MOTION_ACK.equals(reportType)) {
-            return onParsedAck(report, imei);
+            return onParsedAck(reportCtx.getReport(), reportCtx.getImei());
         } else if (MOTION_REPORT.equals(reportType)) {
-            return onParsedMotion(report, imei);
+            return onParsedMotion(reportCtx.getReport(), reportCtx.getImei());
         } else {
             return false;
         }

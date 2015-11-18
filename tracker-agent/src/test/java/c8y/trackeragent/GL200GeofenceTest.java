@@ -81,7 +81,7 @@ public class GL200GeofenceTest {
     public void acknowledgeGeofence() throws SDKException {
         gl200gf.translate(operation);
         String imei = gl200gf.parse(ACKFENCE);
-        gl200gf.onParsed(ACKFENCE, imei);
+        gl200gf.onParsed(new ReportContext(ACKFENCE, imei, null));
 
         assertEquals(IMEI, imei);
         verify(trackerAgent).getOrCreateTrackerDevice(IMEI);
@@ -102,7 +102,7 @@ public class GL200GeofenceTest {
     @Test
     public void reportGeofence() throws SDKException {
         String imei = gl200gf.parse(REPFENCE);
-        gl200gf.onParsed(REPFENCE, imei);
+        gl200gf.onParsed(new ReportContext(REPFENCE, imei, null));
 
         assertEquals(IMEI, imei);
         verify(trackerAgent, times(2)).getOrCreateTrackerDevice(IMEI);

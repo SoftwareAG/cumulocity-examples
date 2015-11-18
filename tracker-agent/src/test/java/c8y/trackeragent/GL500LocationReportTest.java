@@ -65,7 +65,7 @@ public class GL500LocationReportTest {
     @Test
     public void gl500Report() throws SDKException {
         String imei = locationReport.parse(GL500REP);
-        locationReport.onParsed(GL500REP, imei);
+        locationReport.onParsed(new ReportContext(GL500REP, imei, null));
 
         assertEquals(IMEI, imei);
         verify(trackerAgent).getOrCreateTrackerDevice(IMEI);

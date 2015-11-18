@@ -71,12 +71,12 @@ public class GL200LocationReport extends GL200Parser {
 	}
 
     @Override
-    public boolean onParsed(String[] report, String imei) throws SDKException {
-        String[] reportType = report[0].split(":");
+    public boolean onParsed(ReportContext reportCtx) throws SDKException {
+        String[] reportType = reportCtx.getReport()[0].split(":");
         if (ONLINE_REP.equals(reportType[0]) || BUFFER_REP.equals(reportType[0])) {
             for (String availableReps : LOCATION_REPORTS) {
                 if (availableReps.equals(reportType[1])) {
-                    return processLocationReportOnParsed(report, imei);
+                    return processLocationReportOnParsed(reportCtx.getReport(), reportCtx.getImei());
                 }
             }
         }

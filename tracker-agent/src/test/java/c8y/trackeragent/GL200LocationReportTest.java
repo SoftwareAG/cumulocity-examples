@@ -72,7 +72,7 @@ public class GL200LocationReportTest {
 	@Test
 	public void testReportWithMultiplePoints() throws SDKException {
 		String imei = locationReport.parse(FIXEDREP);
-		locationReport.onParsed(FIXEDREP, imei);
+		locationReport.onParsed(new ReportContext(FIXEDREP, imei, null));
 		
 		assertEquals(IMEI, imei);
 		verify(trackerAgent).getOrCreateTrackerDevice(IMEI);
@@ -87,7 +87,7 @@ public class GL200LocationReportTest {
 	@Test
 	public void testReportWithSinglePoint() throws SDKException {
 	    String imei = locationReport.parse(DOGREP);
-	    locationReport.onParsed(DOGREP, imei);
+	    locationReport.onParsed(new ReportContext(DOGREP, imei, null));
 	    
 	    assertEquals(IMEI, imei);
 	    verify(trackerAgent).getOrCreateTrackerDevice(IMEI);

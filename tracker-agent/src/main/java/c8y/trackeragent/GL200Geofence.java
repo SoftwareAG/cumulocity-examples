@@ -79,22 +79,22 @@ public class GL200Geofence extends GL200LocationReport implements Translator {
     }
 
     @Override
-    public boolean onParsed(String[] report, String imei) throws SDKException {
-        String reportType = report[0];
+    public boolean onParsed(ReportContext reportCtx) throws SDKException {
+        String reportType = reportCtx.getReport()[0];
 
         if (GEOFENCE_ACKNOWLEDGE.equals(reportType)) {
-            return parseAcknowledgement(report, imei);
+            return parseAcknowledgement(reportCtx.getReport(), reportCtx.getImei());
         } else if (GEOFENCE_REPORT.equals(reportType)) {
-            return parseFenceReport(report, imei);
+            return parseFenceReport(reportCtx);
         } else {
             return false;
         }
     }
 
-    private boolean parseFenceReport(String[] report, String imei) throws SDKException {
-        super.onParsed(report, imei);
-        String type = report[5];
-        TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(imei);
+    private boolean parseFenceReport(ReportContext reportCtx) throws SDKException {
+        super.onParsed(reportCtx);
+        String type = reportCtx.getReport()[5];
+        TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(reportCtx.getImei());
         device.geofenceAlarm("0".equals(type));
         return true;
     }

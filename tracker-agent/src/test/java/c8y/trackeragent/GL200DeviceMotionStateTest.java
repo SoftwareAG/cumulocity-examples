@@ -83,7 +83,8 @@ public class GL200DeviceMotionStateTest {
         gl200mot.translate(operation);
 
         String imei = gl200mot.parse(ACKMOTION);
-        gl200mot.onParsed(ACKMOTION, imei);
+        ReportContext reportCtx = new ReportContext(ACKMOTION, imei, null);
+        gl200mot.onParsed(reportCtx);
 
         assertEquals(IMEI, imei);
         verify(trackerAgent).getOrCreateTrackerDevice(IMEI);
@@ -93,7 +94,8 @@ public class GL200DeviceMotionStateTest {
     @Test
     public void motionReport() throws SDKException {
         String imei = gl200mot.parse(REPMOTION);
-        gl200mot.onParsed(REPMOTION, imei);
+        ReportContext reportCtx = new ReportContext(REPMOTION, imei, null);
+        gl200mot.onParsed(reportCtx);
 
         assertEquals(IMEI, imei);
         verify(trackerAgent).getOrCreateTrackerDevice(IMEI);
@@ -103,7 +105,8 @@ public class GL200DeviceMotionStateTest {
         String[] repNoMotion = REPMOTIONSTR.split(GL200Constants.FIELD_SEP);
         repNoMotion[4] = "41";
         imei = gl200mot.parse(repNoMotion);
-        gl200mot.onParsed(repNoMotion, imei);
+        reportCtx = new ReportContext(repNoMotion, imei, null);
+        gl200mot.onParsed(reportCtx);
         verify(device, times(2)).motionEvent(anyBoolean());
         verify(device).motionEvent(false);
     }
@@ -111,7 +114,8 @@ public class GL200DeviceMotionStateTest {
     @Test
     public void gv500MotionReport() throws SDKException {
         String imei = gl200mot.parse(GV500REPMOTION);
-        gl200mot.onParsed(GV500REPMOTION, imei);
+        ReportContext reportCtx = new ReportContext(GV500REPMOTION, imei, null);
+        gl200mot.onParsed(reportCtx);
         
         assertEquals(IMEI, imei);
         verify(device).motionEvent(true);       

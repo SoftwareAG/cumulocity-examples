@@ -12,7 +12,5 @@ public class ConnectedCobanTracker extends ConnectedTracker {
         super(client, bis, CobanConstants.REPORT_SEP, CobanConstants.FIELD_SEP, trackerAgent);
         addFragment(new CobanParser());
     }
-    
-    
 
 }

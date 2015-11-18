@@ -7,9 +7,11 @@ import static org.fest.assertions.Assertions.assertThat;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -20,6 +22,7 @@ import java.util.concurrent.Executors;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.junit.After;
 import org.junit.Before;
 
@@ -130,14 +133,32 @@ public abstract class TrackerITSupport {
         }
     }
 
-    protected void writeInNewConnection(Socket socket, byte[] bis) throws Exception {
+    protected String writeInNewConnection(Socket socket, byte[] bis) throws Exception {
         OutputStream out = socket.getOutputStream();
         out.write(bis);
+        out.flush();
+        InputStream in = socket.getInputStream();
+        String response = readSocketResponse(in);
         IOUtils.closeQuietly(out);
+        IOUtils.closeQuietly(in);
+        return response;
+    }
+
+    private String readSocketResponse(InputStream in) throws IOException, UnsupportedEncodingException {
+        byte[] bytes = new byte[0];
+        try {
+            int b;
+            while ((b = in.read()) >= 0) {
+                bytes = ArrayUtils.add(bytes, (byte) b);
+            }
+        } catch (SocketTimeoutException stex) {
+            // nothing to do, simply end of input handled
+        }
+        return bytes.length == 0 ? null : new String(bytes, "US-ASCII");
     }
     
-    protected void writeInNewConnection(byte[] bis) throws Exception {
-        writeInNewConnection(newSocket(), bis);
+    protected String writeInNewConnection(byte[] bis) throws Exception {
+        return writeInNewConnection(newSocket(), bis);
     }
     
     protected Socket newSocket() throws IOException {
@@ -145,6 +166,7 @@ public abstract class TrackerITSupport {
         int socketPort = testConfig.getTrackerAgentPort();
         try {
             Socket socket = new Socket(socketHost, socketPort);
+            socket.setSoTimeout(1000);
             sockets.add(socket);
             return socket;
         } catch (IOException ex) {
