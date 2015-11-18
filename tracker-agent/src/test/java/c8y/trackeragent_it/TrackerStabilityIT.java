@@ -4,12 +4,14 @@ import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import c8y.trackeragent.utils.Devices;
 import c8y.trackeragent.utils.Positions;
-import c8y.trackeragent.utils.Reports;
+import c8y.trackeragent.utils.TelicReports;
 
+@Ignore
 public class TrackerStabilityIT extends TrackerITSupport {
 
     private ExecutorService executorService = Executors.newFixedThreadPool(10);
@@ -31,7 +33,7 @@ public class TrackerStabilityIT extends TrackerITSupport {
         writeInNewConnection(new byte[]{});
         String imei = Devices.randomImei();
         createNewDeviceRequest(imei);
-        byte[] report = Reports.getTelicReportBytes(imei, Positions.ZERO, Positions.SAMPLE_1, Positions.SAMPLE_2, Positions.SAMPLE_3);
+        byte[] report = TelicReports.getTelicReportBytes(imei, Positions.ZERO, Positions.SAMPLE_1, Positions.SAMPLE_2, Positions.SAMPLE_3);
 
         // trigger bootstrap
         writeInNewConnection(report);
@@ -42,7 +44,7 @@ public class TrackerStabilityIT extends TrackerITSupport {
 
     private void executeStep(String imei) throws Exception {
         byte[] report = null;
-        report = Reports.getTelicReportBytes(imei, Positions.random(), Positions.random(), Positions.random(), Positions.random());
+        report = TelicReports.getTelicReportBytes(imei, Positions.random(), Positions.random(), Positions.random(), Positions.random());
         
         if(random.nextInt(2) == 0) {
             System.out.println("send empty report");

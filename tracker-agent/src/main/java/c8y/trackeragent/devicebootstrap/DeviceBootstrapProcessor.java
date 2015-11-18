@@ -1,10 +1,8 @@
 package c8y.trackeragent.devicebootstrap;
 
-import static com.cumulocity.sdk.client.polling.PollingStrategy.DEFAULT_POLL_INTERVALS;
-import static java.util.Arrays.asList;
-
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -32,11 +30,13 @@ public class DeviceBootstrapProcessor implements TrackerAgentEventListener {
     private final Object lock = new Object();
     private final TrackerAgent trackerAgent;
     private final DeviceCredentialsApi deviceCredentialsApi;
+    private final List<Long> bootstrapPollIntervals;
 
     public DeviceBootstrapProcessor(TrackerAgent trackerAgent) {
         this.trackerAgent = trackerAgent;
         this.threadPoolExecutor = Executors.newFixedThreadPool(POOL_SIZE);
         this.deviceCredentialsApi = trackerAgent.getContext().getBootstrapPlatform().getDeviceCredentialsApi();
+        this.bootstrapPollIntervals = trackerAgent.getContext().getConfiguration().getBootstrapPollIntervals();
     }
 
     @Subscribe
@@ -73,7 +73,7 @@ public class DeviceBootstrapProcessor implements TrackerAgentEventListener {
         }
 
         private void doRun() {
-            PollingStrategy strategy = new PollingStrategy(TimeUnit.SECONDS, asList(DEFAULT_POLL_INTERVALS));
+            PollingStrategy strategy = new PollingStrategy(TimeUnit.SECONDS, bootstrapPollIntervals);
             DeviceCredentialsRepresentation credentialsRepresentation = deviceCredentialsApi.pollCredentials(imei, strategy);
             logger.info("Send credentials representation {}.", credentialsRepresentation);
             if (credentialsRepresentation == null) {

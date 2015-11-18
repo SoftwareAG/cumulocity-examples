@@ -1,5 +1,10 @@
 package c8y.trackeragent.utils;
 
+import java.util.Arrays;
+import java.util.List;
+
+import com.cumulocity.sdk.client.polling.PollingStrategy;
+
 public class TrackerConfiguration {
 
     private String platformHost;
@@ -8,6 +13,11 @@ public class TrackerConfiguration {
     private String bootstrapPassword;
     private String bootstrapTenant;
     private int clientTimeout;
+    private List<Long> bootstrapPollIntervals;
+    
+    public TrackerConfiguration() {
+        this.bootstrapPollIntervals = Arrays.asList(PollingStrategy.DEFAULT_POLL_INTERVALS);
+    }
 
     public String getPlatformHost() {
         return platformHost;
@@ -60,6 +70,15 @@ public class TrackerConfiguration {
 
     public TrackerConfiguration setClientTimeout(int clientTimeout) {
         this.clientTimeout = clientTimeout;
+        return this;
+    }
+    
+    public List<Long> getBootstrapPollIntervals() {
+        return bootstrapPollIntervals;
+    }
+
+    public TrackerConfiguration setBootstrapPollIntervals(List<Long> bootstrapPollIntervals) {
+        this.bootstrapPollIntervals = bootstrapPollIntervals;
         return this;
     }
 

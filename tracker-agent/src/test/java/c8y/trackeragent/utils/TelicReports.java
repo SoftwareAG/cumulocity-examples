@@ -11,7 +11,7 @@ import c8y.trackeragent.TelicConstants;
 
 import com.google.common.base.Function;
 
-public class Reports {
+public class TelicReports {
     
     public static final String HEADER = "0000123456|262|02|003002016";
     
@@ -48,7 +48,7 @@ public class Reports {
         return result;
     }
 
-    public static String getTelicReportStr(String imei, Position position) {
+    private static String getTelicReportStr(String imei, Position position) {
         return "0721" + 
                 imei + 
                 "99,200311121210,0,200311121210," +

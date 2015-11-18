@@ -19,7 +19,7 @@ import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.utils.Devices;
 import c8y.trackeragent.utils.Positions;
-import c8y.trackeragent.utils.Reports;
+import c8y.trackeragent.utils.TelicReports;
 import c8y.trackeragent.utils.TrackerContext;
 
 public class TelicLocationReportTest {
@@ -42,7 +42,7 @@ public class TelicLocationReportTest {
 
     @Test
     public void testParseReport() {
-        String[] report = Reports.getTelicReport(Devices.IMEI_1, Positions.SAMPLE_1);
+        String[] report = TelicReports.getTelicReport(Devices.IMEI_1, Positions.SAMPLE_1);
         
         String imei = telic.parse(report);
         telic.onParsed(report, imei);
@@ -54,7 +54,7 @@ public class TelicLocationReportTest {
     @Test
     public void testProcessReport() throws IOException {
         Socket client = mock(Socket.class);
-        byte[] bytes = Reports.getTelicReportBytes(Devices.IMEI_1, Positions.SAMPLE_1);
+        byte[] bytes = TelicReports.getTelicReportBytes(Devices.IMEI_1, Positions.SAMPLE_1);
         ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
         ConnectedTelicTracker tracker = new ConnectedTelicTracker(client, bis, trackerAgent);
         when(trackerContext.isDeviceRegistered(Devices.IMEI_1)).thenReturn(true);

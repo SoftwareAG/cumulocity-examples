@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.Socket;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Properties;
@@ -31,7 +32,7 @@ import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.exception.UnknownDeviceException;
 import c8y.trackeragent.utils.ConfigUtils;
 import c8y.trackeragent.utils.Positions;
-import c8y.trackeragent.utils.Reports;
+import c8y.trackeragent.utils.TelicReports;
 import c8y.trackeragent.utils.TrackerConfiguration;
 
 import com.cumulocity.model.authentication.CumulocityCredentials;
@@ -103,7 +104,10 @@ public abstract class TrackerITSupport {
     }
 
     private TrackerConfiguration getPlatformConfiguration() {
-        return ConfigUtils.get().loadCommonConfiguration().setLocalPort(testConfig.getTrackerAgentPort()).setPlatformHost(testConfig.getC8yHost());
+        return ConfigUtils.get().loadCommonConfiguration()
+                .setLocalPort(testConfig.getTrackerAgentPort())
+                .setPlatformHost(testConfig.getC8yHost())
+                .setBootstrapPollIntervals(Arrays.asList(1L, 2L, 3L, 4L));
     }
 
     protected TrackerPlatform createTrackerPlatform() {
@@ -185,13 +189,12 @@ public abstract class TrackerITSupport {
         createNewDeviceRequest(imei);
         // WAITING_FOR_CONNECTION status
         
-        writeInNewConnection(Reports.getTelicReportBytes(imei, Positions.ZERO));        
+        writeInNewConnection(TelicReports.getTelicReportBytes(imei, Positions.ZERO));        
         // PENDING_ACCEPTANCE status
-        Thread.sleep(8000);
+        Thread.sleep(1100);
         
         acceptNewDeviceRequest(imei);
         // ACCEPTED status
-        Thread.sleep(5000);
         
         DeviceCredentials credentials = pollCredentials(imei);
         assertThat(credentials).isNotNull();

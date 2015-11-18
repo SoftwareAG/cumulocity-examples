@@ -8,7 +8,7 @@ import org.junit.Test;
 import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.utils.Devices;
 import c8y.trackeragent.utils.Positions;
-import c8y.trackeragent.utils.Reports;
+import c8y.trackeragent.utils.TelicReports;
 
 public class ConnectionTimeoutIT extends TrackerITSupport {
     
@@ -21,7 +21,7 @@ public class ConnectionTimeoutIT extends TrackerITSupport {
         bootstrap(imei);  
         
         // trigger regular report 
-        byte[] report = Reports.getTelicReportBytes(imei, Positions.SAMPLE_4);
+        byte[] report = TelicReports.getTelicReportBytes(imei, Positions.SAMPLE_4);
         writeInNewConnection(report);
         
         Thread.sleep(1000);
