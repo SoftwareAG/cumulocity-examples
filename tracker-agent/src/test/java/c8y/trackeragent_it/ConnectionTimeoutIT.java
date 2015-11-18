@@ -1,7 +1,6 @@
 package c8y.trackeragent_it;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 
 import org.junit.Test;
@@ -11,31 +10,23 @@ import c8y.trackeragent.utils.Devices;
 import c8y.trackeragent.utils.Positions;
 import c8y.trackeragent.utils.Reports;
 
-public class TrackerServerIT extends TrackerITSupport {
-
+public class ConnectionTimeoutIT extends TrackerITSupport {
+    
     @Test
-    public void shouldBootstrapNewDeviceAndThenChangeItsLocation() throws Exception {
-        testShouldBootstrapNewDeviceAndThenChangeItsLocation();
-    }
-
-    private void testShouldBootstrapNewDeviceAndThenChangeItsLocation() throws UnsupportedEncodingException, Exception, InterruptedException {
+    public void shouldHandleTimeoutOnConnection() throws Exception {
+        timeoutConnection();
+        
         String imei = Devices.randomImei();
         System.out.println("imei " + imei);
         bootstrap(imei);  
         
-        //trigger regular report 
+        // trigger regular report 
         byte[] report = Reports.getTelicReportBytes(imei, Positions.SAMPLE_4);
         writeInNewConnection(report);
         
         Thread.sleep(1000);
         TrackerDevice newDevice = getTrackerDevice(imei);
         Positions.assertEqual(newDevice.getPosition(), Positions.SAMPLE_4);
-    }
-    
-    @Test
-    public void shouldHandleTimeoutOnConnection() throws Exception {
-        timeoutConnection();
-        testShouldBootstrapNewDeviceAndThenChangeItsLocation();
     }
 
     private void timeoutConnection() throws IOException, InterruptedException {
@@ -46,6 +37,6 @@ public class TrackerServerIT extends TrackerITSupport {
         Thread.sleep(2 * 1000);
         trackerAgentConfig.setClientTimeout(defaultClientTimeout);
     }
-    
+
 
 }

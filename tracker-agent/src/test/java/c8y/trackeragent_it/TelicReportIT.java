@@ -2,32 +2,26 @@ package c8y.trackeragent_it;
 
 import org.junit.Test;
 
-import c8y.Position;
 import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.utils.Devices;
 import c8y.trackeragent.utils.Positions;
 import c8y.trackeragent.utils.Reports;
 
-public class TrackerServerITRemote extends TrackerITSupport {
-    
-    public TrackerServerITRemote() {
-        super(REMOTE);
-    }
+public class TelicReportIT extends TrackerITSupport {
 
     @Test
     public void shouldBootstrapNewDeviceAndThenChangeItsLocation() throws Exception {
         String imei = Devices.randomImei();
-        bootstrap(imei);
-                
+        System.out.println("imei " + imei);
+        bootstrap(imei);  
+        
         //trigger regular report 
-        byte[] report = Reports.getTelicReportBytes(imei, Positions.SAMPLE_1);
+        byte[] report = Reports.getTelicReportBytes(imei, Positions.SAMPLE_4);
         writeInNewConnection(report);
         
         Thread.sleep(1000);
         TrackerDevice newDevice = getTrackerDevice(imei);
-        Position actualPosition = newDevice.getPosition();
-        Positions.assertEqual(actualPosition, Positions.SAMPLE_1);
+        Positions.assertEqual(newDevice.getPosition(), Positions.SAMPLE_4);
     }
-    
 
 }

@@ -181,15 +181,16 @@ public abstract class TrackerITSupport {
         return new TrackerDevice(testPlatform, agentId, imei);
     }
     
-    protected void bootstrap(String imei) throws UnsupportedEncodingException, Exception, InterruptedException {
+    protected void bootstrap(String imei) throws UnsupportedEncodingException, Exception, InterruptedException {        
         createNewDeviceRequest(imei);
+        // WAITING_FOR_CONNECTION status
         
-        byte[] report = Reports.getTelicReportBytes(imei, Positions.ZERO);
-        
-        //trigger bootstrap
-        writeInNewConnection(report);
+        writeInNewConnection(Reports.getTelicReportBytes(imei, Positions.ZERO));        
+        // PENDING_ACCEPTANCE status
         Thread.sleep(8000);
+        
         acceptNewDeviceRequest(imei);
+        // ACCEPTED status
         Thread.sleep(5000);
         
         DeviceCredentials credentials = pollCredentials(imei);
