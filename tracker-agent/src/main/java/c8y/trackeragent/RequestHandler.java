@@ -9,6 +9,8 @@ import java.util.concurrent.ExecutorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import c8y.trackeragent.protocol.coban.ConnectedCobanTracker;
+
 public class RequestHandler implements Runnable {
     
     private static final Logger logger = LoggerFactory.getLogger(RequestHandler.class);
@@ -48,6 +50,8 @@ public class RequestHandler implements Runnable {
         bis.reset();
         if (marker >= '0' && marker <= '9') {
             return new ConnectedTelicTracker(client, bis, trackerAgent);
+        } else if (marker == '*') {
+            return new ConnectedCobanTracker(client, bis, trackerAgent);
         } else {
             return new ConnectedGL200Tracker(client, bis, trackerAgent);
         }

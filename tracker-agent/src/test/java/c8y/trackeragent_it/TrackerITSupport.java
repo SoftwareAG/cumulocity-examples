@@ -31,8 +31,6 @@ import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.exception.UnknownDeviceException;
 import c8y.trackeragent.utils.ConfigUtils;
-import c8y.trackeragent.utils.Positions;
-import c8y.trackeragent.utils.TelicReports;
 import c8y.trackeragent.utils.TrackerConfiguration;
 
 import com.cumulocity.model.authentication.CumulocityCredentials;
@@ -185,11 +183,11 @@ public abstract class TrackerITSupport {
         return new TrackerDevice(testPlatform, agentId, imei);
     }
     
-    protected void bootstrap(String imei) throws UnsupportedEncodingException, Exception, InterruptedException {        
+    protected void bootstrap(String imei, byte[] report) throws UnsupportedEncodingException, Exception, InterruptedException {        
         createNewDeviceRequest(imei);
         // WAITING_FOR_CONNECTION status
         
-        writeInNewConnection(TelicReports.getTelicReportBytes(imei, Positions.ZERO));        
+        writeInNewConnection(report);        
         // PENDING_ACCEPTANCE status
         Thread.sleep(1100);
         

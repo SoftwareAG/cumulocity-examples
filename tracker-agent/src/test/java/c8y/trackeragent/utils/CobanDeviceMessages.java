@@ -15,7 +15,7 @@ public class CobanDeviceMessages {
     
     public static byte[] logon(final String imei) throws Exception {
         String msg = format("**,imei:%s,A;", imei);
-        logger.info("Message prepared:{}.", msg);
+        logger.info("Message prepared:{}", msg);
         return asBytes(msg);
     }
 

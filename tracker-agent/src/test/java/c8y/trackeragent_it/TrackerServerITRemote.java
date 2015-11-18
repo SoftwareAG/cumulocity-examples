@@ -19,7 +19,7 @@ public class TrackerServerITRemote extends TrackerITSupport {
     @Test
     public void shouldBootstrapNewDeviceAndThenChangeItsLocation() throws Exception {
         String imei = Devices.randomImei();
-        bootstrap(imei);
+        bootstrap(imei, TelicReports.getTelicReportBytes(imei, Positions.ZERO));
                 
         //trigger regular report 
         byte[] report = TelicReports.getTelicReportBytes(imei, Positions.SAMPLE_1);
