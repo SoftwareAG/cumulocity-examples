@@ -1,4 +1,4 @@
-package c8y.trackeragent.utils;
+package c8y.trackeragent.protocol.coban;
 
 import static java.lang.String.format;
 
@@ -14,9 +14,11 @@ public class CobanDeviceMessages {
     private static final Logger logger = LoggerFactory.getLogger(CobanDeviceMessages.class);
     
     public static byte[] logon(final String imei) throws Exception {
-        String msg = format("**,imei:%s,A;", imei);
-        logger.info("Message prepared:{}", msg);
-        return asBytes(msg);
+        return withinImei("**,imei:%s,A;", imei);
+    }
+    
+    public static byte[] heartbeat(String imei) {
+        return withinImei("**,imei:%s;", imei);
     }
 
     private static byte[] asBytes(String msg) {
@@ -29,6 +31,12 @@ public class CobanDeviceMessages {
     
     public static byte[] getPositionReport(final String imei, Position position) throws Exception {
         return null;
+    }
+
+    private static byte[] withinImei(String format, String imei) {
+        String msg = format(format, imei);
+        logger.info("Message prepared:{}", msg);
+        return asBytes(msg);
     }
 
 }

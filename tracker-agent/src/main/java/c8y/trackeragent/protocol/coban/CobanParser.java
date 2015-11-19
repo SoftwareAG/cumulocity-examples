@@ -5,12 +5,18 @@ import org.slf4j.LoggerFactory;
 
 import c8y.trackeragent.Parser;
 import c8y.trackeragent.ReportContext;
+import c8y.trackeragent.TrackerAgent;
+import c8y.trackeragent.TrackerDevice;
 
 import com.cumulocity.sdk.client.SDKException;
 
-public class CobanParser implements Parser {
+public class CobanParser extends CobanReport implements Parser {
     
-    protected static Logger logger = LoggerFactory.getLogger(CobanParser.class);
+    private static Logger logger = LoggerFactory.getLogger(CobanParser.class);
+    
+    public CobanParser(TrackerAgent trackerAgent) {
+        super(trackerAgent);
+    }
 
     @Override
     public String parse(String[] report) throws SDKException {
@@ -26,7 +32,7 @@ public class CobanParser implements Parser {
 
     @Override
     public boolean onParsed(ReportContext reportCtx) throws SDKException {
-        if(reportCtx.getNumberOfEntries() == 2) {
+        if(isHeartbeat(reportCtx)) {
             return onParsedHeartbeatToServer(reportCtx);
         }
         String reportType = getReportType(reportCtx);
@@ -35,12 +41,25 @@ public class CobanParser implements Parser {
         }
         return false;
     }
+
+    private boolean isHeartbeat(ReportContext reportCtx) {
+        return reportCtx.getNumberOfEntries() == 2;
+    }
     
     private boolean onParsedHeartbeatToServer(ReportContext reportCtx) {
-        return false;
+        logger.debug("Heartbeat for imei {}.", reportCtx.getImei());
+        try {
+            TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(reportCtx.getImei());
+            device.ping();
+            writeOut(reportCtx, "ON");
+        } catch (Exception ex) {
+            logger.error("Error processing heartbeat on imei " +  reportCtx.getImei(), ex);
+        }
+        return true;
     }
 
     private boolean onParsedDeviceLogonToServer(ReportContext reportCtx) {
+        logger.debug("Success logon for imei {}.", reportCtx.getImei());
         writeOut(reportCtx, "LOAD"); 
         return true;
     }

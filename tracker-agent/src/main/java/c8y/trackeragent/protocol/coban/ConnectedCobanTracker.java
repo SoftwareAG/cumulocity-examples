@@ -10,7 +10,7 @@ public class ConnectedCobanTracker extends ConnectedTracker {
 
     public ConnectedCobanTracker(Socket client, InputStream bis, TrackerAgent trackerAgent) {
         super(client, bis, CobanConstants.REPORT_SEP, CobanConstants.FIELD_SEP, trackerAgent);
-        addFragment(new CobanParser());
+        addFragment(new CobanParser(trackerAgent));
     }
 
 }

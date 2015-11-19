@@ -52,6 +52,9 @@ import com.cumulocity.sdk.client.event.EventApi;
 import com.cumulocity.sdk.client.measurement.MeasurementApi;
 
 public class TrackerDevice extends DeviceManagedObject {
+    
+    private Logger logger = LoggerFactory.getLogger(getClass());
+    
     public static final String TYPE = "c8y_Tracker";
     public static final String XTID_TYPE = "c8y_Imei";
     public static final String BAT_TYPE = "c8y_TrackerBattery";
@@ -63,8 +66,6 @@ public class TrackerDevice extends DeviceManagedObject {
     public static final String MOTION_DETECTED_EVENT_TYPE = "c8y_MotionEvent";
     public static final String MOTION_ENDED_EVENT_TYPE = "c8y_MotionEndedEvent";
     public static final String POWER_ALARM_TYPE = "c8y_PowerAlarm";
-    
-    private Logger logger = LoggerFactory.getLogger(getClass());
 
     private EventApi events;
     private AlarmApi alarms;
@@ -197,6 +198,13 @@ public class TrackerDevice extends DeviceManagedObject {
         ManagedObjectRepresentation device = new ManagedObjectRepresentation();
         mobile.setCellId(cellId);
         device.set(mobile);
+        device.setId(gid);
+        getInventory().update(device);
+    }
+    
+    public void ping() throws SDKException {
+        logger.info("Ping to device with id {}.", gid);
+        ManagedObjectRepresentation device = new ManagedObjectRepresentation();
         device.setId(gid);
         getInventory().update(device);
     }
