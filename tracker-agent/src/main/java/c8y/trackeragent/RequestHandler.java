@@ -45,20 +45,31 @@ public class RequestHandler implements Runnable {
     private ConnectedTracker peekTracker() throws IOException {
         logger.debug("peek tracker for new connection...");
         InputStream bis = asInput(client);
-        bis.mark(1);
-        int marker = bis.read();
-        bis.reset();
-        if (marker >= '0' && marker <= '9') {
+        byte[] markingBytes = firstBytes(4, bis);
+        if (markingBytes[0] >= '0' && markingBytes[0] <= '9') {
             return new ConnectedTelicTracker(client, bis, trackerAgent);
-        } else if (marker == '*') {
+        } else if ("imei".equals(new String(markingBytes, "US-ASCII"))) {
             return new ConnectedCobanTracker(client, bis, trackerAgent);
         } else {
             return new ConnectedGL200Tracker(client, bis, trackerAgent);
         }
     }
-
+    
     private static InputStream asInput(Socket client) throws IOException {
         InputStream is = client.getInputStream();
         return new BufferedInputStream(is);
+    }
+    
+    private byte[] firstBytes(int limit, InputStream is) throws IOException {
+        byte[] bytes = new byte[limit];
+        is.mark(4);
+        int b;
+        int index = 0;
+        while ((b = is.read()) >= 0 && index < 4) {
+            bytes[index] = (byte) b;
+            index++;
+        }
+        is.reset();
+        return bytes;
     }
 }

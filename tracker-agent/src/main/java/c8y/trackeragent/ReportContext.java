@@ -3,7 +3,14 @@ package c8y.trackeragent;
 import java.io.OutputStream;
 import java.util.Arrays;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import c8y.trackeragent.protocol.coban.CobanParser;
+
 public class ReportContext {
+    
+    private static Logger logger = LoggerFactory.getLogger(ReportContext.class);
     
     private final String[] report;
     private final String imei;
@@ -27,8 +34,13 @@ public class ReportContext {
         return out;
     }
     
-    public String getReportEntry(int index) {
-        return (index < report.length) ? report[index] : null;
+    public String getEntry(int index) {
+        if (index < report.length) {
+            return report[index];
+        } else {
+            logger.debug("There is no entry at index " + index + " for array " + Arrays.toString(report));
+            return null;
+        }
     }
     
     public int getNumberOfEntries() {
@@ -62,6 +74,10 @@ public class ReportContext {
             return false;
         return true;
     }
-    
+
+    @Override
+    public String toString() {
+        return String.format("ReportContext [report=%s, imei=%s]", Arrays.toString(report), imei);
+    }
 
 }

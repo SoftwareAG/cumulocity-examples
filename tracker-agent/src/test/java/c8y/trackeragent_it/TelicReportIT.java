@@ -12,7 +12,6 @@ public class TelicReportIT extends TrackerITSupport {
     @Test
     public void shouldBootstrapNewDeviceAndThenChangeItsLocation() throws Exception {
         String imei = Devices.randomImei();
-        System.out.println("imei " + imei);
         bootstrap(imei, TelicReports.getTelicReportBytes(imei, Positions.ZERO));  
         
         //trigger regular report 

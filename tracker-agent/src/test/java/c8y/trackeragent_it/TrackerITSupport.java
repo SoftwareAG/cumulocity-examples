@@ -34,6 +34,7 @@ import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.exception.UnknownDeviceException;
 import c8y.trackeragent.utils.ConfigUtils;
+import c8y.trackeragent.utils.DeviceMessage;
 import c8y.trackeragent.utils.TrackerConfiguration;
 
 import com.cumulocity.model.authentication.CumulocityCredentials;
@@ -144,7 +145,7 @@ public abstract class TrackerITSupport {
         return response;
     }
 
-    private String readSocketResponse(InputStream in) throws IOException, UnsupportedEncodingException {
+    private String readSocketResponse(InputStream in) throws Exception {
         byte[] bytes = new byte[0];
         try {
             int b;
@@ -157,6 +158,11 @@ public abstract class TrackerITSupport {
         return bytes.length == 0 ? null : new String(bytes, "US-ASCII");
     }
     
+    protected String writeInNewConnection(DeviceMessage deviceMessage) throws Exception {
+        return writeInNewConnection(newSocket(), deviceMessage.asBytes());
+    }
+    
+    @Deprecated//use DeviceMessage object
     protected String writeInNewConnection(byte[] bis) throws Exception {
         return writeInNewConnection(newSocket(), bis);
     }
@@ -205,6 +211,11 @@ public abstract class TrackerITSupport {
         return new TrackerDevice(testPlatform, agentId, imei);
     }
     
+    protected void bootstrap(String imei, DeviceMessage deviceMessage) throws UnsupportedEncodingException, Exception, InterruptedException {
+        bootstrap(imei, deviceMessage.asBytes());
+    }
+    
+    @Deprecated//use DeviceMessage
     protected void bootstrap(String imei, byte[] report) throws UnsupportedEncodingException, Exception, InterruptedException {        
         createNewDeviceRequest(imei);
         // WAITING_FOR_CONNECTION status

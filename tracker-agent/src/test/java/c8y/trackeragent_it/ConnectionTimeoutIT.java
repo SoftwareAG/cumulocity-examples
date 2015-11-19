@@ -17,7 +17,6 @@ public class ConnectionTimeoutIT extends TrackerITSupport {
         timeoutConnection();
         
         String imei = Devices.randomImei();
-        System.out.println("imei " + imei);
         bootstrap(imei, TelicReports.getTelicReportBytes(imei, Positions.ZERO));  
         
         // trigger regular report 
