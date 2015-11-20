@@ -92,15 +92,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                   <excludes>
-                        <exclude>**/it/*.java</exclude>
-                   </excludes>
-                    <!-- <excludedGroups>com.orangeandbronze.test.IntegrationTest</excludedGroups> -->
-                </configuration>
-            </plugin>
         </plugins>
     </build>
     <profiles>
@@ -111,12 +102,6 @@
                     <plugin>
                         <artifactId>maven-failsafe-plugin</artifactId>
                         <version>2.16</version>
-                        <configuration>
-                            <includes>
-                                <include>**/it/*.java</include>
-                            </includes>
-                            <!-- <groups>com.orangeandbronze.test.IntegrationTest</groups> -->
-                        </configuration>
                         <executions>
                             <execution>
                                 <goals>
