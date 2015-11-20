@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
@@ -106,6 +107,7 @@ public class ConnectedTracker implements Runnable, Executor {
         try {
             processReport(report);
         } catch (SDKException x) {
+            logger.error("Error processing report " + Arrays.toString(report), x);
             /*
              * What might have happened here? Either the connection to the
              * platform is down or the object has been deleted from the

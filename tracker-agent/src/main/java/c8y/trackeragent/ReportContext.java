@@ -6,8 +6,6 @@ import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import c8y.trackeragent.protocol.coban.parser.CobanParser;
-
 public class ReportContext {
     
     private static Logger logger = LoggerFactory.getLogger(ReportContext.class);

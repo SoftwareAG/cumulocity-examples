@@ -26,11 +26,7 @@ public class PositionUpdateCobanParser extends CobanParser {
 
     @Override
     protected boolean accept(String[] report) {
-        if(report.length < 1) {
-            return false;
-        }
-        String reportType = report[1];
-        return "001".equals(reportType);
+        return report.length >= 1 && "001".equals(report[1]);
     }
 
     @Override
@@ -45,20 +41,16 @@ public class PositionUpdateCobanParser extends CobanParser {
             return true;
         }
         logger.debug("Update position for IMEI {}.", reportCtx.getImei());
-        try {
-            BigDecimal lat = latitude().withValue(reportCtx.getEntry(7), reportCtx.getEntry(8)).getValue();
-            BigDecimal lng = longitude().withValue(reportCtx.getEntry(9), reportCtx.getEntry(10)).getValue();
-            BigDecimal alt = altitude().withValue(reportCtx.getEntry(11)).getValue();
-            Position position = new Position();
-            position.setLat(lat);
-            position.setLng(lng);
-            position.setAlt(alt);
-            logger.debug("Update position for imei: {} to: {}.", reportCtx.getImei(), position);
-            TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(reportCtx.getImei());
-            device.setPosition(position);
-        } catch (Exception ex) {
-            logger.error("cant update position for device " + reportCtx.getImei(),ex);
-        }
+        BigDecimal lat = latitude().withValue(reportCtx.getEntry(7), reportCtx.getEntry(8)).getValue();
+        BigDecimal lng = longitude().withValue(reportCtx.getEntry(9), reportCtx.getEntry(10)).getValue();
+        BigDecimal alt = altitude().withValue(reportCtx.getEntry(11)).getValue();
+        Position position = new Position();
+        position.setLat(lat);
+        position.setLng(lng);
+        position.setAlt(alt);
+        logger.debug("Update position for imei: {} to: {}.", reportCtx.getImei(), position);
+        TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(reportCtx.getImei());
+        device.setPosition(position);
         return true;
     }
     
