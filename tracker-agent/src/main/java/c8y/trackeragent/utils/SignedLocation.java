@@ -18,8 +18,8 @@ public class SignedLocation {
     private final BiMap<Integer, String> signumToSymbol;
     private BigDecimal value;
     
-    protected SignedLocation(String positiveSymbol, String negationSymbol) {
-        this.signumToSymbol = ImmutableBiMap.of(1, positiveSymbol, -1, negationSymbol);
+    protected SignedLocation(String plusSymbol, String minusSymbol) {
+        this.signumToSymbol = ImmutableBiMap.of(1, plusSymbol, -1, minusSymbol);
     }
     
     public static SignedLocation latitude() {
@@ -67,7 +67,9 @@ public class SignedLocation {
     }
     
     public String getSymbol() {
-        return signumToSymbol.get(value.signum());
+        int signum = value.signum();
+        signum = signum == 0 ? 1 : signum;
+        return signumToSymbol.get(signum);
     }
 
 }

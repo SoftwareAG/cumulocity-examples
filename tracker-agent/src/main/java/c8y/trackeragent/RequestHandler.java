@@ -48,11 +48,11 @@ public class RequestHandler implements Runnable {
         byte[] markingBytes = firstBytes(1, bis);
         if (markingBytes[0] >= '0' && markingBytes[0] <= '9') {
             return new ConnectedTelicTracker(client, bis, trackerAgent);
-        } else if ("#".equals(new String(markingBytes, "US-ASCII"))) {
+        } else if (markingBytes[0] == 35) {
             return new ConnectedCobanTracker(client, bis, trackerAgent);
         } else {
             return new ConnectedGL200Tracker(client, bis, trackerAgent);
-        }
+        } 
     }
     
     private static InputStream asInput(Socket client) throws IOException {

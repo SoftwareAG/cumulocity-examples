@@ -31,5 +31,10 @@ public class SignedLocationTest {
         assertThat(longitude().withValue("7", "E").getValue()).isEqualTo(SEVEN);
         assertThat(longitude().withValue("7", "W").getValue()).isEqualTo(SEVEN.negate());
     }
+    
+    @Test
+    public void shouldReturnSymbolForValueZero() throws Exception {
+        assertThat(latitude().withValue(BigDecimal.ZERO).getSymbol()).isEqualTo("N");
+    }
 
 }
