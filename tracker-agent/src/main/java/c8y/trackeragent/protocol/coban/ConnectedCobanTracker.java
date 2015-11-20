@@ -8,6 +8,7 @@ import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.protocol.coban.parser.HeartbeatCobanParser;
 import c8y.trackeragent.protocol.coban.parser.LogonCobanParser;
 import c8y.trackeragent.protocol.coban.parser.PositionUpdateCobanParser;
+import c8y.trackeragent.protocol.coban.parser.alarm.AlarmCobanParser;
 
 public class ConnectedCobanTracker extends ConnectedTracker {
 
@@ -16,6 +17,7 @@ public class ConnectedCobanTracker extends ConnectedTracker {
         addFragment(new LogonCobanParser(trackerAgent));
         addFragment(new HeartbeatCobanParser(trackerAgent));
         addFragment(new PositionUpdateCobanParser(trackerAgent));
+        addFragment(new AlarmCobanParser(trackerAgent));
     }
 
 }
