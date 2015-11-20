@@ -25,6 +25,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.junit.After;
 import org.junit.Before;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import c8y.trackeragent.DeviceManagedObject;
 import c8y.trackeragent.Server;
@@ -33,6 +35,7 @@ import c8y.trackeragent.TrackerPlatform;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.exception.UnknownDeviceException;
+import c8y.trackeragent.protocol.coban.parser.HeartbeatCobanParser;
 import c8y.trackeragent.utils.ConfigUtils;
 import c8y.trackeragent.utils.DeviceMessage;
 import c8y.trackeragent.utils.TrackerConfiguration;
@@ -45,6 +48,8 @@ import com.cumulocity.sdk.client.ResponseParser;
 import com.cumulocity.sdk.client.RestConnector;
 
 public abstract class TrackerITSupport {
+    
+    private static Logger logger = LoggerFactory.getLogger(TrackerITSupport.class);
 
     protected static final boolean REMOTE = false;
     protected static final boolean LOCAL = true;
@@ -158,8 +163,13 @@ public abstract class TrackerITSupport {
         return bytes.length == 0 ? null : new String(bytes, "US-ASCII");
     }
     
-    protected String writeInNewConnection(DeviceMessage deviceMessage) throws Exception {
-        return writeInNewConnection(newSocket(), deviceMessage.asBytes());
+    protected String writeInNewConnection(DeviceMessage... deviceMessages) throws Exception {
+        DeviceMessage sum = deviceMessages[0];
+        for (int index = 1; index < deviceMessages.length; index++) {
+            sum = sum.append(deviceMessages[index]);
+        }
+        logger.info("Send message: {}", sum);
+        return writeInNewConnection(newSocket(), sum.asBytes());
     }
     
     @Deprecated//use DeviceMessage object

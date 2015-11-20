@@ -16,8 +16,8 @@ public class CobanDeviceMessages {
     
     private static final Logger logger = LoggerFactory.getLogger(CobanDeviceMessages.class);
     
-    private static final String LOGON = "imei:%s,A;";
-    private static final String HEARTBEAT = "imei:%s;";
+    private static final String LOGON = "##,imei:%s,A;";
+    private static final String HEARTBEAT = "%s;";
     private static final String POSITION_UPDATE = "imei:%s,001,0809231929,,F,055403.000,A,%s,%s,%s,%s,%s,,;";
     
     public static DeviceMessage logon(final String imei) throws Exception {
@@ -35,7 +35,7 @@ public class CobanDeviceMessages {
         SignedLocation lng = longitude().withValue(position.getLng());
         SignedLocation alt = altitude().withValue(position.getAlt());
         String format = POSITION_UPDATE;
-        String msg = formatMessage(format, imei, lat.getAbsValue(), lat.getSign(), lng.getAbsValue(), lng.getSign(), alt.getAbsValue());
+        String msg = formatMessage(format, imei, lat.getAbsValue(), lat.getSymbol(), lng.getAbsValue(), lng.getSymbol(), alt.getAbsValue());
         return deviceMessage(msg);
     }
 

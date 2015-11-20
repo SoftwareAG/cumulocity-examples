@@ -14,8 +14,8 @@ public class SignedLocationTest {
     
     @Test
     public void shouldConvertLatitude() throws Exception {
-        assertThat(latitude().withValue(SEVEN).getSign()).isEqualTo("N");
-        assertThat(latitude().withValue(SEVEN.negate()).getSign()).isEqualTo("S");
+        assertThat(latitude().withValue(SEVEN).getSymbol()).isEqualTo("N");
+        assertThat(latitude().withValue(SEVEN.negate()).getSymbol()).isEqualTo("S");
         assertThat(latitude().withValue(SEVEN).getAbsValue()).isEqualTo("7");
         
         assertThat(latitude().withValue("7", "N").getValue()).isEqualTo(SEVEN);
@@ -24,8 +24,8 @@ public class SignedLocationTest {
     
     @Test
     public void shouldConvertLongitude() throws Exception {
-        assertThat(longitude().withValue(SEVEN).getSign()).isEqualTo("E");
-        assertThat(longitude().withValue(SEVEN.negate()).getSign()).isEqualTo("W");
+        assertThat(longitude().withValue(SEVEN).getSymbol()).isEqualTo("E");
+        assertThat(longitude().withValue(SEVEN.negate()).getSymbol()).isEqualTo("W");
         assertThat(longitude().withValue(SEVEN).getAbsValue()).isEqualTo("7");
         
         assertThat(longitude().withValue("7", "E").getValue()).isEqualTo(SEVEN);

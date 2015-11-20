@@ -2,6 +2,7 @@ package c8y.trackeragent.utils;
 
 import java.io.UnsupportedEncodingException;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 
@@ -26,12 +27,16 @@ public class DeviceMessage {
     }
     
     public String[] asArray() {
-        String partsStr = text;
+        String partsStr = stripReportSep(text);        
+        Iterable<String> parts = Splitter.on(fieldSep).split(partsStr);
+        return Iterables.toArray(parts, String.class);
+    }
+
+    private String stripReportSep(String partsStr) {
         if (partsStr.endsWith(reportSep)) {
             partsStr = partsStr.substring(0, partsStr.length() - 1);
-        }        
-        Iterable<String> parts = Splitter.on(fieldSep).split(text);
-        return Iterables.toArray(parts, String.class);
+        }
+        return partsStr;
     }
     
     private static byte[] asBytes(String msg) {
@@ -42,6 +47,13 @@ public class DeviceMessage {
         }
     }
     
-    
+    public DeviceMessage append(DeviceMessage other) {
+        String text = Joiner.on(reportSep).join(stripReportSep(this.text), stripReportSep(other.text));
+        return new DeviceMessage(fieldSep, reportSep, text + reportSep);
+    }
 
+    @Override
+    public String toString() {
+        return text;
+    }
 }

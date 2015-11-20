@@ -15,11 +15,11 @@ public class SignedLocation {
     
     private static Logger logger = LoggerFactory.getLogger(SignedLocation.class);
     
-    private final BiMap<Integer, String> signumToOrientation;
+    private final BiMap<Integer, String> signumToSymbol;
     private BigDecimal value;
     
-    protected SignedLocation(String positiveToken, String negationToken) {
-        this.signumToOrientation = ImmutableBiMap.of(1, positiveToken, -1, negationToken);
+    protected SignedLocation(String positiveSymbol, String negationSymbol) {
+        this.signumToSymbol = ImmutableBiMap.of(1, positiveSymbol, -1, negationSymbol);
     }
     
     public static SignedLocation latitude() {
@@ -53,9 +53,9 @@ public class SignedLocation {
         return this;
     }
     
-    public SignedLocation withValue(String abs, String signum) {
+    public SignedLocation withValue(String abs, String symbol) {
         withValue(abs);        
-        int requestedSignum = signumToOrientation.inverse().get(signum);
+        int requestedSignum = signumToSymbol.inverse().get(symbol);
         if (requestedSignum < 0) {
             value = value.negate();
         }
@@ -66,8 +66,8 @@ public class SignedLocation {
         return value.abs().toString();
     }
     
-    public String getSign() {
-        return signumToOrientation.get(value.signum());
+    public String getSymbol() {
+        return signumToSymbol.get(value.signum());
     }
 
 }
