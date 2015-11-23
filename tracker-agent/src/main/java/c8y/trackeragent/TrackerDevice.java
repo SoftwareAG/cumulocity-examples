@@ -20,22 +20,16 @@
 
 package c8y.trackeragent;
 
+import static org.apache.commons.lang.StringUtils.isEmpty;
+
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.HashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import c8y.Battery;
-import c8y.Configuration;
-import c8y.Geofence;
-import c8y.IsDevice;
-import c8y.Mobile;
-import c8y.MotionTracking;
-import c8y.Position;
-import c8y.Restart;
-import c8y.SignalStrength;
-import c8y.SupportedOperations;
+import c8y.*;
 
 import com.cumulocity.model.ID;
 import com.cumulocity.model.event.CumulocityAlarmStatuses;
@@ -54,6 +48,7 @@ import com.cumulocity.sdk.client.measurement.MeasurementApi;
 public class TrackerDevice extends DeviceManagedObject {
     public static final String TYPE = "c8y_Tracker";
     public static final String XTID_TYPE = "c8y_Imei";
+    public static final String VIN_XT_TYPE = "c8y_VIN";
     public static final String BAT_TYPE = "c8y_TrackerBattery";
     public static final String SIG_TYPE = "c8y_TrackerSignal";
 
@@ -292,6 +287,56 @@ public class TrackerDevice extends DeviceManagedObject {
         createOrUpdate(device, extId, agentGid);
         gid = device.getId();
         self = device.getSelf();
+    }
+
+    public void registerVIN(String vin) {
+        if (isEmpty(vin) || gid == null) {
+            return;
+        }
+        ID extId = asVIN(vin);
+        try {
+            if (tryGetBinding(extId) == null) {
+                ManagedObjectRepresentation mor = new ManagedObjectRepresentation();
+                mor.setId(gid);
+                bind(mor, extId);
+            }
+        } catch (SDKException e) {
+            logger.error("Failed to register vin for device " + gid, e);
+        }
+    }
+
+    private ID asVIN(String vin) {
+        ID extId = new ID(vin);
+        extId.setType(TrackerDevice.VIN_XT_TYPE);
+        return extId;
+    }
+    
+    public void createMileageMeasurement(String mileage) {
+        if (isEmpty(mileage)) {
+            return;
+        }
+        float mileageFloat = 0;
+        try {
+            mileageFloat = Float.parseFloat(mileage);
+        } catch (NumberFormatException e) {
+            logger.warn("Failed to parse mileage value: " + mileage);
+            return;
+        }
+        measurements.create(asMeasurementWithSpeed(mileageFloat));
+    }
+
+    private MeasurementRepresentation asMeasurementWithSpeed(float mileage) {
+        ManagedObjectRepresentation source = new ManagedObjectRepresentation();
+        source.setId(gid);
+        MeasurementRepresentation representation = new MeasurementRepresentation();
+        representation.setTime(new Date());
+        representation.setSource(source);
+        representation.setType("c8y_TrackerMileage");
+        HashMap<String, Object> measurementValue = new HashMap<String, Object>();
+        measurementValue.put("value", mileage);
+        measurementValue.put("unit", "km");
+        representation.set(measurementValue, "c8y_DistanceMeasurement");
+        return representation;
     }
 
 }
