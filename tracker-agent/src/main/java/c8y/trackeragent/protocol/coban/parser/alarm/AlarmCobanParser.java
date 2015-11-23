@@ -7,8 +7,10 @@ import java.util.List;
 
 import c8y.trackeragent.ReportContext;
 import c8y.trackeragent.TrackerAgent;
+import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.protocol.coban.parser.CobanParser;
 
+import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 import com.google.common.collect.ImmutableList;
 
@@ -38,17 +40,20 @@ public class AlarmCobanParser extends CobanParser {
     }
 
     @Override
-    public boolean onParsed(ReportContext reportCtx) throws SDKException {
-        // TODO
-        return false;
-    }
-
-    @Override
     protected boolean accept(String[] report) {
-        if(report.length < 2) {
+        if (report.length < 2) {
             return false;
         }
-        return parseAlarmInfo(report[1]) != null;
+        return parseAlarmInfo(report) != null;
+    }
+    
+    @Override
+    public boolean onParsed(ReportContext reportCtx) throws SDKException {
+        AlarmInfo alarmInfo = parseAlarmInfo(reportCtx.getReport());
+        TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(reportCtx.getImei());
+        AlarmRepresentation alarm = new AlarmRepresentation();
+        device.createAlarm(alarm);
+        return true;
     }
 
     @Override
@@ -56,10 +61,11 @@ public class AlarmCobanParser extends CobanParser {
         return extractImeiValue(report[0]);
     }
     
-    private AlarmInfo parseAlarmInfo(String reportType) {
+    private AlarmInfo parseAlarmInfo(String[] report) {
+        String alarmType = report[1];
         AlarmInfo alarmInfo = null;
         for (AlarmInfoParser parser : alarmParsers) {
-            alarmInfo = parser.parse(reportType);
+            alarmInfo = parser.parse(alarmType);
             if (alarmInfo != null) {
                 break;
             }

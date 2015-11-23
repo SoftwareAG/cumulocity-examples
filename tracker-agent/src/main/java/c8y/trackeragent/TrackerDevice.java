@@ -208,8 +208,17 @@ public class TrackerDevice extends DeviceManagedObject {
         device.setId(gid);
         getInventory().update(device);
     }
+    
+    public AlarmRepresentation createAlarm(AlarmRepresentation newAlarm) throws SDKException { 
+        return createOrCancelAlarm(true, newAlarm);
+    }
+    
+    public AlarmRepresentation clearAlarm(AlarmRepresentation newAlarm) throws SDKException { 
+        return createOrCancelAlarm(false, newAlarm);
+    }
 
-    private void createOrCancelAlarm(boolean status, AlarmRepresentation newAlarm) throws SDKException {
+    private AlarmRepresentation createOrCancelAlarm(boolean status, AlarmRepresentation newAlarm) throws SDKException {
+        newAlarm.setSource(asSource());
         String newStatus = status ? CumulocityAlarmStatuses.ACTIVE.toString() : CumulocityAlarmStatuses.CLEARED.toString();
 
         AlarmRepresentation activeAlarm = findActiveAlarm(newAlarm.getType());
@@ -217,11 +226,11 @@ public class TrackerDevice extends DeviceManagedObject {
         if (activeAlarm != null) {
             activeAlarm.setTime(new Date());
             activeAlarm.setStatus(newStatus);
-            alarms.update(activeAlarm);
+            return alarms.update(activeAlarm);
         } else {
             newAlarm.setTime(new Date());
             newAlarm.setStatus(newStatus);
-            alarms.create(newAlarm);
+            return alarms.create(newAlarm);
         }
     }
 
@@ -235,9 +244,7 @@ public class TrackerDevice extends DeviceManagedObject {
     }
 
     private void setupTemplates(GId agentGid) throws SDKException {
-        ManagedObjectRepresentation source = new ManagedObjectRepresentation();
-        source.setId(gid);
-        source.setSelf(self);
+        ManagedObjectRepresentation source = asSource();
 
         locationUpdate.setType(LU_EVENT_TYPE);
         locationUpdate.setText("Location updated");
@@ -271,6 +278,13 @@ public class TrackerDevice extends DeviceManagedObject {
         gprsSignalMsrmt.setType(SIG_TYPE);
         gprsSignalMsrmt.set(gprsSignal);
         gprsSignalMsrmt.setSource(source);
+    }
+
+    private ManagedObjectRepresentation asSource() {
+        ManagedObjectRepresentation source = new ManagedObjectRepresentation();
+        source.setId(gid);
+        source.setSelf(self);
+        return source;
     }
 
     private void createMo(GId agentGid) throws SDKException {
