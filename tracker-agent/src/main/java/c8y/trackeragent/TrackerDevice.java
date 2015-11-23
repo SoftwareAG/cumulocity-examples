@@ -344,10 +344,10 @@ public class TrackerDevice extends DeviceManagedObject {
             logger.warn("Failed to parse mileage value: " + mileage);
             return;
         }
-        measurements.create(asMeasurementWithSpeed(mileageFloat));
+        measurements.create(asMeasurementWithMileage(mileageFloat));
     }
 
-    private MeasurementRepresentation asMeasurementWithSpeed(float mileage) {
+    private MeasurementRepresentation asMeasurementWithMileage(float mileage) {
         ManagedObjectRepresentation source = new ManagedObjectRepresentation();
         source.setId(gid);
         MeasurementRepresentation representation = new MeasurementRepresentation();
