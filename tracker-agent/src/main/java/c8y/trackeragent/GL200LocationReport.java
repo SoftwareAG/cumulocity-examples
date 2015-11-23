@@ -85,7 +85,13 @@ public class GL200LocationReport extends GL200Parser {
     
     private boolean processLocationReportOnParsed(String[] report, String imei) throws SDKException {
         String deviceType = report[1].substring(0, 2);
+        
         TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(imei);
+        String vin = report[3];
+        device.registerVIN(vin);
+        
+        createMileageMeasurementIfAvailable(report, device);
+        
         int reportStart = 7;
         int reportLength = 12;
         int reportEnd = reportStart + Integer.parseInt(report[6]) * reportLength;
@@ -105,6 +111,13 @@ public class GL200LocationReport extends GL200Parser {
             processLocationReportOnParsed(device, report, reportStart);
         }
         return true;
+    }
+
+    private void createMileageMeasurementIfAvailable(String[] report, TrackerDevice device) {
+        if (report.length > 20) {
+            String mileage = report[20];
+            device.createMileageMeasurement(mileage);
+        }
     }
 
 	private void processLocationReportOnParsed(TrackerDevice device, String[] report,
