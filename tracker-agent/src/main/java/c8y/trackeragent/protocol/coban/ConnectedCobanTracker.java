@@ -9,14 +9,16 @@ import c8y.trackeragent.protocol.coban.parser.HeartbeatCobanParser;
 import c8y.trackeragent.protocol.coban.parser.LogonCobanParser;
 import c8y.trackeragent.protocol.coban.parser.PositionUpdateCobanParser;
 import c8y.trackeragent.protocol.coban.parser.alarm.AlarmCobanParser;
+import c8y.trackeragent.utils.message.TrackerMessageFactory;
 
 public class ConnectedCobanTracker extends ConnectedTracker {
 
     public ConnectedCobanTracker(Socket client, InputStream bis, TrackerAgent trackerAgent) {
         super(client, bis, CobanConstants.REPORT_SEP, CobanConstants.FIELD_SEP, trackerAgent);
+        TrackerMessageFactory msgFactory = new TrackerMessageFactory(CobanConstants.FIELD_SEP, "" + CobanConstants.REPORT_SEP);
         addFragment(new LogonCobanParser(trackerAgent));
         addFragment(new HeartbeatCobanParser(trackerAgent));
-        addFragment(new PositionUpdateCobanParser(trackerAgent));
+        addFragment(new PositionUpdateCobanParser(trackerAgent, msgFactory));
         addFragment(new AlarmCobanParser(trackerAgent));
     }
 

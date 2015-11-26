@@ -1,4 +1,4 @@
-package c8y.trackeragent.utils;
+package c8y.trackeragent.utils.message;
 
 import java.io.UnsupportedEncodingException;
 
@@ -6,13 +6,13 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 
-public class DeviceMessage {
+public class TrackerMessage {
     
     private final String text;
     private final String fieldSep;
     private final String reportSep;
 
-    public DeviceMessage(String fieldSep, String reportSep, String text) {
+    public TrackerMessage(String fieldSep, String reportSep, String text) {
         this.fieldSep = fieldSep;
         this.reportSep = reportSep;
         this.text = text;
@@ -33,10 +33,23 @@ public class DeviceMessage {
     }
 
     private String stripReportSep(String partsStr) {
-        if (partsStr.endsWith(reportSep)) {
-            partsStr = partsStr.substring(0, partsStr.length() - 1);
+        return strip(partsStr, reportSep);
+    }
+    
+//    private String stripFieldSep(String partsStr) {
+//        return strip(partsStr, fieldSep);
+//    }
+//    
+//    private String stripSeps(String partsStr) {
+//        return stripFieldSep(stripReportSep(partsStr));
+//    }
+    
+    private static String strip(String source, String postfix) {
+        if (source.endsWith(postfix)) {
+            source = source.substring(0, source.length() - postfix.length());
         }
-        return partsStr;
+        return source;
+        
     }
     
     private static byte[] asBytes(String msg) {
@@ -47,9 +60,14 @@ public class DeviceMessage {
         }
     }
     
-    public DeviceMessage append(DeviceMessage other) {
+    public TrackerMessage appendReport(TrackerMessage other) {
         String text = Joiner.on(reportSep).join(stripReportSep(this.text), stripReportSep(other.text));
-        return new DeviceMessage(fieldSep, reportSep, text + reportSep);
+        return new TrackerMessage(fieldSep, reportSep, text + reportSep);
+    }
+    
+    public TrackerMessage appendField(TrackerMessage other) {
+        String text = Joiner.on(fieldSep).join(stripReportSep(this.text), stripReportSep(other.text));
+        return new TrackerMessage(fieldSep, reportSep, text);
     }
 
     @Override

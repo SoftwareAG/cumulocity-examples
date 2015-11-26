@@ -37,6 +37,10 @@ public abstract class CobanParser implements Parser {
     protected String extractImeiValue(String imeiPart) {
         return imeiPart.replaceFirst(IMEI_PREFIX, "");
     }
+    
+    protected String formatImeiValue(String imei) {
+        return IMEI_PREFIX + imei;
+    }
 
     protected void writeOut(ReportContext reportCtx, String string) {
         try {

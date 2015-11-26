@@ -33,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import c8y.trackeragent.event.TrackerAgentEvents;
+import c8y.trackeragent.operations.OperationContext;
 
 import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
@@ -178,20 +179,20 @@ public class ConnectedTracker implements Runnable, Executor {
     }
 
     @Override
-    public void execute(OperationRepresentation operation) throws IOException {
-        String translation = translate(operation);
-        logger.debug("Executing operation\n{}\n{}", operation, translation);
+    public void execute(OperationContext operationCtx) throws IOException {
+        String translation = translate(operationCtx);
+        logger.debug("Executing operation\n{}\n{}", operationCtx, translation);
 
-        if (translation != null) {
+        if (translation == null) {
+            operationCtx.getOperation().setStatus(OperationStatus.FAILED.toString());
+            operationCtx.getOperation().setFailureReason("Command currently not supported");
+        } else {
             out.write(translation.getBytes());
             out.flush();
-        } else {
-            operation.setStatus(OperationStatus.FAILED.toString());
-            operation.setFailureReason("Command currently not supported");
         }
     }
 
-    public String translate(OperationRepresentation operation) {
+    public String translate(OperationContext operation) {
         for (Object fragment : fragments) {
             if (fragment instanceof Translator) {
                 Translator translator = (Translator) fragment;

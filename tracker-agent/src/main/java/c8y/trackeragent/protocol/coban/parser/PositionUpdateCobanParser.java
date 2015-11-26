@@ -9,19 +9,27 @@ import java.math.BigDecimal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import c8y.MotionTracking;
 import c8y.Position;
 import c8y.trackeragent.ReportContext;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerDevice;
+import c8y.trackeragent.Translator;
+import c8y.trackeragent.operations.OperationContext;
+import c8y.trackeragent.utils.message.TrackerMessage;
+import c8y.trackeragent.utils.message.TrackerMessageFactory;
 
+import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 
-public class PositionUpdateCobanParser extends CobanParser {
+public class PositionUpdateCobanParser extends CobanParser implements Translator {
     
     private static Logger logger = LoggerFactory.getLogger(PositionUpdateCobanParser.class);
-
-    public PositionUpdateCobanParser(TrackerAgent trackerAgent) {
+    private final TrackerMessageFactory msgFactory;
+    
+    public PositionUpdateCobanParser(TrackerAgent trackerAgent, TrackerMessageFactory msgFactory) {
         super(trackerAgent);
+        this.msgFactory = msgFactory;
     }
 
     @Override
@@ -52,6 +60,37 @@ public class PositionUpdateCobanParser extends CobanParser {
         TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(reportCtx.getImei());
         device.setPosition(position);
         return true;
+    }
+
+    @Override
+    public String translate(OperationContext operationCtx) {
+        logger.debug("Translate operation {}.", operationCtx);
+        OperationRepresentation operation = operationCtx.getOperation();
+        MotionTracking mTrack = operation.get(MotionTracking.class);
+
+        if (mTrack == null) {
+            logger.debug("Skip. No fragment {}.", MotionTracking.class);
+            return null;
+        }
+        
+        if (!mTrack.isActive()) {
+            logger.debug("Skip. Fragment {} inactive.", MotionTracking.class);
+            return null;
+        }
+        
+        String cobanRequest = (String) mTrack.getProperty("cobanRequest");
+        if (cobanRequest == null) {
+            logger.debug("Parsed message: {}", cobanRequest);
+            return null;
+        }
+        
+        String imeiPart = formatImeiValue(operationCtx.getImei());
+        TrackerMessage msg = msg("**").appendField(msg(imeiPart)).appendField(msg(cobanRequest));
+        return msg.asText();
+    }
+    
+    private TrackerMessage msg(String text) {
+        return msgFactory.message(text);
     }
     
 }

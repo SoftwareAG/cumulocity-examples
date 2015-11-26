@@ -9,7 +9,7 @@ import org.junit.Test;
 
 import c8y.trackeragent.ReportContext;
 import c8y.trackeragent.protocol.coban.CobanDeviceMessages;
-import c8y.trackeragent.utils.DeviceMessage;
+import c8y.trackeragent.utils.message.TrackerMessage;
 
 public class LogonCobanParserTest extends CobanParserTestSupport {
     
@@ -23,7 +23,7 @@ public class LogonCobanParserTest extends CobanParserTestSupport {
     
     @Test
     public void shouldParseImei() throws Exception {
-        DeviceMessage deviceMessage = CobanDeviceMessages.logon("ABCD");
+        TrackerMessage deviceMessage = CobanDeviceMessages.logon("ABCD");
         String actual = cobanParser.parse(deviceMessage.asArray());
         
         assertThat(actual).isEqualTo("ABCD");

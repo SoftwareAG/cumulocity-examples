@@ -37,8 +37,8 @@ import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.exception.UnknownDeviceException;
 import c8y.trackeragent.protocol.coban.parser.HeartbeatCobanParser;
 import c8y.trackeragent.utils.ConfigUtils;
-import c8y.trackeragent.utils.DeviceMessage;
 import c8y.trackeragent.utils.TrackerConfiguration;
+import c8y.trackeragent.utils.message.TrackerMessage;
 
 import com.cumulocity.model.authentication.CumulocityCredentials;
 import com.cumulocity.model.idtype.GId;
@@ -163,10 +163,10 @@ public abstract class TrackerITSupport {
         return bytes.length == 0 ? null : new String(bytes, "US-ASCII");
     }
     
-    protected String writeInNewConnection(DeviceMessage... deviceMessages) throws Exception {
-        DeviceMessage sum = deviceMessages[0];
+    protected String writeInNewConnection(TrackerMessage... deviceMessages) throws Exception {
+        TrackerMessage sum = deviceMessages[0];
         for (int index = 1; index < deviceMessages.length; index++) {
-            sum = sum.append(deviceMessages[index]);
+            sum = sum.appendReport(deviceMessages[index]);
         }
         logger.info("Send message: {}", sum);
         return writeInNewConnection(newSocket(), sum.asBytes());
@@ -221,7 +221,7 @@ public abstract class TrackerITSupport {
         return new TrackerDevice(testPlatform, agentId, imei);
     }
     
-    protected void bootstrap(String imei, DeviceMessage deviceMessage) throws UnsupportedEncodingException, Exception, InterruptedException {
+    protected void bootstrap(String imei, TrackerMessage deviceMessage) throws UnsupportedEncodingException, Exception, InterruptedException {
         bootstrap(imei, deviceMessage.asBytes());
     }
     

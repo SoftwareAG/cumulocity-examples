@@ -21,6 +21,7 @@
 package c8y.trackeragent;
 
 import c8y.Geofence;
+import c8y.trackeragent.operations.OperationContext;
 
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
@@ -126,7 +127,8 @@ public class GL200Geofence extends GL200LocationReport implements Translator {
      * Convert the operation to set or disable a geofence to GL200 format.
      */
     @Override
-    public String translate(OperationRepresentation operation) {
+    public String translate(OperationContext operationCtx) {
+        OperationRepresentation operation = operationCtx.getOperation();
         Geofence geofence = operation.get(Geofence.class);
 
         if (geofence == null) {

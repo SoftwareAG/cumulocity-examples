@@ -42,6 +42,7 @@ import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
+import c8y.trackeragent.operations.OperationContext;
 import c8y.trackeragent.utils.Devices;
 import c8y.trackeragent.utils.TrackerContext;
 
@@ -52,7 +53,6 @@ import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
 import com.cumulocity.rest.representation.identity.ExternalIDRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
-import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.alarm.AlarmApi;
 import com.cumulocity.sdk.client.alarm.AlarmFilter;
@@ -83,7 +83,7 @@ public class TrackerDeviceIT extends TrackerITSupport {
 
         ConnectionRegistry.instance().put(IMEI, new Executor() {
             @Override
-            public void execute(OperationRepresentation operation) throws IOException {
+            public void execute(OperationContext operation) throws IOException {
                 // Nothing
             }
         });

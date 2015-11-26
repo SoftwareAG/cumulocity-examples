@@ -35,6 +35,7 @@ import c8y.trackeragent.GL200Constants;
 import c8y.trackeragent.GL200Geofence;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerDevice;
+import c8y.trackeragent.operations.OperationContext;
 
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
@@ -54,11 +55,12 @@ public class GL200GeofenceTest {
     private TrackerAgent trackerAgent = mock(TrackerAgent.class);
     private TrackerDevice device = mock(TrackerDevice.class);
 
-    private OperationRepresentation operation = new OperationRepresentation();
+    private OperationContext operationCtx;
     private Geofence fence;
 
     @Before
     public void setup() throws SDKException {
+        OperationRepresentation operation = new OperationRepresentation();
         fence = new Geofence();
         fence.setLng(new BigDecimal("101.412248"));
         fence.setLat(new BigDecimal("21.187891"));
@@ -66,6 +68,8 @@ public class GL200GeofenceTest {
         fence.setActive(true);
         operation.set(fence);
 
+        operationCtx = new OperationContext(operation, IMEI);
+        
         gl200gf = new GL200Geofence(trackerAgent, PASSWORD);
 
         when(trackerAgent.getOrCreateTrackerDevice(anyString())).thenReturn(device);
@@ -73,13 +77,13 @@ public class GL200GeofenceTest {
 
     @Test
     public void setGeofence() {
-        String asciiOperation = gl200gf.translate(operation);
+        String asciiOperation = gl200gf.translate(operationCtx);
         assertEquals(SETFENCESTR, asciiOperation);
     }
 
     @Test
     public void acknowledgeGeofence() throws SDKException {
-        gl200gf.translate(operation);
+        gl200gf.translate(operationCtx);
         String imei = gl200gf.parse(ACKFENCE);
         gl200gf.onParsed(new ReportContext(ACKFENCE, imei, null));
 
@@ -90,7 +94,7 @@ public class GL200GeofenceTest {
 
     @Test
     public void acknowledgeGeofenceWrongReply() throws SDKException {
-        gl200gf.translate(operation);
+        gl200gf.translate(operationCtx);
 
         String[] wrongCorrelation = ACKFENCE;
         wrongCorrelation[5] = "0002";

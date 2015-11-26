@@ -20,18 +20,19 @@
 
 package c8y.trackeragent;
 
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import c8y.MotionTracking;
-import c8y.trackeragent.GL200Constants;
-import c8y.trackeragent.GL200DeviceMotionState;
-import c8y.trackeragent.TrackerAgent;
-import c8y.trackeragent.TrackerDevice;
+import c8y.trackeragent.operations.OperationContext;
 
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
@@ -55,13 +56,15 @@ public class GL200DeviceMotionStateTest {
     private GL200DeviceMotionState gl200mot;
     private TrackerAgent trackerAgent = mock(TrackerAgent.class);
     private TrackerDevice device = mock(TrackerDevice.class);
-    private OperationRepresentation operation = new OperationRepresentation();
+    private OperationContext operationCtx;
     private MotionTracking track = new MotionTracking();
 
 
     @Before
     public void setup() throws SDKException {
+        OperationRepresentation operation = new OperationRepresentation();
         operation.set(track);
+        operationCtx = new OperationContext(operation, IMEI);
         gl200mot = new GL200DeviceMotionState(trackerAgent, PASSWORD);
         when(trackerAgent.getOrCreateTrackerDevice(anyString())).thenReturn(device);
     }
@@ -69,18 +72,18 @@ public class GL200DeviceMotionStateTest {
     @Test
     public void setMotionTracking() {
         track.setActive(false);
-        String asciiOperation = gl200mot.translate(operation);
+        String asciiOperation = gl200mot.translate(operationCtx);
         assertEquals(SETTRACKINGSTR, asciiOperation);
 
         track.setActive(true);
-        asciiOperation = gl200mot.translate(operation);
+        asciiOperation = gl200mot.translate(operationCtx);
         assertEquals(SETTRACKINGSTR.replace("47", "303").replace("0001", "0002"), asciiOperation);
     }
 
     @Test
     public void ackMotionTracking() throws SDKException {
         track.setActive(false);
-        gl200mot.translate(operation);
+        gl200mot.translate(operationCtx);
 
         String imei = gl200mot.parse(ACKMOTION);
         ReportContext reportCtx = new ReportContext(ACKMOTION, imei, null);
