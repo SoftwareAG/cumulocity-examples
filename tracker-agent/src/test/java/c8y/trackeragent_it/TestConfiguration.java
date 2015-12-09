@@ -2,20 +2,11 @@ package c8y.trackeragent_it;
 
 public class TestConfiguration {
     
-    private String c8yHost;
     private String c8yUser;
     private String c8yPassword;
     private String c8yTenant;
     private String trackerAgentHost;
-    private int trackerAgentPort;
     
-    public String getC8yHost() {
-        return c8yHost;
-    }
-    public TestConfiguration setC8yHost(String c8yHost) {
-        this.c8yHost = c8yHost;
-        return this;
-    }
     public String getC8yUser() {
         return c8yUser;
     }
@@ -44,16 +35,10 @@ public class TestConfiguration {
         this.trackerAgentHost = trackerAgentHost;
         return this;
     }
-    public int getTrackerAgentPort() {
-        return trackerAgentPort;
-    }
-    public TestConfiguration setTrackerAgentPort(int trackerAgentPort) {
-        this.trackerAgentPort = trackerAgentPort;
-        return this;
-    }
     @Override
     public String toString() {
-        return String.format("TestConfiguration [c8yHost=%s, c8yUser=%s, c8yPassword=%s, c8yTenant=%s, trackerAgentHost=%s, trackerAgentPort=%s]", c8yHost, c8yUser, c8yPassword, c8yTenant,
-                trackerAgentHost, trackerAgentPort);
+        return String.format("TestConfiguration [c8yUser=%s, c8yPassword=%s, c8yTenant=%s, trackerAgentHost=%s]",
+                c8yUser, c8yPassword, c8yTenant, trackerAgentHost);
     }
+
 }

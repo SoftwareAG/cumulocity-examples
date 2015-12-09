@@ -2,7 +2,6 @@ package c8y.trackeragent_it;
 
 import static com.cumulocity.model.authentication.CumulocityCredentials.Builder.cumulocityCredentials;
 import static com.cumulocity.rest.representation.operation.DeviceControlMediaType.NEW_DEVICE_REQUEST;
-import static java.lang.Integer.parseInt;
 import static org.fest.assertions.Assertions.assertThat;
 
 import java.io.File;
@@ -16,7 +15,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Properties;
-import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -35,7 +33,6 @@ import c8y.trackeragent.TrackerPlatform;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.exception.UnknownDeviceException;
-import c8y.trackeragent.protocol.coban.parser.HeartbeatCobanParser;
 import c8y.trackeragent.utils.ConfigUtils;
 import c8y.trackeragent.utils.TrackerConfiguration;
 import c8y.trackeragent.utils.message.TrackerMessage;
@@ -51,11 +48,6 @@ public abstract class TrackerITSupport {
     
     private static Logger logger = LoggerFactory.getLogger(TrackerITSupport.class);
 
-    protected static final boolean REMOTE = false;
-    protected static final boolean LOCAL = true;
-    private static final Random random = new Random();
-
-    private final boolean local;
     protected TrackerPlatform testPlatform;
     protected TrackerConfiguration trackerAgentConfig;
     protected TestConfiguration testConfig;
@@ -64,30 +56,26 @@ public abstract class TrackerITSupport {
     private Server server;
     private final Collection<Socket> sockets = new HashSet<Socket>();
 
-    public TrackerITSupport() {
-        this(LOCAL);
-    }
-
-    public TrackerITSupport(boolean local) {
-        this.local = local;
-    }
-
     @Before
     public void baseSetUp() throws IOException {
-        testConfig = getTestConfig(local);
+        testConfig = getTestConfig();
         System.out.println(testConfig);
-        trackerAgentConfig = getPlatformConfiguration();
+        trackerAgentConfig = ConfigUtils.get().loadCommonConfiguration().setBootstrapPollIntervals(Arrays.asList(1L, 2L, 3L, 4L));
         System.out.println(trackerAgentConfig);
-        if (local) {
+        if (isLocalTrackerTest()) {
             clearPersistedDevices();
         }
         testPlatform = createTrackerPlatform();
         restConnector = new RestConnector(testPlatform.getPlatformParameters(), new ResponseParser());
-        if (local) {
+        if (isLocalTrackerTest()) {
             server = new Server(trackerAgentConfig);
             server.init();
             executor.submit(server);
         }
+    }
+
+    private boolean isLocalTrackerTest() {
+        return testConfig.getTrackerAgentHost().equals("localhost");
     }
 
     private void clearPersistedDevices() throws IOException {
@@ -99,7 +87,7 @@ public abstract class TrackerITSupport {
 
     @After
     public void baseTearDown() throws IOException {
-        if (local) {
+        if (isLocalTrackerTest()) {
             executor.shutdownNow();
         }
         for(Socket socket : sockets) {
@@ -110,22 +98,10 @@ public abstract class TrackerITSupport {
         sockets.clear();
     }
 
-    private TrackerConfiguration getPlatformConfiguration() {
-        return ConfigUtils.get().loadCommonConfiguration()
-                .setLocalPort(testConfig.getTrackerAgentPort())
-                .setPlatformHost(testConfig.getC8yHost())
-                .setBootstrapPollIntervals(Arrays.asList(1L, 2L, 3L, 4L));
-    }
-
     protected TrackerPlatform createTrackerPlatform() {
-        //@formatter:off
-        CumulocityCredentials credentials = cumulocityCredentials(
-                testConfig.getC8yUser(),
-                testConfig.getC8yPassword())
-                .withTenantId(testConfig.getC8yTenant())
-                .build();
-        //@formatter:on
-        PlatformImpl platform = new PlatformImpl(testConfig.getC8yHost(), credentials);
+        CumulocityCredentials credentials = cumulocityCredentials(testConfig.getC8yUser(),testConfig.getC8yPassword())
+                .withTenantId(testConfig.getC8yTenant()).build();
+        PlatformImpl platform = new PlatformImpl(trackerAgentConfig.getPlatformHost(), credentials);
         return new TrackerPlatform(platform);
     }
 
@@ -179,7 +155,7 @@ public abstract class TrackerITSupport {
     
     protected Socket newSocket() throws IOException {
         String socketHost = testConfig.getTrackerAgentHost();
-        int socketPort = testConfig.getTrackerAgentPort();
+        int socketPort = trackerAgentConfig.getLocalPort();
         try {
             Socket socket = new Socket(socketHost, socketPort);
             socket.setSoTimeout(1000);
@@ -241,22 +217,14 @@ public abstract class TrackerITSupport {
         assertThat(credentials).isNotNull();
     }    
 
-    private static TestConfiguration getTestConfig(boolean local) {
-        String fileName = local ? "it-local.properties" : "it-remote.properties";
-        String testFilePath = ConfigUtils.get().getConfigFilePath(fileName);
-        Properties props = ConfigUtils.get().getProperties(testFilePath);
+    private static TestConfiguration getTestConfig() {
+        Properties props = ConfigUtils.getProperties("/etc/tracker-agent/test.properties");
         //@formatter:off
         return new TestConfiguration()
-            .setC8yHost(props.getProperty("c8y.host"))
             .setC8yTenant(props.getProperty("c8y.tenant"))
             .setC8yUser(props.getProperty("c8y.user"))
             .setC8yPassword(props.getProperty("c8y.password"))
-            .setTrackerAgentHost(local ? "localhost" : props.getProperty("tracker-agent.host"))
-            .setTrackerAgentPort(local ? randomPort() : parseInt(props.getProperty("tracker-agent.port")));
+            .setTrackerAgentHost(props.getProperty("tracker-agent.host"));
         //@formatter:on            
-    }
-
-    private static int randomPort() {
-        return random.nextInt(20000) + 40000;
     }
 }
