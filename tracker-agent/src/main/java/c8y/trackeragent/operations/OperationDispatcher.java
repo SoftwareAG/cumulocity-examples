@@ -50,8 +50,8 @@ import com.cumulocity.sdk.client.devicecontrol.OperationFilter;
  */
 public class OperationDispatcher implements Runnable {
     
-    private static final long POLLING_DELAY = 5;
-    private static final long POLLING_INTERVAL = 5;
+    private static final long POLLING_DELAY = 10;
+    private static final long POLLING_INTERVAL = 10;
     
     private final Logger logger;
     private final TrackerDevice trackerDevice;
