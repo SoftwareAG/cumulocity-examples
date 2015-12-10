@@ -11,8 +11,12 @@ public class TrackerMessageFactory {
         this.reportSep = reportSep;
     }
     
-    public TrackerMessage message(String text) {
-        return new TrackerMessage(fieldSep, reportSep, text);
+    public TrackerMessage msg() {
+        return new TrackerMessage(fieldSep, reportSep);
+    }
+    
+    public TrackerMessage msg(String text) {
+        return msg().fromText(text);
     }
 
     

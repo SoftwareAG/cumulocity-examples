@@ -1,5 +1,6 @@
 package c8y.trackeragent.protocol.coban.parser;
 
+import static c8y.trackeragent.protocol.coban.message.CobanServerMessages.imeiMsg;
 import static c8y.trackeragent.utils.SignedLocation.altitude;
 import static c8y.trackeragent.utils.SignedLocation.latitude;
 import static c8y.trackeragent.utils.SignedLocation.longitude;
@@ -16,30 +17,34 @@ import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.Translator;
 import c8y.trackeragent.operations.OperationContext;
+import c8y.trackeragent.protocol.coban.message.CobanServerMessages;
 import c8y.trackeragent.utils.message.TrackerMessage;
-import c8y.trackeragent.utils.message.TrackerMessageFactory;
 
+import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 
 public class PositionUpdateCobanParser extends CobanParser implements Translator {
     
     private static Logger logger = LoggerFactory.getLogger(PositionUpdateCobanParser.class);
-    private final TrackerMessageFactory msgFactory;
     
-    public PositionUpdateCobanParser(TrackerAgent trackerAgent, TrackerMessageFactory msgFactory) {
+    private static final String KEYWORD = "tracker";
+    
+    private final CobanServerMessages serverMessages;
+    
+    public PositionUpdateCobanParser(TrackerAgent trackerAgent, CobanServerMessages serverMessages) {
         super(trackerAgent);
-        this.msgFactory = msgFactory;
+        this.serverMessages = serverMessages;
     }
 
     @Override
     protected boolean accept(String[] report) {
-        return report.length >= 1 && "001".equals(report[1]);
+        return report.length >= 1 && KEYWORD.equals(report[1]);
     }
 
     @Override
     protected String doParse(String[] report) {
-        return extractImeiValue(report[0]);
+        return CobanServerMessages.extractImeiValue(report[0]);
     }
 
     @Override
@@ -84,13 +89,11 @@ public class PositionUpdateCobanParser extends CobanParser implements Translator
             return null;
         }
         
-        String imeiPart = formatImeiValue(operationCtx.getImei());
-        TrackerMessage msg = msg("**").appendField(msg(imeiPart)).appendField(msg(cobanRequest));
+        String imeiMsg = imeiMsg(operationCtx.getImei());
+        TrackerMessage msg = serverMessages.msg().appendField("**").appendField(imeiMsg).appendField(cobanRequest);
+        operation.setStatus(OperationStatus.SUCCESSFUL.toString());
+        operation.set(msg.asText(), "sent");
         return msg.asText();
-    }
-    
-    private TrackerMessage msg(String text) {
-        return msgFactory.message(text);
     }
     
 }

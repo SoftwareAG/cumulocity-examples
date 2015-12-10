@@ -1,19 +1,21 @@
 package c8y.trackeragent_it;
 
-import static c8y.trackeragent.protocol.coban.CobanDeviceMessages.heartbeat;
-import static c8y.trackeragent.protocol.coban.CobanDeviceMessages.logon;
-import static c8y.trackeragent.protocol.coban.CobanDeviceMessages.positionUpdate;
 import static org.fest.assertions.Assertions.assertThat;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import c8y.trackeragent.protocol.coban.CobanDeviceMessages;
+import c8y.trackeragent.protocol.coban.message.CobanServerMessages;
 import c8y.trackeragent.utils.Devices;
 import c8y.trackeragent.utils.Positions;
+import c8y.trackeragent.utils.message.TrackerMessage;
 
 public class CobanReportIT extends TrackerITSupport {
     
     private String imei;
+    private CobanDeviceMessages deviceMessages = new CobanDeviceMessages();
+    private CobanServerMessages serverMessages = new CobanServerMessages();
 
     @Before
     public void init() {
@@ -21,28 +23,37 @@ public class CobanReportIT extends TrackerITSupport {
     }
     
     @Test
-    public void shouldProcessLoadMessage() throws Exception {
-        bootstrap(imei, logon(imei));
+    public void shouldProcessLogonMessage() throws Exception {
+        bootstrap(imei, deviceMessages.logon(imei));
 
-        String response = writeInNewConnection(logon(imei));
+        String response = writeInNewConnection(deviceMessages.logon(imei));
         
-        assertThat(response).isEqualTo("LOAD");
+        TrackerMessage actual = serverMessages.msg(response);
+        TrackerMessage expected = serverMessages
+                .load()
+                .appendReport(serverMessages.timeIntervalLocationRequest(imei, "03m"));
+        assertThat(actual).isEqualTo(expected);
     }
     
     @Test
     public void shouldProcessHeartbeatMessage() throws Exception {
-        bootstrap(imei, logon(imei));
+        bootstrap(imei, deviceMessages.logon(imei));
         
-        String response = writeInNewConnection(logon(imei), heartbeat(imei));
+        String response = writeInNewConnection(deviceMessages.logon(imei), deviceMessages.heartbeat(imei));
         
-        assertThat(response).isEqualTo("LOAD" + "ON");
+        TrackerMessage actual = serverMessages.msg(response);
+        TrackerMessage expected = serverMessages
+                .load()
+                .appendReport(serverMessages.timeIntervalLocationRequest(imei, "03m"))
+                .appendReport(serverMessages.on());
+        assertThat(actual).isEqualTo(expected);
     }
     
     @Test
     public void shouldProcessPositionUpdateMessage() throws Exception {
-        bootstrap(imei, logon(imei));
+        bootstrap(imei, deviceMessages.logon(imei));
         
-        writeInNewConnection(logon(imei), positionUpdate(imei, Positions.SAMPLE_1));
+        writeInNewConnection(deviceMessages.logon(imei), deviceMessages.positionUpdate(imei, Positions.SAMPLE_1));
         
         assertThat(getTrackerDevice(imei).getPosition()).isEqualTo(Positions.SAMPLE_1);
     }

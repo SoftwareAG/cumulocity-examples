@@ -9,7 +9,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import c8y.trackeragent.ReportContext;
-import c8y.trackeragent.protocol.coban.CobanDeviceMessages;
 import c8y.trackeragent.utils.message.TrackerMessage;
 
 public class HeartbeatCobanParserTest extends CobanParserTestSupport {
@@ -19,12 +18,12 @@ public class HeartbeatCobanParserTest extends CobanParserTestSupport {
     @Before
     public void init() {
         super.init();
-        cobanParser = new HeartbeatCobanParser(trackerAgent);
+        cobanParser = new HeartbeatCobanParser(trackerAgent, serverMessages);
     }
     
     @Test
     public void shouldParseImei() throws Exception {
-        TrackerMessage deviceMessage = CobanDeviceMessages.heartbeat("ABCD");
+        TrackerMessage deviceMessage = deviceMessages.heartbeat("ABCD");
         String actual = cobanParser.parse(deviceMessage.asArray());
         
         assertThat(actual).isEqualTo("ABCD");
@@ -34,13 +33,13 @@ public class HeartbeatCobanParserTest extends CobanParserTestSupport {
   public void shouldProcessHeartbeat() throws Exception {
       when(trackerAgent.getOrCreateTrackerDevice("ABCD")).thenReturn(deviceMock);
       ByteArrayOutputStream out = new ByteArrayOutputStream();
-      String[] report = CobanDeviceMessages.heartbeat("ABCD").asArray();
+      String[] report = deviceMessages.heartbeat("ABCD").asArray();
       ReportContext reportCtx = new ReportContext(report, "ABCD", out);
       
       boolean success = cobanParser.onParsed(reportCtx);
       
       assertThat(success).isTrue();
-      assertThat(out.toString("US-ASCII")).isEqualTo("ON");
+      assertThat(out.toString("US-ASCII")).isEqualTo("ON;");
   }
 
 }

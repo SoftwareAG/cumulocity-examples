@@ -8,6 +8,7 @@ import java.util.List;
 import c8y.trackeragent.ReportContext;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerDevice;
+import c8y.trackeragent.protocol.coban.message.CobanServerMessages;
 import c8y.trackeragent.protocol.coban.parser.CobanParser;
 
 import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
@@ -52,13 +53,14 @@ public class AlarmCobanParser extends CobanParser {
         AlarmInfo alarmInfo = parseAlarmInfo(reportCtx.getReport());
         TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(reportCtx.getImei());
         AlarmRepresentation alarm = new AlarmRepresentation();
+        //TODO
         device.createAlarm(alarm);
         return true;
     }
 
     @Override
     protected String doParse(String[] report) {
-        return extractImeiValue(report[0]);
+        return CobanServerMessages.extractImeiValue(report[0]);
     }
     
     private AlarmInfo parseAlarmInfo(String[] report) {

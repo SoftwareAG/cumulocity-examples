@@ -6,6 +6,8 @@ import org.slf4j.LoggerFactory;
 import c8y.trackeragent.Parser;
 import c8y.trackeragent.ReportContext;
 import c8y.trackeragent.TrackerAgent;
+import c8y.trackeragent.protocol.coban.device.CobanDevice;
+import c8y.trackeragent.utils.message.TrackerMessage;
 
 import com.cumulocity.sdk.client.SDKException;
 
@@ -34,19 +36,21 @@ public abstract class CobanParser implements Parser {
         }
     }
     
-    protected String extractImeiValue(String imeiPart) {
-        return imeiPart.replaceFirst(IMEI_PREFIX, "");
-    }
-    
-    protected String formatImeiValue(String imei) {
-        return IMEI_PREFIX + imei;
-    }
-
     protected void writeOut(ReportContext reportCtx, String string) {
         try {
             reportCtx.getOut().write(string.getBytes("US-ASCII"));
+            reportCtx.getOut().flush();
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
     }
+    
+    protected void writeOut(ReportContext reportCtx, TrackerMessage msg) {
+        writeOut(reportCtx, msg.asText());
+    }
+    
+    protected CobanDevice getCobanDevice(String imei) {
+        return trackerAgent.getOrCreateTrackerDevice(imei).getCobanDevice();
+    }
+
 }

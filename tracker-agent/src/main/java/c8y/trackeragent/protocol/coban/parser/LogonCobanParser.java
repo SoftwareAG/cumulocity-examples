@@ -5,15 +5,21 @@ import org.slf4j.LoggerFactory;
 
 import c8y.trackeragent.ReportContext;
 import c8y.trackeragent.TrackerAgent;
+import c8y.trackeragent.protocol.coban.device.CobanDevice;
+import c8y.trackeragent.protocol.coban.message.CobanServerMessages;
+import c8y.trackeragent.utils.message.TrackerMessage;
 
 import com.cumulocity.sdk.client.SDKException;
 
 public class LogonCobanParser extends CobanParser {
     
     private static Logger logger = LoggerFactory.getLogger(LogonCobanParser.class);
+    
+    private CobanServerMessages serverMessages;
 
-    public LogonCobanParser(TrackerAgent trackerAgent) {
+    public LogonCobanParser(TrackerAgent trackerAgent, CobanServerMessages serverMessages) {
         super(trackerAgent);
+        this.serverMessages = serverMessages;
     }
     
     @Override
@@ -23,18 +29,16 @@ public class LogonCobanParser extends CobanParser {
 
     @Override
     public String doParse(String[] report) throws SDKException {
-        return extractImeiValue(report[1]);
+        return CobanServerMessages.extractImeiValue(report[1]);
     }
 
     @Override
     public boolean onParsed(ReportContext reportCtx) throws SDKException {
         logger.debug("Success logon for imei {}.", reportCtx.getImei());
-        writeOut(reportCtx, "LOAD"); 
+        CobanDevice cobanDevice = getCobanDevice(reportCtx.getImei());
+        TrackerMessage load = serverMessages.load();
+        TrackerMessage positionReportsRequest = serverMessages.timeIntervalLocationRequest(reportCtx.getImei(), cobanDevice.getLocationReportInterval());
+        writeOut(reportCtx, load.appendReport(positionReportsRequest)); 
         return true;
     }
-    
-    
-    
-    
-
 }

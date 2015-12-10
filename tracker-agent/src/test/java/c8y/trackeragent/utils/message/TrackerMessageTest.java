@@ -5,25 +5,34 @@ import static org.fest.assertions.Assertions.assertThat;
 import org.junit.Test;
 
 public class TrackerMessageTest {
-
-    @Test
-    public void shouldAppendReport() throws Exception {
-        TrackerMessage rep0 = new TrackerMessage(",", ";", "sth00,sth01;");
-        TrackerMessage rep1 = new TrackerMessage(",", ";", "sth10,sth11;");
-        
-        TrackerMessage rep01 = rep0.appendReport(rep1);
-        
-        assertThat(rep01.asText()).isEqualTo("sth00,sth01;sth10,sth11;");
-    }
+    
+    TrackerMessage msg1 = new TrackerMessage(",", ";");
+    TrackerMessage msg2 = new TrackerMessage(",", ";");
     
     @Test
     public void shouldAppendField() throws Exception {
-        TrackerMessage rep0 = new TrackerMessage(",", ";", "sth00,sth01;");
-        TrackerMessage rep1 = new TrackerMessage(",", ";", "sth10,sth11;");
+        msg1.appendField("a").appendField("b");
         
-        TrackerMessage rep01 = rep0.appendField(rep1);
-        
-        assertThat(rep01.asText()).isEqualTo("sth00,sth01,sth10,sth11");
+        assertThat(msg1.asText()).isEqualTo("a,b;");
     }
+
+    @Test
+    public void shouldAppendReport() throws Exception {
+        msg1.appendField("a").appendField("b");
+        msg2.appendField("c").appendField("d");
+        
+        msg1.appendReport(msg2);
+        
+        assertThat(msg1.asText()).isEqualTo("a,b;c,d;");
+    }
+    
+    @Test
+    public void shouldCreateReportFromString() throws Exception {
+        msg1.appendField("a").appendField("b");
+        
+        TrackerMessage msg1Copy = new TrackerMessage(",", ";").fromText(msg1.asText());
+        assertThat(msg1Copy.asText()).isEqualTo(msg1.asText());
+    }
+    
     
 }

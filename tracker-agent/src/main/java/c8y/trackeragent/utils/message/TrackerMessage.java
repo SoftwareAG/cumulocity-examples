@@ -1,6 +1,9 @@
 package c8y.trackeragent.utils.message;
 
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
@@ -8,48 +11,45 @@ import com.google.common.collect.Iterables;
 
 public class TrackerMessage {
     
-    private final String text;
+    private final LinkedList<Report> reports = new LinkedList<Report>();
     private final String fieldSep;
     private final String reportSep;
 
-    public TrackerMessage(String fieldSep, String reportSep, String text) {
+    public TrackerMessage(String fieldSep, String reportSep) {
         this.fieldSep = fieldSep;
         this.reportSep = reportSep;
-        this.text = text;
     }
     
     public byte[] asBytes() {
-        return asBytes(text);
+        return asBytes(asText());
     }
     
     public String asText() {
+        return Joiner.on(reportSep).join(reports) + reportSep;
+    }
+    
+    public TrackerMessage fromText(String text) {
+        text = stripLastReportSep(text);
+        reports.clear();
+        for (String reportStr : Splitter.on(reportSep).split(text)) {
+            reports.add(new Report(reportStr));
+        }
+        return this;
+    }
+
+    private String stripLastReportSep(String text) {
+        if (text.endsWith(reportSep)) {
+            text = text.substring(0, text.length() - 1);
+        }
         return text;
     }
     
     public String[] asArray() {
-        String partsStr = stripReportSep(text);        
-        Iterable<String> parts = Splitter.on(fieldSep).split(partsStr);
-        return Iterables.toArray(parts, String.class);
-    }
-
-    private String stripReportSep(String partsStr) {
-        return strip(partsStr, reportSep);
-    }
-    
-//    private String stripFieldSep(String partsStr) {
-//        return strip(partsStr, fieldSep);
-//    }
-//    
-//    private String stripSeps(String partsStr) {
-//        return stripFieldSep(stripReportSep(partsStr));
-//    }
-    
-    private static String strip(String source, String postfix) {
-        if (source.endsWith(postfix)) {
-            source = source.substring(0, source.length() - postfix.length());
+        List<String> parts = new ArrayList<String>();
+        for(Report report : reports) {
+            parts.addAll(report.getFields());
         }
-        return source;
-        
+        return Iterables.toArray(parts, String.class);
     }
     
     private static byte[] asBytes(String msg) {
@@ -60,18 +60,74 @@ public class TrackerMessage {
         }
     }
     
-    public TrackerMessage appendReport(TrackerMessage other) {
-        String text = Joiner.on(reportSep).join(stripReportSep(this.text), stripReportSep(other.text));
-        return new TrackerMessage(fieldSep, reportSep, text + reportSep);
+    public TrackerMessage appendField(String text) {
+        if (reports.isEmpty()) {
+            reports.add(new Report());
+        }
+        Report report = reports.getLast();
+        report.appendField(text);
+        return this;
     }
     
-    public TrackerMessage appendField(TrackerMessage other) {
-        String text = Joiner.on(fieldSep).join(stripReportSep(this.text), stripReportSep(other.text));
-        return new TrackerMessage(fieldSep, reportSep, text);
+    public LinkedList<Report> getReports() {
+        return reports;
+    }
+
+    public TrackerMessage appendReport(TrackerMessage msg) {
+        this.reports.addAll(msg.getReports());
+        return this;
     }
 
     @Override
     public String toString() {
-        return text;
+        return asText();
     }
+    
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((fieldSep == null) ? 0 : toString().hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        return this.toString().equals(obj.toString());
+    }
+
+    private class Report {
+        
+        private final List<String> fields = new ArrayList<String>();
+        
+        public Report() {
+            super();
+        }
+
+        public Report(String reportStr) {
+            fields.addAll(Splitter.on(fieldSep).splitToList(reportStr));
+        }
+
+        void appendField(String field) {
+            fields.add(field);
+        }
+
+        @Override
+        public String toString() {
+            return Joiner.on(fieldSep).join(fields);
+        }
+
+        public List<String> getFields() {
+            return fields;
+        }
+    }
+    
+
+    
 }

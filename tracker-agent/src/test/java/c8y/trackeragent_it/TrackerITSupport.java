@@ -57,7 +57,8 @@ public abstract class TrackerITSupport {
     private final Collection<Socket> sockets = new HashSet<Socket>();
 
     @Before
-    public void baseSetUp() throws IOException {
+    public void baseSetUp() throws Exception {
+        Thread.sleep(200);//avoid address already in use error 
         testConfig = getTestConfig();
         System.out.println(testConfig);
         trackerAgentConfig = ConfigUtils.get().loadCommonConfiguration().setBootstrapPollIntervals(Arrays.asList(1L, 2L, 3L, 4L));

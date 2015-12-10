@@ -8,13 +8,16 @@ import com.cumulocity.sdk.client.SDKException;
 import c8y.trackeragent.ReportContext;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerDevice;
+import c8y.trackeragent.protocol.coban.message.CobanServerMessages;
 
 public class HeartbeatCobanParser extends CobanParser {
     
     private static Logger logger = LoggerFactory.getLogger(HeartbeatCobanParser.class);
+    private CobanServerMessages serverMessages;
 
-    public HeartbeatCobanParser(TrackerAgent trackerAgent) {
+    public HeartbeatCobanParser(TrackerAgent trackerAgent, CobanServerMessages serverMessages) {
         super(trackerAgent);
+        this.serverMessages = serverMessages;
     }
 
     @Override
@@ -33,7 +36,7 @@ public class HeartbeatCobanParser extends CobanParser {
         try {
             TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(reportCtx.getImei());
             device.ping();
-            writeOut(reportCtx, "ON");
+            writeOut(reportCtx, serverMessages.on());
         } catch (Exception ex) {
             logger.error("Error processing heartbeat on imei " +  reportCtx.getImei(), ex);
         }

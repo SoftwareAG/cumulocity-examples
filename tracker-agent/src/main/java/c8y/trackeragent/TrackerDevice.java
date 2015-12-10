@@ -29,7 +29,18 @@ import java.util.HashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import c8y.*;
+import c8y.Battery;
+import c8y.Configuration;
+import c8y.Geofence;
+import c8y.IsDevice;
+import c8y.Mobile;
+import c8y.MotionTracking;
+import c8y.Position;
+import c8y.Restart;
+import c8y.SignalStrength;
+import c8y.SupportedOperations;
+import c8y.trackeragent.protocol.coban.device.CobanDevice;
+import c8y.trackeragent.protocol.coban.device.CobanDeviceFactory;
 
 import com.cumulocity.model.ID;
 import com.cumulocity.model.event.CumulocityAlarmStatuses;
@@ -117,8 +128,12 @@ public class TrackerDevice extends DeviceManagedObject {
     }
     
     public Position getPosition() {
-        ManagedObjectRepresentation device = inventory.get(gid);
+        ManagedObjectRepresentation device = getManagedObject();
         return device == null ? null : device.get(Position.class); 
+    }
+
+    public ManagedObjectRepresentation getManagedObject() {
+        return inventory.get(gid);
     }
 
     public void setGeofence(Geofence fence) throws SDKException {
@@ -359,6 +374,11 @@ public class TrackerDevice extends DeviceManagedObject {
         measurementValue.put("unit", "km");
         representation.set(measurementValue, "c8y_DistanceMeasurement");
         return representation;
+    }
+
+    public CobanDevice getCobanDevice() {
+        ManagedObjectRepresentation mo = getManagedObject();
+        return new CobanDeviceFactory(mo).create();
     }
 
 }

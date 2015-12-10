@@ -12,11 +12,8 @@ import c8y.MotionTracking;
 import c8y.Position;
 import c8y.trackeragent.ReportContext;
 import c8y.trackeragent.operations.OperationContext;
-import c8y.trackeragent.protocol.coban.CobanConstants;
-import c8y.trackeragent.protocol.coban.CobanDeviceMessages;
 import c8y.trackeragent.utils.Positions;
 import c8y.trackeragent.utils.message.TrackerMessage;
-import c8y.trackeragent.utils.message.TrackerMessageFactory;
 
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 
@@ -27,13 +24,20 @@ public class PositionUpdateCobanParserTest extends CobanParserTestSupport {
     @Before
     public void init() {
         super.init();
-        TrackerMessageFactory msgFactory = new TrackerMessageFactory(CobanConstants.FIELD_SEP, "" + CobanConstants.REPORT_SEP);
-        cobanParser = new PositionUpdateCobanParser(trackerAgent, msgFactory);
+        cobanParser = new PositionUpdateCobanParser(trackerAgent, serverMessages);
+    }
+    @Test
+    
+    public void shouldAcceptCobanPositionMessage() throws Exception {
+        boolean actual = cobanParser.accept(deviceMessages.positionUpdate("ABCD", Positions.ZERO).asArray());
+        
+        assertThat(actual).isTrue();
+        
     }
 
     @Test
     public void shouldParseImei() throws Exception {
-        TrackerMessage deviceMessage = CobanDeviceMessages.positionUpdate("ABCD", Positions.ZERO);
+        TrackerMessage deviceMessage = deviceMessages.positionUpdate("ABCD", Positions.ZERO);
         String actual = cobanParser.parse(deviceMessage.asArray());
 
         assertThat(actual).isEqualTo("ABCD");
@@ -41,7 +45,7 @@ public class PositionUpdateCobanParserTest extends CobanParserTestSupport {
 
     @Test
     public void shouldProcessPositionUpdate() throws Exception {
-        TrackerMessage deviceMessage = CobanDeviceMessages.positionUpdate("ABCD", Positions.SAMPLE_1);
+        TrackerMessage deviceMessage = deviceMessages.positionUpdate("ABCD", Positions.SAMPLE_1);
         when(trackerAgent.getOrCreateTrackerDevice("ABCD")).thenReturn(deviceMock);
         ReportContext reportCtx = new ReportContext(deviceMessage.asArray(), "ABCD", null);
         ArgumentCaptor<Position> positionCaptor = ArgumentCaptor.forClass(Position.class);
@@ -64,7 +68,8 @@ public class PositionUpdateCobanParserTest extends CobanParserTestSupport {
         
         String msg = cobanParser.translate(operationCtx);
         
-        assertThat(msg).isEqualTo("**,imei:12345,101,30m");
+        assertThat(operation.get("sent")).isEqualTo("**,imei:12345,101,30m;");
+        assertThat(msg).isEqualTo("**,imei:12345,101,30m;");
     }
 
 }
