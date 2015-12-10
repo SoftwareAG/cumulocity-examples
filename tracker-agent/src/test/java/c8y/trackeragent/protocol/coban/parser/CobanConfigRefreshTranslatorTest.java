@@ -34,6 +34,7 @@ public class CobanConfigRefreshTranslatorTest extends CobanParserTestSupport {
         TrackerMessage expected = serverMessages.timeIntervalLocationRequest("123123", "30s");
         assertThat(actual).isEqualTo(expected);
         assertThat(operation.getStatus()).isEqualTo(OperationStatus.SUCCESSFUL.toString());
+        assertThat(operation.get(CobanSupport.OPERATION_FRAGMENT_SERVER_COMMAND)).isEqualTo(expected.asText());
         
     }
 
