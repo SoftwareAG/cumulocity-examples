@@ -3,6 +3,7 @@ package c8y.trackeragent.protocol.coban.parser;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import org.junit.Before;
 import org.mockito.Mockito;
 
 import c8y.trackeragent.TrackerAgent;
@@ -18,7 +19,8 @@ public abstract class CobanParserTestSupport {
     protected CobanServerMessages serverMessages = new CobanServerMessages();
     protected CobanDeviceMessages deviceMessages = new CobanDeviceMessages();
     
-    public void init() {
+    @Before
+    public void baseInit() {
         trackerAgent = mock(TrackerAgent.class);
         deviceMock = mock(TrackerDevice.class);
         when(trackerAgent.getOrCreateTrackerDevice(Mockito.anyString())).thenReturn(deviceMock);

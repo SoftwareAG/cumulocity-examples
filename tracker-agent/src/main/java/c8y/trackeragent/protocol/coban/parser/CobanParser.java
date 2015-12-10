@@ -6,20 +6,16 @@ import org.slf4j.LoggerFactory;
 import c8y.trackeragent.Parser;
 import c8y.trackeragent.ReportContext;
 import c8y.trackeragent.TrackerAgent;
-import c8y.trackeragent.protocol.coban.device.CobanDevice;
 import c8y.trackeragent.utils.message.TrackerMessage;
 
 import com.cumulocity.sdk.client.SDKException;
 
-public abstract class CobanParser implements Parser {
+public abstract class CobanParser  extends CobanSupport implements Parser {
     
     private static final Logger logger = LoggerFactory.getLogger(CobanParser.class);
-    private static final String IMEI_PREFIX = "imei:";
-    
-    protected final TrackerAgent trackerAgent;
     
     public CobanParser(TrackerAgent trackerAgent) {
-        this.trackerAgent = trackerAgent;
+        super(trackerAgent);
     }
     
     protected abstract boolean accept(String[] report);
@@ -48,9 +44,4 @@ public abstract class CobanParser implements Parser {
     protected void writeOut(ReportContext reportCtx, TrackerMessage msg) {
         writeOut(reportCtx, msg.asText());
     }
-    
-    protected CobanDevice getCobanDevice(String imei) {
-        return trackerAgent.getOrCreateTrackerDevice(imei).getCobanDevice();
-    }
-
 }

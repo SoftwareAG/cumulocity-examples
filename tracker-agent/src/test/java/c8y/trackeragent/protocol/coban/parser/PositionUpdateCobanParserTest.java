@@ -23,7 +23,6 @@ public class PositionUpdateCobanParserTest extends CobanParserTestSupport {
 
     @Before
     public void init() {
-        super.init();
         cobanParser = new PositionUpdateCobanParser(trackerAgent, serverMessages);
     }
     @Test

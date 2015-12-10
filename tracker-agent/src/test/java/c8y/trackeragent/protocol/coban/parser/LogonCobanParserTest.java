@@ -17,7 +17,6 @@ public class LogonCobanParserTest extends CobanParserTestSupport {
 
     @Before
     public void init() {
-        super.init();
         cobanParser = new LogonCobanParser(trackerAgent, serverMessages);
     }
     

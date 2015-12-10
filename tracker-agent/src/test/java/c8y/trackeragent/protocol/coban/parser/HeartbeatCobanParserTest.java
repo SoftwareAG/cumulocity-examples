@@ -17,7 +17,6 @@ public class HeartbeatCobanParserTest extends CobanParserTestSupport {
 
     @Before
     public void init() {
-        super.init();
         cobanParser = new HeartbeatCobanParser(trackerAgent, serverMessages);
     }
     
