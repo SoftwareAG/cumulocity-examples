@@ -92,7 +92,7 @@ public class PositionUpdateCobanParser extends CobanParser implements Translator
         String imeiMsg = imeiMsg(operationCtx.getImei());
         TrackerMessage msg = serverMessages.msg().appendField("**").appendField(imeiMsg).appendField(cobanRequest);
         operation.setStatus(OperationStatus.SUCCESSFUL.toString());
-        operation.set(msg.asText(), "sent");
+        operation.set(msg.asText(), OPERATION_FRAGMENT_SERVER_COMMAND);
         return msg.asText();
     }
     

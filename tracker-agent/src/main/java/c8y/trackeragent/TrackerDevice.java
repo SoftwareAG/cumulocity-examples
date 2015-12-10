@@ -133,7 +133,11 @@ public class TrackerDevice extends DeviceManagedObject {
     }
 
     public ManagedObjectRepresentation getManagedObject() {
-        return inventory.get(gid);
+        ManagedObjectRepresentation mo = inventory.get(gid);
+        if(mo == null) {
+            throw new RuntimeException("No device for id " + gid);
+        }
+        return mo;
     }
 
     public void setGeofence(Geofence fence) throws SDKException {

@@ -9,6 +9,7 @@ import c8y.trackeragent.operations.OperationContext;
 import c8y.trackeragent.protocol.coban.device.CobanDevice;
 import c8y.trackeragent.utils.message.TrackerMessage;
 
+import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 
 public class CobanConfigRefreshTranslatorTest extends CobanParserTestSupport {
@@ -30,7 +31,9 @@ public class CobanConfigRefreshTranslatorTest extends CobanParserTestSupport {
         String serverMessageText = bean.translate(operationCtx);
         
         TrackerMessage actual = serverMessages.msg(serverMessageText);
-        assertThat(actual).isEqualTo(serverMessages.timeIntervalLocationRequest("123123", "30s"));
+        TrackerMessage expected = serverMessages.timeIntervalLocationRequest("123123", "30s");
+        assertThat(actual).isEqualTo(expected);
+        assertThat(operation.getStatus()).isEqualTo(OperationStatus.SUCCESSFUL.toString());
         
     }
 

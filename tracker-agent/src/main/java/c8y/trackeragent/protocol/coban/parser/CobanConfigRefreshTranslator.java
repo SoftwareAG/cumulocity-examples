@@ -10,6 +10,7 @@ import c8y.trackeragent.protocol.coban.device.CobanDevice;
 import c8y.trackeragent.protocol.coban.message.CobanServerMessages;
 import c8y.trackeragent.utils.message.TrackerMessage;
 
+import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 
 public class CobanConfigRefreshTranslator extends CobanSupport implements Translator {
@@ -37,6 +38,8 @@ public class CobanConfigRefreshTranslator extends CobanSupport implements Transl
         String locationReportInterval = device.getLocationReportInterval();
         TrackerMessage msg = serverMessages.timeIntervalLocationRequest(operationCtx.getImei(), locationReportInterval);
         logger.info("Send message to device: {}.", msg);
+        operation.setStatus(OperationStatus.SUCCESSFUL.toString());
+        operation.set(msg.asText(), OPERATION_FRAGMENT_SERVER_COMMAND);
         return msg.asText();
     }
 

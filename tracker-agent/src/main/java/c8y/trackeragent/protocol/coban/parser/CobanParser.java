@@ -44,4 +44,5 @@ public abstract class CobanParser  extends CobanSupport implements Parser {
     protected void writeOut(ReportContext reportCtx, TrackerMessage msg) {
         writeOut(reportCtx, msg.asText());
     }
+    
 }

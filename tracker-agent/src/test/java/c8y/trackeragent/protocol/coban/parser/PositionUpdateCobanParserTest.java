@@ -67,7 +67,7 @@ public class PositionUpdateCobanParserTest extends CobanParserTestSupport {
         
         String msg = cobanParser.translate(operationCtx);
         
-        assertThat(operation.get("sent")).isEqualTo("**,imei:12345,101,30m;");
+        assertThat(operation.get(CobanSupport.OPERATION_FRAGMENT_SERVER_COMMAND)).isEqualTo("**,imei:12345,101,30m;");
         assertThat(msg).isEqualTo("**,imei:12345,101,30m;");
     }
 
