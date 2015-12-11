@@ -6,6 +6,8 @@ import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import c8y.trackeragent.utils.message.TrackerMessage;
+
 public class ReportContext {
     
     private static Logger logger = LoggerFactory.getLogger(ReportContext.class);
@@ -43,6 +45,17 @@ public class ReportContext {
     
     public int getNumberOfEntries() {
         return report.length;
+    }
+    
+    public void writeOut(TrackerMessage msg) {
+        try {
+            String text = msg.asText();
+            logger.debug("Write to device: {}.", text);
+            out.write(text.getBytes("US-ASCII"));
+            out.flush();
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
     @Override

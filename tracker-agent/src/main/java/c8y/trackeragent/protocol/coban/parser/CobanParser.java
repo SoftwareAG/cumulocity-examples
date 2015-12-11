@@ -4,9 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import c8y.trackeragent.Parser;
-import c8y.trackeragent.ReportContext;
 import c8y.trackeragent.TrackerAgent;
-import c8y.trackeragent.utils.message.TrackerMessage;
 
 import com.cumulocity.sdk.client.SDKException;
 
@@ -31,18 +29,4 @@ public abstract class CobanParser  extends CobanSupport implements Parser {
             return null;
         }
     }
-    
-    protected void writeOut(ReportContext reportCtx, String string) {
-        try {
-            reportCtx.getOut().write(string.getBytes("US-ASCII"));
-            reportCtx.getOut().flush();
-        } catch (Exception ex) {
-            throw new RuntimeException(ex);
-        }
-    }
-    
-    protected void writeOut(ReportContext reportCtx, TrackerMessage msg) {
-        writeOut(reportCtx, msg.asText());
-    }
-    
 }

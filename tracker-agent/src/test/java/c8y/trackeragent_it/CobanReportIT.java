@@ -5,6 +5,7 @@ import static org.fest.assertions.Assertions.assertThat;
 import org.junit.Before;
 import org.junit.Test;
 
+import c8y.trackeragent.protocol.coban.CobanConstants;
 import c8y.trackeragent.protocol.coban.CobanDeviceMessages;
 import c8y.trackeragent.protocol.coban.message.CobanServerMessages;
 import c8y.trackeragent.utils.Devices;
@@ -31,7 +32,7 @@ public class CobanReportIT extends TrackerITSupport {
         TrackerMessage actual = serverMessages.msg(response);
         TrackerMessage expected = serverMessages
                 .load()
-                .appendReport(serverMessages.timeIntervalLocationRequest(imei, "03m"));
+                .appendReport(serverMessages.timeIntervalLocationRequest(imei, CobanConstants.DEFAULT_LOCATION_REPORT_INTERVAL));
         assertThat(actual).isEqualTo(expected);
     }
     
@@ -44,7 +45,7 @@ public class CobanReportIT extends TrackerITSupport {
         TrackerMessage actual = serverMessages.msg(response);
         TrackerMessage expected = serverMessages
                 .load()
-                .appendReport(serverMessages.timeIntervalLocationRequest(imei, "03m"))
+                .appendReport(serverMessages.timeIntervalLocationRequest(imei, CobanConstants.DEFAULT_LOCATION_REPORT_INTERVAL))
                 .appendReport(serverMessages.on());
         assertThat(actual).isEqualTo(expected);
     }

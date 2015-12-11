@@ -12,4 +12,9 @@ public class CobanDevice {
         this.locationReportInterval = locationReportInterval;
         return this;
     }
+
+    @Override
+    public String toString() {
+        return String.format("CobanDevice [locationReportInterval=%s]", locationReportInterval);
+    }
 }

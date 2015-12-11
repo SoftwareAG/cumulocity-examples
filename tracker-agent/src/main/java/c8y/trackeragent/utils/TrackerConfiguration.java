@@ -14,6 +14,7 @@ public class TrackerConfiguration {
     private String bootstrapTenant;
     private int clientTimeout;
     private List<Long> bootstrapPollIntervals;
+    private String cobanLocationReportInterval;
     
     public TrackerConfiguration() {
         this.bootstrapPollIntervals = Arrays.asList(PollingStrategy.DEFAULT_POLL_INTERVALS);
@@ -81,11 +82,22 @@ public class TrackerConfiguration {
         this.bootstrapPollIntervals = bootstrapPollIntervals;
         return this;
     }
+    
+    public String getCobanLocationReportInterval() {
+        return cobanLocationReportInterval;
+    }
+
+    public TrackerConfiguration setCobanLocationReportInterval(String cobanDefaultLocationReportInterval) {
+        this.cobanLocationReportInterval = cobanDefaultLocationReportInterval;
+        return this;
+    }
 
     @Override
     public String toString() {
-        return String.format("TrackerConfiguration [platformHost=%s, localPort=%s, bootstrapUser=%s, bootstrapPassword=%s, bootstrapTenant=%s, clientTimeout=%s]", platformHost, localPort,
-                bootstrapUser, bootstrapPassword, bootstrapTenant, clientTimeout);
+        return String
+                .format("TrackerConfiguration [platformHost=%s, localPort=%s, bootstrapUser=%s, bootstrapPassword=%s, bootstrapTenant=%s, clientTimeout=%s, bootstrapPollIntervals=%s, cobanDefaultLocationReportInterval=%s]",
+                        platformHost, localPort, bootstrapUser, bootstrapPassword, bootstrapTenant, clientTimeout,
+                        bootstrapPollIntervals, cobanLocationReportInterval);
     }
     
 }

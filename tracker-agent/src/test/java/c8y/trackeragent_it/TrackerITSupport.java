@@ -195,7 +195,7 @@ public abstract class TrackerITSupport {
     protected TrackerDevice getTrackerDevice(String imei) {
         DeviceManagedObject deviceManagedObject = new DeviceManagedObject(testPlatform);
         GId agentId = deviceManagedObject.getAgentId();
-        return new TrackerDevice(testPlatform, agentId, imei);
+        return new TrackerDevice(testPlatform, trackerAgentConfig, agentId, imei);
     }
     
     protected void bootstrap(String imei, TrackerMessage deviceMessage) throws UnsupportedEncodingException, Exception, InterruptedException {

@@ -29,7 +29,7 @@ public class CobanConfigRefreshTranslator extends CobanSupport implements Transl
 
     @Override
     public String translate(OperationContext operationCtx) {
-        logger.debug("Translate operation {}.", operationCtx);
+        logger.info("Translate operation {}.", operationCtx);
         OperationRepresentation operation = operationCtx.getOperation();
         if (operation.get(OPERATION_MARKER) == null) {
             return null;
@@ -37,9 +37,9 @@ public class CobanConfigRefreshTranslator extends CobanSupport implements Transl
         CobanDevice device = getCobanDevice(operationCtx.getImei());
         String locationReportInterval = device.getLocationReportInterval();
         TrackerMessage msg = serverMessages.timeIntervalLocationRequest(operationCtx.getImei(), locationReportInterval);
-        logger.info("Send message to device: {}.", msg);
         operation.setStatus(OperationStatus.SUCCESSFUL.toString());
         operation.set(msg.asText(), OPERATION_FRAGMENT_SERVER_COMMAND);
+        logger.info("Will change location reports interval to {}.", locationReportInterval);
         return msg.asText();
     }
 

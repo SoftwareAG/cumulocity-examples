@@ -38,7 +38,7 @@ public class LogonCobanParser extends CobanParser {
         CobanDevice cobanDevice = getCobanDevice(reportCtx.getImei());
         TrackerMessage load = serverMessages.load();
         TrackerMessage positionReportsRequest = serverMessages.timeIntervalLocationRequest(reportCtx.getImei(), cobanDevice.getLocationReportInterval());
-        writeOut(reportCtx, load.appendReport(positionReportsRequest)); 
+        reportCtx.writeOut(load.appendReport(positionReportsRequest)); 
         return true;
     }
 }

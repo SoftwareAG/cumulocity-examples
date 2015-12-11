@@ -13,6 +13,8 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import c8y.trackeragent.protocol.coban.CobanConstants;
+
 import com.cumulocity.sdk.client.SDKException;
 
 public class ConfigUtils {
@@ -26,6 +28,7 @@ public class ConfigUtils {
     private static final String BOOTSTRAP_USER_PROP = "bootstrap.user";
     private static final String BOOTSTRAP_PASSWORD_PROP = "bootstrap.password";
     private static final String CLIENT_TIMEOUT_PROP = "client.timeout";
+    private static final String COBAN_LOCATION_REPORT_INTERVAL_PROP = "coban.locationReport.timeInterval";
     private static final String DEFAULT_CLIENT_TIMEOUT = String.valueOf(5 * 60 * 1000);
     private static final Random random = new Random();
     
@@ -69,6 +72,7 @@ public class ConfigUtils {
             .setBootstrapUser(getProperty(SOURCE_FILE, props, BOOTSTRAP_USER_PROP))
             .setBootstrapPassword(getProperty(SOURCE_FILE, props, BOOTSTRAP_PASSWORD_PROP))
             .setBootstrapTenant("management")
+            .setCobanLocationReportInterval(props.getProperty(COBAN_LOCATION_REPORT_INTERVAL_PROP, CobanConstants.DEFAULT_LOCATION_REPORT_INTERVAL))
             .setClientTimeout(clientTimeout);
         //@formatter:on
         logger.info(format("Configuration loaded from: %s: %s", sourceFilePath, config));

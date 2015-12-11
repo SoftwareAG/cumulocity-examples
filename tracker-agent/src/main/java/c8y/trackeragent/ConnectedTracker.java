@@ -187,7 +187,8 @@ public class ConnectedTracker implements Runnable, Executor {
             operationCtx.getOperation().setStatus(OperationStatus.FAILED.toString());
             operationCtx.getOperation().setFailureReason("Command currently not supported");
         } else {
-            out.write(translation.getBytes());
+            logger.debug("Write to device: {}.", translation);
+            out.write(translation.getBytes("US-ASCII"));
             out.flush();
         }
     }

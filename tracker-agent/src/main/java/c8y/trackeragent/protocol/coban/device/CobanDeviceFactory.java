@@ -2,23 +2,27 @@ package c8y.trackeragent.protocol.coban.device;
 
 import java.util.Map;
 
+import c8y.trackeragent.utils.TrackerConfiguration;
+
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 
 public class CobanDeviceFactory {
 
+    private static final String CONFIG_FRAGMENT = "config";
     private static final String LOCATION_REPORT_INTERVAL = "locationReportInterval";
-    private static final String DEFAULT_LOCATION_REPORT_INTERVAL = "03m";
-
     private final Map<String, Object> config;
+    private final TrackerConfiguration trackerConfig;
     
     @SuppressWarnings("unchecked")
-    public CobanDeviceFactory(ManagedObjectRepresentation device) {
-        this.config = (Map<String, Object>) device.get("config");
+    public CobanDeviceFactory(TrackerConfiguration trackerConfig, ManagedObjectRepresentation device) {
+        this.trackerConfig = trackerConfig;
+        this.config = (Map<String, Object>) device.get(CONFIG_FRAGMENT);
     }
 
     public CobanDevice create() {
         CobanDevice result = new CobanDevice();
-        result.setLocationReportInterval(getValue(LOCATION_REPORT_INTERVAL, DEFAULT_LOCATION_REPORT_INTERVAL));
+        String defaultLocationReportInterval = trackerConfig.getCobanLocationReportInterval();
+        result.setLocationReportInterval(getValue(LOCATION_REPORT_INTERVAL, defaultLocationReportInterval));
         return result;
     }
 

@@ -36,7 +36,7 @@ public class HeartbeatCobanParser extends CobanParser {
         try {
             TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(reportCtx.getImei());
             device.ping();
-            writeOut(reportCtx, serverMessages.on());
+            reportCtx.writeOut(serverMessages.on());
         } catch (Exception ex) {
             logger.error("Error processing heartbeat on imei " +  reportCtx.getImei(), ex);
         }

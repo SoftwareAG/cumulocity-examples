@@ -41,6 +41,7 @@ import c8y.SignalStrength;
 import c8y.SupportedOperations;
 import c8y.trackeragent.protocol.coban.device.CobanDevice;
 import c8y.trackeragent.protocol.coban.device.CobanDeviceFactory;
+import c8y.trackeragent.utils.TrackerConfiguration;
 
 import com.cumulocity.model.ID;
 import com.cumulocity.model.event.CumulocityAlarmStatuses;
@@ -94,9 +95,11 @@ public class TrackerDevice extends DeviceManagedObject {
     private Battery battery = new Battery();
     private MeasurementRepresentation gprsSignalMsrmt = new MeasurementRepresentation();
     private SignalStrength gprsSignal = new SignalStrength();
+    private TrackerConfiguration trackerConfig;
 
-    public TrackerDevice(TrackerPlatform platform, GId agentGid, String imei) throws SDKException {
+    public TrackerDevice(TrackerPlatform platform, TrackerConfiguration trackerConfig, GId agentGid, String imei) throws SDKException {
         super(platform);
+        this.trackerConfig = trackerConfig;
         this.events = platform.getEventApi();
         this.alarms = platform.getAlarmApi();
         this.measurements = platform.getMeasurementApi();
@@ -382,7 +385,9 @@ public class TrackerDevice extends DeviceManagedObject {
 
     public CobanDevice getCobanDevice() {
         ManagedObjectRepresentation mo = getManagedObject();
-        return new CobanDeviceFactory(mo).create();
+        CobanDevice cobanDevice = new CobanDeviceFactory(trackerConfig, mo).create();
+        logger.info("Received coban device config: {} for imei: {}", cobanDevice, imei);
+        return cobanDevice;
     }
 
 }
