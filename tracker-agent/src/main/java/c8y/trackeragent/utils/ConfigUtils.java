@@ -72,7 +72,7 @@ public class ConfigUtils {
             .setBootstrapUser(getProperty(SOURCE_FILE, props, BOOTSTRAP_USER_PROP))
             .setBootstrapPassword(getProperty(SOURCE_FILE, props, BOOTSTRAP_PASSWORD_PROP))
             .setBootstrapTenant("management")
-            .setCobanLocationReportInterval(props.getProperty(COBAN_LOCATION_REPORT_INTERVAL_PROP, CobanConstants.DEFAULT_LOCATION_REPORT_INTERVAL))
+            .setCobanLocationReportTimeInterval(props.getProperty(COBAN_LOCATION_REPORT_INTERVAL_PROP, CobanConstants.DEFAULT_LOCATION_REPORT_INTERVAL))
             .setClientTimeout(clientTimeout);
         //@formatter:on
         logger.info(format("Configuration loaded from: %s: %s", sourceFilePath, config));
