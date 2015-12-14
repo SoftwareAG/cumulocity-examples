@@ -13,6 +13,7 @@ import c8y.Position;
 import c8y.trackeragent.ReportContext;
 import c8y.trackeragent.operations.OperationContext;
 import c8y.trackeragent.utils.Positions;
+import c8y.trackeragent.utils.TK10xUtils;
 import c8y.trackeragent.utils.message.TrackerMessage;
 
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
@@ -44,7 +45,7 @@ public class PositionUpdateCobanParserTest extends CobanParserTestSupport {
 
     @Test
     public void shouldProcessPositionUpdate() throws Exception {
-        TrackerMessage deviceMessage = deviceMessages.positionUpdate("ABCD", Positions.SAMPLE_1);
+        TrackerMessage deviceMessage = deviceMessages.positionUpdate("ABCD", Positions.TK10xSample);
         when(trackerAgent.getOrCreateTrackerDevice("ABCD")).thenReturn(deviceMock);
         ReportContext reportCtx = new ReportContext(deviceMessage.asArray(), "ABCD", null);
         ArgumentCaptor<Position> positionCaptor = ArgumentCaptor.forClass(Position.class);
@@ -53,7 +54,7 @@ public class PositionUpdateCobanParserTest extends CobanParserTestSupport {
 
         verify(deviceMock).setPosition(positionCaptor.capture());
         assertThat(success).isTrue();
-        assertThat(positionCaptor.getValue()).isEqualTo(Positions.SAMPLE_1);
+        assertThat(positionCaptor.getValue()).isEqualTo(TK10xUtils.parse(Positions.TK10xSample));
     }
 
     @Test

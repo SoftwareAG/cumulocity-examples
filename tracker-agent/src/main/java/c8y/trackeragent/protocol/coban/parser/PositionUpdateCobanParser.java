@@ -1,9 +1,7 @@
 package c8y.trackeragent.protocol.coban.parser;
 
 import static c8y.trackeragent.protocol.coban.message.CobanServerMessages.imeiMsg;
-import static c8y.trackeragent.utils.SignedLocation.altitude;
-import static c8y.trackeragent.utils.SignedLocation.latitude;
-import static c8y.trackeragent.utils.SignedLocation.longitude;
+import static java.math.BigDecimal.valueOf;
 
 import java.math.BigDecimal;
 
@@ -18,6 +16,7 @@ import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.Translator;
 import c8y.trackeragent.operations.OperationContext;
 import c8y.trackeragent.protocol.coban.message.CobanServerMessages;
+import c8y.trackeragent.utils.TK10xUtils;
 import c8y.trackeragent.utils.message.TrackerMessage;
 
 import com.cumulocity.model.operation.OperationStatus;
@@ -29,6 +28,7 @@ public class PositionUpdateCobanParser extends CobanParser implements Translator
     private static Logger logger = LoggerFactory.getLogger(PositionUpdateCobanParser.class);
     
     private static final String KEYWORD = "tracker";
+    private static final String GPS_OK = "F";
     
     private final CobanServerMessages serverMessages;
     
@@ -49,18 +49,21 @@ public class PositionUpdateCobanParser extends CobanParser implements Translator
 
     @Override
     public boolean onParsed(ReportContext reportCtx) throws SDKException {
+        if (!GPS_OK.equals(reportCtx.getEntry(4))) {
+            logger.error("NO GPS signal in report: {}, ignore!", reportCtx);
+            return true;            
+        }
         if (reportCtx.getNumberOfEntries() < 12) {
             logger.error("Invalid report: {}", reportCtx);
             return true;
         }
         logger.debug("Update position for IMEI {}.", reportCtx.getImei());
-        BigDecimal lat = latitude().withValue(reportCtx.getEntry(7), reportCtx.getEntry(8)).getValue();
-        BigDecimal lng = longitude().withValue(reportCtx.getEntry(9), reportCtx.getEntry(10)).getValue();
-        BigDecimal alt = altitude().withValue(reportCtx.getEntry(11)).getValue();
+        double lat = TK10xUtils.parseLatitude(reportCtx.getEntry(7), reportCtx.getEntry(8));
+        double lng = TK10xUtils.parseLongitude(reportCtx.getEntry(9), reportCtx.getEntry(10));
         Position position = new Position();
-        position.setLat(lat);
-        position.setLng(lng);
-        position.setAlt(alt);
+        position.setLat(valueOf(lat));
+        position.setLng(valueOf(lng));
+        position.setAlt(BigDecimal.ZERO);
         logger.debug("Update position for imei: {} to: {}.", reportCtx.getImei(), position);
         TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(reportCtx.getImei());
         device.setPosition(position);
