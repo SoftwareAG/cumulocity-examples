@@ -4,6 +4,8 @@ import static org.fest.assertions.Assertions.assertThat;
 
 import org.junit.Test;
 
+import c8y.trackeragent.ReportContext;
+
 public class TrackerMessageTest {
     
     TrackerMessage msg1 = new TrackerMessage(",", ";");
@@ -32,6 +34,17 @@ public class TrackerMessageTest {
         
         TrackerMessage msg1Copy = new TrackerMessage(",", ";").fromText(msg1.asText());
         assertThat(msg1Copy.asText()).isEqualTo(msg1.asText());
+    }
+    
+    @Test
+    public void shouldCreateReportFromCobanReportString() throws Exception {
+        TrackerMessage msg = new TrackerMessage(",", ";").fromText("imei:359710047377578,tracker,151211150247,,L,,,9707,,2660,,,");
+        ReportContext ctx = new ReportContext(msg.asArray(), "1212223", null);
+        
+        System.out.println(ctx);
+        
+        
+        
     }
     
     
