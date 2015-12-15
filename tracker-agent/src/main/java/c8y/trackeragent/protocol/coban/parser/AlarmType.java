@@ -10,27 +10,138 @@ public enum AlarmType {
     LOW_BATTERY {
         
         @Override
-        public String asKeyword() {
+        public String asC8yType() {
+            return "c8y_LowBattery";
+        }
+
+        @Override
+        public String asCobanType() {
             return "low battery";
         }
 
         @Override
         public boolean accept(String[] report) {
-            return asKeyword().equals(report[1]);
+            return accept1(this, report);
         }
         
         @Override
         public void populateAlarm(AlarmRepresentation alarm, ReportContext reportContext) {
-            alarm.setType("c8y_LowBattery");
+            alarm.setType(asC8yType());
+            alarm.setText("Battery level is low.");
             alarm.setSeverity(CumulocitySeverities.MAJOR.toString());
         }
+    },
+    
+    MOVE {
+
+        @Override
+        public String asC8yType() {
+            return "c8y_Move";
+        }
+
+        @Override
+        public String asCobanType() {
+            return "move";
+        }
+
+        @Override
+        public boolean accept(String[] report) {
+            return accept1(this, report);
+        }
+
+        @Override
+        public void populateAlarm(AlarmRepresentation alarm, ReportContext reportContext) {
+            alarm.setType(asC8yType());
+            alarm.setText("Device moved.");
+            alarm.setSeverity(CumulocitySeverities.MAJOR.toString());
+        }
+    },
+    
+    CHOCK {
         
+        @Override
+        public String asC8yType() {
+            return "c8y_Chock";
+        }
+        
+        @Override
+        public String asCobanType() {
+            return "sensor alarm";
+        }
+        
+        @Override
+        public boolean accept(String[] report) {
+            return accept1(this, report);
+        }
+        
+        @Override
+        public void populateAlarm(AlarmRepresentation alarm, ReportContext reportContext) {
+            alarm.setType(asC8yType());
+            alarm.setText("Device shocked.");
+            alarm.setSeverity(CumulocitySeverities.MAJOR.toString());
+        }
+    },
+    
+    OVERS_SPEED {
+        
+        @Override
+        public String asC8yType() {
+            return "c8y_Chock";
+        }
+        
+        @Override
+        public String asCobanType() {
+            return "speed";
+        }
+        
+        @Override
+        public boolean accept(String[] report) {
+            return accept1(this, report);
+        }
+        
+        @Override
+        public void populateAlarm(AlarmRepresentation alarm, ReportContext reportContext) {
+            alarm.setType(asC8yType());
+            alarm.setText("Device over speed.");
+            alarm.setSeverity(CumulocitySeverities.MAJOR.toString());
+        }
+    },
+    
+    GEOFENCE {
+        
+        @Override
+        public String asC8yType() {
+            return "c8y_Geofence";
+        }
+        
+        @Override
+        public String asCobanType() {
+            return "stockade";
+        }
+        
+        @Override
+        public boolean accept(String[] report) {
+            return accept1(this, report);
+        }
+        
+        @Override
+        public void populateAlarm(AlarmRepresentation alarm, ReportContext reportContext) {
+            alarm.setType(asC8yType());
+            alarm.setText("Device out of geofence.");
+            alarm.setSeverity(CumulocitySeverities.MAJOR.toString());
+        }
     };
     
-    public abstract String asKeyword();
+    public abstract String asC8yType();
+    
+    public abstract String asCobanType();
     
     public abstract boolean accept(String[] report);
     
     public abstract void populateAlarm(AlarmRepresentation alarm, ReportContext reportContext);
+    
+    private static boolean accept1(AlarmType alarmType, String[] report) {
+        return alarmType.asCobanType().equals(report[1]);
+    }
         
 }

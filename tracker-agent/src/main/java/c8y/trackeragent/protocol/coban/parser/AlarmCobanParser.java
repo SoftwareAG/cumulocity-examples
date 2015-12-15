@@ -2,9 +2,7 @@ package c8y.trackeragent.protocol.coban.parser;
 
 import static com.cumulocity.model.event.CumulocityAlarmStatuses.ACTIVE;
 
-import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,12 +19,6 @@ import com.cumulocity.sdk.client.SDKException;
 public class AlarmCobanParser extends CobanParser {
     
     private static Logger logger = LoggerFactory.getLogger(AlarmCobanParser.class);
-    
-    // @formatter:off
-    public final static List<AlarmType> alarmTypes = Arrays.<AlarmType>asList(
-        AlarmType.LOW_BATTERY
-    );
-    // @formatter:on
     
     public AlarmCobanParser(TrackerAgent trackerAgent) {
         super(trackerAgent);
@@ -68,7 +60,7 @@ public class AlarmCobanParser extends CobanParser {
     }
     
     public AlarmType getAlarmType(String[] report) {
-        for (AlarmType alarmType : alarmTypes) {
+        for (AlarmType alarmType : AlarmType.values()) {
             if (alarmType.accept(report)) {
                 return alarmType;
             }

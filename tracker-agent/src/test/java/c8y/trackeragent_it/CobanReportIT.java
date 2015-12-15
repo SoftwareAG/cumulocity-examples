@@ -5,9 +5,12 @@ import static org.fest.assertions.Assertions.assertThat;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
+
 import c8y.trackeragent.protocol.coban.CobanConstants;
 import c8y.trackeragent.protocol.coban.CobanDeviceMessages;
 import c8y.trackeragent.protocol.coban.message.CobanServerMessages;
+import c8y.trackeragent.protocol.coban.parser.AlarmType;
 import c8y.trackeragent.utils.Devices;
 import c8y.trackeragent.utils.Positions;
 import c8y.trackeragent.utils.TK10xUtils;
@@ -58,6 +61,15 @@ public class CobanReportIT extends TrackerITSupport {
         writeInNewConnection(deviceMessages.logon(imei), deviceMessages.positionUpdate(imei, Positions.TK10xSample));
         
         assertThat(getTrackerDevice(imei).getPosition()).isEqualTo(TK10xUtils.parse(Positions.TK10xSample));
+    }
+    
+    @Test
+    public void shouldProcessAlarmMessage() throws Exception {
+        bootstrap(imei, deviceMessages.logon(imei));
+        
+        writeInNewConnection(deviceMessages.logon(imei), deviceMessages.alarm(imei, AlarmType.LOW_BATTERY));
+        
+        assertThat(getTrackerDevice(imei).findActiveAlarm(AlarmType.LOW_BATTERY.asC8yType())).isNotNull();
     }
 
 

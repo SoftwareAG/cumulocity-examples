@@ -250,8 +250,8 @@ public class TrackerDevice extends DeviceManagedObject {
             return alarms.create(newAlarm);
         }
     }
-
-    private AlarmRepresentation findActiveAlarm(String type) throws SDKException {
+    
+    public AlarmRepresentation findActiveAlarm(String type) throws SDKException {
         for (AlarmRepresentation alarm : alarms.getAlarmsByFilter(alarmFilter).get().allPages()) {
             if (type.equals(alarm.getType())) {
                 return alarm;

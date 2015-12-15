@@ -46,7 +46,7 @@ public class CobanDeviceMessages extends TrackerMessageFactory {
     }
     
     public TrackerMessage alarm(String imei, AlarmType type) {
-        String msg = formatMessage(ALARM, imei, type.asKeyword());
+        String msg = formatMessage(ALARM, imei, type.asCobanType());
         return msg().fromText(msg);
     }
 
