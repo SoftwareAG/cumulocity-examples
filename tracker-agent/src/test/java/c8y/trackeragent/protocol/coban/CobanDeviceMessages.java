@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import c8y.Position;
+import c8y.trackeragent.protocol.coban.parser.AlarmType;
 import c8y.trackeragent.utils.SignedLocation;
 import c8y.trackeragent.utils.message.TrackerMessage;
 import c8y.trackeragent.utils.message.TrackerMessageFactory;
@@ -20,6 +21,7 @@ public class CobanDeviceMessages extends TrackerMessageFactory {
     private static final String LOGON = "##,imei:%s,A;";
     private static final String HEARTBEAT = "%s;";
     private static final String POSITION_UPDATE = "imei:%s,tracker,0809231929,,F,055403.000,A,%s,%s,%s,%s,%s,,;";
+    private static final String ALARM = "imei:%s,%s,0809231929,,F,055403.000,A,,,,,,,;";
     
     public CobanDeviceMessages() {
         super(CobanConstants.FIELD_SEP, "" + CobanConstants.REPORT_SEP);
@@ -39,8 +41,12 @@ public class CobanDeviceMessages extends TrackerMessageFactory {
         SignedLocation lat = latitude().withValue(position.getLat());
         SignedLocation lng = longitude().withValue(position.getLng());
         SignedLocation alt = altitude().withValue(position.getAlt());
-        String format = POSITION_UPDATE;
-        String msg = formatMessage(format, imei, lat.getAbsValue(), lat.getSymbol(), lng.getAbsValue(), lng.getSymbol(), alt.getAbsValue());
+        String msg = formatMessage(POSITION_UPDATE, imei, lat.getAbsValue(), lat.getSymbol(), lng.getAbsValue(), lng.getSymbol(), alt.getAbsValue());
+        return msg().fromText(msg);
+    }
+    
+    public TrackerMessage alarm(String imei, AlarmType type) {
+        String msg = formatMessage(ALARM, imei, type.asKeyword());
         return msg().fromText(msg);
     }
 

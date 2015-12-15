@@ -2,8 +2,6 @@ package c8y.trackeragent.protocol.coban.parser;
 
 import static org.fest.assertions.Assertions.assertThat;
 
-import java.io.ByteArrayOutputStream;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -30,7 +28,6 @@ public class LogonCobanParserTest extends CobanParserTestSupport {
     
   @Test
   public void shouldProcessLogon() throws Exception {
-      ByteArrayOutputStream out = new ByteArrayOutputStream();
       String[] report = deviceMessages.logon("ABCD").asArray();
       ReportContext reportCtx = new ReportContext(report, "ABCD", out);
       currentCobanDeviceIs(new CobanDevice().setLocationReportInterval("03m"));
