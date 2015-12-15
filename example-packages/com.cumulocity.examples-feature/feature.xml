@@ -2,7 +2,7 @@
 <feature
       id="com.cumulocity.examples-feature"
       label="Cumulocity Examples"
-      version="7.4.0.qualifier"
+      version="7.5.0.qualifier"
       provider-name="CUMULOCITY"
       os="linux,macosx,win32"
       arch="x86,x86_64">
