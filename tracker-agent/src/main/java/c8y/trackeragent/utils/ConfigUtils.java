@@ -23,6 +23,8 @@ public class ConfigUtils {
     
     private static final String SOURCE_FILE = "common.properties";
     private static final String PLATFORM_HOST_PROP = "platformHost";    
+    private static final String FORCE_INITIAL_HOST_PROP = "forceInitialHost";    
+    private static final boolean DEFAULT_FORCE_INITIAL_HOST = false;
     private static final String LOCAL_SOCKET_PORT_PROP = "localPort";
     private static final String DEFAULT_LOCAL_SOCKET_PORT = "9090";
     private static final String BOOTSTRAP_USER_PROP = "bootstrap.user";
@@ -67,10 +69,11 @@ public class ConfigUtils {
         int clientTimeout = parseInt(getProperty(props, CLIENT_TIMEOUT_PROP, DEFAULT_CLIENT_TIMEOUT));
         //@formatter:off
         TrackerConfiguration config = new TrackerConfiguration()
-            .setPlatformHost(getProperty(SOURCE_FILE, props, PLATFORM_HOST_PROP))
+            .setPlatformHost(getProperty(props, PLATFORM_HOST_PROP))
+            .setForceInitialHost(getBooleanProperty(props, FORCE_INITIAL_HOST_PROP, DEFAULT_FORCE_INITIAL_HOST))
             .setLocalPort(getSocketPort(props))
-            .setBootstrapUser(getProperty(SOURCE_FILE, props, BOOTSTRAP_USER_PROP))
-            .setBootstrapPassword(getProperty(SOURCE_FILE, props, BOOTSTRAP_PASSWORD_PROP))
+            .setBootstrapUser(getProperty(props, BOOTSTRAP_USER_PROP))
+            .setBootstrapPassword(getProperty(props, BOOTSTRAP_PASSWORD_PROP))
             .setBootstrapTenant("management")
             .setCobanLocationReportTimeInterval(props.getProperty(COBAN_LOCATION_REPORT_INTERVAL_PROP, CobanConstants.DEFAULT_LOCATION_REPORT_INTERVAL))
             .setClientTimeout(clientTimeout);
@@ -84,7 +87,7 @@ public class ConfigUtils {
         return new ConfigUtils();
     }
     
-    private String getProperty(String path, Properties props, String key) {
+    private String getProperty(Properties props, String key) {
         String value = getProperty(props, key, null);
         if (value == null) {
             throw new RuntimeException("Missing property \'" + key + "\' in file " + SOURCE_FILE);
@@ -94,6 +97,10 @@ public class ConfigUtils {
     
     private String getProperty(Properties props, String key, String defaultValue) {
         return props.getProperty(key, defaultValue);
+    }
+    
+    private boolean getBooleanProperty(Properties props, String key, Boolean defaultValue) {
+        return Boolean.parseBoolean(getProperty(props, key, defaultValue.toString()));
     }
     
     private int getSocketPort(Properties props) {

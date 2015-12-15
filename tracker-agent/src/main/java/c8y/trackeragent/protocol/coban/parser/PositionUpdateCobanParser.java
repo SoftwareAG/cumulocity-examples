@@ -57,7 +57,6 @@ public class PositionUpdateCobanParser extends CobanParser implements Translator
             logger.error("Invalid report: {}", reportCtx);
             return true;
         }
-        logger.debug("Update position for IMEI {}.", reportCtx.getImei());
         double lat = TK10xUtils.parseLatitude(reportCtx.getEntry(7), reportCtx.getEntry(8));
         double lng = TK10xUtils.parseLongitude(reportCtx.getEntry(9), reportCtx.getEntry(10));
         Position position = new Position();
