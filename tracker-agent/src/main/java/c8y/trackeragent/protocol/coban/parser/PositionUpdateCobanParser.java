@@ -15,7 +15,9 @@ import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.Translator;
 import c8y.trackeragent.operations.OperationContext;
+import c8y.trackeragent.protocol.coban.CobanConstants;
 import c8y.trackeragent.protocol.coban.message.CobanServerMessages;
+import c8y.trackeragent.protocol.coban.service.AlarmService;
 import c8y.trackeragent.utils.TK10xCoordinatesTranslator;
 import c8y.trackeragent.utils.message.TrackerMessage;
 
@@ -28,13 +30,15 @@ public class PositionUpdateCobanParser extends CobanParser implements Translator
     private static Logger logger = LoggerFactory.getLogger(PositionUpdateCobanParser.class);
     
     private static final String KEYWORD = "tracker";
-    private static final String GPS_OK = "F";
     
     private final CobanServerMessages serverMessages;
+    private final AlarmService alarmService;
     
-    public PositionUpdateCobanParser(TrackerAgent trackerAgent, CobanServerMessages serverMessages) {
+    public PositionUpdateCobanParser(TrackerAgent trackerAgent, 
+            CobanServerMessages serverMessages, AlarmService alarmService) {
         super(trackerAgent);
         this.serverMessages = serverMessages;
+        this.alarmService = alarmService;
     }
 
     @Override
@@ -49,8 +53,10 @@ public class PositionUpdateCobanParser extends CobanParser implements Translator
 
     @Override
     public boolean onParsed(ReportContext reportCtx) throws SDKException {
-        if (!GPS_OK.equals(reportCtx.getEntry(4))) {
+        TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(reportCtx.getImei());
+        if (CobanConstants.GPS_KO.equals(reportCtx.getEntry(4))) {
             logger.error("NO GPS signal in report: {}, ignore!", reportCtx);
+            alarmService.createAlarm(reportCtx, AlarmType.NO_GPS_SIGNAL, device);
             return true;            
         }
         if (reportCtx.getNumberOfEntries() < 12) {
@@ -64,7 +70,6 @@ public class PositionUpdateCobanParser extends CobanParser implements Translator
         position.setLng(valueOf(lng));
         position.setAlt(BigDecimal.ZERO);
         logger.debug("Update position for imei: {} to: {}.", reportCtx.getImei(), position);
-        TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(reportCtx.getImei());
         device.setPosition(position);
         return true;
     }

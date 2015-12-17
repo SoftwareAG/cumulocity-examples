@@ -1,12 +1,14 @@
 package c8y.trackeragent.protocol.coban.parser;
 
 import static org.fest.assertions.Assertions.assertThat;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 
 import c8y.MotionTracking;
 import c8y.Position;
@@ -16,6 +18,7 @@ import c8y.trackeragent.utils.Positions;
 import c8y.trackeragent.utils.TK10xCoordinatesTranslator;
 import c8y.trackeragent.utils.message.TrackerMessage;
 
+import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 
 public class PositionUpdateCobanParserTest extends CobanParserTestSupport {
@@ -24,7 +27,7 @@ public class PositionUpdateCobanParserTest extends CobanParserTestSupport {
 
     @Before
     public void init() {
-        cobanParser = new PositionUpdateCobanParser(trackerAgent, serverMessages);
+        cobanParser = new PositionUpdateCobanParser(trackerAgent, serverMessages, alarmService);
     }
     @Test
     
@@ -70,6 +73,19 @@ public class PositionUpdateCobanParserTest extends CobanParserTestSupport {
         
         assertThat(operation.get(CobanSupport.OPERATION_FRAGMENT_SERVER_COMMAND)).isEqualTo("**,imei:12345,101,30m;");
         assertThat(msg).isEqualTo("**,imei:12345,101,30m;");
+    }
+    
+    @Test
+    public void shouldSendAlarmIfNoGpsSignal() throws Exception {
+        TrackerMessage deviceMessage = deviceMessages.positionUpdateNoGPS("ABCD");
+        ReportContext reportCtx = new ReportContext(deviceMessage.asArray(), "ABCD", null);
+
+        boolean success = cobanParser.onParsed(reportCtx);
+
+        verify(deviceMock, never()).setPosition(Mockito.any(Position.class));
+        assertThat(success).isTrue();
+        verify(deviceMock).createAlarm(Mockito.any(AlarmRepresentation.class));
+        
     }
 
 }

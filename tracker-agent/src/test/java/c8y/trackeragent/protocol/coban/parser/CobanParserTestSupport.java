@@ -17,6 +17,7 @@ import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.protocol.coban.CobanDeviceMessages;
 import c8y.trackeragent.protocol.coban.device.CobanDevice;
 import c8y.trackeragent.protocol.coban.message.CobanServerMessages;
+import c8y.trackeragent.protocol.coban.service.AlarmService;
 
 public abstract class CobanParserTestSupport {
     
@@ -24,6 +25,7 @@ public abstract class CobanParserTestSupport {
     protected TrackerDevice deviceMock;
     protected CobanServerMessages serverMessages = new CobanServerMessages();
     protected CobanDeviceMessages deviceMessages = new CobanDeviceMessages();
+    protected AlarmService alarmService = new AlarmService();
     protected ByteArrayOutputStream out = new ByteArrayOutputStream();
     
     @Before

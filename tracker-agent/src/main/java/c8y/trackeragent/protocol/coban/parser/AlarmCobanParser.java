@@ -1,9 +1,5 @@
 package c8y.trackeragent.protocol.coban.parser;
 
-import static com.cumulocity.model.event.CumulocityAlarmStatuses.ACTIVE;
-
-import java.util.Date;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,17 +7,18 @@ import c8y.trackeragent.ReportContext;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.protocol.coban.message.CobanServerMessages;
+import c8y.trackeragent.protocol.coban.service.AlarmService;
 
-import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
-import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 
 public class AlarmCobanParser extends CobanParser {
     
     private static Logger logger = LoggerFactory.getLogger(AlarmCobanParser.class);
+    private final AlarmService alarmService;
     
-    public AlarmCobanParser(TrackerAgent trackerAgent) {
+    public AlarmCobanParser(TrackerAgent trackerAgent, AlarmService alarmService) {
         super(trackerAgent);
+        this.alarmService = alarmService;
     }
 
     @Override
@@ -37,21 +34,8 @@ public class AlarmCobanParser extends CobanParser {
         AlarmType alarmType = getAlarmType(reportCtx.getReport());
         logger.info("Process alarm {} for imei {}.", alarmType, reportCtx.getImei());
         TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(reportCtx.getImei());
-        AlarmRepresentation alarm = newAlarm(device);
-        alarmType.populateAlarm(alarm, reportCtx);
-        logger.info("Create alarm {}.", alarm);
-        device.createAlarm(alarm);
+        alarmService.createAlarm(reportCtx, alarmType, device);
         return true;
-    }
-
-    private AlarmRepresentation newAlarm(TrackerDevice device) {
-        AlarmRepresentation alarm = new AlarmRepresentation();
-        ManagedObjectRepresentation source = new ManagedObjectRepresentation();
-        source.setId(device.getGId());
-        alarm.setSource(source);
-        alarm.setTime(new Date());
-        alarm.setStatus(ACTIVE.toString());
-        return alarm;
     }
 
     @Override

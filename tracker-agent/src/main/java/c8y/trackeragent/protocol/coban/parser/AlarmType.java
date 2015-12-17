@@ -130,8 +130,60 @@ public enum AlarmType {
             alarm.setText("Device out of geofence.");
             alarm.setSeverity(CumulocitySeverities.MAJOR.toString());
         }
+    },
+    
+    POWER_OFF {
+        
+        @Override
+        public String asC8yType() {
+            return "c8y_PowerOff";
+        }
+        
+        @Override
+        public String asCobanType() {
+            return "ac alarm";
+        }
+        
+        @Override
+        public boolean accept(String[] report) {
+            return accept1(this, report);
+        }
+        
+        @Override
+        public void populateAlarm(AlarmRepresentation alarm, ReportContext reportContext) {
+            alarm.setType(asC8yType());
+            alarm.setText("Device is power off");
+            alarm.setSeverity(CumulocitySeverities.MAJOR.toString());
+        }
+    },
+    
+    NO_GPS_SIGNAL {
+        
+        @Override
+        public String asC8yType() {
+            return "c8y_NoGPSSignal";
+        }
+        
+        @Override
+        public String asCobanType() {
+            return NO_COBAN_TYPE;
+        }
+        
+        @Override
+        public boolean accept(String[] report) {
+            return accept1(this, report);
+        }
+        
+        @Override
+        public void populateAlarm(AlarmRepresentation alarm, ReportContext reportContext) {
+            alarm.setType(asC8yType());
+            alarm.setText("No GPS signal");
+            alarm.setSeverity(CumulocitySeverities.CRITICAL.toString());
+        }
     };
     
+    private static final String NO_COBAN_TYPE = "___";
+
     public abstract String asC8yType();
     
     public abstract String asCobanType();

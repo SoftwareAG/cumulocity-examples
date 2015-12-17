@@ -24,7 +24,7 @@ public class AlarmCobanParserTest extends CobanParserTestSupport {
 
     @Before
     public void init() {
-        alarmCobanParser = new AlarmCobanParser(trackerAgent);
+        alarmCobanParser = new AlarmCobanParser(trackerAgent, alarmService);
         alarmCaptor = ArgumentCaptor.forClass(AlarmRepresentation.class);
     }
 
