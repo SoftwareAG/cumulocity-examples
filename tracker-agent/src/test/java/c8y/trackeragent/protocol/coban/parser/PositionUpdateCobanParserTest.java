@@ -13,7 +13,7 @@ import c8y.Position;
 import c8y.trackeragent.ReportContext;
 import c8y.trackeragent.operations.OperationContext;
 import c8y.trackeragent.utils.Positions;
-import c8y.trackeragent.utils.TK10xUtils;
+import c8y.trackeragent.utils.TK10xCoordinatesTranslator;
 import c8y.trackeragent.utils.message.TrackerMessage;
 
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
@@ -54,7 +54,7 @@ public class PositionUpdateCobanParserTest extends CobanParserTestSupport {
 
         verify(deviceMock).setPosition(positionCaptor.capture());
         assertThat(success).isTrue();
-        assertThat(positionCaptor.getValue()).isEqualTo(TK10xUtils.parse(Positions.TK10xSample));
+        assertThat(positionCaptor.getValue()).isEqualTo(TK10xCoordinatesTranslator.parse(Positions.TK10xSample));
     }
 
     @Test

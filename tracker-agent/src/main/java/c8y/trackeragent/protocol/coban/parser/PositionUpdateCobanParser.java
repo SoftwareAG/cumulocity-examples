@@ -16,7 +16,7 @@ import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.Translator;
 import c8y.trackeragent.operations.OperationContext;
 import c8y.trackeragent.protocol.coban.message.CobanServerMessages;
-import c8y.trackeragent.utils.TK10xUtils;
+import c8y.trackeragent.utils.TK10xCoordinatesTranslator;
 import c8y.trackeragent.utils.message.TrackerMessage;
 
 import com.cumulocity.model.operation.OperationStatus;
@@ -57,8 +57,8 @@ public class PositionUpdateCobanParser extends CobanParser implements Translator
             logger.error("Invalid report: {}", reportCtx);
             return true;
         }
-        double lat = TK10xUtils.parseLatitude(reportCtx.getEntry(7), reportCtx.getEntry(8));
-        double lng = TK10xUtils.parseLongitude(reportCtx.getEntry(9), reportCtx.getEntry(10));
+        double lat = TK10xCoordinatesTranslator.parseLatitude(reportCtx.getEntry(7), reportCtx.getEntry(8));
+        double lng = TK10xCoordinatesTranslator.parseLongitude(reportCtx.getEntry(9), reportCtx.getEntry(10));
         Position position = new Position();
         position.setLat(valueOf(lat));
         position.setLng(valueOf(lng));

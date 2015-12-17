@@ -14,6 +14,9 @@ import c8y.trackeragent.protocol.coban.ConnectedCobanTracker;
 public class RequestHandler implements Runnable {
     
     private static final Logger logger = LoggerFactory.getLogger(RequestHandler.class);
+    
+    private static final int HASH_ASCII_CODE = 35;
+    
     private final TrackerAgent trackerAgent;
     private final ExecutorService reportsExecutor;
     private final Socket client;
@@ -48,7 +51,7 @@ public class RequestHandler implements Runnable {
         byte[] markingBytes = firstBytes(1, bis);
         if (markingBytes[0] >= '0' && markingBytes[0] <= '9') {
             return new ConnectedTelicTracker(client, bis, trackerAgent);
-        } else if (markingBytes[0] == 35) {
+        } else if (markingBytes[0] == HASH_ASCII_CODE) {
             return new ConnectedCobanTracker(client, bis, trackerAgent);
         } else {
             return new ConnectedGL200Tracker(client, bis, trackerAgent);

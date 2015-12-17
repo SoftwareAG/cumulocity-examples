@@ -57,11 +57,11 @@ public enum AlarmType {
         }
     },
     
-    CHOCK {
+    SHOCK {
         
         @Override
         public String asC8yType() {
-            return "c8y_Chock";
+            return "c8y_Shock";
         }
         
         @Override
@@ -82,11 +82,11 @@ public enum AlarmType {
         }
     },
     
-    OVERS_SPEED {
+    OVERSPEED {
         
         @Override
         public String asC8yType() {
-            return "c8y_Chock";
+            return "c8y_Overspeed";
         }
         
         @Override

@@ -59,7 +59,7 @@ public class AlarmCobanParserTest extends CobanParserTestSupport {
             AlarmRepresentation actual = alarmCaptor.getValue();
             checkCommonAlarmProperties(actual);
             assertThat(actual.getType()).isEqualTo(alarmType.asC8yType());
-            assertThat(actual.getSeverity()).isEqualTo(MAJOR.toString());
+            assertThat(actual.getSeverity()).isNotNull();
         }
     }
 

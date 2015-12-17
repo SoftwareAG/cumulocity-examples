@@ -8,7 +8,7 @@ import org.apache.commons.lang.StringUtils;
 
 import c8y.Position;
 
-public class TK10xUtils {
+public class TK10xCoordinatesTranslator {
 
     private static final String HEMISPHERE_WEST = "W";
     private static final String HEMISPHERE_SOUTH = "S";

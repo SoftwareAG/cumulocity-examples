@@ -5,15 +5,13 @@ import static org.fest.assertions.Assertions.assertThat;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
-
 import c8y.trackeragent.protocol.coban.CobanConstants;
 import c8y.trackeragent.protocol.coban.CobanDeviceMessages;
 import c8y.trackeragent.protocol.coban.message.CobanServerMessages;
 import c8y.trackeragent.protocol.coban.parser.AlarmType;
 import c8y.trackeragent.utils.Devices;
 import c8y.trackeragent.utils.Positions;
-import c8y.trackeragent.utils.TK10xUtils;
+import c8y.trackeragent.utils.TK10xCoordinatesTranslator;
 import c8y.trackeragent.utils.message.TrackerMessage;
 
 public class CobanReportIT extends TrackerITSupport {
@@ -60,7 +58,7 @@ public class CobanReportIT extends TrackerITSupport {
         
         writeInNewConnection(deviceMessages.logon(imei), deviceMessages.positionUpdate(imei, Positions.TK10xSample));
         
-        assertThat(getTrackerDevice(imei).getPosition()).isEqualTo(TK10xUtils.parse(Positions.TK10xSample));
+        assertThat(getTrackerDevice(imei).getPosition()).isEqualTo(TK10xCoordinatesTranslator.parse(Positions.TK10xSample));
     }
     
     @Test

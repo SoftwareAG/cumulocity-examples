@@ -34,7 +34,7 @@ public class ConfigUtils {
     private static final String DEFAULT_CLIENT_TIMEOUT = String.valueOf(5 * 60 * 1000);
     private static final Random random = new Random();
     
-    private static final ConfigUtils instance = create();
+    private static final ConfigUtils instance = new ConfigUtils();
     
     /**
      * Path to the folder with configuration files: common.properties and device.properties
@@ -81,10 +81,6 @@ public class ConfigUtils {
         logger.info(format("Configuration loaded from: %s: %s", sourceFilePath, config));
         return config;
 
-    }
-
-    private static ConfigUtils create() {
-        return new ConfigUtils();
     }
     
     private String getProperty(Properties props, String key) {
