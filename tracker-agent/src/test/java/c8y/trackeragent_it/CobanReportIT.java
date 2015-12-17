@@ -78,6 +78,16 @@ public class CobanReportIT extends TrackerITSupport {
         
         assertThat(getTrackerDevice(imei).findActiveAlarm(AlarmType.NO_GPS_SIGNAL.asC8yType())).isNotNull();
     }
+    
+    @Test
+    public void shouldClearNoGpsSignalAlarm() throws Exception {
+        bootstrap(imei, deviceMessages.logon(imei));
+        
+        writeInNewConnection(deviceMessages.logon(imei), deviceMessages.positionUpdateNoGPS(imei));
+        writeInNewConnection(deviceMessages.logon(imei), deviceMessages.positionUpdate(imei, Positions.TK10xSample));
+        
+        assertThat(getTrackerDevice(imei).findActiveAlarm(AlarmType.NO_GPS_SIGNAL.asC8yType())).isNull();
+    }
 
 
 }

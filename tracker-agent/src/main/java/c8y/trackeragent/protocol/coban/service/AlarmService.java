@@ -25,6 +25,14 @@ public class AlarmService {
         device.createAlarm(alarm);
     }
     
+    public void clearAlarm(ReportContext reportCtx, AlarmType alarmType, TrackerDevice device) {
+        AlarmRepresentation alarm = device.findActiveAlarm(alarmType.asC8yType());
+        if (alarm != null) {
+            logger.info("Clear alarm {}.", alarm);
+            device.clearAlarm(alarm);
+        }
+    }
+    
     private AlarmRepresentation newAlarm(TrackerDevice device) {
         AlarmRepresentation alarm = new AlarmRepresentation();
         ManagedObjectRepresentation source = new ManagedObjectRepresentation();

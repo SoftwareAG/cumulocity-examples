@@ -136,7 +136,7 @@ public enum AlarmType {
         
         @Override
         public String asC8yType() {
-            return "c8y_PowerOff";
+            return "c8y_PowerAlarm";
         }
         
         @Override
@@ -152,7 +152,7 @@ public enum AlarmType {
         @Override
         public void populateAlarm(AlarmRepresentation alarm, ReportContext reportContext) {
             alarm.setType(asC8yType());
-            alarm.setText("Device is power off");
+            alarm.setText("Device lost power");
             alarm.setSeverity(CumulocitySeverities.MAJOR.toString());
         }
     },

@@ -63,6 +63,9 @@ public class PositionUpdateCobanParser extends CobanParser implements Translator
             logger.error("Invalid report: {}", reportCtx);
             return true;
         }
+        if (CobanConstants.GPS_OK.equals(reportCtx.getEntry(4))) {
+            alarmService.clearAlarm(reportCtx, AlarmType.NO_GPS_SIGNAL, device);
+        }
         double lat = TK10xCoordinatesTranslator.parseLatitude(reportCtx.getEntry(7), reportCtx.getEntry(8));
         double lng = TK10xCoordinatesTranslator.parseLongitude(reportCtx.getEntry(9), reportCtx.getEntry(10));
         Position position = new Position();
