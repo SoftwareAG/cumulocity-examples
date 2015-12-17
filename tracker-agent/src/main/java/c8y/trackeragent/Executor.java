@@ -20,7 +20,7 @@
 
 package c8y.trackeragent;
 
-import com.cumulocity.rest.representation.operation.OperationRepresentation;
+import c8y.trackeragent.operations.OperationContext;
 
 /**
  * Interface to execute an operation on a device.
@@ -29,5 +29,5 @@ import com.cumulocity.rest.representation.operation.OperationRepresentation;
  */
 public interface Executor {
 
-    void execute(OperationRepresentation operation) throws Exception;
+    void execute(OperationContext operation) throws Exception;
 }

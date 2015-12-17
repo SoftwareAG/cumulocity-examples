@@ -6,6 +6,9 @@ import org.junit.Test;
 
 import c8y.trackeragent.TrackerPlatform;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
+import c8y.trackeragent.utils.ConfigUtils;
+import c8y.trackeragent.utils.TrackerConfiguration;
+import c8y.trackeragent.utils.TrackerPlatformProvider;
 
 public class TrackerPlatformProviderTest {
     
@@ -18,6 +21,6 @@ public class TrackerPlatformProviderTest {
         TrackerPlatform platform = bean.getBootstrapPlatform();        
         assertThat(platform.getTenantId()).isEqualTo("management");
         assertThat(platform.getUser()).isEqualTo("devicebootstrap");
-        assertThat(platform.getPassword()).isEqualTo("secret123");
+        assertThat(platform.getPassword()).isEqualTo("Fhdt1bb1f");
     }
 }

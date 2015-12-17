@@ -29,7 +29,19 @@ import java.util.HashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import c8y.*;
+import c8y.Battery;
+import c8y.Configuration;
+import c8y.Geofence;
+import c8y.IsDevice;
+import c8y.Mobile;
+import c8y.MotionTracking;
+import c8y.Position;
+import c8y.Restart;
+import c8y.SignalStrength;
+import c8y.SupportedOperations;
+import c8y.trackeragent.protocol.coban.device.CobanDevice;
+import c8y.trackeragent.protocol.coban.device.CobanDeviceFactory;
+import c8y.trackeragent.utils.TrackerConfiguration;
 
 import com.cumulocity.model.ID;
 import com.cumulocity.model.event.CumulocityAlarmStatuses;
@@ -46,6 +58,9 @@ import com.cumulocity.sdk.client.event.EventApi;
 import com.cumulocity.sdk.client.measurement.MeasurementApi;
 
 public class TrackerDevice extends DeviceManagedObject {
+    
+    private Logger logger = LoggerFactory.getLogger(getClass());
+    
     public static final String TYPE = "c8y_Tracker";
     public static final String XTID_TYPE = "c8y_Imei";
     public static final String VIN_XT_TYPE = "c8y_VIN";
@@ -58,8 +73,6 @@ public class TrackerDevice extends DeviceManagedObject {
     public static final String MOTION_DETECTED_EVENT_TYPE = "c8y_MotionEvent";
     public static final String MOTION_ENDED_EVENT_TYPE = "c8y_MotionEndedEvent";
     public static final String POWER_ALARM_TYPE = "c8y_PowerAlarm";
-    
-    private Logger logger = LoggerFactory.getLogger(getClass());
 
     private EventApi events;
     private AlarmApi alarms;
@@ -82,9 +95,11 @@ public class TrackerDevice extends DeviceManagedObject {
     private Battery battery = new Battery();
     private MeasurementRepresentation gprsSignalMsrmt = new MeasurementRepresentation();
     private SignalStrength gprsSignal = new SignalStrength();
+    private TrackerConfiguration trackerConfig;
 
-    public TrackerDevice(TrackerPlatform platform, GId agentGid, String imei) throws SDKException {
+    public TrackerDevice(TrackerPlatform platform, TrackerConfiguration trackerConfig, GId agentGid, String imei) throws SDKException {
         super(platform);
+        this.trackerConfig = trackerConfig;
         this.events = platform.getEventApi();
         this.alarms = platform.getAlarmApi();
         this.measurements = platform.getMeasurementApi();
@@ -116,8 +131,16 @@ public class TrackerDevice extends DeviceManagedObject {
     }
     
     public Position getPosition() {
-        ManagedObjectRepresentation device = inventory.get(gid);
+        ManagedObjectRepresentation device = getManagedObject();
         return device == null ? null : device.get(Position.class); 
+    }
+
+    public ManagedObjectRepresentation getManagedObject() {
+        ManagedObjectRepresentation mo = inventory.get(gid);
+        if(mo == null) {
+            throw new RuntimeException("No device for id " + gid);
+        }
+        return mo;
     }
 
     public void setGeofence(Geofence fence) throws SDKException {
@@ -195,8 +218,24 @@ public class TrackerDevice extends DeviceManagedObject {
         device.setId(gid);
         getInventory().update(device);
     }
+    
+    public void ping() throws SDKException {
+        logger.info("Ping to device with id {}.", gid);
+        ManagedObjectRepresentation device = new ManagedObjectRepresentation();
+        device.setId(gid);
+        getInventory().update(device);
+    }
+    
+    public AlarmRepresentation createAlarm(AlarmRepresentation newAlarm) throws SDKException { 
+        return createOrCancelAlarm(true, newAlarm);
+    }
+    
+    public AlarmRepresentation clearAlarm(AlarmRepresentation newAlarm) throws SDKException { 
+        return createOrCancelAlarm(false, newAlarm);
+    }
 
-    private void createOrCancelAlarm(boolean status, AlarmRepresentation newAlarm) throws SDKException {
+    private AlarmRepresentation createOrCancelAlarm(boolean status, AlarmRepresentation newAlarm) throws SDKException {
+        newAlarm.setSource(asSource());
         String newStatus = status ? CumulocityAlarmStatuses.ACTIVE.toString() : CumulocityAlarmStatuses.CLEARED.toString();
 
         AlarmRepresentation activeAlarm = findActiveAlarm(newAlarm.getType());
@@ -204,15 +243,15 @@ public class TrackerDevice extends DeviceManagedObject {
         if (activeAlarm != null) {
             activeAlarm.setTime(new Date());
             activeAlarm.setStatus(newStatus);
-            alarms.update(activeAlarm);
+            return alarms.update(activeAlarm);
         } else {
             newAlarm.setTime(new Date());
             newAlarm.setStatus(newStatus);
-            alarms.create(newAlarm);
+            return alarms.create(newAlarm);
         }
     }
-
-    private AlarmRepresentation findActiveAlarm(String type) throws SDKException {
+    
+    public AlarmRepresentation findActiveAlarm(String type) throws SDKException {
         for (AlarmRepresentation alarm : alarms.getAlarmsByFilter(alarmFilter).get().allPages()) {
             if (type.equals(alarm.getType())) {
                 return alarm;
@@ -222,9 +261,7 @@ public class TrackerDevice extends DeviceManagedObject {
     }
 
     private void setupTemplates(GId agentGid) throws SDKException {
-        ManagedObjectRepresentation source = new ManagedObjectRepresentation();
-        source.setId(gid);
-        source.setSelf(self);
+        ManagedObjectRepresentation source = asSource();
 
         locationUpdate.setType(LU_EVENT_TYPE);
         locationUpdate.setText("Location updated");
@@ -258,6 +295,13 @@ public class TrackerDevice extends DeviceManagedObject {
         gprsSignalMsrmt.setType(SIG_TYPE);
         gprsSignalMsrmt.set(gprsSignal);
         gprsSignalMsrmt.setSource(source);
+    }
+
+    private ManagedObjectRepresentation asSource() {
+        ManagedObjectRepresentation source = new ManagedObjectRepresentation();
+        source.setId(gid);
+        source.setSelf(self);
+        return source;
     }
 
     private void createMo(GId agentGid) throws SDKException {
@@ -322,10 +366,10 @@ public class TrackerDevice extends DeviceManagedObject {
             logger.warn("Failed to parse mileage value: " + mileage);
             return;
         }
-        measurements.create(asMeasurementWithSpeed(mileageFloat));
+        measurements.create(asMeasurementWithMileage(mileageFloat));
     }
 
-    private MeasurementRepresentation asMeasurementWithSpeed(float mileage) {
+    private MeasurementRepresentation asMeasurementWithMileage(float mileage) {
         ManagedObjectRepresentation source = new ManagedObjectRepresentation();
         source.setId(gid);
         MeasurementRepresentation representation = new MeasurementRepresentation();
@@ -337,6 +381,13 @@ public class TrackerDevice extends DeviceManagedObject {
         measurementValue.put("unit", "km");
         representation.set(measurementValue, "c8y_DistanceMeasurement");
         return representation;
+    }
+
+    public CobanDevice getCobanDevice() {
+        ManagedObjectRepresentation mo = getManagedObject();
+        CobanDevice cobanDevice = new CobanDeviceFactory(trackerConfig, mo).create();
+        logger.info("Received coban device config: {} for imei: {}", cobanDevice, imei);
+        return cobanDevice;
     }
 
 }

@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
@@ -32,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import c8y.trackeragent.event.TrackerAgentEvents;
+import c8y.trackeragent.operations.OperationContext;
 
 import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
@@ -106,6 +108,7 @@ public class ConnectedTracker implements Runnable, Executor {
         try {
             processReport(report);
         } catch (SDKException x) {
+            logger.error("Error processing report " + Arrays.toString(report), x);
             /*
              * What might have happened here? Either the connection to the
              * platform is down or the object has been deleted from the
@@ -154,7 +157,8 @@ public class ConnectedTracker implements Runnable, Executor {
                 if (imei != null) {
                     boolean registered = checkIfDeviceRegistered(imei);
                     if (registered) {
-                        boolean success = parser.onParsed(report, imei);
+                        ReportContext reportContext = new ReportContext(report, imei, out);
+                        boolean success = parser.onParsed(reportContext);
                         if (success) {
                             this.imei = imei;
                             ConnectionRegistry.instance().put(imei, this);
@@ -175,20 +179,21 @@ public class ConnectedTracker implements Runnable, Executor {
     }
 
     @Override
-    public void execute(OperationRepresentation operation) throws IOException {
-        String translation = translate(operation);
-        logger.debug("Executing operation\n{}\n{}", operation, translation);
+    public void execute(OperationContext operationCtx) throws IOException {
+        String translation = translate(operationCtx);
+        logger.debug("Executing operation\n{}\n{}", operationCtx, translation);
 
-        if (translation != null) {
-            out.write(translation.getBytes());
-            out.flush();
+        if (translation == null) {
+            operationCtx.getOperation().setStatus(OperationStatus.FAILED.toString());
+            operationCtx.getOperation().setFailureReason("Command currently not supported");
         } else {
-            operation.setStatus(OperationStatus.FAILED.toString());
-            operation.setFailureReason("Command currently not supported");
+            logger.debug("Write to device: {}.", translation);
+            out.write(translation.getBytes("US-ASCII"));
+            out.flush();
         }
     }
 
-    public String translate(OperationRepresentation operation) {
+    public String translate(OperationContext operation) {
         for (Object fragment : fragments) {
             if (fragment instanceof Translator) {
                 Translator translator = (Translator) fragment;

@@ -64,16 +64,16 @@ public class GL200Power extends GL200Parser {
     }
     
     @Override
-    public boolean onParsed(String[] report, String imei) throws SDKException {
-        String reportType = report[0];
+    public boolean onParsed(ReportContext reportCtx) throws SDKException {
+        String reportType = reportCtx.getReport()[0];
         if (POWERON_REPORT.equals(reportType)) {
-            return parsePowerOn(report, imei);
+            return parsePowerOn(reportCtx.getReport(), reportCtx.getImei());
         } else if (POWEROFF_REPORT.equals(reportType)) {
-            return parsePowerOff(report, imei);
+            return parsePowerOff(reportCtx.getReport(), reportCtx.getImei());
         } else if (EXTERNALPOWERON_REPORT.equals(reportType)) {
-            return parseExternalPowerOn(report, imei);
+            return parseExternalPowerOn(reportCtx.getReport(), reportCtx.getImei());
         } else if (EXTERNALPOWEROFF_REPORT.equals(reportType)) {
-            return parseExternalPowerOff(report, imei);
+            return parseExternalPowerOff(reportCtx.getReport(), reportCtx.getImei());
         } else {
             return false;
         }

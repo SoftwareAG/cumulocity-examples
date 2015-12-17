@@ -32,6 +32,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import c8y.Position;
+import c8y.trackeragent.GL200Constants;
+import c8y.trackeragent.GL200LocationReport;
+import c8y.trackeragent.TrackerAgent;
+import c8y.trackeragent.TrackerDevice;
 
 import com.cumulocity.sdk.client.SDKException;
 
@@ -61,7 +65,7 @@ public class GL500LocationReportTest {
     @Test
     public void gl500Report() throws SDKException {
         String imei = locationReport.parse(GL500REP);
-        locationReport.onParsed(GL500REP, imei);
+        locationReport.onParsed(new ReportContext(GL500REP, imei, null));
 
         assertEquals(IMEI, imei);
         verify(trackerAgent).getOrCreateTrackerDevice(IMEI);
