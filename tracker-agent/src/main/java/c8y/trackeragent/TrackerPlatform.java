@@ -33,7 +33,7 @@ public class TrackerPlatform implements Platform {
         this.orig = orig;
         this.cache = CacheBuilder.newBuilder().build();
     }
-
+    
     public InventoryApi getInventoryApi() throws SDKException {
         return new CachedApiGetter<InventoryApi>(InventoryApi.class) {
 
@@ -176,6 +176,12 @@ public class TrackerPlatform implements Platform {
     public GId getAgentId() {
         return agent == null ? null : agent.getId();
     }
+    
+    @Override
+    public BinariesApi getBinariesApi() throws SDKException {
+        return orig.getBinariesApi();
+    }
+
 
     @Override
     public String toString() {
