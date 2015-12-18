@@ -38,6 +38,7 @@ import c8y.MotionTracking;
 import c8y.Position;
 import c8y.Restart;
 import c8y.SignalStrength;
+import c8y.SpeedMeasurement;
 import c8y.SupportedOperations;
 import c8y.trackeragent.protocol.coban.device.CobanDevice;
 import c8y.trackeragent.protocol.coban.device.CobanDeviceFactory;
@@ -55,6 +56,7 @@ import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.alarm.AlarmApi;
 import com.cumulocity.sdk.client.alarm.AlarmFilter;
 import com.cumulocity.sdk.client.event.EventApi;
+import com.cumulocity.sdk.client.event.EventFilter;
 import com.cumulocity.sdk.client.measurement.MeasurementApi;
 
 public class TrackerDevice extends DeviceManagedObject {
@@ -83,13 +85,13 @@ public class TrackerDevice extends DeviceManagedObject {
     private String self;
     private Mobile mobile;
 
-    private EventRepresentation locationUpdate = new EventRepresentation();
     private EventRepresentation eventMotionDetected = new EventRepresentation();
     private EventRepresentation eventMotionEnded = new EventRepresentation();
 
     private AlarmRepresentation fenceAlarm = new AlarmRepresentation();
     private AlarmRepresentation powerAlarm = new AlarmRepresentation();
     private AlarmFilter alarmFilter = new AlarmFilter();
+    private EventFilter eventFilter = new EventFilter();
 
     private MeasurementRepresentation batteryMsrmt = new MeasurementRepresentation();
     private Battery battery = new Battery();
@@ -118,23 +120,37 @@ public class TrackerDevice extends DeviceManagedObject {
     }
 
     public void setPosition(Position position) throws SDKException {
-        logger.debug("Updating location of {} to lat {}, lng {}, alt {}", imei, position.getLat(), position.getLng(), position.getAlt());
-
-        ManagedObjectRepresentation device = new ManagedObjectRepresentation();
-        device.set(position);
-        device.setId(gid);
-        getInventory().update(device);
-
-        locationUpdate.setTime(new Date());
-        locationUpdate.set(position);
-        events.create(locationUpdate);
+        setPositionAndSpeed(position, null);
     }
     
+    public void setPositionAndSpeed(Position position, SpeedMeasurement speed) throws SDKException {
+        EventRepresentation event = aLocationUpdateEvent();
+        ManagedObjectRepresentation device = aDevice();
+        
+        if (position != null) {
+            logger.debug("Updating location of {} to {}.", imei, position);
+            device.set(position);
+            event.set(position);
+        }
+        if (speed != null) {
+            logger.debug("Updating speed of {} to {}.", imei, speed);
+            event.set(speed);
+        }
+        getInventory().update(device);        
+        events.create(event);
+    }
+    
+    private ManagedObjectRepresentation aDevice() {
+        ManagedObjectRepresentation representation = new ManagedObjectRepresentation();
+        representation.setId(gid);
+        return representation;
+    }
+
     public Position getPosition() {
         ManagedObjectRepresentation device = getManagedObject();
         return device == null ? null : device.get(Position.class); 
     }
-
+    
     public ManagedObjectRepresentation getManagedObject() {
         ManagedObjectRepresentation mo = inventory.get(gid);
         if(mo == null) {
@@ -259,13 +275,29 @@ public class TrackerDevice extends DeviceManagedObject {
         }
         return null;
     }
-
-    private void setupTemplates(GId agentGid) throws SDKException {
+    
+    public EventRepresentation findLastEvent(String type) throws SDKException {
+        for (EventRepresentation event : events.getEventsByFilter(eventFilter).get().allPages()) {
+            if (type.equals(event.getType())) {
+                return event;
+            }
+        }
+        return null;
+    }
+    
+    private EventRepresentation aLocationUpdateEvent() {
+        EventRepresentation locationUpdate = new EventRepresentation();
         ManagedObjectRepresentation source = asSource();
-
+        
         locationUpdate.setType(LU_EVENT_TYPE);
         locationUpdate.setText("Location updated");
         locationUpdate.setSource(source);
+        locationUpdate.setTime(new Date());
+        return locationUpdate;
+    }
+
+    private void setupTemplates(GId agentGid) throws SDKException {
+        ManagedObjectRepresentation source = asSource();
 
         fenceAlarm.setType(GEO_ALARM_TYPE);
         fenceAlarm.setSeverity(CumulocitySeverities.MAJOR.toString());
@@ -287,6 +319,8 @@ public class TrackerDevice extends DeviceManagedObject {
 
         alarmFilter.bySource(source.getId());
         alarmFilter.byStatus(CumulocityAlarmStatuses.ACTIVE);
+        
+        eventFilter.bySource(source.getId());
 
         batteryMsrmt.setType(BAT_TYPE);
         batteryMsrmt.set(battery);
@@ -355,6 +389,9 @@ public class TrackerDevice extends DeviceManagedObject {
         return extId;
     }
     
+    public void createMeasurement(MeasurementRepresentation measurement) {
+        measurements.create(measurement);
+    }
     public void createMileageMeasurement(String mileage) {
         if (isEmpty(mileage)) {
             return;

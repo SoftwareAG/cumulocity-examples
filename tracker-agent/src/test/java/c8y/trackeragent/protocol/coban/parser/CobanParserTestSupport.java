@@ -10,14 +10,15 @@ import org.junit.After;
 import org.junit.Before;
 import org.mockito.Mockito;
 
-import com.cumulocity.model.idtype.GId;
-
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.protocol.coban.CobanDeviceMessages;
 import c8y.trackeragent.protocol.coban.device.CobanDevice;
 import c8y.trackeragent.protocol.coban.message.CobanServerMessages;
 import c8y.trackeragent.protocol.coban.service.AlarmService;
+import c8y.trackeragent.protocol.coban.service.MeasurementService;
+
+import com.cumulocity.model.idtype.GId;
 
 public abstract class CobanParserTestSupport {
     
@@ -26,6 +27,7 @@ public abstract class CobanParserTestSupport {
     protected CobanServerMessages serverMessages = new CobanServerMessages();
     protected CobanDeviceMessages deviceMessages = new CobanDeviceMessages();
     protected AlarmService alarmService = new AlarmService();
+    protected MeasurementService measurementService = new MeasurementService();
     protected ByteArrayOutputStream out = new ByteArrayOutputStream();
     
     @Before

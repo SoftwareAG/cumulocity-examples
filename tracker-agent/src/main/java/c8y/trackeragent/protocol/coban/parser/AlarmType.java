@@ -1,6 +1,8 @@
 package c8y.trackeragent.protocol.coban.parser;
 
+import c8y.SpeedMeasurement;
 import c8y.trackeragent.ReportContext;
+import c8y.trackeragent.protocol.coban.service.MeasurementService;
 
 import com.cumulocity.model.event.CumulocitySeverities;
 import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
@@ -27,7 +29,7 @@ public enum AlarmType {
         @Override
         public void populateAlarm(AlarmRepresentation alarm, ReportContext reportContext) {
             alarm.setType(asC8yType());
-            alarm.setText("Battery level is low.");
+            alarm.setText("Batteriezustand ist kritisch.");
             alarm.setSeverity(CumulocitySeverities.MAJOR.toString());
         }
     },
@@ -52,7 +54,7 @@ public enum AlarmType {
         @Override
         public void populateAlarm(AlarmRepresentation alarm, ReportContext reportContext) {
             alarm.setType(asC8yType());
-            alarm.setText("Device moved.");
+            alarm.setText("Bewegungsalarm.");
             alarm.setSeverity(CumulocitySeverities.MAJOR.toString());
         }
     },
@@ -77,7 +79,7 @@ public enum AlarmType {
         @Override
         public void populateAlarm(AlarmRepresentation alarm, ReportContext reportContext) {
             alarm.setType(asC8yType());
-            alarm.setText("Device shocked.");
+            alarm.setText("Erschütterungsalarm.");
             alarm.setSeverity(CumulocitySeverities.MAJOR.toString());
         }
     },
@@ -101,9 +103,18 @@ public enum AlarmType {
         
         @Override
         public void populateAlarm(AlarmRepresentation alarm, ReportContext reportContext) {
+            SpeedMeasurement speedFragment = MeasurementService.createSpeedFragment(reportContext);
+            String text = String.format("Geschwindigkeitsüberschreitung %s", formatSpeed(speedFragment));
             alarm.setType(asC8yType());
-            alarm.setText("Device over speed.");
+            alarm.setText(text);
             alarm.setSeverity(CumulocitySeverities.MAJOR.toString());
+        }
+
+        private String formatSpeed(SpeedMeasurement speedFragment) {
+            if (speedFragment == null) {
+                return "";
+            }
+            return String.format("%s%s", speedFragment.getSpeed().getValue(), speedFragment.getSpeed().getUnit());
         }
     },
     
@@ -177,8 +188,33 @@ public enum AlarmType {
         @Override
         public void populateAlarm(AlarmRepresentation alarm, ReportContext reportContext) {
             alarm.setType(asC8yType());
-            alarm.setText("No GPS signal");
+            alarm.setText("kein GPS-Signal");
             alarm.setSeverity(CumulocitySeverities.CRITICAL.toString());
+        }
+    },
+    
+    SOS {
+        
+        @Override
+        public String asC8yType() {
+            return "c8y_SOS";
+        }
+
+        @Override
+        public String asCobanType() {
+            return "help me";
+        }
+
+        @Override
+        public boolean accept(String[] report) {
+            return accept1(this, report);
+        }
+        
+        @Override
+        public void populateAlarm(AlarmRepresentation alarm, ReportContext reportContext) {
+            alarm.setType(asC8yType());
+            alarm.setText("NOTRUF");
+            alarm.setSeverity(CumulocitySeverities.MAJOR.toString());
         }
     };
     

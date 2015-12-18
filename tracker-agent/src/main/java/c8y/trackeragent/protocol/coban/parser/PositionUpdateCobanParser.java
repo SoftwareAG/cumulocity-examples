@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import c8y.MotionTracking;
 import c8y.Position;
+import c8y.SpeedMeasurement;
 import c8y.trackeragent.ReportContext;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerDevice;
@@ -18,6 +19,7 @@ import c8y.trackeragent.operations.OperationContext;
 import c8y.trackeragent.protocol.coban.CobanConstants;
 import c8y.trackeragent.protocol.coban.message.CobanServerMessages;
 import c8y.trackeragent.protocol.coban.service.AlarmService;
+import c8y.trackeragent.protocol.coban.service.MeasurementService;
 import c8y.trackeragent.utils.TK10xCoordinatesTranslator;
 import c8y.trackeragent.utils.message.TrackerMessage;
 
@@ -33,12 +35,16 @@ public class PositionUpdateCobanParser extends CobanParser implements Translator
     
     private final CobanServerMessages serverMessages;
     private final AlarmService alarmService;
+    private final MeasurementService measurementService;
     
     public PositionUpdateCobanParser(TrackerAgent trackerAgent, 
-            CobanServerMessages serverMessages, AlarmService alarmService) {
+            CobanServerMessages serverMessages, 
+            AlarmService alarmService, 
+            MeasurementService measurementService) {
         super(trackerAgent);
         this.serverMessages = serverMessages;
         this.alarmService = alarmService;
+        this.measurementService = measurementService;
     }
 
     @Override
@@ -73,7 +79,9 @@ public class PositionUpdateCobanParser extends CobanParser implements Translator
         position.setLng(valueOf(lng));
         position.setAlt(BigDecimal.ZERO);
         logger.debug("Update position for imei: {} to: {}.", reportCtx.getImei(), position);
-        device.setPosition(position);
+        SpeedMeasurement speed = measurementService.createSpeedMeasurement(reportCtx, device);
+        device.setPositionAndSpeed(position, speed);
+        measurementService.createSpeedMeasurement(reportCtx, device);
         return true;
     }
 
