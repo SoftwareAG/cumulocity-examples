@@ -12,6 +12,7 @@ import org.mockito.Mockito;
 
 import c8y.MotionTracking;
 import c8y.Position;
+import c8y.SpeedMeasurement;
 import c8y.trackeragent.ReportContext;
 import c8y.trackeragent.operations.OperationContext;
 import c8y.trackeragent.utils.Positions;
@@ -27,7 +28,7 @@ public class PositionUpdateCobanParserTest extends CobanParserTestSupport {
 
     @Before
     public void init() {
-        cobanParser = new PositionUpdateCobanParser(trackerAgent, serverMessages, alarmService);
+        cobanParser = new PositionUpdateCobanParser(trackerAgent, serverMessages, alarmService, measurementService);
     }
     @Test
     
@@ -52,10 +53,11 @@ public class PositionUpdateCobanParserTest extends CobanParserTestSupport {
         when(trackerAgent.getOrCreateTrackerDevice("ABCD")).thenReturn(deviceMock);
         ReportContext reportCtx = new ReportContext(deviceMessage.asArray(), "ABCD", null);
         ArgumentCaptor<Position> positionCaptor = ArgumentCaptor.forClass(Position.class);
+        ArgumentCaptor<SpeedMeasurement> speedCaptor = ArgumentCaptor.forClass(SpeedMeasurement.class);
 
         boolean success = cobanParser.onParsed(reportCtx);
 
-        verify(deviceMock).setPosition(positionCaptor.capture());
+        verify(deviceMock).setPositionAndSpeed(positionCaptor.capture(), speedCaptor.capture());
         assertThat(success).isTrue();
         assertThat(positionCaptor.getValue()).isEqualTo(TK10xCoordinatesTranslator.parse(Positions.TK10xSample));
     }
