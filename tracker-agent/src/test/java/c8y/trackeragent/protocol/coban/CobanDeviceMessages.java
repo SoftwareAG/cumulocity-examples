@@ -19,10 +19,14 @@ public class CobanDeviceMessages extends TrackerMessageFactory {
     
     private static final Logger logger = LoggerFactory.getLogger(CobanDeviceMessages.class);
     
+    private static final Integer DEFAULT_SPEED = 120;
+    private static final Position DEFAULT_POSITION = Positions.ZERO;
+    
     private static final String LOGON = "##,imei:%s,A;";
     private static final String HEARTBEAT = "%s;";
-    private static final String POSITION_UPDATE = "imei:%s,tracker,0809231929,,%S,055403.000,A,%s,%s,%s,%s,%s,,;";
+    private static final String POSITION_UPDATE = "imei:%s,tracker,0809231929,,%S,055403.000,A,%s,%s,%s,%s,%s,%s,;";
     private static final String ALARM = "imei:%s,%s,0809231929,,F,055403.000,A,,,,,,,;";
+    private static final String OVERSPEED_ALARM = "imei:%s,%s,0809231929,,F,055403.000,A,,,,,,%s,;";
     
     public CobanDeviceMessages() {
         super(CobanConstants.FIELD_SEP, "" + CobanConstants.REPORT_SEP);
@@ -38,25 +42,43 @@ public class CobanDeviceMessages extends TrackerMessageFactory {
         return msg().fromText(msg);
     }
     
-    public TrackerMessage positionUpdate(String imei, Position position) {
+    private TrackerMessage positionUpdate(String imei, Position position, String gpsStatus, Integer speed) {
         SignedLocation lat = latitude().withValue(position.getLat());
         SignedLocation lng = longitude().withValue(position.getLng());
         SignedLocation alt = altitude().withValue(position.getAlt());
-        String msg = formatMessage(POSITION_UPDATE, imei, CobanConstants.GPS_OK, lat.getAbsValue(), lat.getSymbol(), lng.getAbsValue(), lng.getSymbol(), alt.getAbsValue());
-        return msg().fromText(msg);
+        // formatter:off
+        String text = formatMessage(POSITION_UPDATE, 
+                imei, 
+                gpsStatus, 
+                lat.getAbsValue(), 
+                lat.getSymbol(), 
+                lng.getAbsValue(), 
+                lng.getSymbol(), 
+                alt.getAbsValue(),
+                speed);
+        // formatter:on
+        return msg().fromText(text);
+    }
+    
+    public TrackerMessage positionUpdate(String imei, Position position) {
+        return positionUpdate(imei, position, CobanConstants.GPS_OK, DEFAULT_SPEED);
+    }
+    
+    public TrackerMessage positionUpdate(String imei, Integer speed) {
+        return positionUpdate(imei, DEFAULT_POSITION, CobanConstants.GPS_OK, speed);
     }
     
     public TrackerMessage positionUpdateNoGPS(String imei) {
-        Position position = Positions.ZERO;
-        SignedLocation lat = latitude().withValue(position.getLat());
-        SignedLocation lng = longitude().withValue(position.getLng());
-        SignedLocation alt = altitude().withValue(position.getAlt());
-        String msg = formatMessage(POSITION_UPDATE, imei, CobanConstants.GPS_KO, lat.getAbsValue(), lat.getSymbol(), lng.getAbsValue(), lng.getSymbol(), alt.getAbsValue());
-        return msg().fromText(msg);
+        return positionUpdate(imei, DEFAULT_POSITION, CobanConstants.GPS_KO, DEFAULT_SPEED);
     }
     
     public TrackerMessage alarm(String imei, AlarmType type) {
         String msg = formatMessage(ALARM, imei, type.asCobanType());
+        return msg().fromText(msg);
+    }
+    
+    public TrackerMessage overSpeedAlarm(String imei, int speed) {
+        String msg = formatMessage(OVERSPEED_ALARM, imei, AlarmType.OVERSPEED.asCobanType(), speed);
         return msg().fromText(msg);
     }
 
