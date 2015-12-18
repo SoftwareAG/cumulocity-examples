@@ -178,12 +178,6 @@ public class TrackerPlatform implements Platform {
     }
     
     @Override
-    public BinariesApi getBinariesApi() throws SDKException {
-        return orig.getBinariesApi();
-    }
-
-
-    @Override
     public String toString() {
         return String.format("TrackerPlatform [orig=%s, getTenantId()=%s, getHost()=%s, getUser()=%s, agentId = %s]", orig, getTenantId(), getHost(), getUser(), getAgentId());
     }
