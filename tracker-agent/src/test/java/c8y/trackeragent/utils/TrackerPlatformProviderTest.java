@@ -2,14 +2,13 @@ package c8y.trackeragent.utils;
 
 import static org.fest.assertions.Assertions.assertThat;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import c8y.trackeragent.TrackerPlatform;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
-import c8y.trackeragent.utils.ConfigUtils;
-import c8y.trackeragent.utils.TrackerConfiguration;
-import c8y.trackeragent.utils.TrackerPlatformProvider;
 
+@Ignore
 public class TrackerPlatformProviderTest {
     
     @Test
