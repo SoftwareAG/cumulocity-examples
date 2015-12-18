@@ -14,6 +14,7 @@
     <properties>
         <maven.compiler.source>1.6</maven.compiler.source>
         <maven.compiler.target>1.6</maven.compiler.target>
+        <spring.boot.version>1.2.1.RELEASE</spring.boot.version>
         <rpm.etc.dir>/etc/tracker-agent</rpm.etc.dir> <!-- TODO move to common parent pom for tracker-agent when created to avoid 
             duplication here and in tracker-agent-package -->
     </properties>
@@ -21,6 +22,12 @@
         <dependency>
             <groupId>com.nsn.cumulocity.clients-java</groupId>
             <artifactId>java-client</artifactId>
+            <exclusions>
+				<exclusion>
+					<groupId>javax.validation</groupId>
+					<artifactId>com.springsource.javax.validation</artifactId>
+				</exclusion>
+			</exclusions>
         </dependency>
         <dependency>
             <groupId>com.nsn.cumulocity.model</groupId>
@@ -39,6 +46,37 @@
             <artifactId>logback-classic</artifactId>
             <version>1.0.13</version>
         </dependency>
+        <dependency>
+			<groupId>com.nsn.cumulocity.clients-java</groupId>
+			<artifactId>agent-framework-core</artifactId>
+			<version>${c8y.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.nsn.cumulocity.clients-java</groupId>
+			<artifactId>agent-framework-repositories</artifactId>
+			<version>${c8y.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.nsn.cumulocity.clients-java</groupId>
+			<artifactId>agent-framework-device-control</artifactId>
+			<version>${c8y.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.nsn.cumulocity.clients-java</groupId>
+			<artifactId>agent-framework-device-context</artifactId>
+			<version>${c8y.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.nsn.cumulocity.clients-java</groupId>
+			<artifactId>agent-framework-mvc</artifactId>
+			<version>${c8y.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>javax.validation</groupId>
+					<artifactId>com.springsource.javax.validation</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
@@ -92,6 +130,23 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<version>${spring.boot.version}</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>com.nsn.cumulocity.clients-java</groupId>
+				<artifactId>agent-framework-package</artifactId>
+				<version>${c8y.version}</version>
+			</plugin>
         </plugins>
     </build>
     <profiles>

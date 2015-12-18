@@ -78,18 +78,15 @@ public class DeviceCredentialsRepository {
     }
 
     private DeviceCredentials asCredentials(Group group) {
-        DeviceCredentials credentials = new DeviceCredentials();
-        credentials.setTenantId(group.get("tenantId"));
-        credentials.setUser(group.get("user"));
-        credentials.setPassword(group.get("password"));
+        DeviceCredentials credentials = new DeviceCredentials(group.get("tenantId"), group.get("user"), group.get("password"), null, null);
         credentials.setImei(group.getName());
         return credentials;
     }
 
     private Group asGroup(String imei, DeviceCredentials credentials) {
         Group group = propertyAccessor.createEmptyGroup(imei);
-        group.put("tenantId", credentials.getTenantId());
-        group.put("user", credentials.getUser());
+        group.put("tenantId", credentials.getTenant());
+        group.put("user", credentials.getUsername());
         group.put("password", credentials.getPassword());
         return group;
     }

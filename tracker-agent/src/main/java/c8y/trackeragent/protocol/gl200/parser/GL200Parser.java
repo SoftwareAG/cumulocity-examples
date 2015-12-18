@@ -1,4 +1,6 @@
-package c8y.trackeragent;
+package c8y.trackeragent.protocol.gl200.parser;
+
+import c8y.trackeragent.Parser;
 
 import com.cumulocity.sdk.client.SDKException;
 

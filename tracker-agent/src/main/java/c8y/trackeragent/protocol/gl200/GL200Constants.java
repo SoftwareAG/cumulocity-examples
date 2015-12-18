@@ -18,9 +18,11 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package c8y.trackeragent;
+package c8y.trackeragent.protocol.gl200;
 
-public interface TelicConstants {
-	static final char REPORT_SEP = '\0';
-	static final String FIELD_SEP = ",";
+public interface GL200Constants {
+    static final char REPORT_SEP = '$';
+    static final String FIELD_SEP = ",";
+    static final String GL500_ID = "11";
+    static final String GV500_ID = "1F";
 }

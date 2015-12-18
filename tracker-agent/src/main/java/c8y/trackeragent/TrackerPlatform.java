@@ -17,6 +17,7 @@ import com.cumulocity.sdk.client.devicecontrol.DeviceControlApi;
 import com.cumulocity.sdk.client.devicecontrol.DeviceCredentialsApi;
 import com.cumulocity.sdk.client.event.EventApi;
 import com.cumulocity.sdk.client.identity.IdentityApi;
+import com.cumulocity.sdk.client.inventory.BinariesApi;
 import com.cumulocity.sdk.client.inventory.InventoryApi;
 import com.cumulocity.sdk.client.measurement.MeasurementApi;
 import com.google.common.cache.Cache;
@@ -116,6 +117,18 @@ public class TrackerPlatform implements Platform {
             @Override
             public CepApi call() throws Exception {
                 return orig.getCepApi();
+            }
+
+        }.get();
+    }
+    
+    @Override
+    public BinariesApi getBinariesApi() throws SDKException {
+        return new CachedApiGetter<BinariesApi>(BinariesApi.class) {
+
+            @Override
+            public BinariesApi call() throws Exception {
+                return orig.getBinariesApi();
             }
 
         }.get();

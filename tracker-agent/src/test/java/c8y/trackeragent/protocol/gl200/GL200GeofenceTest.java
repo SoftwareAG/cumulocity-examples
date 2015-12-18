@@ -18,7 +18,7 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package c8y.trackeragent;
+package c8y.trackeragent.protocol.gl200;
 
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.*;
@@ -31,11 +31,12 @@ import org.junit.Test;
 
 import c8y.Geofence;
 import c8y.Position;
-import c8y.trackeragent.GL200Constants;
-import c8y.trackeragent.GL200Geofence;
+import c8y.trackeragent.ReportContext;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.operations.OperationContext;
+import c8y.trackeragent.protocol.gl200.GL200Constants;
+import c8y.trackeragent.protocol.gl200.parser.GL200Geofence;
 
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;

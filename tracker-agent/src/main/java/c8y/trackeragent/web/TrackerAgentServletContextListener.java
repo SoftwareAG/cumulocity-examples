@@ -23,29 +23,29 @@ public class TrackerAgentServletContextListener implements ServletContextListene
     private static final Logger logger = LoggerFactory.getLogger(TrackerAgentServletContextListener.class);
 
     private final ExecutorService executorService;
-    private final Server server;
+    //private final Server server;
 
     public TrackerAgentServletContextListener() {
         executorService = Executors.newFixedThreadPool(1);
-        server = new Server();
+        //server = new Server();
     }
 
     @Override
     public void contextDestroyed(ServletContextEvent event) {
-        server.destroy();
+        //server.destroy();
         logger.info("Trakcer agent stoped by web server hook.");
     }
 
     @Override
     public void contextInitialized(ServletContextEvent event) {
-        try {
+        /*try {
             configureLogger();
             server.init();
             executorService.submit(server);
             logger.info("Trakcer agent started by web server hook.");
         } catch (Exception  ex) {
             ex.printStackTrace();
-        }
+        }*/
     }
 
     public static void configureLogger() {

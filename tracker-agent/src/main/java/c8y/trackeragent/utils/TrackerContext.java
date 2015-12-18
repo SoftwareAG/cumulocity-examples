@@ -31,6 +31,10 @@ public class TrackerContext {
         return deviceCredentialsRepository.getAllCredentials();
     }
     
+    public DeviceCredentials getDeviceCredentials(final String imei) {
+        return deviceCredentialsRepository.getCredentials(imei);
+    }
+    
     public boolean isDeviceRegistered(String imei) {
         return deviceCredentialsRepository.hasCredentials(imei);
     }

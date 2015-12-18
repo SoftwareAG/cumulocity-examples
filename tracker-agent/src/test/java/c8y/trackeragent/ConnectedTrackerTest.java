@@ -42,6 +42,7 @@ import org.junit.Test;
 
 import c8y.trackeragent.event.TrackerAgentEvents;
 import c8y.trackeragent.operations.OperationContext;
+import c8y.trackeragent.protocol.gl200.GL200Constants;
 import c8y.trackeragent.utils.TrackerContext;
 
 import com.cumulocity.sdk.client.SDKException;

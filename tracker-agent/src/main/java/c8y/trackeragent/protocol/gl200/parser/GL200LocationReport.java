@@ -18,11 +18,15 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package c8y.trackeragent;
+package c8y.trackeragent.protocol.gl200.parser;
 
 import java.math.BigDecimal;
 
 import c8y.Position;
+import c8y.trackeragent.ReportContext;
+import c8y.trackeragent.TrackerAgent;
+import c8y.trackeragent.TrackerDevice;
+import c8y.trackeragent.protocol.gl200.GL200Constants;
 
 import com.cumulocity.sdk.client.SDKException;
 

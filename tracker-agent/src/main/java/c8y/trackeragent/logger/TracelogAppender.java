@@ -82,9 +82,9 @@ public class TracelogAppender extends AppenderBase<ILoggingEvent> {
                 alarmTemplate.setText(msg.toString());
                 platform.getAlarmApi().create(alarmTemplate);
             } else if (entry.getLevel().isGreaterOrEqual(eventLevel)) {
-                eventTemplate.setTime(new Date());
-                eventTemplate.setText(entry.getMessage());
-                platform.getEventApi().create(eventTemplate);
+//                eventTemplate.setTime(new Date());
+//                eventTemplate.setText(entry.getMessage());
+//                platform.getEventApi().create(eventTemplate);
             }
         } catch (SDKException e) {
             // Tough luck.
