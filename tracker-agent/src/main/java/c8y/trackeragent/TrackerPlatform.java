@@ -17,6 +17,7 @@ import com.cumulocity.sdk.client.devicecontrol.DeviceControlApi;
 import com.cumulocity.sdk.client.devicecontrol.DeviceCredentialsApi;
 import com.cumulocity.sdk.client.event.EventApi;
 import com.cumulocity.sdk.client.identity.IdentityApi;
+import com.cumulocity.sdk.client.inventory.BinariesApi;
 import com.cumulocity.sdk.client.inventory.InventoryApi;
 import com.cumulocity.sdk.client.measurement.MeasurementApi;
 import com.google.common.cache.Cache;
@@ -32,7 +33,7 @@ public class TrackerPlatform implements Platform {
         this.orig = orig;
         this.cache = CacheBuilder.newBuilder().build();
     }
-
+    
     public InventoryApi getInventoryApi() throws SDKException {
         return new CachedApiGetter<InventoryApi>(InventoryApi.class) {
 
@@ -120,6 +121,18 @@ public class TrackerPlatform implements Platform {
 
         }.get();
     }
+    
+    @Override
+    public BinariesApi getBinariesApi() throws SDKException {
+        return new CachedApiGetter<BinariesApi>(BinariesApi.class) {
+
+            @Override
+            public BinariesApi call() throws Exception {
+                return orig.getBinariesApi();
+            }
+
+        }.get();
+    }
 
     public DeviceCredentialsApi getDeviceCredentialsApi() throws SDKException {
         return new CachedApiGetter<DeviceCredentialsApi>(DeviceCredentialsApi.class) {
@@ -163,7 +176,7 @@ public class TrackerPlatform implements Platform {
     public GId getAgentId() {
         return agent == null ? null : agent.getId();
     }
-
+    
     @Override
     public String toString() {
         return String.format("TrackerPlatform [orig=%s, getTenantId()=%s, getHost()=%s, getUser()=%s, agentId = %s]", orig, getTenantId(), getHost(), getUser(), getAgentId());

@@ -9,9 +9,14 @@ import java.util.concurrent.ExecutorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import c8y.trackeragent.protocol.coban.ConnectedCobanTracker;
+
 public class RequestHandler implements Runnable {
     
     private static final Logger logger = LoggerFactory.getLogger(RequestHandler.class);
+    
+    private static final int HASH_ASCII_CODE = 35;
+    
     private final TrackerAgent trackerAgent;
     private final ExecutorService reportsExecutor;
     private final Socket client;
@@ -43,18 +48,31 @@ public class RequestHandler implements Runnable {
     private ConnectedTracker peekTracker() throws IOException {
         logger.debug("peek tracker for new connection...");
         InputStream bis = asInput(client);
-        bis.mark(1);
-        int marker = bis.read();
-        bis.reset();
-        if (marker >= '0' && marker <= '9') {
+        byte[] markingBytes = firstBytes(1, bis);
+        if (markingBytes[0] >= '0' && markingBytes[0] <= '9') {
             return new ConnectedTelicTracker(client, bis, trackerAgent);
+        } else if (markingBytes[0] == HASH_ASCII_CODE) {
+            return new ConnectedCobanTracker(client, bis, trackerAgent);
         } else {
             return new ConnectedGL200Tracker(client, bis, trackerAgent);
-        }
+        } 
     }
-
+    
     private static InputStream asInput(Socket client) throws IOException {
         InputStream is = client.getInputStream();
         return new BufferedInputStream(is);
+    }
+    
+    private byte[] firstBytes(int limit, InputStream is) throws IOException {
+        byte[] bytes = new byte[limit];
+        is.mark(limit);
+        int b;
+        int index = 0;
+        while ((b = is.read()) >= 0 && index < limit) {
+            bytes[index] = (byte) b;
+            index++;
+        }
+        is.reset();
+        return bytes;
     }
 }

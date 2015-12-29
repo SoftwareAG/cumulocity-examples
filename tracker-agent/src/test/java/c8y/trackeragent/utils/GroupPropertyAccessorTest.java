@@ -11,6 +11,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import c8y.trackeragent.utils.GroupPropertyAccessor;
 import c8y.trackeragent.utils.GroupPropertyAccessor.Group;
 
 public class GroupPropertyAccessorTest {

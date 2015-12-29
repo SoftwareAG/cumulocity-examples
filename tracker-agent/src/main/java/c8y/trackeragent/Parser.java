@@ -26,5 +26,5 @@ public interface Parser {
     
 	String parse(String[] report) throws SDKException;
 	
-	boolean onParsed(String[] report, String imei) throws SDKException;
+	boolean onParsed(ReportContext reportCtx) throws SDKException;
 }

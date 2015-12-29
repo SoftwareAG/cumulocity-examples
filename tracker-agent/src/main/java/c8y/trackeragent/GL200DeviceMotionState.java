@@ -21,6 +21,7 @@
 package c8y.trackeragent;
 
 import c8y.MotionTracking;
+import c8y.trackeragent.operations.OperationContext;
 
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
@@ -76,12 +77,12 @@ public class GL200DeviceMotionState extends GL200Parser implements Translator {
     }
 
     @Override
-    public boolean onParsed(String[] report, String imei) throws SDKException {
-        String reportType = report[0];
+    public boolean onParsed(ReportContext reportCtx) throws SDKException {
+        String reportType = reportCtx.getReport()[0];
         if (MOTION_ACK.equals(reportType)) {
-            return onParsedAck(report, imei);
+            return onParsedAck(reportCtx.getReport(), reportCtx.getImei());
         } else if (MOTION_REPORT.equals(reportType)) {
-            return onParsedMotion(report, imei);
+            return onParsedMotion(reportCtx.getReport(), reportCtx.getImei());
         } else {
             return false;
         }
@@ -127,7 +128,8 @@ public class GL200DeviceMotionState extends GL200Parser implements Translator {
     }
 
     @Override
-    public String translate(OperationRepresentation operation) {
+    public String translate(OperationContext operationCtx) {
+        OperationRepresentation operation = operationCtx.getOperation();
         MotionTracking mTrack = operation.get(MotionTracking.class);
 
         if (mTrack == null) {
