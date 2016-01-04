@@ -2,11 +2,15 @@ package c8y.trackeragent.protocol.telic.parser;
 
 import java.math.BigDecimal;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import c8y.Position;
 import c8y.trackeragent.Parser;
 import c8y.trackeragent.ReportContext;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerDevice;
+import c8y.trackeragent.protocol.telic.ConnectedTelicTracker;
 
 import com.cumulocity.sdk.client.SDKException;
 
@@ -21,6 +25,8 @@ import com.cumulocity.sdk.client.SDKException;
  * 
  */
 public class TelicLocationReport implements Parser {
+    
+    private static Logger logger = LoggerFactory.getLogger(TelicLocationReport.class);
     
     public static final int ALTITUDE = 12;
     public static final int LONGITUDE = 4;
@@ -40,6 +46,7 @@ public class TelicLocationReport implements Parser {
 
     @Override
     public boolean onParsed(ReportContext reportCtx) throws SDKException {
+        logger.info("Parse position for telic tracker");
         TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(reportCtx.getImei());
         Position pos = new Position();
         String[] report = reportCtx.getReport();

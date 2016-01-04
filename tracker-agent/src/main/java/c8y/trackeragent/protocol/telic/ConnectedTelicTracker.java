@@ -37,6 +37,7 @@ public class ConnectedTelicTracker extends ConnectedTracker {
 
     @Override
     public String readReport(InputStream is) throws IOException {
+        logger.debug("Start reading telic report");
         if (eat(is, REPORT_SKIP) == null) {
             return null;
         }

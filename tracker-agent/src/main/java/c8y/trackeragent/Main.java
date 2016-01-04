@@ -54,17 +54,6 @@ public class Main {
     @Autowired
     private Server server;
     
-    /*
-    public static void main(String[] args) {
-        try {
-            Server server = new Server();
-            server.init();
-            server.run();
-        } catch (Exception x) {
-            logger.error("Error caught", x);
-        }
-    }
-    */
     public static void main(String[] args) {
         logger.info("tracker-agent is starting.");
         //@formatter:off

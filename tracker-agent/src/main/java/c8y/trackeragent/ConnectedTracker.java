@@ -40,7 +40,6 @@ import c8y.trackeragent.operations.OperationContext;
 import com.cumulocity.agent.server.context.DeviceContext;
 import com.cumulocity.agent.server.context.DeviceContextService;
 import com.cumulocity.model.operation.OperationStatus;
-import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 
 /**
@@ -102,6 +101,7 @@ public class ConnectedTracker implements Runnable, Executor {
     void processReports(InputStream is) throws IOException, SDKException {
         String reportStr;
         while ((reportStr = readReport(is)) != null) {
+            logger.debug("Successfully read report");
             String[] report = reportStr.split(fieldSeparator);
             tryProcessReport(report);
         }
@@ -160,28 +160,26 @@ public class ConnectedTracker implements Runnable, Executor {
         for (Object fragment : fragments) {
             if (fragment instanceof Parser) {
                 final Parser parser = (Parser) fragment;
+                logger.debug("Using parser "+ parser.getClass());
                 final String imei = parser.parse(report);
                 if (imei != null) {
+                    logger.debug("Got report from IMEI: " + imei);
                     boolean registered = checkIfDeviceRegistered(imei);
                     if (registered) {
                         final ReportContext reportContext = new ReportContext(report, imei, out);
                         DeviceCredentials credentials = trackerAgent.getContext().getDeviceCredentials(imei);
                         try {
-                            contextService.callWithinContext(new DeviceContext(credentials), new Callable<Void>() {
-
+                            boolean success = contextService.callWithinContext(new DeviceContext(credentials), new Callable<Boolean>() {
                                 @Override
-                                public Void call() throws Exception {
-                                    boolean success = parser.onParsed(reportContext);
-                                    if (success) {
-                                        //this.imei = imei;
-                                        //ConnectionRegistry.instance().put(imei, this);
-                                        //break;
-                                        return null;
-                                    }
-                                    return null;
+                                public Boolean call() throws Exception {
+                                    return parser.onParsed(reportContext);
                                 }
-                                
                             });
+                            if (success) {
+                                this.imei = imei;
+                                ConnectionRegistry.instance().put(imei, this);
+                            }
+
                         } catch (Exception e) {
                             logger.error("Error on parsing request", e);
                         }
@@ -190,6 +188,7 @@ public class ConnectedTracker implements Runnable, Executor {
                 }
             }
         }
+        logger.debug("Finished processing report");
     }
 
     private boolean checkIfDeviceRegistered(String imei) {

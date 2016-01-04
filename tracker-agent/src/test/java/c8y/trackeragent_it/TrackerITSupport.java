@@ -25,6 +25,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import c8y.trackeragent.DeviceManagedObject;
 import c8y.trackeragent.Server;
@@ -37,6 +38,8 @@ import c8y.trackeragent.utils.ConfigUtils;
 import c8y.trackeragent.utils.TrackerConfiguration;
 import c8y.trackeragent.utils.message.TrackerMessage;
 
+import com.cumulocity.agent.server.context.DeviceContextService;
+import com.cumulocity.agent.server.logging.LoggingService;
 import com.cumulocity.model.authentication.CumulocityCredentials;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.devicebootstrap.NewDeviceRequestRepresentation;
@@ -45,6 +48,12 @@ import com.cumulocity.sdk.client.ResponseParser;
 import com.cumulocity.sdk.client.RestConnector;
 
 public abstract class TrackerITSupport {
+
+    @Autowired
+    protected DeviceContextService contextService;
+    
+    @Autowired
+    protected LoggingService loggingService;
     
     private static Logger logger = LoggerFactory.getLogger(TrackerITSupport.class);
 
@@ -69,7 +78,7 @@ public abstract class TrackerITSupport {
         testPlatform = createTrackerPlatform();
         restConnector = new RestConnector(testPlatform.getPlatformParameters(), new ResponseParser());
         if (isLocalTrackerTest()) {
-            server = new Server(trackerAgentConfig);
+            server = new Server(trackerAgentConfig, contextService, loggingService);
             server.init();
             executor.submit(server);
         }

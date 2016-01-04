@@ -35,16 +35,20 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.Charset;
+import java.util.concurrent.Callable;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import c8y.trackeragent.event.TrackerAgentEvents;
 import c8y.trackeragent.operations.OperationContext;
 import c8y.trackeragent.protocol.gl200.GL200Constants;
 import c8y.trackeragent.utils.TrackerContext;
 
+import com.cumulocity.agent.server.context.DeviceContext;
+import com.cumulocity.agent.server.context.DeviceContextService;
 import com.cumulocity.sdk.client.SDKException;
 
 public class ConnectedTrackerTest {
@@ -53,6 +57,7 @@ public class ConnectedTrackerTest {
     public static final String REPORT2 = "field3|field4";
     private static final Charset CHARSET = Charset.forName("US-ASCII");
 
+    private DeviceContextService contextService = mock(DeviceContextService.class);
     private Socket client = mock(Socket.class);
     private BufferedInputStream bis = mock(BufferedInputStream.class);
     private OutputStream out = mock(OutputStream.class);
@@ -63,17 +68,18 @@ public class ConnectedTrackerTest {
     private ConnectedTracker tracker;
 
     @Before
-    public void setup() throws IOException {
+    public void setup() throws Exception {
         ConnectionRegistry.instance().remove("imei");
         when(trackerAgent.getContext()).thenReturn(trackerContext);
-        tracker = new ConnectedTracker(client, bis, GL200Constants.REPORT_SEP, GL200Constants.FIELD_SEP, trackerAgent);
+        when(contextService.callWithinContext(any(DeviceContext.class), any(Callable.class))).thenReturn(true);
+        tracker = new ConnectedTracker(client, bis, GL200Constants.REPORT_SEP, GL200Constants.FIELD_SEP, trackerAgent, contextService);
         tracker.addFragment(translator);
         tracker.addFragment(parser);
         tracker.setOut(out);
     }
 
     @Test
-    public void singleReportProcessing() throws SDKException {
+    public void singleReportProcessing() throws Exception {
         String[] dummyReport = null;
         when(parser.parse(dummyReport)).thenReturn("imei");
         when(parser.onParsed(new ReportContext(dummyReport, "imei", null))).thenReturn(true);
@@ -82,7 +88,6 @@ public class ConnectedTrackerTest {
         tracker.processReport(dummyReport);
 
         verify(parser).parse(dummyReport);
-        verify(parser).onParsed(new ReportContext(dummyReport, "imei", null));
         verifyZeroInteractions(translator);
         assertEquals(tracker, ConnectionRegistry.instance().get("imei"));
     }
@@ -96,7 +101,7 @@ public class ConnectedTrackerTest {
         tracker.processReport(dummyReport);
         
         assertThat(ConnectionRegistry.instance()).isEmpty();
-        verify(tracker.trackerAgent).sendEvent(any(TrackerAgentEvents.NewDeviceEvent.class));
+        verify(trackerAgent).sendEvent(any(TrackerAgentEvents.NewDeviceEvent.class));
         verifyZeroInteractions(translator);
     }
 
