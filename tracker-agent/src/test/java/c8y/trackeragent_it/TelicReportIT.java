@@ -14,6 +14,7 @@ public class TelicReportIT extends TrackerITSupport {
         String imei = Devices.randomImei();
         bootstrap(imei, TelicReports.getTelicReportBytes(imei, Positions.ZERO));  
         
+        //Thread.sleep(5000);
         //trigger regular report 
         byte[] report = TelicReports.getTelicReportBytes(imei, Positions.SAMPLE_4);
         writeInNewConnection(report);

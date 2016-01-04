@@ -23,11 +23,19 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.IntegrationTest;
+import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.WebIntegrationTest;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import c8y.trackeragent.DeviceManagedObject;
+import c8y.trackeragent.Main;
 import c8y.trackeragent.Server;
 import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.TrackerPlatform;
@@ -39,7 +47,10 @@ import c8y.trackeragent.utils.TrackerConfiguration;
 import c8y.trackeragent.utils.message.TrackerMessage;
 
 import com.cumulocity.agent.server.context.DeviceContextService;
+import com.cumulocity.agent.server.context.DeviceContextServiceImpl;
 import com.cumulocity.agent.server.logging.LoggingService;
+import com.cumulocity.agent.server.repository.BinariesRepository;
+import com.cumulocity.agent.server.repository.DeviceControlRepository;
 import com.cumulocity.model.authentication.CumulocityCredentials;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.devicebootstrap.NewDeviceRequestRepresentation;
@@ -47,14 +58,20 @@ import com.cumulocity.sdk.client.PlatformImpl;
 import com.cumulocity.sdk.client.ResponseParser;
 import com.cumulocity.sdk.client.RestConnector;
 
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes = ITConfiguration.class)
 public abstract class TrackerITSupport {
-
-    @Autowired
-    protected DeviceContextService contextService;
     
-    @Autowired
-    protected LoggingService loggingService;
+    @Value("${c8y.tenant}")
+    private String tenant;
+    @Value("${c8y.username}")
+    private String username;
+    @Value("${c8y.password}")
+    private String password;
+    @Value("${tracker-agent.host}")
+    private String trackerAgentHost;
     
+    private final int socketPort = 43210;
     private static Logger logger = LoggerFactory.getLogger(TrackerITSupport.class);
 
     protected TrackerPlatform testPlatform;
@@ -62,7 +79,6 @@ public abstract class TrackerITSupport {
     protected TestConfiguration testConfig;
     protected RestConnector restConnector;
     private final ExecutorService executor = Executors.newFixedThreadPool(1);
-    private Server server;
     private final Collection<Socket> sockets = new HashSet<Socket>();
 
     @Before
@@ -77,11 +93,6 @@ public abstract class TrackerITSupport {
         }
         testPlatform = createTrackerPlatform();
         restConnector = new RestConnector(testPlatform.getPlatformParameters(), new ResponseParser());
-        if (isLocalTrackerTest()) {
-            server = new Server(trackerAgentConfig, contextService, loggingService);
-            server.init();
-            executor.submit(server);
-        }
     }
 
     private boolean isLocalTrackerTest() {
@@ -165,7 +176,6 @@ public abstract class TrackerITSupport {
     
     protected Socket newSocket() throws IOException {
         String socketHost = testConfig.getTrackerAgentHost();
-        int socketPort = trackerAgentConfig.getLocalPort();
         try {
             Socket socket = new Socket(socketHost, socketPort);
             socket.setSoTimeout(1000);
@@ -218,8 +228,9 @@ public abstract class TrackerITSupport {
         
         writeInNewConnection(report);        
         // PENDING_ACCEPTANCE status
-        Thread.sleep(1100);
+        Thread.sleep(5000);
         
+        logger.info("accept request for imei " + imei);
         acceptNewDeviceRequest(imei);
         // ACCEPTED status
         
@@ -227,14 +238,13 @@ public abstract class TrackerITSupport {
         assertThat(credentials).isNotNull();
     }    
 
-    private static TestConfiguration getTestConfig() {
-        Properties props = ConfigUtils.getProperties("/etc/tracker-agent/test.properties");
+    private TestConfiguration getTestConfig() {
         //@formatter:off
         return new TestConfiguration()
-            .setC8yTenant(props.getProperty("c8y.tenant"))
-            .setC8yUser(props.getProperty("c8y.user"))
-            .setC8yPassword(props.getProperty("c8y.password"))
-            .setTrackerAgentHost(props.getProperty("tracker-agent.host"));
+            .setC8yTenant(tenant)
+            .setC8yUser(username)
+            .setC8yPassword(password)
+            .setTrackerAgentHost(trackerAgentHost);
         //@formatter:on            
     }
 }

@@ -1,5 +1,8 @@
 package c8y.trackeragent;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import c8y.trackeragent.event.TrackerAgentEventListener;
 import c8y.trackeragent.exception.UnknownTenantException;
 import c8y.trackeragent.utils.TrackerContext;
@@ -11,6 +14,7 @@ import com.google.common.eventbus.EventBus;
 
 public class TrackerAgent {
     
+    private static final Logger logger = LoggerFactory.getLogger(TrackerAgent.class);
     /**
      * @deprecated
      * TODO remove and replace with direct invocations 
@@ -24,6 +28,14 @@ public class TrackerAgent {
     }
 
     public TrackerDevice getOrCreateTrackerDevice(String imei) throws SDKException {
+        TrackerDevice device = ManagedObjectCache.instance().get(imei);
+        if (device == null) {
+            return doGetOrCreateTrackerDevice(imei);
+        }
+        return device;
+    }
+    
+    private synchronized TrackerDevice doGetOrCreateTrackerDevice(String imei) throws SDKException {
         TrackerDevice device = ManagedObjectCache.instance().get(imei);
         if (device == null) {
             TrackerPlatform platform = context.getDevicePlatform(imei);
