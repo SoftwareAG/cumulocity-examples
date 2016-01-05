@@ -2,17 +2,21 @@ package c8y.trackeragent.utils;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import c8y.trackeragent.TrackerPlatform;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 
+@Component
 public class TrackerContext {
     
     private final DeviceCredentialsRepository deviceCredentialsRepository;
     private final TrackerPlatformProvider platformProvider;
     private final TrackerConfiguration configuration;
     
-        
+    @Autowired
     public TrackerContext(TrackerConfiguration configuration) {
         this.configuration = configuration;
         this.deviceCredentialsRepository = DeviceCredentialsRepository.get();

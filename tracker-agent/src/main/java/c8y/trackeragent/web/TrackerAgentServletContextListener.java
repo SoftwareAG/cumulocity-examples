@@ -49,7 +49,7 @@ public class TrackerAgentServletContextListener implements ServletContextListene
     }
 
     public static void configureLogger() {
-        String logBackConfigFileName = new File(ConfigUtils.get().getConfigFilePath("tracker-agent-logback.xml")).getAbsolutePath();
+        String logBackConfigFileName = new File(ConfigUtils.get().getConfigFilePath(ConfigUtils.LOG_CONFIG_FILE_NAME)).getAbsolutePath();
         // assume SLF4J is bound to logback in the current environment
         LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
 

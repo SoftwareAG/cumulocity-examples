@@ -30,7 +30,8 @@ import com.cumulocity.agent.server.repository.DeviceControlRepository;
   @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = Main.class)
 })
 @Import({RepositoryFeature.class, ContextFeature.class})
-@PropertySource(value = "classpath:/test.properties")
+@PropertySource(value = { "file:/etc/tracker-agent/test.properties", 
+        "file:/etc/tracker-agent/tracker-agent-server.properties" })
 public class ITConfiguration {
 
     @Autowired

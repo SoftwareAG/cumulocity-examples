@@ -17,7 +17,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -30,6 +29,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import c8y.trackeragent.DeviceManagedObject;
+import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.TrackerPlatform;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
@@ -52,17 +52,22 @@ public abstract class TrackerITSupport {
     
     private static Logger logger = LoggerFactory.getLogger(TrackerITSupport.class);
     
-    @Value("${c8y.tenant}")
+    @Value("${C8Y.tenant}")
     private String tenant;
-    @Value("${c8y.username}")
+    @Value("${C8Y.username}")
     private String username;
-    @Value("${c8y.password}")
+    @Value("${C8Y.password}")
     private String password;
     @Value("${tracker-agent.host}")
     private String trackerAgentHost;
     
     @Autowired
     protected TrackerConfiguration trackerAgentConfig;
+    
+    @Autowired
+    protected TrackerAgent trackerAgent;
+    
+    
     
     private int socketPort;
     protected TrackerPlatform testPlatform;
@@ -90,7 +95,7 @@ public abstract class TrackerITSupport {
     }
 
     private void clearPersistedDevices() throws IOException {
-        String filePath = ConfigUtils.get().getConfigFilePath(DeviceCredentialsRepository.SOURCE_FILE);
+        String filePath = ConfigUtils.get().getConfigFilePath(ConfigUtils.DEVICES_FILE_NAME);
         File devicesFile = new File(filePath);
         FileUtils.deleteQuietly(devicesFile);
         devicesFile.createNewFile();
@@ -221,8 +226,8 @@ public abstract class TrackerITSupport {
         // WAITING_FOR_CONNECTION status
         
         writeInNewConnection(report);        
-        // PENDING_ACCEPTANCE status
         Thread.sleep(5000);
+        // PENDING_ACCEPTANCE status
         
         logger.info("accept request for imei " + imei);
         acceptNewDeviceRequest(imei);

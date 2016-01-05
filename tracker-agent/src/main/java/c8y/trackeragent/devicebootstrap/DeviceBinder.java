@@ -10,7 +10,6 @@ import c8y.trackeragent.operations.OperationDispatchers;
 
 import com.cumulocity.agent.server.context.DeviceContext;
 import com.cumulocity.agent.server.context.DeviceContextService;
-import com.cumulocity.agent.server.logging.LoggingService;
 import com.google.common.eventbus.Subscribe;
 
 public class DeviceBinder implements TrackerAgentEventListener {
@@ -21,19 +20,16 @@ public class DeviceBinder implements TrackerAgentEventListener {
     private final TracelogAppenders tracelogAppenders;
     private final DeviceCredentialsRepository deviceCredentialsRepository;
     private final DeviceContextService contextService;
-    private final LoggingService loggingService;
 
     //@formatter:off
     public DeviceBinder(
             OperationDispatchers operationDispatchers, 
             TracelogAppenders tracelogAppenders, 
             DeviceCredentialsRepository deviceCredentialsRepository,
-            DeviceContextService contextService,
-            LoggingService loggingService) {
+            DeviceContextService contextService) {
         this.operationDispatchers = operationDispatchers;
         this.tracelogAppenders = tracelogAppenders;
         this.deviceCredentialsRepository = deviceCredentialsRepository;
-        this.loggingService = loggingService;
         this.contextService = contextService;
         //@formatter:on
     }

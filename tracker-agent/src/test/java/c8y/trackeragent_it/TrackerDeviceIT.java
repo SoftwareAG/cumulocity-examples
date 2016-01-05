@@ -98,8 +98,6 @@ public class TrackerDeviceIT extends TrackerITSupport {
 
     private GId createTrackerData() throws SDKException, InterruptedException {
 
-        TrackerContext trackerContext = new TrackerContext(trackerAgentConfig);
-        TrackerAgent trackerAgent = new TrackerAgent(trackerContext);
         TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(IMEI);
 
         Geofence fence = new Geofence();

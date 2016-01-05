@@ -19,7 +19,6 @@ public class DeviceCredentialsRepository {
 
     private static final Logger logger = LoggerFactory.getLogger(DeviceCredentialsRepository.class);
 
-    public static final String SOURCE_FILE = "device.properties";
     private static final DeviceCredentialsRepository instance;
 
     private final Map<String, DeviceCredentials> credentials = new ConcurrentHashMap<String, DeviceCredentials>();
@@ -36,7 +35,7 @@ public class DeviceCredentialsRepository {
     }
 
     private DeviceCredentialsRepository() {
-        propertyAccessor = new GroupPropertyAccessor(ConfigUtils.get().getConfigFilePath(SOURCE_FILE), asList("tenantId", "user", "password"));
+        propertyAccessor = new GroupPropertyAccessor(ConfigUtils.get().getConfigFilePath(ConfigUtils.DEVICES_FILE_NAME), asList("tenantId", "user", "password"));
     }
 
     public boolean hasCredentials(String imei) {

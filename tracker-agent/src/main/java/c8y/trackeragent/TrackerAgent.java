@@ -1,7 +1,7 @@
 package c8y.trackeragent;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import c8y.trackeragent.event.TrackerAgentEventListener;
 import c8y.trackeragent.exception.UnknownTenantException;
@@ -12,9 +12,9 @@ import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 import com.google.common.eventbus.EventBus;
 
+@Component
 public class TrackerAgent {
     
-    private static final Logger logger = LoggerFactory.getLogger(TrackerAgent.class);
     /**
      * @deprecated
      * TODO remove and replace with direct invocations 
@@ -22,6 +22,7 @@ public class TrackerAgent {
     private final EventBus eventBus;
     private final TrackerContext context;
 
+    @Autowired
     public TrackerAgent(TrackerContext trackerContext) {
         this.context = trackerContext;
         this.eventBus = new EventBus("tracker-agent");
