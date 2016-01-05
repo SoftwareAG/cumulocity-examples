@@ -31,7 +31,7 @@
 			<id>production</id>
 			<properties>
 				<!-- current RELEASE version of c8y-client -->
-				<c8y.version>6.15.0-SNAPSHOT</c8y.version>				
+				<c8y.version>6.16.0-SNAPSHOT</c8y.version>				
 			</properties>
 			<distributionManagement>
 				<!-- TODO remove snapshotRepository after release -->

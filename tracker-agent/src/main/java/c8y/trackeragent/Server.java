@@ -69,6 +69,7 @@ public class Server implements Runnable {
     private volatile boolean running = true;
     
 
+    @Autowired
     public Server(TrackerConfiguration commonConfiguration, DeviceContextService contextService, LoggingService loggingService) {
         this.trackerContext = new TrackerContext(commonConfiguration);
         this.trackerAgent = new TrackerAgent(trackerContext);
@@ -83,11 +84,6 @@ public class Server implements Runnable {
                 operationDispatchers, tracelogAppenders, DeviceCredentialsRepository.get(), contextService, loggingService);
     }
     
-    @Autowired
-    public Server(DeviceContextService contextService, LoggingService loggingService) {
-        this(ConfigUtils.get().loadCommonConfiguration(), contextService, loggingService);        
-    }
-
     public void init() {
         try {
             this.serverSocket = new ServerSocket(trackerContext.getConfiguration().getLocalPort());
