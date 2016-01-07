@@ -19,9 +19,7 @@
  */
 package c8y.trackeragent;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
@@ -30,10 +28,10 @@ import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import c8y.trackeragent.devicebootstrap.DeviceBinder;
 import c8y.trackeragent.devicebootstrap.DeviceBootstrapProcessor;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
-import c8y.trackeragent.devicebootstrap.DeviceBinder;
 import c8y.trackeragent.logger.TracelogAppenders;
 import c8y.trackeragent.operations.OperationDispatchers;
 import c8y.trackeragent.utils.ConfigUtils;

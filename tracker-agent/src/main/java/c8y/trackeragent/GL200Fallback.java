@@ -22,6 +22,7 @@ package c8y.trackeragent;
 
 import c8y.Configuration;
 import c8y.Restart;
+import c8y.trackeragent.operations.OperationContext;
 
 import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
@@ -43,13 +44,14 @@ public class GL200Fallback extends GL200Parser implements Translator {
     }
 
     @Override
-    public boolean onParsed(String[] report, String imei) throws SDKException {
-        trackerAgent.getOrCreateTrackerDevice(imei);
+    public boolean onParsed(ReportContext reportCtx) throws SDKException {
+        trackerAgent.getOrCreateTrackerDevice(reportCtx.getImei());
         return true;
     }
 
     @Override
-    public String translate(OperationRepresentation operation) {
+    public String translate(OperationContext operationCtx) {
+        OperationRepresentation operation = operationCtx.getOperation();
         Configuration cfg = operation.get(Configuration.class);
 
         if (cfg != null) {

@@ -20,9 +20,9 @@
 
 package c8y.trackeragent;
 
-import com.cumulocity.rest.representation.operation.OperationRepresentation;
+import c8y.trackeragent.operations.OperationContext;
 
 public interface Translator {
     
-	String translate(OperationRepresentation operation);
+	String translate(OperationContext operation);
 }

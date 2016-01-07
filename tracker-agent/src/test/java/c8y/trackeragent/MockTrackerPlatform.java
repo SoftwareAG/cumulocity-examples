@@ -4,6 +4,8 @@ import static com.cumulocity.model.idtype.GId.asGId;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import c8y.trackeragent.TrackerPlatform;
+
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.alarm.AlarmApi;

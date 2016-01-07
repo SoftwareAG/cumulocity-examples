@@ -30,6 +30,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import c8y.Position;
+import c8y.trackeragent.GL200Constants;
+import c8y.trackeragent.GL200LocationReport;
+import c8y.trackeragent.TrackerAgent;
+import c8y.trackeragent.TrackerDevice;
 
 import com.cumulocity.sdk.client.SDKException;
 
@@ -68,7 +72,7 @@ public class GL200LocationReportTest {
 	@Test
 	public void testReportWithMultiplePoints() throws SDKException {
 		String imei = locationReport.parse(FIXEDREP);
-		locationReport.onParsed(FIXEDREP, imei);
+		locationReport.onParsed(new ReportContext(FIXEDREP, imei, null));
 		
 		assertEquals(IMEI, imei);
 		verify(trackerAgent).getOrCreateTrackerDevice(IMEI);
@@ -83,7 +87,7 @@ public class GL200LocationReportTest {
 	@Test
 	public void testReportWithSinglePoint() throws SDKException {
 	    String imei = locationReport.parse(DOGREP);
-	    locationReport.onParsed(DOGREP, imei);
+	    locationReport.onParsed(new ReportContext(DOGREP, imei, null));
 	    
 	    assertEquals(IMEI, imei);
 	    verify(trackerAgent).getOrCreateTrackerDevice(IMEI);

@@ -41,9 +41,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import c8y.trackeragent.event.TrackerAgentEvents;
+import c8y.trackeragent.operations.OperationContext;
 import c8y.trackeragent.utils.TrackerContext;
 
-import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 
 public class ConnectedTrackerTest {
@@ -75,13 +75,13 @@ public class ConnectedTrackerTest {
     public void singleReportProcessing() throws SDKException {
         String[] dummyReport = null;
         when(parser.parse(dummyReport)).thenReturn("imei");
-        when(parser.onParsed(dummyReport, "imei")).thenReturn(true);
+        when(parser.onParsed(new ReportContext(dummyReport, "imei", null))).thenReturn(true);
         when(trackerContext.isDeviceRegistered("imei")).thenReturn(true);
 
         tracker.processReport(dummyReport);
 
         verify(parser).parse(dummyReport);
-        verify(parser).onParsed(dummyReport, "imei");
+        verify(parser).onParsed(new ReportContext(dummyReport, "imei", null));
         verifyZeroInteractions(translator);
         assertEquals(tracker, ConnectionRegistry.instance().get("imei"));
     }
@@ -140,7 +140,7 @@ public class ConnectedTrackerTest {
     public void testExecute() throws IOException {
         String translation = "translation";
 
-        OperationRepresentation operation = mock(OperationRepresentation.class);
+        OperationContext operation = mock(OperationContext.class);
         when(translator.translate(operation)).thenReturn(translation);
 
         tracker.execute(operation);

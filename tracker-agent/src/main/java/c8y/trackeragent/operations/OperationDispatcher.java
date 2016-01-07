@@ -122,9 +122,10 @@ public class OperationDispatcher implements Runnable {
     private void executeOperation(Executor exec, OperationRepresentation operation) throws SDKException {
         operation.setStatus(OperationStatus.EXECUTING.toString());
         platform.getDeviceControlApi().update(operation);
-
+        OperationContext operationContext = new OperationContext(operation, trackerDevice.getImei());
+        
         try {
-            exec.execute(operation);
+            exec.execute(operationContext);
         } catch (Exception x) {
             String msg = "Error during communication with device " + operation.getDeviceId();
             logger.warn(msg, x);

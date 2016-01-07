@@ -27,7 +27,7 @@ public class TrackerAgent {
         TrackerDevice device = ManagedObjectCache.instance().get(imei);
         if (device == null) {
             TrackerPlatform platform = context.getDevicePlatform(imei);
-            device = new TrackerDevice(platform, platform.getAgentId(), imei);
+            device = new TrackerDevice(platform, context.getConfiguration(), platform.getAgentId(), imei);
             ManagedObjectCache.instance().put(device);
         }
         return device;
