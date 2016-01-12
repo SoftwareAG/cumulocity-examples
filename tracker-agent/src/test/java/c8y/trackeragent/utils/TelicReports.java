@@ -7,7 +7,7 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 
 import c8y.Position;
-import c8y.trackeragent.TelicConstants;
+import c8y.trackeragent.protocol.telic.TelicConstants;
 
 import com.google.common.base.Function;
 

@@ -19,7 +19,6 @@ public class DeviceCredentialsRepository {
 
     private static final Logger logger = LoggerFactory.getLogger(DeviceCredentialsRepository.class);
 
-    public static final String SOURCE_FILE = "device.properties";
     private static final DeviceCredentialsRepository instance;
 
     private final Map<String, DeviceCredentials> credentials = new ConcurrentHashMap<String, DeviceCredentials>();
@@ -36,7 +35,7 @@ public class DeviceCredentialsRepository {
     }
 
     private DeviceCredentialsRepository() {
-        propertyAccessor = new GroupPropertyAccessor(ConfigUtils.get().getConfigFilePath(SOURCE_FILE), asList("tenantId", "user", "password"));
+        propertyAccessor = new GroupPropertyAccessor(ConfigUtils.get().getConfigFilePath(ConfigUtils.DEVICES_FILE_NAME), asList("tenantId", "user", "password"));
     }
 
     public boolean hasCredentials(String imei) {
@@ -78,18 +77,15 @@ public class DeviceCredentialsRepository {
     }
 
     private DeviceCredentials asCredentials(Group group) {
-        DeviceCredentials credentials = new DeviceCredentials();
-        credentials.setTenantId(group.get("tenantId"));
-        credentials.setUser(group.get("user"));
-        credentials.setPassword(group.get("password"));
+        DeviceCredentials credentials = new DeviceCredentials(group.get("tenantId"), group.get("user"), group.get("password"), null, null);
         credentials.setImei(group.getName());
         return credentials;
     }
 
     private Group asGroup(String imei, DeviceCredentials credentials) {
         Group group = propertyAccessor.createEmptyGroup(imei);
-        group.put("tenantId", credentials.getTenantId());
-        group.put("user", credentials.getUser());
+        group.put("tenantId", credentials.getTenant());
+        group.put("user", credentials.getUsername());
         group.put("password", credentials.getPassword());
         return group;
     }

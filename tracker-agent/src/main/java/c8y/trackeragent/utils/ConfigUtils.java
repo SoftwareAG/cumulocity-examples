@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -21,17 +22,20 @@ public class ConfigUtils {
     
     private static final Logger logger = LoggerFactory.getLogger(ConfigUtils.class);
     
-    private static final String SOURCE_FILE = "common.properties";
-    private static final String PLATFORM_HOST_PROP = "platformHost";    
-    private static final String FORCE_INITIAL_HOST_PROP = "forceInitialHost";    
+    public static final String CONFIG_FILE_NAME = "tracker-agent-server.properties";
+    public static final String LOG_CONFIG_FILE_NAME = "tracker-agent-logback.xml";
+    public static final String DEVICES_FILE_NAME = "device.properties";
+    
+    private static final String PLATFORM_HOST_PROP = "C8Y.baseURL";    
+    private static final String FORCE_INITIAL_HOST_PROP = "C8Y.forceInitialHost";    
     private static final boolean DEFAULT_FORCE_INITIAL_HOST = false;
     private static final String LOCAL_SOCKET_PORT_PROP = "localPort";
     private static final String DEFAULT_LOCAL_SOCKET_PORT = "9090";
-    private static final String BOOTSTRAP_USER_PROP = "bootstrap.user";
-    private static final String BOOTSTRAP_PASSWORD_PROP = "bootstrap.password";
+    private static final String BOOTSTRAP_USER_PROP = "C8Y.devicebootstrap.user";
+    private static final String BOOTSTRAP_PASSWORD_PROP = "C8Y.devicebootstrap.password";
     private static final String CLIENT_TIMEOUT_PROP = "client.timeout";
     private static final String COBAN_LOCATION_REPORT_INTERVAL_PROP = "coban.locationReport.timeInterval";
-    private static final String DEFAULT_CLIENT_TIMEOUT = String.valueOf(5 * 60 * 1000);
+    private static final String DEFAULT_CLIENT_TIMEOUT = "" + TimeUnit.MINUTES.toMillis(5);
     private static final Random random = new Random();
     
     private static final ConfigUtils instance = new ConfigUtils();
@@ -44,6 +48,7 @@ public class ConfigUtils {
     public static ConfigUtils get() {
         return instance;
     }
+
 
     public String getConfigFilePath(String fileName) {
         return "/etc/tracker-agent/" + fileName;
@@ -64,7 +69,7 @@ public class ConfigUtils {
     }
     
     public TrackerConfiguration loadCommonConfiguration() {
-        String sourceFilePath = getConfigFilePath(SOURCE_FILE);
+        String sourceFilePath = getConfigFilePath(CONFIG_FILE_NAME);
         Properties props = getProperties(sourceFilePath);
         int clientTimeout = parseInt(getProperty(props, CLIENT_TIMEOUT_PROP, DEFAULT_CLIENT_TIMEOUT));
         //@formatter:off
@@ -86,7 +91,7 @@ public class ConfigUtils {
     private String getProperty(Properties props, String key) {
         String value = getProperty(props, key, null);
         if (value == null) {
-            throw new RuntimeException("Missing property \'" + key + "\' in file " + SOURCE_FILE);
+            throw new RuntimeException("Missing property \'" + key + "\' in file " + CONFIG_FILE_NAME);
         }
         return value;
     }

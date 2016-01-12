@@ -18,9 +18,13 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package c8y.trackeragent;
+package c8y.trackeragent.protocol.gl200.parser;
 
 import c8y.Geofence;
+import c8y.trackeragent.ReportContext;
+import c8y.trackeragent.TrackerAgent;
+import c8y.trackeragent.TrackerDevice;
+import c8y.trackeragent.Translator;
 import c8y.trackeragent.operations.OperationContext;
 
 import com.cumulocity.rest.representation.operation.OperationRepresentation;

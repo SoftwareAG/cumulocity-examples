@@ -16,6 +16,7 @@ import c8y.trackeragent.logger.PlatformLogger;
 import c8y.trackeragent.logger.TracelogAppenders;
 import c8y.trackeragent.utils.TrackerContext;
 
+import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
 import com.cumulocity.rest.representation.event.EventRepresentation;
 
 public class TracelogAppendersTest {
@@ -24,19 +25,19 @@ public class TracelogAppendersTest {
     private final MockTrackerPlatform platform2 = new MockTrackerPlatform("tenant_2");
     private final TrackerContext trackerContext = mock(TrackerContext.class);
     private final TracelogAppenders tracelogAppenders = new TracelogAppenders(trackerContext);        
-    private final ArgumentCaptor<EventRepresentation> eventCaptor = ArgumentCaptor.forClass(EventRepresentation.class);
+    private final ArgumentCaptor<AlarmRepresentation> alarmCaptor = ArgumentCaptor.forClass(AlarmRepresentation.class);
     
     @Test
-    public void shouldSendEventOnInfoLogEvent() throws Exception {
+    public void shouldSendAlarmOnErrorLogEvent() throws Exception {
         when(trackerContext.getDevicePlatform("imei_1")).thenReturn(platform1);        
         tracelogAppenders.start("imei_1");        
         when(trackerContext.getDevicePlatform("imei_2")).thenReturn(platform2);        
         tracelogAppenders.start("imei_2");               
         
-        PlatformLogger.getLogger("imei_1").warn("somethink happened");
+        PlatformLogger.getLogger("imei_1").error("something happened");
         
-        verify(platform1.getEventApi(), times(1)).create(eventCaptor.capture());
-        assertThat(eventCaptor.getValue().getText()).isEqualTo("somethink happened");        
-        verify(platform2.getEventApi(), never()).create(any(EventRepresentation.class));
+        verify(platform1.getAlarmApi(), times(1)).create(alarmCaptor.capture());
+        assertThat(alarmCaptor.getValue().getText()).contains("something happened");        
+        verify(platform2.getAlarmApi(), never()).create(any(AlarmRepresentation.class));
     }    
 }

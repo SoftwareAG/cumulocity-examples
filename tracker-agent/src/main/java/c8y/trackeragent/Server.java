@@ -27,6 +27,8 @@ import java.util.concurrent.Executors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import c8y.trackeragent.devicebootstrap.DeviceBinder;
 import c8y.trackeragent.devicebootstrap.DeviceBootstrapProcessor;
@@ -34,15 +36,16 @@ import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.logger.TracelogAppenders;
 import c8y.trackeragent.operations.OperationDispatchers;
-import c8y.trackeragent.utils.ConfigUtils;
-import c8y.trackeragent.utils.TrackerConfiguration;
-import c8y.trackeragent.utils.TrackerContext;
+
+import com.cumulocity.agent.server.context.DeviceContextService;
+import com.cumulocity.agent.server.logging.LoggingService;
 
 /**
  * The server listens to connections from devices and starts threads for
  * handling device communication for particular types of devices. (Currently,
  * only GL200 and Telic.)
  */
+@Service
 public class Server implements Runnable {
 
     private static final int REPORTS_EXECUTOR_POOL_SIZE = 10;
@@ -52,40 +55,39 @@ public class Server implements Runnable {
 
 
     private ServerSocket serverSocket;
-    private final TrackerContext trackerContext;
-    private final TrackerAgent trackerAgent;
+    private final TrackerAgent agent;
     private final ExecutorService reportsExecutor;
     private final ExecutorService requestsExecutor;
     private final DeviceBootstrapProcessor deviceBootstrapProcessor;
     private final DeviceBinder deviceBinder;
+    private final DeviceContextService contextService;
     private volatile boolean running = true;
+    
 
-    public Server(TrackerConfiguration commonConfiguration) {
-        this.trackerContext = new TrackerContext(commonConfiguration);
-        this.trackerAgent = new TrackerAgent(trackerContext);
+    @Autowired
+    public Server(TrackerAgent trackerAgent, DeviceContextService contextService, LoggingService loggingService) {
+        this.agent = trackerAgent;
         this.reportsExecutor = Executors.newFixedThreadPool(REPORTS_EXECUTOR_POOL_SIZE);
         this.requestsExecutor = Executors.newFixedThreadPool(REQUESTS_EXECUTOR_POOL_SIZE);
-        OperationDispatchers operationDispatchers = new OperationDispatchers(trackerContext, trackerAgent);
-        TracelogAppenders tracelogAppenders = new TracelogAppenders(trackerContext);
+        OperationDispatchers operationDispatchers = new OperationDispatchers(agent, contextService, loggingService);
+        TracelogAppenders tracelogAppenders = new TracelogAppenders(agent.getContext());
         this.deviceBootstrapProcessor = new DeviceBootstrapProcessor(trackerAgent);
+        this.contextService = contextService;
         this.deviceBinder = new DeviceBinder(
-                operationDispatchers, tracelogAppenders, DeviceCredentialsRepository.get());
+                operationDispatchers, tracelogAppenders, DeviceCredentialsRepository.get(), contextService);
     }
     
-    public Server() {
-        this(ConfigUtils.get().loadCommonConfiguration());        
-    }
-
     public void init() {
         try {
-            this.serverSocket = new ServerSocket(trackerContext.getConfiguration().getLocalPort());
+            this.serverSocket = new ServerSocket(agent.getContext().getConfiguration().getLocalPort());
         } catch (IOException e) {
             throw new RuntimeException("Cant init agent tracker server!", e);
         }
-        trackerAgent.registerEventListener(deviceBootstrapProcessor, deviceBinder);
-        for (DeviceCredentials deviceCredentials : trackerContext.getDeviceCredentials()) {
+        agent.registerEventListener(deviceBootstrapProcessor, deviceBinder);
+        for (DeviceCredentials deviceCredentials : agent.getContext().getDeviceCredentials()) {
             try {
-                deviceBinder.bind(deviceCredentials.getImei());
+                logger.debug("bind IMEI {}", deviceCredentials.getImei());
+                deviceBinder.bind(deviceCredentials);
             } catch (Exception e) {
                 logger.error("Failed to initialize device: " + deviceCredentials.getImei());
             }
@@ -118,15 +120,15 @@ public class Server implements Runnable {
                 return;
             }
             Socket client = serverSocket.accept();
-            client.setSoTimeout(trackerContext.getConfiguration().getClientTimeout());
+            client.setSoTimeout(agent.getContext().getConfiguration().getClientTimeout());
             logger.debug("Accepted connection from {}, launching worker thread.", client.getRemoteSocketAddress());
-            requestsExecutor.execute(new RequestHandler(trackerAgent, reportsExecutor, client));
+            requestsExecutor.execute(new RequestHandler(agent, reportsExecutor, client, contextService));
         } catch (Exception e) {
             logger.error("Error while processing:", e);
         }
     }
 
     public TrackerAgent getTrackerAgent() {
-        return trackerAgent;
+        return agent;
     }
 }
