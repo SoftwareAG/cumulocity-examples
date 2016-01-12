@@ -11,23 +11,25 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import c8y.trackeragent.DeviceManagedObject;
-import c8y.trackeragent.Server;
+import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.TrackerPlatform;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
@@ -44,16 +46,34 @@ import com.cumulocity.sdk.client.PlatformImpl;
 import com.cumulocity.sdk.client.ResponseParser;
 import com.cumulocity.sdk.client.RestConnector;
 
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes = ITConfiguration.class)
 public abstract class TrackerITSupport {
     
     private static Logger logger = LoggerFactory.getLogger(TrackerITSupport.class);
-
-    protected TrackerPlatform testPlatform;
+    
+    @Value("${C8Y.tenant}")
+    private String tenant;
+    @Value("${C8Y.username}")
+    private String username;
+    @Value("${C8Y.password}")
+    private String password;
+    @Value("${tracker-agent.host}")
+    private String trackerAgentHost;
+    
+    @Autowired
     protected TrackerConfiguration trackerAgentConfig;
+    
+    @Autowired
+    protected TrackerAgent trackerAgent;
+    
+    
+    
+    private int socketPort;
+    protected TrackerPlatform testPlatform;
     protected TestConfiguration testConfig;
     protected RestConnector restConnector;
     private final ExecutorService executor = Executors.newFixedThreadPool(1);
-    private Server server;
     private final Collection<Socket> sockets = new HashSet<Socket>();
 
     @Before
@@ -61,18 +81,13 @@ public abstract class TrackerITSupport {
         Thread.sleep(200);//avoid address already in use error 
         testConfig = getTestConfig();
         System.out.println(testConfig);
-        trackerAgentConfig = ConfigUtils.get().loadCommonConfiguration().setBootstrapPollIntervals(Arrays.asList(1L, 2L, 3L, 4L));
         System.out.println(trackerAgentConfig);
+        socketPort = trackerAgentConfig.getLocalPort();
         if (isLocalTrackerTest()) {
             clearPersistedDevices();
         }
         testPlatform = createTrackerPlatform();
         restConnector = new RestConnector(testPlatform.getPlatformParameters(), new ResponseParser());
-        if (isLocalTrackerTest()) {
-            server = new Server(trackerAgentConfig);
-            server.init();
-            executor.submit(server);
-        }
     }
 
     private boolean isLocalTrackerTest() {
@@ -80,7 +95,7 @@ public abstract class TrackerITSupport {
     }
 
     private void clearPersistedDevices() throws IOException {
-        String filePath = ConfigUtils.get().getConfigFilePath(DeviceCredentialsRepository.SOURCE_FILE);
+        String filePath = ConfigUtils.get().getConfigFilePath(ConfigUtils.DEVICES_FILE_NAME);
         File devicesFile = new File(filePath);
         FileUtils.deleteQuietly(devicesFile);
         devicesFile.createNewFile();
@@ -91,7 +106,11 @@ public abstract class TrackerITSupport {
         if (isLocalTrackerTest()) {
             executor.shutdownNow();
         }
-        for(Socket socket : sockets) {
+        destroySockets();
+    }
+
+    private void destroySockets() throws IOException {
+        for (Socket socket : sockets) {
             if (!socket.isClosed()) {
                 socket.close();
             }
@@ -120,14 +139,13 @@ public abstract class TrackerITSupport {
         OutputStream out = socket.getOutputStream();
         out.write(bis);
         out.flush();
-        InputStream in = socket.getInputStream();
-        String response = readSocketResponse(in);
-        IOUtils.closeQuietly(out);
-        IOUtils.closeQuietly(in);
+        String response = readSocketResponse(socket);
+        socket.close();
         return response;
     }
 
-    private String readSocketResponse(InputStream in) throws Exception {
+    private String readSocketResponse(Socket socket) throws Exception {
+        InputStream in = socket.getInputStream();
         byte[] bytes = new byte[0];
         try {
             int b;
@@ -136,7 +154,7 @@ public abstract class TrackerITSupport {
             }
         } catch (SocketTimeoutException stex) {
             // nothing to do, simply end of input handled
-        }
+        } 
         return bytes.length == 0 ? null : new String(bytes, "US-ASCII");
     }
     
@@ -155,11 +173,11 @@ public abstract class TrackerITSupport {
     }
     
     protected Socket newSocket() throws IOException {
+        destroySockets();
         String socketHost = testConfig.getTrackerAgentHost();
-        int socketPort = trackerAgentConfig.getLocalPort();
         try {
             Socket socket = new Socket(socketHost, socketPort);
-            socket.setSoTimeout(1000);
+            socket.setSoTimeout(6000);
             sockets.add(socket);
             return socket;
         } catch (IOException ex) {
@@ -208,9 +226,10 @@ public abstract class TrackerITSupport {
         // WAITING_FOR_CONNECTION status
         
         writeInNewConnection(report);        
+        Thread.sleep(5000);
         // PENDING_ACCEPTANCE status
-        Thread.sleep(1100);
         
+        logger.info("accept request for imei " + imei);
         acceptNewDeviceRequest(imei);
         // ACCEPTED status
         
@@ -218,14 +237,13 @@ public abstract class TrackerITSupport {
         assertThat(credentials).isNotNull();
     }    
 
-    private static TestConfiguration getTestConfig() {
-        Properties props = ConfigUtils.getProperties("/etc/tracker-agent/test.properties");
+    private TestConfiguration getTestConfig() {
         //@formatter:off
         return new TestConfiguration()
-            .setC8yTenant(props.getProperty("c8y.tenant"))
-            .setC8yUser(props.getProperty("c8y.user"))
-            .setC8yPassword(props.getProperty("c8y.password"))
-            .setTrackerAgentHost(props.getProperty("tracker-agent.host"));
+            .setC8yTenant(tenant)
+            .setC8yUser(username)
+            .setC8yPassword(password)
+            .setTrackerAgentHost(trackerAgentHost);
         //@formatter:on            
     }
 }

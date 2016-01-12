@@ -98,8 +98,6 @@ public class TrackerDeviceIT extends TrackerITSupport {
 
     private GId createTrackerData() throws SDKException, InterruptedException {
 
-        TrackerContext trackerContext = new TrackerContext(trackerAgentConfig);
-        TrackerAgent trackerAgent = new TrackerAgent(trackerContext);
         TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(IMEI);
 
         Geofence fence = new Geofence();
@@ -185,11 +183,8 @@ public class TrackerDeviceIT extends TrackerITSupport {
     
     private void bindTestPlatformCredentials(String imei) {
         //@formatter:off
-        DeviceCredentials deviceCredentials = new DeviceCredentials()
-            .setTenantId(testPlatform.getTenantId())
-            .setImei(imei)
-            .setUser(testPlatform.getUser())
-            .setPassword(testPlatform.getPassword());
+        DeviceCredentials deviceCredentials = new DeviceCredentials(testPlatform.getTenantId(), testPlatform.getUser(), testPlatform.getPassword(), null, null);
+        deviceCredentials.setImei(imei);
         DeviceCredentialsRepository.get().saveCredentials(deviceCredentials);
         //@formatter:on
     }

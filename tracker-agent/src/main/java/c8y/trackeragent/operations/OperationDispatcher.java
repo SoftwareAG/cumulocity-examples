@@ -28,13 +28,18 @@ import java.util.concurrent.ScheduledFuture;
 
 import org.slf4j.Logger;
 
+import c8y.AgentLogRequest;
 import c8y.trackeragent.ConnectionRegistry;
 import c8y.trackeragent.Executor;
 import c8y.trackeragent.ManagedObjectCache;
 import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.TrackerPlatform;
+import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.logger.PlatformLogger;
 
+import com.cumulocity.agent.server.context.DeviceContext;
+import com.cumulocity.agent.server.context.DeviceContextService;
+import com.cumulocity.agent.server.logging.LoggingService;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
@@ -55,6 +60,9 @@ public class OperationDispatcher implements Runnable {
     
     private final Logger logger;
     private final TrackerDevice trackerDevice;
+    private final LoggingService loggingService;
+    private final DeviceContextService contextService;
+    private final DeviceCredentials credentials;
     private TrackerPlatform platform;
     private volatile ScheduledFuture<?> self;
 
@@ -64,9 +72,13 @@ public class OperationDispatcher implements Runnable {
      * @param agent
      *            The ID of this agent.
      */
-    public OperationDispatcher(TrackerPlatform platform, TrackerDevice trackerDevice) throws SDKException {
+    public OperationDispatcher(TrackerPlatform platform, TrackerDevice trackerDevice, LoggingService loggingService, DeviceContextService contextService,
+            DeviceCredentials credentials) throws SDKException {
         this.platform = platform;
         this.trackerDevice = trackerDevice;
+        this.loggingService = loggingService;
+        this.contextService = contextService;
+        this.credentials = credentials;
         this.logger = PlatformLogger.getLogger(trackerDevice.getImei());
         
         finishExecutingOps();
@@ -91,18 +103,27 @@ public class OperationDispatcher implements Runnable {
     public void run() {
         logger.debug("Executing queued operations");
         try {
+            contextService.enterContext(new DeviceContext(credentials));
             executePendingOps();
+            contextService.leaveContext();
         } catch (Exception x) {
             logger.warn("Error while executing operations", x);
         }
     }
 
     private void executePendingOps() throws SDKException {
+        logger.debug("Querying for pending operations");
         for (OperationRepresentation operation : byStatusAndDeviceId(OperationStatus.PENDING)) {
+            logger.info("Received operation with ID: {}", operation.getId());
+            if (operation.get(AgentLogRequest.class) != null) {
+                logger.info("Found AgentLogRequest operation");
+                loggingService.readLog(operation);
+            }
             GId gid = operation.getDeviceId();
 
             TrackerDevice device = ManagedObjectCache.instance().get(gid);
             if (device == null) {
+                logger.info("Ignore operation with ID {} -> device hasn't been identified yet", operation.getId());
                 continue; // Device hasn't been identified yet
             }
 
@@ -115,11 +136,14 @@ public class OperationDispatcher implements Runnable {
                     // Connection error, remove device
                     ConnectionRegistry.instance().remove(device.getImei());
                 }
+            } else {
+                logger.info("Ignore operation with ID {} -> device is currently not connected to agent", operation.getId());
             }
         }
     }
 
     private void executeOperation(Executor exec, OperationRepresentation operation) throws SDKException {
+        logger.info("Executing operation with ID: {}", operation.getId());
         operation.setStatus(OperationStatus.EXECUTING.toString());
         platform.getDeviceControlApi().update(operation);
         OperationContext operationContext = new OperationContext(operation, trackerDevice.getImei());

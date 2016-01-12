@@ -75,8 +75,8 @@ public class TrackerPlatformProvider {
 
     private TrackerPlatform createDevicePlatform(String imei) {
         DeviceCredentials deviceCredentials = deviceCredentialsRepository.getCredentials(imei);
-        String tenantId = deviceCredentials.getTenantId();
-        CumulocityCredentials credentials = cumulocityCredentials(deviceCredentials.getUser(), deviceCredentials.getPassword()).withTenantId(tenantId).build();
+        String tenantId = deviceCredentials.getTenant();
+        CumulocityCredentials credentials = cumulocityCredentials(deviceCredentials.getUsername(), deviceCredentials.getPassword()).withTenantId(tenantId).build();
         PlatformImpl platform = c8yPlatform(credentials);
         TrackerPlatform trackerPlatform = new TrackerPlatform(platform);
         setupAgent(trackerPlatform);
