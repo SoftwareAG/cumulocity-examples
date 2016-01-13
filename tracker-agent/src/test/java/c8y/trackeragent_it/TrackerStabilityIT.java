@@ -19,6 +19,11 @@ public class TrackerStabilityIT extends TrackerITSupport {
     private final int parallelIndex = 2;
     private final static Random random = new Random();
     
+    @Override
+    protected int getLocalPort() {
+        return trackerAgentConfig.getLocalPort1();
+    }
+    
     @Test
     public void shouldWork() throws Exception {
         for (int i = 0; i < parallelIndex; i++) {

@@ -8,6 +8,12 @@ import c8y.trackeragent.utils.Positions;
 import c8y.trackeragent.utils.TelicReports;
 
 public class TelicReportIT extends TrackerITSupport {
+    
+    @Override
+    protected int getLocalPort() {
+        return trackerAgentConfig.getLocalPort1();
+    }
+
 
     @Test
     public void shouldBootstrapNewDeviceAndThenChangeItsLocation() throws Exception {

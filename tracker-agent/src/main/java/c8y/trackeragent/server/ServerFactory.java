@@ -1,4 +1,4 @@
-package c8y.trackeragent;
+package c8y.trackeragent.server;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -34,7 +34,9 @@ public class ServerFactory {
     
     public Server createServer(int localPort) {
         logger.info("Create server for port {}", localPort);
-        return new Server(config, trackerFactory, reportsExecutor, requestsExecutor, localPort);
+        Server server = new Server(config, trackerFactory, reportsExecutor, requestsExecutor, localPort);
+        server.init();
+        return server;
     }
     
     

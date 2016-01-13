@@ -20,9 +20,6 @@
 
 package c8y.trackeragent;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
@@ -35,6 +32,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 import c8y.trackeragent.devicebootstrap.DeviceBinder;
+import c8y.trackeragent.server.Servers;
 import c8y.trackeragent.utils.TrackerConfiguration;
 
 import com.cumulocity.agent.server.ServerBuilder;
@@ -55,7 +53,7 @@ public class Main {
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
     
     @Autowired
-    private ServerFactory serverFactory;
+    private Servers servers;
     
     @Autowired
     private TrackerConfiguration config;
@@ -80,16 +78,8 @@ public class Main {
     
     @PostConstruct
     public void onStart() {
-        startServer(config.getLocalPort1());
-        startServer(config.getLocalPort2());
+        servers.startAll();
         deviceBinder.init();
-    }
-
-    private void startServer(int localPort) {
-        Server server = serverFactory.createServer(localPort);
-        server.init();
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.submit(server);
     }
     
     @Bean

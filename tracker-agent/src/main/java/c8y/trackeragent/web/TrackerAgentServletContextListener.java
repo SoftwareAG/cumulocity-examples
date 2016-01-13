@@ -11,7 +11,7 @@ import javax.servlet.annotation.WebListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import c8y.trackeragent.Server;
+import c8y.trackeragent.server.Server;
 import c8y.trackeragent.utils.ConfigUtils;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;

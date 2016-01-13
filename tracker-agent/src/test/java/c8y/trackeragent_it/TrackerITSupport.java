@@ -67,7 +67,6 @@ public abstract class TrackerITSupport {
     @Autowired
     protected TrackerAgent trackerAgent;
     
-    private int socketPort;
     protected TrackerPlatform testPlatform;
     protected TestConfiguration testConfig;
     protected RestConnector restConnector;
@@ -80,13 +79,14 @@ public abstract class TrackerITSupport {
         testConfig = getTestConfig();
         System.out.println(testConfig);
         System.out.println(trackerAgentConfig);
-        socketPort = trackerAgentConfig.getLocalPort1();
         if (isLocalTrackerTest()) {
             clearPersistedDevices();
         }
         testPlatform = createTrackerPlatform();
         restConnector = new RestConnector(testPlatform.getPlatformParameters(), new ResponseParser());
     }
+
+    protected abstract int getLocalPort();
 
     private boolean isLocalTrackerTest() {
         return testConfig.getTrackerAgentHost().equals("localhost");
@@ -174,12 +174,12 @@ public abstract class TrackerITSupport {
         destroySockets();
         String socketHost = testConfig.getTrackerAgentHost();
         try {
-            Socket socket = new Socket(socketHost, socketPort);
+            Socket socket = new Socket(socketHost, getLocalPort());
             socket.setSoTimeout(6000);
             sockets.add(socket);
             return socket;
         } catch (IOException ex) {
-            System.out.println("Cant connect to socket, host = " + socketHost + ", port = " + socketPort);
+            System.out.println("Cant connect to socket, host = " + socketHost + ", port = " + getLocalPort());
             throw ex;
         }
     }

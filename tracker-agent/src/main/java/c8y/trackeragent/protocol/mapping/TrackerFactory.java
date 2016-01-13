@@ -50,6 +50,9 @@ public class TrackerFactory {
         }
     }
 
+    /**
+     * Telic, GL200, Coban
+     */
     private ConnectedTracker getTracker1(Socket client) throws IOException {
         InputStream bis = asInput(client);
         byte[] markingBytes = firstBytes(bis, 1);
@@ -62,7 +65,10 @@ public class TrackerFactory {
         }
     }
     
-    private ConnectedTracker getTracker2(Socket client) {
+    /**
+     * RF-V16
+     */
+    private ConnectedTracker getTracker2(Socket client) throws IOException {
         //TODO
         return null;
     }

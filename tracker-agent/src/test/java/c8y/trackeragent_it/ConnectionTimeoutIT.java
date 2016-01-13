@@ -12,6 +12,11 @@ import c8y.trackeragent.utils.TelicReports;
 
 public class ConnectionTimeoutIT extends TrackerITSupport {
     
+    @Override
+    protected int getLocalPort() {
+        return trackerAgentConfig.getLocalPort1();
+    }
+
     @Test
     public void shouldHandleTimeoutOnConnection() throws Exception {
         timeoutConnection();

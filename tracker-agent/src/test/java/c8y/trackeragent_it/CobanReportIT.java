@@ -33,6 +33,11 @@ public class CobanReportIT extends TrackerITSupport {
         imei = Devices.randomImei();
     }
     
+    @Override
+    protected int getLocalPort() {
+        return trackerAgentConfig.getLocalPort1();
+    }
+    
     @Test
     public void shouldProcessLogonMessage() throws Exception {
         bootstrap(imei, deviceMessages.logon(imei));

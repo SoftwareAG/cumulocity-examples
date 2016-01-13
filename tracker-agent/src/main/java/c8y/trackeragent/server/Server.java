@@ -17,7 +17,7 @@
  * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package c8y.trackeragent;
+package c8y.trackeragent.server;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -27,6 +27,7 @@ import java.util.concurrent.ExecutorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import c8y.trackeragent.RequestHandler;
 import c8y.trackeragent.protocol.mapping.TrackerFactory;
 import c8y.trackeragent.utils.TrackerConfiguration;
 
@@ -65,7 +66,7 @@ public class Server implements Runnable {
         try {
             this.serverSocket = new ServerSocket(localPort);
         } catch (IOException e) {
-            throw new RuntimeException("Cant init agent tracker server!", e);
+            throw new RuntimeException("Cant create socket for localPort " + localPort, e);
         }
     }
     

@@ -88,6 +88,12 @@ public class TrackerDeviceIT extends TrackerITSupport {
             }
         });
     }
+    
+    @Override
+    protected int getLocalPort() {
+        return trackerAgentConfig.getLocalPort1();
+    }
+
 
     @Test
     public void shouldSetTrackerData() throws SDKException, InterruptedException {
