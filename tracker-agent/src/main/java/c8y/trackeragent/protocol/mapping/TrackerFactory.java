@@ -14,6 +14,7 @@ import c8y.trackeragent.ConnectedTracker;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.protocol.coban.ConnectedCobanTracker;
 import c8y.trackeragent.protocol.gl200.ConnectedGL200Tracker;
+import c8y.trackeragent.protocol.rfv16.ConnectedRFV16Tracker;
 import c8y.trackeragent.protocol.telic.ConnectedTelicTracker;
 import c8y.trackeragent.utils.TrackerConfiguration;
 
@@ -69,7 +70,11 @@ public class TrackerFactory {
      * RF-V16
      */
     private ConnectedTracker getTracker2(Socket client) throws IOException {
-        //TODO
+        InputStream bis = asInput(client);
+        byte[] markingBytes = firstBytes(bis, 1);
+        if (markingBytes[0] == '*') {
+            return new ConnectedRFV16Tracker(client, bis, trackerAgent, contextService);
+        }
         return null;
     }
 

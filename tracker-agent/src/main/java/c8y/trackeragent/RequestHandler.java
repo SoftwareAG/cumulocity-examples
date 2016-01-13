@@ -26,9 +26,13 @@ public class RequestHandler implements Runnable {
     @Override
     public void run() {
         try {
-            ConnectedTracker peekTracker = trackerFactory.getTracker(client);
-            logger.debug("Tracker poke {} for connection from {}.", peekTracker.getClass().getSimpleName(), client.getReuseAddress());
-            reportsExecutor.execute(peekTracker);
+            ConnectedTracker tracker = trackerFactory.getTracker(client);
+            if (tracker == null) {
+                logger.debug("Didnt find matching tracker for port {}", client.getLocalPort());
+                return;
+            }
+            logger.debug("Tracker poke {} for connection from {}.", tracker.getClass().getSimpleName(), client.getReuseAddress());
+            reportsExecutor.execute(tracker);
         } catch(Exception ex) {
             logger.error("Error handling request:", ex);
             if(!client.isClosed()) {
