@@ -34,6 +34,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
+import c8y.trackeragent.devicebootstrap.DeviceBinder;
+
 import com.cumulocity.agent.server.ServerBuilder;
 import com.cumulocity.agent.server.feature.ContextFeature;
 import com.cumulocity.agent.server.feature.RepositoryFeature;
@@ -54,6 +56,9 @@ public class Main {
     @Autowired
     private Server server;
     
+    @Autowired
+    private DeviceBinder deviceBinder;
+    
     public static void main(String[] args) {
         logger.info("tracker-agent is starting.");
         //@formatter:off
@@ -70,7 +75,12 @@ public class Main {
     }
     
     @PostConstruct
-    public void startServer() {
+    public void onStart() {
+        startServers();
+        deviceBinder.init();
+    }
+
+    private void startServers() {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         logger.info("initialize tracker-agent server");
         server.init();

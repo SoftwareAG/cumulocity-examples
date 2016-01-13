@@ -67,8 +67,6 @@ public abstract class TrackerITSupport {
     @Autowired
     protected TrackerAgent trackerAgent;
     
-    
-    
     private int socketPort;
     protected TrackerPlatform testPlatform;
     protected TestConfiguration testConfig;

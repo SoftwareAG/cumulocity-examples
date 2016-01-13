@@ -30,12 +30,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import c8y.trackeragent.devicebootstrap.DeviceBinder;
-import c8y.trackeragent.devicebootstrap.DeviceBootstrapProcessor;
-import c8y.trackeragent.devicebootstrap.DeviceCredentials;
-import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
-import c8y.trackeragent.logger.TracelogAppenders;
-import c8y.trackeragent.operations.OperationDispatchers;
 import c8y.trackeragent.protocol.mapping.TrackerFactory;
 
 import com.cumulocity.agent.server.context.DeviceContextService;
@@ -49,21 +43,17 @@ import com.cumulocity.agent.server.logging.LoggingService;
 @Service
 public class Server implements Runnable {
 
+    private static final Logger logger = LoggerFactory.getLogger(Server.class);
+    
     private static final int REPORTS_EXECUTOR_POOL_SIZE = 10;
     private static final int REQUESTS_EXECUTOR_POOL_SIZE = 10;
-
-    private static final Logger logger = LoggerFactory.getLogger(Server.class);
-
 
     private ServerSocket serverSocket;
     private final TrackerAgent agent;
     private final ExecutorService reportsExecutor;
     private final ExecutorService requestsExecutor;
-    private final DeviceBootstrapProcessor deviceBootstrapProcessor;
-    private final DeviceBinder deviceBinder;
     private final TrackerFactory trackerFactory;
     private volatile boolean running = true;
-    
 
     @Autowired
     public Server(
@@ -75,11 +65,6 @@ public class Server implements Runnable {
         this.trackerFactory = trackerFactory;
         this.reportsExecutor = Executors.newFixedThreadPool(REPORTS_EXECUTOR_POOL_SIZE);
         this.requestsExecutor = Executors.newFixedThreadPool(REQUESTS_EXECUTOR_POOL_SIZE);
-        OperationDispatchers operationDispatchers = new OperationDispatchers(agent, contextService, loggingService);
-        TracelogAppenders tracelogAppenders = new TracelogAppenders(agent.getContext());
-        this.deviceBootstrapProcessor = new DeviceBootstrapProcessor(trackerAgent);
-        this.deviceBinder = new DeviceBinder(
-                operationDispatchers, tracelogAppenders, DeviceCredentialsRepository.get(), contextService);
     }
     
     public void init() {
@@ -88,20 +73,11 @@ public class Server implements Runnable {
         } catch (IOException e) {
             throw new RuntimeException("Cant init agent tracker server!", e);
         }
-        agent.registerEventListener(deviceBootstrapProcessor, deviceBinder);
-        for (DeviceCredentials deviceCredentials : agent.getContext().getDeviceCredentials()) {
-            try {
-                logger.debug("bind IMEI {}", deviceCredentials.getImei());
-                deviceBinder.bind(deviceCredentials);
-            } catch (Exception e) {
-                logger.error("Failed to initialize device: " + deviceCredentials.getImei());
-            }
-        }
     }
     
     public void destroy() {
         running = false;
-        if(serverSocket != null) {
+        if (serverSocket != null) {
             try {
                 serverSocket.close();
             } catch (IOException e) {
@@ -131,9 +107,5 @@ public class Server implements Runnable {
         } catch (Exception e) {
             logger.error("Error while processing:", e);
         }
-    }
-
-    public TrackerAgent getTrackerAgent() {
-        return agent;
     }
 }

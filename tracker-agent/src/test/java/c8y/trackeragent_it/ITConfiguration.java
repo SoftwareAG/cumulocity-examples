@@ -17,6 +17,7 @@ import org.springframework.context.annotation.PropertySource;
 
 import c8y.trackeragent.Main;
 import c8y.trackeragent.Server;
+import c8y.trackeragent.devicebootstrap.DeviceBinder;
 
 import com.cumulocity.agent.server.feature.ContextFeature;
 import com.cumulocity.agent.server.feature.RepositoryFeature;
@@ -37,6 +38,9 @@ public class ITConfiguration {
     @Autowired
     Server server;
     
+    @Autowired
+    DeviceBinder deviceBinder;
+    
     @Bean
     @Autowired
     public LoggingService loggingService(DeviceControlRepository deviceControl, BinariesRepository binaries, 
@@ -49,6 +53,7 @@ public class ITConfiguration {
     public void startServer() {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         server.init();
+        deviceBinder.init();
         executor.submit(server);
     }
 }
