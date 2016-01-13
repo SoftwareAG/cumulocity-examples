@@ -61,7 +61,6 @@ public class Server implements Runnable {
     private final ExecutorService requestsExecutor;
     private final DeviceBootstrapProcessor deviceBootstrapProcessor;
     private final DeviceBinder deviceBinder;
-    private final DeviceContextService contextService;
     private final TrackerFactory trackerFactory;
     private volatile boolean running = true;
     
@@ -79,14 +78,13 @@ public class Server implements Runnable {
         OperationDispatchers operationDispatchers = new OperationDispatchers(agent, contextService, loggingService);
         TracelogAppenders tracelogAppenders = new TracelogAppenders(agent.getContext());
         this.deviceBootstrapProcessor = new DeviceBootstrapProcessor(trackerAgent);
-        this.contextService = contextService;
         this.deviceBinder = new DeviceBinder(
                 operationDispatchers, tracelogAppenders, DeviceCredentialsRepository.get(), contextService);
     }
     
     public void init() {
         try {
-            this.serverSocket = new ServerSocket(agent.getContext().getConfiguration().getLocalPort());
+            this.serverSocket = new ServerSocket(agent.getContext().getConfiguration().getLocalPort1());
         } catch (IOException e) {
             throw new RuntimeException("Cant init agent tracker server!", e);
         }

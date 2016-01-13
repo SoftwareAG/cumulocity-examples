@@ -17,7 +17,7 @@ public class RequestHandler implements Runnable {
     private final Socket client;
     private final TrackerFactory trackerFactory;
 
-    public RequestHandler( ExecutorService reportsExecutor, Socket client, TrackerFactory trackerFactory) {
+    public RequestHandler(ExecutorService reportsExecutor, Socket client, TrackerFactory trackerFactory) {
         this.client = client;
         this.reportsExecutor = reportsExecutor;
         this.trackerFactory = trackerFactory;

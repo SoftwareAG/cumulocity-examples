@@ -8,7 +8,8 @@ import com.cumulocity.sdk.client.polling.PollingStrategy;
 public class TrackerConfiguration {
 
     private String platformHost;
-    private int localPort;
+    private int localPort1;
+    private int localPort2;
     private String bootstrapUser;
     private String bootstrapPassword;
     private String bootstrapTenant;
@@ -30,12 +31,21 @@ public class TrackerConfiguration {
         return this;
     }
 
-    public int getLocalPort() {
-        return localPort;
+    public int getLocalPort1() {
+        return localPort1;
     }
 
-    public TrackerConfiguration setLocalPort(int localPort) {
-        this.localPort = localPort;
+    public TrackerConfiguration setLocalPort1(int localPort1) {
+        this.localPort1 = localPort1;
+        return this;
+    }
+    
+    public int getLocalPort2() {
+        return localPort2;
+    }
+    
+    public TrackerConfiguration setLocalPort2(int localPort2) {
+        this.localPort2 = localPort2;
         return this;
     }
 
@@ -105,9 +115,8 @@ public class TrackerConfiguration {
     @Override
     public String toString() {
         return String
-                .format("TrackerConfiguration [platformHost=%s, localPort=%s, bootstrapUser=%s, bootstrapPassword=%s, bootstrapTenant=%s, clientTimeout=%s, bootstrapPollIntervals=%s, cobanLocationReportTimeInterval=%s, forceInitialHost=%s]",
-                        platformHost, localPort, bootstrapUser, bootstrapPassword, bootstrapTenant, clientTimeout,
-                        bootstrapPollIntervals, cobanLocationReportTimeInterval, forceInitialHost);
+                .format("TrackerConfiguration [platformHost=%s, localPort1=%s, localPort2=%s, bootstrapUser=%s, bootstrapPassword=%s, bootstrapTenant=%s, clientTimeout=%s, bootstrapPollIntervals=%s, cobanLocationReportTimeInterval=%s, forceInitialHost=%s]",
+                        platformHost, localPort1, localPort2, bootstrapUser, bootstrapPassword, bootstrapTenant, clientTimeout, bootstrapPollIntervals, cobanLocationReportTimeInterval, forceInitialHost);
     }
     
 }

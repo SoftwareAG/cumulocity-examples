@@ -17,7 +17,7 @@ import c8y.trackeragent.protocol.coban.service.AlarmService;
 import c8y.trackeragent.protocol.coban.service.MeasurementService;
 
 public class ConnectedCobanTracker extends ConnectedTracker {
-
+    
     public ConnectedCobanTracker(Socket client, InputStream bis, TrackerAgent trackerAgent, DeviceContextService contextService) {
         super(client, bis, CobanConstants.REPORT_SEP, CobanConstants.FIELD_SEP, trackerAgent, contextService);
         CobanServerMessages serverMessages = new CobanServerMessages();

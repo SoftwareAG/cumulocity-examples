@@ -15,6 +15,7 @@ import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.protocol.coban.ConnectedCobanTracker;
 import c8y.trackeragent.protocol.gl200.ConnectedGL200Tracker;
 import c8y.trackeragent.protocol.telic.ConnectedTelicTracker;
+import c8y.trackeragent.utils.TrackerConfiguration;
 
 import com.cumulocity.agent.server.context.DeviceContextService;
 
@@ -23,28 +24,47 @@ public class TrackerFactory {
 
     private static final Logger logger = LoggerFactory.getLogger(TrackerFactory.class);
 
-    private static final int HASH_ASCII_CODE = 35;
-
     private final TrackerAgent trackerAgent;
     private final DeviceContextService contextService;
+    private final TrackerConfiguration config;
     
     @Autowired
-    public TrackerFactory(TrackerAgent trackerAgent, DeviceContextService contextService) {
+    public TrackerFactory(
+            TrackerAgent trackerAgent, 
+            DeviceContextService contextService, 
+            TrackerConfiguration config) {
         this.trackerAgent = trackerAgent;
         this.contextService = contextService;
+        this.config = config;
     }
 
     public ConnectedTracker getTracker(Socket client) throws IOException {
+        //TODO IT will fail
         logger.debug("peek tracker for new connection...");
+        if (client.getLocalPort() == config.getLocalPort1()) {
+            return getTracker1(client);
+        } else if (client.getLocalPort() == config.getLocalPort2()) {
+            return getTracker2(client);
+        } else {
+            throw new RuntimeException("Only support local ports: 9090, 9091!");
+        }
+    }
+
+    private ConnectedTracker getTracker1(Socket client) throws IOException {
         InputStream bis = asInput(client);
         byte[] markingBytes = firstBytes(bis, 1);
         if (markingBytes[0] >= '0' && markingBytes[0] <= '9') {
             return new ConnectedTelicTracker(client, bis, trackerAgent, contextService);
-        } else if (markingBytes[0] == HASH_ASCII_CODE) {
+        } else if (markingBytes[0] == '#') {
             return new ConnectedCobanTracker(client, bis, trackerAgent, contextService);
         } else {
             return new ConnectedGL200Tracker(client, bis, trackerAgent, contextService);
         }
+    }
+    
+    private ConnectedTracker getTracker2(Socket client) {
+        //TODO
+        return null;
     }
 
     private static InputStream asInput(Socket client) throws IOException {

@@ -82,7 +82,7 @@ public abstract class TrackerITSupport {
         testConfig = getTestConfig();
         System.out.println(testConfig);
         System.out.println(trackerAgentConfig);
-        socketPort = trackerAgentConfig.getLocalPort();
+        socketPort = trackerAgentConfig.getLocalPort1();
         if (isLocalTrackerTest()) {
             clearPersistedDevices();
         }

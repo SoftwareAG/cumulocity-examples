@@ -29,8 +29,10 @@ public class ConfigUtils {
     private static final String PLATFORM_HOST_PROP = "C8Y.baseURL";    
     private static final String FORCE_INITIAL_HOST_PROP = "C8Y.forceInitialHost";    
     private static final boolean DEFAULT_FORCE_INITIAL_HOST = false;
-    private static final String LOCAL_SOCKET_PORT_PROP = "localPort";
-    private static final String DEFAULT_LOCAL_SOCKET_PORT = "9090";
+    private static final String LOCAL_PORT_1_PROP = "localPort1";
+    private static final String DEFAULT_LOCAL_PORT_1 = "9090";
+    private static final String LOCAL_PORT_2_PROP = "localPort2";
+    private static final String DEFAULT_LOCAL_PORT_2 = "9091";
     private static final String BOOTSTRAP_USER_PROP = "C8Y.devicebootstrap.user";
     private static final String BOOTSTRAP_PASSWORD_PROP = "C8Y.devicebootstrap.password";
     private static final String CLIENT_TIMEOUT_PROP = "client.timeout";
@@ -76,7 +78,8 @@ public class ConfigUtils {
         TrackerConfiguration config = new TrackerConfiguration()
             .setPlatformHost(getProperty(props, PLATFORM_HOST_PROP))
             .setForceInitialHost(getBooleanProperty(props, FORCE_INITIAL_HOST_PROP, DEFAULT_FORCE_INITIAL_HOST))
-            .setLocalPort(getSocketPort(props))
+            .setLocalPort1(getLocalPort(props, LOCAL_PORT_1_PROP, DEFAULT_LOCAL_PORT_1))
+            .setLocalPort2(getLocalPort(props, LOCAL_PORT_2_PROP, DEFAULT_LOCAL_PORT_2))
             .setBootstrapUser(getProperty(props, BOOTSTRAP_USER_PROP))
             .setBootstrapPassword(getProperty(props, BOOTSTRAP_PASSWORD_PROP))
             .setBootstrapTenant("management")
@@ -104,11 +107,11 @@ public class ConfigUtils {
         return Boolean.parseBoolean(getProperty(props, key, defaultValue.toString()));
     }
     
-    private int getSocketPort(Properties props) {
-        String port = getProperty(props, LOCAL_SOCKET_PORT_PROP, DEFAULT_LOCAL_SOCKET_PORT);
+    private int getLocalPort(Properties props, String key, String defaultValue) {
+        String port = getProperty(props, key, defaultValue);
         return "$random".equals(port) ? randomPort() : parseInt(port);
     }
-    
+        
     private static int randomPort() {
         return random.nextInt(20000) + 40000;
     }

@@ -1,35 +1,30 @@
 package c8y.trackeragent.protocol.telic;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.net.Socket;
-import java.util.concurrent.Callable;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import com.cumulocity.agent.server.context.DeviceContext;
-import com.cumulocity.agent.server.context.DeviceContextService;
-import com.cumulocity.agent.server.context.DeviceContextServiceImpl;
-
 import c8y.trackeragent.ReportContext;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
-import c8y.trackeragent.protocol.telic.ConnectedTelicTracker;
 import c8y.trackeragent.protocol.telic.parser.TelicLocationReport;
 import c8y.trackeragent.utils.Devices;
 import c8y.trackeragent.utils.Positions;
 import c8y.trackeragent.utils.TelicReports;
 import c8y.trackeragent.utils.TrackerContext;
+
+import com.cumulocity.agent.server.context.DeviceContextService;
+import com.cumulocity.agent.server.context.DeviceContextServiceImpl;
 
 public class TelicLocationReportTest {
     

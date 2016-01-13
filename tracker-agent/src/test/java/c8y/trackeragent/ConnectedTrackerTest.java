@@ -66,14 +66,13 @@ public class ConnectedTrackerTest {
     private TrackerContext trackerContext = mock(TrackerContext.class);
     private ConnectedTracker tracker;
 
+    @SuppressWarnings("unchecked")
     @Before
     public void setup() throws Exception {
         ConnectionRegistry.instance().remove("imei");
         when(trackerAgent.getContext()).thenReturn(trackerContext);
         when(contextService.callWithinContext(any(DeviceContext.class), any(Callable.class))).thenReturn(true);
-        tracker = new ConnectedTracker(client, bis, GL200Constants.REPORT_SEP, GL200Constants.FIELD_SEP, trackerAgent, contextService)  {
-            
-        };
+        tracker = new ConnectedTracker(client, bis, GL200Constants.REPORT_SEP, GL200Constants.FIELD_SEP, trackerAgent, contextService);
         tracker.addFragment(translator);
         tracker.addFragment(parser);
         tracker.setOut(out);

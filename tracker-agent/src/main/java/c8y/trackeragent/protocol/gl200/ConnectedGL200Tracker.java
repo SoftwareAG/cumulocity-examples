@@ -27,4 +27,5 @@ public class ConnectedGL200Tracker extends ConnectedTracker {
         addFragment(new GL200DeviceMotionState(trackerAgent, PASSWORD));
         addFragment(new GL200Fallback(trackerAgent, PASSWORD));
     }
+
 }
