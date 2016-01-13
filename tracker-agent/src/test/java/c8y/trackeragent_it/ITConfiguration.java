@@ -17,7 +17,9 @@ import org.springframework.context.annotation.PropertySource;
 
 import c8y.trackeragent.Main;
 import c8y.trackeragent.Server;
+import c8y.trackeragent.ServerFactory;
 import c8y.trackeragent.devicebootstrap.DeviceBinder;
+import c8y.trackeragent.utils.TrackerConfiguration;
 
 import com.cumulocity.agent.server.feature.ContextFeature;
 import com.cumulocity.agent.server.feature.RepositoryFeature;
@@ -36,7 +38,10 @@ import com.cumulocity.agent.server.repository.DeviceControlRepository;
 public class ITConfiguration {
 
     @Autowired
-    Server server;
+    ServerFactory serverFactory;
+    
+    @Autowired
+    TrackerConfiguration config;
     
     @Autowired
     DeviceBinder deviceBinder;
@@ -51,9 +56,15 @@ public class ITConfiguration {
     
     @PostConstruct
     public void startServer() {
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        server.init();
+        startServer(config.getLocalPort1());
+        startServer(config.getLocalPort2());
         deviceBinder.init();
+    }
+    
+    private void startServer(int localPort) {
+        Server server = serverFactory.createServer(localPort);
+        server.init();
+        ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.submit(server);
     }
 }

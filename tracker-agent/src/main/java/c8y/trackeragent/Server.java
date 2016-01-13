@@ -23,53 +23,47 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import c8y.trackeragent.protocol.mapping.TrackerFactory;
-
-import com.cumulocity.agent.server.context.DeviceContextService;
-import com.cumulocity.agent.server.logging.LoggingService;
+import c8y.trackeragent.utils.TrackerConfiguration;
 
 /**
  * The server listens to connections from devices and starts threads for
  * handling device communication for particular types of devices. (Currently,
  * only GL200, Telic, Coban)
  */
-@Service
 public class Server implements Runnable {
 
     private static final Logger logger = LoggerFactory.getLogger(Server.class);
     
-    private static final int REPORTS_EXECUTOR_POOL_SIZE = 10;
-    private static final int REQUESTS_EXECUTOR_POOL_SIZE = 10;
-
     private ServerSocket serverSocket;
-    private final TrackerAgent agent;
+    private final TrackerConfiguration config;
     private final ExecutorService reportsExecutor;
     private final ExecutorService requestsExecutor;
     private final TrackerFactory trackerFactory;
+    private final int localPort;
     private volatile boolean running = true;
 
-    @Autowired
-    public Server(
-            TrackerAgent trackerAgent, 
-            DeviceContextService contextService, 
-            LoggingService loggingService, 
-            TrackerFactory trackerFactory) {
-        this.agent = trackerAgent;
+    Server(
+            TrackerConfiguration config, 
+            TrackerFactory trackerFactory,
+            ExecutorService reportsExecutor,
+            ExecutorService requestsExecutor,
+            int localPort) {
+        this.config = config;
         this.trackerFactory = trackerFactory;
-        this.reportsExecutor = Executors.newFixedThreadPool(REPORTS_EXECUTOR_POOL_SIZE);
-        this.requestsExecutor = Executors.newFixedThreadPool(REQUESTS_EXECUTOR_POOL_SIZE);
+        this.reportsExecutor = reportsExecutor;
+        this.requestsExecutor = requestsExecutor;
+        this.localPort = localPort;
     }
     
     public void init() {
+        logger.info("Initialize server for port {}", localPort);
         try {
-            this.serverSocket = new ServerSocket(agent.getContext().getConfiguration().getLocalPort1());
+            this.serverSocket = new ServerSocket(localPort);
         } catch (IOException e) {
             throw new RuntimeException("Cant init agent tracker server!", e);
         }
@@ -88,6 +82,7 @@ public class Server implements Runnable {
 
     @Override
     public void run() {
+        logger.info("Start server for port {}", localPort);
         running = true;
         while (running) {
             accept();
@@ -101,7 +96,7 @@ public class Server implements Runnable {
                 return;
             }
             Socket client = serverSocket.accept();
-            client.setSoTimeout(agent.getContext().getConfiguration().getClientTimeout());
+            client.setSoTimeout(config.getClientTimeout());
             logger.debug("Accepted connection from {}, launching worker thread.", client.getRemoteSocketAddress());
             requestsExecutor.execute(new RequestHandler(reportsExecutor, client, trackerFactory));
         } catch (Exception e) {

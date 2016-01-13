@@ -35,6 +35,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 import c8y.trackeragent.devicebootstrap.DeviceBinder;
+import c8y.trackeragent.utils.TrackerConfiguration;
 
 import com.cumulocity.agent.server.ServerBuilder;
 import com.cumulocity.agent.server.feature.ContextFeature;
@@ -54,7 +55,10 @@ public class Main {
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
     
     @Autowired
-    private Server server;
+    private ServerFactory serverFactory;
+    
+    @Autowired
+    private TrackerConfiguration config;
     
     @Autowired
     private DeviceBinder deviceBinder;
@@ -76,15 +80,15 @@ public class Main {
     
     @PostConstruct
     public void onStart() {
-        startServers();
+        startServer(config.getLocalPort1());
+        startServer(config.getLocalPort2());
         deviceBinder.init();
     }
 
-    private void startServers() {
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        logger.info("initialize tracker-agent server");
+    private void startServer(int localPort) {
+        Server server = serverFactory.createServer(localPort);
         server.init();
-        logger.info("start tracker-agent server");
+        ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.submit(server);
     }
     
