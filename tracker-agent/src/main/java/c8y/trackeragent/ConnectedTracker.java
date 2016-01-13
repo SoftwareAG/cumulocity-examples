@@ -46,7 +46,7 @@ import com.cumulocity.sdk.client.SDKException;
  * Performs the communication with a connected device. Accepts reports from the
  * input stream and sends commands to the output stream.
  */
-public class ConnectedTracker implements Runnable, Executor {
+public abstract class ConnectedTracker implements Runnable, Executor {
 
     protected static Logger logger = LoggerFactory.getLogger(ConnectedTracker.class);
 

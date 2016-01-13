@@ -31,7 +31,7 @@
         </dependency>
         
         <!-- traccar dependencies -->
-        <dependency>
+<!--         <dependency>
             <groupId>org.traccar</groupId>
             <artifactId>traccar</artifactId>
             <version>3.2-SNAPSHOT</version>
@@ -41,7 +41,7 @@
                     <artifactId>slf4j-simple</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
+        </dependency> -->
         <!-- end of -->
         
         <dependency>

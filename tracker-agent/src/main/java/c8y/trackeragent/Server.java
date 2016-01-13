@@ -36,6 +36,7 @@ import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.logger.TracelogAppenders;
 import c8y.trackeragent.operations.OperationDispatchers;
+import c8y.trackeragent.protocol.mapping.TrackerFactory;
 
 import com.cumulocity.agent.server.context.DeviceContextService;
 import com.cumulocity.agent.server.logging.LoggingService;
@@ -43,7 +44,7 @@ import com.cumulocity.agent.server.logging.LoggingService;
 /**
  * The server listens to connections from devices and starts threads for
  * handling device communication for particular types of devices. (Currently,
- * only GL200 and Telic.)
+ * only GL200, Telic, Coban)
  */
 @Service
 public class Server implements Runnable {
@@ -61,12 +62,18 @@ public class Server implements Runnable {
     private final DeviceBootstrapProcessor deviceBootstrapProcessor;
     private final DeviceBinder deviceBinder;
     private final DeviceContextService contextService;
+    private final TrackerFactory trackerFactory;
     private volatile boolean running = true;
     
 
     @Autowired
-    public Server(TrackerAgent trackerAgent, DeviceContextService contextService, LoggingService loggingService) {
+    public Server(
+            TrackerAgent trackerAgent, 
+            DeviceContextService contextService, 
+            LoggingService loggingService, 
+            TrackerFactory trackerFactory) {
         this.agent = trackerAgent;
+        this.trackerFactory = trackerFactory;
         this.reportsExecutor = Executors.newFixedThreadPool(REPORTS_EXECUTOR_POOL_SIZE);
         this.requestsExecutor = Executors.newFixedThreadPool(REQUESTS_EXECUTOR_POOL_SIZE);
         OperationDispatchers operationDispatchers = new OperationDispatchers(agent, contextService, loggingService);
@@ -122,7 +129,7 @@ public class Server implements Runnable {
             Socket client = serverSocket.accept();
             client.setSoTimeout(agent.getContext().getConfiguration().getClientTimeout());
             logger.debug("Accepted connection from {}, launching worker thread.", client.getRemoteSocketAddress());
-            requestsExecutor.execute(new RequestHandler(agent, reportsExecutor, client, contextService));
+            requestsExecutor.execute(new RequestHandler(reportsExecutor, client, trackerFactory));
         } catch (Exception e) {
             logger.error("Error while processing:", e);
         }

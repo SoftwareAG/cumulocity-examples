@@ -40,7 +40,6 @@ import java.util.concurrent.Callable;
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import c8y.trackeragent.event.TrackerAgentEvents;
 import c8y.trackeragent.operations.OperationContext;
@@ -72,7 +71,9 @@ public class ConnectedTrackerTest {
         ConnectionRegistry.instance().remove("imei");
         when(trackerAgent.getContext()).thenReturn(trackerContext);
         when(contextService.callWithinContext(any(DeviceContext.class), any(Callable.class))).thenReturn(true);
-        tracker = new ConnectedTracker(client, bis, GL200Constants.REPORT_SEP, GL200Constants.FIELD_SEP, trackerAgent, contextService);
+        tracker = new ConnectedTracker(client, bis, GL200Constants.REPORT_SEP, GL200Constants.FIELD_SEP, trackerAgent, contextService)  {
+            
+        };
         tracker.addFragment(translator);
         tracker.addFragment(parser);
         tracker.setOut(out);
