@@ -10,7 +10,6 @@ import c8y.trackeragent.Parser;
 import c8y.trackeragent.ReportContext;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerDevice;
-import c8y.trackeragent.protocol.telic.ConnectedTelicTracker;
 
 import com.cumulocity.sdk.client.SDKException;
 
