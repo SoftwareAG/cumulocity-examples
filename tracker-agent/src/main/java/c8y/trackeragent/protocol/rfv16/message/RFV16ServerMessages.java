@@ -10,8 +10,8 @@ import c8y.trackeragent.utils.message.TrackerMessageFactory;
 
 public class RFV16ServerMessages extends TrackerMessageFactory {
     
-    private static final DateTimeFormatter HHMMSS = DateTimeFormat.forPattern("hhmmss");
-    private static final DateTimeFormatter DDMMYY = DateTimeFormat.forPattern("ddMMyy");
+    public static final DateTimeFormatter HHMMSS = DateTimeFormat.forPattern("hhmmss");
+    public static final DateTimeFormatter DDMMYY = DateTimeFormat.forPattern("ddMMyy");
     
     public RFV16ServerMessages() {
         super(RFV16Constants.FIELD_SEP, "" + RFV16Constants.REPORT_SEP, RFV16Constants.REPORT_PREFIX);
