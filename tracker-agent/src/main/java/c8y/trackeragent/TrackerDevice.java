@@ -42,6 +42,8 @@ import c8y.SpeedMeasurement;
 import c8y.SupportedOperations;
 import c8y.trackeragent.protocol.coban.device.CobanDevice;
 import c8y.trackeragent.protocol.coban.device.CobanDeviceFactory;
+import c8y.trackeragent.protocol.rfv16.device.RFV16Device;
+import c8y.trackeragent.protocol.rfv16.device.RFV16DeviceFactory;
 import c8y.trackeragent.utils.TrackerConfiguration;
 
 import com.cumulocity.model.ID;
@@ -425,6 +427,13 @@ public class TrackerDevice extends DeviceManagedObject {
         CobanDevice cobanDevice = new CobanDeviceFactory(trackerConfig, mo).create();
         logger.info("Received coban device config: {} for imei: {}", cobanDevice, imei);
         return cobanDevice;
+    }
+    
+    public RFV16Device getRFV16Device() {
+        ManagedObjectRepresentation mo = getManagedObject();
+        RFV16Device rfv16Device = new RFV16DeviceFactory(trackerConfig, mo).create();
+        logger.info("Received rfv16 device config: {} for imei: {}", rfv16Device, imei);
+        return rfv16Device;
     }
 
 }

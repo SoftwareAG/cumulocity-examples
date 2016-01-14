@@ -1,4 +1,4 @@
-package c8y.trackeragent.protocol.coban.parser;
+package c8y.trackeragent.protocol.rfv16;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -14,21 +14,19 @@ import org.mockito.Mockito;
 
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerDevice;
-import c8y.trackeragent.protocol.coban.CobanDeviceMessages;
-import c8y.trackeragent.protocol.coban.device.CobanDevice;
-import c8y.trackeragent.protocol.coban.message.CobanServerMessages;
-import c8y.trackeragent.protocol.coban.service.AlarmService;
+import c8y.trackeragent.protocol.rfv16.device.RFV16Device;
+import c8y.trackeragent.protocol.rfv16.message.RFV16DeviceMessages;
+import c8y.trackeragent.protocol.rfv16.message.RFV16ServerMessages;
 import c8y.trackeragent.service.MeasurementService;
 
 import com.cumulocity.model.idtype.GId;
 
-public abstract class CobanParserTestSupport {
+public class RFV16ParserTestSupport {
     
     protected TrackerAgent trackerAgent;
     protected TrackerDevice deviceMock;
-    protected CobanServerMessages serverMessages = new CobanServerMessages();
-    protected CobanDeviceMessages deviceMessages = new CobanDeviceMessages();
-    protected AlarmService alarmService = new AlarmService();
+    protected RFV16ServerMessages serverMessages = new RFV16ServerMessages();
+    protected RFV16DeviceMessages deviceMessages = new RFV16DeviceMessages();
     protected MeasurementService measurementService = new MeasurementService();
     protected ByteArrayOutputStream out = new ByteArrayOutputStream();
     
@@ -45,8 +43,8 @@ public abstract class CobanParserTestSupport {
         out.close();
     }
     
-    protected void currentCobanDeviceIs(CobanDevice cobanDevice) {
-        when(deviceMock.getCobanDevice()).thenReturn(cobanDevice);
+    protected void currentDeviceIs(RFV16Device rFV16Device) {
+        when(deviceMock.getRFV16Device()).thenReturn(rFV16Device);
     }
     
     protected void assertOut(String expected) throws UnsupportedEncodingException {

@@ -1,8 +1,10 @@
 package c8y.trackeragent.protocol.coban.parser;
 
+import java.math.BigDecimal;
+
 import c8y.SpeedMeasurement;
 import c8y.trackeragent.ReportContext;
-import c8y.trackeragent.protocol.coban.service.MeasurementService;
+import c8y.trackeragent.service.MeasurementService;
 
 import com.cumulocity.model.event.CumulocitySeverities;
 import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
@@ -102,8 +104,9 @@ public enum AlarmType {
         }
         
         @Override
-        public void populateAlarm(AlarmRepresentation alarm, ReportContext reportContext) {
-            SpeedMeasurement speedFragment = MeasurementService.createSpeedFragment(reportContext);
+        public void populateAlarm(AlarmRepresentation alarm, ReportContext reportCtx) {
+            BigDecimal speedValue = CobanParser.getSpeed(reportCtx);
+            SpeedMeasurement speedFragment = MeasurementService.createSpeedFragment(speedValue);
             String text = String.format("Geschwindigkeitsüberschreitung %s", formatSpeed(speedFragment));
             alarm.setType(asC8yType());
             alarm.setText(text);

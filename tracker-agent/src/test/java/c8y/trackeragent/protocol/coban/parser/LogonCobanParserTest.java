@@ -35,7 +35,7 @@ public class LogonCobanParserTest extends CobanParserTestSupport {
       boolean success = cobanParser.onParsed(reportCtx);
       
       assertThat(success).isTrue();
-      assertThat(out.toString("US-ASCII")).isEqualTo("LOAD;**,imei:ABCD,C,03m;");
+      assertOut("LOAD;**,imei:ABCD,C,03m;");
   }
 
 }

@@ -19,7 +19,7 @@ public class RFV16ServerMessagesTest {
     
     @Test
     public void createPositioningMonitoringCommand() throws Exception {
-        TrackerMessage actual = messages.positioningMonitoringCommand("HQ", "7893267561", 5);
+        TrackerMessage actual = messages.timeIntervalLocationRequest("HQ", "7893267561", "5");
         
         assertThat(actual.asText()).isEqualTo("*HQ,7893267561,D1,010000,5,1#");
     }

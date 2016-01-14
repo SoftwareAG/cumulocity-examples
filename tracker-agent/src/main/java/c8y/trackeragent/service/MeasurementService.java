@@ -1,4 +1,4 @@
-package c8y.trackeragent.protocol.coban.service;
+package c8y.trackeragent.service;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import c8y.SpeedMeasurement;
-import c8y.trackeragent.ReportContext;
 import c8y.trackeragent.TrackerDevice;
 
 import com.cumulocity.model.measurement.MeasurementValue;
@@ -16,10 +15,10 @@ import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
 
 public class MeasurementService {
     
-    private static Logger logger = LoggerFactory.getLogger(AlarmService.class);
+    private static Logger logger = LoggerFactory.getLogger(MeasurementService.class);
     
-    public SpeedMeasurement createSpeedMeasurement(ReportContext reportCtx, TrackerDevice device) {
-        SpeedMeasurement speedFragment = createSpeedFragment(reportCtx);
+    public SpeedMeasurement createSpeedMeasurement(BigDecimal speedValue, TrackerDevice device) {
+        SpeedMeasurement speedFragment = createSpeedFragment(speedValue);
         if (speedFragment == null) {
             return null;
         }
@@ -29,8 +28,7 @@ public class MeasurementService {
         return speedFragment;
     }
     
-    public static SpeedMeasurement createSpeedFragment(ReportContext reportCtx) {
-        BigDecimal speedValue = getSpeed(reportCtx);
+    public static SpeedMeasurement createSpeedFragment(BigDecimal speedValue) {
         if (speedValue == null) {
             return null;
         }
@@ -55,20 +53,6 @@ public class MeasurementService {
         ManagedObjectRepresentation source = new ManagedObjectRepresentation();
         source.setId(device.getGId());
         return source;
-    }
-
-    public static BigDecimal getSpeed(ReportContext reportCtx) {
-        String entry = reportCtx.getEntry(12);
-        if (entry == null) {
-            logger.warn("There is no speed parameter in measurement");
-            return null;
-        }
-        try {
-            return new BigDecimal(entry);
-        } catch (NumberFormatException nfex) {
-            logger.error("Wrong speed value: " + entry, nfex);
-            return null;
-        }
     }
 
 

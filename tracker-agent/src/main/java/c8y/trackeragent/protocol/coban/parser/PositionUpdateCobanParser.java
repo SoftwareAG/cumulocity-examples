@@ -19,7 +19,7 @@ import c8y.trackeragent.operations.OperationContext;
 import c8y.trackeragent.protocol.coban.CobanConstants;
 import c8y.trackeragent.protocol.coban.message.CobanServerMessages;
 import c8y.trackeragent.protocol.coban.service.AlarmService;
-import c8y.trackeragent.protocol.coban.service.MeasurementService;
+import c8y.trackeragent.service.MeasurementService;
 import c8y.trackeragent.utils.TK10xCoordinatesTranslator;
 import c8y.trackeragent.utils.message.TrackerMessage;
 
@@ -79,7 +79,8 @@ public class PositionUpdateCobanParser extends CobanParser implements Translator
         position.setLng(valueOf(lng));
         position.setAlt(BigDecimal.ZERO);
         logger.debug("Update position for imei: {} to: {}.", reportCtx.getImei(), position);
-        SpeedMeasurement speed = measurementService.createSpeedMeasurement(reportCtx, device);
+        BigDecimal speedValue = getSpeed(reportCtx);
+        SpeedMeasurement speed = measurementService.createSpeedMeasurement(speedValue, device);
         device.setPositionAndSpeed(position, speed);
         return true;
     }

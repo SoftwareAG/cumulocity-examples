@@ -1,27 +1,27 @@
-package c8y.trackeragent.protocol.coban.device;
+package c8y.trackeragent.protocol.rfv16.device;
 
 import java.util.Map;
 
-import c8y.trackeragent.protocol.coban.CobanConstants;
+import c8y.trackeragent.protocol.rfv16.RFV16Constants;
 import c8y.trackeragent.utils.TrackerConfiguration;
 
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 
-public class CobanDeviceFactory {
+public class RFV16DeviceFactory {
 
     private final Map<String, Object> config;
     private final TrackerConfiguration trackerConfig;
     
     @SuppressWarnings("unchecked")
-    public CobanDeviceFactory(TrackerConfiguration trackerConfig, ManagedObjectRepresentation device) {
+    public RFV16DeviceFactory(TrackerConfiguration trackerConfig, ManagedObjectRepresentation device) {
         this.trackerConfig = trackerConfig;
-        this.config = (Map<String, Object>) device.get(CobanConstants.DEVICE_CONFIG_FRAGMENT);
+        this.config = (Map<String, Object>) device.get(RFV16Constants.DEVICE_CONFIG_FRAGMENT);
     }
 
-    public CobanDevice create() {
-        CobanDevice result = new CobanDevice();
+    public RFV16Device create() {
+        RFV16Device result = new RFV16Device();
         String defaultLocationReportInterval = trackerConfig.getCobanLocationReportTimeInterval();
-        String locationReportInterval = getValue(CobanConstants.DEVICE_CONFIG_KEY_LOCATION_REPORT_TIME_INTERVAL, defaultLocationReportInterval);
+        String locationReportInterval = getValue(RFV16Constants.DEVICE_CONFIG_KEY_LOCATION_REPORT_TIME_INTERVAL, defaultLocationReportInterval);
         result.setLocationReportInterval(locationReportInterval);
         return result;
     }

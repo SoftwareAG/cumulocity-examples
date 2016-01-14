@@ -30,8 +30,8 @@ public class PositionUpdateCobanParserTest extends CobanParserTestSupport {
     public void init() {
         cobanParser = new PositionUpdateCobanParser(trackerAgent, serverMessages, alarmService, measurementService);
     }
-    @Test
     
+    @Test    
     public void shouldAcceptCobanPositionMessage() throws Exception {
         boolean actual = cobanParser.accept(deviceMessages.positionUpdate("ABCD", Positions.ZERO).asArray());
         

@@ -24,7 +24,7 @@ public class RFV16ServerMessages extends TrackerMessageFactory {
      * Batch: The number of transferred batch, range from 1 to16, outside the range as 1.
      * When batch=1 as the real-time mode, when produce a record upload it, only support batch=1.
      */
-    public TrackerMessage positioningMonitoringCommand(String maker, String imei, int intervalInSeconds) {
+    public TrackerMessage timeIntervalLocationRequest(String maker, String imei, String intervalInSeconds) {
         return msg()
                 .appendField(maker)
                 .appendField(imei)
