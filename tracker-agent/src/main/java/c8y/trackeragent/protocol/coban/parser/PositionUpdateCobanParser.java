@@ -81,7 +81,6 @@ public class PositionUpdateCobanParser extends CobanParser implements Translator
         logger.debug("Update position for imei: {} to: {}.", reportCtx.getImei(), position);
         SpeedMeasurement speed = measurementService.createSpeedMeasurement(reportCtx, device);
         device.setPositionAndSpeed(position, speed);
-        measurementService.createSpeedMeasurement(reportCtx, device);
         return true;
     }
 

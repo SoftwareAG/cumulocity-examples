@@ -1,6 +1,7 @@
 package c8y.trackeragent.utils.message;
 
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -14,10 +15,16 @@ public class TrackerMessage {
     private final LinkedList<Report> reports = new LinkedList<Report>();
     private final String fieldSep;
     private final String reportSep;
-
-    public TrackerMessage(String fieldSep, String reportSep) {
+    private final String reportPrefix;
+    
+    public TrackerMessage(String fieldSep, String reportSep, String reportPrefix) {
         this.fieldSep = fieldSep;
         this.reportSep = reportSep;
+        this.reportPrefix = reportPrefix;
+    }
+
+    public TrackerMessage(String fieldSep, String reportSep) {
+        this(fieldSep, reportSep, "");
     }
     
     public byte[] asBytes() {
@@ -25,11 +32,11 @@ public class TrackerMessage {
     }
     
     public String asText() {
-        return Joiner.on(reportSep).join(reports) + reportSep;
+        return reportPrefix + Joiner.on(reportSep).join(reports) + reportSep;
     }
     
     public TrackerMessage fromText(String text) {
-        text = stripLastReportSep(text);
+        text = stripPrefixAndLastReportSep(text);
         reports.clear();
         for (String reportStr : Splitter.on(reportSep).split(text)) {
             reports.add(new Report(reportStr));
@@ -37,7 +44,10 @@ public class TrackerMessage {
         return this;
     }
 
-    private String stripLastReportSep(String text) {
+    private String stripPrefixAndLastReportSep(String text) {
+        if (!reportPrefix.isEmpty() && text.startsWith(reportPrefix)) {
+            text = text.substring(1);
+        }
         if (text.endsWith(reportSep)) {
             text = text.substring(0, text.length() - 1);
         }
@@ -58,6 +68,14 @@ public class TrackerMessage {
         } catch (UnsupportedEncodingException ex) {
             throw new RuntimeException(ex);
         }
+    }
+    
+    public TrackerMessage appendField(int value) {
+        return appendField("" + value);
+    }
+    
+    public TrackerMessage appendField(BigDecimal value) {
+        return appendField("" + value);
     }
     
     public TrackerMessage appendField(String text) {

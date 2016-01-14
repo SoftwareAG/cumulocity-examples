@@ -41,6 +41,7 @@ import com.cumulocity.agent.server.context.DeviceContext;
 import com.cumulocity.agent.server.context.DeviceContextService;
 import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.sdk.client.SDKException;
+import com.google.common.collect.Iterables;
 
 /**
  * Performs the communication with a connected device. Accepts reports from the
@@ -157,46 +158,37 @@ public class ConnectedTracker implements Runnable, Executor {
     }
 
     void processReport(String[] report) {
-        for (Object fragment : fragments) {
-            if (fragment instanceof Parser) {
-                final Parser parser = (Parser) fragment;
-                logger.debug("Using parser "+ parser.getClass());
-                final String imei = parser.parse(report);
-                if (imei != null) {
-                    logger.debug("Got report from IMEI: " + imei);
-                    boolean registered = checkIfDeviceRegistered(imei);
-                    if (registered) {
-                        final ReportContext reportContext = new ReportContext(report, imei, out);
-                        DeviceCredentials credentials = trackerAgent.getContext().getDeviceCredentials(imei);
-                        try {
-                            boolean success = contextService.callWithinContext(new DeviceContext(credentials), new Callable<Boolean>() {
-                                @Override
-                                public Boolean call() throws Exception {
-                                    return parser.onParsed(reportContext);
-                                }
-                            });
-                            if (success) {
-                                this.imei = imei;
-                                ConnectionRegistry.instance().put(imei, this);
-                            }
-
-                        } catch (Exception e) {
-                            logger.error("Error on parsing request", e);
-                        }
-                        
-                    } 
+        for (final Parser parser : Iterables.filter(fragments, Parser.class)) {
+            logger.debug("Using parser "+ parser.getClass());
+            final String imei = parser.parse(report);
+            if(imei == null) {
+                continue;
+            }
+            logger.debug("Got report from IMEI: " + imei);
+            boolean deviceRegistered = trackerAgent.getContext().isDeviceRegistered(imei);
+            if (!deviceRegistered) {
+                trackerAgent.sendEvent(new TrackerAgentEvents.NewDeviceEvent(imei));
+                break;
+            }
+            final ReportContext reportContext = new ReportContext(report, imei, out);
+            DeviceCredentials credentials = trackerAgent.getContext().getDeviceCredentials(imei);
+            try {
+                boolean success = contextService.callWithinContext(new DeviceContext(credentials), new Callable<Boolean>() {
+                    @Override
+                    public Boolean call() throws Exception {
+                        return parser.onParsed(reportContext);
+                    }
+                });
+                if (success) {
+                    this.imei = imei;
+                    ConnectionRegistry.instance().put(imei, this);
                 }
+
+            } catch (Exception e) {
+                logger.error("Error on parsing request", e);
             }
         }
         logger.debug("Finished processing report");
-    }
-
-    private boolean checkIfDeviceRegistered(String imei) {
-        boolean registered = trackerAgent.getContext().isDeviceRegistered(imei);
-        if (!registered) {
-            trackerAgent.sendEvent(new TrackerAgentEvents.NewDeviceEvent(imei));
-        }
-        return registered;
     }
 
     @Override
