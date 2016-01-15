@@ -33,6 +33,16 @@ public class RFV16ServerMessages extends TrackerMessageFactory {
                 .appendField(intervalInSeconds)
                 .appendField(1);                
     }
+    
+    public TrackerMessage turnOnAllAlarms(String maker, String imei) {
+        return msg()
+                .appendField(maker)
+                .appendField(imei)
+                .appendField("SCF")
+                .appendField(currTime())
+                .appendField(0)
+                .appendField(10);                
+    }
 
     protected String currTime() {
         return HHMMSS.print(new DateTime());

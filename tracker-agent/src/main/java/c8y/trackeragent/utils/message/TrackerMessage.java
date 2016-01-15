@@ -32,13 +32,14 @@ public class TrackerMessage {
     }
     
     public String asText() {
-        return reportPrefix + Joiner.on(reportSep).join(reports) + reportSep;
+        return Joiner.on(reportSep).join(reports) + reportSep;
     }
     
     public TrackerMessage fromText(String text) {
         text = stripPrefixAndLastReportSep(text);
         reports.clear();
         for (String reportStr : Splitter.on(reportSep).split(text)) {
+            reportStr = stripPrefixAndLastReportSep(reportStr);
             reports.add(new Report(reportStr));
         }
         return this;
@@ -138,7 +139,7 @@ public class TrackerMessage {
 
         @Override
         public String toString() {
-            return Joiner.on(fieldSep).join(fields);
+            return reportPrefix + Joiner.on(fieldSep).join(fields);
         }
 
         public List<String> getFields() {

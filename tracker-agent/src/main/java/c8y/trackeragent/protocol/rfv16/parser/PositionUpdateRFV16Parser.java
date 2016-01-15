@@ -58,8 +58,10 @@ public class PositionUpdateRFV16Parser extends RFV16Parser implements Parser {
             device.setPositionAndSpeed(position, speed);            
         }
         RFV16Device rfv16Device = getRFV16Device(reportCtx.getImei());
-        TrackerMessage timeIntervalLocationRequest = serverMessages.timeIntervalLocationRequest(reportCtx.getEntry(0), reportCtx.getImei(), rfv16Device.getLocationReportInterval());
-        reportCtx.writeOut(timeIntervalLocationRequest);
+        String maker = reportCtx.getEntry(0);
+        TrackerMessage timeIntervalLocationRequest = serverMessages.timeIntervalLocationRequest(maker, reportCtx.getImei(), rfv16Device.getLocationReportInterval());
+        TrackerMessage turnOnAllAlarms = serverMessages.turnOnAllAlarms(maker, reportCtx.getImei());
+        reportCtx.writeOut(timeIntervalLocationRequest.appendReport(turnOnAllAlarms));
     }
 
     private boolean isValidReport(ReportContext reportCtx) {
