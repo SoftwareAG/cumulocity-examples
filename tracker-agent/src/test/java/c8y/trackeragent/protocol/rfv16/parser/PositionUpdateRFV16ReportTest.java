@@ -1,7 +1,7 @@
 package c8y.trackeragent.protocol.rfv16.parser;
 
 import static c8y.trackeragent.protocol.rfv16.RFV16Constants.MESSAGE_TYPE_CMD;
-import static c8y.trackeragent.protocol.rfv16.RFV16Constants.MESSAGE_TYPE_V1;
+import static c8y.trackeragent.protocol.rfv16.RFV16Constants.MESSAGE_TYPE_LINK;
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -42,14 +42,14 @@ public class PositionUpdateRFV16ReportTest extends RFV16ParserTestSupport {
     
     @Test    
     public void shouldParseImeiFromPositionMessage() throws Exception {
-        String imei = parser.parse(deviceMessages.positionUpdate("DB", IMEI, MESSAGE_TYPE_V1, Positions.TK10xSample).asArray());
+        String imei = parser.parse(deviceMessages.positionUpdate("DB", IMEI, MESSAGE_TYPE_LINK, Positions.TK10xSample).asArray());
         
         assertThat(imei).isEqualTo(IMEI);
     }
     
     @Test
     public void shouldProcessPositionUpdateV1() throws Exception {
-        doShouldProcessPositionUpdate(MESSAGE_TYPE_V1);
+        doShouldProcessPositionUpdate(MESSAGE_TYPE_LINK);
     }
     
     @Test
@@ -75,7 +75,7 @@ public class PositionUpdateRFV16ReportTest extends RFV16ParserTestSupport {
      */
     @Test
     public void shouldParseDateTime() throws Exception {
-        TrackerMessage deviceMessage = deviceMessages.positionUpdate("DB", IMEI, MESSAGE_TYPE_V1, Positions.TK10xSample);
+        TrackerMessage deviceMessage = deviceMessages.positionUpdate("DB", IMEI, MESSAGE_TYPE_LINK, Positions.TK10xSample);
         ReportContext reportCtx = new ReportContext(deviceMessage.asArray(), IMEI, out);
         DateTime dateTime = RFV16Parser.getDateTime(reportCtx);
         

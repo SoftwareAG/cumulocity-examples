@@ -70,7 +70,7 @@ public class PositionUpdateRFV16Parser extends RFV16Parser implements Parser {
     }
     
     private boolean isV1(ReportContext reportCtx) {
-        return RFV16Constants.MESSAGE_TYPE_V1.equals(reportCtx.getEntry(2));
+        return RFV16Constants.MESSAGE_TYPE_LINK.equals(reportCtx.getEntry(2));
     }
     
     private boolean isCMD(ReportContext reportCtx) {

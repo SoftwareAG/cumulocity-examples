@@ -33,8 +33,8 @@ public abstract class RFV16Parser implements Parser {
 
     @Override
     public final String parse(String[] report) throws SDKException {
-        if (accept(report)) {
-            String imei = getImei(report);
+        if (report.length > 1) {
+            String imei = report[1];
             logger.debug("Imei = '{}'", imei);
             return imei;
         } else {
@@ -42,14 +42,6 @@ public abstract class RFV16Parser implements Parser {
         }
     }
 
-    private boolean accept(String[] report) {
-        return report.length > 1;
-    }
-
-    private String getImei(String[] report) {
-        return report[1];
-    }
-    
     public static BigDecimal getSpeed(ReportContext reportCtx) {
         String entry = reportCtx.getEntry(9);
         if (Strings.isNullOrEmpty(entry)) {
@@ -83,6 +75,5 @@ public abstract class RFV16Parser implements Parser {
         DateTime date = RFV16ServerMessages.DDMMYY.parseDateTime(reportCtx.getEntry(11));
         return time.withDate(date.getYear(), date.getMonthOfYear(), date.getDayOfMonth());
     }
-
 
 }

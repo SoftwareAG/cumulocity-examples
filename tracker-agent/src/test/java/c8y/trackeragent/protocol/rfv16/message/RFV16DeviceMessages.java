@@ -48,22 +48,34 @@ public class RFV16DeviceMessages extends RFV16ServerMessages {
                 .appendField(DEFAULT_TRACKER_STATUS);
     }
     
-    public TrackerMessage status(String maker, String imei, String status) {
+    /**
+     * 
+     * *XX,YYYYYYYYYY,LINK,HHMMSS,GSM,GPS,BAT,STEP,TURNOVER,DDMMYY,tracker_status#
+     * gsm： gsm signal (1-100%) 
+     * gps： number GPS satellites (1-12)
+     * BAT： battery lift  （1-100）
+     * STEP: step (none--upload 0)
+     * TURNOVER: (none--upload-0)
+     * For example: 
+     * *HQ,1451260840,LINK,061720,31,10,100,10000,10,090714,FFFFFFFF#
+     * 
+     */
+    public TrackerMessage heartbeat(String maker, String imei, String status) {
         return msg()
                 .appendField(maker)
                 .appendField(imei)
-                .appendField(RFV16Constants.MESSAGE_TYPE_V1)
+                .appendField(RFV16Constants.MESSAGE_TYPE_LINK)
                 .appendField(currTime())
-                .appendField(RFV16Constants.DATE_EFFECTIVE_MARK)
-                .appendField("")
-                .appendField("")
-                .appendField("")
-                .appendField("")
-                .appendField("") 
-                .appendField("") 
-                .appendField(currDate())
+                .appendField("") //GMS
+                .appendField("") //GPS
+                .appendField("") //BAT
+                .appendField("") //STEP
+                .appendField("") //TUNROVER
+                .appendField(currDate())  
                 .appendField(status);
+        
     }
+    
     
     public TrackerMessage positionUpdate(String maker, String imei, Position position) {
         return positionUpdate(maker, imei, RFV16Constants.MESSAGE_TYPE_V1, position);

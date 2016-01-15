@@ -13,6 +13,7 @@ import c8y.trackeragent.protocol.coban.message.CobanServerMessages;
 public class HeartbeatCobanParser extends CobanParser {
     
     private static Logger logger = LoggerFactory.getLogger(HeartbeatCobanParser.class);
+    
     private CobanServerMessages serverMessages;
 
     public HeartbeatCobanParser(TrackerAgent trackerAgent, CobanServerMessages serverMessages) {

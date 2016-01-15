@@ -33,7 +33,7 @@ public class RFV16ReportIT extends TrackerITSupport {
     
     @Test
     public void processPositionUpdateMessageV1() throws Exception {
-        shouldProcessPositionUpdateMessage(RFV16Constants.MESSAGE_TYPE_V1);
+        shouldProcessPositionUpdateMessage(RFV16Constants.MESSAGE_TYPE_LINK);
     }
     
     @Test
@@ -42,10 +42,10 @@ public class RFV16ReportIT extends TrackerITSupport {
     }
     
     @Test
-    public void processAlarmMessage() throws Exception {
+    public void processHeartbeatMessage() throws Exception {
         bootstrap(imei, deviceMessages.positionUpdate("DB", imei, Positions.TK10xSample));
         
-        writeInNewConnection(deviceMessages.status("DB", imei, "FFFDFFFF"));
+        writeInNewConnection(deviceMessages.heartbeat("DB", imei, "FFFDFFFF"));
         
         assertThat(getTrackerDevice(imei).findActiveAlarm(RFV16AlarmType.LOW_BATTERY.asC8yType())).isNotNull();
     }
