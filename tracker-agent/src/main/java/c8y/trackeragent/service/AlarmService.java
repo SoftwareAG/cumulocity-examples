@@ -1,4 +1,4 @@
-package c8y.trackeragent.protocol.coban.service;
+package c8y.trackeragent.service;
 
 import static com.cumulocity.model.event.CumulocityAlarmStatuses.ACTIVE;
 
@@ -9,7 +9,8 @@ import org.slf4j.LoggerFactory;
 
 import c8y.trackeragent.ReportContext;
 import c8y.trackeragent.TrackerDevice;
-import c8y.trackeragent.protocol.coban.parser.AlarmType;
+import c8y.trackeragent.protocol.coban.parser.CobanAlarmType;
+import c8y.trackeragent.protocol.rfv16.parser.RFV16AlarmType;
 
 import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
@@ -18,19 +19,26 @@ public class AlarmService {
     
     private static Logger logger = LoggerFactory.getLogger(AlarmService.class);
     
-    public void createAlarm(ReportContext reportCtx, AlarmType alarmType, TrackerDevice device) {
+    public void createCobanAlarm(ReportContext reportCtx, CobanAlarmType alarmType, TrackerDevice device) {
         AlarmRepresentation alarm = newAlarm(device);
         alarmType.populateAlarm(alarm, reportCtx);
         logger.info("Create alarm {}.", alarm);
         device.createAlarm(alarm);
     }
     
-    public void clearAlarm(ReportContext reportCtx, AlarmType alarmType, TrackerDevice device) {
+    public void clearCobanAlarm(ReportContext reportCtx, CobanAlarmType alarmType, TrackerDevice device) {
         AlarmRepresentation alarm = device.findActiveAlarm(alarmType.asC8yType());
         if (alarm != null) {
             logger.info("Clear alarm {}.", alarm);
             device.clearAlarm(alarm);
         }
+    }
+    
+    public void createRFV16Alarm(ReportContext reportCtx, RFV16AlarmType alarmType, TrackerDevice device) {
+        AlarmRepresentation alarm = newAlarm(device);
+        alarmType.populateAlarm(alarm, reportCtx);
+        logger.info("Create alarm {}.", alarm);
+        device.createAlarm(alarm);
     }
     
     private AlarmRepresentation newAlarm(TrackerDevice device) {

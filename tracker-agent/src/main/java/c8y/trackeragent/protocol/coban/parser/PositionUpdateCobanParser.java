@@ -18,7 +18,7 @@ import c8y.trackeragent.Translator;
 import c8y.trackeragent.operations.OperationContext;
 import c8y.trackeragent.protocol.coban.CobanConstants;
 import c8y.trackeragent.protocol.coban.message.CobanServerMessages;
-import c8y.trackeragent.protocol.coban.service.AlarmService;
+import c8y.trackeragent.service.AlarmService;
 import c8y.trackeragent.service.MeasurementService;
 import c8y.trackeragent.utils.TK10xCoordinatesTranslator;
 import c8y.trackeragent.utils.message.TrackerMessage;
@@ -62,7 +62,7 @@ public class PositionUpdateCobanParser extends CobanParser implements Translator
         TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(reportCtx.getImei());
         if (CobanConstants.GPS_KO.equals(reportCtx.getEntry(4))) {
             logger.error("NO GPS signal in report: {}, ignore!", reportCtx);
-            alarmService.createAlarm(reportCtx, AlarmType.NO_GPS_SIGNAL, device);
+            alarmService.createCobanAlarm(reportCtx, CobanAlarmType.NO_GPS_SIGNAL, device);
             return true;            
         }
         if (reportCtx.getNumberOfEntries() < 12) {
@@ -70,7 +70,7 @@ public class PositionUpdateCobanParser extends CobanParser implements Translator
             return true;
         }
         if (CobanConstants.GPS_OK.equals(reportCtx.getEntry(4))) {
-            alarmService.clearAlarm(reportCtx, AlarmType.NO_GPS_SIGNAL, device);
+            alarmService.clearCobanAlarm(reportCtx, CobanAlarmType.NO_GPS_SIGNAL, device);
         }
         double lat = TK10xCoordinatesTranslator.parseLatitude(reportCtx.getEntry(7), reportCtx.getEntry(8));
         double lng = TK10xCoordinatesTranslator.parseLongitude(reportCtx.getEntry(9), reportCtx.getEntry(10));

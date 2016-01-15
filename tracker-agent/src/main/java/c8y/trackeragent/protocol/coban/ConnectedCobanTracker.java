@@ -13,7 +13,7 @@ import c8y.trackeragent.protocol.coban.parser.CobanConfigRefreshTranslator;
 import c8y.trackeragent.protocol.coban.parser.HeartbeatCobanParser;
 import c8y.trackeragent.protocol.coban.parser.LogonCobanParser;
 import c8y.trackeragent.protocol.coban.parser.PositionUpdateCobanParser;
-import c8y.trackeragent.protocol.coban.service.AlarmService;
+import c8y.trackeragent.service.AlarmService;
 import c8y.trackeragent.service.MeasurementService;
 
 public class ConnectedCobanTracker extends ConnectedTracker {

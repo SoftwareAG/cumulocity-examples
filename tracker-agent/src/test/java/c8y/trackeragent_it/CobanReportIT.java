@@ -13,7 +13,7 @@ import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.protocol.coban.CobanConstants;
 import c8y.trackeragent.protocol.coban.CobanDeviceMessages;
 import c8y.trackeragent.protocol.coban.message.CobanServerMessages;
-import c8y.trackeragent.protocol.coban.parser.AlarmType;
+import c8y.trackeragent.protocol.coban.parser.CobanAlarmType;
 import c8y.trackeragent.utils.Devices;
 import c8y.trackeragent.utils.Positions;
 import c8y.trackeragent.utils.TK10xCoordinatesTranslator;
@@ -88,9 +88,9 @@ public class CobanReportIT extends TrackerITSupport {
     public void shouldProcessAlarmMessage() throws Exception {
         bootstrap(imei, deviceMessages.logon(imei));
         
-        writeInNewConnection(deviceMessages.logon(imei), deviceMessages.alarm(imei, AlarmType.LOW_BATTERY));
+        writeInNewConnection(deviceMessages.logon(imei), deviceMessages.alarm(imei, CobanAlarmType.LOW_BATTERY));
         
-        assertThat(getTrackerDevice(imei).findActiveAlarm(AlarmType.LOW_BATTERY.asC8yType())).isNotNull();
+        assertThat(getTrackerDevice(imei).findActiveAlarm(CobanAlarmType.LOW_BATTERY.asC8yType())).isNotNull();
     }
     
     @Test
@@ -99,7 +99,7 @@ public class CobanReportIT extends TrackerITSupport {
         
         writeInNewConnection(deviceMessages.logon(imei), deviceMessages.positionUpdateNoGPS(imei));
         
-        assertThat(getTrackerDevice(imei).findActiveAlarm(AlarmType.NO_GPS_SIGNAL.asC8yType())).isNotNull();
+        assertThat(getTrackerDevice(imei).findActiveAlarm(CobanAlarmType.NO_GPS_SIGNAL.asC8yType())).isNotNull();
     }
     
     @Test
@@ -109,7 +109,7 @@ public class CobanReportIT extends TrackerITSupport {
         writeInNewConnection(deviceMessages.logon(imei), deviceMessages.positionUpdateNoGPS(imei));
         writeInNewConnection(deviceMessages.logon(imei), deviceMessages.positionUpdate(imei, Positions.TK10xSample));
         
-        assertThat(getTrackerDevice(imei).findActiveAlarm(AlarmType.NO_GPS_SIGNAL.asC8yType())).isNull();
+        assertThat(getTrackerDevice(imei).findActiveAlarm(CobanAlarmType.NO_GPS_SIGNAL.asC8yType())).isNull();
     }
     
     @Test
@@ -118,7 +118,7 @@ public class CobanReportIT extends TrackerITSupport {
         
         writeInNewConnection(deviceMessages.logon(imei), deviceMessages.overSpeedAlarm(imei, 50));
         
-        AlarmRepresentation alarm = getTrackerDevice(imei).findActiveAlarm(AlarmType.OVERSPEED.asC8yType());
+        AlarmRepresentation alarm = getTrackerDevice(imei).findActiveAlarm(CobanAlarmType.OVERSPEED.asC8yType());
         assertThat(alarm).isNotNull();
         assertThat(alarm.getText()).isEqualTo("Geschwindigkeitsüberschreitung 50km/h");
     }

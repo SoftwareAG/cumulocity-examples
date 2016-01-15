@@ -30,7 +30,7 @@ public class AlarmCobanParserTest extends CobanParserTestSupport {
 
     @Test
     public void shouldAcceptAlarms() throws Exception {
-        for (AlarmType alarmType : AlarmType.values()) {
+        for (CobanAlarmType alarmType : CobanAlarmType.values()) {
             TrackerMessage msg = deviceMessages.alarm(IMEI, alarmType);
 
             assertThat(alarmCobanParser.accept(msg.asArray())).isTrue();
@@ -39,7 +39,7 @@ public class AlarmCobanParserTest extends CobanParserTestSupport {
     
     @Test
     public void shouldCreateLowBatteryAlarm() throws Exception {
-        alarmCobanParser.onParsed(anAlarmReport(AlarmType.LOW_BATTERY));
+        alarmCobanParser.onParsed(anAlarmReport(CobanAlarmType.LOW_BATTERY));
         
         verify(deviceMock).createAlarm(alarmCaptor.capture());
         AlarmRepresentation actual = alarmCaptor.getValue();
@@ -50,7 +50,7 @@ public class AlarmCobanParserTest extends CobanParserTestSupport {
     
     @Test
     public void shouldCreateAlarms() throws Exception {
-        for (AlarmType alarmType : AlarmType.values()) {
+        for (CobanAlarmType alarmType : CobanAlarmType.values()) {
             Mockito.reset(deviceMock);
             
             alarmCobanParser.onParsed(anAlarmReport(alarmType));
@@ -63,7 +63,7 @@ public class AlarmCobanParserTest extends CobanParserTestSupport {
         }
     }
 
-    private ReportContext anAlarmReport(AlarmType alarmType) {
+    private ReportContext anAlarmReport(CobanAlarmType alarmType) {
         String[] report = deviceMessages.alarm(IMEI, alarmType).asArray();
         return new ReportContext(report, IMEI, out);
     }

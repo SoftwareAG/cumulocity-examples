@@ -17,7 +17,7 @@ import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.protocol.coban.CobanDeviceMessages;
 import c8y.trackeragent.protocol.coban.device.CobanDevice;
 import c8y.trackeragent.protocol.coban.message.CobanServerMessages;
-import c8y.trackeragent.protocol.coban.service.AlarmService;
+import c8y.trackeragent.service.AlarmService;
 import c8y.trackeragent.service.MeasurementService;
 
 import com.cumulocity.model.idtype.GId;

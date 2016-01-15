@@ -1,4 +1,4 @@
-package c8y.trackeragent.protocol.rfv16;
+package c8y.trackeragent.protocol.rfv16.parser;
 
 import static c8y.trackeragent.protocol.rfv16.RFV16Constants.MESSAGE_TYPE_CMD;
 import static c8y.trackeragent.protocol.rfv16.RFV16Constants.MESSAGE_TYPE_V1;
@@ -16,6 +16,7 @@ import org.mockito.ArgumentCaptor;
 
 import c8y.Position;
 import c8y.trackeragent.ReportContext;
+import c8y.trackeragent.protocol.rfv16.RFV16ParserTestSupport;
 import c8y.trackeragent.protocol.rfv16.device.RFV16Device;
 import c8y.trackeragent.protocol.rfv16.parser.PositionUpdateRFV16Parser;
 import c8y.trackeragent.protocol.rfv16.parser.RFV16Parser;

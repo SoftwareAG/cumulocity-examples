@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import c8y.Position;
-import c8y.trackeragent.protocol.coban.parser.AlarmType;
+import c8y.trackeragent.protocol.coban.parser.CobanAlarmType;
 import c8y.trackeragent.utils.Positions;
 import c8y.trackeragent.utils.SignedLocation;
 import c8y.trackeragent.utils.message.TrackerMessage;
@@ -72,13 +72,13 @@ public class CobanDeviceMessages extends TrackerMessageFactory {
         return positionUpdate(imei, DEFAULT_POSITION, CobanConstants.GPS_KO, DEFAULT_SPEED);
     }
     
-    public TrackerMessage alarm(String imei, AlarmType type) {
+    public TrackerMessage alarm(String imei, CobanAlarmType type) {
         String msg = formatMessage(ALARM, imei, type.asCobanType());
         return msg().fromText(msg);
     }
     
     public TrackerMessage overSpeedAlarm(String imei, int speed) {
-        String msg = formatMessage(OVERSPEED_ALARM, imei, AlarmType.OVERSPEED.asCobanType(), speed);
+        String msg = formatMessage(OVERSPEED_ALARM, imei, CobanAlarmType.OVERSPEED.asCobanType(), speed);
         return msg().fromText(msg);
     }
 

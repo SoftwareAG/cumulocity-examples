@@ -17,6 +17,7 @@ import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.protocol.rfv16.device.RFV16Device;
 import c8y.trackeragent.protocol.rfv16.message.RFV16DeviceMessages;
 import c8y.trackeragent.protocol.rfv16.message.RFV16ServerMessages;
+import c8y.trackeragent.service.AlarmService;
 import c8y.trackeragent.service.MeasurementService;
 
 import com.cumulocity.model.idtype.GId;
@@ -28,6 +29,7 @@ public class RFV16ParserTestSupport {
     protected RFV16ServerMessages serverMessages = new RFV16ServerMessages();
     protected RFV16DeviceMessages deviceMessages = new RFV16DeviceMessages();
     protected MeasurementService measurementService = new MeasurementService();
+    protected AlarmService alarmService = Mockito.mock(AlarmService.class);
     protected ByteArrayOutputStream out = new ByteArrayOutputStream();
     
     @Before

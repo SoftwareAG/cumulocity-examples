@@ -9,7 +9,7 @@ import c8y.trackeragent.service.MeasurementService;
 import com.cumulocity.model.event.CumulocitySeverities;
 import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
 
-public enum AlarmType {
+public enum CobanAlarmType {
     
     LOW_BATTERY {
         
@@ -231,7 +231,7 @@ public enum AlarmType {
     
     public abstract void populateAlarm(AlarmRepresentation alarm, ReportContext reportContext);
     
-    private static boolean accept1(AlarmType alarmType, String[] report) {
+    private static boolean accept1(CobanAlarmType alarmType, String[] report) {
         return alarmType.asCobanType().equals(report[1]);
     }
         

@@ -7,7 +7,7 @@ import c8y.trackeragent.ReportContext;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.protocol.coban.message.CobanServerMessages;
-import c8y.trackeragent.protocol.coban.service.AlarmService;
+import c8y.trackeragent.service.AlarmService;
 
 import com.cumulocity.sdk.client.SDKException;
 
@@ -31,10 +31,10 @@ public class AlarmCobanParser extends CobanParser {
     
     @Override
     public boolean onParsed(ReportContext reportCtx) throws SDKException {
-        AlarmType alarmType = getAlarmType(reportCtx.getReport());
+        CobanAlarmType alarmType = getAlarmType(reportCtx.getReport());
         logger.info("Process alarm {} for imei {}.", alarmType, reportCtx.getImei());
         TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(reportCtx.getImei());
-        alarmService.createAlarm(reportCtx, alarmType, device);
+        alarmService.createCobanAlarm(reportCtx, alarmType, device);
         return true;
     }
 
@@ -43,8 +43,8 @@ public class AlarmCobanParser extends CobanParser {
         return CobanServerMessages.extractImeiValue(report[0]);
     }
     
-    public AlarmType getAlarmType(String[] report) {
-        for (AlarmType alarmType : AlarmType.values()) {
+    public CobanAlarmType getAlarmType(String[] report) {
+        for (CobanAlarmType alarmType : CobanAlarmType.values()) {
             if (alarmType.accept(report)) {
                 return alarmType;
             }
