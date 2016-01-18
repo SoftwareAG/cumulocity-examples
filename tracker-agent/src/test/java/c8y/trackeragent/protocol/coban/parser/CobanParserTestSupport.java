@@ -1,6 +1,7 @@
 package c8y.trackeragent.protocol.coban.parser;
 
 import static org.fest.assertions.Assertions.assertThat;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -10,7 +11,6 @@ import java.io.UnsupportedEncodingException;
 
 import org.junit.After;
 import org.junit.Before;
-import org.mockito.Mockito;
 
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerDevice;
@@ -21,6 +21,7 @@ import c8y.trackeragent.service.AlarmService;
 import c8y.trackeragent.service.MeasurementService;
 
 import com.cumulocity.model.idtype.GId;
+import com.cumulocity.rest.representation.event.EventRepresentation;
 
 public abstract class CobanParserTestSupport {
     
@@ -36,8 +37,9 @@ public abstract class CobanParserTestSupport {
     public void baseInit() {
         trackerAgent = mock(TrackerAgent.class);
         deviceMock = mock(TrackerDevice.class);
-        when(trackerAgent.getOrCreateTrackerDevice(Mockito.anyString())).thenReturn(deviceMock);
+        when(trackerAgent.getOrCreateTrackerDevice(anyString())).thenReturn(deviceMock);
         when(deviceMock.getGId()).thenReturn(GId.asGId("1001"));
+        when(deviceMock.aLocationUpdateEvent()).thenReturn(new EventRepresentation());
     }
     
     @After

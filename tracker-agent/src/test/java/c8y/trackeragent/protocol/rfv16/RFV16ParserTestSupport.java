@@ -21,6 +21,7 @@ import c8y.trackeragent.service.AlarmService;
 import c8y.trackeragent.service.MeasurementService;
 
 import com.cumulocity.model.idtype.GId;
+import com.cumulocity.rest.representation.event.EventRepresentation;
 
 public class RFV16ParserTestSupport {
     
@@ -38,6 +39,7 @@ public class RFV16ParserTestSupport {
         deviceMock = mock(TrackerDevice.class);
         when(trackerAgent.getOrCreateTrackerDevice(Mockito.anyString())).thenReturn(deviceMock);
         when(deviceMock.getGId()).thenReturn(GId.asGId("1001"));
+        when(deviceMock.aLocationUpdateEvent()).thenReturn(new EventRepresentation());
     }
     
     @After

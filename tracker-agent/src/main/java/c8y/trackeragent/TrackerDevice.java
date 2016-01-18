@@ -38,7 +38,6 @@ import c8y.MotionTracking;
 import c8y.Position;
 import c8y.Restart;
 import c8y.SignalStrength;
-import c8y.SpeedMeasurement;
 import c8y.SupportedOperations;
 import c8y.trackeragent.protocol.coban.device.CobanDevice;
 import c8y.trackeragent.protocol.coban.device.CobanDeviceFactory;
@@ -122,22 +121,15 @@ public class TrackerDevice extends DeviceManagedObject {
     }
 
     public void setPosition(Position position) throws SDKException {
-        setPositionAndSpeed(position, null);
+        EventRepresentation event = aLocationUpdateEvent();
+        setPosition(event, position);
     }
     
-    public void setPositionAndSpeed(Position position, SpeedMeasurement speed) throws SDKException {
-        EventRepresentation event = aLocationUpdateEvent();
-        ManagedObjectRepresentation device = aDevice();
-        
-        if (position != null) {
-            logger.debug("Updating location of {} to {}.", imei, position);
-            device.set(position);
-            event.set(position);
-        }
-        if (speed != null) {
-            logger.debug("Updating speed of {} to {}.", imei, speed);
-            event.set(speed);
-        }
+    public void setPosition(EventRepresentation event, Position position) {
+        ManagedObjectRepresentation device = aDevice();        
+        logger.debug("Updating location of {} to {}.", imei, position);
+        device.set(position);
+        event.set(position);
         getInventory().update(device);        
         events.create(event);
     }
@@ -287,7 +279,7 @@ public class TrackerDevice extends DeviceManagedObject {
         return null;
     }
     
-    private EventRepresentation aLocationUpdateEvent() {
+    public EventRepresentation aLocationUpdateEvent() {
         EventRepresentation locationUpdate = new EventRepresentation();
         ManagedObjectRepresentation source = asSource();
         

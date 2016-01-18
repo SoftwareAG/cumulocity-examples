@@ -24,6 +24,8 @@ import c8y.trackeragent.utils.TK10xCoordinatesTranslator;
 import c8y.trackeragent.utils.message.TrackerMessage;
 
 import com.cumulocity.model.operation.OperationStatus;
+import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
+import com.cumulocity.rest.representation.event.EventRepresentation;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 
@@ -49,7 +51,8 @@ public class PositionUpdateCobanParser extends CobanParser implements Translator
 
     @Override
     protected boolean accept(String[] report) {
-        return report.length >= 1 && KEYWORD.equals(report[1]);
+        return report.length >= 1 && 
+                (KEYWORD.equals(report[1]) || getAlarmType(report) != null);
     }
 
     @Override
@@ -60,9 +63,10 @@ public class PositionUpdateCobanParser extends CobanParser implements Translator
     @Override
     public boolean onParsed(ReportContext reportCtx) throws SDKException {
         TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(reportCtx.getImei());
+        AlarmRepresentation alarm = null;
         if (CobanConstants.GPS_KO.equals(reportCtx.getEntry(4))) {
             logger.error("NO GPS signal in report: {}, ignore!", reportCtx);
-            alarmService.createCobanAlarm(reportCtx, CobanAlarmType.NO_GPS_SIGNAL, device);
+            alarm = alarmService.createCobanAlarm(reportCtx, CobanAlarmType.NO_GPS_SIGNAL, device);
             return true;            
         }
         if (reportCtx.getNumberOfEntries() < 12) {
@@ -72,6 +76,13 @@ public class PositionUpdateCobanParser extends CobanParser implements Translator
         if (CobanConstants.GPS_OK.equals(reportCtx.getEntry(4))) {
             alarmService.clearCobanAlarm(reportCtx, CobanAlarmType.NO_GPS_SIGNAL, device);
         }
+
+        CobanAlarmType alarmType = getAlarmType(reportCtx.getReport());
+        if (alarmType != null) {
+            logger.info("Process alarm {} for imei {}.", alarmType, reportCtx.getImei());
+            alarm = alarmService.createCobanAlarm(reportCtx, alarmType, device);
+        }
+        
         double lat = TK10xCoordinatesTranslator.parseLatitude(reportCtx.getEntry(7), reportCtx.getEntry(8));
         double lng = TK10xCoordinatesTranslator.parseLongitude(reportCtx.getEntry(9), reportCtx.getEntry(10));
         Position position = new Position();
@@ -79,9 +90,17 @@ public class PositionUpdateCobanParser extends CobanParser implements Translator
         position.setLng(valueOf(lng));
         position.setAlt(BigDecimal.ZERO);
         logger.debug("Update position for imei: {} to: {}.", reportCtx.getImei(), position);
+        
+        EventRepresentation locationUpdateEvent = device.aLocationUpdateEvent();
         BigDecimal speedValue = getSpeed(reportCtx);
-        SpeedMeasurement speed = measurementService.createSpeedMeasurement(speedValue, device);
-        device.setPositionAndSpeed(position, speed);
+        if (speedValue != null) {
+            SpeedMeasurement speed = measurementService.createSpeedMeasurement(speedValue, device);
+            locationUpdateEvent.set(speed);
+        }
+        if (alarm != null) {
+            alarmService.populateLocationEventByAlarm(locationUpdateEvent, alarm);
+        }
+        device.setPosition(locationUpdateEvent, position);
         return true;
     }
 
@@ -112,6 +131,15 @@ public class PositionUpdateCobanParser extends CobanParser implements Translator
         operation.setStatus(OperationStatus.SUCCESSFUL.toString());
         operation.set(msg.asText(), OPERATION_FRAGMENT_SERVER_COMMAND);
         return msg.asText();
+    }
+    
+    public CobanAlarmType getAlarmType(String[] report) {
+        for (CobanAlarmType alarmType : CobanAlarmType.values()) {
+            if (alarmType.accept(report)) {
+                return alarmType;
+            }
+        }
+        return null;
     }
     
 }

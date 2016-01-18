@@ -4,8 +4,6 @@ import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 
-import java.util.Collection;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -24,20 +22,6 @@ public class HeartbeatRFV16ParserTest extends RFV16ParserTestSupport {
     @Before
     public void init() {
         parser = new HeartbeatRFV16Parser(trackerAgent, serverMessages, alarmService);
-    }
-    
-    @Test
-    public void shouldParseAlarmStatus() throws Exception {
-        doShouldParseAlarmStatus("FFFFFFFF");
-        doShouldParseAlarmStatus("00000000", RFV16AlarmType.values());
-        doShouldParseAlarmStatus("FFFFFFFD", RFV16AlarmType.SOS);
-        doShouldParseAlarmStatus("FFFFFFFB", RFV16AlarmType.OVERSPEED);
-        doShouldParseAlarmStatus("FFFDFFFF", RFV16AlarmType.LOW_BATTERY);
-    }
-    
-    private void doShouldParseAlarmStatus(String status, RFV16AlarmType... expectedAlarmTypes) {
-        Collection<RFV16AlarmType> actual = parser.getAlarmTypes(status);
-        assertThat(actual).containsOnly((Object[]) expectedAlarmTypes);
     }
     
     @Test

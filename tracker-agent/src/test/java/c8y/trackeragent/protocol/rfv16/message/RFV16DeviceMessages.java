@@ -12,7 +12,7 @@ public class RFV16DeviceMessages extends RFV16ServerMessages {
     private static final String DEFAULT_TRACKER_STATUS = "FFFFFFFF";
 
     /**
-     * *XX,YYYYYYYYYY,[V1|CMD],HHMMSS,S,latitude,D,longitude,G,speed,direction,DDMMYY,tracker_status#
+     * *XX,YYYYYYYYYY,V1,HHMMSS,S,latitude,D,longitude,G,speed,direction,DDMMYY,tracker_status#
      * 
      * 0:   maker
      * 1:   imei
@@ -29,13 +29,17 @@ public class RFV16DeviceMessages extends RFV16ServerMessages {
      * 12:  status
      * 
      */
-    public TrackerMessage positionUpdate(String maker, String imei, String messageType, Position position) {
+    public TrackerMessage positionUpdate(String maker, String imei, Position position) {
+        return positionUpdate(maker, imei, position, DEFAULT_TRACKER_STATUS);
+    }
+    
+    public TrackerMessage positionUpdate(String maker, String imei, Position position, String status) {
         SignedLocation lat = latitude().withValue(position.getLat());
         SignedLocation lng = longitude().withValue(position.getLng());
         return msg()
                 .appendField(maker)
                 .appendField(imei)
-                .appendField(messageType)
+                .appendField(RFV16Constants.MESSAGE_TYPE_V1)
                 .appendField(currTime())
                 .appendField(RFV16Constants.DATE_EFFECTIVE_MARK)
                 .appendField(lat.getValue())
@@ -45,7 +49,7 @@ public class RFV16DeviceMessages extends RFV16ServerMessages {
                 .appendField("") // empty speed
                 .appendField("") // empty direction
                 .appendField(currDate())
-                .appendField(DEFAULT_TRACKER_STATUS);
+                .appendField(status);
     }
     
     /**
@@ -75,12 +79,4 @@ public class RFV16DeviceMessages extends RFV16ServerMessages {
                 .appendField(status);
         
     }
-    
-    
-    public TrackerMessage positionUpdate(String maker, String imei, Position position) {
-        return positionUpdate(maker, imei, RFV16Constants.MESSAGE_TYPE_V1, position);
-    }
-    
-
-
 }

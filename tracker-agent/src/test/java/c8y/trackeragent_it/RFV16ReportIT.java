@@ -8,7 +8,6 @@ import org.junit.Test;
 import c8y.Position;
 import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.protocol.mapping.TrackerProtocol;
-import c8y.trackeragent.protocol.rfv16.RFV16Constants;
 import c8y.trackeragent.protocol.rfv16.message.RFV16DeviceMessages;
 import c8y.trackeragent.protocol.rfv16.parser.RFV16AlarmType;
 import c8y.trackeragent.utils.Devices;
@@ -34,12 +33,11 @@ public class RFV16ReportIT extends TrackerITSupport {
     
     @Test
     public void processPositionUpdateMessageV1() throws Exception {
-        shouldProcessPositionUpdateMessage(RFV16Constants.MESSAGE_TYPE_LINK);
-    }
-    
-    @Test
-    public void processPositionUpdateMessageCMD() throws Exception {
-        shouldProcessPositionUpdateMessage(RFV16Constants.MESSAGE_TYPE_CMD);
+        bootstrap(imei, deviceMessages.positionUpdate("DB", imei, Positions.TK10xSample));
+        writeInNewConnection(deviceMessages.positionUpdate("DB", imei, Positions.TK10xSample));
+        
+        assertThat(actualPositionInTracker()).isEqualTo(TK10xCoordinatesTranslator.parse(Positions.TK10xSample));
+        assertThat(actualPositionInEvent()).isEqualTo(TK10xCoordinatesTranslator.parse(Positions.TK10xSample));
     }
     
     @Test
@@ -49,14 +47,6 @@ public class RFV16ReportIT extends TrackerITSupport {
         writeInNewConnection(deviceMessages.heartbeat("DB", imei, "FFFDFFFF"));
         
         assertThat(getTrackerDevice(imei).findActiveAlarm(RFV16AlarmType.LOW_BATTERY.asC8yType())).isNotNull();
-    }
-    
-    private void shouldProcessPositionUpdateMessage(String messageType) throws Exception {
-        bootstrap(imei, deviceMessages.positionUpdate("DB", imei, Positions.TK10xSample));
-        writeInNewConnection(deviceMessages.positionUpdate("DB", imei, messageType, Positions.TK10xSample));
-        
-        assertThat(actualPositionInTracker()).isEqualTo(TK10xCoordinatesTranslator.parse(Positions.TK10xSample));
-        assertThat(actualPositionInEvent()).isEqualTo(TK10xCoordinatesTranslator.parse(Positions.TK10xSample));
     }
     
     private Position actualPositionInEvent() {
