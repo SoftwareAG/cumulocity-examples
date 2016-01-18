@@ -119,7 +119,7 @@ public class OperationDispatcher implements Runnable {
             logger.info("Received operation with ID: {}", operation.getId());
             LogfileRequest logfileRequest = operation.get(LogfileRequest.class);
             if (logfileRequest != null) {
-                logger.info("Found AgentLogRequest operation");
+                logger.info("Found LogfileRequest operation");
                 String user = logfileRequest.getDeviceUser();
                 if(StringUtils.isEmpty(user)) {
                     ManagedObjectRepresentation deviceObj = trackerDevice.getManagedObject();

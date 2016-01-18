@@ -38,13 +38,12 @@ import c8y.Position;
 import c8y.SupportedOperations;
 import c8y.trackeragent.ConnectionRegistry;
 import c8y.trackeragent.Executor;
-import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.operations.OperationContext;
+import c8y.trackeragent.protocol.mapping.TrackerProtocol;
 import c8y.trackeragent.utils.Devices;
-import c8y.trackeragent.utils.TrackerContext;
 
 import com.cumulocity.model.ID;
 import com.cumulocity.model.event.CumulocityAlarmStatuses;
@@ -90,10 +89,9 @@ public class TrackerDeviceIT extends TrackerITSupport {
     }
     
     @Override
-    protected int getLocalPort() {
-        return trackerAgentConfig.getLocalPort1();
+    protected TrackerProtocol getTrackerProtocol() {
+        return TrackerProtocol.TELIC;
     }
-
 
     @Test
     public void shouldSetTrackerData() throws SDKException, InterruptedException {

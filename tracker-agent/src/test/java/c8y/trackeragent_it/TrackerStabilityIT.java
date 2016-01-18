@@ -7,6 +7,7 @@ import java.util.concurrent.Executors;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import c8y.trackeragent.protocol.mapping.TrackerProtocol;
 import c8y.trackeragent.utils.Devices;
 import c8y.trackeragent.utils.Positions;
 import c8y.trackeragent.utils.TelicReports;
@@ -20,10 +21,10 @@ public class TrackerStabilityIT extends TrackerITSupport {
     private final static Random random = new Random();
     
     @Override
-    protected int getLocalPort() {
-        return trackerAgentConfig.getLocalPort1();
+    protected TrackerProtocol getTrackerProtocol() {
+        return TrackerProtocol.TELIC;
     }
-    
+
     @Test
     public void shouldWork() throws Exception {
         for (int i = 0; i < parallelIndex; i++) {

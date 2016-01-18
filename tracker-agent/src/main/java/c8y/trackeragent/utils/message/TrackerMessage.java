@@ -121,7 +121,7 @@ public class TrackerMessage {
         return this.toString().equals(obj.toString());
     }
 
-    private class Report {
+    public class Report {
         
         private final List<String> fields = new ArrayList<String>();
         

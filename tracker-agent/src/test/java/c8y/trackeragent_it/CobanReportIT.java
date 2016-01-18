@@ -14,6 +14,7 @@ import c8y.trackeragent.protocol.coban.CobanConstants;
 import c8y.trackeragent.protocol.coban.CobanDeviceMessages;
 import c8y.trackeragent.protocol.coban.message.CobanServerMessages;
 import c8y.trackeragent.protocol.coban.parser.CobanAlarmType;
+import c8y.trackeragent.protocol.mapping.TrackerProtocol;
 import c8y.trackeragent.utils.Devices;
 import c8y.trackeragent.utils.Positions;
 import c8y.trackeragent.utils.TK10xCoordinatesTranslator;
@@ -34,10 +35,10 @@ public class CobanReportIT extends TrackerITSupport {
     }
     
     @Override
-    protected int getLocalPort() {
-        return trackerAgentConfig.getLocalPort1();
+    protected TrackerProtocol getTrackerProtocol() {
+        return TrackerProtocol.COBAN;
     }
-    
+
     @Test
     public void shouldProcessLogonMessage() throws Exception {
         bootstrap(imei, deviceMessages.logon(imei));

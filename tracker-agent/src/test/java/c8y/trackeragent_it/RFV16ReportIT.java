@@ -7,6 +7,7 @@ import org.junit.Test;
 
 import c8y.Position;
 import c8y.trackeragent.TrackerDevice;
+import c8y.trackeragent.protocol.mapping.TrackerProtocol;
 import c8y.trackeragent.protocol.rfv16.RFV16Constants;
 import c8y.trackeragent.protocol.rfv16.message.RFV16DeviceMessages;
 import c8y.trackeragent.protocol.rfv16.parser.RFV16AlarmType;
@@ -27,8 +28,8 @@ public class RFV16ReportIT extends TrackerITSupport {
     }
     
     @Override
-    protected int getLocalPort() {
-        return trackerAgentConfig.getLocalPort2();
+    protected TrackerProtocol getTrackerProtocol() {
+        return TrackerProtocol.RFV16;
     }
     
     @Test

@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
+import java.util.Collection;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,41 +41,25 @@ public class TrackerFactory {
     }
 
     public ConnectedTracker getTracker(Socket client) throws IOException {
-        //TODO IT will fail
         logger.debug("peek tracker for new connection...");
         if (client.getLocalPort() == config.getLocalPort1()) {
-            return getTracker1(client);
+            return discoverTracker(client, config.getLocalPort1Protocols());
         } else if (client.getLocalPort() == config.getLocalPort2()) {
-            return getTracker2(client);
+            return discoverTracker(client, config.getLocalPort2Protocols());
         } else {
-            throw new RuntimeException("Only support local ports: 9090, 9091!");
-        }
-    }
-
-    /**
-     * Telic, GL200, Coban
-     */
-    private ConnectedTracker getTracker1(Socket client) throws IOException {
-        InputStream bis = asInput(client);
-        byte[] markingBytes = firstBytes(bis, 1);
-        if (markingBytes[0] >= '0' && markingBytes[0] <= '9') {
-            return new ConnectedTelicTracker(client, bis, trackerAgent, contextService);
-        } else if (markingBytes[0] == '#') {
-            return new ConnectedCobanTracker(client, bis, trackerAgent, contextService);
-        } else {
-            return new ConnectedGL200Tracker(client, bis, trackerAgent, contextService);
+            throw new RuntimeException("Only support local ports: " + config.getLocalPort1() + ", " + config.getLocalPort2());
         }
     }
     
-    /**
-     * RF-V16
-     */
-    private ConnectedTracker getTracker2(Socket client) throws IOException {
+    private ConnectedTracker discoverTracker(Socket client, Collection<TrackerProtocol> available) throws IOException {
         InputStream bis = asInput(client);
         byte[] markingBytes = firstBytes(bis, 1);
-        if (markingBytes[0] == '*') {
-            return new ConnectedRFV16Tracker(client, bis, trackerAgent, contextService);
+        for (TrackerProtocol trackerProtocol : available) {
+            if (trackerProtocol.accept(markingBytes[0])) {
+                return create(client, bis, trackerProtocol);
+            }
         }
+        logger.warn("No matching tracker found for first byte " + markingBytes[0] + " on port " + client.getLocalPort());
         return null;
     }
 
@@ -94,6 +79,21 @@ public class TrackerFactory {
         }
         is.reset();
         return bytes;
+    }
+    
+    private ConnectedTracker create(Socket client, InputStream bis, TrackerProtocol trackerProtocol) throws IOException {
+        switch (trackerProtocol) {
+        case TELIC:
+            return new ConnectedTelicTracker(client, bis, trackerAgent, contextService);
+        case GL200:
+            return new ConnectedGL200Tracker(client, bis, trackerAgent, contextService);
+        case COBAN:
+            return new ConnectedCobanTracker(client, bis, trackerAgent, contextService);
+        case RFV16:
+            return new ConnectedRFV16Tracker(client, bis, trackerAgent, contextService);
+        default:
+            throw new RuntimeException("Cant create connected tracker for name " + trackerProtocol);
+        }
     }
 
 }

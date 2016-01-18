@@ -31,7 +31,7 @@ public class RequestHandler implements Runnable {
                 logger.debug("Didnt find matching tracker for port {}", client.getLocalPort());
                 return;
             }
-            logger.debug("Tracker poke {} for connection from {}.", tracker.getClass().getSimpleName(), client.getReuseAddress());
+            logger.debug("Tracker poke {} for connection from {}.", tracker.getClass().getSimpleName(), client.getRemoteSocketAddress());
             reportsExecutor.execute(tracker);
         } catch(Exception ex) {
             logger.error("Error handling request:", ex);

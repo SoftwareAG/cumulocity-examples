@@ -35,6 +35,7 @@ import c8y.trackeragent.TrackerPlatform;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.exception.UnknownDeviceException;
+import c8y.trackeragent.protocol.mapping.TrackerProtocol;
 import c8y.trackeragent.utils.ConfigUtils;
 import c8y.trackeragent.utils.TrackerConfiguration;
 import c8y.trackeragent.utils.message.TrackerMessage;
@@ -86,7 +87,11 @@ public abstract class TrackerITSupport {
         restConnector = new RestConnector(testPlatform.getPlatformParameters(), new ResponseParser());
     }
 
-    protected abstract int getLocalPort();
+    protected final int getLocalPort() {
+        return trackerAgentConfig.getPort(getTrackerProtocol());
+    }
+    
+    protected abstract TrackerProtocol getTrackerProtocol();
 
     private boolean isLocalTrackerTest() {
         return testConfig.getTrackerAgentHost().equals("localhost");
