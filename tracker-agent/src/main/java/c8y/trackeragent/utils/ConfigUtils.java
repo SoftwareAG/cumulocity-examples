@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import c8y.trackeragent.protocol.coban.CobanConstants;
+import c8y.trackeragent.protocol.rfv16.RFV16Constants;
 
 import com.cumulocity.sdk.client.SDKException;
 
@@ -23,7 +24,6 @@ public class ConfigUtils {
     private static final Logger logger = LoggerFactory.getLogger(ConfigUtils.class);
     
     public static final String CONFIG_FILE_NAME = "tracker-agent-server.properties";
-    public static final String LOG_CONFIG_FILE_NAME = "tracker-agent-logback.xml";
     public static final String DEVICES_FILE_NAME = "device.properties";
     
     private static final String PLATFORM_HOST_PROP = "C8Y.baseURL";    
@@ -37,6 +37,7 @@ public class ConfigUtils {
     private static final String BOOTSTRAP_PASSWORD_PROP = "C8Y.devicebootstrap.password";
     private static final String CLIENT_TIMEOUT_PROP = "client.timeout";
     private static final String COBAN_LOCATION_REPORT_INTERVAL_PROP = "coban.locationReport.timeInterval";
+    private static final String RFV16_LOCATION_REPORT_INTERVAL_PROP = "rfv16.locationReport.timeInterval";
     private static final String DEFAULT_CLIENT_TIMEOUT = "" + TimeUnit.MINUTES.toMillis(5);
     private static final Random random = new Random();
     
@@ -84,6 +85,7 @@ public class ConfigUtils {
             .setBootstrapPassword(getProperty(props, BOOTSTRAP_PASSWORD_PROP))
             .setBootstrapTenant("management")
             .setCobanLocationReportTimeInterval(props.getProperty(COBAN_LOCATION_REPORT_INTERVAL_PROP, CobanConstants.DEFAULT_LOCATION_REPORT_INTERVAL))
+            .setRfv16LocationReportTimeInterval(props.getProperty(RFV16_LOCATION_REPORT_INTERVAL_PROP, RFV16Constants.DEFAULT_LOCATION_REPORT_INTERVAL))
             .setClientTimeout(clientTimeout);
         //@formatter:on
         logger.info(format("Configuration loaded from: %s: %s", sourceFilePath, config));

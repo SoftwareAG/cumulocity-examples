@@ -63,16 +63,19 @@ public class Main {
     
     public static void main(String[] args) {
         logger.info("tracker-agent is starting.");
+        serverBuilder().run(args);
+    }
+
+    public static ServerBuilder serverBuilder() {
         //@formatter:off
-        ServerBuilder.on(8689)
-                .application("tracker-agent")
-                .logging("tracker-agent-server-logging")
-                .loadConfiguration("tracker-agent-server")
-                .enable(Main.class)
-                .enable(ContextFeature.class)
-                .enable(RepositoryFeature.class)
-                .useWebEnvironment(false)
-                .run(args);
+        return ServerBuilder.on(8689)
+            .application("tracker-agent")
+            .logging("tracker-agent-server-logging")
+            .loadConfiguration("tracker-agent-server")
+            .enable(Main.class)
+            .enable(ContextFeature.class)
+            .enable(RepositoryFeature.class)
+            .useWebEnvironment(false);
         //@formatter:on
     }
     

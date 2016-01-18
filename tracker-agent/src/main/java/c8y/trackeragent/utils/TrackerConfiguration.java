@@ -16,6 +16,7 @@ public class TrackerConfiguration {
     private int clientTimeout;
     private List<Long> bootstrapPollIntervals;
     private String cobanLocationReportTimeInterval;
+    private String rfv16LocationReportTimeInterval;
     private boolean forceInitialHost;
     
     public TrackerConfiguration() {
@@ -103,6 +104,15 @@ public class TrackerConfiguration {
         return this;
     }
     
+    public String getRfv16LocationReportTimeInterval() {
+        return rfv16LocationReportTimeInterval;
+    }
+
+    public TrackerConfiguration setRfv16LocationReportTimeInterval(String rfv16LocationReportTimeInterval) {
+        this.rfv16LocationReportTimeInterval = rfv16LocationReportTimeInterval;
+        return this;
+    }
+
     public boolean getForceInitialHost() {
         return forceInitialHost;
     }
@@ -115,8 +125,12 @@ public class TrackerConfiguration {
     @Override
     public String toString() {
         return String
-                .format("TrackerConfiguration [platformHost=%s, localPort1=%s, localPort2=%s, bootstrapUser=%s, bootstrapPassword=%s, bootstrapTenant=%s, clientTimeout=%s, bootstrapPollIntervals=%s, cobanLocationReportTimeInterval=%s, forceInitialHost=%s]",
-                        platformHost, localPort1, localPort2, bootstrapUser, bootstrapPassword, bootstrapTenant, clientTimeout, bootstrapPollIntervals, cobanLocationReportTimeInterval, forceInitialHost);
+                .format("TrackerConfiguration [platformHost=%s, localPort1=%s, localPort2=%s, bootstrapUser=%s, bootstrapTenant=%s, clientTimeout=%s, bootstrapPollIntervals=%s, cobanLocationReportTimeInterval=%s, rfv16LocationReportTimeInterval=%s, forceInitialHost=%s]",
+                        platformHost, localPort1, localPort2, bootstrapUser, bootstrapTenant, clientTimeout,
+                        bootstrapPollIntervals, cobanLocationReportTimeInterval, rfv16LocationReportTimeInterval,
+                        forceInitialHost);
     }
+
+
     
 }

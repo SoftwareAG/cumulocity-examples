@@ -14,6 +14,7 @@ public class RFV16Constants {
     
     public static final String DEVICE_CONFIG_FRAGMENT = "coban_config";
     public static final String DEVICE_CONFIG_KEY_LOCATION_REPORT_TIME_INTERVAL = "locationReportTimeInterval";
+    public static final String DEFAULT_LOCATION_REPORT_INTERVAL = "180";
 
 
 }
