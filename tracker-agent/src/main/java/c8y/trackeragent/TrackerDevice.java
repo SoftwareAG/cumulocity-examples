@@ -384,6 +384,7 @@ public class TrackerDevice extends DeviceManagedObject {
     }
     
     public void createMeasurement(MeasurementRepresentation measurement) {
+        logger.debug("Create measurement {} for device {}", measurement.getType(), imei);
         measurements.create(measurement);
     }
     public void createMileageMeasurement(String mileage) {

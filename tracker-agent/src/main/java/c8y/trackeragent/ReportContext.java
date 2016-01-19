@@ -4,6 +4,7 @@ import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.util.Arrays;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +49,7 @@ public class ReportContext {
     
     public BigDecimal getEntryAsNumber(int index) {
         String entry = getEntry(index);
-        return Strings.isNullOrEmpty(entry) ? null : new BigDecimal(entry);
+        return StringUtils.isBlank(entry) ? null : new BigDecimal(entry.trim());
     }
     
     public int getNumberOfEntries() {

@@ -64,6 +64,10 @@ public class RFV16DeviceMessages extends RFV16ServerMessages {
      * *HQ,1451260840,LINK,061720,31,10,100,10000,10,090714,FFFFFFFF#
      * 
      */
+    public TrackerMessage heartbeat(String maker, String imei) {
+        return heartbeat(maker, imei, DEFAULT_TRACKER_STATUS);
+    }
+    
     public TrackerMessage heartbeat(String maker, String imei, String status) {
         return msg()
                 .appendField(maker)
@@ -106,7 +110,7 @@ public class RFV16DeviceMessages extends RFV16ServerMessages {
                 .appendField(maker)
                 .appendField(imei)
                 .appendField(RFV16Constants.MESSAGE_TYPE_V4)
-                .appendField("")//CK 
+                .appendField(RFV16Constants.COMMAND_DISPLAY_DEVICE_SITUATION) 
                 .appendField(nullToEmpty(gsm))//GSM 
                 .appendField("")//GPS 
                 .appendField(nullToEmpty(batery))//BAT 

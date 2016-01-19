@@ -61,10 +61,10 @@ public class MeasurementService {
         return source;
     }
 
-    public MeasurementRepresentation createBatteryLevelMeasurement(BigDecimal batteryLevel, TrackerDevice device, DateTime date) {
+    public MeasurementRepresentation createBatteryLevelMeasurement(BigDecimal percentageBatteryLevel, TrackerDevice device, DateTime date) {
         MeasurementRepresentation measurement = new MeasurementRepresentation();
         Battery batteryFragment = new Battery();
-        batteryFragment.setLevel(measurementValue(batteryLevel, "%"));
+        batteryFragment.setLevel(measurementValue(percentageBatteryLevel, "%"));
         measurement.set(batteryFragment);
         measurement.setType("c8y_Battery");
         measurement.setSource(asSource(device));
@@ -73,10 +73,10 @@ public class MeasurementService {
         return measurement;
     }
 
-    public MeasurementRepresentation createGSMLevelMeasurement(BigDecimal gsmLevel, TrackerDevice device, DateTime date) {
+    public MeasurementRepresentation createGSMLevelMeasurement(BigDecimal percentageGSMLevel, TrackerDevice device, DateTime date) {
         MeasurementRepresentation measurement = new MeasurementRepresentation();
         SignalStrength signalFragment = new SignalStrength();
-        signalFragment.setProperty("quality", measurementValue(gsmLevel, "%"));
+        signalFragment.setProperty("quality", measurementValue(percentageGSMLevel, "%"));
         measurement.set(signalFragment);
         measurement.setType("c8y_Battery");
         measurement.setSource(asSource(device));

@@ -6,7 +6,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -25,8 +24,6 @@ import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
 
 public class PositionUpdateRFV16ReportTest extends RFV16ParserTestSupport {
     
-    private static final String IMEI = "1234567890";
-    
     PositionUpdateRFV16Parser parser;
     ArgumentCaptor<Position> positionCaptor = ArgumentCaptor.forClass(Position.class);
     ArgumentCaptor<EventRepresentation> eventCaptor = ArgumentCaptor.forClass(EventRepresentation.class);
@@ -36,7 +33,6 @@ public class PositionUpdateRFV16ReportTest extends RFV16ParserTestSupport {
     @Before
     public void init() {
         parser = new PositionUpdateRFV16Parser(trackerAgent, serverMessages, measurementService, alarmService);
-        DateTimeUtils.setCurrentMillisFixed(0);
     }
     
     @Test    
