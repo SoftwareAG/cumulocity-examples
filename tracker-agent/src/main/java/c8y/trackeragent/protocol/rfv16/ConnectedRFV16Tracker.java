@@ -22,7 +22,7 @@ public class ConnectedRFV16Tracker extends ConnectedTracker {
         MeasurementService measurementService = new MeasurementService();
         AlarmService alarmService = new AlarmService();
         addFragment(new PositionUpdateRFV16Parser(trackerAgent, serverMessages, measurementService, alarmService));
-        addFragment(new HeartbeatRFV16Parser(trackerAgent, serverMessages, alarmService));
+        addFragment(new HeartbeatRFV16Parser(trackerAgent, serverMessages, alarmService, measurementService));
     }
     
     

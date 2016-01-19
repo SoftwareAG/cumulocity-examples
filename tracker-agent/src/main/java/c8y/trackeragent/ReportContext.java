@@ -1,12 +1,15 @@
 package c8y.trackeragent;
 
 import java.io.OutputStream;
+import java.math.BigDecimal;
 import java.util.Arrays;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import c8y.trackeragent.utils.message.TrackerMessage;
+
+import com.google.common.base.Strings;
 
 public class ReportContext {
     
@@ -41,6 +44,11 @@ public class ReportContext {
             logger.debug("There is no entry at index " + index + " for array " + Arrays.toString(report));
             return null;
         }
+    }
+    
+    public BigDecimal getEntryAsNumber(int index) {
+        String entry = getEntry(index);
+        return Strings.isNullOrEmpty(entry) ? null : new BigDecimal(entry);
     }
     
     public int getNumberOfEntries() {

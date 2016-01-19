@@ -11,27 +11,45 @@ import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
 
 public enum RFV16AlarmType {
     
-    //NOISE_SENSOR(0, 0),
-//    DOOR(2, 0) {
-//    
-//        public String asC8yType() {
-//            
-//        }
-//        
-//        public void populateAlarm(AlarmRepresentation alarm, ReportContext reportContext) {
-//            
-//        }
-//    },
-//    THEFT(3, 0) {
-//        
-//        public String asC8yType() {
-//            
-//        }
-//        
-//        public void populateAlarm(AlarmRepresentation alarm, ReportContext reportContext) {
-//            
-//        }
-//    },
+    NOISE_SENSOR(0, 0) { //TODO add mapping
+        
+        public String asC8yType() {
+            return "c8y_NoiseSensor";
+        }
+        
+        public void populateAlarm(AlarmRepresentation alarm, ReportContext reportContext) {
+            alarm.setType(asC8yType());
+            alarm.setText(asC8yType());
+            alarm.setSeverity(CumulocitySeverities.MAJOR.toString()); 
+        }
+    },
+    DOOR(2, 0) { //TODO add mapping
+    
+        public String asC8yType() {
+            return "c8y_Door";
+            
+        }
+        
+        public void populateAlarm(AlarmRepresentation alarm, ReportContext reportContext) {
+            alarm.setType(asC8yType());
+            alarm.setText(asC8yType());
+            alarm.setSeverity(CumulocitySeverities.MAJOR.toString());             
+        }
+    },
+    THEFT(3, 0) { //TODO add mapping
+        
+        public String asC8yType() {
+            return "c8y_Theft";
+            
+        }
+        
+        public void populateAlarm(AlarmRepresentation alarm, ReportContext reportContext) {
+            alarm.setType(asC8yType());
+            alarm.setText(asC8yType());
+            alarm.setSeverity(CumulocitySeverities.MAJOR.toString());             
+            
+        }
+    },
     LOW_BATTERY(1, 1) {
         
         public String asC8yType() {
@@ -77,10 +95,40 @@ public enum RFV16AlarmType {
             }
             return String.format("%s%s", speedFragment.getSpeed().getValue(), speedFragment.getSpeed().getUnit());
         }
+    },
+    CHARGER_REMOVED(0, 4) { //TODO add mapping
+        public String asC8yType() {
+            return "c8y_ChargerRemoved";
+        }
+        
+        public void populateAlarm(AlarmRepresentation alarm, ReportContext reportContext) {
+            alarm.setType(asC8yType());
+            alarm.setText(asC8yType());
+            alarm.setSeverity(CumulocitySeverities.MAJOR.toString()); 
+        }
+    },
+    ENTER_FENCE_AREA(3, 4) { //TODO add mapping
+        public String asC8yType() {
+            return "c8y_EnterFenceArea";
+        }
+        
+        public void populateAlarm(AlarmRepresentation alarm, ReportContext reportContext) {
+            alarm.setType(asC8yType());
+            alarm.setText(asC8yType());
+            alarm.setSeverity(CumulocitySeverities.MAJOR.toString()); 
+        }
+    },
+    OUT_OF_FENCE(3, 7) { //TODO add mapping
+        public String asC8yType() {
+            return "c8y_OutOfFence";
+        }
+        
+        public void populateAlarm(AlarmRepresentation alarm, ReportContext reportContext) {
+            alarm.setType(asC8yType());
+            alarm.setText(asC8yType());
+            alarm.setSeverity(CumulocitySeverities.MAJOR.toString()); 
+        }
     };
-    //CHARGER_REMOVED(0, 4),
-    //ENTER_FENCE_AREA(3, 4),
-    //OUT_OF_FENCE(3, 7);
     
     private int byteNo;
     private int bitNo;

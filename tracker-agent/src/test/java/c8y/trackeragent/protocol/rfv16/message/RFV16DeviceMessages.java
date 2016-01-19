@@ -70,13 +70,55 @@ public class RFV16DeviceMessages extends RFV16ServerMessages {
                 .appendField(imei)
                 .appendField(RFV16Constants.MESSAGE_TYPE_LINK)
                 .appendField(currTime())
-                .appendField("") //GMS
+                .appendField("") //GSM
                 .appendField("") //GPS
                 .appendField("") //BAT
                 .appendField("") //STEP
                 .appendField("") //TUNROVER
                 .appendField(currDate())  
                 .appendField(status);
-        
+    }
+    
+    public TrackerMessage heartbeat(String maker, String imei, Integer gsmPercentage, Integer bateryPercentage) {
+        return msg()
+                .appendField(maker)
+                .appendField(imei)
+                .appendField(RFV16Constants.MESSAGE_TYPE_LINK)
+                .appendField(currTime())
+                .appendField(nullToEmpty(gsmPercentage))    //GSM 
+                .appendField("") //GPS
+                .appendField(nullToEmpty(bateryPercentage)) //BAT
+                .appendField("") //STEP
+                .appendField("") //TUNROVER
+                .appendField(currDate())  
+                .appendField(DEFAULT_TRACKER_STATUS);
+    }
+
+    /**
+     * @param maker
+     * @param imei
+     * @param gsm       [0;31] 
+     * @param batery    [0;6]
+     * @return
+     */
+    public TrackerMessage deviceSituation(String maker, String imei, Integer gsm, Integer batery) {
+        return msg()
+                .appendField(maker)
+                .appendField(imei)
+                .appendField(RFV16Constants.MESSAGE_TYPE_V4)
+                .appendField("")//CK 
+                .appendField(nullToEmpty(gsm))//GSM 
+                .appendField("")//GPS 
+                .appendField(nullToEmpty(batery))//BAT 
+                .appendField("")//SCF 
+                .appendField("")//ANS 
+                .appendField("")//LIG 
+                .appendField("")//MOD 
+                .appendField("")//LAG 
+                .appendField("");//DND 
+    }
+    
+    private static String nullToEmpty(Object obj) {
+        return obj == null ? "" : obj.toString();
     }
 }

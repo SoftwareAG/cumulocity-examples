@@ -29,7 +29,7 @@ public class RFV16ParserTestSupport {
     protected TrackerDevice deviceMock;
     protected RFV16ServerMessages serverMessages = new RFV16ServerMessages();
     protected RFV16DeviceMessages deviceMessages = new RFV16DeviceMessages();
-    protected MeasurementService measurementService = new MeasurementService();
+    protected MeasurementService measurementService = Mockito.mock(MeasurementService.class);
     protected AlarmService alarmService = Mockito.mock(AlarmService.class);
     protected ByteArrayOutputStream out = new ByteArrayOutputStream();
     
