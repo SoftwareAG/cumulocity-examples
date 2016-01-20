@@ -58,13 +58,36 @@ public class PositionUpdateRFV16Parser extends RFV16Parser implements Parser {
         TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(reportCtx.getImei());
         Position position = getPosition(reportCtx);
         logger.debug("Update position for imei: {} to: {}.", reportCtx.getImei(), position);
+        
+        SpeedMeasurement speed = createSpeedMeasurement(reportCtx, device);
+        
         EventRepresentation event = device.aLocationUpdateEvent();
+        if (speed != null) {
+            event.set(speed);
+        }
+        
+        Collection<AlarmRepresentation> alarms = createAlarms(reportCtx, device);
+        
+        if (!alarms.isEmpty()) {
+            alarmService.populateLocationEventByAlarms(event, alarms);
+        }
+        
+        device.setPosition(event, position);
+        if (!reportCtx.isConnectionFlagOn(CONNECTION_PARAM_CONTROL_COMMANDS_SENT)) {
+            sendControllCommands(reportCtx);
+        }
+    }
+
+    private SpeedMeasurement createSpeedMeasurement(ReportContext reportCtx, TrackerDevice device) {
+        SpeedMeasurement speed = null;
         BigDecimal speedValue = getSpeed(reportCtx);
         if (speedValue != null) {
-            SpeedMeasurement speed = measurementService.createSpeedMeasurement(speedValue, device);
-            event.set(speed);
-        } 
-        
+            speed = measurementService.createSpeedMeasurement(speedValue, device);
+        }
+        return speed;
+    }
+
+    private Collection<AlarmRepresentation> createAlarms(ReportContext reportCtx, TrackerDevice device) {
         String status = reportCtx.getEntry(12);
         Collection<AlarmRepresentation> alarms = new ArrayList<AlarmRepresentation>();
         Collection<RFV16AlarmType> alarmTypes = AlarmTypeDecoder.getAlarmTypes(status);
@@ -73,23 +96,16 @@ public class PositionUpdateRFV16Parser extends RFV16Parser implements Parser {
             AlarmRepresentation alarm = alarmService.createAlarm(reportCtx, alarmType, device);
             alarms.add(alarm);
         }
-        
-        if (!alarms.isEmpty()) {
-            alarmService.populateLocationEventByAlarms(event, alarms);
-        }
-        
-        device.setPosition(event, position);
-        if (!reportCtx.isConnectionFlagOn(CONNECTION_PARAM_CONTROL_COMMANDS_SENT)) {
-            sentControllCommands(reportCtx);
-        }
+        return alarms;
     }
 
-    private void sentControllCommands(ReportContext reportCtx) {
+    private void sendControllCommands(ReportContext reportCtx) {
         RFV16Device rfv16Device = getRFV16Device(reportCtx.getImei());
         String maker = reportCtx.getEntry(0);
-        TrackerMessage timeIntervalLocationRequest = serverMessages.timeIntervalLocationRequest(maker, reportCtx.getImei(), rfv16Device.getLocationReportInterval());
-        TrackerMessage turnOnAllAlarms = serverMessages.turnOnAllAlarms(maker, reportCtx.getImei());
-        reportCtx.writeOut(timeIntervalLocationRequest.appendReport(turnOnAllAlarms));
+        TrackerMessage reportMonitoringCommand = serverMessages.reportMonitoringCommand(
+                maker, reportCtx.getImei(), rfv16Device.getLocationReportInterval());
+        TrackerMessage turnOnAllAlarmsCommand = serverMessages.turnOnAllAlarms(maker, reportCtx.getImei());
+        reportCtx.writeOut(reportMonitoringCommand.appendReport(turnOnAllAlarmsCommand));
     }
 
     private boolean isV1Report(ReportContext reportCtx) {
