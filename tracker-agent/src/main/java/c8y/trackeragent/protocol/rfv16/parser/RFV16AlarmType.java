@@ -81,8 +81,8 @@ public enum RFV16AlarmType implements AlarmType {
 
     private static final Object[] EMPTY_ARGS = new Object[] {};
 
-    private int byteNo;
-    private int bitNo;
+    private final int byteNo;
+    private final int bitNo;
 
     private RFV16AlarmType(int byteNo, int bitNo) {
         this.byteNo = byteNo;
@@ -93,16 +93,8 @@ public enum RFV16AlarmType implements AlarmType {
         return byteNo;
     }
 
-    public void setByteNo(int byteNo) {
-        this.byteNo = byteNo;
-    }
-
     public int getBitNo() {
         return bitNo;
-    }
-
-    public void setBitNo(int bitNo) {
-        this.bitNo = bitNo;
     }
 
 }
