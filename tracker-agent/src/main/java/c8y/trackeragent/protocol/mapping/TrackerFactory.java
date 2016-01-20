@@ -17,6 +17,7 @@ import c8y.trackeragent.protocol.coban.ConnectedCobanTracker;
 import c8y.trackeragent.protocol.gl200.ConnectedGL200Tracker;
 import c8y.trackeragent.protocol.rfv16.ConnectedRFV16Tracker;
 import c8y.trackeragent.protocol.telic.ConnectedTelicTracker;
+import c8y.trackeragent.service.AlarmService;
 import c8y.trackeragent.utils.TrackerConfiguration;
 
 import com.cumulocity.agent.server.context.DeviceContextService;
@@ -29,15 +30,18 @@ public class TrackerFactory {
     private final TrackerAgent trackerAgent;
     private final DeviceContextService contextService;
     private final TrackerConfiguration config;
+    private final AlarmService alarmService;
     
     @Autowired
     public TrackerFactory(
             TrackerAgent trackerAgent, 
             DeviceContextService contextService, 
-            TrackerConfiguration config) {
+            TrackerConfiguration config, 
+            AlarmService alarmService) {
         this.trackerAgent = trackerAgent;
         this.contextService = contextService;
         this.config = config;
+        this.alarmService = alarmService;
     }
 
     public ConnectedTracker getTracker(Socket client) throws IOException {
@@ -88,9 +92,9 @@ public class TrackerFactory {
         case GL200:
             return new ConnectedGL200Tracker(client, bis, trackerAgent, contextService);
         case COBAN:
-            return new ConnectedCobanTracker(client, bis, trackerAgent, contextService);
+            return new ConnectedCobanTracker(client, bis, trackerAgent, contextService, alarmService);
         case RFV16:
-            return new ConnectedRFV16Tracker(client, bis, trackerAgent, contextService);
+            return new ConnectedRFV16Tracker(client, bis, trackerAgent, contextService, alarmService);
         default:
             throw new RuntimeException("Cant create connected tracker for name " + trackerProtocol);
         }

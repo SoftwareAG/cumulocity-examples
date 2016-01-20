@@ -4,20 +4,15 @@ import java.math.BigDecimal;
 
 import c8y.SpeedMeasurement;
 import c8y.trackeragent.ReportContext;
+import c8y.trackeragent.service.AlarmType;
 import c8y.trackeragent.service.MeasurementService;
 
-import com.cumulocity.model.event.CumulocitySeverities;
 import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
 
-public enum CobanAlarmType {
+public enum CobanAlarmType implements AlarmType {
     
     LOW_BATTERY {
         
-        @Override
-        public String asC8yType() {
-            return "c8y_LowBattery";
-        }
-
         @Override
         public String asCobanType() {
             return "low battery";
@@ -29,19 +24,12 @@ public enum CobanAlarmType {
         }
         
         @Override
-        public void populateAlarm(AlarmRepresentation alarm, ReportContext reportContext) {
-            alarm.setType(asC8yType());
-            alarm.setText("Batteriezustand ist kritisch.");
-            alarm.setSeverity(CumulocitySeverities.MAJOR.toString());
+        public Object[] getTextArgs(AlarmRepresentation alarm, ReportContext reportContext) {
+            return EMPTY_ARGS;
         }
     },
     
     MOVE {
-
-        @Override
-        public String asC8yType() {
-            return "c8y_Move";
-        }
 
         @Override
         public String asCobanType() {
@@ -54,19 +42,12 @@ public enum CobanAlarmType {
         }
 
         @Override
-        public void populateAlarm(AlarmRepresentation alarm, ReportContext reportContext) {
-            alarm.setType(asC8yType());
-            alarm.setText("Bewegungsalarm.");
-            alarm.setSeverity(CumulocitySeverities.MAJOR.toString());
+        public Object[] getTextArgs(AlarmRepresentation alarm, ReportContext reportContext) {
+            return EMPTY_ARGS;
         }
     },
     
     SHOCK {
-        
-        @Override
-        public String asC8yType() {
-            return "c8y_Shock";
-        }
         
         @Override
         public String asCobanType() {
@@ -79,19 +60,12 @@ public enum CobanAlarmType {
         }
         
         @Override
-        public void populateAlarm(AlarmRepresentation alarm, ReportContext reportContext) {
-            alarm.setType(asC8yType());
-            alarm.setText("Erschütterungsalarm.");
-            alarm.setSeverity(CumulocitySeverities.MAJOR.toString());
+        public Object[] getTextArgs(AlarmRepresentation alarm, ReportContext reportContext) {
+            return EMPTY_ARGS;
         }
     },
     
     OVERSPEED {
-        
-        @Override
-        public String asC8yType() {
-            return "c8y_Overspeed";
-        }
         
         @Override
         public String asCobanType() {
@@ -103,30 +77,22 @@ public enum CobanAlarmType {
             return accept1(this, report);
         }
         
-        @Override
-        public void populateAlarm(AlarmRepresentation alarm, ReportContext reportCtx) {
-            BigDecimal speedValue = CobanParser.getSpeed(reportCtx);
-            SpeedMeasurement speedFragment = MeasurementService.createSpeedFragment(speedValue);
-            String text = String.format("Geschwindigkeitsüberschreitung %s", formatSpeed(speedFragment));
-            alarm.setType(asC8yType());
-            alarm.setText(text);
-            alarm.setSeverity(CumulocitySeverities.MAJOR.toString());
-        }
-
         private String formatSpeed(SpeedMeasurement speedFragment) {
             if (speedFragment == null) {
                 return "";
             }
             return String.format("%s%s", speedFragment.getSpeed().getValue(), speedFragment.getSpeed().getUnit());
         }
-    },
-    
-    GEOFENCE {
         
         @Override
-        public String asC8yType() {
-            return "c8y_Geofence";
+        public Object[] getTextArgs(AlarmRepresentation alarm, ReportContext reportContext) {
+            BigDecimal speedValue = CobanParser.getSpeed(reportContext);
+            SpeedMeasurement speedFragment = MeasurementService.createSpeedFragment(speedValue);
+            return new Object[]{formatSpeed(speedFragment)};
         }
+    },
+    
+    OUT_OF_FENCE {
         
         @Override
         public String asCobanType() {
@@ -139,19 +105,12 @@ public enum CobanAlarmType {
         }
         
         @Override
-        public void populateAlarm(AlarmRepresentation alarm, ReportContext reportContext) {
-            alarm.setType(asC8yType());
-            alarm.setText("Device out of geofence.");
-            alarm.setSeverity(CumulocitySeverities.MAJOR.toString());
+        public Object[] getTextArgs(AlarmRepresentation alarm, ReportContext reportContext) {
+            return EMPTY_ARGS;
         }
     },
     
     POWER_OFF {
-        
-        @Override
-        public String asC8yType() {
-            return "c8y_PowerAlarm";
-        }
         
         @Override
         public String asCobanType() {
@@ -164,23 +123,16 @@ public enum CobanAlarmType {
         }
         
         @Override
-        public void populateAlarm(AlarmRepresentation alarm, ReportContext reportContext) {
-            alarm.setType(asC8yType());
-            alarm.setText("Device lost power");
-            alarm.setSeverity(CumulocitySeverities.MAJOR.toString());
+        public Object[] getTextArgs(AlarmRepresentation alarm, ReportContext reportContext) {
+            return EMPTY_ARGS;
         }
     },
     
     NO_GPS_SIGNAL {
         
         @Override
-        public String asC8yType() {
-            return "c8y_NoGPSSignal";
-        }
-        
-        @Override
         public String asCobanType() {
-            return NO_COBAN_TYPE;
+            return "no_gps_signal";
         }
         
         @Override
@@ -189,20 +141,13 @@ public enum CobanAlarmType {
         }
         
         @Override
-        public void populateAlarm(AlarmRepresentation alarm, ReportContext reportContext) {
-            alarm.setType(asC8yType());
-            alarm.setText("kein GPS-Signal");
-            alarm.setSeverity(CumulocitySeverities.CRITICAL.toString());
+        public Object[] getTextArgs(AlarmRepresentation alarm, ReportContext reportContext) {
+            return EMPTY_ARGS;
         }
     },
     
     SOS {
         
-        @Override
-        public String asC8yType() {
-            return "c8y_SOS";
-        }
-
         @Override
         public String asCobanType() {
             return "help me";
@@ -214,22 +159,16 @@ public enum CobanAlarmType {
         }
         
         @Override
-        public void populateAlarm(AlarmRepresentation alarm, ReportContext reportContext) {
-            alarm.setType(asC8yType());
-            alarm.setText("NOTRUF");
-            alarm.setSeverity(CumulocitySeverities.MAJOR.toString());
+        public Object[] getTextArgs(AlarmRepresentation alarm, ReportContext reportContext) {
+            return EMPTY_ARGS;
         }
     };
     
-    private static final String NO_COBAN_TYPE = "___";
-
-    public abstract String asC8yType();
+    private static final Object[] EMPTY_ARGS = new Object[]{};
     
     public abstract String asCobanType();
     
     public abstract boolean accept(String[] report);
-    
-    public abstract void populateAlarm(AlarmRepresentation alarm, ReportContext reportContext);
     
     private static boolean accept1(CobanAlarmType alarmType, String[] report) {
         return alarmType.asCobanType().equals(report[1]);

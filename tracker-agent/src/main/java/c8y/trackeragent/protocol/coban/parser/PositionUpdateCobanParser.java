@@ -66,7 +66,7 @@ public class PositionUpdateCobanParser extends CobanParser implements Translator
         AlarmRepresentation alarm = null;
         if (CobanConstants.GPS_KO.equals(reportCtx.getEntry(4))) {
             logger.error("NO GPS signal in report: {}, ignore!", reportCtx);
-            alarm = alarmService.createCobanAlarm(reportCtx, CobanAlarmType.NO_GPS_SIGNAL, device);
+            alarm = alarmService.createAlarm(reportCtx, CobanAlarmType.NO_GPS_SIGNAL, device);
             return true;            
         }
         if (reportCtx.getNumberOfEntries() < 12) {
@@ -74,13 +74,13 @@ public class PositionUpdateCobanParser extends CobanParser implements Translator
             return true;
         }
         if (CobanConstants.GPS_OK.equals(reportCtx.getEntry(4))) {
-            alarmService.clearCobanAlarm(reportCtx, CobanAlarmType.NO_GPS_SIGNAL, device);
+            alarmService.clearAlarm(reportCtx, CobanAlarmType.NO_GPS_SIGNAL, device);
         }
 
         CobanAlarmType alarmType = getAlarmType(reportCtx.getReport());
         if (alarmType != null) {
             logger.info("Process alarm {} for imei {}.", alarmType, reportCtx.getImei());
-            alarm = alarmService.createCobanAlarm(reportCtx, alarmType, device);
+            alarm = alarmService.createAlarm(reportCtx, alarmType, device);
         }
         
         double lat = TK10xCoordinatesTranslator.parseLatitude(reportCtx.getEntry(7), reportCtx.getEntry(8));

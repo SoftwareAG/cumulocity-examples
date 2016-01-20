@@ -11,6 +11,7 @@ import java.io.UnsupportedEncodingException;
 
 import org.junit.After;
 import org.junit.Before;
+import org.mockito.Mockito;
 
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerDevice;
@@ -29,7 +30,7 @@ public abstract class CobanParserTestSupport {
     protected TrackerDevice deviceMock;
     protected CobanServerMessages serverMessages = new CobanServerMessages();
     protected CobanDeviceMessages deviceMessages = new CobanDeviceMessages();
-    protected AlarmService alarmService = new AlarmService();
+    protected AlarmService alarmService = Mockito.mock(AlarmService.class);
     protected MeasurementService measurementService = new MeasurementService();
     protected ByteArrayOutputStream out = new ByteArrayOutputStream();
     

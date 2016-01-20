@@ -36,12 +36,15 @@ import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.exception.UnknownDeviceException;
 import c8y.trackeragent.protocol.mapping.TrackerProtocol;
+import c8y.trackeragent.service.AlarmMappingService;
+import c8y.trackeragent.service.AlarmType;
 import c8y.trackeragent.utils.ConfigUtils;
 import c8y.trackeragent.utils.TrackerConfiguration;
 import c8y.trackeragent.utils.message.TrackerMessage;
 
 import com.cumulocity.model.authentication.CumulocityCredentials;
 import com.cumulocity.model.idtype.GId;
+import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
 import com.cumulocity.rest.representation.devicebootstrap.NewDeviceRequestRepresentation;
 import com.cumulocity.sdk.client.PlatformImpl;
 import com.cumulocity.sdk.client.ResponseParser;
@@ -67,6 +70,9 @@ public abstract class TrackerITSupport {
     
     @Autowired
     protected TrackerAgent trackerAgent;
+    
+    @Autowired
+    protected AlarmMappingService alarmMappingService;
     
     protected TrackerPlatform testPlatform;
     protected TestConfiguration testConfig;
@@ -249,4 +255,10 @@ public abstract class TrackerITSupport {
             .setTrackerAgentHost(trackerAgentHost);
         //@formatter:on            
     }
+    
+    protected AlarmRepresentation findAlarm(String imei, AlarmType alarmType) {
+        String type = alarmMappingService.getType(alarmType.name());
+        return getTrackerDevice(imei).findActiveAlarm(type);
+    }
+
 }

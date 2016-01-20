@@ -4,90 +4,46 @@ import java.math.BigDecimal;
 
 import c8y.SpeedMeasurement;
 import c8y.trackeragent.ReportContext;
+import c8y.trackeragent.service.AlarmType;
 import c8y.trackeragent.service.MeasurementService;
 
-import com.cumulocity.model.event.CumulocitySeverities;
 import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
 
-public enum RFV16AlarmType {
-    
-    NOISE_SENSOR(0, 0) { //TODO add mapping
-        
-        public String asC8yType() {
-            return "c8y_NoiseSensor";
+public enum RFV16AlarmType implements AlarmType {
+
+    NOISE_SENSOR(0, 0) {
+        @Override
+        public Object[] getTextArgs(AlarmRepresentation alarm, ReportContext reportContext) {
+            return EMPTY_ARGS;
         }
-        
-        public void populateAlarm(AlarmRepresentation alarm, ReportContext reportContext) {
-            alarm.setType(asC8yType());
-            alarm.setText(asC8yType());
-            alarm.setSeverity(CumulocitySeverities.MAJOR.toString()); 
+
+    },
+    DOOR(2, 0) {
+        @Override
+        public Object[] getTextArgs(AlarmRepresentation alarm, ReportContext reportContext) {
+            return EMPTY_ARGS;
         }
     },
-    DOOR(2, 0) { //TODO add mapping
-    
-        public String asC8yType() {
-            return "c8y_Door";
-            
-        }
-        
-        public void populateAlarm(AlarmRepresentation alarm, ReportContext reportContext) {
-            alarm.setType(asC8yType());
-            alarm.setText(asC8yType());
-            alarm.setSeverity(CumulocitySeverities.MAJOR.toString());             
-        }
-    },
-    THEFT(3, 0) { //TODO add mapping
-        
-        public String asC8yType() {
-            return "c8y_Theft";
-            
-        }
-        
-        public void populateAlarm(AlarmRepresentation alarm, ReportContext reportContext) {
-            alarm.setType(asC8yType());
-            alarm.setText(asC8yType());
-            alarm.setSeverity(CumulocitySeverities.MAJOR.toString());             
-            
+    THEFT(3, 0) {
+        @Override
+        public Object[] getTextArgs(AlarmRepresentation alarm, ReportContext reportContext) {
+            return EMPTY_ARGS;
         }
     },
     LOW_BATTERY(1, 1) {
-        
-        public String asC8yType() {
-            return "c8y_LowBattery";
-        }
-        
-        public void populateAlarm(AlarmRepresentation alarm, ReportContext reportContext) {
-            alarm.setType(asC8yType());
-            alarm.setText("Batteriezustand ist kritisch.");
-            alarm.setSeverity(CumulocitySeverities.MAJOR.toString());            
+        @Override
+        public Object[] getTextArgs(AlarmRepresentation alarm, ReportContext reportContext) {
+            return EMPTY_ARGS;
         }
     },
     SOS(3, 1) {
-        public String asC8yType() {
-            return "c8y_SOS";
+        @Override
+        public Object[] getTextArgs(AlarmRepresentation alarm, ReportContext reportContext) {
+            return EMPTY_ARGS;
         }
-        
-        public void populateAlarm(AlarmRepresentation alarm, ReportContext reportContext) {
-            alarm.setType(asC8yType());
-            alarm.setText("NOTRUF");
-            alarm.setSeverity(CumulocitySeverities.MAJOR.toString());
-        }
-        
     },
-    //OTHER(1, 2),
+    // OTHER(1, 2),
     OVERSPEED(3, 2) {
-        public String asC8yType() {
-            return "c8y_Overspeed";
-        }
-        
-        public void populateAlarm(AlarmRepresentation alarm, ReportContext reportCtx) {
-            BigDecimal speedValue = RFV16Parser.getSpeed(reportCtx);
-            SpeedMeasurement speedFragment = MeasurementService.createSpeedFragment(speedValue);
-            String text = String.format("Geschwindigkeitsüberschreitung %s", formatSpeed(speedFragment));
-            alarm.setType(asC8yType());
-            alarm.setText(text);
-            alarm.setSeverity(CumulocitySeverities.MAJOR.toString());
-        }
         
         private String formatSpeed(SpeedMeasurement speedFragment) {
             if (speedFragment == null) {
@@ -95,44 +51,39 @@ public enum RFV16AlarmType {
             }
             return String.format("%s%s", speedFragment.getSpeed().getValue(), speedFragment.getSpeed().getUnit());
         }
-    },
-    CHARGER_REMOVED(0, 4) { //TODO add mapping
-        public String asC8yType() {
-            return "c8y_ChargerRemoved";
+        
+        @Override
+        public Object[] getTextArgs(AlarmRepresentation alarm, ReportContext reportContext) {
+            BigDecimal speedValue = RFV16Parser.getSpeed(reportContext);
+            SpeedMeasurement speedFragment = MeasurementService.createSpeedFragment(speedValue);
+            return new Object[] { formatSpeed(speedFragment) };
         }
         
-        public void populateAlarm(AlarmRepresentation alarm, ReportContext reportContext) {
-            alarm.setType(asC8yType());
-            alarm.setText(asC8yType());
-            alarm.setSeverity(CumulocitySeverities.MAJOR.toString()); 
+    },
+    CHARGER_REMOVED(0, 4) {
+        @Override
+        public Object[] getTextArgs(AlarmRepresentation alarm, ReportContext reportContext) {
+            return EMPTY_ARGS;
         }
     },
-    ENTER_FENCE_AREA(3, 4) { //TODO add mapping
-        public String asC8yType() {
-            return "c8y_EnterFenceArea";
-        }
-        
-        public void populateAlarm(AlarmRepresentation alarm, ReportContext reportContext) {
-            alarm.setType(asC8yType());
-            alarm.setText(asC8yType());
-            alarm.setSeverity(CumulocitySeverities.MAJOR.toString()); 
+    ENTER_FENCE_AREA(3, 4) {
+        @Override
+        public Object[] getTextArgs(AlarmRepresentation alarm, ReportContext reportContext) {
+            return EMPTY_ARGS;
         }
     },
-    OUT_OF_FENCE(3, 7) { //TODO add mapping
-        public String asC8yType() {
-            return "c8y_OutOfFence";
-        }
-        
-        public void populateAlarm(AlarmRepresentation alarm, ReportContext reportContext) {
-            alarm.setType(asC8yType());
-            alarm.setText(asC8yType());
-            alarm.setSeverity(CumulocitySeverities.MAJOR.toString()); 
+    OUT_OF_FENCE(3, 7) {
+        @Override
+        public Object[] getTextArgs(AlarmRepresentation alarm, ReportContext reportContext) {
+            return EMPTY_ARGS;
         }
     };
-    
+
+    private static final Object[] EMPTY_ARGS = new Object[] {};
+
     private int byteNo;
     private int bitNo;
-    
+
     private RFV16AlarmType(int byteNo, int bitNo) {
         this.byteNo = byteNo;
         this.bitNo = bitNo;
@@ -153,9 +104,5 @@ public enum RFV16AlarmType {
     public void setBitNo(int bitNo) {
         this.bitNo = bitNo;
     }
-    
-    public abstract String asC8yType();
-    
-    public abstract void populateAlarm(AlarmRepresentation alarm, ReportContext reportContext);
 
 }

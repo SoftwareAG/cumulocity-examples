@@ -53,8 +53,12 @@ public class ConfigUtils {
     }
 
 
+    public String getConfigDir() {
+        return "/etc/tracker-agent/";
+    }
+    
     public String getConfigFilePath(String fileName) {
-        return "/etc/tracker-agent/" + fileName;
+        return getConfigDir() + fileName;
     }
     
     public static Properties getProperties(String path) throws SDKException {

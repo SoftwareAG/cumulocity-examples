@@ -68,7 +68,7 @@ public class PositionUpdateRFV16Parser extends RFV16Parser implements Parser {
         Collection<RFV16AlarmType> alarmTypes = AlarmTypeDecoder.getAlarmTypes(status);
         logger.debug("Read status {} as alarms {} for device {}", status, reportCtx.getImei(), alarmTypes);
         for (RFV16AlarmType alarmType : alarmTypes) {
-            AlarmRepresentation alarm = alarmService.createRFV16Alarm(reportCtx, alarmType, device);
+            AlarmRepresentation alarm = alarmService.createAlarm(reportCtx, alarmType, device);
             alarms.add(alarm);
         }
         

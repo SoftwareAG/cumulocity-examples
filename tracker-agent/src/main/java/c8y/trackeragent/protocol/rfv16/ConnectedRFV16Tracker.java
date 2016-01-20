@@ -16,11 +16,10 @@ import com.cumulocity.agent.server.context.DeviceContextService;
 
 public class ConnectedRFV16Tracker extends ConnectedTracker {
     
-    public ConnectedRFV16Tracker(Socket client, InputStream bis, TrackerAgent trackerAgent, DeviceContextService contextService) {
+    public ConnectedRFV16Tracker(Socket client, InputStream bis, TrackerAgent trackerAgent, DeviceContextService contextService, AlarmService alarmService) {
         super(client, bis, RFV16Constants.REPORT_SEP, RFV16Constants.FIELD_SEP, trackerAgent, contextService);
         RFV16ServerMessages serverMessages = new RFV16ServerMessages();
         MeasurementService measurementService = new MeasurementService();
-        AlarmService alarmService = new AlarmService();
         addFragment(new PositionUpdateRFV16Parser(trackerAgent, serverMessages, measurementService, alarmService));
         addFragment(new HeartbeatRFV16Parser(trackerAgent, serverMessages, alarmService, measurementService));
         addFragment(new DeviceSituationRFV16Parser(trackerAgent, serverMessages, measurementService));

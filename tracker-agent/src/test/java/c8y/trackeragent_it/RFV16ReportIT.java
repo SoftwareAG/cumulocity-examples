@@ -46,7 +46,7 @@ public class RFV16ReportIT extends TrackerITSupport {
         
         writeInNewConnection(deviceMessages.heartbeat("DB", imei, "FFFDFFFF"));
         
-        assertThat(getTrackerDevice(imei).findActiveAlarm(RFV16AlarmType.LOW_BATTERY.asC8yType())).isNotNull();
+        assertThat(findAlarm(imei, RFV16AlarmType.LOW_BATTERY)).isNotNull();
     }
     
     private Position actualPositionInEvent() {

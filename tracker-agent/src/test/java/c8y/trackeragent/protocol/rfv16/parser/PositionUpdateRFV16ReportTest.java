@@ -75,7 +75,7 @@ public class PositionUpdateRFV16ReportTest extends RFV16ParserTestSupport {
         
         parser.onParsed(reportCtx);
         
-        verify(alarmService).createRFV16Alarm(any(ReportContext.class), alarmTypeCaptor.capture(), any(TrackerDevice.class));
+        verify(alarmService).createAlarm(any(ReportContext.class), alarmTypeCaptor.capture(), any(TrackerDevice.class));
         assertThat(alarmTypeCaptor.getValue()).isEqualTo(RFV16AlarmType.LOW_BATTERY);
     }
     
@@ -87,7 +87,7 @@ public class PositionUpdateRFV16ReportTest extends RFV16ParserTestSupport {
         
         parser.onParsed(reportCtx);
         
-        verify(alarmService, never()).createRFV16Alarm(any(ReportContext.class), any(RFV16AlarmType.class), any(TrackerDevice.class));
+        verify(alarmService, never()).createAlarm(any(ReportContext.class), any(RFV16AlarmType.class), any(TrackerDevice.class));
     }
 
 }

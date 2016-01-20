@@ -18,10 +18,9 @@ import c8y.trackeragent.service.MeasurementService;
 
 public class ConnectedCobanTracker extends ConnectedTracker {
     
-    public ConnectedCobanTracker(Socket client, InputStream bis, TrackerAgent trackerAgent, DeviceContextService contextService) {
+    public ConnectedCobanTracker(Socket client, InputStream bis, TrackerAgent trackerAgent, DeviceContextService contextService, AlarmService alarmService) {
         super(client, bis, CobanConstants.REPORT_SEP, CobanConstants.FIELD_SEP, trackerAgent, contextService);
         CobanServerMessages serverMessages = new CobanServerMessages();
-        AlarmService alarmService = new AlarmService();
         MeasurementService measurementService = new MeasurementService();
         addFragment(new LogonCobanParser(trackerAgent, serverMessages));
         addFragment(new HeartbeatCobanParser(trackerAgent, serverMessages));

@@ -43,7 +43,7 @@ public class HeartbeatRFV16ParserTest extends RFV16ParserTestSupport {
         
         processMessage(msg);
         
-        verify(alarmService).createRFV16Alarm(any(ReportContext.class), alarmTypeCaptor.capture(), any(TrackerDevice.class));
+        verify(alarmService).createAlarm(any(ReportContext.class), alarmTypeCaptor.capture(), any(TrackerDevice.class));
         assertThat(alarmTypeCaptor.getAllValues()).containsOnly(RFV16AlarmType.LOW_BATTERY);
     }
     

@@ -10,11 +10,11 @@ import javax.annotation.Nullable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import c8y.trackeragent.ReportContext;
 import c8y.trackeragent.TrackerDevice;
-import c8y.trackeragent.protocol.coban.parser.CobanAlarmType;
-import c8y.trackeragent.protocol.rfv16.parser.RFV16AlarmType;
 
 import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
 import com.cumulocity.rest.representation.event.EventRepresentation;
@@ -23,32 +23,40 @@ import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
 
+@Component
 public class AlarmService {
     
     private static Logger logger = LoggerFactory.getLogger(AlarmService.class);
+
+    private final AlarmMappingService alarmMappingService;
     
-    public AlarmRepresentation createCobanAlarm(ReportContext reportCtx, CobanAlarmType alarmType, TrackerDevice device) {
+    @Autowired
+    public AlarmService(AlarmMappingService alarmMappingService) {
+        this.alarmMappingService = alarmMappingService;
+    }
+
+    public AlarmRepresentation createAlarm(ReportContext reportCtx, AlarmType alarmType, TrackerDevice device) {
         AlarmRepresentation alarm = newAlarm(device);
-        alarmType.populateAlarm(alarm, reportCtx);
+        populateAlarm(alarm, reportCtx, alarmType);
         logger.info("Create alarm {}.", alarm);
         device.createAlarm(alarm);
         return alarm;
     }
-    
-    public void clearCobanAlarm(ReportContext reportCtx, CobanAlarmType alarmType, TrackerDevice device) {
-        AlarmRepresentation alarm = device.findActiveAlarm(alarmType.asC8yType());
+        
+    private void populateAlarm(AlarmRepresentation alarm, ReportContext reportCtx, AlarmType alarmType) {
+        alarm.setType(alarmMappingService.getType(alarmType.name()));
+        Object[] args = alarmType.getTextArgs(alarm, reportCtx);
+        alarm.setText(alarmMappingService.getText(alarmType.name(), args));
+        alarm.setSeverity(alarmMappingService.getSeverity(alarmType.name()));
+    }
+
+    public void clearAlarm(ReportContext reportCtx, AlarmType alarmType, TrackerDevice device) {
+        String type = alarmMappingService.getType(alarmType.name());
+        AlarmRepresentation alarm = device.findActiveAlarm(type);
         if (alarm != null) {
             logger.info("Clear alarm {}.", alarm);
             device.clearAlarm(alarm);
         }
-    }
-    
-    public AlarmRepresentation createRFV16Alarm(ReportContext reportCtx, RFV16AlarmType alarmType, TrackerDevice device) {
-        AlarmRepresentation alarm = newAlarm(device);
-        alarmType.populateAlarm(alarm, reportCtx);
-        logger.info("Create alarm {}.", alarm);
-        device.createAlarm(alarm);
-        return alarm;
     }
     
     private AlarmRepresentation newAlarm(TrackerDevice device) {

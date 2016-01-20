@@ -34,7 +34,7 @@ public class AlarmCobanParser extends CobanParser {
         CobanAlarmType alarmType = getAlarmType(reportCtx.getReport());
         logger.info("Process alarm {} for imei {}.", alarmType, reportCtx.getImei());
         TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(reportCtx.getImei());
-        alarmService.createCobanAlarm(reportCtx, alarmType, device);
+        alarmService.createAlarm(reportCtx, alarmType, device);
         return true;
     }
 
