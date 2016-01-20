@@ -18,8 +18,8 @@ public class TrackerConfiguration {
     private String bootstrapTenant;
     private int clientTimeout;
     private List<Long> bootstrapPollIntervals;
-    private String cobanLocationReportTimeInterval;
-    private String rfv16LocationReportTimeInterval;
+    private Integer cobanLocationReportTimeInterval;
+    private Integer rfv16LocationReportTimeInterval;
     private boolean forceInitialHost;
     
     public TrackerConfiguration() {
@@ -99,20 +99,20 @@ public class TrackerConfiguration {
         return this;
     }
     
-    public String getCobanLocationReportTimeInterval() {
+    public Integer getCobanLocationReportTimeInterval() {
         return cobanLocationReportTimeInterval;
     }
 
-    public TrackerConfiguration setCobanLocationReportTimeInterval(String cobanDefaultLocationReportInterval) {
+    public TrackerConfiguration setCobanLocationReportTimeInterval(Integer cobanDefaultLocationReportInterval) {
         this.cobanLocationReportTimeInterval = cobanDefaultLocationReportInterval;
         return this;
     }
     
-    public String getRfv16LocationReportTimeInterval() {
+    public Integer getRfv16LocationReportTimeInterval() {
         return rfv16LocationReportTimeInterval;
     }
 
-    public TrackerConfiguration setRfv16LocationReportTimeInterval(String rfv16LocationReportTimeInterval) {
+    public TrackerConfiguration setRfv16LocationReportTimeInterval(Integer rfv16LocationReportTimeInterval) {
         this.rfv16LocationReportTimeInterval = rfv16LocationReportTimeInterval;
         return this;
     }

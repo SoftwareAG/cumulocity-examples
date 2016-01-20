@@ -10,12 +10,10 @@ import org.junit.Test;
 import c8y.Position;
 import c8y.SpeedMeasurement;
 import c8y.trackeragent.TrackerDevice;
-import c8y.trackeragent.protocol.coban.CobanConstants;
 import c8y.trackeragent.protocol.coban.CobanDeviceMessages;
 import c8y.trackeragent.protocol.coban.message.CobanServerMessages;
 import c8y.trackeragent.protocol.coban.parser.CobanAlarmType;
 import c8y.trackeragent.protocol.mapping.TrackerProtocol;
-import c8y.trackeragent.service.AlarmType;
 import c8y.trackeragent.utils.Devices;
 import c8y.trackeragent.utils.Positions;
 import c8y.trackeragent.utils.TK10xCoordinatesTranslator;
@@ -49,7 +47,7 @@ public class CobanReportIT extends TrackerITSupport {
         TrackerMessage actual = serverMessages.msg(response);
         TrackerMessage expected = serverMessages
                 .load()
-                .appendReport(serverMessages.timeIntervalLocationRequest(imei, CobanConstants.DEFAULT_LOCATION_REPORT_INTERVAL));
+                .appendReport(serverMessages.timeIntervalLocationRequest(imei, "03m"));
         assertThat(actual).isEqualTo(expected);
     }
     
@@ -62,7 +60,7 @@ public class CobanReportIT extends TrackerITSupport {
         TrackerMessage actual = serverMessages.msg(response);
         TrackerMessage expected = serverMessages
                 .load()
-                .appendReport(serverMessages.timeIntervalLocationRequest(imei, CobanConstants.DEFAULT_LOCATION_REPORT_INTERVAL))
+                .appendReport(serverMessages.timeIntervalLocationRequest(imei, "03m"))
                 .appendReport(serverMessages.on());
         assertThat(actual).isEqualTo(expected);
     }

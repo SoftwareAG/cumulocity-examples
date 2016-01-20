@@ -88,8 +88,8 @@ public class ConfigUtils {
             .setBootstrapUser(getProperty(props, BOOTSTRAP_USER_PROP))
             .setBootstrapPassword(getProperty(props, BOOTSTRAP_PASSWORD_PROP))
             .setBootstrapTenant("management")
-            .setCobanLocationReportTimeInterval(props.getProperty(COBAN_LOCATION_REPORT_INTERVAL_PROP, CobanConstants.DEFAULT_LOCATION_REPORT_INTERVAL))
-            .setRfv16LocationReportTimeInterval(props.getProperty(RFV16_LOCATION_REPORT_INTERVAL_PROP, RFV16Constants.DEFAULT_LOCATION_REPORT_INTERVAL))
+            .setCobanLocationReportTimeInterval(getIntegerProperty(props, COBAN_LOCATION_REPORT_INTERVAL_PROP, CobanConstants.DEFAULT_LOCATION_REPORT_INTERVAL))
+            .setRfv16LocationReportTimeInterval(getIntegerProperty(props, RFV16_LOCATION_REPORT_INTERVAL_PROP, RFV16Constants.DEFAULT_LOCATION_REPORT_INTERVAL))
             .setClientTimeout(clientTimeout);
         //@formatter:on
         logger.info(format("Configuration loaded from: %s: %s", sourceFilePath, config));
@@ -107,6 +107,10 @@ public class ConfigUtils {
     
     private String getProperty(Properties props, String key, String defaultValue) {
         return props.getProperty(key, defaultValue);
+    }
+    
+    private Integer getIntegerProperty(Properties props, String key, Integer defaultValue) {
+        return Integer.parseInt(getProperty(props, key, defaultValue.toString()));
     }
     
     private boolean getBooleanProperty(Properties props, String key, Boolean defaultValue) {

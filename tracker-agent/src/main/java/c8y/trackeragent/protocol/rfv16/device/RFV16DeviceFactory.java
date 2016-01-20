@@ -20,9 +20,9 @@ public class RFV16DeviceFactory {
 
     public RFV16Device create() {
         RFV16Device result = new RFV16Device();
-        String defaultLocationReportInterval = trackerConfig.getRfv16LocationReportTimeInterval();
-        String locationReportInterval = getValue(RFV16Constants.DEVICE_CONFIG_KEY_LOCATION_REPORT_TIME_INTERVAL, defaultLocationReportInterval);
-        result.setLocationReportInterval(locationReportInterval);
+        Integer defaultLocationReportInterval = trackerConfig.getRfv16LocationReportTimeInterval();
+        Integer locationReportInterval = getValue(RFV16Constants.DEVICE_CONFIG_KEY_LOCATION_REPORT_TIME_INTERVAL, defaultLocationReportInterval);
+        result.setLocationReportInterval(locationReportInterval.toString());
         return result;
     }
 
