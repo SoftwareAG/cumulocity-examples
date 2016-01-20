@@ -6,6 +6,7 @@ import java.net.Socket;
 import c8y.trackeragent.ConnectedTracker;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.protocol.rfv16.message.RFV16ServerMessages;
+import c8y.trackeragent.protocol.rfv16.parser.ConfirmPositionMonitoringCommandRFV16Parser;
 import c8y.trackeragent.protocol.rfv16.parser.DeviceSituationRFV16Parser;
 import c8y.trackeragent.protocol.rfv16.parser.HeartbeatRFV16Parser;
 import c8y.trackeragent.protocol.rfv16.parser.PositionUpdateRFV16Parser;
@@ -23,6 +24,7 @@ public class ConnectedRFV16Tracker extends ConnectedTracker {
         addFragment(new PositionUpdateRFV16Parser(trackerAgent, serverMessages, measurementService, alarmService));
         addFragment(new HeartbeatRFV16Parser(trackerAgent, serverMessages, alarmService, measurementService));
         addFragment(new DeviceSituationRFV16Parser(trackerAgent, serverMessages, measurementService));
+        addFragment(new ConfirmPositionMonitoringCommandRFV16Parser(trackerAgent, serverMessages));
     }
 
 }

@@ -13,6 +13,7 @@ import org.mockito.ArgumentCaptor;
 import c8y.Position;
 import c8y.trackeragent.ReportContext;
 import c8y.trackeragent.TrackerDevice;
+import c8y.trackeragent.protocol.rfv16.RFV16Constants;
 import c8y.trackeragent.protocol.rfv16.RFV16ParserTestSupport;
 import c8y.trackeragent.protocol.rfv16.device.RFV16Device;
 import c8y.trackeragent.utils.Positions;
@@ -33,6 +34,7 @@ public class PositionUpdateRFV16ReportTest extends RFV16ParserTestSupport {
     @Before
     public void init() {
         parser = new PositionUpdateRFV16Parser(trackerAgent, serverMessages, measurementService, alarmService);
+        currentDeviceIs(new RFV16Device().setLocationReportInterval("30"));
     }
     
     @Test    
@@ -46,7 +48,6 @@ public class PositionUpdateRFV16ReportTest extends RFV16ParserTestSupport {
     public void shouldProcessPositionUpdateV1() throws Exception {
         TrackerMessage deviceMessage = deviceMessages.positionUpdate("DB", IMEI, Positions.TK10xSample);
         ReportContext reportCtx = new ReportContext(deviceMessage.asArray(), IMEI, out);
-        currentDeviceIs(new RFV16Device().setLocationReportInterval("30"));
         
         parser.onParsed(reportCtx);
         
@@ -71,7 +72,6 @@ public class PositionUpdateRFV16ReportTest extends RFV16ParserTestSupport {
     public void shouldCreateAlarmIfPresent() throws Exception {
         TrackerMessage deviceMessage = deviceMessages.positionUpdate("DB", IMEI, Positions.TK10xSample, "FFFDFFFF");
         ReportContext reportCtx = new ReportContext(deviceMessage.asArray(), IMEI, out);
-        currentDeviceIs(new RFV16Device().setLocationReportInterval("30"));
         
         parser.onParsed(reportCtx);
         
@@ -83,11 +83,21 @@ public class PositionUpdateRFV16ReportTest extends RFV16ParserTestSupport {
     public void shouldNotCreateAlarmIfNotPresent() throws Exception {
         TrackerMessage deviceMessage = deviceMessages.positionUpdate("DB", IMEI, Positions.TK10xSample, "FFFFFFFF");
         ReportContext reportCtx = new ReportContext(deviceMessage.asArray(), IMEI, out);
-        currentDeviceIs(new RFV16Device().setLocationReportInterval("30"));
         
         parser.onParsed(reportCtx);
         
         verify(alarmService, never()).createAlarm(any(ReportContext.class), any(RFV16AlarmType.class), any(TrackerDevice.class));
+    }
+    
+    @Test
+    public void shouldNotSentControlCommandsIfAlreadySentForTheConnection() throws Exception {
+        TrackerMessage deviceMessage = deviceMessages.positionUpdate("DB", IMEI, Positions.TK10xSample);
+        ReportContext reportCtx = new ReportContext(deviceMessage.asArray(), IMEI, out);
+        reportCtx.setConnectionParam(RFV16Constants.CONNECTION_PARAM_CONTROL_COMMANDS_SENT, true);
+        
+        parser.onParsed(reportCtx);
+        
+        assertNothingOut();
     }
 
 }

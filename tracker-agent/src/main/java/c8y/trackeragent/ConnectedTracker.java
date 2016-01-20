@@ -26,7 +26,9 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.io.IOUtils;
@@ -58,6 +60,7 @@ public class ConnectedTracker implements Runnable, Executor {
     private final List<Object> fragments = new ArrayList<Object>();
     private final TrackerAgent trackerAgent;
     private final DeviceContextService contextService;
+    private final Map<String, Object> connectionParams = new HashMap<String, Object>();
 
     private OutputStream out;
     private String imei;
@@ -170,7 +173,7 @@ public class ConnectedTracker implements Runnable, Executor {
                 trackerAgent.sendEvent(new TrackerAgentEvents.NewDeviceEvent(imei));
                 break;
             }
-            final ReportContext reportContext = new ReportContext(report, imei, out);
+            final ReportContext reportContext = new ReportContext(report, imei, out, connectionParams);
             DeviceCredentials credentials = trackerAgent.getContext().getDeviceCredentials(imei);
             try {
                 boolean success = contextService.callWithinContext(new DeviceContext(credentials), new Callable<Boolean>() {

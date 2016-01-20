@@ -28,7 +28,7 @@ public class RFV16ServerMessages extends TrackerMessageFactory {
         return msg()
                 .appendField(maker)
                 .appendField(imei)
-                .appendField("D1")
+                .appendField(RFV16Constants.COMMAND_POSITION_MONITORING)
                 .appendField(currTime())
                 .appendField(intervalInSeconds)
                 .appendField(1);                
@@ -38,7 +38,7 @@ public class RFV16ServerMessages extends TrackerMessageFactory {
         return msg()
                 .appendField(maker)
                 .appendField(imei)
-                .appendField("SCF")
+                .appendField(RFV16Constants.COMMAND_TURN_ON_ALL_ALARMS)
                 .appendField(currTime())
                 .appendField(0)
                 .appendField(10);                

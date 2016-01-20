@@ -18,6 +18,9 @@ public class RFV16Constants {
     public static final String DEFAULT_LOCATION_REPORT_INTERVAL = "180";
     
     public static final String COMMAND_DISPLAY_DEVICE_SITUATION = "CK";
-
+    public static final String COMMAND_POSITION_MONITORING = "D1";
+    public static final String COMMAND_TURN_ON_ALL_ALARMS = "SCF";
+    
+    public static final String CONNECTION_PARAM_CONTROL_COMMANDS_SENT = "CONTROL_COMMANDS_SENT";
 
 }

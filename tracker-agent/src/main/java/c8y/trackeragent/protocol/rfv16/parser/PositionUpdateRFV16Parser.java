@@ -1,5 +1,7 @@
 package c8y.trackeragent.protocol.rfv16.parser;
 
+import static c8y.trackeragent.protocol.rfv16.RFV16Constants.CONNECTION_PARAM_CONTROL_COMMANDS_SENT;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -76,7 +78,13 @@ public class PositionUpdateRFV16Parser extends RFV16Parser implements Parser {
             alarmService.populateLocationEventByAlarms(event, alarms);
         }
         
-        device.setPosition(event, position);            
+        device.setPosition(event, position);
+        if (!reportCtx.isConnectionFlagOn(CONNECTION_PARAM_CONTROL_COMMANDS_SENT)) {
+            sentControllCommands(reportCtx);
+        }
+    }
+
+    private void sentControllCommands(ReportContext reportCtx) {
         RFV16Device rfv16Device = getRFV16Device(reportCtx.getImei());
         String maker = reportCtx.getEntry(0);
         TrackerMessage timeIntervalLocationRequest = serverMessages.timeIntervalLocationRequest(maker, reportCtx.getImei(), rfv16Device.getLocationReportInterval());

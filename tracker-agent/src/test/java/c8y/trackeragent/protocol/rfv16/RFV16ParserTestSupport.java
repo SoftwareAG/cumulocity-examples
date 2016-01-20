@@ -56,6 +56,15 @@ public class RFV16ParserTestSupport {
     }
     
     protected void assertOut(String expected) throws UnsupportedEncodingException {
-        assertThat(out.toString("US-ASCII")).isEqualTo(expected);
+        assertThat(outAsString()).isEqualTo(expected);
     }
+    
+    protected void assertNothingOut() throws UnsupportedEncodingException {
+        assertThat(outAsString()).isEmpty();
+    }
+
+    protected String outAsString() throws UnsupportedEncodingException {
+        return out.toString("US-ASCII");
+    }
+    
 }

@@ -2,6 +2,11 @@ package c8y.trackeragent.protocol.rfv16.message;
 
 import static c8y.trackeragent.utils.SignedLocation.latitude;
 import static c8y.trackeragent.utils.SignedLocation.longitude;
+
+import java.math.BigDecimal;
+
+import org.joda.time.DateTime;
+
 import c8y.Position;
 import c8y.trackeragent.protocol.rfv16.RFV16Constants;
 import c8y.trackeragent.utils.SignedLocation;
@@ -122,7 +127,31 @@ public class RFV16DeviceMessages extends RFV16ServerMessages {
                 .appendField("");//DND 
     }
     
+    public TrackerMessage confirmPositionMonitoringCommand(String maker, String imei) {
+        return msg()
+                .appendField(maker)
+                .appendField(imei)
+                .appendField(RFV16Constants.MESSAGE_TYPE_V4)
+                .appendField(RFV16Constants.COMMAND_POSITION_MONITORING) 
+                .appendField(prevTime())
+                .appendField(currTime())
+                .appendField("")
+                .appendField("")
+                .appendField("")
+                .appendField("")
+                .appendField("")
+                .appendField("")
+                .appendField("")
+                .appendField(currDate())
+                .appendField(DEFAULT_TRACKER_STATUS);                
+    }
+    
     private static String nullToEmpty(Object obj) {
         return obj == null ? "" : obj.toString();
     }
+    
+    protected String prevTime() {
+        return HHMMSS.print(new DateTime(0));
+    }
+
 }

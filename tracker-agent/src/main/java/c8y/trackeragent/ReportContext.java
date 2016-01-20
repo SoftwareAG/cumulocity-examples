@@ -3,14 +3,14 @@ package c8y.trackeragent;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import c8y.trackeragent.utils.message.TrackerMessage;
-
-import com.google.common.base.Strings;
 
 public class ReportContext {
     
@@ -19,11 +19,17 @@ public class ReportContext {
     private final String[] report;
     private final String imei;
     private final OutputStream out;
+    private final Map<String, Object> connectionParams;
     
     public ReportContext(String[] report, String imei, OutputStream out) {
+        this(report, imei, out, new HashMap<String, Object>());
+    }
+
+    public ReportContext(String[] report, String imei, OutputStream out, Map<String, Object> connectionParams) {
         this.report = report;
         this.imei = imei;
         this.out = out;
+        this.connectionParams = connectionParams;
     }
 
     public String[] getReport() {
@@ -67,6 +73,18 @@ public class ReportContext {
         }
     }
 
+    public Object getConnectionParam(String paramName) {
+        return connectionParams.get(paramName);
+    }
+    
+    public boolean isConnectionFlagOn(String paramName) {
+        return Boolean.TRUE.equals(getConnectionParam(paramName));
+    }
+    
+    public void setConnectionParam(String paramName, Object paramValue) {
+        connectionParams.put(paramName, paramValue);
+    }
+    
     @Override
     public int hashCode() {
         final int prime = 31;

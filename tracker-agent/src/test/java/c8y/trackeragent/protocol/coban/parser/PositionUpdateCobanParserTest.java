@@ -21,8 +21,6 @@ import c8y.trackeragent.utils.Positions;
 import c8y.trackeragent.utils.TK10xCoordinatesTranslator;
 import c8y.trackeragent.utils.message.TrackerMessage;
 
-import com.cumulocity.model.event.CumulocityAlarmStatuses;
-import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
 import com.cumulocity.rest.representation.event.EventRepresentation;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 
@@ -118,28 +116,9 @@ public class PositionUpdateCobanParserTest extends CobanParserTestSupport {
         assertThat(cobanAlarmType).isEqualTo(CobanAlarmType.LOW_BATTERY);
     }
     
-//    @Test
-//    public void shouldSetAlarmTextInLocationEvent() throws Exception {
-//        cobanParser.onParsed(anAlarmReport(CobanAlarmType.LOW_BATTERY));
-//        
-//        verify(deviceMock).setPosition(eventCaptor.capture(), positionCaptor.capture());
-//        verify(deviceMock).createAlarm(alarmCaptor.capture());
-//        EventRepresentation locationEvent = eventCaptor.getValue();
-//        AlarmRepresentation alarm = alarmCaptor.getValue();
-//        assertThat(locationEvent.getText()).isEqualTo(alarm.getText());
-//    }
-
     private ReportContext anAlarmReport(CobanAlarmType alarmType) {
         String[] report = deviceMessages.alarm("ABCD", alarmType).asArray();
         return new ReportContext(report, "ABCD", out);
     }
-    
-    private void checkCommonAlarmProperties(AlarmRepresentation actual) {
-        assertThat(actual.getSource().getId()).isEqualTo(deviceMock.getGId());
-        assertThat(actual.getTime()).isNotNull();
-        assertThat(actual.getText()).isNotNull();
-        assertThat(actual.getStatus()).isEqualTo(CumulocityAlarmStatuses.ACTIVE.toString());
-    }
-
 
 }
