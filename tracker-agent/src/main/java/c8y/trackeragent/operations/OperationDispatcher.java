@@ -29,7 +29,6 @@ import java.util.concurrent.ScheduledFuture;
 import org.slf4j.Logger;
 import org.springframework.util.StringUtils;
 
-import c8y.LogfileRequest;
 import c8y.trackeragent.ConnectionRegistry;
 import c8y.trackeragent.Executor;
 import c8y.trackeragent.ManagedObjectCache;
@@ -117,17 +116,17 @@ public class OperationDispatcher implements Runnable {
         logger.debug("Querying for pending operations");
         for (OperationRepresentation operation : byStatusAndDeviceId(OperationStatus.PENDING)) {
             logger.info("Received operation with ID: {}", operation.getId());
-            LogfileRequest logfileRequest = operation.get(LogfileRequest.class)
-            if (logfileRequest != null) {
-                logger.info("Found AgentLogRequest operation");
-                String user = logfileRequest.getDeviceUser();
-                if(StringUtils.isEmpty(user)) {
-                    ManagedObjectRepresentation deviceObj = trackerDevice.getManagedObject();
-                    logfileRequest.setDeviceUser(deviceObj.getOwner());
-                    operation.set(logfileRequest, LogfileRequest.class);
-                }
-                loggingService.readLog(operation);
-            }
+//            LogfileRequest logfileRequest = operation.get(LogfileRequest.class);
+//            if (logfileRequest != null) {
+//                logger.info("Found AgentLogRequest operation");
+//                String user = logfileRequest.getDeviceUser();
+//                if(StringUtils.isEmpty(user)) {
+//                    ManagedObjectRepresentation deviceObj = trackerDevice.getManagedObject();
+//                    logfileRequest.setDeviceUser(deviceObj.getOwner());
+//                    operation.set(logfileRequest, LogfileRequest.class);
+//                }
+//                loggingService.readLog(operation);
+//            }
             GId gid = operation.getDeviceId();
 
             TrackerDevice device = ManagedObjectCache.instance().get(gid);
