@@ -23,6 +23,7 @@ package c8y.trackeragent;
 import static org.apache.commons.lang.StringUtils.isEmpty;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -347,7 +348,10 @@ public class TrackerDevice extends DeviceManagedObject {
         ops.add("c8y_Configuration");
         ops.add("c8y_MotionTracking");
         ops.add("c8y_Geofence");
+        ops.add("c8y_LogfileRequest");
         device.set(ops);
+        
+        device.set(Arrays.asList("agentlog"), "c8y_SupportedLogs");
 
         device.set(new MotionTracking());
         device.set(new IsDevice());
