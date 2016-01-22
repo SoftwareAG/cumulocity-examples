@@ -148,6 +148,7 @@ public abstract class TrackerITSupport {
         OutputStream out = socket.getOutputStream();
         out.write(bis);
         out.flush();
+        Thread.sleep(1000);
         String response = readSocketResponse(socket);
         socket.close();
         return response;

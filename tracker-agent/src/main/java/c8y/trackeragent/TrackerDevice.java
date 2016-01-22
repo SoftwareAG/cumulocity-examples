@@ -26,6 +26,7 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -412,10 +413,15 @@ public class TrackerDevice extends DeviceManagedObject {
         representation.setTime(new Date());
         representation.setSource(source);
         representation.setType("c8y_TrackerMileage");
-        HashMap<String, Object> measurementValue = new HashMap<String, Object>();
+        Map<String, Object> measurementValue = new HashMap<String, Object>();
         measurementValue.put("value", mileage);
         measurementValue.put("unit", "km");
-        representation.set(measurementValue, "c8y_DistanceMeasurement");
+
+        Map<String, Object> measurementSerie = new HashMap<String, Object>();
+        measurementSerie.put("c8y_DistanceMeasurement", measurementValue);
+
+        representation.set(measurementSerie, "c8y_TrackerMileage");
+
         return representation;
     }
 

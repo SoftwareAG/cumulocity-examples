@@ -3,8 +3,6 @@ package c8y.trackeragent.protocol.rfv16.message;
 import static c8y.trackeragent.utils.SignedLocation.latitude;
 import static c8y.trackeragent.utils.SignedLocation.longitude;
 
-import java.math.BigDecimal;
-
 import org.joda.time.DateTime;
 
 import c8y.Position;

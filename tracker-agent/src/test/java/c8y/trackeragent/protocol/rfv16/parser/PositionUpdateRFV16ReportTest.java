@@ -53,7 +53,7 @@ public class PositionUpdateRFV16ReportTest extends RFV16ParserTestSupport {
         
         verify(deviceMock).setPosition(eventCaptor.capture(), positionCaptor.capture());
         assertThat(positionCaptor.getValue()).isEqualTo(TK10xCoordinatesTranslator.parse(Positions.TK10xSample));
-        assertOut("*DB,1234567890,D1,010000,30,1#*DB,1234567890,SCF,010000,0,10#");
+        assertOut("*DB,1234567890,D1,010000,30,1#");
     }
     
     /**

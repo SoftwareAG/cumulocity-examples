@@ -104,8 +104,7 @@ public class PositionUpdateRFV16Parser extends RFV16Parser implements Parser {
         String maker = reportCtx.getEntry(0);
         TrackerMessage reportMonitoringCommand = serverMessages.reportMonitoringCommand(
                 maker, reportCtx.getImei(), rfv16Device.getLocationReportInterval());
-        TrackerMessage turnOnAllAlarmsCommand = serverMessages.turnOnAllAlarms(maker, reportCtx.getImei());
-        reportCtx.writeOut(reportMonitoringCommand.appendReport(turnOnAllAlarmsCommand));
+        reportCtx.writeOut(reportMonitoringCommand);
     }
 
     private boolean isV1Report(ReportContext reportCtx) {

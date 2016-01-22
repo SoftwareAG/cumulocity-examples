@@ -90,6 +90,7 @@ public class CobanReportIT extends TrackerITSupport {
         
         writeInNewConnection(deviceMessages.logon(imei), deviceMessages.alarm(imei, CobanAlarmType.LOW_BATTERY));
         
+        Thread.sleep(1000);
         assertThat(findAlarm(imei, CobanAlarmType.LOW_BATTERY)).isNotNull();
     }
     
