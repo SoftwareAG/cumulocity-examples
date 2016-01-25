@@ -14,7 +14,7 @@ public class RFV16Constants {
     public static final String MESSAGE_TYPE_LINK = "LINK";
     
     public static final String CONNECTION_PARAM_CONTROL_COMMANDS_SENT = "CONTROL_COMMANDS_SENT";
-    public static final String MAKER_TRACKER_AGENT = "TA"; //default maker //TODO - is it correct?
+    public static final String CONNECTION_PARAM_MAKER = "MAKER";
     
     public static final String DEVICE_CONFIG_FRAGMENT = "coban_config";
     public static final String DEVICE_CONFIG_KEY_LOCATION_REPORT_TIME_INTERVAL = "locationReportTimeInterval";

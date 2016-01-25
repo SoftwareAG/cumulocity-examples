@@ -55,6 +55,7 @@ public class PositionUpdateRFV16Parser extends RFV16Parser implements Parser {
     }
 
     private void processPositionReport(ReportContext reportCtx) {
+    	reportCtx.setConnectionParam(RFV16Constants.CONNECTION_PARAM_MAKER, reportCtx.getEntry(0));
         TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(reportCtx.getImei());
         Position position = getPosition(reportCtx);
         logger.debug("Update position for imei: {} to: {}.", reportCtx.getImei(), position);
