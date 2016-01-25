@@ -26,7 +26,9 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -85,6 +87,12 @@ public class TrackerDeviceIT extends TrackerITSupport {
             public void execute(OperationContext operation) throws IOException {
                 // Nothing
             }
+
+			@Override
+			public Map<String, Object> getConnectionParams() {
+				return new HashMap<String, Object>();
+			}
+            
         });
     }
     

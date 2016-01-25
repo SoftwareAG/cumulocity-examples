@@ -34,6 +34,7 @@ import java.util.concurrent.Callable;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.event.TrackerAgentEvents;
@@ -225,4 +226,9 @@ public class ConnectedTracker implements Runnable, Executor {
     void setOut(OutputStream out) {
         this.out = out;
     }
+
+    @Autowired
+	public Map<String, Object> getConnectionParams() {
+		return connectionParams;
+	}
 }

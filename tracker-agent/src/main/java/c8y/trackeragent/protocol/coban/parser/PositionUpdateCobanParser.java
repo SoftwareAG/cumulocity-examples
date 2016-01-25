@@ -94,6 +94,7 @@ public class PositionUpdateCobanParser extends CobanParser implements Translator
         EventRepresentation locationUpdateEvent = device.aLocationUpdateEvent();
         BigDecimal speedValue = getSpeed(reportCtx);
         if (speedValue != null) {
+        	logger.debug("Parsed speed for imei: {} to: {}.", reportCtx.getImei(), speedValue);
             SpeedMeasurement speed = measurementService.createSpeedMeasurement(speedValue, device);
             locationUpdateEvent.set(speed);
         }

@@ -20,6 +20,8 @@
 
 package c8y.trackeragent;
 
+import java.util.Map;
+
 import c8y.trackeragent.operations.OperationContext;
 
 /**
@@ -30,4 +32,6 @@ import c8y.trackeragent.operations.OperationContext;
 public interface Executor {
 
     void execute(OperationContext operation) throws Exception;
+
+	Map<String, Object> getConnectionParams();
 }

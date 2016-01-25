@@ -6,6 +6,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.math.BigDecimal;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -28,6 +30,7 @@ public class PositionUpdateCobanParserTest extends CobanParserTestSupport {
 
     private PositionUpdateCobanParser cobanParser;
     private ArgumentCaptor<EventRepresentation> eventCaptor;
+    private ArgumentCaptor<BigDecimal> speedCaptor;
     private ArgumentCaptor<Position> positionCaptor;
     private ArgumentCaptor<CobanAlarmType> alarmTypeCaptor;
 
@@ -37,6 +40,7 @@ public class PositionUpdateCobanParserTest extends CobanParserTestSupport {
         alarmTypeCaptor = ArgumentCaptor.forClass(CobanAlarmType.class);
         eventCaptor = ArgumentCaptor.forClass(EventRepresentation.class);
         positionCaptor = ArgumentCaptor.forClass(Position.class);
+        speedCaptor = ArgumentCaptor.forClass(BigDecimal.class);
 
     }
     
@@ -115,6 +119,19 @@ public class PositionUpdateCobanParserTest extends CobanParserTestSupport {
         CobanAlarmType cobanAlarmType = alarmTypeCaptor.getValue();
         assertThat(cobanAlarmType).isEqualTo(CobanAlarmType.LOW_BATTERY);
     }
+    
+    @Test
+	public void shouldCreateSpeedMeasurement() throws Exception {
+    	when(measurementService.createSpeedMeasurement(any(BigDecimal.class), any(TrackerDevice.class))).thenReturn(new SpeedMeasurement());
+    	TrackerMessage report = deviceMessages.positionUpdate("ABCD", 154);
+    	ReportContext reportCtx = new ReportContext(report.asArray(), "ABCD", out);
+    	
+    	cobanParser.onParsed(reportCtx);
+    	
+    	verify(measurementService).createSpeedMeasurement(speedCaptor.capture(), any(TrackerDevice.class));
+    	assertThat(speedCaptor.getValue()).isEqualTo(new BigDecimal(154));
+    	
+	}
     
     private ReportContext anAlarmReport(CobanAlarmType alarmType) {
         String[] report = deviceMessages.alarm("ABCD", alarmType).asArray();

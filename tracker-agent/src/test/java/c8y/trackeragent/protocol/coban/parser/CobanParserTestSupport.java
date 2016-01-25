@@ -31,7 +31,7 @@ public abstract class CobanParserTestSupport {
     protected CobanServerMessages serverMessages = new CobanServerMessages();
     protected CobanDeviceMessages deviceMessages = new CobanDeviceMessages();
     protected AlarmService alarmService = Mockito.mock(AlarmService.class);
-    protected MeasurementService measurementService = new MeasurementService();
+    protected MeasurementService measurementService = Mockito.mock(MeasurementService.class);
     protected ByteArrayOutputStream out = new ByteArrayOutputStream();
     
     @Before

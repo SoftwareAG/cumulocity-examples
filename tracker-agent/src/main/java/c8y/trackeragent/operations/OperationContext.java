@@ -1,30 +1,34 @@
 package c8y.trackeragent.operations;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import c8y.trackeragent.ConnectionContext;
+
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 
-public class OperationContext {
+public class OperationContext extends ConnectionContext {
     
     private final OperationRepresentation operation;
-    private final String imei;
+    
+    public OperationContext(OperationRepresentation operation, String imei, Map<String, Object> connectionParams) {
+        super(imei, connectionParams);
+		this.operation = operation;
+    }
     
     public OperationContext(OperationRepresentation operation, String imei) {
-        this.operation = operation;
-        this.imei = imei;
+		this(operation, imei, new HashMap<String, Object>());
     }
 
     public OperationRepresentation getOperation() {
         return operation;
     }
 
-    public String getImei() {
-        return imei;
-    }
+	@Override
+	public String toString() {
+		return "OperationContext [operation=" + operation + ", " + super.toString() + "]";
+	}
 
-    @Override
-    public String toString() {
-        return String.format("OperationContext [operation=%s, imei=%s]", operation, imei);
-    }
-    
     
 
 }

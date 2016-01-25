@@ -43,6 +43,15 @@ public class RFV16ServerMessages extends TrackerMessageFactory {
                 .appendField(0)
                 .appendField(10);                
     }
+    
+    //*XX,YYYYYYYYYY,R1,HHMMSS #
+    public TrackerMessage restart(String maker, String imei) {
+    	return msg()
+    			.appendField(maker)
+    			.appendField(imei)
+    			.appendField(RFV16Constants.COMMAND_RESTART)
+    			.appendField(currTime());
+    }
 
     protected String currTime() {
         return HHMMSS.print(new DateTime());

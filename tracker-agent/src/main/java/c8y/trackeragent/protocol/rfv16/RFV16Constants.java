@@ -13,6 +13,9 @@ public class RFV16Constants {
     public static final String MESSAGE_TYPE_V4 = "V4";
     public static final String MESSAGE_TYPE_LINK = "LINK";
     
+    public static final String CONNECTION_PARAM_CONTROL_COMMANDS_SENT = "CONTROL_COMMANDS_SENT";
+    public static final String MAKER_TRACKER_AGENT = "TA"; //default maker //TODO - is it correct?
+    
     public static final String DEVICE_CONFIG_FRAGMENT = "coban_config";
     public static final String DEVICE_CONFIG_KEY_LOCATION_REPORT_TIME_INTERVAL = "locationReportTimeInterval";
     public static final Integer DEFAULT_LOCATION_REPORT_INTERVAL = 180;
@@ -20,7 +23,7 @@ public class RFV16Constants {
     public static final String COMMAND_DISPLAY_DEVICE_SITUATION = "CK";
     public static final String COMMAND_POSITION_MONITORING = "D1";
     public static final String COMMAND_TURN_ON_ALL_ALARMS = "SCF";
+    public static final String COMMAND_RESTART = "R1";
     
-    public static final String CONNECTION_PARAM_CONTROL_COMMANDS_SENT = "CONTROL_COMMANDS_SENT";
 
 }
