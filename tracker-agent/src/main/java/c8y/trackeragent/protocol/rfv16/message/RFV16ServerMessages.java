@@ -46,16 +46,6 @@ public class RFV16ServerMessages extends TrackerMessageFactory {
 		.appendField(delayInSeconds);
     }
     
-    public TrackerMessage turnOnAllAlarms(String maker, String imei) {
-        return msg()
-                .appendField(maker)
-                .appendField(imei)
-                .appendField(RFV16Constants.COMMAND_TURN_ON_ALL_ALARMS)
-                .appendField(currTime())
-                .appendField(0)
-                .appendField(10);                
-    }
-    
     public TrackerMessage restartCommand(String maker, String imei) {
     	return msg()
     		.appendField(maker)
@@ -82,6 +72,16 @@ public class RFV16ServerMessages extends TrackerMessageFactory {
 		.appendField(phoneNumber2)
 		.appendField(phoneNumber3);
     }
+    
+    public TrackerMessage armAlarm(String maker, String imei, String flag) {
+	return msg()
+		.appendField(maker)
+		.appendField(imei)
+		.appendField(RFV16Constants.COMMAND_ARM_DISARM_ALARM)
+		.appendField(currTime())
+		.appendField(0)
+		.appendField(flag);                
+    }
 
     protected String currTime() {
         return HHMMSS.print(new DateTime());
@@ -90,8 +90,5 @@ public class RFV16ServerMessages extends TrackerMessageFactory {
     protected String currDate() {
         return DDMMYY.print(new DateTime());
     }
-
-
     
-
 }

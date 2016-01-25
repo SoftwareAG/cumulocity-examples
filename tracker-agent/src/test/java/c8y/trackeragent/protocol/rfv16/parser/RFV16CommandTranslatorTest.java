@@ -7,6 +7,7 @@ import java.util.HashMap;
 import org.junit.Before;
 import org.junit.Test;
 
+import c8y.ArmAlarm;
 import c8y.MeasurementRequestOperation;
 import c8y.Restart;
 import c8y.SetSosNumber;
@@ -68,6 +69,28 @@ public class RFV16CommandTranslatorTest extends RFV16ParserTestSupport {
 	
 	response = commandTranslator.translate(asOperationContext(operation));
 	assertThat(response).isEqualTo("*HQ,1234567890,LOC,010000,350#");
+    }
+    
+    @Test
+    public void shouldTranslateArmAlarmOperation() throws Exception {
+	OperationRepresentation operation = new OperationRepresentation();
+	ArmAlarm armAlarm = new ArmAlarm();
+	armAlarm.setProperty("vibration", true);
+	armAlarm.setProperty("noise", false);
+	operation.set(armAlarm);
+	
+	String response = commandTranslator.translate(asOperationContext(operation));
+	assertThat(response).isEqualTo("*HQ,1234567890,SCF,010000,0,11#*HQ,1234567890,SCF,010000,0,02#");
+    }
+    
+    @Test
+    public void shouldTranslateEMptyArmAlarmOperation() throws Exception {
+	OperationRepresentation operation = new OperationRepresentation();
+	ArmAlarm armAlarm = new ArmAlarm();
+	operation.set(armAlarm);
+	
+	String response = commandTranslator.translate(asOperationContext(operation));
+	assertThat(response).isNull();
     }
     
     private OperationContext asOperationContext(OperationRepresentation operation) {

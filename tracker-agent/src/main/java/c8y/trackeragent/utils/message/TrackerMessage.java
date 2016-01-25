@@ -120,6 +120,10 @@ public class TrackerMessage {
             return false;
         return this.toString().equals(obj.toString());
     }
+    
+    public boolean isEmpty() {
+	return reports.isEmpty();
+    }
 
     public class Report {
         

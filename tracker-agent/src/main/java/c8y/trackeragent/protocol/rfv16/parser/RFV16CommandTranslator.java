@@ -3,6 +3,7 @@ package c8y.trackeragent.protocol.rfv16.parser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import c8y.ArmAlarm;
 import c8y.MeasurementRequestOperation;
 import c8y.Restart;
 import c8y.SetSosNumber;
@@ -11,6 +12,7 @@ import c8y.trackeragent.Translator;
 import c8y.trackeragent.operations.OperationContext;
 import c8y.trackeragent.protocol.rfv16.RFV16Constants;
 import c8y.trackeragent.protocol.rfv16.message.RFV16ServerMessages;
+import c8y.trackeragent.utils.message.TrackerMessage;
 
 public class RFV16CommandTranslator implements Translator {
 
@@ -41,7 +43,11 @@ public class RFV16CommandTranslator implements Translator {
 	}
 	SetSosNumber setSosNumber = operationCtx.getOperation().get(SetSosNumber.class);
 	if (setSosNumber != null) {
-	    return translateSesSosNumber(operationCtx, maker, setSosNumber);
+	    return translateSetSosNumber(operationCtx, maker, setSosNumber);
+	}
+	ArmAlarm armAlarm = operationCtx.getOperation().get(ArmAlarm.class);
+	if (armAlarm != null) {
+	    return translateArmAlarm(operationCtx, maker, armAlarm);
 	}
 	logger.warn("Operation {} cant be translated by RFV16 protocol implementation.", operationCtx);
 	return null;
@@ -63,7 +69,7 @@ public class RFV16CommandTranslator implements Translator {
 	return serverMessages.situationCommand(maker, operationCtx.getImei()).asText();
     }
     
-    private String translateSesSosNumber(OperationContext operationCtx, String maker, SetSosNumber setSosNumber) {
+    private String translateSetSosNumber(OperationContext operationCtx, String maker, SetSosNumber setSosNumber) {
 	return serverMessages.setSosNumberCommand(maker, operationCtx.getImei(), 
 		setSosNumber.getPhoneNumber1(), 
 		setSosNumber.getPhoneNumber2(), 
@@ -79,4 +85,13 @@ public class RFV16CommandTranslator implements Translator {
 	return connectionParam.toString();
     }
 
+    private String translateArmAlarm(OperationContext operationCtx, String maker, ArmAlarm armAlarm) {
+	ArmAlarmWrapper armAlarmWrapper = new ArmAlarmWrapper(armAlarm);
+	TrackerMessage trackerMessage = serverMessages.msg();;
+	for (String val : armAlarmWrapper.getAllValues()) {
+	    TrackerMessage command = serverMessages.armAlarm(maker, operationCtx.getImei(), val);
+	    trackerMessage.appendReport(command);
+        }
+	return trackerMessage.isEmpty() ? null : trackerMessage.asText();
+    }
 }
