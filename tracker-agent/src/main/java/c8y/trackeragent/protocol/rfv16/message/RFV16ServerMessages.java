@@ -34,6 +34,18 @@ public class RFV16ServerMessages extends TrackerMessageFactory {
                 .appendField(1);                
     }
     
+    /**
+     * The device will wake up the GPS, and search the GPS for delayInSeconds, and then up load the location data to server.
+     */
+    public TrackerMessage singleLocationCommand(String maker, String imei, String delayInSeconds) {
+	return msg()
+		.appendField(maker)
+		.appendField(imei)
+		.appendField(RFV16Constants.COMMAND_SINGLE_LOCATION)
+		.appendField(currTime())
+		.appendField(delayInSeconds);
+    }
+    
     public TrackerMessage turnOnAllAlarms(String maker, String imei) {
         return msg()
                 .appendField(maker)
@@ -44,13 +56,31 @@ public class RFV16ServerMessages extends TrackerMessageFactory {
                 .appendField(10);                
     }
     
-    //*XX,YYYYYYYYYY,R1,HHMMSS #
-    public TrackerMessage restart(String maker, String imei) {
+    public TrackerMessage restartCommand(String maker, String imei) {
     	return msg()
-    			.appendField(maker)
-    			.appendField(imei)
-    			.appendField(RFV16Constants.COMMAND_RESTART)
-    			.appendField(currTime());
+    		.appendField(maker)
+    		.appendField(imei)
+    		.appendField(RFV16Constants.COMMAND_RESTART)
+    		.appendField(currTime());
+    }
+    
+    public TrackerMessage situationCommand(String maker, String imei) {
+	return msg()
+		.appendField(maker)
+		.appendField(imei)
+		.appendField(RFV16Constants.COMMAND_DISPLAY_DEVICE_SITUATION)
+		.appendField(currTime());
+    }
+    
+    public TrackerMessage setSosNumberCommand(String maker, String imei, String phoneNumber1, String phoneNumber2, String phoneNumber3) {
+	return msg()
+		.appendField(maker)
+		.appendField(imei)
+		.appendField(RFV16Constants.COMMAND_SET_SOS_NUMBER)
+		.appendField(currTime())
+		.appendField(phoneNumber1)
+		.appendField(phoneNumber2)
+		.appendField(phoneNumber3);
     }
 
     protected String currTime() {
@@ -60,6 +90,8 @@ public class RFV16ServerMessages extends TrackerMessageFactory {
     protected String currDate() {
         return DDMMYY.print(new DateTime());
     }
+
+
     
 
 }

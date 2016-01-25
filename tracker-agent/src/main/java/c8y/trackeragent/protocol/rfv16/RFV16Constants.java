@@ -1,6 +1,8 @@
 package c8y.trackeragent.protocol.rfv16;
 
 
+
+
 public class RFV16Constants {
 
     public static final String REPORT_PREFIX = "*";
@@ -24,6 +26,8 @@ public class RFV16Constants {
     public static final String COMMAND_POSITION_MONITORING = "D1";
     public static final String COMMAND_TURN_ON_ALL_ALARMS = "SCF";
     public static final String COMMAND_RESTART = "R1";
+    public static final String COMMAND_SINGLE_LOCATION = "LOC";
+    public static final String COMMAND_SET_SOS_NUMBER = "S8";
     
 
 }
