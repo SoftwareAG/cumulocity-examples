@@ -64,15 +64,15 @@ public class RFV16ServerMessages extends TrackerMessageFactory {
 		.appendField(currTime());
     }
     
-    public TrackerMessage setSosNumberCommand(String maker, String imei, String phoneNumber1, String phoneNumber2, String phoneNumber3) {
+    public TrackerMessage setSosNumberCommand(String maker, String imei, String phoneNumber) {
 	return msg()
 		.appendField(maker)
 		.appendField(imei)
 		.appendField(RFV16Constants.COMMAND_SET_SOS_NUMBER)
 		.appendField(currTime())
-		.appendField(phoneNumber1)
-		.appendField(phoneNumber2)
-		.appendField(phoneNumber3);
+		.appendField(phoneNumber)
+		.appendField("")
+		.appendField("");
     }
     
     public TrackerMessage armAlarm(String maker, String imei, String flag) {

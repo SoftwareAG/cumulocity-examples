@@ -31,22 +31,6 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import c8y.Battery;
-import c8y.Configuration;
-import c8y.Geofence;
-import c8y.IsDevice;
-import c8y.Mobile;
-import c8y.MotionTracking;
-import c8y.Position;
-import c8y.Restart;
-import c8y.SignalStrength;
-import c8y.SupportedOperations;
-import c8y.trackeragent.protocol.coban.device.CobanDevice;
-import c8y.trackeragent.protocol.coban.device.CobanDeviceFactory;
-import c8y.trackeragent.protocol.rfv16.device.RFV16Device;
-import c8y.trackeragent.protocol.rfv16.device.RFV16DeviceFactory;
-import c8y.trackeragent.utils.TrackerConfiguration;
-
 import com.cumulocity.model.ID;
 import com.cumulocity.model.event.CumulocityAlarmStatuses;
 import com.cumulocity.model.event.CumulocitySeverities;
@@ -61,6 +45,21 @@ import com.cumulocity.sdk.client.alarm.AlarmFilter;
 import com.cumulocity.sdk.client.event.EventApi;
 import com.cumulocity.sdk.client.event.EventFilter;
 import com.cumulocity.sdk.client.measurement.MeasurementApi;
+
+import c8y.Battery;
+import c8y.Configuration;
+import c8y.Geofence;
+import c8y.IsDevice;
+import c8y.Mobile;
+import c8y.MotionTracking;
+import c8y.Position;
+import c8y.RFV16Config;
+import c8y.Restart;
+import c8y.SignalStrength;
+import c8y.SupportedOperations;
+import c8y.trackeragent.protocol.coban.device.CobanDevice;
+import c8y.trackeragent.protocol.coban.device.CobanDeviceFactory;
+import c8y.trackeragent.utils.TrackerConfiguration;
 
 public class TrackerDevice extends DeviceManagedObject {
     
@@ -432,11 +431,16 @@ public class TrackerDevice extends DeviceManagedObject {
         return cobanDevice;
     }
     
-    public RFV16Device getRFV16Device() {
-        ManagedObjectRepresentation mo = getManagedObject();
-        RFV16Device rfv16Device = new RFV16DeviceFactory(trackerConfig, mo).create();
-        logger.info("Received rfv16 device config: {} for imei: {}", rfv16Device, imei);
-        return rfv16Device;
+    public void set(RFV16Config newDeviceConfig) {
+        logger.info("Update {} for imei: {}", newDeviceConfig, imei);
+        ManagedObjectRepresentation device = aDevice();
+        device.set(newDeviceConfig);
+        getInventory().update(device);        
+    }
+    
+    public RFV16Config getRFV16Config() {
+        RFV16Config result = getManagedObject().get(RFV16Config.class);
+        return result == null ? new RFV16Config() : result;
     }
 
 }

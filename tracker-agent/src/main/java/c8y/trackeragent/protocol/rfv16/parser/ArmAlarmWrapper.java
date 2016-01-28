@@ -14,40 +14,60 @@ public class ArmAlarmWrapper {
     private final ArmAlarm armAlarm;
 
     public ArmAlarmWrapper(ArmAlarm armAlarm) {
-	this.armAlarm = armAlarm;
+        this.armAlarm = armAlarm;
     }
 
-    private String getAll() {
-	return boolAsSymbol("all", "10", "00");
+    public Boolean getVibration() {
+        return asBool("vibration");
     }
 
-    private  String getVibration() {
-	return boolAsSymbol("vibration", "11", "01");
+    public Boolean getNoise() {
+        return asBool("noise");
     }
 
-    private String getNoise() {
-	return boolAsSymbol("noise", "12", "02");
+    public Boolean getDoor() {
+        return asBool("door");
     }
 
-    private String getDoor() {
-	return boolAsSymbol("door", "13", "03");
+    public Boolean getSos() {
+        return asBool("sos");
     }
 
-    private String getSos() {
-	return boolAsSymbol("sos", "14", "04");
-    }
-    
-    public Iterable<String> getAllValues() {
-	List<String> result = asList(getAll(), getVibration(), getNoise(), getDoor(), getSos());
-	return Iterables.filter(result, Predicates.notNull());
+    private String getVibrationFlag() {
+        return asFlag(getVibration(), "11", "01");
     }
 
-    private String boolAsSymbol(String propertyName, String valForTrue, String valForFalse) {
-	Object val = armAlarm.getProperty(propertyName);
-	if (val == null) {
-	    return null;
-	}
-	return Boolean.TRUE.equals(val) ? valForTrue : valForFalse;
+    private String getNoiseFlag() {
+        return asFlag(getNoise(), "12", "02");
+    }
+
+    private String getDoorFlag() {
+        return asFlag(getDoor(), "13", "03");
+    }
+
+    private String getSosFlag() {
+        return asFlag(getSos(), "14", "04");
+    }
+
+    public Iterable<String> getAllFlags() {
+        List<String> result = asList(getVibrationFlag(), getNoiseFlag(), getDoorFlag(), getSosFlag());
+        return Iterables.filter(result, Predicates.notNull());
+    }
+
+    private String asFlag(Boolean val, String valForTrue, String valForFalse) {
+        if (val == null) {
+            return null;
+        }
+        return val ? valForTrue : valForFalse;
+    }
+
+    private Boolean asBool(String propertyName) {
+        Object val = armAlarm.getProperty(propertyName);
+        if (val == null) {
+            return null;
+        }
+        return Boolean.TRUE.equals(val);
+
     }
 
 }

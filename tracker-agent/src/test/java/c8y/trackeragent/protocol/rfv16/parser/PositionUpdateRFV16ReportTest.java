@@ -10,18 +10,18 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
+import com.cumulocity.rest.representation.event.EventRepresentation;
+import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
+
 import c8y.Position;
 import c8y.trackeragent.ReportContext;
 import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.protocol.rfv16.RFV16Constants;
 import c8y.trackeragent.protocol.rfv16.RFV16ParserTestSupport;
-import c8y.trackeragent.protocol.rfv16.device.RFV16Device;
 import c8y.trackeragent.utils.Positions;
 import c8y.trackeragent.utils.TK10xCoordinatesTranslator;
+import c8y.trackeragent.utils.TrackerConfiguration;
 import c8y.trackeragent.utils.message.TrackerMessage;
-
-import com.cumulocity.rest.representation.event.EventRepresentation;
-import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
 
 public class PositionUpdateRFV16ReportTest extends RFV16ParserTestSupport {
     
@@ -30,11 +30,12 @@ public class PositionUpdateRFV16ReportTest extends RFV16ParserTestSupport {
     ArgumentCaptor<EventRepresentation> eventCaptor = ArgumentCaptor.forClass(EventRepresentation.class);
     ArgumentCaptor<RFV16AlarmType> alarmTypeCaptor = ArgumentCaptor.forClass(RFV16AlarmType.class);
     ArgumentCaptor<MeasurementRepresentation> measurementCaptor = ArgumentCaptor.forClass(MeasurementRepresentation.class);
+    TrackerConfiguration trackerConfiguration = new TrackerConfiguration();
     
     @Before
     public void init() {
-        parser = new PositionUpdateRFV16Parser(trackerAgent, serverMessages, measurementService, alarmService);
-        currentDeviceIs(new RFV16Device().setLocationReportInterval("30"));
+        parser = new PositionUpdateRFV16Parser(trackerAgent, serverMessages, measurementService, alarmService, trackerConfiguration);
+        trackerConfiguration.setRfv16LocationReportTimeInterval(30);
     }
     
     @Test    

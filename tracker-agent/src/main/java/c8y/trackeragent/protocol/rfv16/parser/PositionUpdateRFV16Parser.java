@@ -11,6 +11,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
+import com.cumulocity.rest.representation.event.EventRepresentation;
+import com.cumulocity.sdk.client.SDKException;
+
 import c8y.Position;
 import c8y.SpeedMeasurement;
 import c8y.trackeragent.Parser;
@@ -18,15 +22,11 @@ import c8y.trackeragent.ReportContext;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.protocol.rfv16.RFV16Constants;
-import c8y.trackeragent.protocol.rfv16.device.RFV16Device;
 import c8y.trackeragent.protocol.rfv16.message.RFV16ServerMessages;
 import c8y.trackeragent.service.AlarmService;
 import c8y.trackeragent.service.MeasurementService;
+import c8y.trackeragent.utils.TrackerConfiguration;
 import c8y.trackeragent.utils.message.TrackerMessage;
-
-import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
-import com.cumulocity.rest.representation.event.EventRepresentation;
-import com.cumulocity.sdk.client.SDKException;
 
 @Component
 public class PositionUpdateRFV16Parser extends RFV16Parser implements Parser {
@@ -35,13 +35,15 @@ public class PositionUpdateRFV16Parser extends RFV16Parser implements Parser {
     
     private final MeasurementService measurementService;
     private final AlarmService alarmService;
+    private final TrackerConfiguration config;
     
     @Autowired
     public PositionUpdateRFV16Parser(TrackerAgent trackerAgent, RFV16ServerMessages serverMessages, 
-            MeasurementService measurementService, AlarmService alarmService) {
+            MeasurementService measurementService, AlarmService alarmService, TrackerConfiguration config) {
         super(trackerAgent, serverMessages);
         this.measurementService = measurementService;
         this.alarmService = alarmService;
+        this.config = config;
     }
 
     @Override
@@ -105,10 +107,9 @@ public class PositionUpdateRFV16Parser extends RFV16Parser implements Parser {
     }
 
     private void sendControllCommands(ReportContext reportCtx) {
-        RFV16Device rfv16Device = getRFV16Device(reportCtx.getImei());
         String maker = reportCtx.getEntry(0);
         TrackerMessage reportMonitoringCommand = serverMessages.reportMonitoringCommand(
-                maker, reportCtx.getImei(), rfv16Device.getLocationReportInterval());
+                maker, reportCtx.getImei(), config.getRfv16LocationReportTimeInterval().toString());
         reportCtx.writeOut(reportMonitoringCommand);
     }
 

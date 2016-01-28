@@ -8,16 +8,15 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cumulocity.sdk.client.SDKException;
+import com.google.common.base.Strings;
+
 import c8y.Position;
 import c8y.trackeragent.Parser;
 import c8y.trackeragent.ReportContext;
 import c8y.trackeragent.TrackerAgent;
-import c8y.trackeragent.protocol.rfv16.device.RFV16Device;
 import c8y.trackeragent.protocol.rfv16.message.RFV16ServerMessages;
 import c8y.trackeragent.utils.TK10xCoordinatesTranslator;
-
-import com.cumulocity.sdk.client.SDKException;
-import com.google.common.base.Strings;
 
 public abstract class RFV16Parser implements Parser, RFV16Fragment {
     
@@ -64,10 +63,6 @@ public abstract class RFV16Parser implements Parser, RFV16Fragment {
         position.setLng(valueOf(lng));
         position.setAlt(BigDecimal.ZERO);
         return position;
-    }
-    
-    protected RFV16Device getRFV16Device(String imei) {
-        return trackerAgent.getOrCreateTrackerDevice(imei).getRFV16Device();
     }
     
     public static DateTime getDateTime(ReportContext reportCtx) {
