@@ -1,30 +1,27 @@
 package c8y.trackeragent.protocol.rfv16;
 
-import java.io.InputStream;
-import java.net.Socket;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import c8y.trackeragent.ConnectedTracker;
 import c8y.trackeragent.TrackerAgent;
-import c8y.trackeragent.protocol.rfv16.message.RFV16ServerMessages;
-import c8y.trackeragent.protocol.rfv16.parser.ConfirmPositionMonitoringCommandRFV16Parser;
-import c8y.trackeragent.protocol.rfv16.parser.DeviceSituationRFV16Parser;
-import c8y.trackeragent.protocol.rfv16.parser.HeartbeatRFV16Parser;
-import c8y.trackeragent.protocol.rfv16.parser.PositionUpdateRFV16Parser;
+import c8y.trackeragent.protocol.rfv16.parser.RFV16Fragment;
 import c8y.trackeragent.service.AlarmService;
-import c8y.trackeragent.service.MeasurementService;
 
 import com.cumulocity.agent.server.context.DeviceContextService;
 
-public class ConnectedRFV16Tracker extends ConnectedTracker {
-    
-    public ConnectedRFV16Tracker(Socket client, InputStream bis, TrackerAgent trackerAgent, DeviceContextService contextService, AlarmService alarmService) {
-        super(client, bis, RFV16Constants.REPORT_SEP, RFV16Constants.FIELD_SEP, trackerAgent, contextService);
-        RFV16ServerMessages serverMessages = new RFV16ServerMessages();
-        MeasurementService measurementService = new MeasurementService();
-        addFragment(new PositionUpdateRFV16Parser(trackerAgent, serverMessages, measurementService, alarmService));
-        addFragment(new HeartbeatRFV16Parser(trackerAgent, serverMessages, alarmService, measurementService));
-        addFragment(new DeviceSituationRFV16Parser(trackerAgent, serverMessages, measurementService));
-        addFragment(new ConfirmPositionMonitoringCommandRFV16Parser(trackerAgent, serverMessages));
+@Component
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+public class ConnectedRFV16Tracker extends ConnectedTracker<RFV16Fragment> {
+
+    @Autowired
+    public ConnectedRFV16Tracker(TrackerAgent trackerAgent, DeviceContextService contextService, AlarmService alarmService, 
+	    List<RFV16Fragment> fragments) {
+	super(RFV16Constants.REPORT_SEP, RFV16Constants.FIELD_SEP, trackerAgent, contextService, fragments);
     }
 
 }

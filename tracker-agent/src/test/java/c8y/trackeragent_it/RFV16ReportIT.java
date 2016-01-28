@@ -46,6 +46,7 @@ public class RFV16ReportIT extends TrackerITSupport {
         
         writeInNewConnection(deviceMessages.heartbeat("DB", imei, "FFFDFFFF"));
         
+        Thread.sleep(1000);
         assertThat(findAlarm(imei, RFV16AlarmType.LOW_BATTERY)).isNotNull();
     }
     

@@ -2,6 +2,8 @@ package c8y.trackeragent.protocol.coban.parser;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import c8y.trackeragent.ReportContext;
 import c8y.trackeragent.TrackerAgent;
@@ -11,12 +13,14 @@ import c8y.trackeragent.utils.message.TrackerMessage;
 
 import com.cumulocity.sdk.client.SDKException;
 
+@Component
 public class LogonCobanParser extends CobanParser {
     
     private static Logger logger = LoggerFactory.getLogger(LogonCobanParser.class);
     
     private CobanServerMessages serverMessages;
 
+    @Autowired
     public LogonCobanParser(TrackerAgent trackerAgent, CobanServerMessages serverMessages) {
         super(trackerAgent);
         this.serverMessages = serverMessages;

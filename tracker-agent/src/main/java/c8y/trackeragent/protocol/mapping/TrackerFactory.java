@@ -8,43 +8,28 @@ import java.util.Collection;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import c8y.trackeragent.ConnectedTracker;
-import c8y.trackeragent.TrackerAgent;
-import c8y.trackeragent.protocol.coban.ConnectedCobanTracker;
-import c8y.trackeragent.protocol.gl200.ConnectedGL200Tracker;
-import c8y.trackeragent.protocol.rfv16.ConnectedRFV16Tracker;
-import c8y.trackeragent.protocol.telic.ConnectedTelicTracker;
-import c8y.trackeragent.service.AlarmService;
 import c8y.trackeragent.utils.TrackerConfiguration;
-
-import com.cumulocity.agent.server.context.DeviceContextService;
 
 @Component
 public class TrackerFactory {
 
     private static final Logger logger = LoggerFactory.getLogger(TrackerFactory.class);
 
-    private final TrackerAgent trackerAgent;
-    private final DeviceContextService contextService;
     private final TrackerConfiguration config;
-    private final AlarmService alarmService;
+    private ListableBeanFactory beanFactory;
     
     @Autowired
-    public TrackerFactory(
-            TrackerAgent trackerAgent, 
-            DeviceContextService contextService, 
-            TrackerConfiguration config, 
-            AlarmService alarmService) {
-        this.trackerAgent = trackerAgent;
-        this.contextService = contextService;
+    public TrackerFactory(TrackerConfiguration config, ListableBeanFactory beanFactory) {
         this.config = config;
-        this.alarmService = alarmService;
+	this.beanFactory = beanFactory;
     }
 
-    public ConnectedTracker getTracker(Socket client) throws IOException {
+    public ConnectedTracker<?> getTracker(Socket client) throws Exception {
         logger.debug("peek tracker for new connection...");
         if (client.getLocalPort() == config.getLocalPort1()) {
             return discoverTracker(client, config.getLocalPort1Protocols());
@@ -55,12 +40,12 @@ public class TrackerFactory {
         }
     }
     
-    private ConnectedTracker discoverTracker(Socket client, Collection<TrackerProtocol> available) throws IOException {
-        InputStream bis = asInput(client);
-        byte[] markingBytes = firstBytes(bis, 1);
+    private ConnectedTracker<?> discoverTracker(Socket client, Collection<TrackerProtocol> available) throws Exception {
+        InputStream in = asInput(client);
+        byte[] markingBytes = firstBytes(in, 1);
         for (TrackerProtocol trackerProtocol : available) {
             if (trackerProtocol.accept(markingBytes[0])) {
-                return create(client, bis, trackerProtocol);
+                return create(trackerProtocol, client, in);
             }
         }
         logger.warn("No matching tracker found for first byte " + markingBytes[0] + " on port " + client.getLocalPort());
@@ -85,19 +70,10 @@ public class TrackerFactory {
         return bytes;
     }
     
-    private ConnectedTracker create(Socket client, InputStream bis, TrackerProtocol trackerProtocol) throws IOException {
-        switch (trackerProtocol) {
-        case TELIC:
-            return new ConnectedTelicTracker(client, bis, trackerAgent, contextService);
-        case GL200:
-            return new ConnectedGL200Tracker(client, bis, trackerAgent, contextService);
-        case COBAN:
-            return new ConnectedCobanTracker(client, bis, trackerAgent, contextService, alarmService);
-        case RFV16:
-            return new ConnectedRFV16Tracker(client, bis, trackerAgent, contextService, alarmService);
-        default:
-            throw new RuntimeException("Cant create connected tracker for name " + trackerProtocol);
-        }
+    private ConnectedTracker<?> create(TrackerProtocol trackerProtocol, Socket client, InputStream in) throws Exception {
+        ConnectedTracker<?> tracker = beanFactory.getBean(trackerProtocol.getTrackerClass());
+        tracker.init(client, in);
+        return tracker;
     }
 
 }

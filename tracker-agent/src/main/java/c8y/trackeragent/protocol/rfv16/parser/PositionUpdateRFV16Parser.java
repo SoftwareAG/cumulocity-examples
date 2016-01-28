@@ -8,6 +8,8 @@ import java.util.Collection;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import c8y.Position;
 import c8y.SpeedMeasurement;
@@ -26,6 +28,7 @@ import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
 import com.cumulocity.rest.representation.event.EventRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 
+@Component
 public class PositionUpdateRFV16Parser extends RFV16Parser implements Parser {
     
     private static Logger logger = LoggerFactory.getLogger(PositionUpdateRFV16Parser.class);
@@ -33,6 +36,7 @@ public class PositionUpdateRFV16Parser extends RFV16Parser implements Parser {
     private final MeasurementService measurementService;
     private final AlarmService alarmService;
     
+    @Autowired
     public PositionUpdateRFV16Parser(TrackerAgent trackerAgent, RFV16ServerMessages serverMessages, 
             MeasurementService measurementService, AlarmService alarmService) {
         super(trackerAgent, serverMessages);

@@ -19,7 +19,7 @@ import c8y.trackeragent.utils.TK10xCoordinatesTranslator;
 import com.cumulocity.sdk.client.SDKException;
 import com.google.common.base.Strings;
 
-public abstract class RFV16Parser implements Parser {
+public abstract class RFV16Parser implements Parser, RFV16Fragment {
     
     private static final Logger logger = LoggerFactory.getLogger(RFV16Parser.class);
     

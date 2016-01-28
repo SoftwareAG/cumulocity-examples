@@ -5,6 +5,8 @@ import java.math.BigDecimal;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import c8y.trackeragent.Parser;
 import c8y.trackeragent.ReportContext;
@@ -20,12 +22,14 @@ import com.cumulocity.sdk.client.SDKException;
  * listen to response on CK server command
  *
  */
+@Component
 public class DeviceSituationRFV16Parser extends RFV16Parser implements Parser {
 
     private static Logger logger = LoggerFactory.getLogger(DeviceSituationRFV16Parser.class);
     
     private final MeasurementService measurementService;
 
+    @Autowired
     public DeviceSituationRFV16Parser(TrackerAgent trackerAgent, 
             RFV16ServerMessages serverMessages, 
             MeasurementService measurementService

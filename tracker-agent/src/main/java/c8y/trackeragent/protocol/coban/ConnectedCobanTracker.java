@@ -1,32 +1,27 @@
 package c8y.trackeragent.protocol.coban;
 
-import java.io.InputStream;
-import java.net.Socket;
+import java.util.List;
 
-import com.cumulocity.agent.server.context.DeviceContextService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import c8y.trackeragent.ConnectedTracker;
 import c8y.trackeragent.TrackerAgent;
-import c8y.trackeragent.protocol.coban.message.CobanServerMessages;
-import c8y.trackeragent.protocol.coban.parser.AlarmCobanParser;
-import c8y.trackeragent.protocol.coban.parser.CobanConfigRefreshTranslator;
-import c8y.trackeragent.protocol.coban.parser.HeartbeatCobanParser;
-import c8y.trackeragent.protocol.coban.parser.LogonCobanParser;
-import c8y.trackeragent.protocol.coban.parser.PositionUpdateCobanParser;
+import c8y.trackeragent.protocol.coban.parser.CobanFragment;
 import c8y.trackeragent.service.AlarmService;
-import c8y.trackeragent.service.MeasurementService;
 
-public class ConnectedCobanTracker extends ConnectedTracker {
+import com.cumulocity.agent.server.context.DeviceContextService;
+
+@Component
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+public class ConnectedCobanTracker extends ConnectedTracker<CobanFragment> {
     
-    public ConnectedCobanTracker(Socket client, InputStream bis, TrackerAgent trackerAgent, DeviceContextService contextService, AlarmService alarmService) {
-        super(client, bis, CobanConstants.REPORT_SEP, CobanConstants.FIELD_SEP, trackerAgent, contextService);
-        CobanServerMessages serverMessages = new CobanServerMessages();
-        MeasurementService measurementService = new MeasurementService();
-        addFragment(new LogonCobanParser(trackerAgent, serverMessages));
-        addFragment(new HeartbeatCobanParser(trackerAgent, serverMessages));
-        addFragment(new PositionUpdateCobanParser(trackerAgent, serverMessages, alarmService, measurementService));
-        addFragment(new AlarmCobanParser(trackerAgent, alarmService));
-        addFragment(new CobanConfigRefreshTranslator(trackerAgent, serverMessages));
+    @Autowired
+    public ConnectedCobanTracker(TrackerAgent trackerAgent, DeviceContextService contextService, AlarmService alarmService, 
+	    List<CobanFragment> fragments) {
+        super(CobanConstants.REPORT_SEP, CobanConstants.FIELD_SEP, trackerAgent, contextService, fragments);
     }
 
 }

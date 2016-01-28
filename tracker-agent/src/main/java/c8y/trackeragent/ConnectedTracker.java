@@ -50,51 +50,51 @@ import com.google.common.collect.Iterables;
  * Performs the communication with a connected device. Accepts reports from the
  * input stream and sends commands to the output stream.
  */
-public class ConnectedTracker implements Runnable, Executor {
-
+public class ConnectedTracker<F extends Fragment> implements Runnable, Executor {
+    
     protected static Logger logger = LoggerFactory.getLogger(ConnectedTracker.class);
 
     private final char reportSeparator;
     private final String fieldSeparator;
-    private final Socket client;
-    private final InputStream bis;
-    private final List<Object> fragments = new ArrayList<Object>();
+    private final List<F> fragments = new ArrayList<F>();
     private final TrackerAgent trackerAgent;
     private final DeviceContextService contextService;
     private final Map<String, Object> connectionParams = new HashMap<String, Object>();
 
+    private Socket client;
+    private InputStream in;
     private OutputStream out;
     private String imei;
 
-    public ConnectedTracker(Socket client, InputStream bis, char reportSeparator, String fieldSeparator, 
-            TrackerAgent trackerAgent, DeviceContextService contextService) {
-        this.client = client;
-        this.bis = bis;
+    public ConnectedTracker(char reportSeparator, String fieldSeparator, 
+            TrackerAgent trackerAgent, DeviceContextService contextService, List<F> fragments) {
         this.reportSeparator = reportSeparator;
         this.fieldSeparator = fieldSeparator;
         this.trackerAgent = trackerAgent;
         this.contextService = contextService;
+        this.fragments.addAll(fragments);
     }
-
-    public void addFragment(Object o) {
-        fragments.add(o);
+    
+    public void init(Socket client, InputStream in) throws Exception {
+	this.client = client;
+	this.in= in;
     }
 
     @Override
     public void run() {
-        if(bis == null) {
+        if(in == null) {
             return;
         }
         try {
             out = client.getOutputStream();
-            processReports(bis);
+            processReports(in);
         } catch (IOException e) {
             logger.warn("Error during communication with client device", e);
         } catch (SDKException e) {
             logger.warn("Error during communication with the platform", e);
         } finally {
             IOUtils.closeQuietly(out);
-            IOUtils.closeQuietly(bis);
+            IOUtils.closeQuietly(in);
             try {
                 client.close();
             } catch (IOException e) {

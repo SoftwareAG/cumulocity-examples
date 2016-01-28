@@ -5,6 +5,8 @@ import static c8y.trackeragent.protocol.rfv16.RFV16Constants.CONNECTION_PARAM_CO
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import c8y.trackeragent.Parser;
 import c8y.trackeragent.ReportContext;
@@ -18,10 +20,12 @@ import com.cumulocity.sdk.client.SDKException;
  * listen to response on D1 server command
  *
  */
+@Component
 public class ConfirmPositionMonitoringCommandRFV16Parser extends RFV16Parser implements Parser {
 
     private static Logger logger = LoggerFactory.getLogger(ConfirmPositionMonitoringCommandRFV16Parser.class);
     
+    @Autowired
     public ConfirmPositionMonitoringCommandRFV16Parser(TrackerAgent trackerAgent, RFV16ServerMessages serverMessages) {
         super(trackerAgent, serverMessages);
     }

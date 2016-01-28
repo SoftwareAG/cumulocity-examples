@@ -4,9 +4,12 @@ import static c8y.trackeragent.protocol.coban.message.CobanServerMessages.imeiMs
 import static java.math.BigDecimal.valueOf;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import c8y.MotionTracking;
 import c8y.Position;
@@ -29,6 +32,7 @@ import com.cumulocity.rest.representation.event.EventRepresentation;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 
+@Component
 public class PositionUpdateCobanParser extends CobanParser implements Translator {
     
     private static Logger logger = LoggerFactory.getLogger(PositionUpdateCobanParser.class);
@@ -38,7 +42,8 @@ public class PositionUpdateCobanParser extends CobanParser implements Translator
     private final CobanServerMessages serverMessages;
     private final AlarmService alarmService;
     private final MeasurementService measurementService;
-    
+
+    @Autowired
     public PositionUpdateCobanParser(TrackerAgent trackerAgent, 
             CobanServerMessages serverMessages, 
             AlarmService alarmService, 
@@ -51,8 +56,13 @@ public class PositionUpdateCobanParser extends CobanParser implements Translator
 
     @Override
     protected boolean accept(String[] report) {
-        return report.length >= 1 && 
-                (KEYWORD.equals(report[1]) || getAlarmType(report) != null);
+	if (report.length <= 1) {
+	    return false;
+	}
+	System.out.println("PositionUpdateCobanParser accept " + Arrays.toString(report));
+	boolean position = KEYWORD.equals(report[1]);
+	boolean alarm = getAlarmType(report) != null;
+        return position || alarm;
     }
 
     @Override

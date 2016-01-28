@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
 import java.net.Socket;
+import java.util.Collections;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -17,6 +18,7 @@ import c8y.trackeragent.ReportContext;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
+import c8y.trackeragent.protocol.telic.parser.TelicFragment;
 import c8y.trackeragent.protocol.telic.parser.TelicLocationReport;
 import c8y.trackeragent.utils.Devices;
 import c8y.trackeragent.utils.Positions;
@@ -62,8 +64,10 @@ public class TelicLocationReportTest {
         when(trackerContext.getDeviceCredentials(anyString())).thenReturn(credentials);
         Socket client = mock(Socket.class);
         byte[] bytes = TelicReports.getTelicReportBytes(Devices.IMEI_1, Positions.SAMPLE_1);
-        ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
-        ConnectedTelicTracker tracker = new ConnectedTelicTracker(client, bis, trackerAgent, contextService);
+        ByteArrayInputStream in = new ByteArrayInputStream(bytes);
+        ConnectedTelicTracker tracker = new ConnectedTelicTracker(
+        	trackerAgent, contextService, Collections.<TelicFragment>singletonList(telic));
+        tracker.init(client, in);
         when(trackerContext.isDeviceRegistered(Devices.IMEI_1)).thenReturn(true);
         
         tracker.run();

@@ -33,7 +33,7 @@ public class RequestHandler implements Runnable {
             }
             logger.debug("Tracker poke {} for connection from {}.", tracker.getClass().getSimpleName(), client.getRemoteSocketAddress());
             reportsExecutor.execute(tracker);
-        } catch(Exception ex) {
+	} catch (Exception ex) {
             logger.error("Error handling request:", ex);
             if(!client.isClosed()) {
                 try {

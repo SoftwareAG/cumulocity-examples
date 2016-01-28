@@ -2,6 +2,8 @@ package c8y.trackeragent.protocol.rfv16.parser;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import c8y.ArmAlarm;
 import c8y.MeasurementRequestOperation;
@@ -14,12 +16,14 @@ import c8y.trackeragent.protocol.rfv16.RFV16Constants;
 import c8y.trackeragent.protocol.rfv16.message.RFV16ServerMessages;
 import c8y.trackeragent.utils.message.TrackerMessage;
 
-public class RFV16CommandTranslator implements Translator {
+@Component
+public class RFV16CommandTranslator implements Translator, RFV16Fragment {
 
     private static final Logger logger = LoggerFactory.getLogger(RFV16Parser.class);
 
     private final RFV16ServerMessages serverMessages;
 
+    @Autowired
     public RFV16CommandTranslator(RFV16ServerMessages serverMessages) {
 	this.serverMessages = serverMessages;
     }

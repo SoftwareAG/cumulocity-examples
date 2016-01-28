@@ -6,6 +6,8 @@ import java.util.Collection;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import c8y.trackeragent.Parser;
 import c8y.trackeragent.ReportContext;
@@ -23,6 +25,7 @@ import com.google.common.base.Strings;
  * listen to HEARTBEAT (LINK) message
  *
  */
+@Component
 public class HeartbeatRFV16Parser extends RFV16Parser implements Parser {
 
     private static Logger logger = LoggerFactory.getLogger(HeartbeatRFV16Parser.class);
@@ -30,6 +33,7 @@ public class HeartbeatRFV16Parser extends RFV16Parser implements Parser {
     private final AlarmService alarmService;
     private final MeasurementService measurementService;
 
+    @Autowired
     public HeartbeatRFV16Parser(TrackerAgent trackerAgent, 
             RFV16ServerMessages serverMessages, 
             AlarmService alarmService,

@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import c8y.Battery;
 import c8y.SignalStrength;
@@ -15,6 +16,7 @@ import com.cumulocity.model.measurement.MeasurementValue;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
 
+@Component
 public class MeasurementService {
     
     private static Logger logger = LoggerFactory.getLogger(MeasurementService.class);
