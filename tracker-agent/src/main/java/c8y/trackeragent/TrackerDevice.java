@@ -54,6 +54,7 @@ import c8y.Mobile;
 import c8y.MotionTracking;
 import c8y.Position;
 import c8y.RFV16Config;
+import c8y.RequiredAvailability;
 import c8y.Restart;
 import c8y.SignalStrength;
 import c8y.SupportedOperations;
@@ -336,6 +337,9 @@ public class TrackerDevice extends DeviceManagedObject {
     private void createMo(GId agentGid) throws SDKException {
         ManagedObjectRepresentation device = new ManagedObjectRepresentation();
 
+        RequiredAvailability availability = new RequiredAvailability(15);
+        device.set(availability);
+        
         SupportedOperations ops = new SupportedOperations();
         ops.add("c8y_Restart");
         ops.add("c8y_Configuration");
