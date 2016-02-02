@@ -144,6 +144,23 @@ public class RFV16DeviceMessages extends RFV16ServerMessages {
                 .appendField(DEFAULT_TRACKER_STATUS);                
     }
     
+    public TrackerMessage positionUpdateWithSpeed(String maker, String imei, int speed) {
+        return msg()
+                .appendField(maker)
+                .appendField(imei)
+                .appendField(RFV16Constants.MESSAGE_TYPE_V1)
+                .appendField(currTime())
+                .appendField(RFV16Constants.DATE_EFFECTIVE_MARK)
+                .appendField("")
+                .appendField("")
+                .appendField("")
+                .appendField("")
+                .appendField(speed) // empty speed
+                .appendField("") // empty direction
+                .appendField(currDate())
+                .appendField(DEFAULT_TRACKER_STATUS);
+    }
+    
     private static String nullToEmpty(Object obj) {
         return obj == null ? "" : obj.toString();
     }

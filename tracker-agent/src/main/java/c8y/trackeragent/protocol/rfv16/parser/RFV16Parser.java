@@ -1,5 +1,6 @@
 package c8y.trackeragent.protocol.rfv16.parser;
 
+import static java.math.BigDecimal.ROUND_DOWN;
 import static java.math.BigDecimal.valueOf;
 
 import java.math.BigDecimal;
@@ -21,6 +22,8 @@ import c8y.trackeragent.utils.TK10xCoordinatesTranslator;
 public abstract class RFV16Parser implements Parser, RFV16Fragment {
     
     private static final Logger logger = LoggerFactory.getLogger(RFV16Parser.class);
+    
+    public static final BigDecimal RFV16_SPEED_MEASUREMENT_FACTOR = new BigDecimal(1.852);
     
     protected final TrackerAgent trackerAgent;
     protected final RFV16ServerMessages serverMessages;
@@ -48,7 +51,9 @@ public abstract class RFV16Parser implements Parser, RFV16Fragment {
             return null;
         }
         try {
-            return new BigDecimal(entry);
+            BigDecimal speedValue = new BigDecimal(entry);
+            speedValue = speedValue.multiply(RFV16_SPEED_MEASUREMENT_FACTOR);
+            return speedValue.setScale(0, ROUND_DOWN);
         } catch (NumberFormatException nfex) {
             logger.error("Wrong speed value: " + entry, nfex);
             return null;

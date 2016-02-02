@@ -24,7 +24,7 @@ public class CobanDeviceMessages extends TrackerMessageFactory {
     
     private static final String LOGON = "##,imei:%s,A;";
     private static final String HEARTBEAT = "%s;";
-    private static final String POSITION_UPDATE = "imei:%s,tracker,0809231929,,%s,055403.000,A,%s,%s,%s,%s,%s,%s,;";
+    private static final String POSITION_UPDATE = "imei:%s,tracker,0809231929,,%s,055403.000,A,%s,%s,%s,%s,%s,,;";
     private static final String ALARM = "imei:%s,%s,0809231929,,F,055403.000,A,,,,,,100,;";
     private static final String OVERSPEED_ALARM = "imei:%s,%s,0809231929,,F,055403.000,A,,,,,,%s,;";
     
@@ -54,7 +54,6 @@ public class CobanDeviceMessages extends TrackerMessageFactory {
                 lat.getSymbol(), 
                 lng.getAbsValue(), 
                 lng.getSymbol(), 
-                alt.getAbsValue(),
                 speed);
         // formatter:on
         return msg().fromText(text);

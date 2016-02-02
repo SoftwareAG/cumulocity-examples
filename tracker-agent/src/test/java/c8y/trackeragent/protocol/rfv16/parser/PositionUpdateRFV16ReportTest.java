@@ -5,6 +5,8 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import java.math.BigDecimal;
+
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
@@ -99,6 +101,19 @@ public class PositionUpdateRFV16ReportTest extends RFV16ParserTestSupport {
         parser.onParsed(reportCtx);
         
         assertNothingOut();
+    }
+    
+    @Test
+    public void shouldCreateSpeedMeasurement() throws Exception {
+        ArgumentCaptor<BigDecimal> speedCaptor = ArgumentCaptor.forClass(BigDecimal.class);
+        TrackerMessage deviceMessage = deviceMessages.positionUpdateWithSpeed("DB", IMEI, 60);
+        ReportContext reportCtx = new ReportContext(deviceMessage.asArray(), IMEI, out);
+        
+        parser.onParsed(reportCtx);
+        
+        verify(measurementService).createSpeedMeasurement(speedCaptor.capture(), any(TrackerDevice.class));
+        assertThat(speedCaptor.getAllValues().size()).isEqualTo(1);
+        assertThat(speedCaptor.getValue()).isEqualTo((new BigDecimal(60)).multiply(RFV16Parser.RFV16_SPEED_MEASUREMENT_FACTOR).setScale(0, BigDecimal.ROUND_DOWN));
     }
 
 }

@@ -128,7 +128,7 @@ public class PositionUpdateCobanParserTest extends CobanParserTestSupport {
 	cobanParser.onParsed(reportCtx);
 
 	verify(measurementService).createSpeedMeasurement(speedCaptor.capture(), any(TrackerDevice.class));
-	assertThat(speedCaptor.getValue()).isEqualTo(new BigDecimal(154));
+	assertThat(speedCaptor.getValue()).isEqualTo((new BigDecimal(154)).multiply(CobanParser.COBAN_SPEED_MEASUREMENT_FACTOR).setScale(0, BigDecimal.ROUND_DOWN));
 
     }
 

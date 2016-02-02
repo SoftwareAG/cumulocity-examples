@@ -1,5 +1,7 @@
 package c8y.trackeragent.protocol.coban.parser;
 
+import static java.math.BigDecimal.ROUND_DOWN;
+
 import java.math.BigDecimal;
 
 import org.slf4j.Logger;
@@ -14,6 +16,8 @@ import com.cumulocity.sdk.client.SDKException;
 public abstract class CobanParser  extends CobanSupport implements Parser {
     
     private static final Logger logger = LoggerFactory.getLogger(CobanParser.class);
+    
+    public static final BigDecimal COBAN_SPEED_MEASUREMENT_FACTOR = new BigDecimal(1.852);
     
     public CobanParser(TrackerAgent trackerAgent) {
         super(trackerAgent);
@@ -34,13 +38,15 @@ public abstract class CobanParser  extends CobanSupport implements Parser {
     }
     
     public static BigDecimal getSpeed(ReportContext reportCtx) {
-        String entry = reportCtx.getEntry(12);
+        String entry = reportCtx.getEntry(11);
         if (entry == null) {
             logger.warn("There is no speed parameter in measurement");
             return null;
         }
         try {
-            return new BigDecimal(entry);
+            BigDecimal speedValue = new BigDecimal(entry);
+            speedValue = speedValue.multiply(COBAN_SPEED_MEASUREMENT_FACTOR);
+            return speedValue.setScale(0, ROUND_DOWN);
         } catch (NumberFormatException nfex) {
             logger.error("Wrong speed value: " + entry, nfex);
             return null;
