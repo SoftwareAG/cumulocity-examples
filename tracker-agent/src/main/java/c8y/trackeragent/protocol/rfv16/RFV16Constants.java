@@ -14,6 +14,7 @@ public class RFV16Constants {
     public static final String MESSAGE_TYPE_V1 = "V1";
     public static final String MESSAGE_TYPE_V4 = "V4";
     public static final String MESSAGE_TYPE_LINK = "LINK";
+    public static final String MESSAGE_TYPE_MULTI_BASE_STATION_DATA = "NBR";
     
     public static final String CONNECTION_PARAM_CONTROL_COMMANDS_SENT = "CONTROL_COMMANDS_SENT";
     public static final String CONNECTION_PARAM_MAKER = "MAKER";

@@ -161,6 +161,25 @@ public class RFV16DeviceMessages extends RFV16ServerMessages {
                 .appendField(DEFAULT_TRACKER_STATUS);
     }
     
+    public TrackerMessage multiBaseStationDataReport(String maker, String imei, String mcc, String mnc, String lac, String status) {
+        return msg()
+                .appendField(maker)
+                .appendField(imei)
+                .appendField(RFV16Constants.MESSAGE_TYPE_MULTI_BASE_STATION_DATA)
+                .appendField(mcc)
+                .appendField(mnc)
+                .appendField("")
+                .appendField("")
+                .appendField(lac)
+                .appendField("")
+                .appendField("")
+                .appendField("")
+                .appendField("")
+                .appendField("")
+                .appendField(currDate())
+                .appendField(status);
+    }
+    
     private static String nullToEmpty(Object obj) {
         return obj == null ? "" : obj.toString();
     }

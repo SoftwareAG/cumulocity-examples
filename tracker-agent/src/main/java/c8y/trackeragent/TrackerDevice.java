@@ -446,5 +446,12 @@ public class TrackerDevice extends DeviceManagedObject {
         RFV16Config result = getManagedObject().get(RFV16Config.class);
         return result == null ? new RFV16Config() : result;
     }
+    
+    public void updateMobile(Mobile mobile) {
+        ManagedObjectRepresentation device = aDevice();        
+        logger.debug("Updating mobile of {} to {}.", imei, mobile);
+        device.set(mobile);
+        getInventory().update(device);        
+    }
 
 }
