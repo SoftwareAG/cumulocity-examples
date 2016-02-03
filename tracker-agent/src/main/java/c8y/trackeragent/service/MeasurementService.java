@@ -80,7 +80,7 @@ public class MeasurementService {
         SignalStrength signalFragment = new SignalStrength();
         signalFragment.setProperty("quality", measurementValue(percentageGSMLevel, "%"));
         measurement.set(signalFragment);
-        measurement.setType("c8y_Battery");
+        measurement.setType("c8y_SignalStrength");
         measurement.setSource(asSource(device));
         measurement.setTime(date.toDate());
         device.createMeasurement(measurement);
