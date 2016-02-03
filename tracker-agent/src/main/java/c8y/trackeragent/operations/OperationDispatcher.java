@@ -27,7 +27,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 
 import org.slf4j.Logger;
+import org.springframework.util.StringUtils;
 
+import c8y.LogfileRequest;
 import c8y.trackeragent.ConnectionRegistry;
 import c8y.trackeragent.Executor;
 import c8y.trackeragent.ManagedObjectCache;
@@ -41,6 +43,7 @@ import com.cumulocity.agent.server.context.DeviceContextService;
 import com.cumulocity.agent.server.logging.LoggingService;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.model.operation.OperationStatus;
+import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.devicecontrol.OperationFilter;
