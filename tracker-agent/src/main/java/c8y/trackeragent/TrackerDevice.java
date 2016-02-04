@@ -35,13 +35,17 @@ import com.cumulocity.model.ID;
 import com.cumulocity.model.event.CumulocityAlarmStatuses;
 import com.cumulocity.model.event.CumulocitySeverities;
 import com.cumulocity.model.idtype.GId;
+import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
 import com.cumulocity.rest.representation.event.EventRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
+import com.cumulocity.rest.representation.operation.OperationRepresentation;
+import com.cumulocity.rest.representation.operation.Operations;
 import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.alarm.AlarmApi;
 import com.cumulocity.sdk.client.alarm.AlarmFilter;
+import com.cumulocity.sdk.client.devicecontrol.DeviceControlApi;
 import com.cumulocity.sdk.client.event.EventApi;
 import com.cumulocity.sdk.client.event.EventFilter;
 import com.cumulocity.sdk.client.measurement.MeasurementApi;
@@ -82,6 +86,7 @@ public class TrackerDevice extends DeviceManagedObject {
     private EventApi events;
     private AlarmApi alarms;
     private MeasurementApi measurements;
+    private DeviceControlApi deviceControl;
 
     private String imei;
     private GId gid;
@@ -108,6 +113,7 @@ public class TrackerDevice extends DeviceManagedObject {
         this.events = platform.getEventApi();
         this.alarms = platform.getAlarmApi();
         this.measurements = platform.getMeasurementApi();
+        this.deviceControl = platform.getDeviceControlApi();
 
         this.imei = imei;
         createMo(agentGid);
@@ -452,6 +458,11 @@ public class TrackerDevice extends DeviceManagedObject {
         logger.debug("Updating mobile of {} to {}.", imei, mobile);
         device.set(mobile);
         getInventory().update(device);        
+    }
+    
+    public void setOperationSuccessful(OperationRepresentation operation) {
+        operation.setStatus(OperationStatus.SUCCESSFUL.toString());
+        deviceControl.update(operation);
     }
 
 }

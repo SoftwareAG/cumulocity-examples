@@ -1,9 +1,16 @@
 package c8y.trackeragent.protocol.rfv16.parser;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.svenson.AbstractDynamicProperties;
+
+import com.cumulocity.rest.representation.operation.OperationRepresentation;
+import com.cumulocity.sdk.client.SDKException;
+import com.google.common.collect.Lists;
 
 import c8y.ArmAlarm;
 import c8y.MeasurementRequestOperation;
@@ -11,6 +18,8 @@ import c8y.RFV16Config;
 import c8y.Restart;
 import c8y.SetSosNumber;
 import c8y.trackeragent.ConnectionContext;
+import c8y.trackeragent.Parser;
+import c8y.trackeragent.ReportContext;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.Translator;
@@ -20,17 +29,19 @@ import c8y.trackeragent.protocol.rfv16.message.RFV16ServerMessages;
 import c8y.trackeragent.utils.message.TrackerMessage;
 
 @Component
-public class RFV16CommandTranslator implements Translator, RFV16Fragment {
+public class RFV16CommandTranslator extends RFV16Parser implements Parser, Translator, RFV16Fragment {
+
+    private static final String LOCATION_REQUEST = "location";
+    private static final String SITUATION_REQUEST = "situation";
 
     private static final Logger logger = LoggerFactory.getLogger(RFV16Parser.class);
 
-    private final RFV16ServerMessages serverMessages;
-    private final TrackerAgent trackerAgent;
+    private volatile List<OperationRepresentation> operationsInExecution;
 
     @Autowired
     public RFV16CommandTranslator(RFV16ServerMessages serverMessages, TrackerAgent trackerAgent) {
-        this.serverMessages = serverMessages;
-        this.trackerAgent = trackerAgent;
+        super(trackerAgent, serverMessages);
+        operationsInExecution = Lists.newArrayList();
     }
     
     @Override
@@ -42,21 +53,26 @@ public class RFV16CommandTranslator implements Translator, RFV16Fragment {
         
         logger.info("Handled operation {}.", operationCtx);
         if (operationCtx.getOperation().get(Restart.class) != null) {
+            addOperation(operationCtx.getOperation());
             return translateRestart(operationCtx, maker);
         }
         MeasurementRequestOperation request = operationCtx.getOperation().get(MeasurementRequestOperation.class);
-        if (request != null && "situation".equals(request.getRequestName())) {
+        if (request != null && SITUATION_REQUEST.equals(request.getRequestName())) {
+            addOperation(operationCtx.getOperation());
             return translateSituationRequest(operationCtx, maker, request);
         }
-        if (request != null && "location".equals(request.getRequestName())) {
+        if (request != null && LOCATION_REQUEST.equals(request.getRequestName())) {
+            addOperation(operationCtx.getOperation());
             return translateSingleLocationRequest(operationCtx, maker, request);
         }
         SetSosNumber setSosNumber = operationCtx.getOperation().get(SetSosNumber.class);
         if (setSosNumber != null) {
+            addOperation(operationCtx.getOperation());
             return translateSetSosNumber(operationCtx, maker, setSosNumber);
         }
         ArmAlarm armAlarm = operationCtx.getOperation().get(ArmAlarm.class);
         if (armAlarm != null) {
+            addOperation(operationCtx.getOperation());
             return translateArmAlarm(operationCtx, maker, armAlarm);
         }
         logger.warn("Operation {} cant be translated by RFV16 protocol implementation.", operationCtx);
@@ -119,4 +135,104 @@ public class RFV16CommandTranslator implements Translator, RFV16Fragment {
         return trackerAgent.getOrCreateTrackerDevice(connCtx.getImei());
     }
     
+    @Override
+    public boolean onParsed(ReportContext reportCtx) throws SDKException {
+        OperationRepresentation operation;
+        TrackerDevice device;
+        
+        if (isV1orNBR(reportCtx)) {
+            operation = findMatchingOperation(Restart.class);
+            if (operation != null) {
+                device = trackerAgent.getOrCreateTrackerDevice(reportCtx.getImei());
+                device.setOperationSuccessful(operation);
+            }
+            
+            operation = findMatchingRequestOperation(LOCATION_REQUEST);
+            if (operation != null) {
+                device = trackerAgent.getOrCreateTrackerDevice(reportCtx.getImei());
+                device.setOperationSuccessful(operation);
+            }
+            return true;
+        }
+        
+        if (isSosConfirmation(reportCtx)) {
+            operation = findMatchingOperation(SetSosNumber.class);
+            if (operation != null) {
+                device = trackerAgent.getOrCreateTrackerDevice(reportCtx.getImei());
+                device.setOperationSuccessful(operation);
+            }
+            return true;
+        }
+        
+        if (isDeviceSituationConfirmation(reportCtx)) {
+            operation = findMatchingRequestOperation(SITUATION_REQUEST);
+            if (operation != null) {
+                device = trackerAgent.getOrCreateTrackerDevice(reportCtx.getImei());
+                device.setOperationSuccessful(operation);
+            }
+            return true;
+        }
+        
+        if (isAlarmSettingConfirmation(reportCtx)) {
+            operation = findMatchingOperation(ArmAlarm.class);
+            if (operation != null) {
+                device = trackerAgent.getOrCreateTrackerDevice(reportCtx.getImei());
+                device.setOperationSuccessful(operation);
+            }
+            return true;
+        }
+        
+        return false;
+    }
+    
+    private void addOperation(OperationRepresentation op) {
+        synchronized (operationsInExecution) {
+            operationsInExecution.add(op);
+        }
+    }
+    
+    private <T extends AbstractDynamicProperties> OperationRepresentation findMatchingOperation(Class<T> operationFragment) {
+        synchronized (operationsInExecution) {
+            for (OperationRepresentation operation : operationsInExecution) {
+                if (operation.get(operationFragment) != null) {
+                    operationsInExecution.remove(operation);
+                    return operation;
+                }
+            }
+        }
+        return null;
+    }
+    
+    private OperationRepresentation findMatchingRequestOperation(String request) {
+        synchronized (operationsInExecution) {
+            for (OperationRepresentation operation : operationsInExecution) {
+                MeasurementRequestOperation fragment = operation.get(MeasurementRequestOperation.class);
+                if (fragment != null && fragment.getRequestName().equals(request)) {
+                    operationsInExecution.remove(operation);
+                    return operation;
+                }
+            }
+        }
+        return null;
+    }
+    
+    private boolean isSosConfirmation(ReportContext reportCtx) {
+        return RFV16Constants.MESSAGE_TYPE_V4.equals(reportCtx.getEntry(2))
+                && RFV16Constants.COMMAND_SET_SOS_NUMBER.equals(reportCtx.getEntry(3));
+    }
+    
+    private boolean isDeviceSituationConfirmation(ReportContext reportCtx) {
+        return RFV16Constants.MESSAGE_TYPE_V4.equals(reportCtx.getEntry(2))
+                && RFV16Constants.COMMAND_DISPLAY_DEVICE_SITUATION.equals(reportCtx.getEntry(3));
+    }
+    
+    private boolean isAlarmSettingConfirmation(ReportContext reportCtx) {
+        return RFV16Constants.MESSAGE_TYPE_V4.equals(reportCtx.getEntry(2))
+                && RFV16Constants.COMMAND_ARM_DISARM_ALARM.equals(reportCtx.getEntry(3));
+    }
+    
+    private boolean isV1orNBR(ReportContext reportCtx) {
+        return RFV16Constants.MESSAGE_TYPE_V1.equals(reportCtx.getEntry(2))
+                || RFV16Constants.MESSAGE_TYPE_MULTI_BASE_STATION_DATA.equals(reportCtx.getEntry(2));
+    }
 }
