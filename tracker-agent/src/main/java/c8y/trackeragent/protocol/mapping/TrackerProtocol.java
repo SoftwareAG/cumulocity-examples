@@ -38,13 +38,13 @@ public enum TrackerProtocol {
         
     };
     
-    private final Class<? extends ConnectedTracker> trackerClazz;
+    private final Class<? extends ConnectedTracker<?>> trackerClazz;
     
-    private TrackerProtocol(Class<? extends ConnectedTracker> trackerClazz) {
+    private TrackerProtocol(Class<? extends ConnectedTracker<?>> trackerClazz) {
 	this.trackerClazz = trackerClazz;
     }
 
-    public Class<? extends ConnectedTracker> getTrackerClass() {
+    public Class<? extends ConnectedTracker<?>> getTrackerClass() {
         return trackerClazz;
     }
 

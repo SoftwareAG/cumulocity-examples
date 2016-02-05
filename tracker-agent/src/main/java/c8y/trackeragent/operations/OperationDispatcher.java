@@ -35,6 +35,7 @@ import c8y.trackeragent.Executor;
 import c8y.trackeragent.ManagedObjectCache;
 import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.TrackerPlatform;
+import c8y.trackeragent.context.OperationContext;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.logger.PlatformLogger;
 

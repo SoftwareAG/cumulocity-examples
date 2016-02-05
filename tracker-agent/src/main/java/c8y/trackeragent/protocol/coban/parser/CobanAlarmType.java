@@ -3,7 +3,7 @@ package c8y.trackeragent.protocol.coban.parser;
 import java.math.BigDecimal;
 
 import c8y.SpeedMeasurement;
-import c8y.trackeragent.ReportContext;
+import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.service.AlarmType;
 import c8y.trackeragent.service.MeasurementService;
 

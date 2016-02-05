@@ -36,9 +36,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import c8y.trackeragent.context.OperationContext;
+import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.event.TrackerAgentEvents;
-import c8y.trackeragent.operations.OperationContext;
 
 import com.cumulocity.agent.server.context.DeviceContext;
 import com.cumulocity.agent.server.context.DeviceContextService;
@@ -76,8 +77,8 @@ public class ConnectedTracker<F extends Fragment> implements Runnable, Executor 
     }
     
     public void init(Socket client, InputStream in) throws Exception {
-	this.client = client;
-	this.in= in;
+        this.client = client;
+        this.in = in;
     }
 
     @Override

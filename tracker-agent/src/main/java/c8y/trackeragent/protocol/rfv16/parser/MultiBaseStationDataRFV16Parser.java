@@ -1,8 +1,5 @@
 package c8y.trackeragent.protocol.rfv16.parser;
 
-import static c8y.trackeragent.protocol.rfv16.RFV16Constants.CONNECTION_PARAM_CONTROL_COMMANDS_SENT;
-
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -12,23 +9,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
-import com.cumulocity.rest.representation.event.EventRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 import com.google.common.base.Strings;
 
 import c8y.Mobile;
-import c8y.Position;
-import c8y.SpeedMeasurement;
 import c8y.trackeragent.Parser;
-import c8y.trackeragent.ReportContext;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerDevice;
+import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.protocol.rfv16.RFV16Constants;
 import c8y.trackeragent.protocol.rfv16.message.RFV16ServerMessages;
 import c8y.trackeragent.service.AlarmService;
-import c8y.trackeragent.service.MeasurementService;
-import c8y.trackeragent.utils.TrackerConfiguration;
-import c8y.trackeragent.utils.message.TrackerMessage;
 
 @Component
 public class MultiBaseStationDataRFV16Parser extends RFV16Parser implements Parser {
@@ -36,14 +27,12 @@ public class MultiBaseStationDataRFV16Parser extends RFV16Parser implements Pars
     private static Logger logger = LoggerFactory.getLogger(MultiBaseStationDataRFV16Parser.class);
     
     private final AlarmService alarmService;
-    private final TrackerConfiguration config;
     
     @Autowired
     public MultiBaseStationDataRFV16Parser(TrackerAgent trackerAgent, RFV16ServerMessages serverMessages,
-            AlarmService alarmService, TrackerConfiguration config) {
+            AlarmService alarmService) {
         super(trackerAgent, serverMessages);
         this.alarmService = alarmService;
-        this.config = config;
     }
 
     @Override

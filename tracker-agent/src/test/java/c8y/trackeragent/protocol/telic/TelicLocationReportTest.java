@@ -14,16 +14,16 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import c8y.trackeragent.ReportContext;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerDevice;
+import c8y.trackeragent.context.ReportContext;
+import c8y.trackeragent.context.TrackerContext;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.protocol.telic.parser.TelicFragment;
 import c8y.trackeragent.protocol.telic.parser.TelicLocationReport;
 import c8y.trackeragent.utils.Devices;
 import c8y.trackeragent.utils.Positions;
 import c8y.trackeragent.utils.TelicReports;
-import c8y.trackeragent.utils.TrackerContext;
 
 import com.cumulocity.agent.server.context.DeviceContextService;
 import com.cumulocity.agent.server.context.DeviceContextServiceImpl;

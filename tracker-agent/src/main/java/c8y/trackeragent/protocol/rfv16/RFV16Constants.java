@@ -19,6 +19,9 @@ public class RFV16Constants {
     public static final String CONNECTION_PARAM_CONTROL_COMMANDS_SENT = "CONTROL_COMMANDS_SENT";
     public static final String CONNECTION_PARAM_MAKER = "MAKER";
     
+    public static final String DEVICE_PARAM_OPERATION_IN_EXECUTION = "OPERATIONS_IN_EXECUTION";
+    
+    
     public static final String DEVICE_CONFIG_KEY_LOCATION_REPORT_TIME_INTERVAL = "locationReportTimeInterval";
     public static final Integer DEFAULT_LOCATION_REPORT_INTERVAL = 180;
     

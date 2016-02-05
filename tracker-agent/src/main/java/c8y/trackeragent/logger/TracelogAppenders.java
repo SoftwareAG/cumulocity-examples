@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerPlatform;
-import c8y.trackeragent.utils.TrackerContext;
+import c8y.trackeragent.context.TrackerContext;
 import ch.qos.logback.classic.LoggerContext;
 
 @Component

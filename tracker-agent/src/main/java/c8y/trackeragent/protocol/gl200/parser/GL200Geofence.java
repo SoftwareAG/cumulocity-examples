@@ -24,11 +24,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import c8y.Geofence;
-import c8y.trackeragent.ReportContext;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.Translator;
-import c8y.trackeragent.operations.OperationContext;
+import c8y.trackeragent.context.OperationContext;
+import c8y.trackeragent.context.ReportContext;
 
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;

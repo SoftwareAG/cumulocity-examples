@@ -23,9 +23,9 @@ package c8y.trackeragent.protocol.gl200.parser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import c8y.trackeragent.ReportContext;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerDevice;
+import c8y.trackeragent.context.ReportContext;
 
 import com.cumulocity.sdk.client.SDKException;
 

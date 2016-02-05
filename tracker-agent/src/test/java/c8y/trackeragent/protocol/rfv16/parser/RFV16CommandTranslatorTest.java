@@ -14,7 +14,7 @@ import c8y.MeasurementRequestOperation;
 import c8y.RFV16Config;
 import c8y.Restart;
 import c8y.SetSosNumber;
-import c8y.trackeragent.operations.OperationContext;
+import c8y.trackeragent.context.OperationContext;
 import c8y.trackeragent.protocol.rfv16.RFV16Constants;
 import c8y.trackeragent.protocol.rfv16.RFV16ParserTestSupport;
 

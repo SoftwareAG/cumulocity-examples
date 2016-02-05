@@ -1,9 +1,7 @@
-package c8y.trackeragent.operations;
+package c8y.trackeragent.context;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import c8y.trackeragent.ConnectionContext;
 
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 

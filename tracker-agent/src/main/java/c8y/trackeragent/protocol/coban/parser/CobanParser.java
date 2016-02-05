@@ -8,8 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import c8y.trackeragent.Parser;
-import c8y.trackeragent.ReportContext;
 import c8y.trackeragent.TrackerAgent;
+import c8y.trackeragent.context.ReportContext;
 
 import com.cumulocity.sdk.client.SDKException;
 

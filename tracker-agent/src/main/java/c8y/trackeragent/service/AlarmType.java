@@ -1,8 +1,8 @@
 package c8y.trackeragent.service;
 
-import c8y.trackeragent.ReportContext;
-
 import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
+
+import c8y.trackeragent.context.ReportContext;
 
 public interface AlarmType {
     

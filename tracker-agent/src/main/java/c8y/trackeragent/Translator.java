@@ -20,7 +20,7 @@
 
 package c8y.trackeragent;
 
-import c8y.trackeragent.operations.OperationContext;
+import c8y.trackeragent.context.OperationContext;
 
 public interface Translator extends Fragment {
     

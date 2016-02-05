@@ -16,8 +16,8 @@ import com.cumulocity.rest.representation.event.EventRepresentation;
 import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
 
 import c8y.Position;
-import c8y.trackeragent.ReportContext;
 import c8y.trackeragent.TrackerDevice;
+import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.protocol.rfv16.RFV16Constants;
 import c8y.trackeragent.protocol.rfv16.RFV16ParserTestSupport;
 import c8y.trackeragent.utils.Positions;

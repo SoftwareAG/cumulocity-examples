@@ -1,5 +1,8 @@
 package c8y.trackeragent.protocol.rfv16.parser;
 
+import static c8y.trackeragent.protocol.rfv16.RFV16Constants.DEVICE_PARAM_OPERATION_IN_EXECUTION;
+
+import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -10,38 +13,34 @@ import org.svenson.AbstractDynamicProperties;
 
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
-import com.google.common.collect.Lists;
 
 import c8y.ArmAlarm;
 import c8y.MeasurementRequestOperation;
 import c8y.RFV16Config;
 import c8y.Restart;
 import c8y.SetSosNumber;
-import c8y.trackeragent.ConnectionContext;
-import c8y.trackeragent.Parser;
-import c8y.trackeragent.ReportContext;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.Translator;
-import c8y.trackeragent.operations.OperationContext;
+import c8y.trackeragent.context.ConnectionContext;
+import c8y.trackeragent.context.DeviceContext;
+import c8y.trackeragent.context.OperationContext;
+import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.protocol.rfv16.RFV16Constants;
 import c8y.trackeragent.protocol.rfv16.message.RFV16ServerMessages;
 import c8y.trackeragent.utils.message.TrackerMessage;
 
 @Component
-public class RFV16CommandTranslator extends RFV16Parser implements Parser, Translator, RFV16Fragment {
+public class RFV16CommandTranslator extends RFV16Parser implements Translator {
 
     private static final String LOCATION_REQUEST = "location";
     private static final String SITUATION_REQUEST = "situation";
 
     private static final Logger logger = LoggerFactory.getLogger(RFV16Parser.class);
 
-    private volatile List<OperationRepresentation> operationsInExecution;
-
     @Autowired
     public RFV16CommandTranslator(RFV16ServerMessages serverMessages, TrackerAgent trackerAgent) {
         super(trackerAgent, serverMessages);
-        operationsInExecution = Lists.newArrayList();
     }
     
     @Override
@@ -53,26 +52,26 @@ public class RFV16CommandTranslator extends RFV16Parser implements Parser, Trans
         
         logger.info("Handled operation {}.", operationCtx);
         if (operationCtx.getOperation().get(Restart.class) != null) {
-            addOperation(operationCtx.getOperation());
+            registerOperationAsExecuting(operationCtx);
             return translateRestart(operationCtx, maker);
         }
         MeasurementRequestOperation request = operationCtx.getOperation().get(MeasurementRequestOperation.class);
         if (request != null && SITUATION_REQUEST.equals(request.getRequestName())) {
-            addOperation(operationCtx.getOperation());
+            registerOperationAsExecuting(operationCtx);
             return translateSituationRequest(operationCtx, maker, request);
         }
         if (request != null && LOCATION_REQUEST.equals(request.getRequestName())) {
-            addOperation(operationCtx.getOperation());
+            registerOperationAsExecuting(operationCtx);
             return translateSingleLocationRequest(operationCtx, maker, request);
         }
         SetSosNumber setSosNumber = operationCtx.getOperation().get(SetSosNumber.class);
         if (setSosNumber != null) {
-            addOperation(operationCtx.getOperation());
+            registerOperationAsExecuting(operationCtx);
             return translateSetSosNumber(operationCtx, maker, setSosNumber);
         }
         ArmAlarm armAlarm = operationCtx.getOperation().get(ArmAlarm.class);
         if (armAlarm != null) {
-            addOperation(operationCtx.getOperation());
+            registerOperationAsExecuting(operationCtx);
             return translateArmAlarm(operationCtx, maker, armAlarm);
         }
         logger.warn("Operation {} cant be translated by RFV16 protocol implementation.", operationCtx);
@@ -141,13 +140,13 @@ public class RFV16CommandTranslator extends RFV16Parser implements Parser, Trans
         TrackerDevice device;
         
         if (isV1orNBR(reportCtx)) {
-            operation = findMatchingOperation(Restart.class);
+            operation = findMatchingOperation(reportCtx, Restart.class);
             if (operation != null) {
                 device = trackerAgent.getOrCreateTrackerDevice(reportCtx.getImei());
                 device.setOperationSuccessful(operation);
             }
             
-            operation = findMatchingRequestOperation(LOCATION_REQUEST);
+            operation = findMatchingRequestOperation(reportCtx, LOCATION_REQUEST);
             if (operation != null) {
                 device = trackerAgent.getOrCreateTrackerDevice(reportCtx.getImei());
                 device.setOperationSuccessful(operation);
@@ -156,7 +155,7 @@ public class RFV16CommandTranslator extends RFV16Parser implements Parser, Trans
         }
         
         if (isSosConfirmation(reportCtx)) {
-            operation = findMatchingOperation(SetSosNumber.class);
+            operation = findMatchingOperation(reportCtx, SetSosNumber.class);
             if (operation != null) {
                 device = trackerAgent.getOrCreateTrackerDevice(reportCtx.getImei());
                 device.setOperationSuccessful(operation);
@@ -165,7 +164,7 @@ public class RFV16CommandTranslator extends RFV16Parser implements Parser, Trans
         }
         
         if (isDeviceSituationConfirmation(reportCtx)) {
-            operation = findMatchingRequestOperation(SITUATION_REQUEST);
+            operation = findMatchingRequestOperation(reportCtx, SITUATION_REQUEST);
             if (operation != null) {
                 device = trackerAgent.getOrCreateTrackerDevice(reportCtx.getImei());
                 device.setOperationSuccessful(operation);
@@ -174,7 +173,7 @@ public class RFV16CommandTranslator extends RFV16Parser implements Parser, Trans
         }
         
         if (isAlarmSettingConfirmation(reportCtx)) {
-            operation = findMatchingOperation(ArmAlarm.class);
+            operation = findMatchingOperation(reportCtx, ArmAlarm.class);
             if (operation != null) {
                 device = trackerAgent.getOrCreateTrackerDevice(reportCtx.getImei());
                 device.setOperationSuccessful(operation);
@@ -185,14 +184,26 @@ public class RFV16CommandTranslator extends RFV16Parser implements Parser, Trans
         return false;
     }
     
-    private void addOperation(OperationRepresentation op) {
-        synchronized (operationsInExecution) {
-            operationsInExecution.add(op);
+    @SuppressWarnings("unchecked")
+    private List<OperationRepresentation> getOperationsInExceution(ConnectionContext ctx) {
+        synchronized (ctx.getImei()) {
+            DeviceContext deviceContext = ctx.getDeviceContext();
+            List<OperationRepresentation> operationsInExceution = (List<OperationRepresentation>) deviceContext.get(DEVICE_PARAM_OPERATION_IN_EXECUTION);
+            if (operationsInExceution == null) {
+                operationsInExceution = new ArrayList<OperationRepresentation>();
+                deviceContext.put(DEVICE_PARAM_OPERATION_IN_EXECUTION, operationsInExceution);
+            }
+            return operationsInExceution;
         }
     }
     
-    private <T extends AbstractDynamicProperties> OperationRepresentation findMatchingOperation(Class<T> operationFragment) {
-        synchronized (operationsInExecution) {
+    private void registerOperationAsExecuting(OperationContext op) {
+        getOperationsInExceution(op).add(op.getOperation());
+    }
+    
+    private <T extends AbstractDynamicProperties> OperationRepresentation findMatchingOperation(ConnectionContext connectionCtx, Class<T> operationFragment) {
+        List<OperationRepresentation> operationsInExecution = getOperationsInExceution(connectionCtx);
+        synchronized (connectionCtx.getImei()) {
             for (OperationRepresentation operation : operationsInExecution) {
                 if (operation.get(operationFragment) != null) {
                     operationsInExecution.remove(operation);
@@ -203,8 +214,9 @@ public class RFV16CommandTranslator extends RFV16Parser implements Parser, Trans
         return null;
     }
     
-    private OperationRepresentation findMatchingRequestOperation(String request) {
-        synchronized (operationsInExecution) {
+    private OperationRepresentation findMatchingRequestOperation(ConnectionContext connectionCtx, String request) {
+        List<OperationRepresentation> operationsInExecution = getOperationsInExceution(connectionCtx);
+        synchronized (connectionCtx.getImei()) {
             for (OperationRepresentation operation : operationsInExecution) {
                 MeasurementRequestOperation fragment = operation.get(MeasurementRequestOperation.class);
                 if (fragment != null && fragment.getRequestName().equals(request)) {
@@ -235,4 +247,5 @@ public class RFV16CommandTranslator extends RFV16Parser implements Parser, Trans
         return RFV16Constants.MESSAGE_TYPE_V1.equals(reportCtx.getEntry(2))
                 || RFV16Constants.MESSAGE_TYPE_MULTI_BASE_STATION_DATA.equals(reportCtx.getEntry(2));
     }
+    
 }

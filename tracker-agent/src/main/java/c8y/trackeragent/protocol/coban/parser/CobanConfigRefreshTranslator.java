@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.Translator;
-import c8y.trackeragent.operations.OperationContext;
+import c8y.trackeragent.context.OperationContext;
 import c8y.trackeragent.protocol.coban.device.CobanDevice;
 import c8y.trackeragent.protocol.coban.message.CobanServerMessages;
 import c8y.trackeragent.utils.message.TrackerMessage;

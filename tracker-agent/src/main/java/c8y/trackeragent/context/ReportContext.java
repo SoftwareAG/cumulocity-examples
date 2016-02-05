@@ -1,4 +1,4 @@
-package c8y.trackeragent;
+package c8y.trackeragent.context;
 
 import java.io.OutputStream;
 import java.math.BigDecimal;

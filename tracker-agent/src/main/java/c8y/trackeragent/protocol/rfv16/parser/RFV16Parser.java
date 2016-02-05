@@ -14,8 +14,8 @@ import com.google.common.base.Strings;
 
 import c8y.Position;
 import c8y.trackeragent.Parser;
-import c8y.trackeragent.ReportContext;
 import c8y.trackeragent.TrackerAgent;
+import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.protocol.rfv16.message.RFV16ServerMessages;
 import c8y.trackeragent.utils.TK10xCoordinatesTranslator;
 

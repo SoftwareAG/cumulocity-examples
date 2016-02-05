@@ -1,4 +1,4 @@
-package c8y.trackeragent;
+package c8y.trackeragent.context;
 
 import java.util.Map;
 
@@ -26,6 +26,10 @@ public class ConnectionContext {
 
 	public String getImei() {
 		return imei;
+	}
+	
+	public DeviceContext getDeviceContext() {
+	    return DeviceContextRegistry.get().get(imei);
 	}
 
 	@Override
