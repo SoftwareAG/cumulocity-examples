@@ -63,25 +63,29 @@ public class PositionUpdateRFV16Parser extends RFV16Parser implements Parser {
     private void processPositionReport(ReportContext reportCtx) {
     	reportCtx.setConnectionParam(RFV16Constants.CONNECTION_PARAM_MAKER, reportCtx.getEntry(0));
         TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(reportCtx.getImei());
-        Position position = getPosition(reportCtx);
-        logger.debug("Update position for imei: {} to: {}.", reportCtx.getImei(), position);
-        
-        SpeedMeasurement speed = createSpeedMeasurement(reportCtx, device);
-        
-        EventRepresentation event = device.aLocationUpdateEvent();
-        if (speed != null) {
-            event.set(speed);
-        }
         
         Collection<AlarmRepresentation> alarms = createAlarms(reportCtx, device);
         
-        if (!alarms.isEmpty()) {
-            alarmService.populateLocationEventByAlarms(event, alarms);
-        }
-        
-        device.setPosition(event, position);
-        if (!reportCtx.isConnectionFlagOn(CONNECTION_PARAM_CONTROL_COMMANDS_SENT)) {
-            sendControllCommands(reportCtx);
+        if (isValidLocationData(reportCtx)) { 
+            Position position = getPosition(reportCtx);
+            logger.debug("Update position for imei: {} to: {}.", reportCtx.getImei(), position);
+            
+            
+            SpeedMeasurement speed = createSpeedMeasurement(reportCtx, device);
+            
+            EventRepresentation event = device.aLocationUpdateEvent();
+            if (speed != null) {
+                event.set(speed);
+            }
+            
+            if (!alarms.isEmpty()) {
+                alarmService.populateLocationEventByAlarms(event, alarms);
+            }
+            
+            device.setPosition(event, position);
+            if (!reportCtx.isConnectionFlagOn(CONNECTION_PARAM_CONTROL_COMMANDS_SENT)) {
+                sendControllCommands(reportCtx);
+            }
         }
     }
 
@@ -115,7 +119,10 @@ public class PositionUpdateRFV16Parser extends RFV16Parser implements Parser {
 
     private boolean isV1Report(ReportContext reportCtx) {
         return reportCtx.getNumberOfEntries() == 13 
-                && RFV16Constants.MESSAGE_TYPE_V1.equals(reportCtx.getEntry(2))
-                && RFV16Constants.DATE_EFFECTIVE_MARK.equals(reportCtx.getEntry(4));
+                && RFV16Constants.MESSAGE_TYPE_V1.equals(reportCtx.getEntry(2));
+    }
+    
+    private boolean isValidLocationData(ReportContext reportCtx) {
+        return RFV16Constants.DATE_EFFECTIVE_MARK.equals(reportCtx.getEntry(4));
     }
 }    
