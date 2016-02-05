@@ -13,7 +13,7 @@ public class DeviceContextRegistry {
 
     private static final Logger logger = LoggerFactory.getLogger(DeviceContextRegistry.class);
     
-    private static DeviceContextRegistry instance = new DeviceContextRegistry();
+    private static final DeviceContextRegistry instance = new DeviceContextRegistry();
 
     private final LoadingCache<String, DeviceContext> content = CacheBuilder.newBuilder().build(new CacheLoader<String, DeviceContext>() {
 
@@ -25,7 +25,7 @@ public class DeviceContextRegistry {
     });
     
     public static DeviceContextRegistry get() {
-        return new DeviceContextRegistry();
+        return instance;
     }
     
     private DeviceContextRegistry() {}
