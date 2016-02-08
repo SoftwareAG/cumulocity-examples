@@ -26,7 +26,9 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -38,13 +40,12 @@ import c8y.Position;
 import c8y.SupportedOperations;
 import c8y.trackeragent.ConnectionRegistry;
 import c8y.trackeragent.Executor;
-import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerDevice;
+import c8y.trackeragent.context.OperationContext;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
-import c8y.trackeragent.operations.OperationContext;
+import c8y.trackeragent.protocol.mapping.TrackerProtocol;
 import c8y.trackeragent.utils.Devices;
-import c8y.trackeragent.utils.TrackerContext;
 
 import com.cumulocity.model.ID;
 import com.cumulocity.model.event.CumulocityAlarmStatuses;
@@ -86,7 +87,18 @@ public class TrackerDeviceIT extends TrackerITSupport {
             public void execute(OperationContext operation) throws IOException {
                 // Nothing
             }
+
+			@Override
+			public Map<String, Object> getConnectionParams() {
+				return new HashMap<String, Object>();
+			}
+            
         });
+    }
+    
+    @Override
+    protected TrackerProtocol getTrackerProtocol() {
+        return TrackerProtocol.TELIC;
     }
 
     @Test

@@ -35,12 +35,16 @@ import c8y.trackeragent.TrackerPlatform;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.exception.UnknownDeviceException;
+import c8y.trackeragent.protocol.mapping.TrackerProtocol;
+import c8y.trackeragent.service.AlarmMappingService;
+import c8y.trackeragent.service.AlarmType;
 import c8y.trackeragent.utils.ConfigUtils;
 import c8y.trackeragent.utils.TrackerConfiguration;
 import c8y.trackeragent.utils.message.TrackerMessage;
 
 import com.cumulocity.model.authentication.CumulocityCredentials;
 import com.cumulocity.model.idtype.GId;
+import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
 import com.cumulocity.rest.representation.devicebootstrap.NewDeviceRequestRepresentation;
 import com.cumulocity.sdk.client.PlatformImpl;
 import com.cumulocity.sdk.client.ResponseParser;
@@ -67,9 +71,9 @@ public abstract class TrackerITSupport {
     @Autowired
     protected TrackerAgent trackerAgent;
     
+    @Autowired
+    protected AlarmMappingService alarmMappingService;
     
-    
-    private int socketPort;
     protected TrackerPlatform testPlatform;
     protected TestConfiguration testConfig;
     protected RestConnector restConnector;
@@ -82,13 +86,18 @@ public abstract class TrackerITSupport {
         testConfig = getTestConfig();
         System.out.println(testConfig);
         System.out.println(trackerAgentConfig);
-        socketPort = trackerAgentConfig.getLocalPort();
         if (isLocalTrackerTest()) {
             clearPersistedDevices();
         }
         testPlatform = createTrackerPlatform();
         restConnector = new RestConnector(testPlatform.getPlatformParameters(), new ResponseParser());
     }
+
+    protected final int getLocalPort() {
+        return trackerAgentConfig.getPort(getTrackerProtocol());
+    }
+    
+    protected abstract TrackerProtocol getTrackerProtocol();
 
     private boolean isLocalTrackerTest() {
         return testConfig.getTrackerAgentHost().equals("localhost");
@@ -139,6 +148,7 @@ public abstract class TrackerITSupport {
         OutputStream out = socket.getOutputStream();
         out.write(bis);
         out.flush();
+        Thread.sleep(1000);
         String response = readSocketResponse(socket);
         socket.close();
         return response;
@@ -176,12 +186,12 @@ public abstract class TrackerITSupport {
         destroySockets();
         String socketHost = testConfig.getTrackerAgentHost();
         try {
-            Socket socket = new Socket(socketHost, socketPort);
+            Socket socket = new Socket(socketHost, getLocalPort());
             socket.setSoTimeout(6000);
             sockets.add(socket);
             return socket;
         } catch (IOException ex) {
-            System.out.println("Cant connect to socket, host = " + socketHost + ", port = " + socketPort);
+            System.out.println("Cant connect to socket, host = " + socketHost + ", port = " + getLocalPort());
             throw ex;
         }
     }
@@ -246,4 +256,10 @@ public abstract class TrackerITSupport {
             .setTrackerAgentHost(trackerAgentHost);
         //@formatter:on            
     }
+    
+    protected AlarmRepresentation findAlarm(String imei, AlarmType alarmType) {
+        String type = alarmMappingService.getType(alarmType.name());
+        return getTrackerDevice(imei).findActiveAlarm(type);
+    }
+
 }

@@ -20,12 +20,15 @@
 
 package c8y.trackeragent.protocol.gl200.parser;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import c8y.MotionTracking;
-import c8y.trackeragent.ReportContext;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.Translator;
-import c8y.trackeragent.operations.OperationContext;
+import c8y.trackeragent.context.OperationContext;
+import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.protocol.gl200.GL200Constants;
 
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
@@ -42,6 +45,7 @@ import com.cumulocity.sdk.client.SDKException;
  * +RESP:GTSTT,02010B,135790246811220,,41,0,4.3,92,70.0,121.354335,31.222073,2009021,4013254,0460,0000,18d8,6141,00,20100214093254,11F0$
  * </pre>
  */
+@Component
 public class GL200DeviceMotionState extends GL200Parser implements Translator {
 
     /**
@@ -76,9 +80,10 @@ public class GL200DeviceMotionState extends GL200Parser implements Translator {
     private OperationRepresentation lastOperation;
 
 
-    public GL200DeviceMotionState(TrackerAgent trackerAgent, String password) {
+    @Autowired
+    public GL200DeviceMotionState(TrackerAgent trackerAgent) {
         this.trackerAgent = trackerAgent;
-        this.password = password;
+        this.password = PASSWORD;
     }
 
     @Override

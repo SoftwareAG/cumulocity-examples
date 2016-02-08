@@ -4,13 +4,14 @@ import java.math.BigDecimal;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import c8y.Position;
 import c8y.trackeragent.Parser;
-import c8y.trackeragent.ReportContext;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerDevice;
-import c8y.trackeragent.protocol.telic.ConnectedTelicTracker;
+import c8y.trackeragent.context.ReportContext;
 
 import com.cumulocity.sdk.client.SDKException;
 
@@ -24,7 +25,8 @@ import com.cumulocity.sdk.client.SDKException;
  * </pre>
  * 
  */
-public class TelicLocationReport implements Parser {
+@Component
+public class TelicLocationReport implements Parser, TelicFragment {
     
     private static Logger logger = LoggerFactory.getLogger(TelicLocationReport.class);
     
@@ -35,6 +37,7 @@ public class TelicLocationReport implements Parser {
 
     private TrackerAgent trackerAgent;
 
+    @Autowired
     public TelicLocationReport(TrackerAgent trackerAgent) {
         this.trackerAgent = trackerAgent;
     }

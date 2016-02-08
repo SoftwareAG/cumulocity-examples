@@ -29,6 +29,21 @@
 				</exclusion>
 			</exclusions>
         </dependency>
+        
+        <!-- traccar dependencies -->
+<!--         <dependency>
+            <groupId>org.traccar</groupId>
+            <artifactId>traccar</artifactId>
+            <version>3.2-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-simple</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency> -->
+        <!-- end of -->
+        
         <dependency>
             <groupId>com.nsn.cumulocity.model</groupId>
             <artifactId>device-capability-model</artifactId>
@@ -107,15 +122,15 @@
 			<version>4.1.4.RELEASE</version>
 			<scope>test</scope>
 		</dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-tomcat</artifactId>
+            <scope>provided</scope>
+            <version>${spring.boot.version}</version>
+        </dependency>        
         
     </dependencies>
     <build>
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-                <filtering>true</filtering>
-            </resource>           
-        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -123,9 +138,20 @@
                 <version>2.4</version>
                 <configuration>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
-                    <attachClasses>true</attachClasses>
+                    <!-- <attachClasses>true</attachClasses> -->
                 </configuration>
             </plugin>
+            <plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<version>${spring.boot.version}</version>
+			</plugin>
+			<plugin>
+				<groupId>com.nsn.cumulocity.clients-java</groupId>
+				<artifactId>agent-framework-package</artifactId>
+				<version>${c8y.version}</version>
+			</plugin>
+            
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -137,24 +163,13 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-				<version>${spring.boot.version}</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>repackage</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>com.nsn.cumulocity.clients-java</groupId>
-				<artifactId>agent-framework-package</artifactId>
-				<version>${c8y.version}</version>
-			</plugin>
         </plugins>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>           
+        </resources>
     </build>
     <profiles>
         <profile>

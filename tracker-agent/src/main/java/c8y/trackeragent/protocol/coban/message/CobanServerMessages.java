@@ -1,9 +1,12 @@
 package c8y.trackeragent.protocol.coban.message;
 
+import org.springframework.stereotype.Component;
+
 import c8y.trackeragent.protocol.coban.CobanConstants;
 import c8y.trackeragent.utils.message.TrackerMessage;
 import c8y.trackeragent.utils.message.TrackerMessageFactory;
 
+@Component
 public class CobanServerMessages extends TrackerMessageFactory {
     
     private static final String IMEI_PREFIX = "imei:";

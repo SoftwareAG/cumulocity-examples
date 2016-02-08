@@ -22,7 +22,9 @@ package c8y.trackeragent;
 
 import com.cumulocity.sdk.client.SDKException;
 
-public interface Parser {
+import c8y.trackeragent.context.ReportContext;
+
+public interface Parser extends Fragment {
     
 	String parse(String[] report) throws SDKException;
 	

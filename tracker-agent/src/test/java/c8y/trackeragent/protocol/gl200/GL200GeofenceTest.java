@@ -31,10 +31,10 @@ import org.junit.Test;
 
 import c8y.Geofence;
 import c8y.Position;
-import c8y.trackeragent.ReportContext;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerDevice;
-import c8y.trackeragent.operations.OperationContext;
+import c8y.trackeragent.context.OperationContext;
+import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.protocol.gl200.GL200Constants;
 import c8y.trackeragent.protocol.gl200.parser.GL200Geofence;
 
@@ -43,7 +43,6 @@ import com.cumulocity.sdk.client.SDKException;
 
 public class GL200GeofenceTest {
 
-    public static final String PASSWORD = "gl200";
     public static final String IMEI = "135790246811220";
 
     public static final String SETFENCESTR = "AT+GTGEO=gl200,0,3,101.412248,21.187891,1000,30,,,,,,,,,0001$";
@@ -71,7 +70,7 @@ public class GL200GeofenceTest {
 
         operationCtx = new OperationContext(operation, IMEI);
         
-        gl200gf = new GL200Geofence(trackerAgent, PASSWORD);
+        gl200gf = new GL200Geofence(trackerAgent);
 
         when(trackerAgent.getOrCreateTrackerDevice(anyString())).thenReturn(device);
     }

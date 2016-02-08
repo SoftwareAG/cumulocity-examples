@@ -2,10 +2,12 @@ package c8y.trackeragent.protocol.coban.parser;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.Translator;
-import c8y.trackeragent.operations.OperationContext;
+import c8y.trackeragent.context.OperationContext;
 import c8y.trackeragent.protocol.coban.device.CobanDevice;
 import c8y.trackeragent.protocol.coban.message.CobanServerMessages;
 import c8y.trackeragent.utils.message.TrackerMessage;
@@ -13,6 +15,7 @@ import c8y.trackeragent.utils.message.TrackerMessage;
 import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 
+@Component
 public class CobanConfigRefreshTranslator extends CobanSupport implements Translator {
 
     private static final Logger logger = LoggerFactory.getLogger(CobanConfigRefreshTranslator.class);
@@ -21,7 +24,7 @@ public class CobanConfigRefreshTranslator extends CobanSupport implements Transl
 
     private final CobanServerMessages serverMessages;
 
-
+    @Autowired
     public CobanConfigRefreshTranslator(TrackerAgent trackerAgent, CobanServerMessages serverMessages) {
         super(trackerAgent);
         this.serverMessages = serverMessages;

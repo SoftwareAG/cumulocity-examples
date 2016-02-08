@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import c8y.Position;
-import c8y.trackeragent.protocol.coban.parser.AlarmType;
+import c8y.trackeragent.protocol.coban.parser.CobanAlarmType;
 import c8y.trackeragent.utils.Positions;
 import c8y.trackeragent.utils.SignedLocation;
 import c8y.trackeragent.utils.message.TrackerMessage;
@@ -24,8 +24,8 @@ public class CobanDeviceMessages extends TrackerMessageFactory {
     
     private static final String LOGON = "##,imei:%s,A;";
     private static final String HEARTBEAT = "%s;";
-    private static final String POSITION_UPDATE = "imei:%s,tracker,0809231929,,%S,055403.000,A,%s,%s,%s,%s,%s,%s,;";
-    private static final String ALARM = "imei:%s,%s,0809231929,,F,055403.000,A,,,,,,,;";
+    private static final String POSITION_UPDATE = "imei:%s,tracker,0809231929,,%s,055403.000,A,%s,%s,%s,%s,%s,,;";
+    private static final String ALARM = "imei:%s,%s,0809231929,,F,055403.000,A,,,,,,100,;";
     private static final String OVERSPEED_ALARM = "imei:%s,%s,0809231929,,F,055403.000,A,,,,,,%s,;";
     
     public CobanDeviceMessages() {
@@ -54,7 +54,6 @@ public class CobanDeviceMessages extends TrackerMessageFactory {
                 lat.getSymbol(), 
                 lng.getAbsValue(), 
                 lng.getSymbol(), 
-                alt.getAbsValue(),
                 speed);
         // formatter:on
         return msg().fromText(text);
@@ -72,13 +71,13 @@ public class CobanDeviceMessages extends TrackerMessageFactory {
         return positionUpdate(imei, DEFAULT_POSITION, CobanConstants.GPS_KO, DEFAULT_SPEED);
     }
     
-    public TrackerMessage alarm(String imei, AlarmType type) {
+    public TrackerMessage alarm(String imei, CobanAlarmType type) {
         String msg = formatMessage(ALARM, imei, type.asCobanType());
         return msg().fromText(msg);
     }
     
     public TrackerMessage overSpeedAlarm(String imei, int speed) {
-        String msg = formatMessage(OVERSPEED_ALARM, imei, AlarmType.OVERSPEED.asCobanType(), speed);
+        String msg = formatMessage(OVERSPEED_ALARM, imei, CobanAlarmType.OVERSPEED.asCobanType(), speed);
         return msg().fromText(msg);
     }
 
