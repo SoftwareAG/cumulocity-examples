@@ -65,6 +65,7 @@ public class TelicLocationReport implements Parser, TelicFragment {
             position.setProperty(TelicConstants.LOG_CODE_TYPE, logCodeType.getLabel());
         }
         position.setProperty(TelicConstants.LOG_TIMESTAMP, getLogTimestamp(reportCtx));
+        position.setProperty(TelicConstants.GPS_TIMESTAMP, getGPSTimestamp(reportCtx));
         device.setPosition(locationUpdateEvent, position);
         return true;
     }
@@ -83,6 +84,11 @@ public class TelicLocationReport implements Parser, TelicFragment {
     
     private Date getLogTimestamp(ReportContext reportCtx) {
         String eventTypeStr = reportCtx.getEntry(1);
+        return TelicConstants.TIMESTAMP_FORMATTER.parseDateTime(eventTypeStr).toDate();
+    }
+    
+    private Date getGPSTimestamp(ReportContext reportCtx) {
+        String eventTypeStr = reportCtx.getEntry(3);
         return TelicConstants.TIMESTAMP_FORMATTER.parseDateTime(eventTypeStr).toDate();
     }
 

@@ -8,7 +8,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.Date;
 
-import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -85,6 +84,17 @@ public class TelicLocationReportTest {
         verifyReport();
         Date actualLogTimestamp = (Date) positionCaptor.getValue().getProperty(TelicConstants.LOG_TIMESTAMP);
         assertThat(actualLogTimestamp).isEqualTo(TelicConstants.TIMESTAMP_FORMATTER.parseDateTime("020216021710").toDate());
+    }
+    
+    @Test
+    public void shouldSetGPSTimestampInPositionFragment() throws Exception {
+        String[] report = TelicReports.getTelicReport(Devices.IMEI_1, Positions.SAMPLE_1);
+        
+        telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
+        
+        verifyReport();
+        Date actualLogTimestamp = (Date) positionCaptor.getValue().getProperty(TelicConstants.GPS_TIMESTAMP);
+        assertThat(actualLogTimestamp).isEqualTo(TelicConstants.TIMESTAMP_FORMATTER.parseDateTime("020216021711").toDate());
     }
    
 

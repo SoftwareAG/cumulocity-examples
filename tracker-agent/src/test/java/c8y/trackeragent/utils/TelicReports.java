@@ -51,7 +51,7 @@ public class TelicReports {
     private static String getTelicReportStr(String imei, Position position) {
         return "0721" + 
                 imei + 
-                "99,020216021710,0,200311121210," +
+                "99,020216021710,0,020216021711," +
                 asTelicStringCoord(position.getLng()) + 
                 "," +
                 asTelicStringCoord(position.getLat()) + 
