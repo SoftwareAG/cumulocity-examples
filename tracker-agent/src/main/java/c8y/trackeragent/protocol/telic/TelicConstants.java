@@ -21,6 +21,9 @@
 package c8y.trackeragent.protocol.telic;
 
 public interface TelicConstants {
-	static final char REPORT_SEP = '\0';
-	static final String FIELD_SEP = ",";
+    
+    public static final char REPORT_SEP = '\0';
+    public static final String FIELD_SEP = ",";
+	
+    public static final String LOG_CODE_TYPE = "logCodeType";
 }

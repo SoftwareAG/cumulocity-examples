@@ -34,7 +34,7 @@ public class ConnectedTelicTracker extends ConnectedTracker<TelicFragment> {
     
     @Override
     public void init(Socket client, InputStream in) throws Exception {
-	super.init(client, eat(in, HEADER_LENGTH));
+        super.init(client, eat(in, HEADER_LENGTH));
     }
 
     private static InputStream eat(InputStream bis, int bytesToRead) throws IOException {

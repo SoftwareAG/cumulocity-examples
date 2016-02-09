@@ -26,7 +26,7 @@ public class TrackerFactory {
     @Autowired
     public TrackerFactory(TrackerConfiguration config, ListableBeanFactory beanFactory) {
         this.config = config;
-	this.beanFactory = beanFactory;
+        this.beanFactory = beanFactory;
     }
 
     public ConnectedTracker<?> getTracker(Socket client) throws Exception {
