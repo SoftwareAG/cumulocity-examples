@@ -20,10 +20,16 @@
 
 package c8y.trackeragent.protocol.telic;
 
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
 public interface TelicConstants {
     
     public static final char REPORT_SEP = '\0';
     public static final String FIELD_SEP = ",";
 	
     public static final String LOG_CODE_TYPE = "logCodeType";
+    public static final String LOG_TIMESTAMP = "logTimestamp";
+    
+    public static final DateTimeFormatter TIMESTAMP_FORMATTER = DateTimeFormat.forPattern("ddMMyyhhmmss");
 }

@@ -1,6 +1,7 @@
 package c8y.trackeragent.protocol.telic.parser;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,6 +64,7 @@ public class TelicLocationReport implements Parser, TelicFragment {
         if (logCodeType != null) {
             position.setProperty(TelicConstants.LOG_CODE_TYPE, logCodeType.getLabel());
         }
+        position.setProperty(TelicConstants.LOG_TIMESTAMP, getLogTimestamp(reportCtx));
         device.setPosition(locationUpdateEvent, position);
         return true;
     }
@@ -77,6 +79,11 @@ public class TelicLocationReport implements Parser, TelicFragment {
         //TODO
         logger.warn("Cant establish event code for value {} in report {}", codeStr, reportCtx);
         return null;
+    }
+    
+    private Date getLogTimestamp(ReportContext reportCtx) {
+        String eventTypeStr = reportCtx.getEntry(1);
+        return TelicConstants.TIMESTAMP_FORMATTER.parseDateTime(eventTypeStr).toDate();
     }
 
 }
