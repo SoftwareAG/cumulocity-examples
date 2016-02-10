@@ -31,6 +31,7 @@ public interface TelicConstants {
     public static final String LOG_CODE_TYPE = "logCodeType";
     public static final String LOG_TIMESTAMP = "logTimestamp";
     public static final String GPS_TIMESTAMP = "GPSTimestamp";
+    public static final String FIX_TYPE = "fixType";
     
     public static final DateTimeFormatter TIMESTAMP_FORMATTER = DateTimeFormat.forPattern("ddMMyyhhmmss");
 }

@@ -31,12 +31,20 @@ import c8y.trackeragent.protocol.telic.TelicConstants;
 @Component
 public class TelicLocationReport implements Parser, TelicFragment {
     
+
+
+
     private static Logger logger = LoggerFactory.getLogger(TelicLocationReport.class);
     
-    public static final int ALTITUDE = 12;
+    private static final int LOG_CODE = 0;
+    private static final int LOG_TIMESTAMP = 1;
+    private static final int GPS_TIMESTAMP = 3;
     public static final int LONGITUDE = 4;
     public static final int LATITUDE = 5;
-    public static final BigDecimal DIVISOR = new BigDecimal(10000);
+    public static final int FIX_TYPE = 6;
+    public static final int ALTITUDE = 12;
+    
+    public static final BigDecimal LAT_AND_LNG_DIVISOR = new BigDecimal(10000);
 
     private TrackerAgent trackerAgent;
 
@@ -56,22 +64,26 @@ public class TelicLocationReport implements Parser, TelicFragment {
         TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(reportCtx.getImei());
         EventRepresentation locationUpdateEvent = device.aLocationUpdateEvent();
         Position position = new Position();
-        String[] report = reportCtx.getReport();
-        position.setAlt(new BigDecimal(report[ALTITUDE]));
-        position.setLng(new BigDecimal(report[LONGITUDE]).divide(DIVISOR));
-        position.setLat(new BigDecimal(report[LATITUDE]).divide(DIVISOR));
+        position.setAlt(getAltitude(reportCtx));
+        position.setLng(getLongitue(reportCtx));
+        position.setLat(getLatitude(reportCtx));
         LogCodeType logCodeType = getLogCodeType(reportCtx);
         if (logCodeType != null) {
             position.setProperty(TelicConstants.LOG_CODE_TYPE, logCodeType.getLabel());
         }
         position.setProperty(TelicConstants.LOG_TIMESTAMP, getLogTimestamp(reportCtx));
         position.setProperty(TelicConstants.GPS_TIMESTAMP, getGPSTimestamp(reportCtx));
+        FixType fixType = getFixType(reportCtx);
+        if (fixType != null) {
+            position.setProperty(TelicConstants.FIX_TYPE, fixType.getLabel());
+        }
+        
         device.setPosition(locationUpdateEvent, position);
         return true;
     }
     
     private LogCodeType getLogCodeType(ReportContext reportCtx) {
-        String codeStr = reportCtx.getEntry(0).substring(10);
+        String codeStr = reportCtx.getEntry(LOG_CODE).substring(10);
         if ("99".equals(codeStr)) {
             return LogCodeType.TIME_EVENT;
         } else if ("98".equals(codeStr)) {
@@ -83,13 +95,38 @@ public class TelicLocationReport implements Parser, TelicFragment {
     }
     
     private Date getLogTimestamp(ReportContext reportCtx) {
-        String eventTypeStr = reportCtx.getEntry(1);
+        String eventTypeStr = reportCtx.getEntry(LOG_TIMESTAMP);
         return TelicConstants.TIMESTAMP_FORMATTER.parseDateTime(eventTypeStr).toDate();
     }
     
     private Date getGPSTimestamp(ReportContext reportCtx) {
-        String eventTypeStr = reportCtx.getEntry(3);
+        String eventTypeStr = reportCtx.getEntry(GPS_TIMESTAMP);
         return TelicConstants.TIMESTAMP_FORMATTER.parseDateTime(eventTypeStr).toDate();
     }
+    
+    private BigDecimal getLongitue(ReportContext reportCtx) {
+        return getCoord(reportCtx, LONGITUDE);
+    }
+    
+    private BigDecimal getLatitude(ReportContext reportCtx) {
+        return getCoord(reportCtx, LATITUDE);
+    }
+    
+    private BigDecimal getAltitude(ReportContext reportCtx) {
+        return new BigDecimal(reportCtx.getEntry(ALTITUDE));
+    }
+    
+    private BigDecimal getCoord(ReportContext reportCtx, int index) {
+        BigDecimal incomingValue = new BigDecimal(reportCtx.getEntry(index));
+        return incomingValue.divide(LAT_AND_LNG_DIVISOR);        
+    }
 
+    private FixType getFixType(ReportContext reportCtx) {
+        String fixTypeStr = reportCtx.getEntry(FIX_TYPE);
+        FixType fixType = FixType.forValue(fixTypeStr);
+        if(fixType == null) {
+            logger.warn("Cant establish fix type for value {} in report {}", fixTypeStr, reportCtx);
+        }
+        return fixType;
+    }
 }

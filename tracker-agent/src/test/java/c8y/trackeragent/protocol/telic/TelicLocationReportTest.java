@@ -19,6 +19,7 @@ import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.context.TrackerContext;
+import c8y.trackeragent.protocol.telic.parser.FixType;
 import c8y.trackeragent.protocol.telic.parser.LogCodeType;
 import c8y.trackeragent.protocol.telic.parser.TelicLocationReport;
 import c8y.trackeragent.utils.Devices;
@@ -95,6 +96,17 @@ public class TelicLocationReportTest {
         verifyReport();
         Date actualLogTimestamp = (Date) positionCaptor.getValue().getProperty(TelicConstants.GPS_TIMESTAMP);
         assertThat(actualLogTimestamp).isEqualTo(TelicConstants.TIMESTAMP_FORMATTER.parseDateTime("020216021711").toDate());
+    }
+    
+    @Test
+    public void shouldSetFixTypeInPositionFragment() throws Exception {
+        String[] report = TelicReports.getTelicReport(Devices.IMEI_1, Positions.SAMPLE_1);
+        
+        telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
+        
+        verifyReport();
+        Object actualFixType = positionCaptor.getValue().getProperty(TelicConstants.FIX_TYPE);
+        assertThat(actualFixType).isEqualTo(FixType._3D.getLabel());
     }
    
 
