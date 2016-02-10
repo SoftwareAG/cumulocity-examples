@@ -27,11 +27,12 @@ public interface TelicConstants {
     
     public static final char REPORT_SEP = '\0';
     public static final String FIELD_SEP = ",";
+    public static final DateTimeFormatter TIMESTAMP_FORMATTER = DateTimeFormat.forPattern("ddMMyyhhmmss");
 	
     public static final String LOG_CODE_TYPE = "logCodeType";
     public static final String LOG_TIMESTAMP = "logTimestamp";
     public static final String GPS_TIMESTAMP = "GPSTimestamp";
     public static final String FIX_TYPE = "fixType";
+    public static final String SATELLITES = "satellitesForCalculation";
     
-    public static final DateTimeFormatter TIMESTAMP_FORMATTER = DateTimeFormat.forPattern("ddMMyyhhmmss");
 }

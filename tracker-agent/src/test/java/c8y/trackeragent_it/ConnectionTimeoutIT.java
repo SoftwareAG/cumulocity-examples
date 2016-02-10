@@ -7,11 +7,13 @@ import org.junit.Test;
 
 import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.protocol.mapping.TrackerProtocol;
+import c8y.trackeragent.protocol.telic.TelicDeviceMessages;
 import c8y.trackeragent.utils.Devices;
 import c8y.trackeragent.utils.Positions;
-import c8y.trackeragent.utils.TelicReports;
 
 public class ConnectionTimeoutIT extends TrackerITSupport {
+    
+    private final TelicDeviceMessages deviceMessages = new TelicDeviceMessages(); 
     
     @Override
     protected TrackerProtocol getTrackerProtocol() {
@@ -23,10 +25,10 @@ public class ConnectionTimeoutIT extends TrackerITSupport {
         timeoutConnection();
         
         String imei = Devices.randomImei();
-        bootstrap(imei, TelicReports.getTelicReportBytes(imei, Positions.ZERO));  
+        bootstrap(imei, deviceMessages.positionUpdate(imei, Positions.ZERO));  
         
         // trigger regular report 
-        byte[] report = TelicReports.getTelicReportBytes(imei, Positions.SAMPLE_4);
+        byte[] report = deviceMessages.positionUpdate(imei, Positions.SAMPLE_4).asBytes();
         writeInNewConnection(report);
         
         Thread.sleep(1000);

@@ -6,11 +6,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 
 import com.cumulocity.rest.representation.event.EventRepresentation;
 
@@ -22,16 +24,18 @@ import c8y.trackeragent.context.TrackerContext;
 import c8y.trackeragent.protocol.telic.parser.FixType;
 import c8y.trackeragent.protocol.telic.parser.LogCodeType;
 import c8y.trackeragent.protocol.telic.parser.TelicLocationReport;
+import c8y.trackeragent.service.MeasurementService;
 import c8y.trackeragent.utils.Devices;
 import c8y.trackeragent.utils.Positions;
-import c8y.trackeragent.utils.TelicReports;
 
 public class TelicLocationReportTest {
     
+    private TelicDeviceMessages deviceMessages = new TelicDeviceMessages();
+    private MeasurementService measurementService = Mockito.mock(MeasurementService.class);
     private TrackerAgent trackerAgent = mock(TrackerAgent.class);
     private TrackerContext trackerContext = mock(TrackerContext.class);
     private TrackerDevice device = mock(TrackerDevice.class);
-    private TelicLocationReport telic = new TelicLocationReport(trackerAgent);
+    private TelicLocationReport telic = new TelicLocationReport(trackerAgent, measurementService);
     private ArgumentCaptor<EventRepresentation> locationEventCaptor = ArgumentCaptor.forClass(EventRepresentation.class); 
     private ArgumentCaptor<Position> positionCaptor = ArgumentCaptor.forClass(Position.class); 
 
@@ -39,6 +43,7 @@ public class TelicLocationReportTest {
     public void setup() throws Exception {
         when(trackerAgent.getOrCreateTrackerDevice(anyString())).thenReturn(device);
         when(trackerAgent.getContext()).thenReturn(trackerContext);
+        when(device.aLocationUpdateEvent()).thenReturn(new EventRepresentation());
     }
     
     private void verifyReport() {
@@ -48,7 +53,7 @@ public class TelicLocationReportTest {
     
     @Test
     public void shouldParseImei() throws Exception {
-        String[] report = TelicReports.getTelicReport(Devices.IMEI_1, Positions.SAMPLE_1);
+        String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1).asArray();
         
         String actualImei = telic.parse(report);
         
@@ -57,7 +62,7 @@ public class TelicLocationReportTest {
     
     @Test
     public void shouldUpdateDevicePosition() throws Exception {
-        String[] report = TelicReports.getTelicReport(Devices.IMEI_1, Positions.SAMPLE_1);
+        String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1).asArray();
         
         telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
         
@@ -67,7 +72,7 @@ public class TelicLocationReportTest {
     
     @Test
     public void shouldSetLogCodeTypeInPositionFragment() throws Exception {
-        String[] report = TelicReports.getTelicReport(Devices.IMEI_1, Positions.SAMPLE_1);
+        String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1).asArray();
         
         telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
         
@@ -78,29 +83,29 @@ public class TelicLocationReportTest {
     
     @Test
     public void shouldSetLogTimestampInPositionFragment() throws Exception {
-        String[] report = TelicReports.getTelicReport(Devices.IMEI_1, Positions.SAMPLE_1);
+        String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1).asArray();
         
         telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
         
         verifyReport();
         Date actualLogTimestamp = (Date) positionCaptor.getValue().getProperty(TelicConstants.LOG_TIMESTAMP);
-        assertThat(actualLogTimestamp).isEqualTo(TelicConstants.TIMESTAMP_FORMATTER.parseDateTime("020216021710").toDate());
+        assertThat(actualLogTimestamp).isEqualTo(TelicDeviceMessages.LOG_TIMESTAMP.toDate());
     }
     
     @Test
     public void shouldSetGPSTimestampInPositionFragment() throws Exception {
-        String[] report = TelicReports.getTelicReport(Devices.IMEI_1, Positions.SAMPLE_1);
+        String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1).asArray();
         
         telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
         
         verifyReport();
         Date actualLogTimestamp = (Date) positionCaptor.getValue().getProperty(TelicConstants.GPS_TIMESTAMP);
-        assertThat(actualLogTimestamp).isEqualTo(TelicConstants.TIMESTAMP_FORMATTER.parseDateTime("020216021711").toDate());
+        assertThat(actualLogTimestamp).isEqualTo(TelicDeviceMessages.GPS_TIMESTAMP.toDate());
     }
     
     @Test
     public void shouldSetFixTypeInPositionFragment() throws Exception {
-        String[] report = TelicReports.getTelicReport(Devices.IMEI_1, Positions.SAMPLE_1);
+        String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1).asArray();
         
         telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
         
@@ -108,6 +113,34 @@ public class TelicLocationReportTest {
         Object actualFixType = positionCaptor.getValue().getProperty(TelicConstants.FIX_TYPE);
         assertThat(actualFixType).isEqualTo(FixType._3D.getLabel());
     }
+    
+    @Test
+    public void shouldSetSpeedIntoMeasurement() throws Exception {
+        String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1).asArray();
+        
+        telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
+        
+        verify(measurementService).createSpeedMeasurement(new BigDecimal(4), device, TelicDeviceMessages.GPS_TIMESTAMP);
+    }
    
+    @Test
+    public void shouldSetSatellitesInPositionFragment() throws Exception {
+        String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1).asArray();
+        
+        telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
+        
+        verifyReport();
+        Object actualSatellites = positionCaptor.getValue().getProperty(TelicConstants.SATELLITES);
+        assertThat(actualSatellites).isEqualTo(4);
+    }
+    
+    @Test
+    public void shouldSetAltitudeIntoMeasurement() throws Exception {
+        String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1).asArray();
+        
+        telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
+        
+        verify(measurementService).createAltitudeMeasurement(Positions.SAMPLE_1.getAlt(), device, TelicDeviceMessages.GPS_TIMESTAMP);
+    }
 
 }

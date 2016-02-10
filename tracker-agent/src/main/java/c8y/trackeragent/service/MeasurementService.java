@@ -1,20 +1,22 @@
 package c8y.trackeragent.service;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.cumulocity.model.measurement.MeasurementValue;
+import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
+import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
+
 import c8y.Battery;
 import c8y.SignalStrength;
 import c8y.SpeedMeasurement;
 import c8y.trackeragent.TrackerDevice;
-
-import com.cumulocity.model.measurement.MeasurementValue;
-import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
-import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
 
 @Component
 public class MeasurementService {
@@ -46,6 +48,18 @@ public class MeasurementService {
         speed.setUnit("km/h");
         speed.setValue(speedValue);
         return speedFragment;
+    }
+    
+    public static Map<String, Object> createAltitudeFragment(BigDecimal altitude) {
+        if (altitude == null) {
+            return null;
+        }
+        Map<String, Object> altFragment = new HashMap<String, Object>();
+        MeasurementValue alt = new MeasurementValue();
+        altFragment.put("altitude", alt);
+        alt.setUnit("m");
+        alt.setValue(altitude);
+        return altFragment;
     }
 
     private MeasurementRepresentation asMeasurement(TrackerDevice device, SpeedMeasurement speedFragment, DateTime date) {
@@ -92,6 +106,21 @@ public class MeasurementService {
         measurementValue.setValue(value);
         measurementValue.setUnit(unit);
         return measurementValue;
+    }
+
+    public Map<String, Object> createAltitudeMeasurement(BigDecimal altitude, TrackerDevice device, DateTime date) {
+        Map<String, Object> altFragment = createAltitudeFragment(altitude);
+        if (altFragment == null) {
+            return null;
+        }
+        MeasurementRepresentation measurement = new MeasurementRepresentation();
+        measurement.set(altFragment);
+        measurement.setType("c8y_Altitude");
+        measurement.setSource(asSource(device));
+        measurement.setTime(date.toDate());
+        logger.debug("Create speed measurement: ", measurement);
+        device.createMeasurement(measurement);
+        return altFragment;
     }
 
 

@@ -15,7 +15,7 @@ import c8y.trackeragent.utils.SignedLocation;
 import c8y.trackeragent.utils.message.TrackerMessage;
 import c8y.trackeragent.utils.message.TrackerMessageFactory;
 
-public class CobanDeviceMessages extends TrackerMessageFactory {
+public class CobanDeviceMessages extends TrackerMessageFactory<TrackerMessage> {
     
     private static final Logger logger = LoggerFactory.getLogger(CobanDeviceMessages.class);
     
@@ -28,9 +28,11 @@ public class CobanDeviceMessages extends TrackerMessageFactory {
     private static final String ALARM = "imei:%s,%s,0809231929,,F,055403.000,A,,,,,,100,;";
     private static final String OVERSPEED_ALARM = "imei:%s,%s,0809231929,,F,055403.000,A,,,,,,%s,;";
     
-    public CobanDeviceMessages() {
-        super(CobanConstants.FIELD_SEP, "" + CobanConstants.REPORT_SEP);
+    @Override
+    public TrackerMessage msg() {
+        return new TrackerMessage(CobanConstants.FIELD_SEP, "" + CobanConstants.REPORT_SEP);
     }
+
 
     public TrackerMessage logon(final String imei) {
         String msg = formatMessage(LOGON, imei);

@@ -51,6 +51,11 @@ public class ReportContext extends ConnectionContext {
         return StringUtils.isBlank(entry) ? null : new BigDecimal(entry.trim());
     }
     
+    public Integer getEntryAsInt(int index) {
+        String entry = getEntry(index);
+        return StringUtils.isBlank(entry) ? null : Integer.parseInt(entry.trim());
+    }
+    
     public int getNumberOfEntries() {
         return report.length;
     }
