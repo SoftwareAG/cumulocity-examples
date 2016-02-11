@@ -3,6 +3,8 @@ package c8y.trackeragent.protocol.telic.parser;
 import java.math.BigDecimal;
 import java.util.Date;
 
+import javax.activation.MimeTypeParameterList;
+
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +54,10 @@ public class TelicLocationReport implements Parser, TelicFragment {
     private static final int SATELLITES_FOR_CALCULATION = 9;
 
     public static final int ALTITUDE = 12;
+    
+    public static final int MILEAGE = 13;
+    
+    public static final int BATTERY = 17;
 
     public static final BigDecimal LAT_AND_LNG_DIVISOR = new BigDecimal(10000);
 
@@ -114,6 +120,15 @@ public class TelicLocationReport implements Parser, TelicFragment {
         if (speed != null) {
             measurementService.createSpeedMeasurement(speed, device, dateTime);
         }
+        
+        BigDecimal mileage = getMileage(reportCtx);
+        if (mileage != null) {
+            measurementService.createMileageMeasurement(mileage, device, dateTime);
+        }
+        BigDecimal batteryLevel = getBatteryLevel(reportCtx);
+        if (batteryLevel != null) {
+            measurementService.createBatteryLevelMeasurement(batteryLevel, device, dateTime, "mV");
+        }
         return true;
     }
 
@@ -175,4 +190,13 @@ public class TelicLocationReport implements Parser, TelicFragment {
     private Integer getSatellitesForCalculation(ReportContext reportCtx) {
         return reportCtx.getEntryAsInt(SATELLITES_FOR_CALCULATION);
     }
+    
+    private BigDecimal getMileage(ReportContext reportCtx) {
+        return reportCtx.getEntryAsNumber(MILEAGE);
+    }
+    
+    private BigDecimal getBatteryLevel(ReportContext reportCtx) {
+        return reportCtx.getEntryAsNumber(BATTERY);
+    }
+
 }

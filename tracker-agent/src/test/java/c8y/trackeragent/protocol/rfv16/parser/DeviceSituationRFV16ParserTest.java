@@ -46,7 +46,7 @@ public class DeviceSituationRFV16ParserTest extends RFV16ParserTestSupport {
         processMessage(deviceMessages.deviceSituation("DB", IMEI, null, 3));
         processMessage(deviceMessages.deviceSituation("DB", IMEI, null, 6));
         
-        verify(measurementService, times(3)).createBatteryLevelMeasurement(numberCaptor.capture(), any(TrackerDevice.class), any(DateTime.class));
+        verify(measurementService, times(3)).createPercentageBatteryLevelMeasurement(numberCaptor.capture(), any(TrackerDevice.class), any(DateTime.class));
         assertThat(numberCaptor.getAllValues()).containsExactly(new BigDecimal(0), new BigDecimal(50), new BigDecimal(100));
     }
     

@@ -400,38 +400,6 @@ public class TrackerDevice extends DeviceManagedObject {
         logger.debug("Create measurement {} for device {}", measurement, imei);
         measurements.create(measurement);
     }
-    public void createMileageMeasurement(String mileage) {
-        if (isEmpty(mileage)) {
-            return;
-        }
-        float mileageFloat = 0;
-        try {
-            mileageFloat = Float.parseFloat(mileage);
-        } catch (NumberFormatException e) {
-            logger.warn("Failed to parse mileage value: " + mileage);
-            return;
-        }
-        measurements.create(asMeasurementWithMileage(mileageFloat));
-    }
-
-    private MeasurementRepresentation asMeasurementWithMileage(float mileage) {
-        ManagedObjectRepresentation source = new ManagedObjectRepresentation();
-        source.setId(gid);
-        MeasurementRepresentation representation = new MeasurementRepresentation();
-        representation.setTime(new Date());
-        representation.setSource(source);
-        representation.setType("c8y_TrackerMileage");
-        Map<String, Object> measurementValue = new HashMap<String, Object>();
-        measurementValue.put("value", mileage);
-        measurementValue.put("unit", "km");
-
-        Map<String, Object> measurementSerie = new HashMap<String, Object>();
-        measurementSerie.put("c8y_DistanceMeasurement", measurementValue);
-
-        representation.set(measurementSerie, "c8y_TrackerMileage");
-
-        return representation;
-    }
 
     public CobanDevice getCobanDevice() {
         ManagedObjectRepresentation mo = getManagedObject();

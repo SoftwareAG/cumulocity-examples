@@ -22,16 +22,18 @@ package c8y.trackeragent.protocol.gl200.parser;
 
 import java.math.BigDecimal;
 
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import com.cumulocity.sdk.client.SDKException;
 
 import c8y.Position;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.protocol.gl200.GL200Constants;
-
-import com.cumulocity.sdk.client.SDKException;
+import c8y.trackeragent.service.MeasurementService;
 
 /**
  * <p>
@@ -74,10 +76,12 @@ public class GL200LocationReport extends GL200Parser {
     // @formatter:on
 	
     protected final TrackerAgent trackerAgent;
+    protected final MeasurementService measurementService;
 
     @Autowired
-    public GL200LocationReport(TrackerAgent trackerAgent) {
-	this.trackerAgent = trackerAgent;
+    public GL200LocationReport(TrackerAgent trackerAgent, MeasurementService measurementService) {
+        this.trackerAgent = trackerAgent;
+        this.measurementService = measurementService;
     }
 
     @Override
@@ -86,25 +90,25 @@ public class GL200LocationReport extends GL200Parser {
         if (ONLINE_REP.equals(reportType[0]) || BUFFER_REP.equals(reportType[0])) {
             for (String availableReps : LOCATION_REPORTS) {
                 if (availableReps.equals(reportType[1])) {
-                    return processLocationReportOnParsed(reportCtx.getReport(), reportCtx.getImei());
+                    return processLocationReportOnParsed(reportCtx);
                 }
             }
         }
         return false;
     }
     
-    private boolean processLocationReportOnParsed(String[] report, String imei) throws SDKException {
-        String deviceType = report[1].substring(0, 2);
+    private boolean processLocationReportOnParsed(ReportContext reportCtx) throws SDKException {
+        String deviceType = reportCtx.getEntry(1).substring(0, 2);
         
-        TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(imei);
-        String vin = report[3];
+        TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(reportCtx.getImei());
+        String vin = reportCtx.getEntry(3);
         device.registerVIN(vin);
         
-        createMileageMeasurementIfAvailable(report, device);
+        createMileageMeasurementIfAvailable(reportCtx, device);
         
         int reportStart = 7;
         int reportLength = 12;
-        int reportEnd = reportStart + Integer.parseInt(report[6]) * reportLength;
+        int reportEnd = reportStart + reportCtx.getEntryAsInt(6) * reportLength;
         
         if (GL200Constants.GL500_ID.equals(deviceType)) {
             reportStart = 9;
@@ -114,36 +118,39 @@ public class GL200LocationReport extends GL200Parser {
 
         if (GL200Constants.GV500_ID.equals(deviceType)) {
             reportStart = 8;
-            reportEnd = reportStart + Integer.parseInt(report[7]) * reportLength;
+            reportEnd = reportStart + reportCtx.getEntryAsInt(7) * reportLength;
         }
 
         for (; reportStart < reportEnd; reportStart += reportLength) {
-            processLocationReportOnParsed(device, report, reportStart);
+            processLocationReportOnParsed(device, reportCtx, reportStart);
         }
         return true;
     }
 
-    private void createMileageMeasurementIfAvailable(String[] report, TrackerDevice device) {
-        if (report.length > 20) {
-            String mileage = report[20];
-            device.createMileageMeasurement(mileage);
+    private void createMileageMeasurementIfAvailable(ReportContext reportCtx, TrackerDevice device) {
+        if (reportCtx.getNumberOfEntries() <= 20) {
+            return;
+        }
+        BigDecimal mileage = reportCtx.getEntryAsNumber(20);
+        if (mileage != null) {
+            measurementService.createMileageMeasurement(mileage, device, new DateTime());
         }
     }
 
-	private void processLocationReportOnParsed(TrackerDevice device, String[] report,
+	private void processLocationReportOnParsed(TrackerDevice device, ReportContext report,
 			int reportStart) throws SDKException {
-		if (report[reportStart + 3].length() > 0
-				&& report[reportStart + 4].length() > 0
-				&& report[reportStart + 5].length() > 0) {
+		if (report.getEntry(reportStart + 3).length() > 0
+				&& report.getEntry(reportStart + 4).length() > 0
+				&& report.getEntry(reportStart + 5).length() > 0) {
 			Position pos = new Position();
-			pos.setAlt(new BigDecimal(report[reportStart + 3]));
-			pos.setLng(new BigDecimal(report[reportStart + 4]));
-			pos.setLat(new BigDecimal(report[reportStart + 5]));
+			pos.setAlt(new BigDecimal(report.getEntry(reportStart + 3)));
+			pos.setLng(new BigDecimal(report.getEntry(reportStart + 4)));
+			pos.setLat(new BigDecimal(report.getEntry(reportStart + 5)));
 			device.setPosition(pos);
 		}
 		
-		if (report[reportStart + 10].length() > 0) {
-			device.setCellId(report[reportStart + 9] + "-" + report[reportStart + 10]);
+		if (report.getEntry(reportStart + 10).length() > 0) {
+			device.setCellId(report.getEntry(reportStart + 9) + "-" + report.getEntry(reportStart + 10));
 		}
 	}
 }

@@ -37,6 +37,7 @@ import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.protocol.gl200.GL200Constants;
 import c8y.trackeragent.protocol.gl200.parser.GL200LocationReport;
+import c8y.trackeragent.service.MeasurementService;
 
 import com.cumulocity.sdk.client.SDKException;
 
@@ -52,7 +53,8 @@ public class GL500LocationReportTest {
 
     private TrackerAgent trackerAgent = mock(TrackerAgent.class);
     private TrackerDevice device = mock(TrackerDevice.class);
-    private GL200LocationReport locationReport = new GL200LocationReport(trackerAgent);
+    private MeasurementService measurementService = mock(MeasurementService.class);
+    private GL200LocationReport locationReport = new GL200LocationReport(trackerAgent, measurementService);
 
     @Before
     public void setup() throws SDKException {

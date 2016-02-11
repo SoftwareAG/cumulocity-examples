@@ -36,14 +36,13 @@ public class TelicDeviceMessages extends TrackerMessageFactory<TrackerMessage> {
                 .appendField("")    //HDOP 
                 .appendField("")    //VDOP
                 .appendField(asTelicStringCoord(position.getAlt())) //Altitude
-                .appendField("11032")
+                .appendField("11032") //mileage
                 .appendField("")
-                .appendField("010 1")
-                .appendField("00")
-                .appendField("238")
-                .appendField("0")
-                .appendField("0")
-                .appendField("0");
+                .appendField("0101") //digital input status
+                .appendField("238") //digital output status
+                .appendField("211")   //analog input 1
+                .appendField("0")   //analog input 2
+                .appendField("0");  //analog input 3
         // @formatter:on
     }
     

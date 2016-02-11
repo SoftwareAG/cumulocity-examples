@@ -71,7 +71,7 @@ public class TelicLocationReportTest {
     }
     
     @Test
-    public void shouldSetLogCodeTypeInPositionFragment() throws Exception {
+    public void shouldSendLogCodeTypeInPositionFragment() throws Exception {
         String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1).asArray();
         
         telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
@@ -82,7 +82,7 @@ public class TelicLocationReportTest {
     }
     
     @Test
-    public void shouldSetLogTimestampInPositionFragment() throws Exception {
+    public void shouldSendLogTimestampInPositionFragment() throws Exception {
         String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1).asArray();
         
         telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
@@ -93,7 +93,7 @@ public class TelicLocationReportTest {
     }
     
     @Test
-    public void shouldSetGPSTimestampInPositionFragment() throws Exception {
+    public void shouldSendGPSTimestampInPositionFragment() throws Exception {
         String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1).asArray();
         
         telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
@@ -104,7 +104,7 @@ public class TelicLocationReportTest {
     }
     
     @Test
-    public void shouldSetFixTypeInPositionFragment() throws Exception {
+    public void shouldSendFixTypeInPositionFragment() throws Exception {
         String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1).asArray();
         
         telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
@@ -115,7 +115,7 @@ public class TelicLocationReportTest {
     }
     
     @Test
-    public void shouldSetSpeedIntoMeasurement() throws Exception {
+    public void shouldSendSpeedAsMeasurement() throws Exception {
         String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1).asArray();
         
         telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
@@ -124,7 +124,7 @@ public class TelicLocationReportTest {
     }
    
     @Test
-    public void shouldSetSatellitesInPositionFragment() throws Exception {
+    public void shouldSendSatellitesInPositionFragment() throws Exception {
         String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1).asArray();
         
         telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
@@ -135,12 +135,30 @@ public class TelicLocationReportTest {
     }
     
     @Test
-    public void shouldSetAltitudeIntoMeasurement() throws Exception {
+    public void shouldSendAltitudeAsMeasurement() throws Exception {
         String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1).asArray();
         
         telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
         
         verify(measurementService).createAltitudeMeasurement(Positions.SAMPLE_1.getAlt(), device, TelicDeviceMessages.GPS_TIMESTAMP);
     }
-
+    
+    @Test
+    public void shouldSendMileageAsMeasurement() throws Exception {
+        String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1).asArray();
+        
+        telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
+        
+        verify(measurementService).createMileageMeasurement(new BigDecimal(11032), device, TelicDeviceMessages.GPS_TIMESTAMP);
+    }
+    
+    @Test
+    public void shouldSendBatteryAsMeasurement() throws Exception {
+        String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1).asArray();
+        
+        telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
+        
+        verify(measurementService).createBatteryLevelMeasurement(new BigDecimal(211), device, TelicDeviceMessages.GPS_TIMESTAMP, "mV");
+    }
+    
 }

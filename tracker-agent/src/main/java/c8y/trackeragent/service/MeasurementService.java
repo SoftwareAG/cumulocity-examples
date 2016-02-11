@@ -77,10 +77,14 @@ public class MeasurementService {
         return source;
     }
 
-    public MeasurementRepresentation createBatteryLevelMeasurement(BigDecimal percentageBatteryLevel, TrackerDevice device, DateTime date) {
+    public MeasurementRepresentation createPercentageBatteryLevelMeasurement(BigDecimal percentageBatteryLevel, TrackerDevice device, DateTime date) {
+        return createBatteryLevelMeasurement(percentageBatteryLevel, device, date, "%");
+    }
+    
+    public MeasurementRepresentation createBatteryLevelMeasurement(BigDecimal batteryLevel, TrackerDevice device, DateTime date, String unit) {
         MeasurementRepresentation measurement = new MeasurementRepresentation();
         Battery batteryFragment = new Battery();
-        batteryFragment.setLevel(measurementValue(percentageBatteryLevel, "%"));
+        batteryFragment.setLevel(measurementValue(batteryLevel, unit));
         measurement.set(batteryFragment);
         measurement.setType("c8y_Battery");
         measurement.setSource(asSource(device));
@@ -121,6 +125,28 @@ public class MeasurementService {
         logger.debug("Create speed measurement: ", measurement);
         device.createMeasurement(measurement);
         return altFragment;
+    }
+    
+    public void createMileageMeasurement(BigDecimal mileage, TrackerDevice device, DateTime date) {
+        MeasurementRepresentation measurement = asMeasurementWithMileage(mileage, device, date);
+        device.createMeasurement(measurement);
+    }
+
+    private MeasurementRepresentation asMeasurementWithMileage(BigDecimal mileage, TrackerDevice device, DateTime date) {
+        MeasurementRepresentation representation = new MeasurementRepresentation();
+        representation.setTime(date.toDate());
+        representation.setSource(asSource(device));
+        representation.setType("c8y_TrackerMileage");
+        Map<String, Object> measurementValue = new HashMap<String, Object>();
+        measurementValue.put("value", mileage);
+        measurementValue.put("unit", "km");
+
+        Map<String, Object> measurementSerie = new HashMap<String, Object>();
+        measurementSerie.put("c8y_DistanceMeasurement", measurementValue);
+
+        representation.set(measurementSerie, "c8y_TrackerMileage");
+
+        return representation;
     }
 
 

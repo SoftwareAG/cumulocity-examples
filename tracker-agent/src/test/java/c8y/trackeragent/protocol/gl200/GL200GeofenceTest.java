@@ -37,6 +37,7 @@ import c8y.trackeragent.context.OperationContext;
 import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.protocol.gl200.GL200Constants;
 import c8y.trackeragent.protocol.gl200.parser.GL200Geofence;
+import c8y.trackeragent.service.MeasurementService;
 
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
@@ -54,6 +55,7 @@ public class GL200GeofenceTest {
     private GL200Geofence gl200gf;
     private TrackerAgent trackerAgent = mock(TrackerAgent.class);
     private TrackerDevice device = mock(TrackerDevice.class);
+    private MeasurementService measurementService = mock(MeasurementService.class);
 
     private OperationContext operationCtx;
     private Geofence fence;
@@ -70,7 +72,7 @@ public class GL200GeofenceTest {
 
         operationCtx = new OperationContext(operation, IMEI);
         
-        gl200gf = new GL200Geofence(trackerAgent);
+        gl200gf = new GL200Geofence(trackerAgent, measurementService);
 
         when(trackerAgent.getOrCreateTrackerDevice(anyString())).thenReturn(device);
     }
