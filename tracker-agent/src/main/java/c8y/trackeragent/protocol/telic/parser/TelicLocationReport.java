@@ -3,8 +3,6 @@ package c8y.trackeragent.protocol.telic.parser;
 import java.math.BigDecimal;
 import java.util.Date;
 
-import javax.activation.MimeTypeParameterList;
-
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,11 +51,13 @@ public class TelicLocationReport implements Parser, TelicFragment {
 
     private static final int SATELLITES_FOR_CALCULATION = 9;
 
-    public static final int ALTITUDE = 12;
+    private static final int ALTITUDE = 12;
     
-    public static final int MILEAGE = 13;
+    private static final int MILEAGE = 13;
     
-    public static final int BATTERY = 17;
+    private static final int BATTERY = 17;
+    
+    private static final int MOTION_SENSOR = 22;
 
     public static final BigDecimal LAT_AND_LNG_DIVISOR = new BigDecimal(10000);
 
@@ -198,5 +198,12 @@ public class TelicLocationReport implements Parser, TelicFragment {
     private BigDecimal getBatteryLevel(ReportContext reportCtx) {
         return reportCtx.getEntryAsNumber(BATTERY);
     }
+    
+    private BigDecimal getMotionSensor(ReportContext reportCtx) {
+        //TODO
+        return null;
+    }
+    
+    
 
 }
