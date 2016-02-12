@@ -37,6 +37,15 @@ public class ConnectedTelicTracker extends ConnectedTracker<TelicFragment> {
         super.init(client, eat(in, HEADER_LENGTH));
     }
 
+    @Override
+    public String readReport(InputStream is) throws IOException {
+        logger.debug("Start reading telic report");
+        if (eat(is, REPORT_SKIP) == null) {
+            return null;
+        }
+        return super.readReport(is);
+    }
+    
     private static InputStream eat(InputStream bis, int bytesToRead) throws IOException {
         byte[] dummy = new byte[bytesToRead];
         int bytesRead = bis.read(dummy, 0, bytesToRead);
@@ -45,15 +54,6 @@ public class ConnectedTelicTracker extends ConnectedTracker<TelicFragment> {
             return null;
         }
         return bis;
-    }
-
-    @Override
-    public String readReport(InputStream is) throws IOException {
-        logger.debug("Start reading telic report");
-        if (eat(is, REPORT_SKIP) == null) {
-            return null;
-        }
-        return super.readReport(is);
     }
     
 }

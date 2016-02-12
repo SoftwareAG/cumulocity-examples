@@ -26,7 +26,7 @@ public class RequestHandler implements Runnable {
     @Override
     public void run() {
         try {
-            ConnectedTracker tracker = trackerFactory.getTracker(client);
+            ConnectedTracker<?> tracker = trackerFactory.getTracker(client);
             if (tracker == null) {
                 logger.debug("Didnt find matching tracker for port {}", client.getLocalPort());
                 return;

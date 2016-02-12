@@ -8,12 +8,12 @@ public class Devices {
     
     private static Logger logger = LoggerFactory.getLogger(Devices.class);
     
-    public static final int IMEI_LENGTH = 6; 
+    public static final int IMEI_LENGTH = 4; 
     public static final String IMEI_1 = "187182";
     public static final String IMEI_2 = "012345";
     
     public static String randomImei() {
-        String imei = RandomStringUtils.random(IMEI_LENGTH, true, true);
+        String imei = "TT" + RandomStringUtils.random(IMEI_LENGTH, true, true);
         logger.info("Random imei: {} ", imei);
         return imei;
     }
