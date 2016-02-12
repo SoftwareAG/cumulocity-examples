@@ -149,7 +149,7 @@ public class TelicLocationReportTest {
         
         telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
         
-        verify(measurementService).createMileageMeasurement(new BigDecimal(11032), device, TelicDeviceMessages.GPS_TIMESTAMP);
+        verify(measurementService).createMileageMeasurement(new BigDecimal("11.032"), device, TelicDeviceMessages.GPS_TIMESTAMP);
     }
     
     @Test

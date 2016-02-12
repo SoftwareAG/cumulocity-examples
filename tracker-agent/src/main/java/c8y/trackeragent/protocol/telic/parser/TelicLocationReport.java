@@ -1,6 +1,7 @@
 package c8y.trackeragent.protocol.telic.parser;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.Date;
 
 import org.joda.time.DateTime;
@@ -61,6 +62,7 @@ public class TelicLocationReport implements Parser, TelicFragment {
     
 
     public static final BigDecimal LAT_AND_LNG_DIVISOR = new BigDecimal(10000);
+    public static final BigDecimal MILEAGE_DIVISOR = new BigDecimal(1000);
 
     private TrackerAgent trackerAgent;
 
@@ -197,7 +199,8 @@ public class TelicLocationReport implements Parser, TelicFragment {
     }
     
     private BigDecimal getMileage(ReportContext reportCtx) {
-        return reportCtx.getEntryAsNumber(MILEAGE);
+        BigDecimal mileage = reportCtx.getEntryAsNumber(MILEAGE);
+        return mileage == null ? null : mileage.divide(MILEAGE_DIVISOR);
     }
     
     private BigDecimal getBatteryLevel(ReportContext reportCtx) {
