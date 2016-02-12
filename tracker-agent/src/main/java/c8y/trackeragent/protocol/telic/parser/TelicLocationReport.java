@@ -55,9 +55,10 @@ public class TelicLocationReport implements Parser, TelicFragment {
     
     private static final int MILEAGE = 13;
     
+    private static final int DIGITAL_INPUT = 15;
+    
     private static final int BATTERY = 17;
     
-    private static final int MOTION_SENSOR = 22;
 
     public static final BigDecimal LAT_AND_LNG_DIVISOR = new BigDecimal(10000);
 
@@ -99,7 +100,7 @@ public class TelicLocationReport implements Parser, TelicFragment {
         LogCodeType logCodeType = getLogCodeType(reportCtx);
         if (logCodeType != null) {
             position.setProperty(TelicConstants.LOG_CODE_TYPE, logCodeType.getLabel());
-            checkGeofence(device, logCodeType);
+            handleLogCodeType(device, logCodeType, dateTime);
         }
         Date logTimestamp = getLogTimestamp(reportCtx).toDate();
         if (logTimestamp != null) {
@@ -125,6 +126,10 @@ public class TelicLocationReport implements Parser, TelicFragment {
         BigDecimal mileage = getMileage(reportCtx);
         if (mileage != null) {
             measurementService.createMileageMeasurement(mileage, device, dateTime);
+        }
+        String digitalInput = getDigitalInput(reportCtx);
+        if(digitalInput != null) {
+            handleDigitalInput(device, digitalInput, dateTime);
         }
         BigDecimal batteryLevel = getBatteryLevel(reportCtx);
         if (batteryLevel != null) {
@@ -199,23 +204,39 @@ public class TelicLocationReport implements Parser, TelicFragment {
         return reportCtx.getEntryAsNumber(BATTERY);
     }
     
-    private BigDecimal getMotionSensor(ReportContext reportCtx) {
-        //TODO
-        return null;
+    private String getDigitalInput(ReportContext reportCtx) {
+        return reportCtx.getEntry(DIGITAL_INPUT);
     }
     
-    private void checkGeofence(TrackerDevice device, LogCodeType logCodeType) {
+    private void handleLogCodeType(TrackerDevice device, LogCodeType logCodeType, DateTime dateTime) {
         switch (logCodeType) {
         case GEOFENCE_ENTER:
-            device.geofenceEnter();
+            device.geofenceEnter(dateTime);
             break;
         case GEOFENCE_EXIT:
-            device.geofenceExit();
+            device.geofenceExit(dateTime);
+            break;
+        case MOTION_SENSOR_MOTION:
+            device.motionEvent(true);
+            measurementService.createMotionMeasurement(true, device, dateTime);
+            break;
+        case MOTION_SENSOR_STATIONARY:
+            device.motionEvent(false);
+            measurementService.createMotionMeasurement(false, device, dateTime);
             break;
         default:
             //do nothing
         }
     }
     
+    private void handleDigitalInput(TrackerDevice device, String digitalInput, DateTime dateTime) {
+        if (digitalInput.length() != 4) {
+            logger.warn("Digital input has unexpected size {} (expected 4)");
+        }
+        if (digitalInput.charAt(2) == '1') {
+            device.chargerConnected(dateTime);
+        }
+        
+    }
 
 }

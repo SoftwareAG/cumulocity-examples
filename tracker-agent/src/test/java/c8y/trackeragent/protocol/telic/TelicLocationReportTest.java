@@ -163,20 +163,49 @@ public class TelicLocationReportTest {
     
     @Test
     public void shouldSendGeofenceEnterAsEvent() throws Exception {
-        String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1, "7").asArray();
+        String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1, LogCodeType.GEOFENCE_ENTER.getCode()).asArray();
         
         telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
         
-        verify(device).geofenceEnter();
+        verify(device).geofenceEnter(TelicDeviceMessages.GPS_TIMESTAMP);
     }
     
     @Test
     public void shouldSendGeofenceExitAsEvent() throws Exception {
-        String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1, "8").asArray();
+        String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1, LogCodeType.GEOFENCE_EXIT.getCode()).asArray();
         
         telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
         
-        verify(device).geofenceExit();
+        verify(device).geofenceExit(TelicDeviceMessages.GPS_TIMESTAMP);
+    }
+    
+    @Test
+    public void shouldSendMotionStartAsEventAndMeasurement() throws Exception {
+        String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1, LogCodeType.MOTION_SENSOR_MOTION.getCode()).asArray();
+        
+        telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
+        
+        verify(device).motionEvent(true);
+        verify(measurementService).createMotionMeasurement(true, device, TelicDeviceMessages.GPS_TIMESTAMP);
+    }
+    
+    @Test
+    public void shouldSendMotionStopAsEventAndMeasurement() throws Exception {
+        String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1, LogCodeType.MOTION_SENSOR_STATIONARY.getCode()).asArray();
+        
+        telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
+        
+        verify(device).motionEvent(false);
+        verify(measurementService).createMotionMeasurement(false, device, TelicDeviceMessages.GPS_TIMESTAMP);
+    }
+    
+    @Test
+    public void shouldSendChargerCOnnectedAsEvent() throws Exception {
+        String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1).asArray();
+        
+        telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
+        
+        verify(device).chargerConnected(TelicDeviceMessages.GPS_TIMESTAMP);
     }
     
 }

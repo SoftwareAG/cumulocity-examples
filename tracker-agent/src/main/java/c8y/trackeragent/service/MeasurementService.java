@@ -150,5 +150,26 @@ public class MeasurementService {
 
         return representation;
     }
+    
+    public void createMotionMeasurement(boolean motion, TrackerDevice device, DateTime date) {
+        MeasurementRepresentation measurement = asMeasurementWithMotion(motion, device, date);
+        device.createMeasurement(measurement);
+    }
+    
+    private MeasurementRepresentation asMeasurementWithMotion(boolean motion, TrackerDevice device, DateTime date) {
+        MeasurementRepresentation representation = new MeasurementRepresentation();
+        representation.setTime(date.toDate());
+        representation.setSource(asSource(device));
+        representation.setType("c8y_TrackerMotion");
+        MeasurementValue measurementValue = new MeasurementValue();
+        measurementValue.setValue(motion ? BigDecimal.ONE : BigDecimal.ZERO);
+        
+        Map<String, Object> measurementSerie = new HashMap<String, Object>();
+        measurementSerie.put("c8y_TrackerMotion", measurementValue);
+        
+        representation.set(measurementSerie, "c8y_TrackerMotion");
+        
+        return representation;
+    }
 
 }
