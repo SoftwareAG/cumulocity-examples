@@ -80,6 +80,8 @@ public class TrackerDevice extends DeviceManagedObject {
     public static final String GEO_ALARM_TYPE = "c8y_GeofenceAlarm";
     public static final String MOTION_DETECTED_EVENT_TYPE = "c8y_MotionEvent";
     public static final String MOTION_ENDED_EVENT_TYPE = "c8y_MotionEndedEvent";
+    public static final String GEOFENCE_ENTER = "c8y_GeofenceEnter";
+    public static final String GEOFENCE_EXIT = "c8y_GeofenceExit";
     public static final String POWER_ALARM_TYPE = "c8y_PowerAlarm";
 
     private EventApi events;
@@ -94,6 +96,8 @@ public class TrackerDevice extends DeviceManagedObject {
 
     private EventRepresentation eventMotionDetected = new EventRepresentation();
     private EventRepresentation eventMotionEnded = new EventRepresentation();
+    private EventRepresentation geofenceEnter = new EventRepresentation();
+    private EventRepresentation geofenceExit = new EventRepresentation();
 
     private AlarmRepresentation fenceAlarm = new AlarmRepresentation();
     private AlarmRepresentation powerAlarm = new AlarmRepresentation();
@@ -199,6 +203,18 @@ public class TrackerDevice extends DeviceManagedObject {
     		events.create(eventMotionEnded);
     		logger.debug("{} stopped moving", imei);
     	}
+    }
+    
+    public void geofenceEnter() throws SDKException {
+        geofenceEnter.setTime(new Date());
+        events.create(geofenceEnter);
+        logger.debug("{} enter geofence", imei);
+    }
+    
+    public void geofenceExit() throws SDKException {
+        geofenceExit.setTime(new Date());
+        events.create(geofenceExit);
+        logger.debug("{} exit geofence", imei);
     }
 
     public void powerAlarm(boolean powerLost, boolean external) throws SDKException {
@@ -312,6 +328,14 @@ public class TrackerDevice extends DeviceManagedObject {
         eventMotionEnded.setSource(source);
         eventMotionEnded.setType(MOTION_ENDED_EVENT_TYPE);
         eventMotionEnded.setText("Motion ended");
+        
+        geofenceEnter.setSource(source);
+        geofenceEnter.setType(GEOFENCE_ENTER);
+        geofenceEnter.setText("Geofence enter");
+        
+        geofenceExit.setSource(source);
+        geofenceExit.setType(GEOFENCE_EXIT);
+        geofenceExit.setText("Geofence exit");
         
         powerAlarm.setType(POWER_ALARM_TYPE);
         powerAlarm.setSeverity(CumulocitySeverities.MAJOR.toString());

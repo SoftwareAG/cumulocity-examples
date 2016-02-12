@@ -10,8 +10,8 @@ import c8y.trackeragent.utils.message.TrackerMessageFactory;
 
 public class TelicDeviceMessages extends TrackerMessageFactory<TrackerMessage> {
     
-    private static final String LOG_TIMESTAMP_STR = "020216021710";
-    private static final String GPS_TIMESTAMPS_STR = "020216021711";
+    private static final String LOG_TIMESTAMP_STR = "020216141710";
+    private static final String GPS_TIMESTAMPS_STR = "020216141711";
     public static final DateTime LOG_TIMESTAMP = TelicConstants.TIMESTAMP_FORMATTER.parseDateTime(LOG_TIMESTAMP_STR);
     public static final DateTime GPS_TIMESTAMP = TelicConstants.TIMESTAMP_FORMATTER.parseDateTime(GPS_TIMESTAMPS_STR);
     
@@ -20,10 +20,10 @@ public class TelicDeviceMessages extends TrackerMessageFactory<TrackerMessage> {
         return new TelicMessage(TelicConstants.FIELD_SEP, "" + TelicConstants.REPORT_SEP);
     }
     
-    public TrackerMessage positionUpdate(String imei, Position position) {
+    public TrackerMessage positionUpdate(String imei, Position position, String eventCode) {
         // @formatter:off
         return msg()
-                .appendField("0721" + imei + "99")
+                .appendField("0721" + imei + eventCode)
                 .appendField(LOG_TIMESTAMP_STR) //Log Timestamp
                 .appendField("0")
                 .appendField(GPS_TIMESTAMPS_STR) //GPS Timestamp
@@ -44,6 +44,11 @@ public class TelicDeviceMessages extends TrackerMessageFactory<TrackerMessage> {
                 .appendField("0")   //analog input 2
                 .appendField("0");  //analog input 3
         // @formatter:on
+        
+    }
+    
+    public TrackerMessage positionUpdate(String imei, Position position) {
+        return positionUpdate(imei, position, "99");
     }
     
     private static String asTelicStringCoord(BigDecimal coord) {

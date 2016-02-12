@@ -9,7 +9,9 @@ public enum LogCodeType {
     TIME_EVENT("Time Event", "99"),
     DISTANCE_EVENT("Distance Event", "98"),
     ANGULAR_CHANGE_EVENT("Angular Change Event", "6"),
-    POWER_EVENT("Power Event ", "1", "5");
+    POWER_EVENT("Power Event", "1", "5"),
+    GEOFENCE_ENTER("Geofence Area Enter", "7"),
+    GEOFENCE_EXIT("Geofence Area Exit", "8");
     
     private final String label;
     private final Set<String> codes;

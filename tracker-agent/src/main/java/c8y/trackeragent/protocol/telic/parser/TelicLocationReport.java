@@ -99,6 +99,7 @@ public class TelicLocationReport implements Parser, TelicFragment {
         LogCodeType logCodeType = getLogCodeType(reportCtx);
         if (logCodeType != null) {
             position.setProperty(TelicConstants.LOG_CODE_TYPE, logCodeType.getLabel());
+            checkGeofence(device, logCodeType);
         }
         Date logTimestamp = getLogTimestamp(reportCtx).toDate();
         if (logTimestamp != null) {
@@ -203,6 +204,18 @@ public class TelicLocationReport implements Parser, TelicFragment {
         return null;
     }
     
+    private void checkGeofence(TrackerDevice device, LogCodeType logCodeType) {
+        switch (logCodeType) {
+        case GEOFENCE_ENTER:
+            device.geofenceEnter();
+            break;
+        case GEOFENCE_EXIT:
+            device.geofenceExit();
+            break;
+        default:
+            //do nothing
+        }
+    }
     
 
 }

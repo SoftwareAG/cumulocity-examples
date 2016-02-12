@@ -161,4 +161,22 @@ public class TelicLocationReportTest {
         verify(measurementService).createBatteryLevelMeasurement(new BigDecimal(211), device, TelicDeviceMessages.GPS_TIMESTAMP, "mV");
     }
     
+    @Test
+    public void shouldSendGeofenceEnterAsEvent() throws Exception {
+        String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1, "7").asArray();
+        
+        telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
+        
+        verify(device).geofenceEnter();
+    }
+    
+    @Test
+    public void shouldSendGeofenceExitAsEvent() throws Exception {
+        String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1, "8").asArray();
+        
+        telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
+        
+        verify(device).geofenceExit();
+    }
+    
 }
