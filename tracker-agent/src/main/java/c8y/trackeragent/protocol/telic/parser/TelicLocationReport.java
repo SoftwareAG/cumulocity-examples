@@ -134,12 +134,11 @@ public class TelicLocationReport implements Parser, TelicFragment {
 
     private LogCodeType getLogCodeType(ReportContext reportCtx) {
         String codeStr = reportCtx.getEntry(LOG_CODE).substring(10);
-        if ("99".equals(codeStr)) {
-            return LogCodeType.TIME_EVENT;
-        } else if ("98".equals(codeStr)) {
-            return LogCodeType.DISTANCE_EVENT;
+        for (LogCodeType logCodeType : LogCodeType.values()) {
+            if (logCodeType.match(codeStr)) {
+                return logCodeType;
+            }
         }
-        //TODO
         logger.warn("Cant establish event code for value {} in report {}", codeStr, reportCtx);
         return null;
     }
