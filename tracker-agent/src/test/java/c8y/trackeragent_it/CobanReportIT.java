@@ -7,6 +7,9 @@ import java.math.BigDecimal;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
+import com.cumulocity.rest.representation.event.EventRepresentation;
+
 import c8y.Position;
 import c8y.SpeedMeasurement;
 import c8y.trackeragent.TrackerDevice;
@@ -18,9 +21,6 @@ import c8y.trackeragent.utils.Devices;
 import c8y.trackeragent.utils.Positions;
 import c8y.trackeragent.utils.TK10xCoordinatesTranslator;
 import c8y.trackeragent.utils.message.TrackerMessage;
-
-import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
-import com.cumulocity.rest.representation.event.EventRepresentation;
 
 public class CobanReportIT extends TrackerITSupport {
     
@@ -79,9 +79,10 @@ public class CobanReportIT extends TrackerITSupport {
     public void shouldProcessSpeedWithinPositionUpdateMessage() throws Exception {
         bootstrap(imei, deviceMessages.logon(imei));
         
+        // 120 = 65 * CobanParser.COBAN_SPEED_MEASUREMENT_FACTOR
         writeInNewConnection(deviceMessages.logon(imei), deviceMessages.positionUpdate(imei, 65));
         
-        assertThat(actualSpeedInEvent()).isEqualTo(new BigDecimal(65));
+        assertThat(actualSpeedInEvent()).isEqualTo(new BigDecimal(120));
     }
 
     @Test
@@ -121,7 +122,8 @@ public class CobanReportIT extends TrackerITSupport {
         
         AlarmRepresentation alarm = findAlarm(imei, CobanAlarmType.OVERSPEED);
         assertThat(alarm).isNotNull();
-        assertThat(alarm.getText()).isEqualTo("Geschwindigkeitsüberschreitung 50km/h");
+        // 92 = 50 * CobanParser.COBAN_SPEED_MEASUREMENT_FACTOR
+        assertThat(alarm.getText()).isEqualTo("Geschwindigkeitsüberschreitung 92km/h");
     }
     
     private BigDecimal actualSpeedInEvent() {
