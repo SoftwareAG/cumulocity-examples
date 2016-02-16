@@ -20,12 +20,15 @@
 
 package c8y.trackeragent.protocol.gl200.parser;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import c8y.Configuration;
 import c8y.Restart;
-import c8y.trackeragent.ReportContext;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.Translator;
-import c8y.trackeragent.operations.OperationContext;
+import c8y.trackeragent.context.OperationContext;
+import c8y.trackeragent.context.ReportContext;
 
 import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
@@ -36,14 +39,16 @@ import com.cumulocity.sdk.client.SDKException;
  * wasn't understood. Also, execute a verbatim command that was sent through the
  * configuration widget.
  */
+@Component
 public class GL200Fallback extends GL200Parser implements Translator {
 
     private final TrackerAgent trackerAgent;
     private final String password;
 
-    public GL200Fallback(TrackerAgent trackerAgent, String password) {
+    @Autowired
+    public GL200Fallback(TrackerAgent trackerAgent) {
         this.trackerAgent = trackerAgent;
-        this.password = password;
+        this.password = PASSWORD;
     }
 
     @Override

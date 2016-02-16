@@ -20,9 +20,12 @@
 
 package c8y.trackeragent.protocol.gl200.parser;
 
-import c8y.trackeragent.ReportContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerDevice;
+import c8y.trackeragent.context.ReportContext;
 
 import com.cumulocity.sdk.client.SDKException;
 
@@ -50,6 +53,7 @@ import com.cumulocity.sdk.client.SDKException;
  * +RESP:GTEPF,02010B,135790246811220,0,,4.3,92,70.0,121.354335,31.222073,20090214013254,0460,0000,18d8,18d8,6141,00,20100214093254,11F0$
  * 
  */
+@Component
 public class GL200Power extends GL200Parser {
     
     /**
@@ -63,6 +67,7 @@ public class GL200Power extends GL200Parser {
     
     private final TrackerAgent trackerAgent;
 
+    @Autowired
     public GL200Power(TrackerAgent trackerAgent) {
         this.trackerAgent = trackerAgent;
     }

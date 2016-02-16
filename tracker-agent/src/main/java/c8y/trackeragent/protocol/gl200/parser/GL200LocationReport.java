@@ -22,10 +22,13 @@ package c8y.trackeragent.protocol.gl200.parser;
 
 import java.math.BigDecimal;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import c8y.Position;
-import c8y.trackeragent.ReportContext;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerDevice;
+import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.protocol.gl200.GL200Constants;
 
 import com.cumulocity.sdk.client.SDKException;
@@ -40,17 +43,19 @@ import com.cumulocity.sdk.client.SDKException;
  * +RESP:GTFRI,02010B,135790246811220,,0,0,2,1,4.3,92,70.0,121.354335,31.222073,20090 214013254,0460,0000,18d8,6141,00,0,4.3,92,70.0,121.354335,31.222073,20090101000000,04 60,0000,18d8,6141,00,,20090214093254,11F0$
  * </pre>
  */
+@Component
 public class GL200LocationReport extends GL200Parser {
-	/**
-	 * Online reports sent directly by the device when GPRS is available.
-	 */
-	public static final String ONLINE_REP = "+RESP";
+    
+    /**
+     * Online reports sent directly by the device when GPRS is available.
+     */
+    public static final String ONLINE_REP = "+RESP";
 
-	/**
-	 * Reports that have been buffered due to GPRS unavailability. TODO Time
-	 * handling for such reports is incorrect.
-	 */
-	public static final String BUFFER_REP = "+BUFF";
+    /**
+     * Reports that have been buffered due to GPRS unavailability. TODO Time
+     * handling for such reports is incorrect.
+     */
+    public static final String BUFFER_REP = "+BUFF";
 
 	/**
 	 * Diverse Location reports sent by tracker.
@@ -68,11 +73,12 @@ public class GL200LocationReport extends GL200Parser {
     };
     // @formatter:on
 	
-	protected final TrackerAgent trackerAgent;
+    protected final TrackerAgent trackerAgent;
 
-	public GL200LocationReport(TrackerAgent trackerAgent) {
-		this.trackerAgent = trackerAgent;
-	}
+    @Autowired
+    public GL200LocationReport(TrackerAgent trackerAgent) {
+	this.trackerAgent = trackerAgent;
+    }
 
     @Override
     public boolean onParsed(ReportContext reportCtx) throws SDKException {

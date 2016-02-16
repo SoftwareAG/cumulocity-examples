@@ -1,20 +1,25 @@
 package c8y.trackeragent.utils;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+
+import c8y.trackeragent.protocol.mapping.TrackerProtocol;
 
 import com.cumulocity.sdk.client.polling.PollingStrategy;
 
 public class TrackerConfiguration {
 
     private String platformHost;
-    private int localPort;
+    private int localPort1;
+    private int localPort2;
     private String bootstrapUser;
     private String bootstrapPassword;
     private String bootstrapTenant;
     private int clientTimeout;
     private List<Long> bootstrapPollIntervals;
-    private String cobanLocationReportTimeInterval;
+    private Integer cobanLocationReportTimeInterval;
+    private Integer rfv16LocationReportTimeInterval;
     private boolean forceInitialHost;
     
     public TrackerConfiguration() {
@@ -30,12 +35,22 @@ public class TrackerConfiguration {
         return this;
     }
 
-    public int getLocalPort() {
-        return localPort;
+    public int getLocalPort1() {
+        return localPort1;
     }
+    
 
-    public TrackerConfiguration setLocalPort(int localPort) {
-        this.localPort = localPort;
+    public TrackerConfiguration setLocalPort1(int localPort1) {
+        this.localPort1 = localPort1;
+        return this;
+    }
+    
+    public int getLocalPort2() {
+        return localPort2;
+    }
+        
+    public TrackerConfiguration setLocalPort2(int localPort2) {
+        this.localPort2 = localPort2;
         return this;
     }
 
@@ -84,15 +99,24 @@ public class TrackerConfiguration {
         return this;
     }
     
-    public String getCobanLocationReportTimeInterval() {
+    public Integer getCobanLocationReportTimeInterval() {
         return cobanLocationReportTimeInterval;
     }
 
-    public TrackerConfiguration setCobanLocationReportTimeInterval(String cobanDefaultLocationReportInterval) {
+    public TrackerConfiguration setCobanLocationReportTimeInterval(Integer cobanDefaultLocationReportInterval) {
         this.cobanLocationReportTimeInterval = cobanDefaultLocationReportInterval;
         return this;
     }
     
+    public Integer getRfv16LocationReportTimeInterval() {
+        return rfv16LocationReportTimeInterval;
+    }
+
+    public TrackerConfiguration setRfv16LocationReportTimeInterval(Integer rfv16LocationReportTimeInterval) {
+        this.rfv16LocationReportTimeInterval = rfv16LocationReportTimeInterval;
+        return this;
+    }
+
     public boolean getForceInitialHost() {
         return forceInitialHost;
     }
@@ -101,13 +125,38 @@ public class TrackerConfiguration {
         this.forceInitialHost = forceInitialHost;
         return this;
     }
+    
+    public int getPort(TrackerProtocol protocol) {
+        if (getLocalPort1Protocols().contains(protocol)) {
+            return getLocalPort1();
+        }
+        if (getLocalPort2Protocols().contains(protocol)) {
+            return getLocalPort2();
+        }
+        throw new RuntimeException("Dont know port for protocol " + protocol);
+    }
+    
+    public Collection<TrackerProtocol> getLocalPort1Protocols() {
+        return Arrays.asList(
+                TrackerProtocol.TELIC, 
+                TrackerProtocol.GL200
+        );
+    }
+    
+    public Collection<TrackerProtocol> getLocalPort2Protocols() {
+        return Arrays.asList(
+                TrackerProtocol.COBAN, 
+                TrackerProtocol.RFV16
+        );
+    }
 
     @Override
     public String toString() {
         return String
-                .format("TrackerConfiguration [platformHost=%s, localPort=%s, bootstrapUser=%s, bootstrapPassword=%s, bootstrapTenant=%s, clientTimeout=%s, bootstrapPollIntervals=%s, cobanLocationReportTimeInterval=%s, forceInitialHost=%s]",
-                        platformHost, localPort, bootstrapUser, bootstrapPassword, bootstrapTenant, clientTimeout,
-                        bootstrapPollIntervals, cobanLocationReportTimeInterval, forceInitialHost);
+                .format("TrackerConfiguration [platformHost=%s, localPort1=%s, localPort2=%s, bootstrapUser=%s, bootstrapPassword=%s, bootstrapTenant=%s, clientTimeout=%s, bootstrapPollIntervals=%s, cobanLocationReportTimeInterval=%s, rfv16LocationReportTimeInterval=%s, forceInitialHost=%s, getLocalPort1Protocols()=%s, getLocalPort2Protocols()=%s]",
+                        platformHost, localPort1, localPort2, bootstrapUser, bootstrapPassword, bootstrapTenant,
+                        clientTimeout, bootstrapPollIntervals, cobanLocationReportTimeInterval,
+                        rfv16LocationReportTimeInterval, forceInitialHost, getLocalPort1Protocols(), getLocalPort2Protocols());
     }
     
 }

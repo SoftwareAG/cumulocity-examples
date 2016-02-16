@@ -20,9 +20,6 @@
 
 package c8y.trackeragent;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
@@ -33,6 +30,10 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+
+import c8y.trackeragent.devicebootstrap.DeviceBinder;
+import c8y.trackeragent.server.Servers;
+import c8y.trackeragent.utils.TrackerConfiguration;
 
 import com.cumulocity.agent.server.ServerBuilder;
 import com.cumulocity.agent.server.feature.ContextFeature;
@@ -52,30 +53,36 @@ public class Main {
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
     
     @Autowired
-    private Server server;
+    private Servers servers;
+    
+    @Autowired
+    private TrackerConfiguration config;
+    
+    @Autowired
+    private DeviceBinder deviceBinder;
     
     public static void main(String[] args) {
         logger.info("tracker-agent is starting.");
+        serverBuilder().run(args);
+    }
+
+    public static ServerBuilder serverBuilder() {
         //@formatter:off
-        ServerBuilder.on(8689)
-                .application("tracker-agent")
-                .logging("tracker-agent-server-logging")
-                .loadConfiguration("tracker-agent-server")
-                .enable(Main.class)
-                .enable(ContextFeature.class)
-                .enable(RepositoryFeature.class)
-                .useWebEnvironment(false)
-                .run(args);
+        return ServerBuilder.on(8689)
+            .application("tracker-agent")
+            .logging("tracker-agent-server-logging")
+            .loadConfiguration("tracker-agent-server")
+            .enable(Main.class)
+            .enable(ContextFeature.class)
+            .enable(RepositoryFeature.class)
+            .useWebEnvironment(false);
         //@formatter:on
     }
     
     @PostConstruct
-    public void startServer() {
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        logger.info("initialize tracker-agent server");
-        server.init();
-        logger.info("start tracker-agent server");
-        executor.submit(server);
+    public void onStart() {
+        servers.startAll();
+        deviceBinder.init();
     }
     
     @Bean

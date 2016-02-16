@@ -2,7 +2,10 @@ package c8y.trackeragent.devicebootstrap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.event.TrackerAgentEventListener;
 import c8y.trackeragent.event.TrackerAgentEvents.NewDeviceRegisteredEvent;
 import c8y.trackeragent.logger.TracelogAppenders;
@@ -12,26 +15,31 @@ import com.cumulocity.agent.server.context.DeviceContext;
 import com.cumulocity.agent.server.context.DeviceContextService;
 import com.google.common.eventbus.Subscribe;
 
+@Component
 public class DeviceBinder implements TrackerAgentEventListener {
     
     private static Logger logger = LoggerFactory.getLogger(DeviceBinder.class);
 
+    private final TrackerAgent agent;
     private final OperationDispatchers operationDispatchers;
     private final TracelogAppenders tracelogAppenders;
     private final DeviceCredentialsRepository deviceCredentialsRepository;
     private final DeviceContextService contextService;
+    private final DeviceBootstrapProcessor deviceBootstrapProcessor;
 
-    //@formatter:off
+    @Autowired
     public DeviceBinder(
+            TrackerAgent agent,
             OperationDispatchers operationDispatchers, 
             TracelogAppenders tracelogAppenders, 
-            DeviceCredentialsRepository deviceCredentialsRepository,
-            DeviceContextService contextService) {
+            DeviceContextService contextService, 
+            DeviceBootstrapProcessor deviceBootstrapProcessor) {
+        this.agent = agent;
         this.operationDispatchers = operationDispatchers;
         this.tracelogAppenders = tracelogAppenders;
-        this.deviceCredentialsRepository = deviceCredentialsRepository;
+        this.deviceBootstrapProcessor = deviceBootstrapProcessor;
+        this.deviceCredentialsRepository = DeviceCredentialsRepository.get();
         this.contextService = contextService;
-        //@formatter:on
     }
     
     @Subscribe
@@ -39,7 +47,18 @@ public class DeviceBinder implements TrackerAgentEventListener {
         DeviceCredentials credentials = event.getDeviceCredentials();
         deviceCredentialsRepository.saveCredentials(credentials);
         bind(credentials);
-        
+    }
+    
+    public void init() {
+        agent.registerEventListener(deviceBootstrapProcessor, this);
+        for (DeviceCredentials deviceCredentials : agent.getContext().getDeviceCredentials()) {
+            try {
+                logger.debug("bind IMEI {}", deviceCredentials.getImei());
+                bind(deviceCredentials);
+            } catch (Exception e) {
+                logger.error("Failed to initialize device: " + deviceCredentials.getImei());
+            }
+        }
     }
     
     public void bind(final DeviceCredentials credentials) {

@@ -1,4 +1,4 @@
-package c8y.trackeragent.utils;
+package c8y.trackeragent.context;
 
 import java.util.List;
 
@@ -8,6 +8,8 @@ import org.springframework.stereotype.Component;
 import c8y.trackeragent.TrackerPlatform;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
+import c8y.trackeragent.utils.TrackerConfiguration;
+import c8y.trackeragent.utils.TrackerPlatformProvider;
 
 @Component
 public class TrackerContext {

@@ -9,6 +9,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.event.TrackerAgentEventListener;
@@ -19,6 +21,7 @@ import com.cumulocity.sdk.client.devicecontrol.DeviceCredentialsApi;
 import com.cumulocity.sdk.client.polling.PollingStrategy;
 import com.google.common.eventbus.Subscribe;
 
+@Component
 public class DeviceBootstrapProcessor implements TrackerAgentEventListener {
 
     private static final int POOL_SIZE = 2;
@@ -32,6 +35,7 @@ public class DeviceBootstrapProcessor implements TrackerAgentEventListener {
     private final DeviceCredentialsApi deviceCredentialsApi;
     private final List<Long> bootstrapPollIntervals;
 
+    @Autowired
     public DeviceBootstrapProcessor(TrackerAgent trackerAgent) {
         this.trackerAgent = trackerAgent;
         this.threadPoolExecutor = Executors.newFixedThreadPool(POOL_SIZE);

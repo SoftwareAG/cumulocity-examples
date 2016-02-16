@@ -26,70 +26,76 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import c8y.trackeragent.context.OperationContext;
+import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.event.TrackerAgentEvents;
-import c8y.trackeragent.operations.OperationContext;
 
 import com.cumulocity.agent.server.context.DeviceContext;
 import com.cumulocity.agent.server.context.DeviceContextService;
 import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.sdk.client.SDKException;
+import com.google.common.collect.Iterables;
 
 /**
  * Performs the communication with a connected device. Accepts reports from the
  * input stream and sends commands to the output stream.
  */
-public class ConnectedTracker implements Runnable, Executor {
-
+public class ConnectedTracker<F extends Fragment> implements Runnable, Executor {
+    
     protected static Logger logger = LoggerFactory.getLogger(ConnectedTracker.class);
 
     private final char reportSeparator;
     private final String fieldSeparator;
-    private final Socket client;
-    private final InputStream bis;
-    private final List<Object> fragments = new ArrayList<Object>();
+    private final List<F> fragments = new ArrayList<F>();
     private final TrackerAgent trackerAgent;
     private final DeviceContextService contextService;
+    private final Map<String, Object> connectionParams = new HashMap<String, Object>();
 
+    private Socket client;
+    private InputStream in;
     private OutputStream out;
     private String imei;
 
-    public ConnectedTracker(Socket client, InputStream bis, char reportSeparator, String fieldSeparator, 
-            TrackerAgent trackerAgent, DeviceContextService contextService) {
-        this.client = client;
-        this.bis = bis;
+    public ConnectedTracker(char reportSeparator, String fieldSeparator, 
+            TrackerAgent trackerAgent, DeviceContextService contextService, List<F> fragments) {
         this.reportSeparator = reportSeparator;
         this.fieldSeparator = fieldSeparator;
         this.trackerAgent = trackerAgent;
         this.contextService = contextService;
+        this.fragments.addAll(fragments);
     }
-
-    public void addFragment(Object o) {
-        fragments.add(o);
+    
+    public void init(Socket client, InputStream in) throws Exception {
+        this.client = client;
+        this.in = in;
     }
 
     @Override
     public void run() {
-        if(bis == null) {
+        if(in == null) {
             return;
         }
         try {
             out = client.getOutputStream();
-            processReports(bis);
+            processReports(in);
         } catch (IOException e) {
             logger.warn("Error during communication with client device", e);
         } catch (SDKException e) {
             logger.warn("Error during communication with the platform", e);
         } finally {
             IOUtils.closeQuietly(out);
-            IOUtils.closeQuietly(bis);
+            IOUtils.closeQuietly(in);
             try {
                 client.close();
             } catch (IOException e) {
@@ -157,46 +163,37 @@ public class ConnectedTracker implements Runnable, Executor {
     }
 
     void processReport(String[] report) {
-        for (Object fragment : fragments) {
-            if (fragment instanceof Parser) {
-                final Parser parser = (Parser) fragment;
-                logger.debug("Using parser "+ parser.getClass());
-                final String imei = parser.parse(report);
-                if (imei != null) {
-                    logger.debug("Got report from IMEI: " + imei);
-                    boolean registered = checkIfDeviceRegistered(imei);
-                    if (registered) {
-                        final ReportContext reportContext = new ReportContext(report, imei, out);
-                        DeviceCredentials credentials = trackerAgent.getContext().getDeviceCredentials(imei);
-                        try {
-                            boolean success = contextService.callWithinContext(new DeviceContext(credentials), new Callable<Boolean>() {
-                                @Override
-                                public Boolean call() throws Exception {
-                                    return parser.onParsed(reportContext);
-                                }
-                            });
-                            if (success) {
-                                this.imei = imei;
-                                ConnectionRegistry.instance().put(imei, this);
-                            }
-
-                        } catch (Exception e) {
-                            logger.error("Error on parsing request", e);
-                        }
-                        
-                    } 
+        for (final Parser parser : Iterables.filter(fragments, Parser.class)) {
+            logger.debug("Using parser "+ parser.getClass());
+            final String imei = parser.parse(report);
+            if(imei == null) {
+                continue;
+            }
+            logger.debug("Got report from IMEI: " + imei);
+            boolean deviceRegistered = trackerAgent.getContext().isDeviceRegistered(imei);
+            if (!deviceRegistered) {
+                trackerAgent.sendEvent(new TrackerAgentEvents.NewDeviceEvent(imei));
+                break;
+            }
+            final ReportContext reportContext = new ReportContext(report, imei, out, connectionParams);
+            DeviceCredentials credentials = trackerAgent.getContext().getDeviceCredentials(imei);
+            try {
+                boolean success = contextService.callWithinContext(new DeviceContext(credentials), new Callable<Boolean>() {
+                    @Override
+                    public Boolean call() throws Exception {
+                        return parser.onParsed(reportContext);
+                    }
+                });
+                if (success) {
+                    this.imei = imei;
+                    ConnectionRegistry.instance().put(imei, this);
                 }
+
+            } catch (Exception e) {
+                logger.error("Error on parsing request", e);
             }
         }
         logger.debug("Finished processing report");
-    }
-
-    private boolean checkIfDeviceRegistered(String imei) {
-        boolean registered = trackerAgent.getContext().isDeviceRegistered(imei);
-        if (!registered) {
-            trackerAgent.sendEvent(new TrackerAgentEvents.NewDeviceEvent(imei));
-        }
-        return registered;
     }
 
     @Override
@@ -230,4 +227,9 @@ public class ConnectedTracker implements Runnable, Executor {
     void setOut(OutputStream out) {
         this.out = out;
     }
+
+    @Autowired
+	public Map<String, Object> getConnectionParams() {
+		return connectionParams;
+	}
 }

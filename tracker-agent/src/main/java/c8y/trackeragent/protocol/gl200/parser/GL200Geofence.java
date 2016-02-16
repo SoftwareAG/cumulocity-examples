@@ -20,12 +20,15 @@
 
 package c8y.trackeragent.protocol.gl200.parser;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import c8y.Geofence;
-import c8y.trackeragent.ReportContext;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.Translator;
-import c8y.trackeragent.operations.OperationContext;
+import c8y.trackeragent.context.OperationContext;
+import c8y.trackeragent.context.ReportContext;
 
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
@@ -41,6 +44,7 @@ import com.cumulocity.sdk.client.SDKException;
  * +ACK:GTGEO,02010B,135790246811220,,0,0008,20100310172830,11F0$
  * +RESP:GTGEO,02010B,135790246811220,,0,0,1,1,4.3,92,70.0,121.354335,31.222073,2009 0214013254,0460,0000,18d8,6141,00,,20090214093254,11F0$
  */
+@Component
 public class GL200Geofence extends GL200LocationReport implements Translator {
     /**
      * Number of fence, device supports up to five fences.
@@ -78,9 +82,10 @@ public class GL200Geofence extends GL200LocationReport implements Translator {
     private Geofence lastFence = new Geofence();
     private OperationRepresentation lastOperation;
 
-    public GL200Geofence(TrackerAgent trackerAgent, String password) {
+    @Autowired
+    public GL200Geofence(TrackerAgent trackerAgent) {
         super(trackerAgent);
-        this.password = password;
+        this.password = PASSWORD;
     }
 
     @Override

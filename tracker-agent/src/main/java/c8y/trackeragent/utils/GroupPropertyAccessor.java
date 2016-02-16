@@ -47,7 +47,7 @@ public class GroupPropertyAccessor {
     }
 
     public GroupPropertyAccessor refresh() {
-        source = ConfigUtils.get().getProperties(sourceFilePath);
+        source = ConfigUtils.getProperties(sourceFilePath);
         groups.clear();
         for (Object entry : source.keySet()) {
             tryReadEntry(String.valueOf(entry));

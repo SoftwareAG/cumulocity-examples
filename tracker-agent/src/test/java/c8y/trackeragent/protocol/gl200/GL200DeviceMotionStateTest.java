@@ -32,10 +32,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import c8y.MotionTracking;
-import c8y.trackeragent.ReportContext;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerDevice;
-import c8y.trackeragent.operations.OperationContext;
+import c8y.trackeragent.context.OperationContext;
+import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.protocol.gl200.GL200Constants;
 import c8y.trackeragent.protocol.gl200.parser.GL200DeviceMotionState;
 
@@ -44,7 +44,6 @@ import com.cumulocity.sdk.client.SDKException;
 
 public class GL200DeviceMotionStateTest {
 
-    public static final String PASSWORD = "gl200";
     public static final String IMEI = "135790246811220";
 
     public static final String SETTRACKINGSTR = "AT+GTCFG=gl200,,,,,,,,,,47,,,,,,,,,,,0001$";
@@ -70,7 +69,7 @@ public class GL200DeviceMotionStateTest {
         OperationRepresentation operation = new OperationRepresentation();
         operation.set(track);
         operationCtx = new OperationContext(operation, IMEI);
-        gl200mot = new GL200DeviceMotionState(trackerAgent, PASSWORD);
+        gl200mot = new GL200DeviceMotionState(trackerAgent);
         when(trackerAgent.getOrCreateTrackerDevice(anyString())).thenReturn(device);
     }
 

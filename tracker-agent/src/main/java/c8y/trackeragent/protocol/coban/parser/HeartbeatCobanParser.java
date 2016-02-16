@@ -2,19 +2,24 @@ package c8y.trackeragent.protocol.coban.parser;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.cumulocity.sdk.client.SDKException;
 
-import c8y.trackeragent.ReportContext;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerDevice;
+import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.protocol.coban.message.CobanServerMessages;
 
+@Component
 public class HeartbeatCobanParser extends CobanParser {
     
     private static Logger logger = LoggerFactory.getLogger(HeartbeatCobanParser.class);
+    
     private CobanServerMessages serverMessages;
 
+    @Autowired
     public HeartbeatCobanParser(TrackerAgent trackerAgent, CobanServerMessages serverMessages) {
         super(trackerAgent);
         this.serverMessages = serverMessages;

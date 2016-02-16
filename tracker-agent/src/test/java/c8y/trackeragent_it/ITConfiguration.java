@@ -1,8 +1,5 @@
 package c8y.trackeragent_it;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +13,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 
 import c8y.trackeragent.Main;
-import c8y.trackeragent.Server;
+import c8y.trackeragent.devicebootstrap.DeviceBinder;
+import c8y.trackeragent.server.Servers;
 
 import com.cumulocity.agent.server.feature.ContextFeature;
 import com.cumulocity.agent.server.feature.RepositoryFeature;
@@ -35,7 +33,10 @@ import com.cumulocity.agent.server.repository.DeviceControlRepository;
 public class ITConfiguration {
 
     @Autowired
-    Server server;
+    Servers servers;
+    
+    @Autowired
+    DeviceBinder deviceBinder;
     
     @Bean
     @Autowired
@@ -47,8 +48,7 @@ public class ITConfiguration {
     
     @PostConstruct
     public void startServer() {
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        server.init();
-        executor.submit(server);
+        servers.startAll();
+        deviceBinder.init();
     }
 }
