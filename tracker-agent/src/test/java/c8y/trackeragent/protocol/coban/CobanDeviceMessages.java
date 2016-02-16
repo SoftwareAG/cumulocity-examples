@@ -1,6 +1,5 @@
 package c8y.trackeragent.protocol.coban;
 
-import static c8y.trackeragent.utils.SignedLocation.altitude;
 import static c8y.trackeragent.utils.SignedLocation.latitude;
 import static c8y.trackeragent.utils.SignedLocation.longitude;
 import static java.lang.String.format;
@@ -47,7 +46,6 @@ public class CobanDeviceMessages extends TrackerMessageFactory<TrackerMessage> {
     private TrackerMessage positionUpdate(String imei, Position position, String gpsStatus, Integer speed) {
         SignedLocation lat = latitude().withValue(position.getLat());
         SignedLocation lng = longitude().withValue(position.getLng());
-        SignedLocation alt = altitude().withValue(position.getAlt());
         // formatter:off
         String text = formatMessage(POSITION_UPDATE, 
                 imei, 
