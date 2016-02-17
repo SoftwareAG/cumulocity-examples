@@ -347,7 +347,7 @@ public class TrackerDevice extends DeviceManagedObject {
         
         chargerConnected.setSource(source);
         chargerConnected.setType(CHARGER_CONNECTED);
-        geofenceExit.setText("Charger connected");
+        chargerConnected.setText("Charger connected");
         
         powerAlarm.setType(POWER_ALARM_TYPE);
         powerAlarm.setSeverity(CumulocitySeverities.MAJOR.toString());

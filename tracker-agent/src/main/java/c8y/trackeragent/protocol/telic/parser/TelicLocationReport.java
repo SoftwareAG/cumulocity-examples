@@ -1,7 +1,6 @@
 package c8y.trackeragent.protocol.telic.parser;
 
 import java.math.BigDecimal;
-import java.math.MathContext;
 import java.util.Date;
 
 import org.joda.time.DateTime;
