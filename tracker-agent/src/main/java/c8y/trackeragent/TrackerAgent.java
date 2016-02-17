@@ -3,9 +3,9 @@ package c8y.trackeragent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import c8y.trackeragent.context.TrackerContext;
 import c8y.trackeragent.event.TrackerAgentEventListener;
 import c8y.trackeragent.exception.UnknownTenantException;
-import c8y.trackeragent.utils.TrackerContext;
 
 import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;

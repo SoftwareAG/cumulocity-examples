@@ -35,17 +35,18 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 
+import c8y.trackeragent.context.OperationContext;
+import c8y.trackeragent.context.ReportContext;
+import c8y.trackeragent.context.TrackerContext;
 import c8y.trackeragent.event.TrackerAgentEvents;
-import c8y.trackeragent.operations.OperationContext;
 import c8y.trackeragent.protocol.gl200.GL200Constants;
-import c8y.trackeragent.utils.TrackerContext;
 
 import com.cumulocity.agent.server.context.DeviceContext;
 import com.cumulocity.agent.server.context.DeviceContextService;
@@ -59,22 +60,22 @@ public class ConnectedTrackerTest {
 
     private DeviceContextService contextService = mock(DeviceContextService.class);
     private Socket client = mock(Socket.class);
-    private BufferedInputStream bis = mock(BufferedInputStream.class);
+    private BufferedInputStream in = mock(BufferedInputStream.class);
     private OutputStream out = mock(OutputStream.class);
     private Translator translator = mock(Translator.class);
     private Parser parser = mock(Parser.class);
     private TrackerAgent trackerAgent = mock(TrackerAgent.class);
     private TrackerContext trackerContext = mock(TrackerContext.class);
-    private ConnectedTracker tracker;
+    private ConnectedTracker<Fragment> tracker;
 
+    @SuppressWarnings("unchecked")
     @Before
     public void setup() throws Exception {
         ConnectionRegistry.instance().remove("imei");
         when(trackerAgent.getContext()).thenReturn(trackerContext);
         when(contextService.callWithinContext(any(DeviceContext.class), any(Callable.class))).thenReturn(true);
-        tracker = new ConnectedTracker(client, bis, GL200Constants.REPORT_SEP, GL200Constants.FIELD_SEP, trackerAgent, contextService);
-        tracker.addFragment(translator);
-        tracker.addFragment(parser);
+        tracker = new ConnectedTracker<Fragment>(GL200Constants.REPORT_SEP, GL200Constants.FIELD_SEP, trackerAgent, contextService, Arrays.asList(translator, parser));
+        tracker.init(client, in);
         tracker.setOut(out);
     }
 

@@ -15,8 +15,9 @@
         <maven.compiler.source>1.6</maven.compiler.source>
         <maven.compiler.target>1.6</maven.compiler.target>
         <spring.boot.version>1.2.1.RELEASE</spring.boot.version>
-        <rpm.etc.dir>/etc/tracker-agent</rpm.etc.dir> <!-- TODO move to common parent pom for tracker-agent when created to avoid 
-            duplication here and in tracker-agent-package -->
+        <package.name>tracker-agent-server</package.name>
+        <package.directory>tracker-agent</package.directory>
+        <agent.main.class>c8y.trackeragent.Main</agent.main.class>
     </properties>
     <dependencies>
         <dependency>
@@ -75,6 +76,10 @@
 					<groupId>javax.validation</groupId>
 					<artifactId>com.springsource.javax.validation</artifactId>
 				</exclusion>
+				<exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-tomcat</artifactId>				
+				</exclusion>
 			</exclusions>
 		</dependency>
         <dependency>
@@ -107,15 +112,14 @@
 			<version>4.1.4.RELEASE</version>
 			<scope>test</scope>
 		</dependency>
-        
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-tomcat</artifactId>
+            <scope>provided</scope>
+            <version>${spring.boot.version}</version>
+        </dependency>
     </dependencies>
     <build>
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-                <filtering>true</filtering>
-            </resource>           
-        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -123,8 +127,35 @@
                 <version>2.4</version>
                 <configuration>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
-                    <attachClasses>true</attachClasses>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.nsn.cumulocity.clients-java</groupId>
+                <artifactId>agent-framework-package</artifactId>
+                <version>${c8y.version}</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>agent-package</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring.boot.version}</version>
+                <configuration>
+                    <mainClass>${agent.main.class}</mainClass>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -137,24 +168,13 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-				<version>${spring.boot.version}</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>repackage</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>com.nsn.cumulocity.clients-java</groupId>
-				<artifactId>agent-framework-package</artifactId>
-				<version>${c8y.version}</version>
-			</plugin>
         </plugins>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>           
+        </resources>
     </build>
     <profiles>
         <profile>

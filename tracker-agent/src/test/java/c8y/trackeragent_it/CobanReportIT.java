@@ -7,20 +7,20 @@ import java.math.BigDecimal;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
+import com.cumulocity.rest.representation.event.EventRepresentation;
+
 import c8y.Position;
 import c8y.SpeedMeasurement;
 import c8y.trackeragent.TrackerDevice;
-import c8y.trackeragent.protocol.coban.CobanConstants;
 import c8y.trackeragent.protocol.coban.CobanDeviceMessages;
 import c8y.trackeragent.protocol.coban.message.CobanServerMessages;
-import c8y.trackeragent.protocol.coban.parser.AlarmType;
+import c8y.trackeragent.protocol.coban.parser.CobanAlarmType;
+import c8y.trackeragent.protocol.mapping.TrackerProtocol;
 import c8y.trackeragent.utils.Devices;
 import c8y.trackeragent.utils.Positions;
 import c8y.trackeragent.utils.TK10xCoordinatesTranslator;
 import c8y.trackeragent.utils.message.TrackerMessage;
-
-import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
-import com.cumulocity.rest.representation.event.EventRepresentation;
 
 public class CobanReportIT extends TrackerITSupport {
     
@@ -33,6 +33,11 @@ public class CobanReportIT extends TrackerITSupport {
         imei = Devices.randomImei();
     }
     
+    @Override
+    protected TrackerProtocol getTrackerProtocol() {
+        return TrackerProtocol.COBAN;
+    }
+
     @Test
     public void shouldProcessLogonMessage() throws Exception {
         bootstrap(imei, deviceMessages.logon(imei));
@@ -42,7 +47,7 @@ public class CobanReportIT extends TrackerITSupport {
         TrackerMessage actual = serverMessages.msg(response);
         TrackerMessage expected = serverMessages
                 .load()
-                .appendReport(serverMessages.timeIntervalLocationRequest(imei, CobanConstants.DEFAULT_LOCATION_REPORT_INTERVAL));
+                .appendReport(serverMessages.timeIntervalLocationRequest(imei, "03m"));
         assertThat(actual).isEqualTo(expected);
     }
     
@@ -55,7 +60,7 @@ public class CobanReportIT extends TrackerITSupport {
         TrackerMessage actual = serverMessages.msg(response);
         TrackerMessage expected = serverMessages
                 .load()
-                .appendReport(serverMessages.timeIntervalLocationRequest(imei, CobanConstants.DEFAULT_LOCATION_REPORT_INTERVAL))
+                .appendReport(serverMessages.timeIntervalLocationRequest(imei, "03m"))
                 .appendReport(serverMessages.on());
         assertThat(actual).isEqualTo(expected);
     }
@@ -74,18 +79,20 @@ public class CobanReportIT extends TrackerITSupport {
     public void shouldProcessSpeedWithinPositionUpdateMessage() throws Exception {
         bootstrap(imei, deviceMessages.logon(imei));
         
+        // 120 = 65 * CobanParser.COBAN_SPEED_MEASUREMENT_FACTOR
         writeInNewConnection(deviceMessages.logon(imei), deviceMessages.positionUpdate(imei, 65));
         
-        assertThat(actualSpeedInEvent()).isEqualTo(new BigDecimal(65));
+        assertThat(actualSpeedInEvent()).isEqualTo(new BigDecimal(120));
     }
 
     @Test
     public void shouldProcessAlarmMessage() throws Exception {
         bootstrap(imei, deviceMessages.logon(imei));
         
-        writeInNewConnection(deviceMessages.logon(imei), deviceMessages.alarm(imei, AlarmType.LOW_BATTERY));
+        writeInNewConnection(deviceMessages.logon(imei), deviceMessages.alarm(imei, CobanAlarmType.LOW_BATTERY));
         
-        assertThat(getTrackerDevice(imei).findActiveAlarm(AlarmType.LOW_BATTERY.asC8yType())).isNotNull();
+        Thread.sleep(1000);
+        assertThat(findAlarm(imei, CobanAlarmType.LOW_BATTERY)).isNotNull();
     }
     
     @Test
@@ -94,7 +101,7 @@ public class CobanReportIT extends TrackerITSupport {
         
         writeInNewConnection(deviceMessages.logon(imei), deviceMessages.positionUpdateNoGPS(imei));
         
-        assertThat(getTrackerDevice(imei).findActiveAlarm(AlarmType.NO_GPS_SIGNAL.asC8yType())).isNotNull();
+        assertThat(findAlarm(imei, CobanAlarmType.NO_GPS_SIGNAL)).isNotNull();
     }
     
     @Test
@@ -103,8 +110,8 @@ public class CobanReportIT extends TrackerITSupport {
         
         writeInNewConnection(deviceMessages.logon(imei), deviceMessages.positionUpdateNoGPS(imei));
         writeInNewConnection(deviceMessages.logon(imei), deviceMessages.positionUpdate(imei, Positions.TK10xSample));
-        
-        assertThat(getTrackerDevice(imei).findActiveAlarm(AlarmType.NO_GPS_SIGNAL.asC8yType())).isNull();
+
+        assertThat(findAlarm(imei, CobanAlarmType.NO_GPS_SIGNAL)).isNull();
     }
     
     @Test
@@ -113,9 +120,10 @@ public class CobanReportIT extends TrackerITSupport {
         
         writeInNewConnection(deviceMessages.logon(imei), deviceMessages.overSpeedAlarm(imei, 50));
         
-        AlarmRepresentation alarm = getTrackerDevice(imei).findActiveAlarm(AlarmType.OVERSPEED.asC8yType());
+        AlarmRepresentation alarm = findAlarm(imei, CobanAlarmType.OVERSPEED);
         assertThat(alarm).isNotNull();
-        assertThat(alarm.getText()).isEqualTo("Geschwindigkeitsüberschreitung 50km/h");
+        // 92 = 50 * CobanParser.COBAN_SPEED_MEASUREMENT_FACTOR
+        assertThat(alarm.getText()).isEqualTo("Geschwindigkeitsüberschreitung 92km/h");
     }
     
     private BigDecimal actualSpeedInEvent() {

@@ -4,7 +4,7 @@ import static org.fest.assertions.Assertions.assertThat;
 
 import org.junit.Test;
 
-import c8y.trackeragent.ReportContext;
+import c8y.trackeragent.context.ReportContext;
 
 public class TrackerMessageTest {
     
@@ -42,9 +42,23 @@ public class TrackerMessageTest {
         ReportContext ctx = new ReportContext(msg.asArray(), "1212223", null);
         
         System.out.println(ctx);
+    }
+    
+    @Test
+    public void shouldCreateReportWithPrefix() throws Exception {
+        TrackerMessage msg1 = new TrackerMessage(",", ";", "*").appendField("A").appendField("B").appendField("C");
+        TrackerMessage msg2 = new TrackerMessage(",", ";", "*").appendField("D").appendField("E").appendField("F");
+        msg1.appendReport(msg2);
         
+        assertThat(msg1.asText()).isEqualTo("*A,B,C;*D,E,F;");
+    }
+    
+    @Test
+    public void shouldParseReportWithPrefixFromText() throws Exception {
+        TrackerMessage msg = new TrackerMessage(",", ";", "*").fromText("*A,B,C;*D,E,F;");
         
-        
+        assertThat(msg.getReports()).hasSize(2);
+        assertThat(msg.toString()).isEqualTo("*A,B,C;*D,E,F;");
     }
     
     

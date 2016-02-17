@@ -8,7 +8,7 @@ import java.io.ByteArrayOutputStream;
 import org.junit.Before;
 import org.junit.Test;
 
-import c8y.trackeragent.ReportContext;
+import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.utils.message.TrackerMessage;
 
 public class HeartbeatCobanParserTest extends CobanParserTestSupport {

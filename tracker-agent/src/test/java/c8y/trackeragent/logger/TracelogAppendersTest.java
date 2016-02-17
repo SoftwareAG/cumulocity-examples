@@ -12,12 +12,9 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
 import c8y.trackeragent.MockTrackerPlatform;
-import c8y.trackeragent.logger.PlatformLogger;
-import c8y.trackeragent.logger.TracelogAppenders;
-import c8y.trackeragent.utils.TrackerContext;
+import c8y.trackeragent.context.TrackerContext;
 
 import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
-import com.cumulocity.rest.representation.event.EventRepresentation;
 
 public class TracelogAppendersTest {
 

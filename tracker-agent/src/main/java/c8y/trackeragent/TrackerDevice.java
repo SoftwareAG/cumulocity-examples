@@ -25,11 +25,28 @@ import static org.apache.commons.lang.StringUtils.isEmpty;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.cumulocity.model.ID;
+import com.cumulocity.model.event.CumulocityAlarmStatuses;
+import com.cumulocity.model.event.CumulocitySeverities;
+import com.cumulocity.model.idtype.GId;
+import com.cumulocity.model.operation.OperationStatus;
+import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
+import com.cumulocity.rest.representation.event.EventRepresentation;
+import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
+import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
+import com.cumulocity.rest.representation.operation.OperationRepresentation;
+import com.cumulocity.sdk.client.SDKException;
+import com.cumulocity.sdk.client.alarm.AlarmApi;
+import com.cumulocity.sdk.client.alarm.AlarmFilter;
+import com.cumulocity.sdk.client.devicecontrol.DeviceControlApi;
+import com.cumulocity.sdk.client.event.EventApi;
+import com.cumulocity.sdk.client.event.EventFilter;
+import com.cumulocity.sdk.client.measurement.MeasurementApi;
 
 import c8y.Battery;
 import c8y.Configuration;
@@ -38,28 +55,14 @@ import c8y.IsDevice;
 import c8y.Mobile;
 import c8y.MotionTracking;
 import c8y.Position;
+import c8y.RFV16Config;
+import c8y.RequiredAvailability;
 import c8y.Restart;
 import c8y.SignalStrength;
-import c8y.SpeedMeasurement;
 import c8y.SupportedOperations;
 import c8y.trackeragent.protocol.coban.device.CobanDevice;
 import c8y.trackeragent.protocol.coban.device.CobanDeviceFactory;
 import c8y.trackeragent.utils.TrackerConfiguration;
-
-import com.cumulocity.model.ID;
-import com.cumulocity.model.event.CumulocityAlarmStatuses;
-import com.cumulocity.model.event.CumulocitySeverities;
-import com.cumulocity.model.idtype.GId;
-import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
-import com.cumulocity.rest.representation.event.EventRepresentation;
-import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
-import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
-import com.cumulocity.sdk.client.SDKException;
-import com.cumulocity.sdk.client.alarm.AlarmApi;
-import com.cumulocity.sdk.client.alarm.AlarmFilter;
-import com.cumulocity.sdk.client.event.EventApi;
-import com.cumulocity.sdk.client.event.EventFilter;
-import com.cumulocity.sdk.client.measurement.MeasurementApi;
 
 public class TrackerDevice extends DeviceManagedObject {
     
@@ -76,11 +79,16 @@ public class TrackerDevice extends DeviceManagedObject {
     public static final String GEO_ALARM_TYPE = "c8y_GeofenceAlarm";
     public static final String MOTION_DETECTED_EVENT_TYPE = "c8y_MotionEvent";
     public static final String MOTION_ENDED_EVENT_TYPE = "c8y_MotionEndedEvent";
+    private static final String CHARGER_CONNECTED = "c8y_ChargerConnected";
+    public static final String GEOFENCE_ENTER = "c8y_GeofenceEnter";
+    public static final String GEOFENCE_EXIT = "c8y_GeofenceExit";
     public static final String POWER_ALARM_TYPE = "c8y_PowerAlarm";
+
 
     private EventApi events;
     private AlarmApi alarms;
     private MeasurementApi measurements;
+    private DeviceControlApi deviceControl;
 
     private String imei;
     private GId gid;
@@ -89,6 +97,9 @@ public class TrackerDevice extends DeviceManagedObject {
 
     private EventRepresentation eventMotionDetected = new EventRepresentation();
     private EventRepresentation eventMotionEnded = new EventRepresentation();
+    private EventRepresentation geofenceEnter = new EventRepresentation();
+    private EventRepresentation geofenceExit = new EventRepresentation();
+    private EventRepresentation chargerConnected = new EventRepresentation();
 
     private AlarmRepresentation fenceAlarm = new AlarmRepresentation();
     private AlarmRepresentation powerAlarm = new AlarmRepresentation();
@@ -107,6 +118,7 @@ public class TrackerDevice extends DeviceManagedObject {
         this.events = platform.getEventApi();
         this.alarms = platform.getAlarmApi();
         this.measurements = platform.getMeasurementApi();
+        this.deviceControl = platform.getDeviceControlApi();
 
         this.imei = imei;
         createMo(agentGid);
@@ -122,22 +134,15 @@ public class TrackerDevice extends DeviceManagedObject {
     }
 
     public void setPosition(Position position) throws SDKException {
-        setPositionAndSpeed(position, null);
+        EventRepresentation event = aLocationUpdateEvent();
+        setPosition(event, position);
     }
     
-    public void setPositionAndSpeed(Position position, SpeedMeasurement speed) throws SDKException {
-        EventRepresentation event = aLocationUpdateEvent();
-        ManagedObjectRepresentation device = aDevice();
-        
-        if (position != null) {
-            logger.debug("Updating location of {} to {}.", imei, position);
-            device.set(position);
-            event.set(position);
-        }
-        if (speed != null) {
-            logger.debug("Updating speed of {} to {}.", imei, speed);
-            event.set(speed);
-        }
+    public void setPosition(EventRepresentation event, Position position) {
+        ManagedObjectRepresentation device = aDevice();        
+        logger.debug("Updating location of {} to {}.", imei, position);
+        device.set(position);
+        event.set(position);
         getInventory().update(device);        
         events.create(event);
     }
@@ -200,6 +205,24 @@ public class TrackerDevice extends DeviceManagedObject {
     		events.create(eventMotionEnded);
     		logger.debug("{} stopped moving", imei);
     	}
+    }
+    
+    public void geofenceEnter(DateTime dateTime) throws SDKException {
+        geofenceEnter.setTime(dateTime.toDate());
+        events.create(geofenceEnter);
+        logger.debug("{} enter geofence", imei);
+    }
+    
+    public void geofenceExit(DateTime dateTime) throws SDKException {
+        geofenceExit.setTime(dateTime.toDate());
+        events.create(geofenceExit);
+        logger.debug("{} exit geofence", imei);
+    }
+    
+    public void chargerConnected(DateTime dateTime) throws SDKException {
+        chargerConnected.setTime(dateTime.toDate());
+        events.create(chargerConnected);
+        logger.debug("Charger connected to {}", imei);
     }
 
     public void powerAlarm(boolean powerLost, boolean external) throws SDKException {
@@ -287,7 +310,7 @@ public class TrackerDevice extends DeviceManagedObject {
         return null;
     }
     
-    private EventRepresentation aLocationUpdateEvent() {
+    public EventRepresentation aLocationUpdateEvent() {
         EventRepresentation locationUpdate = new EventRepresentation();
         ManagedObjectRepresentation source = asSource();
         
@@ -313,6 +336,18 @@ public class TrackerDevice extends DeviceManagedObject {
         eventMotionEnded.setSource(source);
         eventMotionEnded.setType(MOTION_ENDED_EVENT_TYPE);
         eventMotionEnded.setText("Motion ended");
+        
+        geofenceEnter.setSource(source);
+        geofenceEnter.setType(GEOFENCE_ENTER);
+        geofenceEnter.setText("Geofence enter");
+        
+        geofenceExit.setSource(source);
+        geofenceExit.setType(GEOFENCE_EXIT);
+        geofenceExit.setText("Geofence exit");
+        
+        chargerConnected.setSource(source);
+        chargerConnected.setType(CHARGER_CONNECTED);
+        chargerConnected.setText("Charger connected");
         
         powerAlarm.setType(POWER_ALARM_TYPE);
         powerAlarm.setSeverity(CumulocitySeverities.MAJOR.toString());
@@ -343,6 +378,9 @@ public class TrackerDevice extends DeviceManagedObject {
     private void createMo(GId agentGid) throws SDKException {
         ManagedObjectRepresentation device = new ManagedObjectRepresentation();
 
+        RequiredAvailability availability = new RequiredAvailability(15);
+        device.set(availability);
+        
         SupportedOperations ops = new SupportedOperations();
         ops.add("c8y_Restart");
         ops.add("c8y_Configuration");
@@ -395,39 +433,8 @@ public class TrackerDevice extends DeviceManagedObject {
     }
     
     public void createMeasurement(MeasurementRepresentation measurement) {
+        logger.debug("Create measurement {} for device {}", measurement, imei);
         measurements.create(measurement);
-    }
-    public void createMileageMeasurement(String mileage) {
-        if (isEmpty(mileage)) {
-            return;
-        }
-        float mileageFloat = 0;
-        try {
-            mileageFloat = Float.parseFloat(mileage);
-        } catch (NumberFormatException e) {
-            logger.warn("Failed to parse mileage value: " + mileage);
-            return;
-        }
-        measurements.create(asMeasurementWithMileage(mileageFloat));
-    }
-
-    private MeasurementRepresentation asMeasurementWithMileage(float mileage) {
-        ManagedObjectRepresentation source = new ManagedObjectRepresentation();
-        source.setId(gid);
-        MeasurementRepresentation representation = new MeasurementRepresentation();
-        representation.setTime(new Date());
-        representation.setSource(source);
-        representation.setType("c8y_TrackerMileage");
-        Map<String, Object> measurementValue = new HashMap<String, Object>();
-        measurementValue.put("value", mileage);
-        measurementValue.put("unit", "km");
-
-        Map<String, Object> measurementSerie = new HashMap<String, Object>();
-        measurementSerie.put("c8y_DistanceMeasurement", measurementValue);
-
-        representation.set(measurementSerie, "c8y_TrackerMileage");
-
-        return representation;
     }
 
     public CobanDevice getCobanDevice() {
@@ -436,5 +443,30 @@ public class TrackerDevice extends DeviceManagedObject {
         logger.info("Received coban device config: {} for imei: {}", cobanDevice, imei);
         return cobanDevice;
     }
+    
+    public void set(RFV16Config newDeviceConfig) {
+        logger.info("Update {} for imei: {}", newDeviceConfig, imei);
+        ManagedObjectRepresentation device = aDevice();
+        device.set(newDeviceConfig);
+        getInventory().update(device);        
+    }
+    
+    public RFV16Config getRFV16Config() {
+        RFV16Config result = getManagedObject().get(RFV16Config.class);
+        return result == null ? new RFV16Config() : result;
+    }
+    
+    public void updateMobile(Mobile mobile) {
+        ManagedObjectRepresentation device = aDevice();        
+        logger.debug("Updating mobile of {} to {}.", imei, mobile);
+        device.set(mobile);
+        getInventory().update(device);        
+    }
+    
+    public void setOperationSuccessful(OperationRepresentation operation) {
+        operation.setStatus(OperationStatus.SUCCESSFUL.toString());
+        deviceControl.update(operation);
+    }
+
 
 }
