@@ -63,7 +63,7 @@ public class TrackerMessage {
         return Iterables.toArray(parts, String.class);
     }
     
-    private static byte[] asBytes(String msg) {
+    protected static byte[] asBytes(String msg) {
         try {
             return msg.getBytes("US-ASCII");
         } catch (UnsupportedEncodingException ex) {
@@ -91,7 +91,7 @@ public class TrackerMessage {
     public LinkedList<Report> getReports() {
         return reports;
     }
-
+    
     public TrackerMessage appendReport(TrackerMessage msg) {
         this.reports.addAll(msg.getReports());
         return this;

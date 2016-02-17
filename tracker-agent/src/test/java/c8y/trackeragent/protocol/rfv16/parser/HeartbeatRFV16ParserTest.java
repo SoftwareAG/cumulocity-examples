@@ -62,7 +62,7 @@ public class HeartbeatRFV16ParserTest extends RFV16ParserTestSupport {
         
         processMessage(msg);
         
-        verify(measurementService).createBatteryLevelMeasurement(eq(new BigDecimal(20)), any(TrackerDevice.class), any(DateTime.class));
+        verify(measurementService).createPercentageBatteryLevelMeasurement(eq(new BigDecimal(20)), any(TrackerDevice.class), any(DateTime.class));
     }
     
     @Test

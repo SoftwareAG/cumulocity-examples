@@ -48,7 +48,7 @@ public class DeviceSituationRFV16Parser extends RFV16Parser implements Parser {
 
         BigDecimal batteryLevel = getBatteryPercentageLevel(reportCtx);
         if (batteryLevel != null) {
-            measurementService.createBatteryLevelMeasurement(batteryLevel, device, new DateTime());
+            measurementService.createPercentageBatteryLevelMeasurement(batteryLevel, device, new DateTime());
         }
         BigDecimal gsmLevel = getGSMPercentageLevel(reportCtx);
         if (gsmLevel != null) {

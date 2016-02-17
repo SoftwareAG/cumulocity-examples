@@ -23,15 +23,16 @@ package c8y.trackeragent.protocol.gl200.parser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.cumulocity.rest.representation.operation.OperationRepresentation;
+import com.cumulocity.sdk.client.SDKException;
+
 import c8y.Geofence;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.Translator;
 import c8y.trackeragent.context.OperationContext;
 import c8y.trackeragent.context.ReportContext;
-
-import com.cumulocity.rest.representation.operation.OperationRepresentation;
-import com.cumulocity.sdk.client.SDKException;
+import c8y.trackeragent.service.MeasurementService;
 
 /**
  * <p>
@@ -83,8 +84,8 @@ public class GL200Geofence extends GL200LocationReport implements Translator {
     private OperationRepresentation lastOperation;
 
     @Autowired
-    public GL200Geofence(TrackerAgent trackerAgent) {
-        super(trackerAgent);
+    public GL200Geofence(TrackerAgent trackerAgent, MeasurementService measurementService) {
+        super(trackerAgent, measurementService);
         this.password = PASSWORD;
     }
 

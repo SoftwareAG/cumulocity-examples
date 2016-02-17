@@ -25,9 +25,8 @@ import static org.apache.commons.lang.StringUtils.isEmpty;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +40,6 @@ import com.cumulocity.rest.representation.event.EventRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
-import com.cumulocity.rest.representation.operation.Operations;
 import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.alarm.AlarmApi;
 import com.cumulocity.sdk.client.alarm.AlarmFilter;
@@ -81,7 +79,11 @@ public class TrackerDevice extends DeviceManagedObject {
     public static final String GEO_ALARM_TYPE = "c8y_GeofenceAlarm";
     public static final String MOTION_DETECTED_EVENT_TYPE = "c8y_MotionEvent";
     public static final String MOTION_ENDED_EVENT_TYPE = "c8y_MotionEndedEvent";
+    private static final String CHARGER_CONNECTED = "c8y_ChargerConnected";
+    public static final String GEOFENCE_ENTER = "c8y_GeofenceEnter";
+    public static final String GEOFENCE_EXIT = "c8y_GeofenceExit";
     public static final String POWER_ALARM_TYPE = "c8y_PowerAlarm";
+
 
     private EventApi events;
     private AlarmApi alarms;
@@ -95,6 +97,9 @@ public class TrackerDevice extends DeviceManagedObject {
 
     private EventRepresentation eventMotionDetected = new EventRepresentation();
     private EventRepresentation eventMotionEnded = new EventRepresentation();
+    private EventRepresentation geofenceEnter = new EventRepresentation();
+    private EventRepresentation geofenceExit = new EventRepresentation();
+    private EventRepresentation chargerConnected = new EventRepresentation();
 
     private AlarmRepresentation fenceAlarm = new AlarmRepresentation();
     private AlarmRepresentation powerAlarm = new AlarmRepresentation();
@@ -200,6 +205,24 @@ public class TrackerDevice extends DeviceManagedObject {
     		events.create(eventMotionEnded);
     		logger.debug("{} stopped moving", imei);
     	}
+    }
+    
+    public void geofenceEnter(DateTime dateTime) throws SDKException {
+        geofenceEnter.setTime(dateTime.toDate());
+        events.create(geofenceEnter);
+        logger.debug("{} enter geofence", imei);
+    }
+    
+    public void geofenceExit(DateTime dateTime) throws SDKException {
+        geofenceExit.setTime(dateTime.toDate());
+        events.create(geofenceExit);
+        logger.debug("{} exit geofence", imei);
+    }
+    
+    public void chargerConnected(DateTime dateTime) throws SDKException {
+        chargerConnected.setTime(dateTime.toDate());
+        events.create(chargerConnected);
+        logger.debug("Charger connected to {}", imei);
     }
 
     public void powerAlarm(boolean powerLost, boolean external) throws SDKException {
@@ -314,6 +337,18 @@ public class TrackerDevice extends DeviceManagedObject {
         eventMotionEnded.setType(MOTION_ENDED_EVENT_TYPE);
         eventMotionEnded.setText("Motion ended");
         
+        geofenceEnter.setSource(source);
+        geofenceEnter.setType(GEOFENCE_ENTER);
+        geofenceEnter.setText("Geofence enter");
+        
+        geofenceExit.setSource(source);
+        geofenceExit.setType(GEOFENCE_EXIT);
+        geofenceExit.setText("Geofence exit");
+        
+        chargerConnected.setSource(source);
+        chargerConnected.setType(CHARGER_CONNECTED);
+        geofenceExit.setText("Charger connected");
+        
         powerAlarm.setType(POWER_ALARM_TYPE);
         powerAlarm.setSeverity(CumulocitySeverities.MAJOR.toString());
         powerAlarm.setText("Asset lost power.");
@@ -401,38 +436,6 @@ public class TrackerDevice extends DeviceManagedObject {
         logger.debug("Create measurement {} for device {}", measurement, imei);
         measurements.create(measurement);
     }
-    public void createMileageMeasurement(String mileage) {
-        if (isEmpty(mileage)) {
-            return;
-        }
-        float mileageFloat = 0;
-        try {
-            mileageFloat = Float.parseFloat(mileage);
-        } catch (NumberFormatException e) {
-            logger.warn("Failed to parse mileage value: " + mileage);
-            return;
-        }
-        measurements.create(asMeasurementWithMileage(mileageFloat));
-    }
-
-    private MeasurementRepresentation asMeasurementWithMileage(float mileage) {
-        ManagedObjectRepresentation source = new ManagedObjectRepresentation();
-        source.setId(gid);
-        MeasurementRepresentation representation = new MeasurementRepresentation();
-        representation.setTime(new Date());
-        representation.setSource(source);
-        representation.setType("c8y_TrackerMileage");
-        Map<String, Object> measurementValue = new HashMap<String, Object>();
-        measurementValue.put("value", mileage);
-        measurementValue.put("unit", "km");
-
-        Map<String, Object> measurementSerie = new HashMap<String, Object>();
-        measurementSerie.put("c8y_DistanceMeasurement", measurementValue);
-
-        representation.set(measurementSerie, "c8y_TrackerMileage");
-
-        return representation;
-    }
 
     public CobanDevice getCobanDevice() {
         ManagedObjectRepresentation mo = getManagedObject();
@@ -464,5 +467,6 @@ public class TrackerDevice extends DeviceManagedObject {
         operation.setStatus(OperationStatus.SUCCESSFUL.toString());
         deviceControl.update(operation);
     }
+
 
 }

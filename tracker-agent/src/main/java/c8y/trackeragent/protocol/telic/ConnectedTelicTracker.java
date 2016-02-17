@@ -34,17 +34,7 @@ public class ConnectedTelicTracker extends ConnectedTracker<TelicFragment> {
     
     @Override
     public void init(Socket client, InputStream in) throws Exception {
-	super.init(client, eat(in, HEADER_LENGTH));
-    }
-
-    private static InputStream eat(InputStream bis, int bytesToRead) throws IOException {
-        byte[] dummy = new byte[bytesToRead];
-        int bytesRead = bis.read(dummy, 0, bytesToRead);
-        if (bytesRead < bytesToRead) {
-            logger.warn("{} bytes read from header but expected at least {}, skip this report!", bytesRead, bytesToRead);
-            return null;
-        }
-        return bis;
+        super.init(client, eat(in, HEADER_LENGTH));
     }
 
     @Override
@@ -54,6 +44,16 @@ public class ConnectedTelicTracker extends ConnectedTracker<TelicFragment> {
             return null;
         }
         return super.readReport(is);
+    }
+    
+    private static InputStream eat(InputStream bis, int bytesToRead) throws IOException {
+        byte[] dummy = new byte[bytesToRead];
+        int bytesRead = bis.read(dummy, 0, bytesToRead);
+        if (bytesRead < bytesToRead) {
+            logger.warn("{} bytes read from header but expected at least {}, skip this report!", bytesRead, bytesToRead);
+            return null;
+        }
+        return bis;
     }
     
 }
