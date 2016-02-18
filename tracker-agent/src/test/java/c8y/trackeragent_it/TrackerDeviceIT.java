@@ -83,9 +83,9 @@ public class TrackerDeviceIT extends TrackerITSupport {
         // Clean up previous tests
         try {
             extId.setType("c8y_Imei");
-            ExternalIDRepresentation eir = testPlatform.getIdentityApi().getExternalId(extId);
+            ExternalIDRepresentation eir = trackerPlatform.getIdentityApi().getExternalId(extId);
             GId gid = eir.getManagedObject().getId();
-            testPlatform.getInventoryApi().delete(gid);
+            trackerPlatform.getInventoryApi().delete(gid);
         } catch (SDKException e) {
         }
 
@@ -158,7 +158,7 @@ public class TrackerDeviceIT extends TrackerITSupport {
     }
 
     private void validateTrackerData(GId gid) throws SDKException {
-        InventoryApi inventory = testPlatform.getInventoryApi();
+        InventoryApi inventory = trackerPlatform.getInventoryApi();
         ManagedObjectRepresentation mo = inventory.get(gid);
 
         assertNotNull(mo.get(IsDevice.class));
@@ -181,7 +181,7 @@ public class TrackerDeviceIT extends TrackerITSupport {
         assertNotNull(tracking);
         assertTrue(tracking.isActive());
 
-        AlarmApi alarms = testPlatform.getAlarmApi();
+        AlarmApi alarms = trackerPlatform.getAlarmApi();
 
         AlarmFilter filter = new AlarmFilter();
         filter.bySource(mo.getId());
@@ -189,7 +189,7 @@ public class TrackerDeviceIT extends TrackerITSupport {
             assertEquals(CumulocityAlarmStatuses.CLEARED.toString(), alarm.getStatus());
         }
 
-        MeasurementApi measurements = testPlatform.getMeasurementApi();
+        MeasurementApi measurements = trackerPlatform.getMeasurementApi();
         MeasurementFilter mf = new MeasurementFilter();
         mf.bySource(mo.getId());
         MeasurementCollection mpcr = measurements.getMeasurementsByFilter(mf);
@@ -203,7 +203,7 @@ public class TrackerDeviceIT extends TrackerITSupport {
     
     private void bindTestPlatformCredentials(String imei) {
         //@formatter:off
-        DeviceCredentials deviceCredentials = new DeviceCredentials(testPlatform.getTenantId(), testPlatform.getUser(), testPlatform.getPassword(), null, null);
+        DeviceCredentials deviceCredentials = new DeviceCredentials(trackerPlatform.getTenantId(), trackerPlatform.getUser(), trackerPlatform.getPassword(), null, null);
         deviceCredentials.setImei(imei);
         DeviceCredentialsRepository.get().saveCredentials(deviceCredentials);
         //@formatter:on

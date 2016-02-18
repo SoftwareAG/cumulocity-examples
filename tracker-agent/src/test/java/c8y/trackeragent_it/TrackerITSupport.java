@@ -74,7 +74,7 @@ public abstract class TrackerITSupport {
     @Autowired
     protected AlarmMappingService alarmMappingService;
     
-    protected TrackerPlatform testPlatform;
+    protected TrackerPlatform trackerPlatform;
     protected TestConfiguration testConfig;
     protected RestConnector restConnector;
     private final ExecutorService executor = Executors.newFixedThreadPool(1);
@@ -89,8 +89,8 @@ public abstract class TrackerITSupport {
         if (isLocalTrackerTest()) {
             clearPersistedDevices();
         }
-        testPlatform = createTrackerPlatform();
-        restConnector = new RestConnector(testPlatform.getPlatformParameters(), new ResponseParser());
+        trackerPlatform = createTrackerPlatform();
+        restConnector = new RestConnector(trackerPlatform.getPlatformParameters(), new ResponseParser());
     }
 
     protected final int getLocalPort() {
@@ -144,6 +144,15 @@ public abstract class TrackerITSupport {
         }
     }
 
+    protected Socket writeInNewConnectionAndKeepOpen(byte[] bis) throws Exception {
+        Socket socket = newSocket();
+        OutputStream out = socket.getOutputStream();
+        out.write(bis);
+        out.flush();
+        Thread.sleep(1000);
+        return socket;
+    }
+    
     protected String writeInNewConnection(Socket socket, byte[] bis) throws Exception {
         OutputStream out = socket.getOutputStream();
         out.write(bis);
@@ -176,7 +185,7 @@ public abstract class TrackerITSupport {
         logger.info("Send message: {}", sum);
         return writeInNewConnection(newSocket(), sum.asBytes());
     }
-    
+        
     @Deprecated//use DeviceMessage object
     protected String writeInNewConnection(byte[] bis) throws Exception {
         return writeInNewConnection(newSocket(), bis);
@@ -203,7 +212,7 @@ public abstract class TrackerITSupport {
     }
 
     protected String newDeviceRequestsUri() {
-        return testPlatform.getHost() + "devicecontrol/newDeviceRequests";
+        return trackerPlatform.getHost() + "devicecontrol/newDeviceRequests";
     }
 
     protected String newDeviceRequestUri(String deviceId) {
@@ -221,9 +230,9 @@ public abstract class TrackerITSupport {
     }
 
     protected TrackerDevice getTrackerDevice(String imei) {
-        DeviceManagedObject deviceManagedObject = new DeviceManagedObject(testPlatform);
+        DeviceManagedObject deviceManagedObject = new DeviceManagedObject(trackerPlatform);
         GId agentId = deviceManagedObject.getAgentId();
-        return new TrackerDevice(testPlatform, trackerAgentConfig, agentId, imei);
+        return new TrackerDevice(trackerPlatform, trackerAgentConfig, agentId, imei);
     }
     
     protected void bootstrap(String imei, TrackerMessage deviceMessage) throws UnsupportedEncodingException, Exception, InterruptedException {
