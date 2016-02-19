@@ -45,57 +45,53 @@ public class RFV16CommandTranslator extends RFV16Parser implements Translator {
     
     @Override
     public String translate(OperationContext operationCtx) {
-        String maker = getMaker(operationCtx);
-        if (maker == null) {
-            return null;
-        }
         
         logger.info("Handled operation {}.", operationCtx);
         if (operationCtx.getOperation().get(Restart.class) != null) {
             registerOperationAsExecuting(operationCtx);
-            return translateRestart(operationCtx, maker);
+            return translateRestart(operationCtx);
         }
         MeasurementRequestOperation request = operationCtx.getOperation().get(MeasurementRequestOperation.class);
         if (request != null && SITUATION_REQUEST.equals(request.getRequestName())) {
             registerOperationAsExecuting(operationCtx);
-            return translateSituationRequest(operationCtx, maker, request);
+            return translateSituationRequest(operationCtx, request);
         }
         if (request != null && LOCATION_REQUEST.equals(request.getRequestName())) {
             registerOperationAsExecuting(operationCtx);
-            return translateSingleLocationRequest(operationCtx, maker, request);
+            return translateSingleLocationRequest(operationCtx, request);
         }
         SetSosNumber setSosNumber = operationCtx.getOperation().get(SetSosNumber.class);
         if (setSosNumber != null) {
             registerOperationAsExecuting(operationCtx);
-            return translateSetSosNumber(operationCtx, maker, setSosNumber);
+            return translateSetSosNumber(operationCtx, setSosNumber);
         }
         ArmAlarm armAlarm = operationCtx.getOperation().get(ArmAlarm.class);
         if (armAlarm != null) {
             registerOperationAsExecuting(operationCtx);
-            return translateArmAlarm(operationCtx, maker, armAlarm);
+            return translateArmAlarm(operationCtx, armAlarm);
         }
         logger.warn("Operation {} cant be translated by RFV16 protocol implementation.", operationCtx);
         return null;
     }
 
-    private String translateRestart(OperationContext operationCtx, String maker) {
-        return serverMessages.restartCommand(maker, operationCtx.getImei()).asText();
+    private String translateRestart(OperationContext operationCtx) {
+        return serverMessages.restartCommand(operationCtx.getImei()).asText();
     }
 
-    private String translateSingleLocationRequest(OperationContext operationCtx, String maker, MeasurementRequestOperation request) {
+    private String translateSingleLocationRequest(OperationContext operationCtx, MeasurementRequestOperation request) {
         Integer delayInSceonds = (Integer) request.getProperty("delay");
         if (delayInSceonds == null) {
             delayInSceonds = 180;
         }
-        return serverMessages.singleLocationCommand(maker, operationCtx.getImei(), delayInSceonds.toString()).asText();
+        return serverMessages.singleLocationCommand(operationCtx.getImei(), delayInSceonds.toString()).asText();
     }
 
-    private String translateSituationRequest(OperationContext operationCtx, String maker, MeasurementRequestOperation request) {
-        return serverMessages.situationCommand(maker, operationCtx.getImei()).asText();
+    private String translateSituationRequest(OperationContext operationCtx, MeasurementRequestOperation request) {
+        return serverMessages.situationCommand(operationCtx.getImei()).asText();
     }
 
-    private String translateSetSosNumber(OperationContext operationCtx, String maker, SetSosNumber setSosNumber) {
-        String msg = serverMessages.setSosNumberCommand(maker, operationCtx.getImei(), setSosNumber.getPhoneNumber()).asText();
+    private String translateSetSosNumber(OperationContext operationCtx, SetSosNumber setSosNumber) {
+        String msg = serverMessages.setSosNumberCommand(operationCtx.getImei(), setSosNumber.getPhoneNumber()).asText();
         TrackerDevice device = getDevice(operationCtx);
         RFV16Config deviceConfig = device.getRFV16Config();
         deviceConfig.setSosNumber(setSosNumber.getPhoneNumber());
@@ -103,20 +99,11 @@ public class RFV16CommandTranslator extends RFV16Parser implements Translator {
         return msg;
     }
 
-    protected String getMaker(ConnectionContext connectionContext) {
-        Object connectionParam = connectionContext.getConnectionParam(RFV16Constants.CONNECTION_PARAM_MAKER);
-        if (connectionParam == null) {
-            logger.warn("There are no maker param in connection {}.", connectionContext);
-            return "";
-        }
-        return connectionParam.toString();
-    }
-
-    private String translateArmAlarm(OperationContext operationCtx, String maker, ArmAlarm armAlarm) {
+    private String translateArmAlarm(OperationContext operationCtx, ArmAlarm armAlarm) {
         ArmAlarmWrapper armAlarmWrapper = new ArmAlarmWrapper(armAlarm);
         TrackerMessage trackerMessage = serverMessages.msg();
         for (String val : armAlarmWrapper.getAllFlags()) {
-            TrackerMessage command = serverMessages.armAlarm(maker, operationCtx.getImei(), val);
+            TrackerMessage command = serverMessages.armAlarm(operationCtx.getImei(), val);
             trackerMessage.appendReport(command);
         }
         TrackerDevice device = getDevice(operationCtx);

@@ -61,7 +61,6 @@ public class PositionUpdateRFV16Parser extends RFV16Parser implements Parser {
     }
 
     private void processPositionReport(ReportContext reportCtx) {
-    	reportCtx.setConnectionParam(RFV16Constants.CONNECTION_PARAM_MAKER, reportCtx.getEntry(0));
         TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(reportCtx.getImei());
         
         Collection<AlarmRepresentation> alarms = createAlarms(reportCtx, device);
@@ -111,9 +110,7 @@ public class PositionUpdateRFV16Parser extends RFV16Parser implements Parser {
     }
 
     private void sendControllCommands(ReportContext reportCtx) {
-        String maker = reportCtx.getEntry(0);
-        TrackerMessage reportMonitoringCommand = serverMessages.reportMonitoringCommand(
-                maker, reportCtx.getImei(), config.getRfv16LocationReportTimeInterval().toString());
+        TrackerMessage reportMonitoringCommand = serverMessages.reportMonitoringCommand(reportCtx.getImei(), config.getRfv16LocationReportTimeInterval().toString());
         reportCtx.writeOut(reportMonitoringCommand);
     }
 

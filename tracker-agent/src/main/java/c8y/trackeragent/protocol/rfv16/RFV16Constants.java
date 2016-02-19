@@ -9,6 +9,8 @@ public class RFV16Constants {
     public static final String FIELD_SEP = ",";
     public static final char REPORT_SEP = '#';
     
+    public static final String DEFAULT_MAKER = "HQ";
+    
     public static final String DATE_EFFECTIVE_MARK = "A";
     public static final String DATE_EFFECTIVE_INVALID = "V";
     public static final String MESSAGE_TYPE_V1 = "V1";
@@ -17,7 +19,6 @@ public class RFV16Constants {
     public static final String MESSAGE_TYPE_MULTI_BASE_STATION_DATA = "NBR";
     
     public static final String CONNECTION_PARAM_CONTROL_COMMANDS_SENT = "CONTROL_COMMANDS_SENT";
-    public static final String CONNECTION_PARAM_MAKER = "MAKER";
     
     public static final String DEVICE_PARAM_OPERATION_IN_EXECUTION = "OPERATIONS_IN_EXECUTION";
     
