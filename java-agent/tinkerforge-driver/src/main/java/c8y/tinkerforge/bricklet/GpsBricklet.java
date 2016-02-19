@@ -107,11 +107,15 @@ public class GpsBricklet extends PollingDriver {
 			Coordinates coor = gps.getCoordinates();
 
 			long latitude = coor.latitude;
+			char latDir = coor.ns;
 			BigDecimal lat = new BigDecimal(latitude).divide(COOR_DIVISOR);
+			if (latDir == 'S') { lat = lat.negate(); }
 			newPos.setLat(lat);
 
 			long longitude = coor.longitude;
+			char longDir = coor.ew;
 			BigDecimal lng = new BigDecimal(longitude).divide(COOR_DIVISOR);
+			if (longDir == 'W') { lng = lng.negate(); }
 			newPos.setLng(lng);
 		} catch (TimeoutException | NotConnectedException e) {
 			logger.warn("Cannot retrieve coordinates, ignoring", e);
