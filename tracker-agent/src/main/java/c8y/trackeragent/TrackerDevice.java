@@ -30,6 +30,8 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cumulocity.agent.server.context.DeviceContextService;
+import com.cumulocity.agent.server.repository.InventoryRepository;
 import com.cumulocity.model.ID;
 import com.cumulocity.model.event.CumulocityAlarmStatuses;
 import com.cumulocity.model.event.CumulocitySeverities;
@@ -112,8 +114,9 @@ public class TrackerDevice extends DeviceManagedObject {
     private SignalStrength gprsSignal = new SignalStrength();
     private TrackerConfiguration trackerConfig;
 
-    public TrackerDevice(TrackerPlatform platform, TrackerConfiguration trackerConfig, GId agentGid, String imei) throws SDKException {
-        super(platform);
+    public TrackerDevice(TrackerPlatform platform, TrackerConfiguration trackerConfig, GId agentGid, String imei, 
+            DeviceContextService contextService, InventoryRepository inventoryRepository, String agentUser, String agentPassword) throws SDKException {
+        super(platform, contextService, inventoryRepository, agentUser, agentPassword);
         this.trackerConfig = trackerConfig;
         this.events = platform.getEventApi();
         this.alarms = platform.getAlarmApi();

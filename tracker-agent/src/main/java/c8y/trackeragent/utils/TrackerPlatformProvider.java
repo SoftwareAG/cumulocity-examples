@@ -11,6 +11,8 @@ import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.exception.SDKExceptions;
 
+import com.cumulocity.agent.server.context.DeviceContextService;
+import com.cumulocity.agent.server.repository.InventoryRepository;
 import com.cumulocity.model.authentication.CumulocityCredentials;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.PlatformImpl;
@@ -24,11 +26,20 @@ public class TrackerPlatformProvider {
     private final Cache<PlatformKey, TrackerPlatform> cache;
     private final TrackerConfiguration config;
     private final Object lock = new Object();
+    private final DeviceContextService contextService;
+    private final InventoryRepository inventoryRepository;
+    private final String agentUser;
+    private final String agentPassword;
 
-    public TrackerPlatformProvider(TrackerConfiguration config, DeviceCredentialsRepository deviceCredentialsRepository) {
+    public TrackerPlatformProvider(TrackerConfiguration config, DeviceCredentialsRepository deviceCredentialsRepository,
+            DeviceContextService contextService, InventoryRepository inventoryRepository, String agentUser, String agentPassword) {
         this.config = config;
         this.deviceCredentialsRepository = deviceCredentialsRepository;
         this.cache = CacheBuilder.newBuilder().build();
+        this.contextService = contextService;
+        this.inventoryRepository = inventoryRepository;
+        this.agentUser = agentUser;
+        this.agentPassword = agentPassword;
     }
 
     public TrackerPlatform getDevicePlatformForTenant(final String tenantId) {
@@ -97,7 +108,7 @@ public class TrackerPlatformProvider {
 
     private void setupAgent(TrackerPlatform platform) {
         synchronized (lock) {
-            DeviceManagedObject deviceManagedObject = new DeviceManagedObject(platform);
+            DeviceManagedObject deviceManagedObject = new DeviceManagedObject(platform, contextService, inventoryRepository, agentUser, agentPassword);
             ManagedObjectRepresentation agentMo = deviceManagedObject.assureTrackerAgentExisting();
             platform.setAgent(agentMo);
         }

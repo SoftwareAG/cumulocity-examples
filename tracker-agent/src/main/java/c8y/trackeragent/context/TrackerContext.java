@@ -3,7 +3,11 @@ package c8y.trackeragent.context;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import com.cumulocity.agent.server.context.DeviceContextService;
+import com.cumulocity.agent.server.repository.InventoryRepository;
 
 import c8y.trackeragent.TrackerPlatform;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
@@ -19,10 +23,14 @@ public class TrackerContext {
     private final TrackerConfiguration configuration;
     
     @Autowired
-    public TrackerContext(TrackerConfiguration configuration) {
+    public TrackerContext(TrackerConfiguration configuration, 
+            DeviceContextService contextSerivce,
+            InventoryRepository inventoryRepository,
+            @Value("${C8Y.agent.user}") String agentUser,
+            @Value("${C8Y.agent.password}") String agentPassword) {
         this.configuration = configuration;
         this.deviceCredentialsRepository = DeviceCredentialsRepository.get();
-        this.platformProvider = new TrackerPlatformProvider(configuration, deviceCredentialsRepository);
+        this.platformProvider = new TrackerPlatformProvider(configuration, deviceCredentialsRepository, contextSerivce, inventoryRepository, agentUser, agentPassword);
     }
 
     public TrackerPlatform getBootstrapPlatform() {

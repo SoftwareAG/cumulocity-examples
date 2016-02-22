@@ -15,7 +15,7 @@ public class TrackerPlatformProviderTest {
     public void shouldCreateTrackerContextBasingOnConfiguration() throws Exception {
         TrackerConfiguration config = ConfigUtils.get().loadCommonConfiguration();
         DeviceCredentialsRepository deviceCredentialsRepository = DeviceCredentialsRepository.get();
-        TrackerPlatformProvider bean = new TrackerPlatformProvider(config, deviceCredentialsRepository);
+        TrackerPlatformProvider bean = new TrackerPlatformProvider(config, deviceCredentialsRepository, null, null, null, null);
         
         TrackerPlatform platform = bean.getBootstrapPlatform();        
         assertThat(platform.getTenantId()).isEqualTo("management");

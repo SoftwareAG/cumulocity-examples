@@ -42,6 +42,8 @@ import c8y.trackeragent.utils.ConfigUtils;
 import c8y.trackeragent.utils.TrackerConfiguration;
 import c8y.trackeragent.utils.message.TrackerMessage;
 
+import com.cumulocity.agent.server.context.DeviceContextService;
+import com.cumulocity.agent.server.repository.InventoryRepository;
 import com.cumulocity.model.authentication.CumulocityCredentials;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
@@ -64,6 +66,10 @@ public abstract class TrackerITSupport {
     private String password;
     @Value("${tracker-agent.host}")
     private String trackerAgentHost;
+    @Value("${C8Y.agent.user}") 
+    private String agentUser;
+    @Value("${C8Y.agent.password}") 
+    private String agentPassword;
     
     @Autowired
     protected TrackerConfiguration trackerAgentConfig;
@@ -73,6 +79,12 @@ public abstract class TrackerITSupport {
     
     @Autowired
     protected AlarmMappingService alarmMappingService;
+    
+    @Autowired
+    protected DeviceContextService contextService;
+    
+    @Autowired
+    protected InventoryRepository inventoryRepository;
     
     protected TrackerPlatform trackerPlatform;
     protected TestConfiguration testConfig;
@@ -230,9 +242,9 @@ public abstract class TrackerITSupport {
     }
 
     protected TrackerDevice getTrackerDevice(String imei) {
-        DeviceManagedObject deviceManagedObject = new DeviceManagedObject(trackerPlatform);
+        DeviceManagedObject deviceManagedObject = new DeviceManagedObject(trackerPlatform, contextService, inventoryRepository, agentUser, agentPassword);
         GId agentId = deviceManagedObject.getAgentId();
-        return new TrackerDevice(trackerPlatform, trackerAgentConfig, agentId, imei);
+        return new TrackerDevice(trackerPlatform, trackerAgentConfig, agentId, imei, contextService, inventoryRepository, agentUser, agentPassword);
     }
     
     protected void bootstrap(String imei, TrackerMessage deviceMessage) throws UnsupportedEncodingException, Exception, InterruptedException {

@@ -20,13 +20,19 @@
 
 package c8y.trackeragent;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import c8y.trackeragent.devicebootstrap.DeviceCredentials;
+
+import com.cumulocity.agent.server.context.DeviceContext;
+import com.cumulocity.agent.server.context.DeviceContextService;
+import com.cumulocity.agent.server.repository.InventoryRepository;
 import com.cumulocity.model.Agent;
 import com.cumulocity.model.ID;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.identity.ExternalIDRepresentation;
-import com.cumulocity.rest.representation.inventory.ManagedObjectReferenceRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
-import com.cumulocity.sdk.client.Platform;
 import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.identity.IdentityApi;
 import com.cumulocity.sdk.client.inventory.InventoryApi;
@@ -37,12 +43,26 @@ import com.cumulocity.sdk.client.inventory.InventoryApi;
  */
 public class DeviceManagedObject {
 
+    private Logger logger = LoggerFactory.getLogger(getClass());
+    
     protected IdentityApi registry;
     protected InventoryApi inventory;
+    protected DeviceContextService contextService;
+    protected InventoryRepository inventoryRepository;
+    protected String agentUser;
+    protected String agentPassword;
+    protected String tenant;
+    
 
-    public DeviceManagedObject(Platform platform) {
+    public DeviceManagedObject(TrackerPlatform platform, DeviceContextService contextService, InventoryRepository inventoryRepository,
+            String agentUser, String agentPassword) {
         this.registry = platform.getIdentityApi();
         this.inventory = platform.getInventoryApi();
+        this.tenant = platform.getTenantId();
+        this.contextService = contextService;
+        this.inventoryRepository = inventoryRepository;
+        this.agentUser = agentUser;
+        this.agentPassword = agentPassword;
     }
 
     /**
@@ -77,7 +97,6 @@ public class DeviceManagedObject {
         } else {
             return inventory.get(gid);
         }
-        
     }
     
     public boolean updateIfExists(ManagedObjectRepresentation mo, ID extId) throws SDKException {
@@ -90,20 +109,29 @@ public class DeviceManagedObject {
         return true;
     }
 
-    private ManagedObjectRepresentation create(ManagedObjectRepresentation mo, ID extId, GId parentId) throws SDKException {
-        ManagedObjectRepresentation returnedMo;
-        returnedMo = inventory.create(mo);
+    private ManagedObjectRepresentation create(ManagedObjectRepresentation mo, ID extId, final GId parentId) throws SDKException {
+        final ManagedObjectRepresentation returnedMo = inventory.create(mo);
         bind(returnedMo, extId);
-
         if (parentId != null) {
-            ManagedObjectRepresentation handle = new ManagedObjectRepresentation();
-            handle.setId(returnedMo.getId());
-            handle.setSelf(returnedMo.getSelf());
-            ManagedObjectReferenceRepresentation moRef = new ManagedObjectReferenceRepresentation();
-            moRef.setManagedObject(handle);
-            inventory.getManagedObjectApi(parentId).addChildDevice(moRef);
+            addChildToAgent(returnedMo, parentId);
         }
         return returnedMo;
+    }
+    
+    private void addChildToAgent(final ManagedObjectRepresentation mo, final GId parentId) {
+        try {
+            DeviceCredentials agentCredentials = new DeviceCredentials(tenant, agentUser, agentPassword, null, null);
+            contextService.runWithinContext(new DeviceContext(agentCredentials), new Runnable() {
+                
+                @Override
+                public void run() {
+                    inventoryRepository.bindToParent(parentId, mo.getId());
+                    
+                }
+            });
+        } catch (Exception e) {
+            logger.error("Could not add tracker with id " + mo.getId() + " as child to agent", e);
+        }
     }
 
     private ManagedObjectRepresentation update(ManagedObjectRepresentation mo, GId gid) throws SDKException {
