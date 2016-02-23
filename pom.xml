@@ -65,7 +65,6 @@
 		<module>kontron-shock-agent</module>
 		<module>java-agent</module>
 		<module>tracker-agent</module>
-		<module>tracker-agent-rpm</module>
 	</modules>
 
 	<licenses>
