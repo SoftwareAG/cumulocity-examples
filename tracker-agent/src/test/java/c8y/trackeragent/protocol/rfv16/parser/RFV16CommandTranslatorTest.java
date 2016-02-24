@@ -36,7 +36,7 @@ public class RFV16CommandTranslatorTest extends RFV16ParserTestSupport {
 
         String response = commandTranslator.translate(asOperationContext(operation));
 
-        assertThat(response).isEqualTo("*HQ,1234567890,S8," + HHMMSS + ",501501501,,#");
+        assertThat(response).isEqualTo("*HQ,1234567890,S8," + SOME_DATE_TIME_STR + ",501501501,,#");
     }
 
     @Test

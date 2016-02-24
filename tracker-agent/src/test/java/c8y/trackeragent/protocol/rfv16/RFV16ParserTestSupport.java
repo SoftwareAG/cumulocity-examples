@@ -28,7 +28,8 @@ import c8y.trackeragent.service.MeasurementService;
 public class RFV16ParserTestSupport {
     
     protected static final String IMEI = "1234567890";
-    protected static final String HHMMSS = "010000";
+    protected static final String SOME_DATE_TIME_STR = "010000";
+    protected static final DateTime SOME_DATE_TIME = RFV16ServerMessages.HHMMSS.parseDateTime(SOME_DATE_TIME_STR);
     
     protected TrackerAgent trackerAgent  = mock(TrackerAgent.class);
     protected TrackerDevice deviceMock = mock(TrackerDevice.class); 
@@ -40,8 +41,7 @@ public class RFV16ParserTestSupport {
     
     @Before
     public void baseInit() {
-        DateTime dateTime = RFV16ServerMessages.HHMMSS.parseDateTime(HHMMSS);
-        DateTimeUtils.setCurrentMillisFixed(dateTime.getMillis());
+        DateTimeUtils.setCurrentMillisFixed(SOME_DATE_TIME.getMillis());
         when(trackerAgent.getOrCreateTrackerDevice(Mockito.anyString())).thenReturn(deviceMock);
         when(deviceMock.getGId()).thenReturn(GId.asGId("1001"));
         when(deviceMock.aLocationUpdateEvent()).thenReturn(new EventRepresentation());

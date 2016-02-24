@@ -68,7 +68,7 @@ public class PositionUpdateRFV16ReportTest extends RFV16ParserTestSupport {
         ReportContext reportCtx = new ReportContext(deviceMessage.asArray(), IMEI, out);
         DateTime dateTime = RFV16Parser.getDateTime(reportCtx);
         
-        assertThat(dateTime).isEqualTo(new DateTime(0));
+        assertThat(dateTime).isEqualTo(SOME_DATE_TIME);
     }
     
     @Test
