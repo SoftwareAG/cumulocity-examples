@@ -46,7 +46,6 @@ public class TracelogAppender extends AppenderBase<ILoggingEvent> {
     private AlarmRepresentation alarmTemplate = new AlarmRepresentation();
     private Level alarmLevel = Level.toLevel(DEFAULT_ALARM_LEVEL);
     private EventRepresentation eventTemplate = new EventRepresentation();
-    private Level eventLevel = Level.toLevel(DEFAULT_EVENT_LEVEL);
     private TrackerPlatform platform;
 
     public TracelogAppender(TrackerPlatform platform, LoggerContext loggerContext) {

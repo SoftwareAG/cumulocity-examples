@@ -10,6 +10,7 @@ import c8y.trackeragent.protocol.mapping.TrackerProtocol;
 import c8y.trackeragent.protocol.telic.TelicDeviceMessages;
 import c8y.trackeragent.utils.Devices;
 import c8y.trackeragent.utils.Positions;
+import c8y.trackeragent.utils.message.TrackerMessage;
 
 public class ConnectionTimeoutIT extends TrackerITSupport {
     
@@ -28,8 +29,8 @@ public class ConnectionTimeoutIT extends TrackerITSupport {
         bootstrap(imei, deviceMessages.positionUpdate(imei, Positions.ZERO));  
         
         // trigger regular report 
-        byte[] report = deviceMessages.positionUpdate(imei, Positions.SAMPLE_4).asBytes();
-        writeInNewConnection(report);
+        TrackerMessage message = deviceMessages.positionUpdate(imei, Positions.SAMPLE_4);
+        writeInNewConnection(message);
         
         Thread.sleep(1000);
         TrackerDevice newDevice = getTrackerDevice(imei);

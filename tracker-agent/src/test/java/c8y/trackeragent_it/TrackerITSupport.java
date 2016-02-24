@@ -198,11 +198,6 @@ public abstract class TrackerITSupport {
         return writeInNewConnection(newSocket(), sum.asBytes());
     }
         
-    @Deprecated//use DeviceMessage object
-    protected String writeInNewConnection(byte[] bis) throws Exception {
-        return writeInNewConnection(newSocket(), bis);
-    }
-    
     protected Socket newSocket() throws IOException {
         destroySockets();
         String socketHost = testConfig.getTrackerAgentHost();
@@ -248,26 +243,22 @@ public abstract class TrackerITSupport {
     }
     
     protected void bootstrap(String imei, TrackerMessage deviceMessage) throws UnsupportedEncodingException, Exception, InterruptedException {
-        bootstrap(imei, deviceMessage.asBytes());
-    }
-    
-    @Deprecated//use DeviceMessage
-    protected void bootstrap(String imei, byte[] report) throws UnsupportedEncodingException, Exception, InterruptedException {        
         createNewDeviceRequest(imei);
         // WAITING_FOR_CONNECTION status
         
-        writeInNewConnection(report);        
+        writeInNewConnection(deviceMessage);
         Thread.sleep(5000);
         // PENDING_ACCEPTANCE status
         
-        logger.info("accept request for imei " + imei);
+        logger.info("accept request for imei: {}");
         acceptNewDeviceRequest(imei);
         // ACCEPTED status
         
         DeviceCredentials credentials = pollCredentials(imei);
+        logger.info("Created credentails: {}", credentials);
         assertThat(credentials).isNotNull();
-    }    
-
+    }
+    
     private TestConfiguration getTestConfig() {
         //@formatter:off
         return new TestConfiguration()
