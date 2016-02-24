@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -36,16 +37,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import c8y.trackeragent.context.OperationContext;
-import c8y.trackeragent.context.ReportContext;
-import c8y.trackeragent.devicebootstrap.DeviceCredentials;
-import c8y.trackeragent.event.TrackerAgentEvents;
-
 import com.cumulocity.agent.server.context.DeviceContext;
 import com.cumulocity.agent.server.context.DeviceContextService;
 import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.sdk.client.SDKException;
 import com.google.common.collect.Iterables;
+
+import c8y.trackeragent.context.OperationContext;
+import c8y.trackeragent.context.ReportContext;
+import c8y.trackeragent.devicebootstrap.DeviceCredentials;
+import c8y.trackeragent.event.TrackerAgentEvents;
 
 /**
  * Performs the communication with a connected device. Accepts reports from the
@@ -89,6 +90,8 @@ public class ConnectedTracker<F extends Fragment> implements Runnable, Executor 
         try {
             out = client.getOutputStream();
             processReports(in);
+        } catch (SocketException e) {
+            logger.warn("Error during communication with client device: " + e.getMessage());           
         } catch (IOException e) {
             logger.warn("Error during communication with client device", e);
         } catch (SDKException e) {
