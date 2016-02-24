@@ -8,6 +8,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
+import org.joda.time.DateTime;
 import org.joda.time.DateTimeUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -27,6 +28,7 @@ import c8y.trackeragent.service.MeasurementService;
 public class RFV16ParserTestSupport {
     
     protected static final String IMEI = "1234567890";
+    protected static final String HHMMSS = "010000";
     
     protected TrackerAgent trackerAgent  = mock(TrackerAgent.class);
     protected TrackerDevice deviceMock = mock(TrackerDevice.class); 
@@ -38,7 +40,8 @@ public class RFV16ParserTestSupport {
     
     @Before
     public void baseInit() {
-        DateTimeUtils.setCurrentMillisFixed(0);
+        DateTime dateTime = RFV16ServerMessages.HHMMSS.parseDateTime(HHMMSS);
+        DateTimeUtils.setCurrentMillisFixed(dateTime.getMillis());
         when(trackerAgent.getOrCreateTrackerDevice(Mockito.anyString())).thenReturn(deviceMock);
         when(deviceMock.getGId()).thenReturn(GId.asGId("1001"));
         when(deviceMock.aLocationUpdateEvent()).thenReturn(new EventRepresentation());

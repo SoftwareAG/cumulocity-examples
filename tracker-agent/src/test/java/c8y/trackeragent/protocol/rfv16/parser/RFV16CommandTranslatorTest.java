@@ -15,7 +15,6 @@ import c8y.RFV16Config;
 import c8y.Restart;
 import c8y.SetSosNumber;
 import c8y.trackeragent.context.OperationContext;
-import c8y.trackeragent.protocol.rfv16.RFV16Constants;
 import c8y.trackeragent.protocol.rfv16.RFV16ParserTestSupport;
 
 public class RFV16CommandTranslatorTest extends RFV16ParserTestSupport {
@@ -37,7 +36,7 @@ public class RFV16CommandTranslatorTest extends RFV16ParserTestSupport {
 
         String response = commandTranslator.translate(asOperationContext(operation));
 
-        assertThat(response).isEqualTo("*HQ,1234567890,S8,010000,501501501,,#");
+        assertThat(response).isEqualTo("*HQ,1234567890,S8," + HHMMSS + ",501501501,,#");
     }
 
     @Test
