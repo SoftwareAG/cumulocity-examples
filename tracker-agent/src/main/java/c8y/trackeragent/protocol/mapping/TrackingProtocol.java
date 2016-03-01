@@ -6,7 +6,7 @@ import c8y.trackeragent.protocol.gl200.ConnectedGL200Tracker;
 import c8y.trackeragent.protocol.rfv16.ConnectedRFV16Tracker;
 import c8y.trackeragent.protocol.telic.ConnectedTelicTracker;
 
-public enum TrackerProtocol {
+public enum TrackingProtocol {
 
     TELIC(ConnectedTelicTracker.class) {
         @Override
@@ -39,7 +39,7 @@ public enum TrackerProtocol {
 
     private final Class<? extends ConnectedTracker<?>> trackerClazz;
 
-    private TrackerProtocol(Class<? extends ConnectedTracker<?>> trackerClazz) {
+    private TrackingProtocol(Class<? extends ConnectedTracker<?>> trackerClazz) {
         this.trackerClazz = trackerClazz;
     }
 

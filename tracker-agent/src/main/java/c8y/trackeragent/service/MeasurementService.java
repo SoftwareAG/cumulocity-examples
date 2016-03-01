@@ -76,7 +76,7 @@ public class MeasurementService {
         source.setId(device.getGId());
         return source;
     }
-
+    
     public MeasurementRepresentation createPercentageBatteryLevelMeasurement(BigDecimal percentageBatteryLevel, TrackerDevice device, DateTime date) {
         return createBatteryLevelMeasurement(percentageBatteryLevel, device, date, "%");
     }
@@ -86,7 +86,7 @@ public class MeasurementService {
         MeasurementRepresentation measurement = new MeasurementRepresentation();
         Battery batteryFragment = new Battery();
         batteryFragment.setLevel(measurementValue(batteryLevel, unit));
-        measurement.set(batteryFragment);
+        measurement.set(batteryFragment, "c8y_TrackerBattery");
         measurement.setType("c8y_TrackerBattery");
         measurement.setSource(asSource(device));
         measurement.setTime(date.toDate());
@@ -99,7 +99,7 @@ public class MeasurementService {
         MeasurementRepresentation measurement = new MeasurementRepresentation();
         SignalStrength signalFragment = new SignalStrength();
         signalFragment.setProperty("quality", measurementValue(percentageGSMLevel, "%"));
-        measurement.set(signalFragment);
+        measurement.set(signalFragment,"c8y_SignalStrength");
         measurement.setType("c8y_SignalStrength");
         measurement.setSource(asSource(device));
         measurement.setTime(date.toDate());
@@ -120,11 +120,11 @@ public class MeasurementService {
             return null;
         }
         MeasurementRepresentation measurement = new MeasurementRepresentation();
-        measurement.set(altFragment);
+        measurement.set(altFragment, "c8y_Altitude");
         measurement.setType("c8y_Altitude");
         measurement.setSource(asSource(device));
         measurement.setTime(date.toDate());
-        logger.debug("Create speed measurement: ", measurement);
+        logger.debug("Create altitude measurement: ", measurement);
         device.createMeasurement(measurement);
         return altFragment;
     }
@@ -171,5 +171,4 @@ public class MeasurementService {
         
         return representation;
     }
-
 }

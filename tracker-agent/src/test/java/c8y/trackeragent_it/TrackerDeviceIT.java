@@ -47,7 +47,7 @@ import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.context.OperationContext;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
-import c8y.trackeragent.protocol.mapping.TrackerProtocol;
+import c8y.trackeragent.protocol.mapping.TrackingProtocol;
 import c8y.trackeragent.utils.Devices;
 
 import com.cumulocity.model.ID;
@@ -104,8 +104,8 @@ public class TrackerDeviceIT extends TrackerITSupport {
     }
     
     @Override
-    protected TrackerProtocol getTrackerProtocol() {
-        return TrackerProtocol.TELIC;
+    protected TrackingProtocol getTrackerProtocol() {
+        return TrackingProtocol.TELIC;
     }
 
     @Test

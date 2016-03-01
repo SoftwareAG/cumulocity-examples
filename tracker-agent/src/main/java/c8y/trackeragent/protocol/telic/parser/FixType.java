@@ -2,7 +2,7 @@ package c8y.trackeragent.protocol.telic.parser;
 
 public enum FixType {
 
-    _1D("1", "1D Fix"), 
+    _1D("1", "No Fix"), 
     _2D("2", "2D Fix"), 
     _3D("3", "3D Fix");
 

@@ -1,7 +1,6 @@
 package c8y.trackeragent.protocol.telic.parser;
 
 import java.math.BigDecimal;
-import java.util.Date;
 
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -17,6 +16,8 @@ import c8y.trackeragent.Parser;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.context.ReportContext;
+import c8y.trackeragent.protocol.CommonConstants;
+import c8y.trackeragent.protocol.mapping.TrackingProtocol;
 import c8y.trackeragent.protocol.telic.TelicConstants;
 import c8y.trackeragent.service.MeasurementService;
 
@@ -84,11 +85,15 @@ public class TelicLocationReport implements Parser, TelicFragment {
         TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(reportCtx.getImei());
         EventRepresentation locationUpdateEvent = device.aLocationUpdateEvent();
         Position position = new Position();
-        DateTime dateTime = getGPSTimestamp(reportCtx);
+        DateTime dateTime = getLogTimestamp(reportCtx);
         if (dateTime == null) {
             dateTime = new DateTime();
         } else {
-            position.setProperty(TelicConstants.GPS_TIMESTAMP, dateTime.toDate());
+            position.setProperty(TelicConstants.LOG_TIMESTAMP, dateTime.toDate());
+        }
+        DateTime gpsTimestamp = getGPSTimestamp(reportCtx);
+        if (dateTime != null) {
+            position.setProperty(TelicConstants.GPS_TIMESTAMP, gpsTimestamp.toDate());
         }
         
         position.setLat(getLatitude(reportCtx));
@@ -100,14 +105,11 @@ public class TelicLocationReport implements Parser, TelicFragment {
         }
         LogCodeType logCodeType = getLogCodeType(reportCtx);
         if (logCodeType != null) {
-            position.setProperty(TelicConstants.LOG_CODE_TYPE, logCodeType.getLabel());
+            position.setProperty(CommonConstants.REPORT_REASON, logCodeType.getLabel());
             handleLogCodeType(device, logCodeType, dateTime);
         }
-        Date logTimestamp = getLogTimestamp(reportCtx).toDate();
-        if (logTimestamp != null) {
-            position.setProperty(TelicConstants.LOG_TIMESTAMP, logTimestamp);
-        }
         locationUpdateEvent.setTime(dateTime.toDate());
+        locationUpdateEvent.set(TrackingProtocol.TELIC, CommonConstants.TRACKING_PROTOCOL);
         FixType fixType = getFixType(reportCtx);
         if (fixType != null) {
             position.setProperty(TelicConstants.FIX_TYPE, fixType.getLabel());

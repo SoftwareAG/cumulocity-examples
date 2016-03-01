@@ -35,7 +35,7 @@ import c8y.trackeragent.TrackerPlatform;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.exception.UnknownDeviceException;
-import c8y.trackeragent.protocol.mapping.TrackerProtocol;
+import c8y.trackeragent.protocol.mapping.TrackingProtocol;
 import c8y.trackeragent.service.AlarmMappingService;
 import c8y.trackeragent.service.AlarmType;
 import c8y.trackeragent.utils.ConfigUtils;
@@ -109,7 +109,7 @@ public abstract class TrackerITSupport {
         return trackerAgentConfig.getPort(getTrackerProtocol());
     }
     
-    protected abstract TrackerProtocol getTrackerProtocol();
+    protected abstract TrackingProtocol getTrackerProtocol();
 
     private boolean isLocalTrackerTest() {
         return testConfig.getTrackerAgentHost().equals("localhost");

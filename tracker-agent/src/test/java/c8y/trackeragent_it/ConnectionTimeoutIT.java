@@ -6,7 +6,7 @@ import java.net.Socket;
 import org.junit.Test;
 
 import c8y.trackeragent.TrackerDevice;
-import c8y.trackeragent.protocol.mapping.TrackerProtocol;
+import c8y.trackeragent.protocol.mapping.TrackingProtocol;
 import c8y.trackeragent.protocol.telic.TelicDeviceMessages;
 import c8y.trackeragent.utils.Devices;
 import c8y.trackeragent.utils.Positions;
@@ -17,8 +17,8 @@ public class ConnectionTimeoutIT extends TrackerITSupport {
     private final TelicDeviceMessages deviceMessages = new TelicDeviceMessages(); 
     
     @Override
-    protected TrackerProtocol getTrackerProtocol() {
-        return TrackerProtocol.TELIC;
+    protected TrackingProtocol getTrackerProtocol() {
+        return TrackingProtocol.TELIC;
     }
 
     @Test

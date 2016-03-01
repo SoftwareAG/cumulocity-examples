@@ -199,7 +199,7 @@ public class TrackerDevice extends DeviceManagedObject {
     }
 
     public void motionEvent(boolean moving) throws SDKException {
-    	if(moving){
+        if (moving) {
     		eventMotionDetected.setTime(new Date());
     		events.create(eventMotionDetected);
     		logger.debug("{} is moving", imei);

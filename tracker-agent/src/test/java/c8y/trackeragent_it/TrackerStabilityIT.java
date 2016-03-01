@@ -8,7 +8,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import c8y.trackeragent.protocol.coban.CobanDeviceMessages;
-import c8y.trackeragent.protocol.mapping.TrackerProtocol;
+import c8y.trackeragent.protocol.mapping.TrackingProtocol;
 import c8y.trackeragent.utils.Devices;
 import c8y.trackeragent.utils.Positions;
 import c8y.trackeragent.utils.message.TrackerMessage;
@@ -23,8 +23,8 @@ public class TrackerStabilityIT extends TrackerITSupport {
     private final static Random random = new Random();
     
     @Override
-    protected TrackerProtocol getTrackerProtocol() {
-        return TrackerProtocol.TELIC;
+    protected TrackingProtocol getTrackerProtocol() {
+        return TrackingProtocol.TELIC;
     }
     
     @Test

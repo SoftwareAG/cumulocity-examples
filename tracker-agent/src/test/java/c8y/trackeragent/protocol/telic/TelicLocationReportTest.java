@@ -21,6 +21,7 @@ import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.context.TrackerContext;
+import c8y.trackeragent.protocol.CommonConstants;
 import c8y.trackeragent.protocol.telic.parser.FixType;
 import c8y.trackeragent.protocol.telic.parser.LogCodeType;
 import c8y.trackeragent.protocol.telic.parser.TelicLocationReport;
@@ -77,7 +78,7 @@ public class TelicLocationReportTest {
         telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
         
         verifyReport();
-        Object actualLogCodeType = positionCaptor.getValue().getProperty(TelicConstants.LOG_CODE_TYPE);
+        Object actualLogCodeType = positionCaptor.getValue().getProperty(CommonConstants.REPORT_REASON);
         assertThat(actualLogCodeType).isEqualTo(LogCodeType.TIME_EVENT.getLabel());
     }
     
@@ -99,8 +100,8 @@ public class TelicLocationReportTest {
         telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
         
         verifyReport();
-        Date actualLogTimestamp = (Date) positionCaptor.getValue().getProperty(TelicConstants.GPS_TIMESTAMP);
-        assertThat(actualLogTimestamp).isEqualTo(TelicDeviceMessages.GPS_TIMESTAMP.toDate());
+        Date actualLogTimestamp = (Date) positionCaptor.getValue().getProperty(TelicConstants.LOG_TIMESTAMP);
+        assertThat(actualLogTimestamp).isEqualTo(TelicDeviceMessages.LOG_TIMESTAMP.toDate());
     }
     
     @Test
@@ -120,7 +121,7 @@ public class TelicLocationReportTest {
         
         telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
         
-        verify(measurementService).createSpeedMeasurement(new BigDecimal(4), device, TelicDeviceMessages.GPS_TIMESTAMP);
+        verify(measurementService).createSpeedMeasurement(new BigDecimal(4), device, TelicDeviceMessages.LOG_TIMESTAMP);
     }
    
     @Test
@@ -140,7 +141,7 @@ public class TelicLocationReportTest {
         
         telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
         
-        verify(measurementService).createAltitudeMeasurement(Positions.SAMPLE_1.getAlt(), device, TelicDeviceMessages.GPS_TIMESTAMP);
+        verify(measurementService).createAltitudeMeasurement(Positions.SAMPLE_1.getAlt(), device, TelicDeviceMessages.LOG_TIMESTAMP);
     }
     
     @Test
@@ -149,7 +150,7 @@ public class TelicLocationReportTest {
         
         telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
         
-        verify(measurementService).createMileageMeasurement(new BigDecimal("11.032"), device, TelicDeviceMessages.GPS_TIMESTAMP);
+        verify(measurementService).createMileageMeasurement(new BigDecimal("11.032"), device, TelicDeviceMessages.LOG_TIMESTAMP);
     }
     
     @Test
@@ -158,7 +159,7 @@ public class TelicLocationReportTest {
         
         telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
         
-        verify(measurementService).createBatteryLevelMeasurement(new BigDecimal(211), device, TelicDeviceMessages.GPS_TIMESTAMP, "mV");
+        verify(measurementService).createBatteryLevelMeasurement(new BigDecimal(211), device, TelicDeviceMessages.LOG_TIMESTAMP, "mV");
     }
     
     @Test
@@ -167,7 +168,7 @@ public class TelicLocationReportTest {
         
         telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
         
-        verify(device).geofenceEnter(TelicDeviceMessages.GPS_TIMESTAMP);
+        verify(device).geofenceEnter(TelicDeviceMessages.LOG_TIMESTAMP);
     }
     
     @Test
@@ -176,7 +177,7 @@ public class TelicLocationReportTest {
         
         telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
         
-        verify(device).geofenceExit(TelicDeviceMessages.GPS_TIMESTAMP);
+        verify(device).geofenceExit(TelicDeviceMessages.LOG_TIMESTAMP);
     }
     
     @Test
@@ -186,7 +187,7 @@ public class TelicLocationReportTest {
         telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
         
         verify(device).motionEvent(true);
-        verify(measurementService).createMotionMeasurement(true, device, TelicDeviceMessages.GPS_TIMESTAMP);
+        verify(measurementService).createMotionMeasurement(true, device, TelicDeviceMessages.LOG_TIMESTAMP);
     }
     
     @Test
@@ -196,7 +197,7 @@ public class TelicLocationReportTest {
         telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
         
         verify(device).motionEvent(false);
-        verify(measurementService).createMotionMeasurement(false, device, TelicDeviceMessages.GPS_TIMESTAMP);
+        verify(measurementService).createMotionMeasurement(false, device, TelicDeviceMessages.LOG_TIMESTAMP);
     }
     
     @Test
@@ -205,7 +206,7 @@ public class TelicLocationReportTest {
         
         telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
         
-        verify(device).chargerConnected(TelicDeviceMessages.GPS_TIMESTAMP);
+        verify(device).chargerConnected(TelicDeviceMessages.LOG_TIMESTAMP);
     }
     
 }

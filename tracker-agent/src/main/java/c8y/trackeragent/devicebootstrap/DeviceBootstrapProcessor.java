@@ -48,9 +48,11 @@ public class DeviceBootstrapProcessor implements TrackerAgentEventListener {
         startBootstraping(event.getImei());
     }
 
-    public void startBootstraping(String imei) {
+    public void startBootstraping(String imei) {    
+        logger.info("Start bootstrapping: {}", imei);
         synchronized (lock) {
             if (duringBootstrap.contains(imei)) {
+                logger.info("{} already during bootstraping; dont start it again.", imei);
                 return;
             }
             duringBootstrap.add(imei);

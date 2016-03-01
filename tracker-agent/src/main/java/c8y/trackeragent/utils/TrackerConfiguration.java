@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import c8y.trackeragent.protocol.mapping.TrackerProtocol;
+import c8y.trackeragent.protocol.mapping.TrackingProtocol;
 
 import com.cumulocity.sdk.client.polling.PollingStrategy;
 
@@ -126,7 +126,7 @@ public class TrackerConfiguration {
         return this;
     }
     
-    public int getPort(TrackerProtocol protocol) {
+    public int getPort(TrackingProtocol protocol) {
         if (getLocalPort1Protocols().contains(protocol)) {
             return getLocalPort1();
         }
@@ -136,17 +136,17 @@ public class TrackerConfiguration {
         throw new RuntimeException("Dont know port for protocol " + protocol);
     }
     
-    public Collection<TrackerProtocol> getLocalPort1Protocols() {
+    public Collection<TrackingProtocol> getLocalPort1Protocols() {
         return Arrays.asList(
-                TrackerProtocol.TELIC, 
-                TrackerProtocol.GL200
+                TrackingProtocol.TELIC, 
+                TrackingProtocol.GL200
         );
     }
     
-    public Collection<TrackerProtocol> getLocalPort2Protocols() {
+    public Collection<TrackingProtocol> getLocalPort2Protocols() {
         return Arrays.asList(
-                TrackerProtocol.COBAN, 
-                TrackerProtocol.RFV16
+                TrackingProtocol.COBAN, 
+                TrackingProtocol.RFV16
         );
     }
 
