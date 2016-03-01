@@ -239,10 +239,10 @@ public class TelicLocationReport implements Parser, TelicFragment {
     }
     
     private void handleDigitalInput(TrackerDevice device, String digitalInput, DateTime dateTime) {
-        if (digitalInput.length() != 4) {
-            logger.warn("Digital input has unexpected size {} (expected 4)");
+        if (digitalInput.length() < 2) {
+            logger.warn("Digital input has unexpected size {} (expected more than 1)");
         }
-        if (digitalInput.charAt(2) == '1') {
+        if (digitalInput.charAt(1) == '1') {
             device.chargerConnected(dateTime);
         }
         

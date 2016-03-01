@@ -42,7 +42,7 @@ public class TelicDeviceMessages extends TrackerMessageFactory<TrackerMessage> {
                 .appendField(asTelicStringCoord(position.getAlt())) //Altitude
                 .appendField("11032") //mileage
                 .appendField("")
-                .appendField("0010") //digital input status
+                .appendField("0100") //digital input status
                 .appendField("238") //digital output status
                 .appendField("211")   //analog input 1
                 .appendField("0")   //analog input 2
