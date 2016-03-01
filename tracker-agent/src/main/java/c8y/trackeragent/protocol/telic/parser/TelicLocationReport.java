@@ -1,5 +1,7 @@
 package c8y.trackeragent.protocol.telic.parser;
 
+import static com.cumulocity.model.DateConverter.date2String;
+
 import java.math.BigDecimal;
 
 import org.joda.time.DateTime;
@@ -89,11 +91,11 @@ public class TelicLocationReport implements Parser, TelicFragment {
         if (dateTime == null) {
             dateTime = new DateTime();
         } else {
-            position.setProperty(TelicConstants.LOG_TIMESTAMP, dateTime.toDate());
+            position.setProperty(TelicConstants.LOG_TIMESTAMP, date2String(dateTime.toDate()));
         }
         DateTime gpsTimestamp = getGPSTimestamp(reportCtx);
         if (dateTime != null) {
-            position.setProperty(TelicConstants.GPS_TIMESTAMP, gpsTimestamp.toDate());
+            position.setProperty(TelicConstants.GPS_TIMESTAMP, date2String(gpsTimestamp.toDate()));
         }
         
         position.setLat(getLatitude(reportCtx));
@@ -162,7 +164,10 @@ public class TelicLocationReport implements Parser, TelicFragment {
 
     private DateTime getTimestamp(ReportContext reportCtx, int index) {
         String timestampStr = reportCtx.getEntry(index);
-        return timestampStr == null ? null : TelicConstants.TIMESTAMP_FORMATTER.parseDateTime(timestampStr);
+        if(timestampStr == null) {
+            return null;
+        }
+        return TelicConstants.TIMESTAMP_FORMATTER.parseDateTime(timestampStr);
     }
 
     private BigDecimal getLongitue(ReportContext reportCtx) {

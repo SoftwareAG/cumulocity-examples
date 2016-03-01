@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 
 import org.joda.time.DateTime;
 
+import com.cumulocity.model.DateConverter;
+
 import c8y.Position;
 import c8y.trackeragent.utils.message.TrackerMessage;
 import c8y.trackeragent.utils.message.TrackerMessageFactory;
@@ -14,6 +16,8 @@ public class TelicDeviceMessages extends TrackerMessageFactory<TrackerMessage> {
     private static final String GPS_TIMESTAMPS_STR = "020216141711";
     public static final DateTime LOG_TIMESTAMP = TelicConstants.TIMESTAMP_FORMATTER.parseDateTime(LOG_TIMESTAMP_STR);
     public static final DateTime GPS_TIMESTAMP = TelicConstants.TIMESTAMP_FORMATTER.parseDateTime(GPS_TIMESTAMPS_STR);
+    public static final String LOG_TIMESTAMP_C8Y_STR = DateConverter.date2String(LOG_TIMESTAMP.toDate());
+    public static final String GPS_TIMESTAMP_C8Y_STR = DateConverter.date2String(GPS_TIMESTAMP.toDate());
     
     @Override
     public TrackerMessage msg() {

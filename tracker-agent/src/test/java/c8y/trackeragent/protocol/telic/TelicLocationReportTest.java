@@ -7,7 +7,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
-import java.util.Date;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -89,8 +88,8 @@ public class TelicLocationReportTest {
         telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
         
         verifyReport();
-        Date actualLogTimestamp = (Date) positionCaptor.getValue().getProperty(TelicConstants.LOG_TIMESTAMP);
-        assertThat(actualLogTimestamp).isEqualTo(TelicDeviceMessages.LOG_TIMESTAMP.toDate());
+        String actualLogTimestamp = (String) positionCaptor.getValue().getProperty(TelicConstants.LOG_TIMESTAMP);
+        assertThat(actualLogTimestamp).isEqualTo(TelicDeviceMessages.LOG_TIMESTAMP_C8Y_STR);
     }
     
     @Test
@@ -100,8 +99,8 @@ public class TelicLocationReportTest {
         telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
         
         verifyReport();
-        Date actualLogTimestamp = (Date) positionCaptor.getValue().getProperty(TelicConstants.LOG_TIMESTAMP);
-        assertThat(actualLogTimestamp).isEqualTo(TelicDeviceMessages.LOG_TIMESTAMP.toDate());
+        String actualLogTimestamp = (String) positionCaptor.getValue().getProperty(TelicConstants.LOG_TIMESTAMP);
+        assertThat(actualLogTimestamp).isEqualTo(TelicDeviceMessages.LOG_TIMESTAMP_C8Y_STR);
     }
     
     @Test
