@@ -213,13 +213,13 @@ public class TrackerDevice extends DeviceManagedObject {
     public void geofenceEnter(DateTime dateTime) throws SDKException {
         geofenceEnter.setTime(dateTime.toDate());
         events.create(geofenceEnter);
-        logger.debug("{} enter geofence", imei);
+        logger.info("{} enter geofence", imei);
     }
     
     public void geofenceExit(DateTime dateTime) throws SDKException {
         geofenceExit.setTime(dateTime.toDate());
         events.create(geofenceExit);
-        logger.debug("{} exit geofence", imei);
+        logger.info("{} exit geofence", imei);
     }
     
     public void chargerConnected(DateTime dateTime) throws SDKException {

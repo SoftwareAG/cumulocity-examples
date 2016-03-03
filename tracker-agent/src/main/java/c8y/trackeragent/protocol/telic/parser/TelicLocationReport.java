@@ -63,7 +63,6 @@ public class TelicLocationReport implements Parser, TelicFragment {
     private static final int BATTERY = 17;
     
 
-    public static final BigDecimal LAT_AND_LNG_DIVISOR = new BigDecimal(10000);
     public static final BigDecimal MILEAGE_DIVISOR = new BigDecimal(1000);
 
     private TrackerAgent trackerAgent;
@@ -111,7 +110,7 @@ public class TelicLocationReport implements Parser, TelicFragment {
             handleLogCodeType(device, logCodeType, dateTime);
         }
         locationUpdateEvent.setTime(dateTime.toDate());
-        locationUpdateEvent.set(TrackingProtocol.TELIC, CommonConstants.TRACKING_PROTOCOL);
+        position.setProperty(CommonConstants.TRACKING_PROTOCOL, TrackingProtocol.TELIC);
         FixType fixType = getFixType(reportCtx);
         if (fixType != null) {
             position.setProperty(TelicConstants.FIX_TYPE, fixType.getLabel());
@@ -134,7 +133,7 @@ public class TelicLocationReport implements Parser, TelicFragment {
         }
         String digitalInput = getDigitalInput(reportCtx);
         if(digitalInput != null) {
-            handleDigitalInput(device, digitalInput, dateTime);
+            handleDigitalInput(reportCtx, device, digitalInput, dateTime);
         }
         BigDecimal batteryLevel = getBatteryLevel(reportCtx);
         if (batteryLevel != null) {
@@ -171,20 +170,17 @@ public class TelicLocationReport implements Parser, TelicFragment {
     }
 
     private BigDecimal getLongitue(ReportContext reportCtx) {
-        return getCoord(reportCtx, LONGITUDE);
+        String value = reportCtx.getEntry(LONGITUDE);
+        return PositionParser.LONGITUDE_PARSER.parse(value);
     }
 
     private BigDecimal getLatitude(ReportContext reportCtx) {
-        return getCoord(reportCtx, LATITUDE);
+        String value = reportCtx.getEntry(LATITUDE);
+        return PositionParser.LATITUDE_PARSER.parse(value);
     }
 
     private BigDecimal getAltitude(ReportContext reportCtx) {
         return new BigDecimal(reportCtx.getEntry(ALTITUDE));
-    }
-
-    private BigDecimal getCoord(ReportContext reportCtx, int index) {
-        BigDecimal incomingValue = new BigDecimal(reportCtx.getEntry(index));
-        return incomingValue.divide(LAT_AND_LNG_DIVISOR);
     }
 
     private FixType getFixType(ReportContext reportCtx) {
@@ -238,14 +234,20 @@ public class TelicLocationReport implements Parser, TelicFragment {
         }
     }
     
-    private void handleDigitalInput(TrackerDevice device, String digitalInput, DateTime dateTime) {
+    private void handleDigitalInput(ReportContext reportCtx, TrackerDevice device, String digitalInput, DateTime dateTime) {
         if (digitalInput.length() < 2) {
             logger.warn("Digital input has unexpected size {} (expected more than 1)");
         }
-        if (digitalInput.charAt(1) == '1') {
+        boolean chargerConnected = digitalInput.charAt(1) == '1';
+        boolean chargerConnectedEventSent = reportCtx.isConnectionFlagOn("chargerConnectedEventSent");
+        if (chargerConnected && !chargerConnectedEventSent) {
             device.chargerConnected(dateTime);
+            reportCtx.setConnectionParam("chargerConnectedEventSent", Boolean.TRUE);
+        } 
+        if (!chargerConnected) {
+            //reset connection state for next time when charger will be connected
+            reportCtx.setConnectionParam("chargerConnectedEventSent", Boolean.FALSE);
         }
-        
     }
 
 }
