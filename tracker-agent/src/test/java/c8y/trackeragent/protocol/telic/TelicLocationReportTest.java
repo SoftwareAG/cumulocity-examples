@@ -200,12 +200,23 @@ public class TelicLocationReportTest {
     }
     
     @Test
-    public void shouldSendChargerCOnnectedAsEvent() throws Exception {
+    public void shouldSendChargerConnectedAsEvent() throws Exception {
         String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1).asArray();
         
         telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
         
         verify(device).chargerConnected(TelicDeviceMessages.LOG_TIMESTAMP);
+    }
+    
+    @Test
+    public void shouldSendChargerConnectedAsEventOnceOnly() throws Exception {
+        String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1).asArray();
+        ReportContext reportCtx = new ReportContext(report, Devices.IMEI_1, null);
+        
+        telic.onParsed(reportCtx);
+        telic.onParsed(reportCtx);
+        
+        verify(device, Mockito.times(1)).chargerConnected(TelicDeviceMessages.LOG_TIMESTAMP);
     }
     
 }
