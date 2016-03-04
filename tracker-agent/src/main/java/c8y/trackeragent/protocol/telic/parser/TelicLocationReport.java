@@ -93,7 +93,7 @@ public class TelicLocationReport implements Parser, TelicFragment {
             position.setProperty(TelicConstants.LOG_TIMESTAMP, date2String(dateTime.toDate()));
         }
         DateTime gpsTimestamp = getGPSTimestamp(reportCtx);
-        if (dateTime != null) {
+        if (gpsTimestamp != null) {
             position.setProperty(TelicConstants.GPS_TIMESTAMP, date2String(gpsTimestamp.toDate()));
         }
         
