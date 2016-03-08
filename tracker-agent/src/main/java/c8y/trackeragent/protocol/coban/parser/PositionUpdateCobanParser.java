@@ -1,6 +1,7 @@
 package c8y.trackeragent.protocol.coban.parser;
 
 import static c8y.trackeragent.protocol.coban.message.CobanServerMessages.imeiMsg;
+import static c8y.trackeragent.utils.LocationEventBuilder.aLocationEvent;
 import static java.math.BigDecimal.valueOf;
 
 import java.math.BigDecimal;
@@ -12,12 +13,10 @@ import org.springframework.stereotype.Component;
 
 import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
-import com.cumulocity.rest.representation.event.EventRepresentation;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 
 import c8y.MotionTracking;
-import c8y.Position;
 import c8y.SpeedMeasurement;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerDevice;
@@ -28,6 +27,7 @@ import c8y.trackeragent.protocol.coban.CobanConstants;
 import c8y.trackeragent.protocol.coban.message.CobanServerMessages;
 import c8y.trackeragent.service.AlarmService;
 import c8y.trackeragent.service.MeasurementService;
+import c8y.trackeragent.utils.LocationEventBuilder;
 import c8y.trackeragent.utils.TK10xCoordinatesTranslator;
 import c8y.trackeragent.utils.message.TrackerMessage;
 
@@ -90,26 +90,22 @@ public class PositionUpdateCobanParser extends CobanParser implements Translator
             logger.info("Process alarm {} for imei {}.", alarmType, reportCtx.getImei());
             alarm = alarmService.createAlarm(reportCtx, alarmType, device);
         }
+        LocationEventBuilder aLocationEvent = aLocationEvent();
         
         double lat = TK10xCoordinatesTranslator.parseLatitude(reportCtx.getEntry(7), reportCtx.getEntry(8));
         double lng = TK10xCoordinatesTranslator.parseLongitude(reportCtx.getEntry(9), reportCtx.getEntry(10));
-        Position position = new Position();
-        position.setLat(valueOf(lat));
-        position.setLng(valueOf(lng));
-        position.setAlt(BigDecimal.ZERO);
-        logger.debug("Update position for imei: {} to: {}.", reportCtx.getImei(), position);
+        aLocationEvent.withLat(valueOf(lat)).withLng(valueOf(lng)).withAlt(BigDecimal.ZERO);
         
-        EventRepresentation locationUpdateEvent = device.aLocationUpdateEvent();
         BigDecimal speedValue = getSpeed(reportCtx);
         if (speedValue != null) {
         	logger.debug("Parsed speed for imei: {} to: {}.", reportCtx.getImei(), speedValue);
             SpeedMeasurement speed = measurementService.createSpeedMeasurement(speedValue, device);
-            locationUpdateEvent.set(speed);
+            aLocationEvent.withSpeedMeasurement(speed);
         }
         if (alarm != null) {
-            alarmService.populateLocationEventByAlarm(locationUpdateEvent, alarm);
+            aLocationEvent.withAlarm(alarm);
         }
-        device.setPosition(locationUpdateEvent, position);
+        device.setPosition(aLocationEvent.build());
         return true;
     }
 

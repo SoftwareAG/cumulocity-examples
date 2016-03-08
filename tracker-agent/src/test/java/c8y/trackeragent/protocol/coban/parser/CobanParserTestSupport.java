@@ -8,11 +8,19 @@ import static org.mockito.Mockito.when;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 
 import org.junit.After;
 import org.junit.Before;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
+import com.cumulocity.model.idtype.GId;
+import com.cumulocity.model.measurement.MeasurementValue;
+import com.cumulocity.rest.representation.event.EventRepresentation;
+
+import c8y.SpeedMeasurement;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.protocol.coban.CobanDeviceMessages;
@@ -20,9 +28,6 @@ import c8y.trackeragent.protocol.coban.device.CobanDevice;
 import c8y.trackeragent.protocol.coban.message.CobanServerMessages;
 import c8y.trackeragent.service.AlarmService;
 import c8y.trackeragent.service.MeasurementService;
-
-import com.cumulocity.model.idtype.GId;
-import com.cumulocity.rest.representation.event.EventRepresentation;
 
 public abstract class CobanParserTestSupport {
     
@@ -55,4 +60,17 @@ public abstract class CobanParserTestSupport {
     protected void assertOut(String expected) throws UnsupportedEncodingException {
         assertThat(out.toString("US-ASCII")).isEqualTo(expected);
     }
+    
+    public static class CreateSpeedMeasurementAnswer implements Answer<SpeedMeasurement> {
+
+        @Override
+        public SpeedMeasurement answer(InvocationOnMock invocation) throws Throwable {
+            BigDecimal speed = (BigDecimal) invocation.getArguments()[0];
+            SpeedMeasurement speedMeasurement = new SpeedMeasurement();
+            MeasurementValue value = new MeasurementValue(speed, "km/h", null, null, null);
+            speedMeasurement.setSpeed(value);
+            return speedMeasurement;
+        }
+        
+    };
 }

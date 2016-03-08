@@ -34,8 +34,6 @@ public class PositionUpdateCobanParserTest extends CobanParserTestSupport {
 
     private ArgumentCaptor<BigDecimal> speedCaptor;
 
-    private ArgumentCaptor<Position> positionCaptor;
-
     private ArgumentCaptor<CobanAlarmType> alarmTypeCaptor;
 
     @Before
@@ -43,9 +41,8 @@ public class PositionUpdateCobanParserTest extends CobanParserTestSupport {
         cobanParser = new PositionUpdateCobanParser(trackerAgent, serverMessages, alarmService, measurementService);
         alarmTypeCaptor = ArgumentCaptor.forClass(CobanAlarmType.class);
         eventCaptor = ArgumentCaptor.forClass(EventRepresentation.class);
-        positionCaptor = ArgumentCaptor.forClass(Position.class);
         speedCaptor = ArgumentCaptor.forClass(BigDecimal.class);
-        when(measurementService.createSpeedMeasurement(any(BigDecimal.class), any(TrackerDevice.class))).thenReturn(new SpeedMeasurement());
+        when(measurementService.createSpeedMeasurement(any(BigDecimal.class), any(TrackerDevice.class))).thenAnswer(new CreateSpeedMeasurementAnswer());
     }
 
     @Test
@@ -72,10 +69,11 @@ public class PositionUpdateCobanParserTest extends CobanParserTestSupport {
 
         boolean success = cobanParser.onParsed(reportCtx);
 
-        verify(deviceMock).setPosition(eventCaptor.capture(), positionCaptor.capture());
+        verify(deviceMock).setPosition(eventCaptor.capture());
         assertThat(success).isTrue();
-        assertThat(positionCaptor.getValue()).isEqualTo(TK10xCoordinatesTranslator.parse(Positions.TK10xSample));
         assertThat(eventCaptor.getValue().get(SpeedMeasurement.class)).isNotNull();
+        Position position = eventCaptor.getValue().get(Position.class);
+        assertThat(position).isEqualTo(TK10xCoordinatesTranslator.parse(Positions.TK10xSample));
     }
 
     @Test

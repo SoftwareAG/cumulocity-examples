@@ -39,6 +39,7 @@ public class PositionUpdateRFV16ParserTest extends RFV16ParserTestSupport {
     public void init() {
         parser = new PositionUpdateRFV16Parser(trackerAgent, serverMessages, measurementService, alarmService, trackerConfiguration);
         trackerConfiguration.setRfv16LocationReportTimeInterval(30);
+        when(alarmService.createAlarm(any(ReportContext.class), any(RFV16AlarmType.class), any(TrackerDevice.class))).thenAnswer(new CreateAlarmAnswer());
     }
     
     @Test    
@@ -55,8 +56,9 @@ public class PositionUpdateRFV16ParserTest extends RFV16ParserTestSupport {
         
         parser.onParsed(reportCtx);
         
-        verify(deviceMock).setPosition(eventCaptor.capture(), positionCaptor.capture());
-        assertThat(positionCaptor.getValue()).isEqualTo(TK10xCoordinatesTranslator.parse(Positions.TK10xSample));
+        verify(deviceMock).setPosition(eventCaptor.capture());
+        Position position = eventCaptor.getValue().get(Position.class);
+        assertThat(position).isEqualTo(TK10xCoordinatesTranslator.parse(Positions.TK10xSample));
         assertOut("*HQ,1234567890,D1,010000,30,1#");
     }
     
@@ -136,7 +138,7 @@ public class PositionUpdateRFV16ParserTest extends RFV16ParserTestSupport {
         
         parser.onParsed(reportCtx);
         
-        verify(deviceMock).setPosition(eventCaptor.capture(), positionCaptor.capture());
+        verify(deviceMock).setPosition(eventCaptor.capture());
         assertThat(eventCaptor.getValue().get(Position.class)).isEqualTo(Positions.SAMPLE_1);
     }
 

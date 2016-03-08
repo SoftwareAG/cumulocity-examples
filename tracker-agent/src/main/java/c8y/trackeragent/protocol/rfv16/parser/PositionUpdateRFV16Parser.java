@@ -1,6 +1,8 @@
 package c8y.trackeragent.protocol.rfv16.parser;
 
 import static c8y.trackeragent.protocol.rfv16.RFV16Constants.CONNECTION_PARAM_CONTROL_COMMANDS_SENT;
+import static c8y.trackeragent.utils.LocationEventBuilder.aLocationEvent;
+import static java.math.BigDecimal.valueOf;
 
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -11,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
-import com.cumulocity.rest.representation.event.EventRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 
 import c8y.Position;
@@ -24,6 +25,8 @@ import c8y.trackeragent.protocol.rfv16.RFV16Constants;
 import c8y.trackeragent.protocol.rfv16.message.RFV16ServerMessages;
 import c8y.trackeragent.service.AlarmService;
 import c8y.trackeragent.service.MeasurementService;
+import c8y.trackeragent.utils.LocationEventBuilder;
+import c8y.trackeragent.utils.TK10xCoordinatesTranslator;
 import c8y.trackeragent.utils.TrackerConfiguration;
 import c8y.trackeragent.utils.message.TrackerMessage;
 
@@ -58,26 +61,22 @@ public class PositionUpdateRFV16Parser extends RFV16Parser implements Parser {
         }
         return true;
     }
-
+    
     private void processValidPositionReport(ReportContext reportCtx) {
         TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(reportCtx.getImei());
-
         Collection<AlarmRepresentation> alarms = createAlarms(reportCtx, device, reportCtx.getEntry(12));
-        Position position = getPosition(reportCtx);
-        logger.debug("Update position for imei: {} to: {}.", reportCtx.getImei(), position);
-
+        double lat = TK10xCoordinatesTranslator.parseLatitude(reportCtx.getEntry(5), reportCtx.getEntry(6));
+        double lng = TK10xCoordinatesTranslator.parseLongitude(reportCtx.getEntry(7), reportCtx.getEntry(8));
         SpeedMeasurement speed = createSpeedMeasurement(reportCtx, device);
-
-        EventRepresentation event = device.aLocationUpdateEvent();
-        if (speed != null) {
-            event.set(speed);
-        }
-
-        if (!alarms.isEmpty()) {
-            alarmService.populateLocationEventByAlarms(event, alarms);
-        }
-
-        device.setPosition(event, position);
+        // @formatter:off
+        LocationEventBuilder locationEvent = aLocationEvent()
+                .withLat(valueOf(lat))
+                .withLng(valueOf(lng))
+                .withAlt(BigDecimal.ZERO)
+                .withSpeedMeasurement(speed)
+                .withAlarms(alarms);
+        // @formatter:on
+        device.setPosition(locationEvent.build());
         if (!reportCtx.isConnectionFlagOn(CONNECTION_PARAM_CONTROL_COMMANDS_SENT)) {
             sendControllCommands(reportCtx);
         }
@@ -91,27 +90,22 @@ public class PositionUpdateRFV16Parser extends RFV16Parser implements Parser {
             return;
         }
         logger.debug("There are alarms {}.", alarms);
-        putAlarmsToLastEvent(device, alarms);
-    }
-
-    private void putAlarmsToLastEvent(TrackerDevice device, Collection<AlarmRepresentation> alarms) {
         Position lastPosition = device.getLastPosition();
         if (lastPosition == null) {
             return;
         }
-        EventRepresentation event = device.aLocationUpdateEvent();
-        event.set(lastPosition);
-        alarmService.populateLocationEventByAlarms(event, alarms);
-        device.setPosition(event, lastPosition);
+        SpeedMeasurement speed = createSpeedMeasurement(reportCtx, device);
+        LocationEventBuilder locationEvent = aLocationEvent().withPosition(lastPosition).withAlarms(alarms).withSpeedMeasurement(speed);
+        device.setPosition(locationEvent.build());
     }
 
     private SpeedMeasurement createSpeedMeasurement(ReportContext reportCtx, TrackerDevice device) {
-        SpeedMeasurement speed = null;
         BigDecimal speedValue = getSpeed(reportCtx);
-        if (speedValue != null) {
-            speed = measurementService.createSpeedMeasurement(speedValue, device);
+        if (speedValue == null) {
+            return null;
+        } else {
+            return measurementService.createSpeedMeasurement(speedValue, device);
         }
-        return speed;
     }
 
     private void sendControllCommands(ReportContext reportCtx) {

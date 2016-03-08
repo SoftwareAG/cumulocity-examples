@@ -1,7 +1,6 @@
 package c8y.trackeragent.protocol.rfv16.parser;
 
 import static java.math.BigDecimal.ROUND_DOWN;
-import static java.math.BigDecimal.valueOf;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -15,14 +14,12 @@ import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 import com.google.common.base.Strings;
 
-import c8y.Position;
 import c8y.trackeragent.Parser;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.protocol.rfv16.message.RFV16ServerMessages;
 import c8y.trackeragent.service.AlarmService;
-import c8y.trackeragent.utils.TK10xCoordinatesTranslator;
 
 public abstract class RFV16Parser implements Parser, RFV16Fragment {
     
@@ -65,16 +62,6 @@ public abstract class RFV16Parser implements Parser, RFV16Fragment {
             logger.error("Wrong speed value: " + entry, nfex);
             return null;
         }
-    }
-    
-    protected Position getPosition(ReportContext reportCtx) {
-        double lat = TK10xCoordinatesTranslator.parseLatitude(reportCtx.getEntry(5), reportCtx.getEntry(6));
-        double lng = TK10xCoordinatesTranslator.parseLongitude(reportCtx.getEntry(7), reportCtx.getEntry(8));
-        Position position = new Position();
-        position.setLat(valueOf(lat));
-        position.setLng(valueOf(lng));
-        position.setAlt(BigDecimal.ZERO);
-        return position;
     }
     
     protected Collection<AlarmRepresentation> createAlarms(ReportContext reportCtx, TrackerDevice device, String status) {

@@ -144,6 +144,11 @@ public class TrackerDevice extends DeviceManagedObject {
         setPosition(event, position);
     }
     
+    public void setPosition(EventRepresentation event) {
+        setPosition(event, event.get(Position.class));
+    }
+
+    
     public void setPosition(EventRepresentation event, Position position) {
         ManagedObjectRepresentation device = aDevice();        
         logger.debug("Updating location of {} to {}.", imei, position);
@@ -492,6 +497,7 @@ public class TrackerDevice extends DeviceManagedObject {
         EventRepresentation lastEvent = getLastLocationEvent();
         return lastEvent == null ? null : lastEvent.get(Position.class);
     }
+
 
 
 }
