@@ -51,7 +51,11 @@ public class LocationEventBuilder {
     }
 
     public LocationEventBuilder withAlarm(AlarmRepresentation alarm) {
-        return withAlarms(asList(alarm));
+        if(alarm == null) {
+            return this;
+        } else {
+            return withAlarms(asList(alarm));
+        }
     }
 
     public LocationEventBuilder withAlarms(Collection<AlarmRepresentation> alarms) {

@@ -102,9 +102,7 @@ public class PositionUpdateCobanParser extends CobanParser implements Translator
             SpeedMeasurement speed = measurementService.createSpeedMeasurement(speedValue, device);
             aLocationEvent.withSpeedMeasurement(speed);
         }
-        if (alarm != null) {
-            aLocationEvent.withAlarm(alarm);
-        }
+        aLocationEvent.withAlarm(alarm);
         device.setPosition(aLocationEvent.build());
         return true;
     }
