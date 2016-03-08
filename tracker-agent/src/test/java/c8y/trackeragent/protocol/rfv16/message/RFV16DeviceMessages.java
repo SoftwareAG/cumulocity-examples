@@ -55,6 +55,23 @@ public class RFV16DeviceMessages extends RFV16ServerMessages {
                 .appendField(status);
     }
     
+    public TrackerMessage invalidPositionUpdate(String maker, String imei, String status) {
+        return msg()
+                .appendField(maker)
+                .appendField(imei)
+                .appendField(RFV16Constants.MESSAGE_TYPE_V1)
+                .appendField(currTime())
+                .appendField(RFV16Constants.DATE_EFFECTIVE_INVALID_MARK)
+                .appendField("")
+                .appendField("")
+                .appendField("")
+                .appendField("")
+                .appendField("") 
+                .appendField("") 
+                .appendField(currDate())
+                .appendField(status);
+    }
+    
     /**
      * 
      * *XX,YYYYYYYYYY,LINK,HHMMSS,GSM,GPS,BAT,STEP,TURNOVER,DDMMYY,tracker_status#

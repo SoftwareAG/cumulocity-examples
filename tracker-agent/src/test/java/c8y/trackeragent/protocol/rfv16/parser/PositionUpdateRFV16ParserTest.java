@@ -4,6 +4,7 @@ import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 
@@ -25,7 +26,7 @@ import c8y.trackeragent.utils.TK10xCoordinatesTranslator;
 import c8y.trackeragent.utils.TrackerConfiguration;
 import c8y.trackeragent.utils.message.TrackerMessage;
 
-public class PositionUpdateRFV16ReportTest extends RFV16ParserTestSupport {
+public class PositionUpdateRFV16ParserTest extends RFV16ParserTestSupport {
     
     PositionUpdateRFV16Parser parser;
     ArgumentCaptor<Position> positionCaptor = ArgumentCaptor.forClass(Position.class);
@@ -114,6 +115,29 @@ public class PositionUpdateRFV16ReportTest extends RFV16ParserTestSupport {
         verify(measurementService).createSpeedMeasurement(speedCaptor.capture(), any(TrackerDevice.class));
         assertThat(speedCaptor.getAllValues().size()).isEqualTo(1);
         assertThat(speedCaptor.getValue()).isEqualTo((new BigDecimal(60)).multiply(RFV16Parser.RFV16_SPEED_MEASUREMENT_FACTOR).setScale(0, BigDecimal.ROUND_DOWN));
+    }
+    
+    @Test
+    public void shouldSendAlarmsEitherIfCurrentEventHasNoGpsData() throws Exception {
+        TrackerMessage deviceMessage = deviceMessages.invalidPositionUpdate("DB", IMEI, "FFFDFFFF");
+        ReportContext reportCtx = new ReportContext(deviceMessage.asArray(), IMEI, out);
+        
+        parser.onParsed(reportCtx);
+        
+        verify(alarmService).createAlarm(any(ReportContext.class), alarmTypeCaptor.capture(), any(TrackerDevice.class));
+        assertThat(alarmTypeCaptor.getValue()).isEqualTo(RFV16AlarmType.LOW_BATTERY);
+    }
+    
+    @Test
+    public void shouldPutAlarmsToLastEventIfCurrentEventHasNoGpsData() throws Exception {
+        TrackerMessage deviceMessage = deviceMessages.invalidPositionUpdate("DB", IMEI, "FFFDFFFF");
+        ReportContext reportCtx = new ReportContext(deviceMessage.asArray(), IMEI, out);
+        when(deviceMock.getLastPosition()).thenReturn(Positions.SAMPLE_1);
+        
+        parser.onParsed(reportCtx);
+        
+        verify(deviceMock).setPosition(eventCaptor.capture(), positionCaptor.capture());
+        assertThat(eventCaptor.getValue().get(Position.class)).isEqualTo(Positions.SAMPLE_1);
     }
 
 }

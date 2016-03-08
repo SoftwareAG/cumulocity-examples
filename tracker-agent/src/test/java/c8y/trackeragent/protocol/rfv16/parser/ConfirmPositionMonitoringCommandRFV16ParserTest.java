@@ -16,7 +16,7 @@ public class ConfirmPositionMonitoringCommandRFV16ParserTest extends RFV16Parser
 
     @Before
     public void init() {
-        parser = new ConfirmPositionMonitoringCommandRFV16Parser(trackerAgent, serverMessages);
+        parser = new ConfirmPositionMonitoringCommandRFV16Parser(trackerAgent, serverMessages, alarmService);
     }
 
     @Test

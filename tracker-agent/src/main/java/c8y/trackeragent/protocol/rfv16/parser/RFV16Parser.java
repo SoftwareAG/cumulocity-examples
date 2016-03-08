@@ -4,19 +4,24 @@ import static java.math.BigDecimal.ROUND_DOWN;
 import static java.math.BigDecimal.valueOf;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 import com.google.common.base.Strings;
 
 import c8y.Position;
 import c8y.trackeragent.Parser;
 import c8y.trackeragent.TrackerAgent;
+import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.protocol.rfv16.message.RFV16ServerMessages;
+import c8y.trackeragent.service.AlarmService;
 import c8y.trackeragent.utils.TK10xCoordinatesTranslator;
 
 public abstract class RFV16Parser implements Parser, RFV16Fragment {
@@ -27,10 +32,12 @@ public abstract class RFV16Parser implements Parser, RFV16Fragment {
     
     protected final TrackerAgent trackerAgent;
     protected final RFV16ServerMessages serverMessages;
+    protected final AlarmService alarmService;
     
-    public RFV16Parser(TrackerAgent trackerAgent, RFV16ServerMessages serverMessages) {
+    public RFV16Parser(TrackerAgent trackerAgent, RFV16ServerMessages serverMessages, AlarmService alarmService) {
         this.trackerAgent = trackerAgent;
         this.serverMessages = serverMessages;
+        this.alarmService = alarmService;
     }
 
     @Override
@@ -69,6 +76,18 @@ public abstract class RFV16Parser implements Parser, RFV16Fragment {
         position.setAlt(BigDecimal.ZERO);
         return position;
     }
+    
+    protected Collection<AlarmRepresentation> createAlarms(ReportContext reportCtx, TrackerDevice device, String status) {
+        Collection<AlarmRepresentation> alarms = new ArrayList<AlarmRepresentation>();
+        Collection<RFV16AlarmType> alarmTypes = AlarmTypeDecoder.getAlarmTypes(status);
+        logger.debug("Read status {} as alarms {} for device {}", status, reportCtx.getImei(), alarmTypes);
+        for (RFV16AlarmType alarmType : alarmTypes) {
+            AlarmRepresentation alarm = alarmService.createAlarm(reportCtx, alarmType, device);
+            alarms.add(alarm);
+        }
+        return alarms;
+    }
+
     
     public static DateTime getDateTime(ReportContext reportCtx) {
         DateTime time = RFV16ServerMessages.HHMMSS.parseDateTime(reportCtx.getEntry(3));

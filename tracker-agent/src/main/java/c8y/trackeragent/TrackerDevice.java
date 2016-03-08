@@ -25,6 +25,7 @@ import static org.apache.commons.lang.StringUtils.isEmpty;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -47,8 +48,10 @@ import com.cumulocity.sdk.client.alarm.AlarmApi;
 import com.cumulocity.sdk.client.alarm.AlarmFilter;
 import com.cumulocity.sdk.client.devicecontrol.DeviceControlApi;
 import com.cumulocity.sdk.client.event.EventApi;
+import com.cumulocity.sdk.client.event.EventCollection;
 import com.cumulocity.sdk.client.event.EventFilter;
 import com.cumulocity.sdk.client.measurement.MeasurementApi;
+import com.google.common.collect.Iterables;
 
 import c8y.Battery;
 import c8y.Configuration;
@@ -469,6 +472,25 @@ public class TrackerDevice extends DeviceManagedObject {
     public void setOperationSuccessful(OperationRepresentation operation) {
         operation.setStatus(OperationStatus.SUCCESSFUL.toString());
         deviceControl.update(operation);
+    }
+    
+    public EventRepresentation getLastLocationEvent() {
+        Date fromDate = new Date(0);
+        Date toDate = new DateTime().plusDays(1).toDate();
+        // @formatter:off
+        EventFilter filter = new EventFilter()
+                .bySource(getGId())
+                .byType(TrackerDevice.LU_EVENT_TYPE)
+                .byDate(fromDate, toDate);
+        // @formatter:on
+        EventCollection collection = events.getEventsByFilter(filter);
+        List<EventRepresentation> events = collection.get().getEvents();
+        return Iterables.getFirst(events, null);
+    }
+    
+    public Position getLastPosition() {
+        EventRepresentation lastEvent = getLastLocationEvent();
+        return lastEvent == null ? null : lastEvent.get(Position.class);
     }
 
 

@@ -24,7 +24,7 @@ public class RFV16CommandTranslatorTest extends RFV16ParserTestSupport {
 
     @Before
     public void init() {
-        commandTranslator = new RFV16CommandTranslator(serverMessages, trackerAgent);
+        commandTranslator = new RFV16CommandTranslator(serverMessages, trackerAgent, alarmService);
         currentDeviceConfigIs(rFV16Config);
     }
 

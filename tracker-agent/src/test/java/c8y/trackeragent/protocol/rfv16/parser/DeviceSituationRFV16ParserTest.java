@@ -27,7 +27,7 @@ public class DeviceSituationRFV16ParserTest extends RFV16ParserTestSupport {
     
     @Before
     public void init() {
-        parser = new DeviceSituationRFV16Parser(trackerAgent, serverMessages, measurementService);
+        parser = new DeviceSituationRFV16Parser(trackerAgent, serverMessages, measurementService, alarmService);
     }
 
     @Test

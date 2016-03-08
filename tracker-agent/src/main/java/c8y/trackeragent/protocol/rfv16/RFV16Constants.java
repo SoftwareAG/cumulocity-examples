@@ -12,7 +12,7 @@ public class RFV16Constants {
     public static final String DEFAULT_MAKER = "HQ";
     
     public static final String DATE_EFFECTIVE_MARK = "A";
-    public static final String DATE_EFFECTIVE_INVALID = "V";
+    public static final String DATE_EFFECTIVE_INVALID_MARK = "V";
     public static final String MESSAGE_TYPE_V1 = "V1";
     public static final String MESSAGE_TYPE_V4 = "V4";
     public static final String MESSAGE_TYPE_LINK = "LINK";

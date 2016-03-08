@@ -1,13 +1,15 @@
 package c8y.trackeragent.protocol.rfv16.parser;
 
 import java.math.BigDecimal;
-import java.util.Collection;
 
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import com.cumulocity.sdk.client.SDKException;
+import com.google.common.base.Strings;
 
 import c8y.trackeragent.Parser;
 import c8y.trackeragent.TrackerAgent;
@@ -18,9 +20,6 @@ import c8y.trackeragent.protocol.rfv16.message.RFV16ServerMessages;
 import c8y.trackeragent.service.AlarmService;
 import c8y.trackeragent.service.MeasurementService;
 
-import com.cumulocity.sdk.client.SDKException;
-import com.google.common.base.Strings;
-
 /**
  * listen to HEARTBEAT (LINK) message
  *
@@ -30,7 +29,6 @@ public class HeartbeatRFV16Parser extends RFV16Parser implements Parser {
 
     private static Logger logger = LoggerFactory.getLogger(HeartbeatRFV16Parser.class);
     
-    private final AlarmService alarmService;
     private final MeasurementService measurementService;
 
     @Autowired
@@ -39,8 +37,7 @@ public class HeartbeatRFV16Parser extends RFV16Parser implements Parser {
             AlarmService alarmService,
             MeasurementService measurementService
             ) {
-        super(trackerAgent, serverMessages);
-        this.alarmService = alarmService;
+        super(trackerAgent, serverMessages, alarmService);
         this.measurementService = measurementService;
     }
 
@@ -57,11 +54,7 @@ public class HeartbeatRFV16Parser extends RFV16Parser implements Parser {
             return false;
         }
         logger.debug("Read status {} as alarms for device {}", status, reportCtx.getImei());
-        Collection<RFV16AlarmType> alarmTypes = AlarmTypeDecoder.getAlarmTypes(status);
-        logger.debug("Read status {} as alarms {} for device {}", status, reportCtx.getImei(), alarmTypes);
-        for (RFV16AlarmType alarmType : alarmTypes) {
-            alarmService.createAlarm(reportCtx, alarmType, device);
-        }
+        createAlarms(reportCtx, device, status);
         BigDecimal batteryLevel = getBatteryPercentageLevel(reportCtx);
         if (batteryLevel != null) {
             measurementService.createPercentageBatteryLevelMeasurement(batteryLevel, device, new DateTime());

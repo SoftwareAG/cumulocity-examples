@@ -28,6 +28,7 @@ import c8y.trackeragent.context.OperationContext;
 import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.protocol.rfv16.RFV16Constants;
 import c8y.trackeragent.protocol.rfv16.message.RFV16ServerMessages;
+import c8y.trackeragent.service.AlarmService;
 import c8y.trackeragent.utils.message.TrackerMessage;
 
 @Component
@@ -39,8 +40,8 @@ public class RFV16CommandTranslator extends RFV16Parser implements Translator {
     private static final Logger logger = LoggerFactory.getLogger(RFV16Parser.class);
 
     @Autowired
-    public RFV16CommandTranslator(RFV16ServerMessages serverMessages, TrackerAgent trackerAgent) {
-        super(trackerAgent, serverMessages);
+    public RFV16CommandTranslator(RFV16ServerMessages serverMessages, TrackerAgent trackerAgent, AlarmService alarmService) {
+        super(trackerAgent, serverMessages, alarmService);
     }
     
     @Override
