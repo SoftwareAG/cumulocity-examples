@@ -15,6 +15,7 @@ import com.cumulocity.agent.server.context.DeviceContextService;
 import com.cumulocity.agent.server.repository.InventoryRepository;
 import com.cumulocity.model.authentication.CumulocityCredentials;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
+import com.cumulocity.sdk.client.ClientConfiguration;
 import com.cumulocity.sdk.client.PlatformImpl;
 import com.google.common.base.Predicate;
 import com.google.common.cache.Cache;
@@ -101,7 +102,7 @@ public class TrackerPlatformProvider {
     }
 
     private PlatformImpl c8yPlatform(CumulocityCredentials credentials) {
-        PlatformImpl platform = new PlatformImpl(config.getPlatformHost(), credentials);
+        PlatformImpl platform = new PlatformImpl(config.getPlatformHost(), credentials, new ClientConfiguration(null, false));
         platform.setForceInitialHost(config.getForceInitialHost());
         return platform;
     }
