@@ -8,13 +8,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import c8y.trackeragent.TrackerAgent;
-import c8y.trackeragent.TrackerDevice;
-import c8y.trackeragent.TrackerPlatform;
-import c8y.trackeragent.devicebootstrap.DeviceCredentials;
-
 import com.cumulocity.agent.server.context.DeviceContextService;
 import com.cumulocity.agent.server.logging.LoggingService;
+
+import c8y.trackeragent.TrackerPlatform;
+import c8y.trackeragent.devicebootstrap.DeviceCredentials;
+import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
+import c8y.trackeragent.utils.TrackerPlatformProvider;
 
 @Component
 public class OperationDispatchers {
@@ -23,26 +23,26 @@ public class OperationDispatchers {
 
     private static final int THREAD_POOL_SIZE = 10;
 
-    private final TrackerAgent trackerAgent;
     private final ScheduledExecutorService operationsExecutor;
     private final DeviceContextService contextService;
     private final LoggingService loggingService;
+    private final TrackerPlatformProvider platformProvider;
+    
 
     @Autowired
-    public OperationDispatchers(TrackerAgent trackerAgent, 
-            DeviceContextService contextService, LoggingService loggingService) {
-        this.trackerAgent = trackerAgent;
+    public OperationDispatchers(TrackerPlatformProvider platformProvider, 
+            DeviceContextService contextService, LoggingService loggingService, DeviceCredentialsRepository DeviceCredentialsRepository) {
+        this.platformProvider = platformProvider;
         this.loggingService = loggingService;
         this.contextService = contextService;
         this.operationsExecutor = Executors.newScheduledThreadPool(THREAD_POOL_SIZE);
     }
 
-    public void startPollerFor(DeviceCredentials credentials) {
-        TrackerDevice trackerDevice = trackerAgent.getOrCreateTrackerDevice(credentials.getImei());
-        TrackerPlatform devicePlatform = trackerAgent.getContext().getDevicePlatform(credentials.getImei());
+    public void startPollerFor(DeviceCredentials tenantCredentials) {
+        TrackerPlatform tenantPlatform = platformProvider.getTenantPlatform(tenantCredentials.getTenant());
         // Could be replace by device control notifications
-        OperationDispatcher task = new OperationDispatcher(devicePlatform, trackerDevice, loggingService, contextService, credentials);
+        OperationDispatcher task = new OperationDispatcher(tenantPlatform, tenantCredentials, loggingService, contextService);
         task.startPolling(operationsExecutor);
-        logger.info("Started operation polling for device {}.", credentials.getImei());
+        logger.info("Started operation polling for tenant {}.", tenantCredentials);
     }
 }

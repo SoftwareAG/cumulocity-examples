@@ -38,7 +38,7 @@ import com.cumulocity.agent.server.logging.LoggingService;
 import com.cumulocity.agent.server.repository.BinariesRepository;
 import com.cumulocity.agent.server.repository.DeviceControlRepository;
 
-import c8y.trackeragent.devicebootstrap.DeviceBinder;
+import c8y.trackeragent.devicebootstrap.TenantBinder;
 import c8y.trackeragent.server.Servers;
 
 /**
@@ -55,7 +55,7 @@ public class Main {
     private Servers servers;
     
     @Autowired
-    private DeviceBinder deviceBinder;
+    private TenantBinder tenantBinder;
     
     public static void main(String[] args) {
         logger.info("tracker-agent is starting.");
@@ -78,7 +78,7 @@ public class Main {
     @PostConstruct
     public void onStart() {
         servers.startAll();
-        deviceBinder.init();
+        tenantBinder.init();
     }
     
     @Bean

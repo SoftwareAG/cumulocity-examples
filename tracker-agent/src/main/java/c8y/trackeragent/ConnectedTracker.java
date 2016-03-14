@@ -179,7 +179,7 @@ public class ConnectedTracker<F extends Fragment> implements Runnable, Executor 
                 break;
             }
             final ReportContext reportContext = new ReportContext(report, imei, out, connectionParams);
-            DeviceCredentials credentials = trackerAgent.getContext().getDeviceCredentials(imei);
+            DeviceCredentials credentials = trackerAgent.getContext().getTenantCredentials(imei);
             try {
                 boolean success = contextService.callWithinContext(new DeviceContext(credentials), new Callable<Boolean>() {
                     @Override

@@ -2,6 +2,7 @@ package c8y.trackeragent.service;
 
 import org.springframework.stereotype.Component;
 
+import com.cumulocity.agent.server.context.DeviceContextService;
 import com.cumulocity.model.Agent;
 import com.cumulocity.model.ID;
 import com.cumulocity.model.idtype.GId;
@@ -10,26 +11,39 @@ import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.identity.IdentityApi;
 
+import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
+import c8y.trackeragent.utils.TrackerPlatformProvider;
 
 @Component
 public class TenantAgentService {
 	
 //	private IdentityApi registry;
 //	private DeviceCredentialsRepository credentialsRepository;
+//	private TrackerPlatformProvider platformProvider;
+//	private DeviceContextService contextService;
+//	
+//	public ManagedObjectRepresentation createAgent(DeviceCredentials agentCredentials) {
+//		ManagedObjectRepresentation agentMo = new ManagedObjectRepresentation();
+//		agentMo.setType("c8y_TrackerAgent");
+//		agentMo.setName("Tracker agent");
+//		agentMo.set(new Agent());
+//		platformProvider.getDevicePlatformForTenant(agentCredentials.getTenant())
+//		
+//	}
 //	
 //    public ManagedObjectRepresentation getAgent() {
 //        ID extId = getAgentExternalId();
 //        GId gid = tryGetBinding(extId);
-//        if(gid == null) {
-//            ManagedObjectRepresentation agentMo = new ManagedObjectRepresentation();
-//            agentMo.setType("c8y_TrackerAgent");
-//            agentMo.setName("Tracker agent");
-//            agentMo.set(new Agent());            
-//            return create(agentMo, extId, null);
-//        } else {
-//            return inventory.get(gid);
-//        }
+//		if (gid == null) {
+//			ManagedObjectRepresentation agentMo = new ManagedObjectRepresentation();
+//			agentMo.setType("c8y_TrackerAgent");
+//			agentMo.setName("Tracker agent");
+//			agentMo.set(new Agent());
+//			return create(agentMo, extId, null);
+//		} else {
+//			return inventory.get(gid);
+//		}
 //    }
 //    
 //    public static ID getAgentExternalId() {

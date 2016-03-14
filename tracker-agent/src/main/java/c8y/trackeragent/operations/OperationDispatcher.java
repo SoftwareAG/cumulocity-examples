@@ -27,17 +27,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
-
-import c8y.LogfileRequest;
-import c8y.trackeragent.ConnectionRegistry;
-import c8y.trackeragent.Executor;
-import c8y.trackeragent.ManagedObjectCache;
-import c8y.trackeragent.TrackerDevice;
-import c8y.trackeragent.TrackerPlatform;
-import c8y.trackeragent.context.OperationContext;
-import c8y.trackeragent.devicebootstrap.DeviceCredentials;
-import c8y.trackeragent.logger.PlatformLogger;
 
 import com.cumulocity.agent.server.context.DeviceContext;
 import com.cumulocity.agent.server.context.DeviceContextService;
@@ -49,6 +40,15 @@ import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.devicecontrol.OperationFilter;
 
+import c8y.LogfileRequest;
+import c8y.trackeragent.ConnectionRegistry;
+import c8y.trackeragent.Executor;
+import c8y.trackeragent.ManagedObjectCache;
+import c8y.trackeragent.TrackerDevice;
+import c8y.trackeragent.TrackerPlatform;
+import c8y.trackeragent.context.OperationContext;
+import c8y.trackeragent.devicebootstrap.DeviceCredentials;
+
 /**
  * Polls the platform for pending operations, executes the operations and
  * reports back the status. Operations can only be executed on devices that are
@@ -58,42 +58,30 @@ import com.cumulocity.sdk.client.devicecontrol.OperationFilter;
  */
 public class OperationDispatcher implements Runnable {
     
+	private static Logger logger = LoggerFactory.getLogger(OperationDispatcher.class);
+	
     private static final long POLLING_DELAY = 10;
     private static final long POLLING_INTERVAL = 10;
     
-    private final Logger logger;
-    private final TrackerDevice trackerDevice;
     private final LoggingService loggingService;
     private final DeviceContextService contextService;
-    private final DeviceCredentials credentials;
-    private TrackerPlatform platform;
+    private final DeviceCredentials tenantCredentials;
+    private final TrackerPlatform platform;
     private volatile ScheduledFuture<?> self;
 
-    /**
-     * @param platform
-     *            The connection to the platform.
-     * @param agent
-     *            The ID of this agent.
-     */
-    public OperationDispatcher(TrackerPlatform platform, TrackerDevice trackerDevice, LoggingService loggingService, DeviceContextService contextService,
-            DeviceCredentials credentials) throws SDKException {
-        this.platform = platform;
-        this.trackerDevice = trackerDevice;
+
+    public OperationDispatcher(TrackerPlatform tenantPlatform, DeviceCredentials tenantCredentials, LoggingService loggingService, DeviceContextService contextService) throws SDKException {
+        this.platform = tenantPlatform;
+		this.tenantCredentials = tenantCredentials;
         this.loggingService = loggingService;
         this.contextService = contextService;
-        this.credentials = credentials;
-        this.logger = PlatformLogger.getLogger(trackerDevice.getImei());
-        
         finishExecutingOps();
     }
 
-    /**
-     * Clean up operations that are stuck in "executing" state.
-     */
     private void finishExecutingOps() throws SDKException {
         logger.debug("Cancelling hanging operations");
         try {
-            for (OperationRepresentation operation : byStatusAndDeviceId(OperationStatus.EXECUTING)) {
+            for (OperationRepresentation operation : getOperationsByStatus(OperationStatus.EXECUTING)) {
                 operation.setStatus(OperationStatus.FAILED.toString());
                 platform.getDeviceControlApi().update(operation);
             }
@@ -106,7 +94,7 @@ public class OperationDispatcher implements Runnable {
     public void run() {
         logger.debug("Executing queued operations");
         try {
-            contextService.enterContext(new DeviceContext(credentials));
+            contextService.enterContext(new DeviceContext(tenantCredentials));
             executePendingOps();
             contextService.leaveContext();
         } catch (Exception x) {
@@ -116,32 +104,29 @@ public class OperationDispatcher implements Runnable {
 
     private void executePendingOps() throws SDKException {
         logger.debug("Querying for pending operations");
-        for (OperationRepresentation operation : byStatusAndDeviceId(OperationStatus.PENDING)) {
+        for (OperationRepresentation operation : getOperationsByStatus(OperationStatus.PENDING)) {
+        	GId deviceId = operation.getDeviceId();
+        	TrackerDevice device = ManagedObjectCache.instance().get(deviceId);
+        	if (device == null) {
+        		logger.debug("Ignore operation with ID {} -> device with id {} hasn't been identified yet", operation.getId(), deviceId);
+        		continue; // Device hasn't been identified yet
+        	}
             logger.info("Received operation with ID: {}", operation.getId());
             LogfileRequest logfileRequest = operation.get(LogfileRequest.class);
             if (logfileRequest != null) {
                 logger.info("Found AgentLogRequest operation");
                 String user = logfileRequest.getDeviceUser();
-                if(StringUtils.isEmpty(user)) {
-                    ManagedObjectRepresentation deviceObj = trackerDevice.getManagedObject();
+				if (StringUtils.isEmpty(user)) {
+                    ManagedObjectRepresentation deviceObj = device.getManagedObject();
                     logfileRequest.setDeviceUser(deviceObj.getOwner());
                     operation.set(logfileRequest, LogfileRequest.class);
                 }
                 loggingService.readLog(operation);
             }
-            GId gid = operation.getDeviceId();
-
-            TrackerDevice device = ManagedObjectCache.instance().get(gid);
-            if (device == null) {
-                logger.info("Ignore operation with ID {} -> device hasn't been identified yet", operation.getId());
-                continue; // Device hasn't been identified yet
-            }
-
             Executor exec = ConnectionRegistry.instance().get(device.getImei());
-
             if (exec != null) {
                 // Device is currently connected, execute on device
-                executeOperation(exec, operation);
+                executeOperation(exec, device.getImei(), operation);
                 if (OperationStatus.FAILED.toString().equals(operation.getStatus())) {
                     // Connection error, remove device
                     ConnectionRegistry.instance().remove(device.getImei());
@@ -152,11 +137,11 @@ public class OperationDispatcher implements Runnable {
         }
     }
 
-    private void executeOperation(Executor exec, OperationRepresentation operation) throws SDKException {
+    private void executeOperation(Executor exec, String imei, OperationRepresentation operation) throws SDKException {
         logger.info("Executing operation with ID: {}", operation.getId());
         operation.setStatus(OperationStatus.EXECUTING.toString());
         platform.getDeviceControlApi().update(operation);
-        OperationContext operationContext = new OperationContext(operation, trackerDevice.getImei(), exec.getConnectionParams());
+        OperationContext operationContext = new OperationContext(operation, imei, exec.getConnectionParams());
         
         try {
             exec.execute(operationContext);
@@ -169,8 +154,8 @@ public class OperationDispatcher implements Runnable {
         platform.getDeviceControlApi().update(operation);
     }
 
-    private Iterable<OperationRepresentation> byStatusAndDeviceId(OperationStatus status) throws SDKException {
-        OperationFilter opsFilter = new OperationFilter().byDevice(trackerDevice.getGId().getValue()).byStatus(status);
+    private Iterable<OperationRepresentation> getOperationsByStatus(OperationStatus status) throws SDKException {
+        OperationFilter opsFilter = new OperationFilter().byStatus(status);
         Iterable<OperationRepresentation> operationsIterable = Collections.emptyList();
         try {
             operationsIterable = platform.getDeviceControlApi().getOperationsByFilter(opsFilter).get().allPages();

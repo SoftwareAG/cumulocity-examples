@@ -38,16 +38,18 @@ public class TrackerContext {
         return platformProvider.getBootstrapPlatform();
     }
 
-    public TrackerPlatform getDevicePlatform(final String imei) {
-        return platformProvider.getDevicePlatform(imei);
+    public TrackerPlatform getTenantPlatform(final String tenant) {
+        return platformProvider.getTenantPlatform(tenant);
     }
 
-    public List<DeviceCredentials> getDeviceCredentials() {
-        return deviceCredentialsRepository.getAllDeviceCredentials();
+    public List<DeviceCredentials> getAllTenantCredentials() {
+    	return deviceCredentialsRepository.getAllAgentCredentials();
     }
     
-    public DeviceCredentials getDeviceCredentials(final String imei) {
-        return deviceCredentialsRepository.getDeviceCredentials(imei);
+    public DeviceCredentials getTenantCredentials(String imei) {
+    	TrackerPlatform devicePlatform = getDevicePlatform(imei);
+    	String tenantId = devicePlatform.getTenantId();
+    	return deviceCredentialsRepository.getAgentCredentials(tenantId);
     }
     
     public boolean isDeviceRegistered(String imei) {
@@ -57,10 +59,17 @@ public class TrackerContext {
     public TrackerConfiguration getConfiguration() {
         return configuration;
     }
+    
+    public TrackerPlatform getDevicePlatform(String imei) {
+    	DeviceCredentials deviceCredentials = deviceCredentialsRepository.getDeviceCredentials(imei);
+    	String tenant = deviceCredentials.getTenant();
+    	return getTenantPlatform(tenant);
+    }
 
     @Override
     public String toString() {
         return String.format("TrackerContext [configuration=%s]", configuration);
     }
+
     
 }

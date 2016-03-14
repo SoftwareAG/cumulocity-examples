@@ -35,21 +35,6 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import c8y.Geofence;
-import c8y.IsDevice;
-import c8y.MotionTracking;
-import c8y.Position;
-import c8y.SupportedOperations;
-import c8y.trackeragent.ConnectedTracker;
-import c8y.trackeragent.ConnectionRegistry;
-import c8y.trackeragent.Executor;
-import c8y.trackeragent.TrackerDevice;
-import c8y.trackeragent.context.OperationContext;
-import c8y.trackeragent.devicebootstrap.DeviceCredentials;
-import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
-import c8y.trackeragent.protocol.mapping.TrackingProtocol;
-import c8y.trackeragent.utils.Devices;
-
 import com.cumulocity.model.ID;
 import com.cumulocity.model.event.CumulocityAlarmStatuses;
 import com.cumulocity.model.idtype.GId;
@@ -64,6 +49,21 @@ import com.cumulocity.sdk.client.inventory.InventoryApi;
 import com.cumulocity.sdk.client.measurement.MeasurementApi;
 import com.cumulocity.sdk.client.measurement.MeasurementCollection;
 import com.cumulocity.sdk.client.measurement.MeasurementFilter;
+
+import c8y.Geofence;
+import c8y.IsDevice;
+import c8y.MotionTracking;
+import c8y.Position;
+import c8y.SupportedOperations;
+import c8y.trackeragent.ConnectedTracker;
+import c8y.trackeragent.ConnectionRegistry;
+import c8y.trackeragent.Executor;
+import c8y.trackeragent.TrackerDevice;
+import c8y.trackeragent.context.OperationContext;
+import c8y.trackeragent.devicebootstrap.DeviceBootstrapStatus;
+import c8y.trackeragent.devicebootstrap.DeviceCredentials;
+import c8y.trackeragent.protocol.mapping.TrackingProtocol;
+import c8y.trackeragent.utils.Devices;
 
 public class TrackerDeviceIT extends TrackerITSupport {
     
@@ -202,7 +202,7 @@ public class TrackerDeviceIT extends TrackerITSupport {
     }
     
     private void bindTestPlatformCredentials(String imei) {
-    	DeviceCredentials deviceCredentials = DeviceCredentials.forDevice(imei, trackerPlatform.getTenantId());
+    	DeviceCredentials deviceCredentials = DeviceCredentials.forDevice(imei, trackerPlatform.getTenantId(), DeviceBootstrapStatus.BOOTSTRAPED);
         //DeviceCredentials deviceCredentials = new DeviceCredentials(trackerPlatform.getTenantId(), trackerPlatform.getUser(), trackerPlatform.getPassword(), imei);
         deviceCredentialsRepository.saveDeviceCredentials(deviceCredentials);
     }
