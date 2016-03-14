@@ -86,8 +86,8 @@ public class MeasurementService {
         MeasurementRepresentation measurement = new MeasurementRepresentation();
         Battery batteryFragment = new Battery();
         batteryFragment.setLevel(measurementValue(batteryLevel, unit));
-        measurement.set(batteryFragment, "c8y_TrackerBattery");
-        measurement.setType("c8y_TrackerBattery");
+        measurement.set(batteryFragment);
+        measurement.setType(TrackerDevice.BAT_TYPE);
         measurement.setSource(asSource(device));
         measurement.setTime(date.toDate());
         device.createMeasurement(measurement);

@@ -76,7 +76,7 @@ public class TrackerDevice extends DeviceManagedObject {
     public static final String TYPE = "c8y_Tracker";
     public static final String XTID_TYPE = "c8y_Imei";
     public static final String VIN_XT_TYPE = "c8y_VIN";
-    public static final String BAT_TYPE = "c8y_TrackerBattery";
+    public static final String BAT_TYPE = "c8y_Battery";
     public static final String SIG_TYPE = "c8y_TrackerSignal";
 
     // TODO These should really come device-capabilities/sensor library.
