@@ -86,6 +86,9 @@ public abstract class TrackerITSupport {
     @Autowired
     protected InventoryRepository inventoryRepository;
     
+    @Autowired
+    protected DeviceCredentialsRepository deviceCredentialsRepository;
+    
     protected TrackerPlatform trackerPlatform;
     protected TestConfiguration testConfig;
     protected RestConnector restConnector;
@@ -149,10 +152,10 @@ public abstract class TrackerITSupport {
     protected DeviceCredentials pollCredentials(String imei) throws InterruptedException {
         try {
             Thread.sleep(5000);
-            return DeviceCredentialsRepository.get().getCredentials(imei);
+            return deviceCredentialsRepository.getDeviceCredentials(imei);
         } catch (UnknownDeviceException uex) {
             Thread.sleep(5000);
-            return DeviceCredentialsRepository.get().getCredentials(imei);
+            return deviceCredentialsRepository.getDeviceCredentials(imei);
         }
     }
 

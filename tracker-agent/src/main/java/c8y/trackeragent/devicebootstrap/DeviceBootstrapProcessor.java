@@ -60,9 +60,6 @@ public class DeviceBootstrapProcessor implements TrackerAgentEventListener {
     }
     
     private DeviceCredentials asCredentials(DeviceCredentialsRepresentation credentials) {
-        //@formatter:off
-        return new DeviceCredentials(credentials.getTenantId(), credentials.getUsername(), credentials.getPassword(), null, null)
-            .setImei(credentials.getId());
-        //@formatter:on
+    	return DeviceCredentials.forDevice(credentials.getId(), credentials.getTenantId());
     }
 }

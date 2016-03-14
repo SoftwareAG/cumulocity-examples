@@ -33,19 +33,20 @@ public class DeviceBinder implements TrackerAgentEventListener {
             OperationDispatchers operationDispatchers, 
             TracelogAppenders tracelogAppenders, 
             DeviceContextService contextService, 
-            DeviceBootstrapProcessor deviceBootstrapProcessor) {
+            DeviceBootstrapProcessor deviceBootstrapProcessor, 
+            DeviceCredentialsRepository deviceCredentialsRepository) {
         this.agent = agent;
         this.operationDispatchers = operationDispatchers;
         this.tracelogAppenders = tracelogAppenders;
         this.deviceBootstrapProcessor = deviceBootstrapProcessor;
-        this.deviceCredentialsRepository = DeviceCredentialsRepository.get();
+        this.deviceCredentialsRepository = deviceCredentialsRepository;
         this.contextService = contextService;
     }
     
     @Subscribe
     public void listen(NewDeviceRegisteredEvent event) {  
         DeviceCredentials credentials = event.getDeviceCredentials();
-        deviceCredentialsRepository.saveCredentials(credentials);
+        deviceCredentialsRepository.saveDeviceCredentials(credentials);
         bind(credentials);
     }
     

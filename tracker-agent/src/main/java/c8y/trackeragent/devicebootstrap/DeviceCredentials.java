@@ -1,34 +1,39 @@
 package c8y.trackeragent.devicebootstrap;
 
-import com.cumulocity.model.idtype.GId;
-
 public class DeviceCredentials extends com.cumulocity.agent.server.context.DeviceCredentials {
 
-    public DeviceCredentials(String tenant, String username, String password, String appKey, GId deviceId) {
-        super(tenant, username, password, appKey, deviceId);
+	private String imei;
+	private DeviceBootstrapStatus status;
+	
+	public static DeviceCredentials forDevice(String imei, String tenant) {
+		return new DeviceCredentials(tenant, null, null, imei);
+	}
+	
+	public static DeviceCredentials forAgent(String tenant, String username, String password) {
+		return new DeviceCredentials(tenant, username, password, null);
+	}
+	
+    private DeviceCredentials(String tenant, String username, String password, String imei) {
+        super(tenant, username, password, null, null);
+        this.imei = imei;
     }
-
-    private String imei;
 
     public DeviceCredentials duplicate() {
-        //@formatter:off
-        return new DeviceCredentials(super.getTenant(), super.getUsername(), super.getPassword(), null, null)
-            .setImei(imei);
-        //@formatter:on
-    }
-
-    public DeviceCredentials setImei(String imei) {
-        this.imei = imei;
-        return this;
+        return new DeviceCredentials(super.getTenant(), super.getUsername(), super.getPassword(), imei);
     }
 
     public String getImei() {
         return imei;
     }
+    
+    public DeviceBootstrapStatus getStatus() {
+		return status;
+	}
 
-    @Override
+	@Override
     public String toString() {
-        return String.format("DeviceCredentials [tenantId=%s, user=%s, password=%s, imei=%s]", super.getTenant(), super.getUsername(), super.getPassword(), imei);
+        return String.format("DeviceCredentials [tenantId=%s, user=%s, password=%s, imei=%s, status=%s]", 
+        		super.getTenant(), super.getUsername(), super.getPassword(), imei, status);
     }
 
 }

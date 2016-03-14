@@ -26,10 +26,11 @@ public class TrackerContext {
     public TrackerContext(TrackerConfiguration configuration, 
             DeviceContextService contextSerivce,
             InventoryRepository inventoryRepository,
+            DeviceCredentialsRepository deviceCredentialsRepository,
             @Value("${C8Y.agent.user}") String agentUser,
             @Value("${C8Y.agent.password}") String agentPassword) {
         this.configuration = configuration;
-        this.deviceCredentialsRepository = DeviceCredentialsRepository.get();
+        this.deviceCredentialsRepository = deviceCredentialsRepository;
         this.platformProvider = new TrackerPlatformProvider(configuration, deviceCredentialsRepository, contextSerivce, inventoryRepository, agentUser, agentPassword);
     }
 
@@ -42,15 +43,15 @@ public class TrackerContext {
     }
 
     public List<DeviceCredentials> getDeviceCredentials() {
-        return deviceCredentialsRepository.getAllCredentials();
+        return deviceCredentialsRepository.getAllDeviceCredentials();
     }
     
     public DeviceCredentials getDeviceCredentials(final String imei) {
-        return deviceCredentialsRepository.getCredentials(imei);
+        return deviceCredentialsRepository.getDeviceCredentials(imei);
     }
     
     public boolean isDeviceRegistered(String imei) {
-        return deviceCredentialsRepository.hasCredentials(imei);
+        return deviceCredentialsRepository.hasDeviceCredentials(imei);
     }
     
     public TrackerConfiguration getConfiguration() {

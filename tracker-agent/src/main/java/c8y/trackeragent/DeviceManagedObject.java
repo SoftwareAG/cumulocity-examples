@@ -120,7 +120,7 @@ public class DeviceManagedObject {
     
     private void addChildToAgent(final ManagedObjectRepresentation mo, final GId parentId) {
         try {
-            DeviceCredentials agentCredentials = new DeviceCredentials(tenant, agentUser, agentPassword, null, null);
+            DeviceCredentials agentCredentials = DeviceCredentials.forAgent(tenant, agentUser, agentPassword);
             contextService.runWithinContext(new DeviceContext(agentCredentials), new Runnable() {
                 
                 @Override

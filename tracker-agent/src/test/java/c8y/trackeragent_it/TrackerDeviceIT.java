@@ -202,10 +202,8 @@ public class TrackerDeviceIT extends TrackerITSupport {
     }
     
     private void bindTestPlatformCredentials(String imei) {
-        //@formatter:off
-        DeviceCredentials deviceCredentials = new DeviceCredentials(trackerPlatform.getTenantId(), trackerPlatform.getUser(), trackerPlatform.getPassword(), null, null);
-        deviceCredentials.setImei(imei);
-        DeviceCredentialsRepository.get().saveCredentials(deviceCredentials);
-        //@formatter:on
+    	DeviceCredentials deviceCredentials = DeviceCredentials.forDevice(imei, trackerPlatform.getTenantId());
+        //DeviceCredentials deviceCredentials = new DeviceCredentials(trackerPlatform.getTenantId(), trackerPlatform.getUser(), trackerPlatform.getPassword(), imei);
+        deviceCredentialsRepository.saveDeviceCredentials(deviceCredentials);
     }
 }
