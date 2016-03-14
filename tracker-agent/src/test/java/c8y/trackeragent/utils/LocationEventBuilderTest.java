@@ -32,6 +32,7 @@ public class LocationEventBuilderTest {
     public void shouldCreateLocationEvent() throws Exception {
         EventRepresentation event = aLocationEvent().withAlarms(alarms).build();
         
+        assertThat(event.getSource()).isNotNull();
         assertThat(event.getText()).isNotNull();
         assertThat(event.getType()).isNotNull();
         assertThat(event.getTime()).isNotNull();

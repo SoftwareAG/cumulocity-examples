@@ -90,7 +90,7 @@ public class PositionUpdateCobanParser extends CobanParser implements Translator
             logger.info("Process alarm {} for imei {}.", alarmType, reportCtx.getImei());
             alarm = alarmService.createAlarm(reportCtx, alarmType, device);
         }
-        LocationEventBuilder aLocationEvent = aLocationEvent();
+        LocationEventBuilder aLocationEvent = aLocationEvent().withSourceId(device.getGId());
         
         double lat = TK10xCoordinatesTranslator.parseLatitude(reportCtx.getEntry(7), reportCtx.getEntry(8));
         double lng = TK10xCoordinatesTranslator.parseLongitude(reportCtx.getEntry(9), reportCtx.getEntry(10));
