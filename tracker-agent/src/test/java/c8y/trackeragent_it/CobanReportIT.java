@@ -29,8 +29,9 @@ public class CobanReportIT extends TrackerITSupport {
     private CobanServerMessages serverMessages = new CobanServerMessages();
 
     @Before
-    public void init() {
+    public void init() throws Exception {
         imei = Devices.randomImei();
+        bootstrapDevice(imei, deviceMessages.logon(imei));
     }
     
     @Override
@@ -40,8 +41,6 @@ public class CobanReportIT extends TrackerITSupport {
 
     @Test
     public void shouldProcessLogonMessage() throws Exception {
-        bootstrapDevice(imei, deviceMessages.logon(imei));
-
         String response = writeInNewConnection(deviceMessages.logon(imei));
         
         TrackerMessage actual = serverMessages.msg(response);
@@ -53,9 +52,6 @@ public class CobanReportIT extends TrackerITSupport {
     
     @Test
     public void shouldProcessHeartbeatMessage() throws Exception {
-    	bootstrapAgent("management", deviceMessages.logon(imei));
-    	bootstrapDevice(imei, deviceMessages.logon(imei));
-        
         String response = writeInNewConnection(deviceMessages.logon(imei), deviceMessages.heartbeat(imei));
         
         TrackerMessage actual = serverMessages.msg(response);
@@ -68,9 +64,6 @@ public class CobanReportIT extends TrackerITSupport {
     
     @Test
     public void shouldProcessPositionUpdateMessage() throws Exception {
-    	bootstrapAgent("management", deviceMessages.logon(imei));
-        bootstrapDevice(imei, deviceMessages.logon(imei));
-        
         writeInNewConnection(deviceMessages.logon(imei), deviceMessages.positionUpdate(imei, Positions.TK10xSample));
         
         assertThat(actualPositionInTracker()).isEqualTo(TK10xCoordinatesTranslator.parse(Positions.TK10xSample));
@@ -79,8 +72,6 @@ public class CobanReportIT extends TrackerITSupport {
     
     @Test
     public void shouldProcessSpeedWithinPositionUpdateMessage() throws Exception {
-        bootstrapDevice(imei, deviceMessages.logon(imei));
-        
         // 120 = 65 * CobanParser.COBAN_SPEED_MEASUREMENT_FACTOR
         writeInNewConnection(deviceMessages.logon(imei), deviceMessages.positionUpdate(imei, 65));
         
@@ -89,8 +80,6 @@ public class CobanReportIT extends TrackerITSupport {
 
     @Test
     public void shouldProcessAlarmMessage() throws Exception {
-        bootstrapDevice(imei, deviceMessages.logon(imei));
-        
         writeInNewConnection(deviceMessages.logon(imei), deviceMessages.alarm(imei, CobanAlarmType.LOW_BATTERY));
         
         Thread.sleep(1000);
@@ -99,8 +88,6 @@ public class CobanReportIT extends TrackerITSupport {
     
     @Test
     public void shouldProcessPositionUpdateNoGpsSignalMessage() throws Exception {
-        bootstrapDevice(imei, deviceMessages.logon(imei));
-        
         writeInNewConnection(deviceMessages.logon(imei), deviceMessages.positionUpdateNoGPS(imei));
         
         assertThat(findAlarm(imei, CobanAlarmType.NO_GPS_SIGNAL)).isNotNull();
@@ -108,8 +95,6 @@ public class CobanReportIT extends TrackerITSupport {
     
     @Test
     public void shouldClearNoGpsSignalAlarm() throws Exception {
-        bootstrapDevice(imei, deviceMessages.logon(imei));
-        
         writeInNewConnection(deviceMessages.logon(imei), deviceMessages.positionUpdateNoGPS(imei));
         writeInNewConnection(deviceMessages.logon(imei), deviceMessages.positionUpdate(imei, Positions.TK10xSample));
 
@@ -118,8 +103,6 @@ public class CobanReportIT extends TrackerITSupport {
     
     @Test
     public void shouldProcessOverSpeedMessage() throws Exception {
-        bootstrapDevice(imei, deviceMessages.logon(imei));
-        
         writeInNewConnection(deviceMessages.logon(imei), deviceMessages.overSpeedAlarm(imei, 50));
         
         AlarmRepresentation alarm = findAlarm(imei, CobanAlarmType.OVERSPEED);

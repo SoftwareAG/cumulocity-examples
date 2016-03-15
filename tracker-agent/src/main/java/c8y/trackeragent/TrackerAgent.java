@@ -70,14 +70,4 @@ public class TrackerAgent {
     	DeviceCredentials deviceCredentials = credentialsRepository.getDeviceCredentials(imei);
     	return platformProvider.getTenantPlatform(deviceCredentials.getTenant());
     }
-    
-	public DeviceCredentials getTenantCredentials(String imei) {
-		DeviceCredentials deviceCredentials = credentialsRepository.getDeviceCredentials(imei);
-		return credentialsRepository.getAgentCredentials(deviceCredentials.getTenant());
-	}
-
-	public boolean isDeviceRegistered(String imei) {
-		return credentialsRepository.hasDeviceCredentials(imei);
-	}
-
 }

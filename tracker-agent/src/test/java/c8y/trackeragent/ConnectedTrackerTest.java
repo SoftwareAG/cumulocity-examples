@@ -51,6 +51,8 @@ import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.devicebootstrap.DeviceBootstrapProcessor;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
+import c8y.trackeragent.exception.UnknownDeviceException;
+import c8y.trackeragent.exception.UnknownTenantException;
 import c8y.trackeragent.protocol.gl200.GL200Constants;
 
 public class ConnectedTrackerTest {
@@ -65,7 +67,6 @@ public class ConnectedTrackerTest {
     private OutputStream out = mock(OutputStream.class);
     private Translator translator = mock(Translator.class);
     private Parser parser = mock(Parser.class);
-    private TrackerAgent trackerAgent = mock(TrackerAgent.class);
     private DeviceBootstrapProcessor bootstrapProcessor = mock(DeviceBootstrapProcessor.class);
     private DeviceCredentialsRepository credentialsRepository = mock(DeviceCredentialsRepository.class);
     private ConnectedTracker<Fragment> tracker;
@@ -83,11 +84,11 @@ public class ConnectedTrackerTest {
 
     @Test
     public void singleReportProcessing() throws Exception {
+    	when(credentialsRepository.getDeviceCredentials("imei")).thenReturn(DeviceCredentials.forDevice("imei", "tenant"));
+    	when(credentialsRepository.getAgentCredentials("tenant")).thenReturn(DeviceCredentials.forAgent("tenant", "user", "password"));
         String[] dummyReport = null;
         when(parser.parse(dummyReport)).thenReturn("imei");
         when(parser.onParsed(new ReportContext(dummyReport, "imei", null))).thenReturn(true);
-        when(credentialsRepository.getDeviceCredentials("imei")).thenReturn(DeviceCredentials.forDevice("imei", "tenant"));
-        when(credentialsRepository.getAgentCredentials("tenant")).thenReturn(DeviceCredentials.forAgent("tenant", "user", "password"));
 
         tracker.processReport(dummyReport);
 
@@ -98,9 +99,10 @@ public class ConnectedTrackerTest {
     
     @Test
     public void singleReportProcessingForNewImei() throws SDKException {
+    	when(credentialsRepository.getDeviceCredentials("imei")).thenThrow(UnknownDeviceException.forImei("imei"));
+    	when(credentialsRepository.getAgentCredentials("tenant")).thenThrow(UnknownTenantException.forTenantId("tenant"));
         String[] dummyReport = null;
         when(parser.parse(dummyReport)).thenReturn("imei");
-        when(trackerAgent.isDeviceRegistered("imei")).thenReturn(false);
         
         tracker.processReport(dummyReport);
         
@@ -111,6 +113,8 @@ public class ConnectedTrackerTest {
 
     @Test
     public void reportReading() throws IOException {
+    	when(credentialsRepository.getDeviceCredentials("imei")).thenThrow(UnknownDeviceException.forImei("imei"));
+    	when(credentialsRepository.getAgentCredentials("tenant")).thenThrow(UnknownTenantException.forTenantId("tenant"));
         String reports = REPORT1 + GL200Constants.REPORT_SEP + REPORT2 + GL200Constants.REPORT_SEP;
         ByteArrayInputStream is = null;
         try {
@@ -128,8 +132,9 @@ public class ConnectedTrackerTest {
 
     @Test
     public void continuousReportProcessing() throws IOException, SDKException {
+    	when(credentialsRepository.getDeviceCredentials("imei")).thenReturn(DeviceCredentials.forDevice("imei", "tenant"));
+    	when(credentialsRepository.getAgentCredentials("tenant")).thenReturn(DeviceCredentials.forAgent("tenant", "user", "password"));    	
         when(parser.parse(any(String[].class))).thenReturn("imei");
-        when(trackerAgent.isDeviceRegistered("imei")).thenReturn(true);
 
         String reports = REPORT1 + GL200Constants.REPORT_SEP + REPORT2 + GL200Constants.REPORT_SEP;
 
@@ -148,6 +153,8 @@ public class ConnectedTrackerTest {
 
     @Test
     public void testExecute() throws IOException {
+    	when(credentialsRepository.getDeviceCredentials("imei")).thenThrow(UnknownDeviceException.forImei("imei"));
+    	when(credentialsRepository.getAgentCredentials("tenant")).thenThrow(UnknownTenantException.forTenantId("tenant"));    	
         String translation = "translation";
 
         OperationContext operation = mock(OperationContext.class);

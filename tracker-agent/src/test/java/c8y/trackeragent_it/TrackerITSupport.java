@@ -20,6 +20,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +45,6 @@ import c8y.trackeragent.configuration.ConfigUtils;
 import c8y.trackeragent.configuration.TrackerConfiguration;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
-import c8y.trackeragent.exception.UnknownDeviceException;
 import c8y.trackeragent.protocol.mapping.TrackingProtocol;
 import c8y.trackeragent.service.AlarmMappingService;
 import c8y.trackeragent.service.AlarmType;
@@ -89,7 +89,11 @@ public abstract class TrackerITSupport {
     protected RestConnector restConnector;
     private final ExecutorService executor = Executors.newFixedThreadPool(1);
     private final Collection<Socket> sockets = new HashSet<Socket>();
-
+    
+    @BeforeClass
+    public static void baseClassSetup() throws IOException {
+    	clearPersistedDevices();    	
+    }
 
     @Before
     public void baseSetUp() throws Exception {
@@ -97,12 +101,15 @@ public abstract class TrackerITSupport {
         testConfig = getTestConfig();
         System.out.println(testConfig);
         System.out.println(trackerAgentConfig);
-        if (isLocalTrackerTest()) {
-            clearPersistedDevices();
-        }
         trackerPlatform = createTrackerPlatform();
         bootstrapPlatform = createBootstrapPlatform();
         restConnector = new RestConnector(trackerPlatform.getPlatformParameters(), new ResponseParser());
+    }
+    
+    @After
+    public void baseTearDown() throws IOException {
+    	executor.shutdownNow();
+    	destroySockets();
     }
 
     protected final int getLocalPort() {
@@ -111,24 +118,14 @@ public abstract class TrackerITSupport {
     
     protected abstract TrackingProtocol getTrackerProtocol();
 
-    private boolean isLocalTrackerTest() {
-        return testConfig.getTrackerAgentHost().equals("localhost");
-    }
 
-    private void clearPersistedDevices() throws IOException {
-        String filePath = ConfigUtils.get().getConfigFilePath(ConfigUtils.DEVICES_FILE_NAME);
+    private static void clearPersistedDevices() throws IOException {
+        String filePath = "/etc/tracker-agent/" + ConfigUtils.DEVICES_FILE_NAME;
         File devicesFile = new File(filePath);
         FileUtils.deleteQuietly(devicesFile);
         devicesFile.createNewFile();
     }
 
-    @After
-    public void baseTearDown() throws IOException {
-        if (isLocalTrackerTest()) {
-            executor.shutdownNow();
-        }
-        destroySockets();
-    }
 
     private void destroySockets() throws IOException {
         for (Socket socket : sockets) {
@@ -269,7 +266,10 @@ public abstract class TrackerITSupport {
     	
     }
     
-    protected void bootstrapDevice(String imei, TrackerMessage deviceMessage) throws UnsupportedEncodingException, Exception, InterruptedException {
+    protected void bootstrapDevice(String imei, TrackerMessage deviceMessage) throws Exception {
+		if (!deviceCredentialsRepository.hasAgentCredentials("management")) {
+			bootstrapAgent("management", deviceMessage);
+		}    	    	
         createNewDeviceRequest(imei);
         // WAITING_FOR_CONNECTION status
         
