@@ -47,6 +47,7 @@ import c8y.trackeragent.context.OperationContext;
 import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.devicebootstrap.DeviceBootstrapProcessor;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
+import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 
 /**
  * Performs the communication with a connected device. Accepts reports from the
@@ -59,23 +60,31 @@ public class ConnectedTracker<F extends Fragment> implements Runnable, Executor 
     private final char reportSeparator;
     private final String fieldSeparator;
     private final List<F> fragments = new ArrayList<F>();
-    private final TrackerAgent trackerAgent;
     private final DeviceContextService contextService;
     private final DeviceBootstrapProcessor bootstrapService;
     private final Map<String, Object> connectionParams = new HashMap<String, Object>();
+    private final DeviceCredentialsRepository credentialsRepository;
 
     private Socket client;
     private InputStream in;
     private OutputStream out;
     private String imei;
 
-    public ConnectedTracker(char reportSeparator, String fieldSeparator, 
-            TrackerAgent trackerAgent, DeviceContextService contextService, DeviceBootstrapProcessor bootstrapService, List<F> fragments) {
+
+    public ConnectedTracker(
+    		// @formatter:off
+    		char reportSeparator, 
+    		String fieldSeparator, 
+            DeviceContextService contextService, 
+            DeviceBootstrapProcessor bootstrapService, 
+            DeviceCredentialsRepository credentialsRepository, 
+            List<F> fragments) {
+    	// @formatter:on
         this.reportSeparator = reportSeparator;
         this.fieldSeparator = fieldSeparator;
-        this.trackerAgent = trackerAgent;
         this.contextService = contextService;
 		this.bootstrapService = bootstrapService;
+		this.credentialsRepository = credentialsRepository;
         this.fragments.addAll(fragments);
     }
     
@@ -170,20 +179,27 @@ public class ConnectedTracker<F extends Fragment> implements Runnable, Executor 
     void processReport(String[] report) {
         for (final Parser parser : Iterables.filter(fragments, Parser.class)) {
             logger.debug("Using parser "+ parser.getClass());
-            final String imei = parser.parse(report);
-            if(imei == null) {
-                continue;
-            }
+            String imei = parser.parse(report);
+			if (imei == null) {
+				continue;
+			}
             logger.debug("Got report from IMEI: " + imei);
-            boolean deviceRegistered = trackerAgent.isDeviceRegistered(imei);
-            if (!deviceRegistered) {
+            DeviceCredentials deviceCredentials = credentialsRepository.getDeviceCredentials(imei);
+            if (deviceCredentials == null) {
+            	logger.debug("Device with imei {} not yet bootstraped. Will skip report and try bootstrap the device.", imei);
             	bootstrapService.startDeviceBootstraping(imei);
                 break;
             }
+            final String tenant = deviceCredentials.getTenant();
+			DeviceCredentials agentCredentials = credentialsRepository.getAgentCredentials(tenant);
+			if (agentCredentials == null) {
+				logger.debug("Agent for tenant {} not yet bootstraped. Will skip report and try bootstrap the agent.", tenant);
+				bootstrapService.startAgentBootstraping(tenant);
+				break;
+			}
             final ReportContext reportContext = new ReportContext(report, imei, out, connectionParams);
-            DeviceCredentials credentials = trackerAgent.getTenantCredentials(imei);
             try {
-                boolean success = contextService.callWithinContext(new DeviceContext(credentials), new Callable<Boolean>() {
+                boolean success = contextService.callWithinContext(new DeviceContext(agentCredentials), new Callable<Boolean>() {
                     @Override
                     public Boolean call() throws Exception {
                         return parser.onParsed(reportContext);

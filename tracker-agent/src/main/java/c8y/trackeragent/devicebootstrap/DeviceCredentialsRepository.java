@@ -1,6 +1,6 @@
 package c8y.trackeragent.devicebootstrap;
 
-import static com.google.common.collect.Iterables.filter;
+import static com.google.common.collect.FluentIterable.from;
 import static java.util.Arrays.asList;
 
 import java.util.ArrayList;
@@ -33,7 +33,7 @@ public class DeviceCredentialsRepository {
 
 
     public DeviceCredentialsRepository(String devicePropertiesPath) {
-    	devicePropertyAccessor = new GroupPropertyAccessor(devicePropertiesPath, asList("tenantId", "status"));
+    	devicePropertyAccessor = new GroupPropertyAccessor(devicePropertiesPath, asList("tenantId"));
     	agentPropertyAccessor = new GroupPropertyAccessor(devicePropertiesPath, asList("user", "password"));
     	
     }
@@ -117,14 +117,9 @@ public class DeviceCredentialsRepository {
     }
 
     private DeviceCredentials asDeviceCredentials(Group group) {
-    	return DeviceCredentials.forDevice(group.getName(), group.get("tenantId"), asBootstrapStatus(group));
+    	return DeviceCredentials.forDevice(group.getName(), group.get("tenantId"));
     }
-    
-	private DeviceBootstrapStatus asBootstrapStatus(Group group) {
-		String status = group.get("status");
-		return status == null ? null : DeviceBootstrapStatus.valueOf(status);
-	}
-    
+        
     private DeviceCredentials asAgentCredentials(Group group) {
     	return DeviceCredentials.forAgent(group.getName(), group.get("user"), group.get("password"));
     }
@@ -132,7 +127,6 @@ public class DeviceCredentialsRepository {
     private Group asDeviceGroup(String imei, DeviceCredentials credentials) {
         Group group = devicePropertyAccessor.createEmptyGroup(imei);
         group.put("tenantId", credentials.getTenant());
-        group.put("status", credentials.getStatus().name());
         return group;
     }
     
@@ -142,16 +136,8 @@ public class DeviceCredentialsRepository {
     	group.put("password", credentials.getPassword());
     	return group;
     }
-
-	public void setAllDeviceCredentialsBootstraped(String tenant) {
-		Iterable<DeviceCredentials> credentials = getAllDeviceCredentials(tenant);
-		for (DeviceCredentials cred : credentials) {
-			cred.setStatus(DeviceBootstrapStatus.BOOTSTRAPED);
-			saveDeviceCredentials(cred);
-		}
-	}
 	
-	public Iterable<DeviceCredentials> getAllDeviceCredentials(String tenant) {
-		return filter(getAllDeviceCredentials(), DeviceCredentials.hasTenant(tenant));
+	public List<DeviceCredentials> getAllDeviceCredentials(String tenant) {
+		return from(getAllDeviceCredentials()).filter(DeviceCredentials.hasTenant(tenant)).toList();
 	}
 }

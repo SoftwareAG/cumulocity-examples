@@ -12,12 +12,12 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import c8y.trackeragent.ConnectedTracker;
-import c8y.trackeragent.TrackerAgent;
-import c8y.trackeragent.devicebootstrap.DeviceBootstrapProcessor;
-import c8y.trackeragent.protocol.telic.parser.TelicFragment;
-
 import com.cumulocity.agent.server.context.DeviceContextService;
+
+import c8y.trackeragent.ConnectedTracker;
+import c8y.trackeragent.devicebootstrap.DeviceBootstrapProcessor;
+import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
+import c8y.trackeragent.protocol.telic.parser.TelicFragment;
 
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -28,12 +28,13 @@ public class ConnectedTelicTracker extends ConnectedTracker<TelicFragment> {
     public static final int HEADER_LENGTH = 28;
     public static final int REPORT_SKIP = 4;
 
-    @Autowired
-    public ConnectedTelicTracker(TrackerAgent trackerAgent, DeviceContextService contextService,
-    		DeviceBootstrapProcessor bootstrapProcessor,
-    		List<TelicFragment> fragments) throws IOException {
-        super(TelicConstants.REPORT_SEP, TelicConstants.FIELD_SEP, trackerAgent, contextService, bootstrapProcessor, fragments);
-    }
+	@Autowired
+	public ConnectedTelicTracker(DeviceContextService contextService,
+			DeviceBootstrapProcessor bootstrapProcessor, DeviceCredentialsRepository credentialsRepository,
+			List<TelicFragment> fragments) throws IOException {
+		super(TelicConstants.REPORT_SEP, TelicConstants.FIELD_SEP, contextService, bootstrapProcessor,
+				credentialsRepository, fragments);
+	}
     
     @Override
     public void init(Socket client, InputStream in) throws Exception {

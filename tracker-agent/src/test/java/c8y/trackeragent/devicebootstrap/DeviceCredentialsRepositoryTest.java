@@ -1,7 +1,5 @@
 package c8y.trackeragent.devicebootstrap;
 
-import static c8y.trackeragent.devicebootstrap.DeviceBootstrapStatus.BOOTSTRAPED;
-import static c8y.trackeragent.devicebootstrap.DeviceBootstrapStatus.WAITING_FOR_AGENT;
 import static org.fest.assertions.Assertions.assertThat;
 
 import java.io.File;
@@ -17,7 +15,7 @@ public class DeviceCredentialsRepositoryTest {
 	private static final String TENANT = "tenant";
 	
 	private DeviceCredentialsRepository deviceCredentialsRepository;
-	private DeviceCredentials deviceCredentials = DeviceCredentials.forDevice(IMEI, TENANT, BOOTSTRAPED);
+	private DeviceCredentials deviceCredentials = DeviceCredentials.forDevice(IMEI, TENANT);
 	private DeviceCredentials agentCredentials = DeviceCredentials.forAgent(TENANT, "john", "secret");
 	
 	@Before
@@ -88,16 +86,16 @@ public class DeviceCredentialsRepositoryTest {
 	}
 	
 	@Test
-	public void shouldSetAllDeviceCredentialsBootstraped() throws Exception {
-		DeviceCredentials cred_1 = DeviceCredentials.forDevice("imei_1", "tenant_1", WAITING_FOR_AGENT);
+	public void shouldGetAllDeviceCredentialsForTenant() throws Exception {
+		DeviceCredentials cred_1 = DeviceCredentials.forDevice("imei_1", "tenant_1");
 		deviceCredentialsRepository.saveDeviceCredentials(cred_1);
-		DeviceCredentials cred_2 = DeviceCredentials.forDevice("imei_2", "tenant_2", WAITING_FOR_AGENT);
+		DeviceCredentials cred_2 = DeviceCredentials.forDevice("imei_2", "tenant_2");
 		deviceCredentialsRepository.saveDeviceCredentials(cred_2);
 		
-		deviceCredentialsRepository.setAllDeviceCredentialsBootstraped("tenant_1");
+		deviceCredentialsRepository.getAllDeviceCredentials("tenant_1");
 		
 		Iterable<DeviceCredentials> allDeviceCredentials = deviceCredentialsRepository.getAllDeviceCredentials("tenant_1");
-		assertThat(allDeviceCredentials).containsOnly(DeviceCredentials.forDevice("imei_1", "tenant_1", BOOTSTRAPED));
+		assertThat(allDeviceCredentials).containsOnly(cred_1);
 	}
 
 }

@@ -60,7 +60,6 @@ import c8y.trackeragent.ConnectionRegistry;
 import c8y.trackeragent.Executor;
 import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.context.OperationContext;
-import c8y.trackeragent.devicebootstrap.DeviceBootstrapStatus;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.protocol.mapping.TrackingProtocol;
 import c8y.trackeragent.utils.Devices;
@@ -202,7 +201,7 @@ public class TrackerDeviceIT extends TrackerITSupport {
     }
     
     private void bindTestPlatformCredentials(String imei) {
-    	DeviceCredentials deviceCredentials = DeviceCredentials.forDevice(imei, trackerPlatform.getTenantId(), DeviceBootstrapStatus.BOOTSTRAPED);
+    	DeviceCredentials deviceCredentials = DeviceCredentials.forDevice(imei, trackerPlatform.getTenantId());
         //DeviceCredentials deviceCredentials = new DeviceCredentials(trackerPlatform.getTenantId(), trackerPlatform.getUser(), trackerPlatform.getPassword(), imei);
         deviceCredentialsRepository.saveDeviceCredentials(deviceCredentials);
     }

@@ -1,10 +1,5 @@
 package c8y.trackeragent.devicebootstrap;
 
-import static c8y.trackeragent.devicebootstrap.DeviceBootstrapStatus.BOOTSTRAPED;
-import static c8y.trackeragent.devicebootstrap.DeviceBootstrapStatus.WAITING_FOR_AGENT;
-
-import java.util.Collection;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,13 +58,13 @@ public class DeviceBootstrapProcessor {
 		credentialsRepository.saveAgentCredentials(agentCredentials);
 		platformProvider.initTenantPlatform(agentCredentials.getTenant());
 		tenantBinder.bind(agentCredentials.getTenant());
-		credentialsRepository.setAllDeviceCredentialsBootstraped(agentCredentials.getTenant());
+		logger.info("Agent for tenant {} bootstraped. Following devices start working: {}",
+				agentCredentials.getTenant(), credentialsRepository.getAllDeviceCredentials(agentCredentials.getTenant()));
 	}
 
 	private void onNewDeviceCredentials(DeviceCredentialsRepresentation credentialsRep) {
 		boolean hasAgentCredentials = credentialsRepository.hasAgentCredentials(credentialsRep.getTenantId());
-		DeviceBootstrapStatus bootstrapStatus = hasAgentCredentials ? BOOTSTRAPED : WAITING_FOR_AGENT;
-		DeviceCredentials credentials = DeviceCredentials.forDevice(credentialsRep.getId(), credentialsRep.getTenantId(), bootstrapStatus); 
+		DeviceCredentials credentials = DeviceCredentials.forDevice(credentialsRep.getId(), credentialsRep.getTenantId()); 
 		logger.info("Credentials for imei {} accessed: {}.", credentials.getImei(), credentials);
 		credentialsRepository.saveDeviceCredentials(credentials);
 		if (!hasAgentCredentials) {

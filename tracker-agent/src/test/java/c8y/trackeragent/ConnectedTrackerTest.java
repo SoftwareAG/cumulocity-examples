@@ -20,6 +20,7 @@
 
 package c8y.trackeragent;
 
+import static java.util.Arrays.asList;
 import static org.fest.assertions.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -35,7 +36,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.Charset;
-import java.util.Arrays;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.io.IOUtils;
@@ -49,6 +49,8 @@ import com.cumulocity.sdk.client.SDKException;
 import c8y.trackeragent.context.OperationContext;
 import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.devicebootstrap.DeviceBootstrapProcessor;
+import c8y.trackeragent.devicebootstrap.DeviceCredentials;
+import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.protocol.gl200.GL200Constants;
 
 public class ConnectedTrackerTest {
@@ -65,6 +67,7 @@ public class ConnectedTrackerTest {
     private Parser parser = mock(Parser.class);
     private TrackerAgent trackerAgent = mock(TrackerAgent.class);
     private DeviceBootstrapProcessor bootstrapProcessor = mock(DeviceBootstrapProcessor.class);
+    private DeviceCredentialsRepository credentialsRepository = mock(DeviceCredentialsRepository.class);
     private ConnectedTracker<Fragment> tracker;
 
     @SuppressWarnings("unchecked")
@@ -72,8 +75,8 @@ public class ConnectedTrackerTest {
     public void setup() throws Exception {
         ConnectionRegistry.instance().remove("imei");
         when(contextService.callWithinContext(any(DeviceContext.class), any(Callable.class))).thenReturn(true);
-        tracker = new ConnectedTracker<Fragment>(GL200Constants.REPORT_SEP, GL200Constants.FIELD_SEP, trackerAgent, 
-        		contextService, bootstrapProcessor, Arrays.asList(translator, parser));
+        tracker = new ConnectedTracker<Fragment>(GL200Constants.REPORT_SEP, GL200Constants.FIELD_SEP,  
+        		contextService, bootstrapProcessor, credentialsRepository, asList(translator, parser));
         tracker.init(client, in);
         tracker.setOut(out);
     }
@@ -83,7 +86,8 @@ public class ConnectedTrackerTest {
         String[] dummyReport = null;
         when(parser.parse(dummyReport)).thenReturn("imei");
         when(parser.onParsed(new ReportContext(dummyReport, "imei", null))).thenReturn(true);
-        when(trackerAgent.isDeviceRegistered("imei")).thenReturn(true);
+        when(credentialsRepository.getDeviceCredentials("imei")).thenReturn(DeviceCredentials.forDevice("imei", "tenant"));
+        when(credentialsRepository.getAgentCredentials("tenant")).thenReturn(DeviceCredentials.forAgent("tenant", "user", "password"));
 
         tracker.processReport(dummyReport);
 
