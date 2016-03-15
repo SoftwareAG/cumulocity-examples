@@ -4,6 +4,9 @@ import static com.cumulocity.model.authentication.CumulocityCredentials.Builder.
 
 import java.util.concurrent.Callable;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.cumulocity.agent.server.context.DeviceContextService;
 import com.cumulocity.agent.server.repository.InventoryRepository;
 import com.cumulocity.model.authentication.CumulocityCredentials;
@@ -20,6 +23,7 @@ import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.exception.SDKExceptions;
 
+@Component
 public class TrackerPlatformProvider {
 
     private final DeviceCredentialsRepository deviceCredentialsRepository;
@@ -29,6 +33,7 @@ public class TrackerPlatformProvider {
     private final DeviceContextService contextService;
     private final InventoryRepository inventoryRepository;
 
+    @Autowired
     public TrackerPlatformProvider(TrackerConfiguration config, DeviceCredentialsRepository deviceCredentialsRepository,
             DeviceContextService contextService, InventoryRepository inventoryRepository) {
         this.config = config;
@@ -57,7 +62,7 @@ public class TrackerPlatformProvider {
 
                 @Override
                 public TrackerPlatform call() throws Exception {
-                    return createPlatform(key);
+                    return createAndCachePlatform(key);
                 }
 
             });
@@ -66,7 +71,7 @@ public class TrackerPlatformProvider {
         }
     }
 
-    private TrackerPlatform createPlatform(PlatformKey key) {
+    private TrackerPlatform createAndCachePlatform(PlatformKey key) {
         if (key.isBootstrap()) {
             return createBootstrapPlatform();
         } else {

@@ -3,6 +3,8 @@ package c8y.trackeragent.devicebootstrap;
 import static com.google.common.collect.FluentIterable.from;
 import static java.util.Arrays.asList;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -30,10 +32,12 @@ public class DeviceCredentialsRepository {
     private final GroupPropertyAccessor devicePropertyAccessor;
     private final GroupPropertyAccessor agentPropertyAccessor;
     private final Object lock = new Object();
+	private final String devicePropertiesPath;
 
 
     public DeviceCredentialsRepository(String devicePropertiesPath) {
-    	devicePropertyAccessor = new GroupPropertyAccessor(devicePropertiesPath, asList("tenantId"));
+    	this.devicePropertiesPath = devicePropertiesPath;
+		devicePropertyAccessor = new GroupPropertyAccessor(devicePropertiesPath, asList("tenantId"));
     	agentPropertyAccessor = new GroupPropertyAccessor(devicePropertiesPath, asList("user", "password"));
     	
     }
@@ -100,7 +104,11 @@ public class DeviceCredentialsRepository {
     }
 
     @PostConstruct
-    public void refresh() {
+    public void refresh() throws IOException {
+    	File deviceProperties = new File(devicePropertiesPath);
+    	if (!deviceProperties.exists()) {
+    		deviceProperties.createNewFile();
+    	}
         devicePropertyAccessor.refresh();
         imei2DeviceCredentials.clear();
         tenant2AgentCredentials.clear();

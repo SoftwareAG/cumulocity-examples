@@ -9,93 +9,109 @@ import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
 
+import c8y.trackeragent.exception.UnknownDeviceException;
+import c8y.trackeragent.exception.UnknownTenantException;
+
 public class DeviceCredentialsRepositoryTest {
 	
 	private static final String IMEI = "1234567890";
 	private static final String TENANT = "tenant";
 	
-	private DeviceCredentialsRepository deviceCredentialsRepository;
+	private DeviceCredentialsRepository credentialsRepository;
 	private DeviceCredentials deviceCredentials = DeviceCredentials.forDevice(IMEI, TENANT);
 	private DeviceCredentials agentCredentials = DeviceCredentials.forAgent(TENANT, "john", "secret");
 	
 	@Before
 	public void init() throws Exception {
 		File file = assureDevicePropertiesFile();
-		deviceCredentialsRepository = new DeviceCredentialsRepository(file.getAbsolutePath());
-		deviceCredentialsRepository.refresh();
+		credentialsRepository = new DeviceCredentialsRepository(file.getAbsolutePath());
+		credentialsRepository.refresh();
 	}
 
 	private File assureDevicePropertiesFile() throws IOException {
 		File file = new File("target/device.properties");
 		FileUtils.deleteQuietly(file);
-		file.createNewFile();
 		return file;
 	}
 	
 	@Test
 	public void shouldSaveAndGetDeviceCredentials() throws Exception {
-		deviceCredentialsRepository.saveDeviceCredentials(deviceCredentials);
+		credentialsRepository.saveDeviceCredentials(deviceCredentials);
 		
-		assertThat(deviceCredentialsRepository.getDeviceCredentials(IMEI)).isEqualTo(deviceCredentials);
+		assertThat(credentialsRepository.getDeviceCredentials(IMEI)).isEqualTo(deviceCredentials);
 	}
 	
 	@Test
 	public void shouldSaveAndHasDeviceCredentials() throws Exception {
-		deviceCredentialsRepository.saveDeviceCredentials(deviceCredentials);
+		credentialsRepository.saveDeviceCredentials(deviceCredentials);
 		
-		assertThat(deviceCredentialsRepository.hasDeviceCredentials(IMEI)).isTrue();
+		assertThat(credentialsRepository.hasDeviceCredentials(IMEI)).isTrue();
 	}
 	
 	@Test
 	public void shouldGetAllDeviceCredentials() throws Exception {
-		deviceCredentialsRepository.saveDeviceCredentials(deviceCredentials);
+		credentialsRepository.saveDeviceCredentials(deviceCredentials);
 		
-		assertThat(deviceCredentialsRepository.getAllDeviceCredentials()).containsOnly(deviceCredentials);
+		assertThat(credentialsRepository.getAllDeviceCredentials()).containsOnly(deviceCredentials);
 	}
 	
 	@Test
 	public void shouldSaveAndGetAgentCredentials() throws Exception {
-		deviceCredentialsRepository.saveAgentCredentials(agentCredentials);
+		credentialsRepository.saveAgentCredentials(agentCredentials);
 		
-		assertThat(deviceCredentialsRepository.getAgentCredentials(TENANT)).isEqualTo(agentCredentials);
+		assertThat(credentialsRepository.getAgentCredentials(TENANT)).isEqualTo(agentCredentials);
 	}
 	
 	@Test
 	public void shouldSaveAndHasAgentCredentials() throws Exception {
-		deviceCredentialsRepository.saveAgentCredentials(agentCredentials);
+		credentialsRepository.saveAgentCredentials(agentCredentials);
 		
-		assertThat(deviceCredentialsRepository.hasAgentCredentials(TENANT)).isTrue();
+		assertThat(credentialsRepository.hasAgentCredentials(TENANT)).isTrue();
 	}
 	
 	@Test
 	public void shouldGetAllAgentCredentials() throws Exception {
-		deviceCredentialsRepository.saveAgentCredentials(agentCredentials);
+		credentialsRepository.saveAgentCredentials(agentCredentials);
 		
-		assertThat(deviceCredentialsRepository.getAllAgentCredentials()).containsOnly(agentCredentials);
+		assertThat(credentialsRepository.getAllAgentCredentials()).containsOnly(agentCredentials);
 	}
 	
 	@Test
 	public void shouldRefreshDataFromFile() throws Exception {
-		deviceCredentialsRepository.saveAgentCredentials(agentCredentials);
-		deviceCredentialsRepository.saveDeviceCredentials(deviceCredentials);
+		credentialsRepository.saveAgentCredentials(agentCredentials);
+		credentialsRepository.saveDeviceCredentials(deviceCredentials);
 		
-		deviceCredentialsRepository.refresh();
+		credentialsRepository.refresh();
 		
-		assertThat(deviceCredentialsRepository.getAllAgentCredentials()).containsOnly(agentCredentials);
-		assertThat(deviceCredentialsRepository.getAllDeviceCredentials()).containsOnly(deviceCredentials);
+		assertThat(credentialsRepository.getAllAgentCredentials()).containsOnly(agentCredentials);
+		assertThat(credentialsRepository.getAllDeviceCredentials()).containsOnly(deviceCredentials);
 	}
 	
 	@Test
 	public void shouldGetAllDeviceCredentialsForTenant() throws Exception {
 		DeviceCredentials cred_1 = DeviceCredentials.forDevice("imei_1", "tenant_1");
-		deviceCredentialsRepository.saveDeviceCredentials(cred_1);
+		credentialsRepository.saveDeviceCredentials(cred_1);
 		DeviceCredentials cred_2 = DeviceCredentials.forDevice("imei_2", "tenant_2");
-		deviceCredentialsRepository.saveDeviceCredentials(cred_2);
+		credentialsRepository.saveDeviceCredentials(cred_2);
 		
-		deviceCredentialsRepository.getAllDeviceCredentials("tenant_1");
+		credentialsRepository.getAllDeviceCredentials("tenant_1");
 		
-		Iterable<DeviceCredentials> allDeviceCredentials = deviceCredentialsRepository.getAllDeviceCredentials("tenant_1");
+		Iterable<DeviceCredentials> allDeviceCredentials = credentialsRepository.getAllDeviceCredentials("tenant_1");
 		assertThat(allDeviceCredentials).containsOnly(cred_1);
+	}
+	
+	@Test(expected = UnknownDeviceException.class)
+	public void shouldThrowExceptionDeviceCredentialsAbsent() throws Exception {
+		DeviceCredentials deviceCredentials = credentialsRepository.getDeviceCredentials(IMEI);
+		
+		assertThat(deviceCredentials).isNull();
+	}
+	
+	@Test(expected = UnknownTenantException.class)
+	public void shouldThrowExceptionTenantCredentialsAbsent() throws Exception {
+		DeviceCredentials deviceCredentials = credentialsRepository.getAgentCredentials(TENANT);
+		
+		assertThat(deviceCredentials).isNull();
 	}
 
 }

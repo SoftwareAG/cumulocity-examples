@@ -35,7 +35,6 @@ import java.util.concurrent.Callable;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.cumulocity.agent.server.context.DeviceContext;
 import com.cumulocity.agent.server.context.DeviceContextService;
@@ -48,6 +47,8 @@ import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.devicebootstrap.DeviceBootstrapProcessor;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
+import c8y.trackeragent.exception.UnknownDeviceException;
+import c8y.trackeragent.exception.UnknownTenantException;
 
 /**
  * Performs the communication with a connected device. Accepts reports from the
@@ -184,19 +185,25 @@ public class ConnectedTracker<F extends Fragment> implements Runnable, Executor 
 				continue;
 			}
             logger.debug("Got report from IMEI: " + imei);
-            DeviceCredentials deviceCredentials = credentialsRepository.getDeviceCredentials(imei);
-            if (deviceCredentials == null) {
-            	logger.debug("Device with imei {} not yet bootstraped. Will skip report and try bootstrap the device.", imei);
-            	bootstrapService.startDeviceBootstraping(imei);
-                break;
-            }
-            final String tenant = deviceCredentials.getTenant();
-			DeviceCredentials agentCredentials = credentialsRepository.getAgentCredentials(tenant);
-			if (agentCredentials == null) {
-				logger.debug("Agent for tenant {} not yet bootstraped. Will skip report and try bootstrap the agent.", tenant);
-				bootstrapService.startAgentBootstraping(tenant);
+            DeviceCredentials deviceCredentials;
+			try {
+				deviceCredentials = credentialsRepository.getDeviceCredentials(imei);
+			} catch (UnknownDeviceException ex) {
+				logger.debug("Device with imei {} not yet bootstraped. Will skip report and try bootstrap the device.", imei);
+				bootstrapService.startDeviceBootstraping(imei);
 				break;
+
 			}
+            final String tenant = deviceCredentials.getTenant();
+            DeviceCredentials agentCredentials;
+            try {
+            	agentCredentials = credentialsRepository.getAgentCredentials(tenant);
+            } catch (UnknownTenantException ex) {
+            	logger.debug("Agent for tenant {} not yet bootstraped. Will skip report and try bootstrap the agent.", tenant);
+            	bootstrapService.startAgentBootstraping(tenant);
+            	break;
+            	
+            }
             final ReportContext reportContext = new ReportContext(report, imei, out, connectionParams);
             try {
                 boolean success = contextService.callWithinContext(new DeviceContext(agentCredentials), new Callable<Boolean>() {
@@ -249,7 +256,6 @@ public class ConnectedTracker<F extends Fragment> implements Runnable, Executor 
         this.out = out;
     }
 
-    @Autowired
 	public Map<String, Object> getConnectionParams() {
 		return connectionParams;
 	}
