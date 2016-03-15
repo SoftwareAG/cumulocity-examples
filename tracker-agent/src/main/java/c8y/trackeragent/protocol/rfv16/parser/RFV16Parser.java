@@ -72,6 +72,11 @@ public abstract class RFV16Parser implements Parser, RFV16Fragment {
             AlarmRepresentation alarm = alarmService.createAlarm(reportCtx, alarmType, device);
             alarms.add(alarm);
         }
+		if (alarms.isEmpty()) {
+			logger.debug("There are no alarms");
+        } else {
+        	logger.debug("There are alarms {}.", alarms);        	
+        }
         return alarms;
     }
 

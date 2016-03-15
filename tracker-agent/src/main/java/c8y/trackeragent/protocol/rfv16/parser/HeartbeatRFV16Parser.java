@@ -1,6 +1,9 @@
 package c8y.trackeragent.protocol.rfv16.parser;
 
+import static c8y.trackeragent.utils.LocationEventBuilder.aLocationEvent;
+
 import java.math.BigDecimal;
+import java.util.Collection;
 
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -8,9 +11,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 import com.google.common.base.Strings;
 
+import c8y.Position;
 import c8y.trackeragent.Parser;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerDevice;
@@ -19,6 +24,7 @@ import c8y.trackeragent.protocol.rfv16.RFV16Constants;
 import c8y.trackeragent.protocol.rfv16.message.RFV16ServerMessages;
 import c8y.trackeragent.service.AlarmService;
 import c8y.trackeragent.service.MeasurementService;
+import c8y.trackeragent.utils.LocationEventBuilder;
 
 /**
  * listen to HEARTBEAT (LINK) message
@@ -54,7 +60,10 @@ public class HeartbeatRFV16Parser extends RFV16Parser implements Parser {
             return false;
         }
         logger.debug("Read status {} as alarms for device {}", status, reportCtx.getImei());
-        createAlarms(reportCtx, device, status);
+        Collection<AlarmRepresentation> alarms = createAlarms(reportCtx, device, status);
+		if (!alarms.isEmpty()) {
+        	sendAlarmsWithLastPosition(reportCtx, device, alarms);
+        }
         BigDecimal batteryLevel = getBatteryPercentageLevel(reportCtx);
         if (batteryLevel != null) {
             measurementService.createPercentageBatteryLevelMeasurement(batteryLevel, device, new DateTime());
@@ -66,7 +75,20 @@ public class HeartbeatRFV16Parser extends RFV16Parser implements Parser {
         return true;
     }
 
-    private boolean isHeartbeat(ReportContext reportCtx) {
+    private void sendAlarmsWithLastPosition(ReportContext reportCtx, TrackerDevice device, Collection<AlarmRepresentation> alarms) {
+        Position lastPosition = device.getLastPosition();
+        if (lastPosition == null) {
+            return;
+        }
+        LocationEventBuilder locationEvent = aLocationEvent()
+        		.withSourceId(device.getGId())
+        		.withPosition(lastPosition)
+        		.withAlarms(alarms);
+        device.setPosition(locationEvent.build());
+		
+	}
+
+	private boolean isHeartbeat(ReportContext reportCtx) {
         return RFV16Constants.MESSAGE_TYPE_LINK.equalsIgnoreCase(reportCtx.getEntry(2));
     }
 

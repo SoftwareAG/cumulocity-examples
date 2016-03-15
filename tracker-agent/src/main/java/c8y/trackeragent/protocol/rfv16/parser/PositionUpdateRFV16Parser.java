@@ -87,10 +87,8 @@ public class PositionUpdateRFV16Parser extends RFV16Parser implements Parser {
         TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(reportCtx.getImei());
         Collection<AlarmRepresentation> alarms = createAlarms(reportCtx, device, reportCtx.getEntry(12));
         if (alarms.isEmpty()) {
-            logger.debug("There are no alarms");
             return;
         }
-        logger.debug("There are alarms {}.", alarms);
         Position lastPosition = device.getLastPosition();
         if (lastPosition == null) {
             return;
