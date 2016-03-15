@@ -243,7 +243,7 @@ public abstract class TrackerITSupport {
     	return trackerAgent.getOrCreateTrackerDevice(imei);
     }
     
-    protected void bootstrapAgent(String tenant, TrackerMessage deviceMessage) throws UnsupportedEncodingException, Exception, InterruptedException {
+    private void bootstrapAgent(TrackerMessage deviceMessage) throws UnsupportedEncodingException, Exception, InterruptedException {
     	String id = "tracker-agent-" + tenant;
     	
     	NewDeviceRequestRepresentation newDeviceRequest = new NewDeviceRequestRepresentation();
@@ -268,13 +268,14 @@ public abstract class TrackerITSupport {
     
     protected void bootstrapDevice(String imei, TrackerMessage deviceMessage) throws Exception {
 		if (!deviceCredentialsRepository.hasAgentCredentials("management")) {
-			bootstrapAgent("management", deviceMessage);
+			bootstrapAgent(deviceMessage);
 		}    	    	
         createNewDeviceRequest(imei);
+        Thread.sleep(500);
         // WAITING_FOR_CONNECTION status
         
         writeInNewConnection(deviceMessage);
-        Thread.sleep(1000);
+        Thread.sleep(500);
         // PENDING_ACCEPTANCE status
         
         logger.info("accept request for imei: {}");
@@ -282,7 +283,7 @@ public abstract class TrackerITSupport {
         // ACCEPTED status
         
         writeInNewConnection(deviceMessage);
-        Thread.sleep(1000);
+        Thread.sleep(500);
         // Device credentials got
         
         DeviceCredentials credentials = deviceCredentialsRepository.getDeviceCredentials(imei);
