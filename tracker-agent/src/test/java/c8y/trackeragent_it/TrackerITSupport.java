@@ -84,10 +84,12 @@ public abstract class TrackerITSupport {
     protected DeviceCredentialsRepository deviceCredentialsRepository;
     
     protected TrackerPlatform trackerPlatform;
+    protected TrackerPlatform bootstrapPlatform;
     protected TestConfiguration testConfig;
     protected RestConnector restConnector;
     private final ExecutorService executor = Executors.newFixedThreadPool(1);
     private final Collection<Socket> sockets = new HashSet<Socket>();
+
 
     @Before
     public void baseSetUp() throws Exception {
@@ -99,6 +101,7 @@ public abstract class TrackerITSupport {
             clearPersistedDevices();
         }
         trackerPlatform = createTrackerPlatform();
+        bootstrapPlatform = createBootstrapPlatform();
         restConnector = new RestConnector(trackerPlatform.getPlatformParameters(), new ResponseParser());
     }
 
@@ -137,20 +140,17 @@ public abstract class TrackerITSupport {
     }
 
     protected TrackerPlatform createTrackerPlatform() {
-        CumulocityCredentials credentials = cumulocityCredentials(testConfig.getC8yUser(),testConfig.getC8yPassword())
+        CumulocityCredentials credentials = cumulocityCredentials(testConfig.getC8yUser(), testConfig.getC8yPassword())
                 .withTenantId(testConfig.getC8yTenant()).build();
         PlatformImpl platform = new PlatformImpl(trackerAgentConfig.getPlatformHost(), credentials);
         return new TrackerPlatform(platform);
     }
-
-    protected DeviceCredentials pollCredentials(String imei) throws InterruptedException {
-        try {
-            Thread.sleep(5000);
-            return deviceCredentialsRepository.getDeviceCredentials(imei);
-        } catch (UnknownDeviceException uex) {
-            Thread.sleep(5000);
-            return deviceCredentialsRepository.getDeviceCredentials(imei);
-        }
+    
+    protected TrackerPlatform createBootstrapPlatform() {
+    	CumulocityCredentials credentials = cumulocityCredentials(trackerAgentConfig.getBootstrapUser(), trackerAgentConfig.getBootstrapPassword())
+    			.withTenantId(testConfig.getC8yTenant()).build();
+    	PlatformImpl platform = new PlatformImpl(trackerAgentConfig.getPlatformHost(), credentials);
+    	return new TrackerPlatform(platform);
     }
 
     protected Socket writeInNewConnectionAndKeepOpen(byte[] bis) throws Exception {
@@ -192,7 +192,8 @@ public abstract class TrackerITSupport {
             sum = sum.appendReport(deviceMessages[index]);
         }
         logger.info("Send message: {}", sum);
-        return writeInNewConnection(newSocket(), sum.asBytes());
+        Socket newSocket = newSocket();
+		return writeInNewConnection(newSocket, sum.asBytes());
     }
         
     protected Socket newSocket() throws IOException {
@@ -200,7 +201,7 @@ public abstract class TrackerITSupport {
         String socketHost = testConfig.getTrackerAgentHost();
         try {
             Socket socket = new Socket(socketHost, getLocalPort());
-            socket.setSoTimeout(6000);
+            socket.setSoTimeout(2000);
             sockets.add(socket);
             return socket;
         } catch (IOException ex) {
@@ -232,24 +233,59 @@ public abstract class TrackerITSupport {
             ex.printStackTrace();
         }
     }
+    
+    protected void connectNewDeviceRequest(String deviceId) {
+    	try {
+    		bootstrapPlatform.getDeviceCredentialsApi().pollCredentials(deviceId);
+    	} catch (Exception ex) {
+    		
+    	}
+    }
 
     protected TrackerDevice getTrackerDevice(String imei) {
     	return trackerAgent.getOrCreateTrackerDevice(imei);
     }
     
-    protected void bootstrap(String imei, TrackerMessage deviceMessage) throws UnsupportedEncodingException, Exception, InterruptedException {
+    protected void bootstrapAgent(String tenant, TrackerMessage deviceMessage) throws UnsupportedEncodingException, Exception, InterruptedException {
+    	String id = "tracker-agent-" + tenant;
+    	
+    	NewDeviceRequestRepresentation newDeviceRequest = new NewDeviceRequestRepresentation();
+    	newDeviceRequest.setId(id);
+    	try {
+    		bootstrapPlatform.getDeviceCredentialsApi().delete(newDeviceRequest);
+    	} catch (Exception ex) {
+    		
+    	}
+    	// agent request deleted
+    	
+    	createNewDeviceRequest(id);
+        // WAITING_FOR_CONNECTION
+    	
+    	connectNewDeviceRequest(id);
+    	// PENDING_ACCEPTANCE
+    	
+    	acceptNewDeviceRequest(id);
+    	// ACCEPTED status
+    	
+    }
+    
+    protected void bootstrapDevice(String imei, TrackerMessage deviceMessage) throws UnsupportedEncodingException, Exception, InterruptedException {
         createNewDeviceRequest(imei);
         // WAITING_FOR_CONNECTION status
         
         writeInNewConnection(deviceMessage);
-        Thread.sleep(5000);
+        Thread.sleep(1000);
         // PENDING_ACCEPTANCE status
         
         logger.info("accept request for imei: {}");
         acceptNewDeviceRequest(imei);
         // ACCEPTED status
         
-        DeviceCredentials credentials = pollCredentials(imei);
+        writeInNewConnection(deviceMessage);
+        Thread.sleep(1000);
+        // Device credentials got
+        
+        DeviceCredentials credentials = deviceCredentialsRepository.getDeviceCredentials(imei);
         logger.info("Created credentails: {}", credentials);
         assertThat(credentials).isNotNull();
     }

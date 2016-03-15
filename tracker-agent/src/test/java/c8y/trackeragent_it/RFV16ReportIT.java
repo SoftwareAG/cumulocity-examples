@@ -39,7 +39,7 @@ public class RFV16ReportIT extends TrackerITSupport {
     
     @Test
     public void processPositionUpdateMessageV1() throws Exception {
-        bootstrap(imei, deviceMessages.positionUpdate("DB", imei, Positions.TK10xSample));
+        bootstrapDevice(imei, deviceMessages.positionUpdate("DB", imei, Positions.TK10xSample));
         writeInNewConnection(deviceMessages.positionUpdate("DB", imei, Positions.TK10xSample));
         
         assertThat(actualPositionInTracker()).isEqualTo(TK10xCoordinatesTranslator.parse(Positions.TK10xSample));
@@ -48,7 +48,7 @@ public class RFV16ReportIT extends TrackerITSupport {
     
     @Test
     public void processHeartbeatMessage() throws Exception {
-        bootstrap(imei, deviceMessages.positionUpdate("DB", imei, Positions.TK10xSample));
+        bootstrapDevice(imei, deviceMessages.positionUpdate("DB", imei, Positions.TK10xSample));
         
         writeInNewConnection(deviceMessages.heartbeat("DB", imei, "FFFDFFFF"));
         
@@ -58,7 +58,7 @@ public class RFV16ReportIT extends TrackerITSupport {
     
     @Test
     public void setSosNumber() throws Exception {
-        bootstrap(imei, deviceMessages.positionUpdate("DB", imei, Positions.TK10xSample));
+        bootstrapDevice(imei, deviceMessages.positionUpdate("DB", imei, Positions.TK10xSample));
         Socket socket = writeInNewConnectionAndKeepOpen(deviceMessages.heartbeat("DB", imei, "FFFDFFFF").asBytes());
         TrackerDevice device = getTrackerDevice(imei);
         DeviceControlApi deviceControlApi = trackerPlatform.getDeviceControlApi();

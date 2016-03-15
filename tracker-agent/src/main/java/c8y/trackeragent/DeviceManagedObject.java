@@ -23,7 +23,6 @@ package c8y.trackeragent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.cumulocity.agent.server.context.DeviceContext;
 import com.cumulocity.agent.server.context.DeviceContextService;
 import com.cumulocity.agent.server.repository.InventoryRepository;
 import com.cumulocity.model.Agent;
@@ -34,8 +33,6 @@ import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.identity.IdentityApi;
 import com.cumulocity.sdk.client.inventory.InventoryApi;
-
-import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 
 /**
  * A utility class that simplifies handling devices and their associated
@@ -50,13 +47,10 @@ public class DeviceManagedObject {
     protected DeviceContextService contextService;
     protected InventoryRepository inventoryRepository;
     protected String tenant;
-    protected DeviceCredentials agentCredentials;
 
     public DeviceManagedObject(TrackerPlatform platform, 
     		DeviceContextService contextService, 
-    		InventoryRepository inventoryRepository,
-    		DeviceCredentials agentCredentials) {
-		this.agentCredentials = agentCredentials;
+    		InventoryRepository inventoryRepository) {
 		this.registry = platform.getIdentityApi();
         this.inventory = platform.getInventoryApi();
         this.tenant = platform.getTenantId();
@@ -73,26 +67,29 @@ public class DeviceManagedObject {
      * @param parentId
      *            ID of the parent to link to, or null if no link is needed.
      */
-    public boolean createOrUpdate(ManagedObjectRepresentation mo, ID extId, GId parentId) throws SDKException {
+    protected void createOrUpdate(ManagedObjectRepresentation mo, ID extId) throws SDKException {
         GId gid = tryGetBinding(extId);
-
         ManagedObjectRepresentation returnedMo;
-        returnedMo = (gid == null) ? create(mo, extId, parentId) : update(mo, gid);
-
+		if (gid == null) {
+			returnedMo = create(mo, extId);
+        } else {
+        	returnedMo = update(mo, gid);
+        }
         copyProps(returnedMo, mo);
-
-        return gid == null;
     }
     
-    public ManagedObjectRepresentation assureTrackerAgentExisting() {
+    private ManagedObjectRepresentation assureTrackerAgentExisting() {
         ID extId = getAgentExternalId();
         GId gid = tryGetBinding(extId);
-        if(gid == null) {
+		if (gid == null) {
+			logger.info("Agent not create yet for tenant " + tenant + " will create it!");
             ManagedObjectRepresentation agentMo = new ManagedObjectRepresentation();
             agentMo.setType("c8y_TrackerAgent");
             agentMo.setName("Tracker agent");
             agentMo.set(new Agent());            
-            return create(agentMo, extId, null);
+            agentMo = inventory.create(agentMo);
+            bind(agentMo, extId);
+            return agentMo;
         } else {
             return inventory.get(gid);
         }
@@ -108,30 +105,15 @@ public class DeviceManagedObject {
         return true;
     }
 
-    private ManagedObjectRepresentation create(ManagedObjectRepresentation mo, ID extId, final GId parentId) throws SDKException {
+    private ManagedObjectRepresentation create(ManagedObjectRepresentation mo, ID extId) throws SDKException {
         final ManagedObjectRepresentation returnedMo = inventory.create(mo);
+        ManagedObjectRepresentation agent = assureTrackerAgentExisting();
+        logger.info("Bind device to agent for tenant {}", tenant);
+        inventoryRepository.bindToParent(agent.getId(), returnedMo.getId());
         bind(returnedMo, extId);
-        if (parentId != null) {
-            addChildToAgent(returnedMo, parentId);
-        }
         return returnedMo;
     }
     
-    private void addChildToAgent(final ManagedObjectRepresentation mo, final GId parentId) {
-        try {
-            contextService.runWithinContext(new DeviceContext(agentCredentials), new Runnable() {
-                
-                @Override
-                public void run() {
-                    inventoryRepository.bindToParent(parentId, mo.getId());
-                    
-                }
-            });
-        } catch (Exception e) {
-            logger.error("Could not add tracker with id " + mo.getId() + " as child to agent", e);
-        }
-    }
-
     private ManagedObjectRepresentation update(ManagedObjectRepresentation mo, GId gid) throws SDKException {
         mo.setName(null); // Don't overwrite user-modified names
         mo.setId(gid);
@@ -170,10 +152,6 @@ public class DeviceManagedObject {
         registry.create(eir);
     }
 
-    protected InventoryApi getInventory() {
-        return inventory;
-    }
-    
     protected static ID imeiAsId(String imei) {
         ID extId = new ID(imei);
         extId.setType(TrackerDevice.XTID_TYPE);

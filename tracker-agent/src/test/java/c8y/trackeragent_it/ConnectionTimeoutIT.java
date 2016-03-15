@@ -26,7 +26,7 @@ public class ConnectionTimeoutIT extends TrackerITSupport {
         timeoutConnection();
         
         String imei = Devices.randomImei();
-        bootstrap(imei, deviceMessages.positionUpdate(imei, Positions.ZERO));  
+        bootstrapDevice(imei, deviceMessages.positionUpdate(imei, Positions.ZERO));  
         
         // trigger regular report 
         TrackerMessage message = deviceMessages.positionUpdate(imei, Positions.SAMPLE_4);

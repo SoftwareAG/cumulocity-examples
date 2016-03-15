@@ -66,7 +66,6 @@ import c8y.Restart;
 import c8y.SignalStrength;
 import c8y.SupportedOperations;
 import c8y.trackeragent.configuration.TrackerConfiguration;
-import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.protocol.coban.device.CobanDevice;
 import c8y.trackeragent.protocol.coban.device.CobanDeviceFactory;
 
@@ -89,7 +88,6 @@ public class TrackerDevice extends DeviceManagedObject {
     public static final String GEOFENCE_ENTER = "c8y_GeofenceEnter";
     public static final String GEOFENCE_EXIT = "c8y_GeofenceExit";
     public static final String POWER_ALARM_TYPE = "c8y_PowerAlarm";
-
 
     private EventApi events;
     private AlarmApi alarms;
@@ -118,11 +116,9 @@ public class TrackerDevice extends DeviceManagedObject {
     private SignalStrength gprsSignal = new SignalStrength();
     private TrackerConfiguration trackerConfig;
 
-    public TrackerDevice(TrackerPlatform platform, TrackerConfiguration trackerConfig, GId agentGid, String imei, 
-            DeviceContextService contextService, InventoryRepository inventoryRepository,
-            DeviceCredentials credentials
-            ) throws SDKException {
-        super(platform, contextService, inventoryRepository, credentials);
+    public TrackerDevice(TrackerPlatform platform, TrackerConfiguration trackerConfig, String imei, 
+            DeviceContextService contextService, InventoryRepository inventoryRepository) throws SDKException {
+        super(platform, contextService, inventoryRepository);
         this.trackerConfig = trackerConfig;
         this.events = platform.getEventApi();
         this.alarms = platform.getAlarmApi();
@@ -130,7 +126,7 @@ public class TrackerDevice extends DeviceManagedObject {
         this.deviceControl = platform.getDeviceControlApi();
 
         this.imei = imei;
-        createMo(agentGid);
+        createMo();
         setupTemplates(gid);
     }
 
@@ -157,7 +153,7 @@ public class TrackerDevice extends DeviceManagedObject {
         logger.debug("Updating location of {} to {}.", imei, position);
         device.set(position);
         event.set(position);
-        getInventory().update(device);        
+        inventory.update(device);        
         events.create(event);
     }
     
@@ -190,7 +186,7 @@ public class TrackerDevice extends DeviceManagedObject {
         ManagedObjectRepresentation device = new ManagedObjectRepresentation();
         device.set(fence);
         device.setId(gid);
-        getInventory().update(device);
+        inventory.update(device);
     }
 
     public void geofenceAlarm(boolean raise) throws SDKException {
@@ -206,7 +202,7 @@ public class TrackerDevice extends DeviceManagedObject {
         motion.setActive(active);
         device.set(motion);
         device.setId(gid);
-        getInventory().update(device);
+        inventory.update(device);
     }
 
     public void motionEvent(boolean moving) throws SDKException {
@@ -271,14 +267,14 @@ public class TrackerDevice extends DeviceManagedObject {
         mobile.setCellId(cellId);
         device.set(mobile);
         device.setId(gid);
-        getInventory().update(device);
+        inventory.update(device);
     }
     
     public void ping() throws SDKException {
         logger.info("Ping to device with id {}.", gid);
         ManagedObjectRepresentation device = new ManagedObjectRepresentation();
         device.setId(gid);
-        getInventory().update(device);
+        inventory.update(device);
     }
     
     public AlarmRepresentation createAlarm(AlarmRepresentation newAlarm) throws SDKException { 
@@ -389,7 +385,7 @@ public class TrackerDevice extends DeviceManagedObject {
         return source;
     }
 
-    private void createMo(GId agentGid) throws SDKException {
+    private void createMo() throws SDKException {
         ManagedObjectRepresentation device = new ManagedObjectRepresentation();
 
         RequiredAvailability availability = new RequiredAvailability(15);
@@ -419,7 +415,7 @@ public class TrackerDevice extends DeviceManagedObject {
         device.setType(TYPE);
         device.setName("Tracker " + imei);
 
-        createOrUpdate(device, extId, agentGid);
+        createOrUpdate(device, extId);
         gid = device.getId();
         self = device.getSelf();
     }
@@ -462,7 +458,7 @@ public class TrackerDevice extends DeviceManagedObject {
         logger.info("Update {} for imei: {}", newDeviceConfig, imei);
         ManagedObjectRepresentation device = aDevice();
         device.set(newDeviceConfig);
-        getInventory().update(device);        
+        inventory.update(device);        
     }
     
     public RFV16Config getRFV16Config() {
@@ -474,7 +470,7 @@ public class TrackerDevice extends DeviceManagedObject {
         ManagedObjectRepresentation device = aDevice();        
         logger.debug("Updating mobile of {} to {}.", imei, mobile);
         device.set(mobile);
-        getInventory().update(device);        
+        inventory.update(device);        
     }
     
     public void setOperationSuccessful(OperationRepresentation operation) {

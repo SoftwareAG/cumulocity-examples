@@ -189,19 +189,28 @@ public class ConnectedTracker<F extends Fragment> implements Runnable, Executor 
 			try {
 				deviceCredentials = credentialsRepository.getDeviceCredentials(imei);
 			} catch (UnknownDeviceException ex) {
-				logger.debug("Device with imei {} not yet bootstraped. Will skip report and try bootstrap the device.", imei);
-				bootstrapService.startDeviceBootstraping(imei);
-				break;
-
+				logger.debug("Device with imei {} not yet bootstraped. Will try bootstrap the device.", imei);
+				deviceCredentials = bootstrapService.tryAccessDeviceCredentials(imei);
+				if (deviceCredentials == null) {
+					logger.debug("Device with imei {} not yet available. Will skip the report.", imei);
+					break;
+				} else {
+					logger.debug("Device with imei {} available.", imei);
+				}
 			}
             final String tenant = deviceCredentials.getTenant();
             DeviceCredentials agentCredentials;
             try {
             	agentCredentials = credentialsRepository.getAgentCredentials(tenant);
             } catch (UnknownTenantException ex) {
-            	logger.debug("Agent for tenant {} not yet bootstraped. Will skip report and try bootstrap the agent.", tenant);
-            	bootstrapService.startAgentBootstraping(tenant);
-            	break;
+            	logger.debug("Agent for tenant {} not yet bootstraped. Will try bootstrap the agent.", tenant);
+            	agentCredentials = bootstrapService.tryAccessAgentCredentials(tenant);
+				if (agentCredentials == null) {
+					logger.debug("Agent for tenant {} not yet available. Will skip the report.", tenant);
+					break;
+				} else {
+					logger.debug("Agent for tenant {} available.", tenant);					
+				}
             	
             }
             final ReportContext reportContext = new ReportContext(report, imei, out, connectionParams);

@@ -105,7 +105,7 @@ public class ConnectedTrackerTest {
         tracker.processReport(dummyReport);
         
         assertThat(ConnectionRegistry.instance()).isEmpty();
-        verify(bootstrapProcessor).startDeviceBootstraping("imei");
+        verify(bootstrapProcessor).tryAccessDeviceCredentials("imei");
         verifyZeroInteractions(translator);
     }
 

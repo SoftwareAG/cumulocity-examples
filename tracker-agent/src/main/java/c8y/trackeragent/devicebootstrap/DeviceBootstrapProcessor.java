@@ -32,44 +32,46 @@ public class DeviceBootstrapProcessor {
         this.deviceCredentialsApi = platformProvider.getBootstrapPlatform().getDeviceCredentialsApi();
     }
     
-    public void startDeviceBootstraping(String imei) {    
+    public DeviceCredentials tryAccessDeviceCredentials(String imei) {    
         logger.info("Start bootstrapping: {}", imei);
         DeviceCredentialsRepresentation credentialsRepresentation = pollCredentials(imei);
         if (credentialsRepresentation == null) {
-            logger.info("No credentials accessed for imei {}.", imei);
-            return;
-        } 
-        onNewDeviceCredentials(credentialsRepresentation);
+        	return null;
+        } else {
+        	return onNewDeviceCredentials(credentialsRepresentation);            
+        }
     }
     
-    public void startAgentBootstraping(String tenant) {    
+    public DeviceCredentials tryAccessAgentCredentials(String tenant) {    
     	logger.info("Start bootstrapping agent for tenant: {}", tenant);
     	String newDeviceRequestId = "tracker-agent-" + tenant;
     	DeviceCredentialsRepresentation credentialsRepresentation = pollCredentials(newDeviceRequestId);
     	if (credentialsRepresentation == null) {
-    		logger.info("No credentials accessed for tenant agent {}.", tenant);
-    		return;
-    	} 
-    	onNewAgentCredentials(credentialsRepresentation);
+    		return null;
+    	} else {
+    		return onNewAgentCredentials(credentialsRepresentation);    		
+    	}
     }
 
-	private void onNewAgentCredentials(DeviceCredentialsRepresentation credentialsRep) {
-		DeviceCredentials agentCredentials = DeviceCredentials.forAgent(credentialsRep.getTenantId(), credentialsRep.getUsername(), credentialsRep.getPassword());
-		credentialsRepository.saveAgentCredentials(agentCredentials);
-		platformProvider.initTenantPlatform(agentCredentials.getTenant());
-		tenantBinder.bind(agentCredentials.getTenant());
+	private DeviceCredentials onNewAgentCredentials(DeviceCredentialsRepresentation credentialsRep) {
+		DeviceCredentials credentials = DeviceCredentials.forAgent(credentialsRep.getTenantId(), credentialsRep.getUsername(), credentialsRep.getPassword());
+		credentialsRepository.saveAgentCredentials(credentials);
+		//platformProvider.initTenantPlatform(credentials.getTenant());
+		tenantBinder.bind(credentials.getTenant());
 		logger.info("Agent for tenant {} bootstraped. Following devices start working: {}",
-				agentCredentials.getTenant(), credentialsRepository.getAllDeviceCredentials(agentCredentials.getTenant()));
+				credentials.getTenant(), credentialsRepository.getAllDeviceCredentials(credentials.getTenant()));
+		return credentials;
 	}
 
-	private void onNewDeviceCredentials(DeviceCredentialsRepresentation credentialsRep) {
+	private DeviceCredentials onNewDeviceCredentials(DeviceCredentialsRepresentation credentialsRep) {
 		boolean hasAgentCredentials = credentialsRepository.hasAgentCredentials(credentialsRep.getTenantId());
 		DeviceCredentials credentials = DeviceCredentials.forDevice(credentialsRep.getId(), credentialsRep.getTenantId()); 
 		logger.info("Credentials for imei {} accessed: {}.", credentials.getImei(), credentials);
 		credentialsRepository.saveDeviceCredentials(credentials);
 		if (!hasAgentCredentials) {
-			startAgentBootstraping(credentials.getTenant());
+			tryAccessAgentCredentials(credentials.getTenant());
 		}
+		return credentials;
 	}
     
     private DeviceCredentialsRepresentation pollCredentials(final String newDeviceRequestId) {
