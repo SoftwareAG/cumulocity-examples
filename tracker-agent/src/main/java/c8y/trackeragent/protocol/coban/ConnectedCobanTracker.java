@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import c8y.trackeragent.ConnectedTracker;
 import c8y.trackeragent.TrackerAgent;
+import c8y.trackeragent.devicebootstrap.DeviceBootstrapProcessor;
 import c8y.trackeragent.protocol.coban.parser.CobanFragment;
 import c8y.trackeragent.service.AlarmService;
 
@@ -19,9 +20,10 @@ import com.cumulocity.agent.server.context.DeviceContextService;
 public class ConnectedCobanTracker extends ConnectedTracker<CobanFragment> {
     
     @Autowired
-    public ConnectedCobanTracker(TrackerAgent trackerAgent, DeviceContextService contextService, AlarmService alarmService, 
+    public ConnectedCobanTracker(TrackerAgent trackerAgent, DeviceContextService contextService, 
+    		DeviceBootstrapProcessor bootstrapProcessor, AlarmService alarmService, 
 	    List<CobanFragment> fragments) {
-        super(CobanConstants.REPORT_SEP, CobanConstants.FIELD_SEP, trackerAgent, contextService, fragments);
+        super(CobanConstants.REPORT_SEP, CobanConstants.FIELD_SEP, trackerAgent, contextService, bootstrapProcessor, fragments);
     }
 
 }

@@ -28,29 +28,27 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import c8y.trackeragent.DeviceManagedObject;
+import com.cumulocity.agent.server.context.DeviceContextService;
+import com.cumulocity.agent.server.repository.InventoryRepository;
+import com.cumulocity.model.authentication.CumulocityCredentials;
+import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
+import com.cumulocity.rest.representation.devicebootstrap.NewDeviceRequestRepresentation;
+import com.cumulocity.sdk.client.PlatformImpl;
+import com.cumulocity.sdk.client.ResponseParser;
+import com.cumulocity.sdk.client.RestConnector;
+
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.TrackerPlatform;
+import c8y.trackeragent.configuration.ConfigUtils;
+import c8y.trackeragent.configuration.TrackerConfiguration;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.exception.UnknownDeviceException;
 import c8y.trackeragent.protocol.mapping.TrackingProtocol;
 import c8y.trackeragent.service.AlarmMappingService;
 import c8y.trackeragent.service.AlarmType;
-import c8y.trackeragent.utils.ConfigUtils;
-import c8y.trackeragent.utils.TrackerConfiguration;
 import c8y.trackeragent.utils.message.TrackerMessage;
-
-import com.cumulocity.agent.server.context.DeviceContextService;
-import com.cumulocity.agent.server.repository.InventoryRepository;
-import com.cumulocity.model.authentication.CumulocityCredentials;
-import com.cumulocity.model.idtype.GId;
-import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
-import com.cumulocity.rest.representation.devicebootstrap.NewDeviceRequestRepresentation;
-import com.cumulocity.sdk.client.PlatformImpl;
-import com.cumulocity.sdk.client.ResponseParser;
-import com.cumulocity.sdk.client.RestConnector;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = ITConfiguration.class)
@@ -66,10 +64,6 @@ public abstract class TrackerITSupport {
     private String password;
     @Value("${tracker-agent.host}")
     private String trackerAgentHost;
-    @Value("${C8Y.agent.user}") 
-    private String agentUser;
-    @Value("${C8Y.agent.password}") 
-    private String agentPassword;
     
     @Autowired
     protected TrackerConfiguration trackerAgentConfig;
@@ -240,9 +234,7 @@ public abstract class TrackerITSupport {
     }
 
     protected TrackerDevice getTrackerDevice(String imei) {
-        DeviceManagedObject deviceManagedObject = new DeviceManagedObject(trackerPlatform, contextService, inventoryRepository, agentUser, agentPassword);
-        GId agentId = deviceManagedObject.getAgentId();
-        return new TrackerDevice(trackerPlatform, trackerAgentConfig, agentId, imei, contextService, inventoryRepository, agentUser, agentPassword);
+    	return trackerAgent.getOrCreateTrackerDevice(imei);
     }
     
     protected void bootstrap(String imei, TrackerMessage deviceMessage) throws UnsupportedEncodingException, Exception, InterruptedException {

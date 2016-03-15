@@ -1,4 +1,4 @@
-package c8y.trackeragent.utils;
+package c8y.trackeragent.configuration;
 
 import static java.lang.Integer.parseInt;
 import static java.lang.String.format;

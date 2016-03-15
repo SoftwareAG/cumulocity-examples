@@ -8,8 +8,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import c8y.trackeragent.configuration.TrackerConfiguration;
 import c8y.trackeragent.protocol.mapping.TrackerFactory;
-import c8y.trackeragent.utils.TrackerConfiguration;
 
 @Component
 public class ServerFactory {

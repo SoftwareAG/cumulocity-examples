@@ -45,8 +45,8 @@ import com.google.common.collect.Iterables;
 
 import c8y.trackeragent.context.OperationContext;
 import c8y.trackeragent.context.ReportContext;
+import c8y.trackeragent.devicebootstrap.DeviceBootstrapProcessor;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
-import c8y.trackeragent.event.TrackerAgentEvents;
 
 /**
  * Performs the communication with a connected device. Accepts reports from the
@@ -61,6 +61,7 @@ public class ConnectedTracker<F extends Fragment> implements Runnable, Executor 
     private final List<F> fragments = new ArrayList<F>();
     private final TrackerAgent trackerAgent;
     private final DeviceContextService contextService;
+    private final DeviceBootstrapProcessor bootstrapService;
     private final Map<String, Object> connectionParams = new HashMap<String, Object>();
 
     private Socket client;
@@ -69,11 +70,12 @@ public class ConnectedTracker<F extends Fragment> implements Runnable, Executor 
     private String imei;
 
     public ConnectedTracker(char reportSeparator, String fieldSeparator, 
-            TrackerAgent trackerAgent, DeviceContextService contextService, List<F> fragments) {
+            TrackerAgent trackerAgent, DeviceContextService contextService, DeviceBootstrapProcessor bootstrapService, List<F> fragments) {
         this.reportSeparator = reportSeparator;
         this.fieldSeparator = fieldSeparator;
         this.trackerAgent = trackerAgent;
         this.contextService = contextService;
+		this.bootstrapService = bootstrapService;
         this.fragments.addAll(fragments);
     }
     
@@ -173,13 +175,13 @@ public class ConnectedTracker<F extends Fragment> implements Runnable, Executor 
                 continue;
             }
             logger.debug("Got report from IMEI: " + imei);
-            boolean deviceRegistered = trackerAgent.getContext().isDeviceRegistered(imei);
+            boolean deviceRegistered = trackerAgent.isDeviceRegistered(imei);
             if (!deviceRegistered) {
-                trackerAgent.sendEvent(new TrackerAgentEvents.NewDeviceEvent(imei));
+            	bootstrapService.startDeviceBootstraping(imei);
                 break;
             }
             final ReportContext reportContext = new ReportContext(report, imei, out, connectionParams);
-            DeviceCredentials credentials = trackerAgent.getContext().getTenantCredentials(imei);
+            DeviceCredentials credentials = trackerAgent.getTenantCredentials(imei);
             try {
                 boolean success = contextService.callWithinContext(new DeviceContext(credentials), new Callable<Boolean>() {
                     @Override

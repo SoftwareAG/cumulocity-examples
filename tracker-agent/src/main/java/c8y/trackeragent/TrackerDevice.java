@@ -65,9 +65,10 @@ import c8y.RequiredAvailability;
 import c8y.Restart;
 import c8y.SignalStrength;
 import c8y.SupportedOperations;
+import c8y.trackeragent.configuration.TrackerConfiguration;
+import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.protocol.coban.device.CobanDevice;
 import c8y.trackeragent.protocol.coban.device.CobanDeviceFactory;
-import c8y.trackeragent.utils.TrackerConfiguration;
 
 public class TrackerDevice extends DeviceManagedObject {
     
@@ -118,8 +119,10 @@ public class TrackerDevice extends DeviceManagedObject {
     private TrackerConfiguration trackerConfig;
 
     public TrackerDevice(TrackerPlatform platform, TrackerConfiguration trackerConfig, GId agentGid, String imei, 
-            DeviceContextService contextService, InventoryRepository inventoryRepository, String agentUser, String agentPassword) throws SDKException {
-        super(platform, contextService, inventoryRepository, agentUser, agentPassword);
+            DeviceContextService contextService, InventoryRepository inventoryRepository,
+            DeviceCredentials credentials
+            ) throws SDKException {
+        super(platform, contextService, inventoryRepository, credentials);
         this.trackerConfig = trackerConfig;
         this.events = platform.getEventApi();
         this.alarms = platform.getAlarmApi();

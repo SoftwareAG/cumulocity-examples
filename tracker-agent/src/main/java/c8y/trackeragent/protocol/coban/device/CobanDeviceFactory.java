@@ -2,8 +2,8 @@ package c8y.trackeragent.protocol.coban.device;
 
 import java.util.Map;
 
+import c8y.trackeragent.configuration.TrackerConfiguration;
 import c8y.trackeragent.protocol.coban.CobanConstants;
-import c8y.trackeragent.utils.TrackerConfiguration;
 
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.google.common.base.Strings;

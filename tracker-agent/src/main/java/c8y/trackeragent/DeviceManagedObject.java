@@ -23,8 +23,6 @@ package c8y.trackeragent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import c8y.trackeragent.devicebootstrap.DeviceCredentials;
-
 import com.cumulocity.agent.server.context.DeviceContext;
 import com.cumulocity.agent.server.context.DeviceContextService;
 import com.cumulocity.agent.server.repository.InventoryRepository;
@@ -36,6 +34,8 @@ import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.identity.IdentityApi;
 import com.cumulocity.sdk.client.inventory.InventoryApi;
+
+import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 
 /**
  * A utility class that simplifies handling devices and their associated
@@ -49,20 +49,19 @@ public class DeviceManagedObject {
     protected InventoryApi inventory;
     protected DeviceContextService contextService;
     protected InventoryRepository inventoryRepository;
-    protected String agentUser;
-    protected String agentPassword;
     protected String tenant;
-    
+    protected DeviceCredentials agentCredentials;
 
-    public DeviceManagedObject(TrackerPlatform platform, DeviceContextService contextService, InventoryRepository inventoryRepository,
-            String agentUser, String agentPassword) {
-        this.registry = platform.getIdentityApi();
+    public DeviceManagedObject(TrackerPlatform platform, 
+    		DeviceContextService contextService, 
+    		InventoryRepository inventoryRepository,
+    		DeviceCredentials agentCredentials) {
+		this.agentCredentials = agentCredentials;
+		this.registry = platform.getIdentityApi();
         this.inventory = platform.getInventoryApi();
         this.tenant = platform.getTenantId();
         this.contextService = contextService;
         this.inventoryRepository = inventoryRepository;
-        this.agentUser = agentUser;
-        this.agentPassword = agentPassword;
     }
 
     /**
@@ -120,7 +119,6 @@ public class DeviceManagedObject {
     
     private void addChildToAgent(final ManagedObjectRepresentation mo, final GId parentId) {
         try {
-            DeviceCredentials agentCredentials = DeviceCredentials.forAgent(tenant, agentUser, agentPassword);
             contextService.runWithinContext(new DeviceContext(agentCredentials), new Runnable() {
                 
                 @Override

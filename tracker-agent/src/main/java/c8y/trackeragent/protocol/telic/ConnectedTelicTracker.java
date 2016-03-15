@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import c8y.trackeragent.ConnectedTracker;
 import c8y.trackeragent.TrackerAgent;
+import c8y.trackeragent.devicebootstrap.DeviceBootstrapProcessor;
 import c8y.trackeragent.protocol.telic.parser.TelicFragment;
 
 import com.cumulocity.agent.server.context.DeviceContextService;
@@ -28,8 +29,10 @@ public class ConnectedTelicTracker extends ConnectedTracker<TelicFragment> {
     public static final int REPORT_SKIP = 4;
 
     @Autowired
-    public ConnectedTelicTracker(TrackerAgent trackerAgent, DeviceContextService contextService, List<TelicFragment> fragments) throws IOException {
-        super(TelicConstants.REPORT_SEP, TelicConstants.FIELD_SEP, trackerAgent, contextService, fragments);
+    public ConnectedTelicTracker(TrackerAgent trackerAgent, DeviceContextService contextService,
+    		DeviceBootstrapProcessor bootstrapProcessor,
+    		List<TelicFragment> fragments) throws IOException {
+        super(TelicConstants.REPORT_SEP, TelicConstants.FIELD_SEP, trackerAgent, contextService, bootstrapProcessor, fragments);
     }
     
     @Override

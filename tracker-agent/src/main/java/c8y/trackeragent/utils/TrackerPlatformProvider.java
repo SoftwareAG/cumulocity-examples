@@ -15,6 +15,7 @@ import com.google.common.cache.CacheBuilder;
 
 import c8y.trackeragent.DeviceManagedObject;
 import c8y.trackeragent.TrackerPlatform;
+import c8y.trackeragent.configuration.TrackerConfiguration;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.exception.SDKExceptions;
@@ -27,23 +28,24 @@ public class TrackerPlatformProvider {
     private final Object lock = new Object();
     private final DeviceContextService contextService;
     private final InventoryRepository inventoryRepository;
-    private final String agentUser;
-    private final String agentPassword;
 
     public TrackerPlatformProvider(TrackerConfiguration config, DeviceCredentialsRepository deviceCredentialsRepository,
-            DeviceContextService contextService, InventoryRepository inventoryRepository, String agentUser, String agentPassword) {
+            DeviceContextService contextService, InventoryRepository inventoryRepository) {
         this.config = config;
         this.deviceCredentialsRepository = deviceCredentialsRepository;
         this.cache = CacheBuilder.newBuilder().build();
         this.contextService = contextService;
         this.inventoryRepository = inventoryRepository;
-        this.agentUser = agentUser;
-        this.agentPassword = agentPassword;
+    }
+    
+    public void initTenantPlatform(final String tenantId) {
+    	getTenantPlatform(tenantId);
     }
 
     public TrackerPlatform getTenantPlatform(final String tenantId) {
-    	return cache.getIfPresent(PlatformKey.forTenant(tenantId));
+    	return getPlatform(PlatformKey.forTenant(tenantId));
     }
+    
     
     public TrackerPlatform getBootstrapPlatform() {
         return getPlatform(PlatformKey.forBootstrap());
@@ -83,7 +85,7 @@ public class TrackerPlatformProvider {
     	CumulocityCredentials credentials = cumulocityCredentials(agentCredentials.getUsername(), agentCredentials.getPassword()).withTenantId(tenant).build();
     	PlatformImpl platform = c8yPlatform(credentials);
     	TrackerPlatform trackerPlatform = new TrackerPlatform(platform);
-    	setupAgent(trackerPlatform);
+    	setupAgent(trackerPlatform, tenant);
     	return trackerPlatform;
     }
 
@@ -93,9 +95,10 @@ public class TrackerPlatformProvider {
         return platform;
     }
 
-    private void setupAgent(TrackerPlatform platform) {
+    private void setupAgent(TrackerPlatform platform, String tenant) {
         synchronized (lock) {
-            DeviceManagedObject deviceManagedObject = new DeviceManagedObject(platform, contextService, inventoryRepository, agentUser, agentPassword);
+        	DeviceCredentials agentCredentials = deviceCredentialsRepository.getAgentCredentials(tenant);
+            DeviceManagedObject deviceManagedObject = new DeviceManagedObject(platform, contextService, inventoryRepository, agentCredentials);
             ManagedObjectRepresentation agentMo = deviceManagedObject.assureTrackerAgentExisting();
             platform.setAgent(agentMo);
         }

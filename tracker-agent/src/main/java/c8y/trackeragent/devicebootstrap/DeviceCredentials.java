@@ -1,5 +1,7 @@
 package c8y.trackeragent.devicebootstrap;
 
+import com.google.common.base.Predicate;
+
 public class DeviceCredentials extends com.cumulocity.agent.server.context.DeviceCredentials {
 
 	private String imei;
@@ -73,6 +75,14 @@ public class DeviceCredentials extends com.cumulocity.agent.server.context.Devic
 		return true;
 	}
 	
-	
+	public static Predicate<DeviceCredentials> hasTenant(final String tenant) {
+		return new Predicate<DeviceCredentials>() {
+
+			@Override
+			public boolean apply(DeviceCredentials input) {
+				return input.getTenant().equals(tenant);
+			}
+		};
+	}
 
 }

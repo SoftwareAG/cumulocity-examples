@@ -1,4 +1,4 @@
-package c8y.trackeragent.utils;
+package c8y.trackeragent.configuration;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.stereotype.Component;

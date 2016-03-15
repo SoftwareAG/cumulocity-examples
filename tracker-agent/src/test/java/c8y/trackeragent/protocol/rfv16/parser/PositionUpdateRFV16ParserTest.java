@@ -18,12 +18,12 @@ import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
 
 import c8y.Position;
 import c8y.trackeragent.TrackerDevice;
+import c8y.trackeragent.configuration.TrackerConfiguration;
 import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.protocol.rfv16.RFV16Constants;
 import c8y.trackeragent.protocol.rfv16.RFV16ParserTestSupport;
 import c8y.trackeragent.utils.Positions;
 import c8y.trackeragent.utils.TK10xCoordinatesTranslator;
-import c8y.trackeragent.utils.TrackerConfiguration;
 import c8y.trackeragent.utils.message.TrackerMessage;
 
 public class PositionUpdateRFV16ParserTest extends RFV16ParserTestSupport {

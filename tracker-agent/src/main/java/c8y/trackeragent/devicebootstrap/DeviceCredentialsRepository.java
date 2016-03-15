@@ -1,5 +1,6 @@
 package c8y.trackeragent.devicebootstrap;
 
+import static com.google.common.collect.Iterables.filter;
 import static java.util.Arrays.asList;
 
 import java.util.ArrayList;
@@ -13,9 +14,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import c8y.trackeragent.configuration.ConfigUtils;
 import c8y.trackeragent.exception.UnknownDeviceException;
 import c8y.trackeragent.exception.UnknownTenantException;
-import c8y.trackeragent.utils.ConfigUtils;
 import c8y.trackeragent.utils.GroupPropertyAccessor;
 import c8y.trackeragent.utils.GroupPropertyAccessor.Group;
 
@@ -141,4 +142,16 @@ public class DeviceCredentialsRepository {
     	group.put("password", credentials.getPassword());
     	return group;
     }
+
+	public void setAllDeviceCredentialsBootstraped(String tenant) {
+		Iterable<DeviceCredentials> credentials = getAllDeviceCredentials(tenant);
+		for (DeviceCredentials cred : credentials) {
+			cred.setStatus(DeviceBootstrapStatus.BOOTSTRAPED);
+			saveDeviceCredentials(cred);
+		}
+	}
+	
+	public Iterable<DeviceCredentials> getAllDeviceCredentials(String tenant) {
+		return filter(getAllDeviceCredentials(), DeviceCredentials.hasTenant(tenant));
+	}
 }
