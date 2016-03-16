@@ -2,10 +2,6 @@ package c8y.trackeragent;
 
 import java.util.concurrent.Callable;
 
-import c8y.trackeragent.exception.SDKExceptions;
-
-import com.cumulocity.model.idtype.GId;
-import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.Platform;
 import com.cumulocity.sdk.client.PlatformImpl;
 import com.cumulocity.sdk.client.PlatformParameters;
@@ -23,10 +19,11 @@ import com.cumulocity.sdk.client.measurement.MeasurementApi;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
+import c8y.trackeragent.exception.SDKExceptions;
+
 public class TrackerPlatform implements Platform {
 
     private final Platform orig;
-    private ManagedObjectRepresentation agent;
     private Cache<Class<?>, Object> cache;
 
     public TrackerPlatform(PlatformImpl orig) {
@@ -164,22 +161,10 @@ public class TrackerPlatform implements Platform {
     public PlatformParameters getPlatformParameters() {
         return (PlatformParameters) orig;
     }
-
-    public void setAgent(ManagedObjectRepresentation agentMo) {
-        this.agent = agentMo;
-    }
-
-    public ManagedObjectRepresentation getAgent() {
-        return agent;
-    }
-
-    public GId getAgentId() {
-        return agent == null ? null : agent.getId();
-    }
     
     @Override
     public String toString() {
-        return String.format("TrackerPlatform [orig=%s, getTenantId()=%s, getHost()=%s, getUser()=%s, agentId = %s]", orig, getTenantId(), getHost(), getUser(), getAgentId());
+        return String.format("TrackerPlatform [orig=%s, getTenantId()=%s, getHost()=%s, getUser()=%s]", orig, getTenantId(), getHost(), getUser());
     }
 
     abstract class CachedApiGetter<V> implements Callable<V> {
