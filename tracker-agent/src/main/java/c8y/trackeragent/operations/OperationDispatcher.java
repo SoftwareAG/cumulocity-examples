@@ -70,7 +70,8 @@ public class OperationDispatcher implements Runnable {
     private volatile ScheduledFuture<?> self;
 
 
-    public OperationDispatcher(TrackerPlatform tenantPlatform, DeviceCredentials tenantCredentials, LoggingService loggingService, DeviceContextService contextService) throws SDKException {
+    public OperationDispatcher(TrackerPlatform tenantPlatform, DeviceCredentials tenantCredentials, 
+    		LoggingService loggingService, DeviceContextService contextService) throws SDKException {
         this.platform = tenantPlatform;
 		this.tenantCredentials = tenantCredentials;
         this.loggingService = loggingService;

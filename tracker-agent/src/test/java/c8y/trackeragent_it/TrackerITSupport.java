@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import com.cumulocity.agent.server.context.DeviceContext;
 import com.cumulocity.agent.server.context.DeviceContextService;
 import com.cumulocity.agent.server.repository.InventoryRepository;
 import com.cumulocity.model.authentication.CumulocityCredentials;
@@ -292,7 +293,15 @@ public abstract class TrackerITSupport {
         DeviceCredentials credentials = deviceCredentialsRepository.getDeviceCredentials(imei);
         logger.info("Created credentails: {}", credentials);
         assertThat(credentials).isNotNull();
+    	enterDeviceContext(imei);
     }
+
+	private void enterDeviceContext(String imei) {
+		DeviceCredentials deviceCredentials = deviceCredentialsRepository.getDeviceCredentials(imei);
+    	DeviceCredentials agentCredentials = deviceCredentialsRepository.getAgentCredentials(deviceCredentials.getTenant());
+    	DeviceContext deviceContext = new DeviceContext(agentCredentials);
+    	contextService.enterContext(deviceContext);
+	}
     
     private TestConfiguration getTestConfig() {
         //@formatter:off

@@ -41,8 +41,7 @@ public class TrackerAgent {
         TrackerDevice device = ManagedObjectCache.instance().get(imei);
         if (device == null) {
             DeviceCredentials deviceCredentials = credentialsRepository.getDeviceCredentials(imei);
-			TrackerPlatform platform = platformProvider.getTenantPlatform(deviceCredentials.getTenant());
-			device = trackerDeviceFactory.create(platform, imei);
+			device = trackerDeviceFactory.create(deviceCredentials.getTenant(), imei);
             ManagedObjectCache.instance().put(device);
         }
         return device;

@@ -38,7 +38,7 @@ public class CobanReportIT extends TrackerITSupport {
 	protected TrackingProtocol getTrackerProtocol() {
 		return TrackingProtocol.COBAN;
 	}
-
+	
 	@Test
 	public void shouldProcessLogonMessage() throws Exception {
 		String response = writeInNewConnection(deviceMessages.logon(imei));
