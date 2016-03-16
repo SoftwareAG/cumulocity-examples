@@ -216,7 +216,7 @@ public class ConnectedTracker<F extends Fragment> implements Runnable, Executor 
             }
             final ReportContext reportContext = new ReportContext(report, imei, out, connectionParams);
             try {
-                boolean success = contextService.callWithinContext(new DeviceContext(agentCredentials), new Callable<Boolean>() {
+                boolean success = contextService.callWithinContext(new DeviceContext(agentCredentials, imei), new Callable<Boolean>() {
                     @Override
                     public Boolean call() throws Exception {
                         return parser.onParsed(reportContext);
