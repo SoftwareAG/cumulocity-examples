@@ -16,8 +16,8 @@ import com.google.common.base.Strings;
 
 import c8y.trackeragent.Parser;
 import c8y.trackeragent.TrackerAgent;
-import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.context.ReportContext;
+import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.protocol.rfv16.message.RFV16ServerMessages;
 import c8y.trackeragent.service.AlarmService;
 

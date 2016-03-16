@@ -18,7 +18,7 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package c8y.trackeragent;
+package c8y.trackeragent.device;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
 
@@ -31,7 +31,6 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.cumulocity.agent.server.context.DeviceContextService;
 import com.cumulocity.agent.server.repository.InventoryRepository;
 import com.cumulocity.model.ID;
 import com.cumulocity.model.event.CumulocityAlarmStatuses;
@@ -65,6 +64,7 @@ import c8y.RequiredAvailability;
 import c8y.Restart;
 import c8y.SignalStrength;
 import c8y.SupportedOperations;
+import c8y.trackeragent.TrackerPlatform;
 import c8y.trackeragent.configuration.TrackerConfiguration;
 import c8y.trackeragent.protocol.coban.device.CobanDevice;
 import c8y.trackeragent.protocol.coban.device.CobanDeviceFactory;
@@ -117,8 +117,8 @@ public class TrackerDevice extends DeviceManagedObject {
     private TrackerConfiguration trackerConfig;
 
     public TrackerDevice(TrackerPlatform platform, TrackerConfiguration trackerConfig, String imei, 
-            DeviceContextService contextService, InventoryRepository inventoryRepository) throws SDKException {
-        super(platform, contextService, inventoryRepository);
+            InventoryRepository inventoryRepository) throws SDKException {
+        super(platform, inventoryRepository);
         this.trackerConfig = trackerConfig;
         this.events = platform.getEventApi();
         this.alarms = platform.getAlarmApi();
@@ -126,9 +126,12 @@ public class TrackerDevice extends DeviceManagedObject {
         this.deviceControl = platform.getDeviceControlApi();
 
         this.imei = imei;
-        createMo();
-        setupTemplates(gid);
     }
+
+	public void init() {
+		createMo();
+        setupTemplates(gid);
+	}
 
     public String getImei() {
         return imei;

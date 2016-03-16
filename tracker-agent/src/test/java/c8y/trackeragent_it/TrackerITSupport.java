@@ -39,10 +39,10 @@ import com.cumulocity.sdk.client.ResponseParser;
 import com.cumulocity.sdk.client.RestConnector;
 
 import c8y.trackeragent.TrackerAgent;
-import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.TrackerPlatform;
 import c8y.trackeragent.configuration.ConfigUtils;
 import c8y.trackeragent.configuration.TrackerConfiguration;
+import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.protocol.mapping.TrackingProtocol;
@@ -58,10 +58,13 @@ public abstract class TrackerITSupport {
     
     @Value("${C8Y.tenant}")
     private String tenant;
+    
     @Value("${C8Y.username}")
     private String username;
+    
     @Value("${C8Y.password}")
     private String password;
+    
     @Value("${tracker-agent.host}")
     private String trackerAgentHost;
     
@@ -267,15 +270,15 @@ public abstract class TrackerITSupport {
     }
     
     protected void bootstrapDevice(String imei, TrackerMessage deviceMessage) throws Exception {
-		if (!deviceCredentialsRepository.hasAgentCredentials("management")) {
+		if (!deviceCredentialsRepository.hasAgentCredentials(tenant)) {
 			bootstrapAgent(deviceMessage);
 		}    	    	
         createNewDeviceRequest(imei);
-        Thread.sleep(500);
+        Thread.sleep(1000);
         // WAITING_FOR_CONNECTION status
         
         writeInNewConnection(deviceMessage);
-        Thread.sleep(500);
+        Thread.sleep(1000);
         // PENDING_ACCEPTANCE status
         
         logger.info("accept request for imei: {}");
@@ -283,7 +286,7 @@ public abstract class TrackerITSupport {
         // ACCEPTED status
         
         writeInNewConnection(deviceMessage);
-        Thread.sleep(500);
+        Thread.sleep(1000);
         // Device credentials got
         
         DeviceCredentials credentials = deviceCredentialsRepository.getDeviceCredentials(imei);

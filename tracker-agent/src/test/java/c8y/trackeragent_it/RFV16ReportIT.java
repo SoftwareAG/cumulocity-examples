@@ -14,7 +14,7 @@ import com.cumulocity.sdk.client.devicecontrol.DeviceControlApi;
 import c8y.Position;
 import c8y.RFV16Config;
 import c8y.SetSosNumber;
-import c8y.trackeragent.TrackerDevice;
+import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.protocol.mapping.TrackingProtocol;
 import c8y.trackeragent.protocol.rfv16.message.RFV16DeviceMessages;
 import c8y.trackeragent.protocol.rfv16.parser.RFV16AlarmType;

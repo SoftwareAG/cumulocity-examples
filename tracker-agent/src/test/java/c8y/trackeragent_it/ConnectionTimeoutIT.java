@@ -5,7 +5,7 @@ import java.net.Socket;
 
 import org.junit.Test;
 
-import c8y.trackeragent.TrackerDevice;
+import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.protocol.mapping.TrackingProtocol;
 import c8y.trackeragent.protocol.telic.TelicDeviceMessages;
 import c8y.trackeragent.utils.Devices;

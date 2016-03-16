@@ -22,7 +22,7 @@ import com.cumulocity.rest.representation.event.EventRepresentation;
 
 import c8y.SpeedMeasurement;
 import c8y.trackeragent.TrackerAgent;
-import c8y.trackeragent.TrackerDevice;
+import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.protocol.coban.CobanDeviceMessages;
 import c8y.trackeragent.protocol.coban.device.CobanDevice;
 import c8y.trackeragent.protocol.coban.message.CobanServerMessages;

@@ -44,6 +44,7 @@ import com.google.common.collect.Iterables;
 
 import c8y.trackeragent.context.OperationContext;
 import c8y.trackeragent.context.ReportContext;
+import c8y.trackeragent.device.ManagedObjectCache;
 import c8y.trackeragent.devicebootstrap.DeviceBootstrapProcessor;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;

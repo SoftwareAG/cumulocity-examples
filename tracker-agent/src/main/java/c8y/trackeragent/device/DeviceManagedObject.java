@@ -18,12 +18,11 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package c8y.trackeragent;
+package c8y.trackeragent.device;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.cumulocity.agent.server.context.DeviceContextService;
 import com.cumulocity.agent.server.repository.InventoryRepository;
 import com.cumulocity.model.Agent;
 import com.cumulocity.model.ID;
@@ -34,27 +33,25 @@ import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.identity.IdentityApi;
 import com.cumulocity.sdk.client.inventory.InventoryApi;
 
+import c8y.trackeragent.TrackerPlatform;
+
 /**
  * A utility class that simplifies handling devices and their associated
  * external IDs.
  */
-public class DeviceManagedObject {
+public abstract class DeviceManagedObject {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
     
     protected IdentityApi registry;
     protected InventoryApi inventory;
-    protected DeviceContextService contextService;
     protected InventoryRepository inventoryRepository;
     protected String tenant;
 
-    public DeviceManagedObject(TrackerPlatform platform, 
-    		DeviceContextService contextService, 
-    		InventoryRepository inventoryRepository) {
+    public DeviceManagedObject(TrackerPlatform platform, InventoryRepository inventoryRepository) {
 		this.registry = platform.getIdentityApi();
         this.inventory = platform.getInventoryApi();
         this.tenant = platform.getTenantId();
-        this.contextService = contextService;
         this.inventoryRepository = inventoryRepository;
     }
 

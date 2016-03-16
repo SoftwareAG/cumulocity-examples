@@ -43,10 +43,10 @@ import com.cumulocity.sdk.client.devicecontrol.OperationFilter;
 import c8y.LogfileRequest;
 import c8y.trackeragent.ConnectionRegistry;
 import c8y.trackeragent.Executor;
-import c8y.trackeragent.ManagedObjectCache;
-import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.TrackerPlatform;
 import c8y.trackeragent.context.OperationContext;
+import c8y.trackeragent.device.ManagedObjectCache;
+import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 
 /**

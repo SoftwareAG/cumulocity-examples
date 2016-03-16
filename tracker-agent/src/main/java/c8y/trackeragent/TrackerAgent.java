@@ -3,13 +3,13 @@ package c8y.trackeragent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.cumulocity.agent.server.context.DeviceContextService;
-import com.cumulocity.agent.server.repository.InventoryRepository;
 import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 
-import c8y.trackeragent.configuration.TrackerConfiguration;
+import c8y.trackeragent.device.ManagedObjectCache;
+import c8y.trackeragent.device.TrackerDevice;
+import c8y.trackeragent.device.TrackerDeviceFactory;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.exception.UnknownTenantException;
@@ -18,21 +18,14 @@ import c8y.trackeragent.utils.TrackerPlatformProvider;
 @Component
 public class TrackerAgent {
     
-    private final TrackerConfiguration configuration;
-    private final DeviceContextService contextService;
-    private final InventoryRepository inventoryRepository;
 	private final DeviceCredentialsRepository credentialsRepository;
 	private final TrackerPlatformProvider platformProvider;
+	private final TrackerDeviceFactory trackerDeviceFactory;
 	
     @Autowired
-    public TrackerAgent(TrackerConfiguration configuration, DeviceContextService contextSerivce,
-            InventoryRepository inventoryRepository,
-            DeviceCredentialsRepository deviceCredentialsRepository, 
-            TrackerPlatformProvider platformProvider) {
-        this.configuration = configuration;
-        this.contextService = contextSerivce;
-        this.inventoryRepository = inventoryRepository;
-		this.credentialsRepository = deviceCredentialsRepository;
+    public TrackerAgent(TrackerDeviceFactory deviceFactory, DeviceCredentialsRepository credentialsRepository,  TrackerPlatformProvider platformProvider) {
+		this.trackerDeviceFactory = deviceFactory;
+		this.credentialsRepository = credentialsRepository;
 		this.platformProvider = platformProvider;
     }
 
@@ -49,7 +42,7 @@ public class TrackerAgent {
         if (device == null) {
             DeviceCredentials deviceCredentials = credentialsRepository.getDeviceCredentials(imei);
 			TrackerPlatform platform = platformProvider.getTenantPlatform(deviceCredentials.getTenant());
-            device = new TrackerDevice(platform, configuration, imei, contextService, inventoryRepository);
+			device = trackerDeviceFactory.create(platform, imei);
             ManagedObjectCache.instance().put(device);
         }
         return device;
