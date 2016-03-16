@@ -3,6 +3,8 @@ package c8y.trackeragent.protocol.telic.parser;
 import static com.cumulocity.model.DateConverter.date2String;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -64,6 +66,9 @@ public class TelicLocationReport implements Parser, TelicFragment {
     
 
     public static final BigDecimal MILEAGE_DIVISOR = new BigDecimal(1000);
+    public static final BigDecimal BATTERY_MULTIPLIER = new BigDecimal(0.00345);
+    public static final BigDecimal BATTERY_INCREMENTOR = new BigDecimal(3.4);
+    public static final MathContext BATTERY_CALCULATION_MODE = new MathContext(3, RoundingMode.HALF_DOWN);
 
     private TrackerAgent trackerAgent;
 
@@ -206,8 +211,17 @@ public class TelicLocationReport implements Parser, TelicFragment {
     }
     
     private BigDecimal getBatteryLevel(ReportContext reportCtx) {
-        return reportCtx.getEntryAsNumber(BATTERY);
+        BigDecimal batteryLevel = reportCtx.getEntryAsNumber(BATTERY);
+		if (batteryLevel == null) {
+			return null;
+		} else {
+			return normalizeBatteryLevel(batteryLevel);
+		}
     }
+
+	public static BigDecimal normalizeBatteryLevel(BigDecimal batteryLevel) {
+		return batteryLevel.multiply(BATTERY_MULTIPLIER, BATTERY_CALCULATION_MODE).add(BATTERY_INCREMENTOR, BATTERY_CALCULATION_MODE);
+	}
     
     private String getDigitalInput(ReportContext reportCtx) {
         return reportCtx.getEntry(DIGITAL_INPUT);
