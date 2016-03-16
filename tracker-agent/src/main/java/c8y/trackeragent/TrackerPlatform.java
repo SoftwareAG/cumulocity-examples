@@ -21,6 +21,7 @@ import com.google.common.cache.CacheBuilder;
 
 import c8y.trackeragent.exception.SDKExceptions;
 
+@Deprecated //use context instead
 public class TrackerPlatform implements Platform {
 
     private final Platform orig;

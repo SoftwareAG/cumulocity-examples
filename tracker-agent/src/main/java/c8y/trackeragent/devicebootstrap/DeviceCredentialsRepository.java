@@ -25,7 +25,9 @@ import c8y.trackeragent.utils.GroupPropertyAccessor.Group;
 @Component
 public class DeviceCredentialsRepository {
 
-    private static final Logger logger = LoggerFactory.getLogger(DeviceCredentialsRepository.class);
+    private static final String TENANT_ENTRY_PREFIX = "tenant-";
+
+	private static final Logger logger = LoggerFactory.getLogger(DeviceCredentialsRepository.class);
 
     private final Map<String, DeviceCredentials> imei2DeviceCredentials = new ConcurrentHashMap<String, DeviceCredentials>();
     private final Map<String, DeviceCredentials> tenant2AgentCredentials = new ConcurrentHashMap<String, DeviceCredentials>();
@@ -53,7 +55,7 @@ public class DeviceCredentialsRepository {
 		return tenant2AgentCredentials.containsKey(tenant);
 	}
 
-    public DeviceCredentials getDeviceCredentials(String imei) {
+	public DeviceCredentials getDeviceCredentials(String imei) {
         DeviceCredentials result = imei2DeviceCredentials.get(imei);
         if (result == null) {
             throw UnknownDeviceException.forImei(imei);
@@ -78,8 +80,7 @@ public class DeviceCredentialsRepository {
 		return new ArrayList<DeviceCredentials>(tenant2AgentCredentials.values());
 	}
 
-
-    public void saveDeviceCredentials(DeviceCredentials newCredentials) {
+	public void saveDeviceCredentials(DeviceCredentials newCredentials) {
         synchronized (lock) {
             Group group = asDeviceGroup(newCredentials.getImei(), newCredentials);
             if (!group.isFullyInitialized()) {
@@ -129,7 +130,8 @@ public class DeviceCredentialsRepository {
     }
         
     private DeviceCredentials asAgentCredentials(Group group) {
-    	return DeviceCredentials.forAgent(group.getName(), group.get("user"), group.get("password"));
+    	String tenant = groupNameToTenant(group.getName());
+    	return DeviceCredentials.forAgent(tenant, group.get("user"), group.get("password"));
     }
 
     private Group asDeviceGroup(String imei, DeviceCredentials credentials) {
@@ -139,7 +141,8 @@ public class DeviceCredentialsRepository {
     }
     
     private Group asAgentGroup(String tenant, DeviceCredentials credentials) {
-    	Group group = agentPropertyAccessor.createEmptyGroup(tenant);
+    	String groupName = tenantToGroupName(tenant);
+    	Group group = agentPropertyAccessor.createEmptyGroup(groupName);
     	group.put("user", credentials.getUsername());
     	group.put("password", credentials.getPassword());
     	return group;
@@ -148,4 +151,12 @@ public class DeviceCredentialsRepository {
 	public List<DeviceCredentials> getAllDeviceCredentials(String tenant) {
 		return from(getAllDeviceCredentials()).filter(DeviceCredentials.hasTenant(tenant)).toList();
 	}
+	
+    private static String tenantToGroupName(String tenant) {
+		return TENANT_ENTRY_PREFIX + tenant;
+	}
+    
+    private static String groupNameToTenant(String groupName) {
+    	return groupName.replaceFirst(TENANT_ENTRY_PREFIX, "");
+    }
 }
