@@ -108,6 +108,7 @@ public abstract class TrackerITSupport {
         trackerPlatform = createTrackerPlatform();
         bootstrapPlatform = createBootstrapPlatform();
         restConnector = new RestConnector(trackerPlatform.getPlatformParameters(), new ResponseParser());
+        deleteExistingAgentRequest();
     }
     
     @After
@@ -211,10 +212,18 @@ public abstract class TrackerITSupport {
         }
     }
 
-    protected synchronized void createNewDeviceRequest(String deviceId) {
+    private synchronized void createNewDeviceRequest(String deviceId) {
         NewDeviceRequestRepresentation representation = new NewDeviceRequestRepresentation();
         representation.setId(deviceId);
         restConnector.post(newDeviceRequestsUri(), NEW_DEVICE_REQUEST, representation);
+    }
+    
+    private synchronized void deleteExistingAgentRequest() {
+    	try {
+    		restConnector.delete(newDeviceRequestsUri() + "/" + bootstrapAgentRequestId());
+    	} catch (Exception ex) {
+    		logger.info("OK, there is no legacy device request for tracker agent.");
+    	}
     }
 
     protected String newDeviceRequestsUri() {
@@ -230,16 +239,18 @@ public abstract class TrackerITSupport {
             NewDeviceRequestRepresentation representation = new NewDeviceRequestRepresentation();
             representation.setStatus("ACCEPTED");
             restConnector.put(newDeviceRequestUri(deviceId), NEW_DEVICE_REQUEST, representation);
+            logger.info("Device with id {} accepted.", deviceId);
         } catch (Exception ex) {
-            ex.printStackTrace();
+        	logger.info("Device with id {} not accepted.", deviceId);
         }
     }
     
-    protected void connectNewDeviceRequest(String deviceId) {
+    protected void connectNewDeviceRequest(String deviceId) throws Exception {
     	try {
     		bootstrapPlatform.getDeviceCredentialsApi().pollCredentials(deviceId);
+    		logger.info("Device with id {} connected.", deviceId);
     	} catch (Exception ex) {
-    		
+    		logger.info("Device with id {} not connected.", deviceId);
     	}
     }
 
@@ -248,7 +259,7 @@ public abstract class TrackerITSupport {
     }
     
     private void bootstrapAgent(TrackerMessage deviceMessage) throws UnsupportedEncodingException, Exception, InterruptedException {
-    	String id = "tracker-agent-" + tenant;
+    	String id = bootstrapAgentRequestId();
     	
     	NewDeviceRequestRepresentation newDeviceRequest = new NewDeviceRequestRepresentation();
     	newDeviceRequest.setId(id);
@@ -269,6 +280,10 @@ public abstract class TrackerITSupport {
     	// ACCEPTED status
     	
     }
+
+	private String bootstrapAgentRequestId() {
+		return "tracker-agent-" + tenant;
+	}
     
     protected void bootstrapDevice(String imei, TrackerMessage deviceMessage) throws Exception {
 		if (!deviceCredentialsRepository.hasAgentCredentials(tenant)) {

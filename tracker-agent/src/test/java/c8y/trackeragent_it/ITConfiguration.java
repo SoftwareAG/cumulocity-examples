@@ -24,9 +24,8 @@ import c8y.trackeragent.server.Servers;
 
 @Configuration
 @EnableAutoConfiguration
-@ComponentScan(basePackages = {"c8y.trackeragent"},excludeFilters={
-  @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = Main.class)
-})
+@ComponentScan(basePackages = { "c8y.trackeragent" }, excludeFilters = {
+		@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = Main.class) })
 @Import({RepositoryFeature.class, ContextFeature.class})
 @PropertySource(value = { "file:/etc/tracker-agent/test.properties", 
         "file:/etc/tracker-agent/tracker-agent-server.properties" })
