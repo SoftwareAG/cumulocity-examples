@@ -5,6 +5,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
 
@@ -155,7 +156,7 @@ public class TelicLocationReportTest {
         
         telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
         
-        verify(measurementService).createBatteryLevelMeasurement(new BigDecimal(211), device, TelicDeviceMessages.LOG_TIMESTAMP, "mV");
+        verify(measurementService).createBatteryLevelMeasurement(any(BigDecimal.class), eq(device), eq(TelicDeviceMessages.LOG_TIMESTAMP), eq("mV"));
     }
     
     @Test
@@ -215,5 +216,15 @@ public class TelicLocationReportTest {
         
         verify(device, Mockito.times(1)).chargerConnected(TelicDeviceMessages.LOG_TIMESTAMP);
     }
+    
+    @Test
+	public void shouldNormalizeBatteryValue() throws Exception {
+    	BigDecimal input = new BigDecimal(238);
+    	
+    	BigDecimal output = TelicLocationReport.normalizeBatteryLevel(input);
+    	
+    	assertThat(output).isEqualTo(new BigDecimal(4.22, TelicLocationReport.BATTERY_CALCULATION_MODE));
+		
+	}
     
 }
