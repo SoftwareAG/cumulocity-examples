@@ -76,8 +76,11 @@ public class ConnectedTrackerTest {
     public void setup() throws Exception {
         ConnectionRegistry.instance().remove("imei");
         when(contextService.callWithinContext(any(DeviceContext.class), any(Callable.class))).thenReturn(true);
-        tracker = new ConnectedTracker<Fragment>(GL200Constants.REPORT_SEP, GL200Constants.FIELD_SEP,  
-        		contextService, bootstrapProcessor, credentialsRepository, asList(translator, parser));
+        tracker = new ConnectedTracker<Fragment>(GL200Constants.REPORT_SEP, GL200Constants.FIELD_SEP);
+        tracker.fragments = asList(translator, parser);
+        tracker.contextService = contextService;
+        tracker.credentialsRepository = credentialsRepository;
+        tracker.bootstrapProcessor = bootstrapProcessor;
         tracker.init(client, in);
         tracker.setOut(out);
     }

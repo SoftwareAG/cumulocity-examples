@@ -35,6 +35,7 @@ import java.util.concurrent.Callable;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.cumulocity.agent.server.context.DeviceContext;
 import com.cumulocity.agent.server.context.DeviceContextService;
@@ -45,6 +46,7 @@ import com.google.common.collect.Iterables;
 import c8y.trackeragent.context.OperationContext;
 import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.device.ManagedObjectCache;
+import c8y.trackeragent.device.TrackerDeviceFactory;
 import c8y.trackeragent.devicebootstrap.DeviceBootstrapProcessor;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
@@ -61,33 +63,26 @@ public class ConnectedTracker<F extends Fragment> implements Runnable, Executor 
 
     private final char reportSeparator;
     private final String fieldSeparator;
-    private final List<F> fragments = new ArrayList<F>();
-    private final DeviceContextService contextService;
-    private final DeviceBootstrapProcessor bootstrapService;
     private final Map<String, Object> connectionParams = new HashMap<String, Object>();
-    private final DeviceCredentialsRepository credentialsRepository;
-
     private Socket client;
     private InputStream in;
     private OutputStream out;
     private String imei;
+    
+    @Autowired
+    protected List<F> fragments = new ArrayList<F>();
+    @Autowired
+    protected DeviceContextService contextService;
+    @Autowired
+    protected DeviceBootstrapProcessor bootstrapProcessor;
+    @Autowired
+    protected DeviceCredentialsRepository credentialsRepository;
+    @Autowired
+    protected TrackerDeviceFactory trackerDeviceFactory;
 
-
-    public ConnectedTracker(
-    		// @formatter:off
-    		char reportSeparator, 
-    		String fieldSeparator, 
-            DeviceContextService contextService, 
-            DeviceBootstrapProcessor bootstrapService, 
-            DeviceCredentialsRepository credentialsRepository, 
-            List<F> fragments) {
-    	// @formatter:on
+    public ConnectedTracker(char reportSeparator, String fieldSeparator) {
         this.reportSeparator = reportSeparator;
         this.fieldSeparator = fieldSeparator;
-        this.contextService = contextService;
-		this.bootstrapService = bootstrapService;
-		this.credentialsRepository = credentialsRepository;
-        this.fragments.addAll(fragments);
     }
     
     public void init(Socket client, InputStream in) throws Exception {
@@ -191,7 +186,7 @@ public class ConnectedTracker<F extends Fragment> implements Runnable, Executor 
 				deviceCredentials = credentialsRepository.getDeviceCredentials(imei);
 			} catch (UnknownDeviceException ex) {
 				logger.debug("Device with imei {} not yet bootstraped. Will try bootstrap the device.", imei);
-				deviceCredentials = bootstrapService.tryAccessDeviceCredentials(imei);
+				deviceCredentials = bootstrapProcessor.tryAccessDeviceCredentials(imei);
 				if (deviceCredentials == null) {
 					logger.debug("Device with imei {} not yet available. Will skip the report.", imei);
 					break;
@@ -205,7 +200,7 @@ public class ConnectedTracker<F extends Fragment> implements Runnable, Executor 
             	agentCredentials = credentialsRepository.getAgentCredentials(tenant);
             } catch (UnknownTenantException ex) {
             	logger.debug("Agent for tenant {} not yet bootstraped. Will try bootstrap the agent.", tenant);
-            	agentCredentials = bootstrapService.tryAccessAgentCredentials(tenant);
+            	agentCredentials = bootstrapProcessor.tryAccessAgentCredentials(tenant);
 				if (agentCredentials == null) {
 					logger.debug("Agent for tenant {} not yet available. Will skip the report.", tenant);
 					break;
@@ -216,7 +211,7 @@ public class ConnectedTracker<F extends Fragment> implements Runnable, Executor 
             }
             final ReportContext reportContext = new ReportContext(report, imei, out, connectionParams);
             try {
-                boolean success = contextService.callWithinContext(new DeviceContext(agentCredentials, imei), new Callable<Boolean>() {
+                boolean success = contextService.callWithinContext(new DeviceContext(agentCredentials), new Callable<Boolean>() {
                     @Override
                     public Boolean call() throws Exception {
                         return parser.onParsed(reportContext);

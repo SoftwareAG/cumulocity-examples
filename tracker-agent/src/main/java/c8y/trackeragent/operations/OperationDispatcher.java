@@ -106,6 +106,7 @@ public class OperationDispatcher implements Runnable {
     private void executePendingOps() throws SDKException {
         logger.debug("Querying for pending operations");
         for (OperationRepresentation operation : getOperationsByStatus(OperationStatus.PENDING)) {
+        	// TODO lest enter the context here 
         	GId deviceId = operation.getDeviceId();
         	TrackerDevice device = ManagedObjectCache.instance().get(deviceId);
         	if (device == null) {
