@@ -30,8 +30,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
-import com.cumulocity.agent.server.context.DeviceContext;
-import com.cumulocity.agent.server.context.DeviceContextService;
 import com.cumulocity.agent.server.logging.LoggingService;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.model.operation.OperationStatus;
@@ -48,6 +46,7 @@ import c8y.trackeragent.context.OperationContext;
 import c8y.trackeragent.device.ManagedObjectCache;
 import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
+import c8y.trackeragent.service.TrackerDeviceContextService;
 
 /**
  * Polls the platform for pending operations, executes the operations and
@@ -64,14 +63,14 @@ public class OperationDispatcher implements Runnable {
     private static final long POLLING_INTERVAL = 10;
     
     private final LoggingService loggingService;
-    private final DeviceContextService contextService;
+    private final TrackerDeviceContextService contextService;
     private final DeviceCredentials tenantCredentials;
     private final TrackerPlatform platform;
     private volatile ScheduledFuture<?> self;
 
 
     public OperationDispatcher(TrackerPlatform tenantPlatform, DeviceCredentials tenantCredentials, 
-    		LoggingService loggingService, DeviceContextService contextService) throws SDKException {
+    		LoggingService loggingService, TrackerDeviceContextService contextService) throws SDKException {
         this.platform = tenantPlatform;
 		this.tenantCredentials = tenantCredentials;
         this.loggingService = loggingService;
@@ -79,7 +78,7 @@ public class OperationDispatcher implements Runnable {
         finishExecutingOps();
     }
 
-    private void finishExecutingOps() throws SDKException {
+    public void finishExecutingOps() throws SDKException {
         logger.debug("Cancelling hanging operations");
         try {
             for (OperationRepresentation operation : getOperationsByStatus(OperationStatus.EXECUTING)) {
@@ -95,7 +94,7 @@ public class OperationDispatcher implements Runnable {
     public void run() {
         logger.debug("Executing queued operations");
         try {
-            contextService.enterContext(new DeviceContext(tenantCredentials));
+            contextService.enterContext(tenantCredentials.getTenant());
             executePendingOps();
             contextService.leaveContext();
         } catch (Exception x) {
@@ -113,30 +112,39 @@ public class OperationDispatcher implements Runnable {
         		logger.debug("Ignore operation with ID {} -> device with id {} hasn't been identified yet", operation.getId(), deviceId);
         		continue; // Device hasn't been identified yet
         	}
-            logger.info("Received operation with ID: {}", operation.getId());
-            LogfileRequest logfileRequest = operation.get(LogfileRequest.class);
-            if (logfileRequest != null) {
-                logger.info("Found AgentLogRequest operation");
-                String user = logfileRequest.getDeviceUser();
-				if (StringUtils.isEmpty(user)) {
-                    ManagedObjectRepresentation deviceObj = device.getManagedObject();
-                    logfileRequest.setDeviceUser(deviceObj.getOwner());
-                    operation.set(logfileRequest, LogfileRequest.class);
-                }
-                loggingService.readLog(operation);
-            }
-            Executor exec = ConnectionRegistry.instance().get(device.getImei());
-            if (exec != null) {
-                // Device is currently connected, execute on device
-                executeOperation(exec, device.getImei(), operation);
-                if (OperationStatus.FAILED.toString().equals(operation.getStatus())) {
-                    // Connection error, remove device
-                    ConnectionRegistry.instance().remove(device.getImei());
-                }
-            } else {
-                logger.info("Ignore operation with ID {} -> device is currently not connected to agent", operation.getId());
-            }
+        	contextService.enterContext(tenantCredentials.getTenant(), device.getImei());
+        	try {
+        		executePendingOp(operation, device);
+        	} finally {
+        		contextService.leaveContext();
+        	}
         }
+    }
+    
+    private void executePendingOp(OperationRepresentation operation, TrackerDevice device) {
+        logger.info("Received operation with ID: {}", operation.getId());
+        LogfileRequest logfileRequest = operation.get(LogfileRequest.class);
+        if (logfileRequest != null) {
+            logger.info("Found AgentLogRequest operation");
+            String user = logfileRequest.getDeviceUser();
+			if (StringUtils.isEmpty(user)) {
+                ManagedObjectRepresentation deviceObj = device.getManagedObject();
+                logfileRequest.setDeviceUser(deviceObj.getOwner());
+                operation.set(logfileRequest, LogfileRequest.class);
+            }
+            loggingService.readLog(operation);
+        }
+        Executor exec = ConnectionRegistry.instance().get(device.getImei());
+        if (exec != null) {
+            // Device is currently connected, execute on device
+            executeOperation(exec, device.getImei(), operation);
+            if (OperationStatus.FAILED.toString().equals(operation.getStatus())) {
+                // Connection error, remove device
+                ConnectionRegistry.instance().remove(device.getImei());
+            }
+        } else {
+            logger.info("Ignore operation with ID {} -> device is currently not connected to agent", operation.getId());
+        }    	
     }
 
     private void executeOperation(Executor exec, String imei, OperationRepresentation operation) throws SDKException {

@@ -39,11 +39,15 @@ public class TrackerDeviceFactory {
 		this.inventory = inventory;
 	}
 
-
-	public TrackerDevice create(String tenant, String imei) {
-		 TrackerDevice result = new TrackerDevice(tenant, imei, configuration, inventoryRepository, events, alarms, measurements, deviceControl, registry, inventory);
-		 result.init();
-		 return result;
+	/**
+	 * TODO instead of device.init() - execute mo preparation here.
+	 */
+	public TrackerDevice newTrackerDevice(String tenant, String imei) {
+		TrackerDevice device = new TrackerDevice(tenant, imei, configuration, inventoryRepository, events, alarms, measurements, deviceControl, registry, inventory);
+		device.init();
+		return device;
 	}
+    
+    
 
 }

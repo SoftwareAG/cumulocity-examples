@@ -8,11 +8,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.cumulocity.agent.server.context.DeviceContextService;
 import com.cumulocity.agent.server.logging.LoggingService;
 
 import c8y.trackeragent.TrackerPlatform;
 import c8y.trackeragent.operations.OperationDispatcher;
+import c8y.trackeragent.service.TrackerDeviceContextService;
 import c8y.trackeragent.utils.TrackerPlatformProvider;
 
 @Component
@@ -21,7 +21,7 @@ public class TenantBinder {
     private static Logger logger = LoggerFactory.getLogger(TenantBinder.class);
 
     private final DeviceCredentialsRepository deviceCredentialsRepository;
-    private final DeviceContextService contextService;
+    private final TrackerDeviceContextService contextService;
     private final TrackerPlatformProvider platformProvider;
     private final LoggingService loggingService;
 	private final ScheduledExecutorService operationsExecutor;
@@ -30,7 +30,7 @@ public class TenantBinder {
 
     @Autowired
     public TenantBinder(
-            DeviceContextService contextService, 
+    		TrackerDeviceContextService contextService, 
             DeviceCredentialsRepository deviceCredentialsRepository, 
             TrackerPlatformProvider platformProvider, 
             LoggingService loggingService) {

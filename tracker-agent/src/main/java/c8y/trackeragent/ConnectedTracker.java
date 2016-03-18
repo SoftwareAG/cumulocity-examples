@@ -30,15 +30,12 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.cumulocity.agent.server.context.DeviceContext;
-import com.cumulocity.agent.server.context.DeviceContextService;
 import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.sdk.client.SDKException;
 import com.google.common.collect.Iterables;
@@ -46,12 +43,12 @@ import com.google.common.collect.Iterables;
 import c8y.trackeragent.context.OperationContext;
 import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.device.ManagedObjectCache;
-import c8y.trackeragent.device.TrackerDeviceFactory;
 import c8y.trackeragent.devicebootstrap.DeviceBootstrapProcessor;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.exception.UnknownDeviceException;
 import c8y.trackeragent.exception.UnknownTenantException;
+import c8y.trackeragent.service.TrackerDeviceContextService;
 
 /**
  * Performs the communication with a connected device. Accepts reports from the
@@ -72,15 +69,24 @@ public class ConnectedTracker<F extends Fragment> implements Runnable, Executor 
     @Autowired
     protected List<F> fragments = new ArrayList<F>();
     @Autowired
-    protected DeviceContextService contextService;
-    @Autowired
     protected DeviceBootstrapProcessor bootstrapProcessor;
     @Autowired
     protected DeviceCredentialsRepository credentialsRepository;
     @Autowired
-    protected TrackerDeviceFactory trackerDeviceFactory;
+    protected TrackerDeviceContextService contextService;
+    
+    ConnectedTracker(char reportSeparator, String fieldSeparator, List<F> fragments,
+			DeviceBootstrapProcessor bootstrapProcessor, DeviceCredentialsRepository credentialsRepository, 
+			TrackerDeviceContextService contextService) {
+		this.reportSeparator = reportSeparator;
+		this.fieldSeparator = fieldSeparator;
+		this.fragments = fragments;
+		this.bootstrapProcessor = bootstrapProcessor;
+		this.credentialsRepository = credentialsRepository;
+		this.contextService = contextService;
+	}
 
-    public ConnectedTracker(char reportSeparator, String fieldSeparator) {
+	public ConnectedTracker(char reportSeparator, String fieldSeparator) {
         this.reportSeparator = reportSeparator;
         this.fieldSeparator = fieldSeparator;
     }
@@ -211,20 +217,16 @@ public class ConnectedTracker<F extends Fragment> implements Runnable, Executor 
             }
             final ReportContext reportContext = new ReportContext(report, imei, out, connectionParams);
             try {
-                boolean success = contextService.callWithinContext(new DeviceContext(agentCredentials), new Callable<Boolean>() {
-                    @Override
-                    public Boolean call() throws Exception {
-                        return parser.onParsed(reportContext);
-                    }
-                });
-                if (success) {
-                    this.imei = imei;
-                    ConnectionRegistry.instance().put(imei, this);
-                }
-
+            	contextService.enterContext(tenant, imei);
+            	if (parser.onParsed(reportContext)) {
+            		this.imei = imei;
+            		ConnectionRegistry.instance().put(imei, this);
+            	}
             } catch (Exception e) {
                 logger.error("Error on parsing request", e);
-            }
+            } finally {
+				 contextService.leaveContext();
+			}
         }
         logger.debug("Finished processing report");
     }

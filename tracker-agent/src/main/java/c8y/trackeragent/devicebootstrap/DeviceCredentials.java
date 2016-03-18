@@ -1,5 +1,6 @@
 package c8y.trackeragent.devicebootstrap;
 
+import com.cumulocity.model.idtype.GId;
 import com.google.common.base.Predicate;
 
 public class DeviceCredentials extends com.cumulocity.agent.server.context.DeviceCredentials {
@@ -7,20 +8,24 @@ public class DeviceCredentials extends com.cumulocity.agent.server.context.Devic
 	private String imei;
 	
 	public static DeviceCredentials forDevice(String imei, String tenant) {
-		return new DeviceCredentials(tenant, null, null, imei);
+		return new DeviceCredentials(tenant, null, null, imei, null);
 	}
 	
 	public static DeviceCredentials forAgent(String tenant, String username, String password) {
-		return new DeviceCredentials(tenant, username, password, null);
+		return new DeviceCredentials(tenant, username, password, null, null);
 	}
 	
-    private DeviceCredentials(String tenant, String username, String password, String imei) {
-        super(tenant, username, password, null, null);
+	public static DeviceCredentials forAgent(String tenant, String username, String password, GId deviceId) {
+		return new DeviceCredentials(tenant, username, password, null, deviceId);
+	}
+	
+    private DeviceCredentials(String tenant, String username, String password, String imei, GId deviceId) {
+        super(tenant, username, password, null, deviceId);
         this.imei = imei;
     }
 
     public DeviceCredentials duplicate() {
-        return new DeviceCredentials(super.getTenant(), super.getUsername(), super.getPassword(), imei);
+        return new DeviceCredentials(super.getTenant(), super.getUsername(), super.getPassword(), imei, super.getDeviceId());
     }
 
     public String getImei() {

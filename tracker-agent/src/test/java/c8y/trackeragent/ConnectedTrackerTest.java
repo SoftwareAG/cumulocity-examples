@@ -36,14 +36,11 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.Charset;
-import java.util.concurrent.Callable;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.cumulocity.agent.server.context.DeviceContext;
-import com.cumulocity.agent.server.context.DeviceContextService;
 import com.cumulocity.sdk.client.SDKException;
 
 import c8y.trackeragent.context.OperationContext;
@@ -54,6 +51,7 @@ import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.exception.UnknownDeviceException;
 import c8y.trackeragent.exception.UnknownTenantException;
 import c8y.trackeragent.protocol.gl200.GL200Constants;
+import c8y.trackeragent.service.TrackerDeviceContextService;
 
 public class ConnectedTrackerTest {
     
@@ -61,7 +59,7 @@ public class ConnectedTrackerTest {
     public static final String REPORT2 = "field3|field4";
     private static final Charset CHARSET = Charset.forName("US-ASCII");
 
-    private DeviceContextService contextService = mock(DeviceContextService.class);
+    private TrackerDeviceContextService contextService = mock(TrackerDeviceContextService.class);
     private Socket client = mock(Socket.class);
     private BufferedInputStream in = mock(BufferedInputStream.class);
     private OutputStream out = mock(OutputStream.class);
@@ -71,16 +69,16 @@ public class ConnectedTrackerTest {
     private DeviceCredentialsRepository credentialsRepository = mock(DeviceCredentialsRepository.class);
     private ConnectedTracker<Fragment> tracker;
 
-    @SuppressWarnings("unchecked")
     @Before
     public void setup() throws Exception {
         ConnectionRegistry.instance().remove("imei");
-        when(contextService.callWithinContext(any(DeviceContext.class), any(Callable.class))).thenReturn(true);
-        tracker = new ConnectedTracker<Fragment>(GL200Constants.REPORT_SEP, GL200Constants.FIELD_SEP);
-        tracker.fragments = asList(translator, parser);
-        tracker.contextService = contextService;
-        tracker.credentialsRepository = credentialsRepository;
-        tracker.bootstrapProcessor = bootstrapProcessor;
+        tracker = new ConnectedTracker<Fragment>(
+        		GL200Constants.REPORT_SEP, 
+        		GL200Constants.FIELD_SEP,
+        		asList(translator, parser),
+        		bootstrapProcessor,
+        		credentialsRepository,
+        		contextService);
         tracker.init(client, in);
         tracker.setOut(out);
     }

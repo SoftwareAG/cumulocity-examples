@@ -9,7 +9,7 @@ import com.cumulocity.sdk.client.SDKException;
 
 import c8y.trackeragent.device.ManagedObjectCache;
 import c8y.trackeragent.device.TrackerDevice;
-import c8y.trackeragent.device.TrackerDeviceFactory;
+import c8y.trackeragent.device.TrackerDeviceProvider;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.exception.UnknownTenantException;
@@ -20,33 +20,20 @@ public class TrackerAgent {
     
 	private final DeviceCredentialsRepository credentialsRepository;
 	private final TrackerPlatformProvider platformProvider;
-	private final TrackerDeviceFactory trackerDeviceFactory;
+	private final TrackerDeviceProvider trackerDeviceProvider;
 	
     @Autowired
-    public TrackerAgent(TrackerDeviceFactory deviceFactory, DeviceCredentialsRepository credentialsRepository,  TrackerPlatformProvider platformProvider) {
-		this.trackerDeviceFactory = deviceFactory;
+    public TrackerAgent(TrackerDeviceProvider trackerDeviceProvider, DeviceCredentialsRepository credentialsRepository,  TrackerPlatformProvider platformProvider) {
+		this.trackerDeviceProvider = trackerDeviceProvider;
 		this.credentialsRepository = credentialsRepository;
 		this.platformProvider = platformProvider;
     }
 
     public TrackerDevice getOrCreateTrackerDevice(String imei) throws SDKException {
-        TrackerDevice device = ManagedObjectCache.instance().get(imei);
-        if (device == null) {
-            return doGetOrCreateTrackerDevice(imei);
-        }
-        return device;
+    	DeviceCredentials deviceCredentials = credentialsRepository.getDeviceCredentials(imei);
+    	return trackerDeviceProvider.getOrCreate(deviceCredentials.getTenant(), imei);
     }
     
-    private synchronized TrackerDevice doGetOrCreateTrackerDevice(String imei) throws SDKException {
-        TrackerDevice device = ManagedObjectCache.instance().get(imei);
-        if (device == null) {
-            DeviceCredentials deviceCredentials = credentialsRepository.getDeviceCredentials(imei);
-			device = trackerDeviceFactory.create(deviceCredentials.getTenant(), imei);
-            ManagedObjectCache.instance().put(device);
-        }
-        return device;
-    }
-
     public void finish(String deviceImei, OperationRepresentation operation) throws UnknownTenantException {
         operation.setStatus(OperationStatus.SUCCESSFUL.toString());
         getPlatform(deviceImei).getDeviceControlApi().update(operation);

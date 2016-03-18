@@ -146,6 +146,7 @@ public class TrackerDevice {
     }
 
 	public void init() {
+		logger.info("Init new tracker device for imei: {]", imei);
 		createMo();
         setupTemplates(gid);
 	}
