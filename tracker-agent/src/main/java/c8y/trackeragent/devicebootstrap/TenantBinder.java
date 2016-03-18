@@ -8,23 +8,19 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.cumulocity.agent.server.logging.LoggingService;
-
-import c8y.trackeragent.TrackerPlatform;
+import c8y.trackeragent.operations.OperationsHelper;
 import c8y.trackeragent.operations.OperationDispatcher;
 import c8y.trackeragent.service.TrackerDeviceContextService;
-import c8y.trackeragent.utils.TrackerPlatformProvider;
 
 @Component
 public class TenantBinder {
     
     private static Logger logger = LoggerFactory.getLogger(TenantBinder.class);
 
-    private final DeviceCredentialsRepository deviceCredentialsRepository;
+    private final DeviceCredentialsRepository credentialsRepository;
     private final TrackerDeviceContextService contextService;
-    private final TrackerPlatformProvider platformProvider;
-    private final LoggingService loggingService;
 	private final ScheduledExecutorService operationsExecutor;
+	private final OperationsHelper operationHelper;
     
     private static final int OPERATIONS_THREAD_POOL_SIZE = 10;
 
@@ -32,17 +28,15 @@ public class TenantBinder {
     public TenantBinder(
     		TrackerDeviceContextService contextService, 
             DeviceCredentialsRepository deviceCredentialsRepository, 
-            TrackerPlatformProvider platformProvider, 
-            LoggingService loggingService) {
-        this.deviceCredentialsRepository = deviceCredentialsRepository;
+            OperationsHelper operationHelper) {
+        this.credentialsRepository = deviceCredentialsRepository;
         this.contextService = contextService;
-		this.platformProvider = platformProvider;
-		this.loggingService = loggingService;
+		this.operationHelper = operationHelper;
 		this.operationsExecutor = Executors.newScheduledThreadPool(OPERATIONS_THREAD_POOL_SIZE);
     }
     
     public void init() {
-        for (DeviceCredentials deviceCredentials : deviceCredentialsRepository.getAllAgentCredentials()) {
+        for (DeviceCredentials deviceCredentials : credentialsRepository.getAllAgentCredentials()) {
             try {
                 logger.debug("bind IMEI {}", deviceCredentials.getTenant());
                 bind(deviceCredentials.getTenant());
@@ -53,16 +47,20 @@ public class TenantBinder {
     }
     
     public void bind(final String tenant) {
-    	final DeviceCredentials credentials = deviceCredentialsRepository.getAgentCredentials(tenant);
+    	final DeviceCredentials credentials = credentialsRepository.getAgentCredentials(tenant);
     	logger.info("Bind new tenant " + tenant);
     	startPollerFor(credentials);
     	logger.info("Tenant " + tenant + " bound successfully.");
     }
     
     public void startPollerFor(DeviceCredentials tenantCredentials) {
-        TrackerPlatform tenantPlatform = platformProvider.getTenantPlatform(tenantCredentials.getTenant());
-        // Could be replace by device control notifications
-        OperationDispatcher task = new OperationDispatcher(tenantPlatform, tenantCredentials, loggingService, contextService);
+        contextService.enterContext(tenantCredentials.getTenant());
+        try {
+        	operationHelper.finishExecutingOps();
+        } finally {
+        	contextService.leaveContext();
+        }
+        OperationDispatcher task = new OperationDispatcher(tenantCredentials, contextService, operationHelper);
         task.startPolling(operationsExecutor);
         logger.info("Started operation polling for tenant {}.", tenantCredentials);
     }

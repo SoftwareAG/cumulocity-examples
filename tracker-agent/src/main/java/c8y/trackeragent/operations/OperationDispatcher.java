@@ -28,21 +28,12 @@ import java.util.concurrent.ScheduledFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
 
-import com.cumulocity.agent.server.logging.LoggingService;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.model.operation.OperationStatus;
-import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
-import com.cumulocity.sdk.client.devicecontrol.OperationFilter;
 
-import c8y.LogfileRequest;
-import c8y.trackeragent.ConnectionRegistry;
-import c8y.trackeragent.Executor;
-import c8y.trackeragent.TrackerPlatform;
-import c8y.trackeragent.context.OperationContext;
 import c8y.trackeragent.device.ManagedObjectCache;
 import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
@@ -62,32 +53,21 @@ public class OperationDispatcher implements Runnable {
     private static final long POLLING_DELAY = 10;
     private static final long POLLING_INTERVAL = 10;
     
-    private final LoggingService loggingService;
     private final TrackerDeviceContextService contextService;
     private final DeviceCredentials tenantCredentials;
-    private final TrackerPlatform platform;
+    private final OperationsHelper operationHelper;
     private volatile ScheduledFuture<?> self;
 
 
-    public OperationDispatcher(TrackerPlatform tenantPlatform, DeviceCredentials tenantCredentials, 
-    		LoggingService loggingService, TrackerDeviceContextService contextService) throws SDKException {
-        this.platform = tenantPlatform;
+    public OperationDispatcher(DeviceCredentials tenantCredentials,  
+    		TrackerDeviceContextService contextService, OperationsHelper operationHelper) throws SDKException {
 		this.tenantCredentials = tenantCredentials;
-        this.loggingService = loggingService;
         this.contextService = contextService;
-        finishExecutingOps();
+		this.operationHelper = operationHelper;
     }
-
-    public void finishExecutingOps() throws SDKException {
-        logger.debug("Cancelling hanging operations");
-        try {
-            for (OperationRepresentation operation : getOperationsByStatus(OperationStatus.EXECUTING)) {
-                operation.setStatus(OperationStatus.FAILED.toString());
-                platform.getDeviceControlApi().update(operation);
-            }
-        } catch (Exception e) {
-            logger.error("Error while finishing executing operations", e);
-        }
+    
+    public void startPolling(ScheduledExecutorService operationsExecutor) {
+        self = operationsExecutor.scheduleWithFixedDelay(this, POLLING_DELAY, POLLING_INTERVAL, SECONDS);
     }
 
     @Override
@@ -114,61 +94,17 @@ public class OperationDispatcher implements Runnable {
         	}
         	contextService.enterContext(tenantCredentials.getTenant(), device.getImei());
         	try {
-        		executePendingOp(operation, device);
+        		operationHelper.executePendingOp(operation, device);
         	} finally {
         		contextService.leaveContext();
         	}
         }
     }
     
-    private void executePendingOp(OperationRepresentation operation, TrackerDevice device) {
-        logger.info("Received operation with ID: {}", operation.getId());
-        LogfileRequest logfileRequest = operation.get(LogfileRequest.class);
-        if (logfileRequest != null) {
-            logger.info("Found AgentLogRequest operation");
-            String user = logfileRequest.getDeviceUser();
-			if (StringUtils.isEmpty(user)) {
-                ManagedObjectRepresentation deviceObj = device.getManagedObject();
-                logfileRequest.setDeviceUser(deviceObj.getOwner());
-                operation.set(logfileRequest, LogfileRequest.class);
-            }
-            loggingService.readLog(operation);
-        }
-        Executor exec = ConnectionRegistry.instance().get(device.getImei());
-        if (exec != null) {
-            // Device is currently connected, execute on device
-            executeOperation(exec, device.getImei(), operation);
-            if (OperationStatus.FAILED.toString().equals(operation.getStatus())) {
-                // Connection error, remove device
-                ConnectionRegistry.instance().remove(device.getImei());
-            }
-        } else {
-            logger.info("Ignore operation with ID {} -> device is currently not connected to agent", operation.getId());
-        }    	
-    }
-
-    private void executeOperation(Executor exec, String imei, OperationRepresentation operation) throws SDKException {
-        logger.info("Executing operation with ID: {}", operation.getId());
-        operation.setStatus(OperationStatus.EXECUTING.toString());
-        platform.getDeviceControlApi().update(operation);
-        OperationContext operationContext = new OperationContext(operation, imei, exec.getConnectionParams());
-        
-        try {
-            exec.execute(operationContext);
-        } catch (Exception x) {
-            String msg = "Error during communication with device " + operation.getDeviceId();
-            logger.warn(msg, x);
-            operation.setStatus(OperationStatus.FAILED.toString());
-            operation.setFailureReason(msg + x.getMessage());
-        }
-        platform.getDeviceControlApi().update(operation);
-    }
-
     private Iterable<OperationRepresentation> getOperationsByStatus(OperationStatus status) throws SDKException {
-        OperationFilter opsFilter = new OperationFilter().byStatus(status);
         Iterable<OperationRepresentation> operationsIterable = Collections.emptyList();
         try {
-            operationsIterable = platform.getDeviceControlApi().getOperationsByFilter(opsFilter).get().allPages();
+            operationsIterable = operationHelper.getOperationsByStatus(status);
         } catch (SDKException e) {
             if (hasIncorrectStatus(e) && self != null) {
                 self.cancel(false);
@@ -182,7 +118,4 @@ public class OperationDispatcher implements Runnable {
         return e.getHttpStatus() == 404 || e.getHttpStatus() == 401;
     }
 
-    public void startPolling(ScheduledExecutorService operationsExecutor) {
-        self = operationsExecutor.scheduleWithFixedDelay(this, POLLING_DELAY, POLLING_INTERVAL, SECONDS);
-    }
 }

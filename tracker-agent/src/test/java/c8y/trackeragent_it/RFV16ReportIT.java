@@ -67,7 +67,7 @@ public class RFV16ReportIT extends TrackerITSupport {
         operation.set(new SetSosNumber("112"));
         
         deviceControlApi.create(operation);
-        Thread.sleep(12000);
+        Thread.sleep(15000);
         
         TrackerDevice trackerDevice = getTrackerDevice(imei);
         RFV16Config rfv16Config = trackerDevice.getRFV16Config();
