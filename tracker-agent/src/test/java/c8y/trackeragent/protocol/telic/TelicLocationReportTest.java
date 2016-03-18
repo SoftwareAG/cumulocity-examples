@@ -156,7 +156,7 @@ public class TelicLocationReportTest {
         
         telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
         
-        verify(measurementService).createBatteryLevelMeasurement(any(BigDecimal.class), eq(device), eq(TelicDeviceMessages.LOG_TIMESTAMP), eq("mV"));
+        verify(measurementService).createBatteryLevelMeasurement(any(BigDecimal.class), eq(device), eq(TelicDeviceMessages.LOG_TIMESTAMP), eq("V"));
     }
     
     @Test
