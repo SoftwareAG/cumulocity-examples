@@ -142,7 +142,7 @@ public class TelicLocationReport implements Parser, TelicFragment {
         }
         BigDecimal batteryLevel = getBatteryLevel(reportCtx);
         if (batteryLevel != null) {
-            measurementService.createBatteryLevelMeasurement(batteryLevel, device, dateTime, "mV");
+            measurementService.createBatteryLevelMeasurement(batteryLevel, device, dateTime, "V");
         }
         return true;
     }
