@@ -111,6 +111,7 @@ public class DeviceCredentialsRepository {
     		deviceProperties.createNewFile();
     	}
         devicePropertyAccessor.refresh();
+        agentPropertyAccessor.refresh();
         imei2DeviceCredentials.clear();
         tenant2AgentCredentials.clear();
         for (Group group : devicePropertyAccessor.getGroups()) {
@@ -120,7 +121,8 @@ public class DeviceCredentialsRepository {
         }
         for (Group group : agentPropertyAccessor.getGroups()) {
         	if (group.isFullyInitialized()) {
-        		tenant2AgentCredentials.put(group.getName(), asAgentCredentials(group));
+        		String tenant = groupNameToTenant(group.getName());
+        		tenant2AgentCredentials.put(tenant, asAgentCredentials(group));
         	}
         }
     }

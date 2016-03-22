@@ -1,5 +1,6 @@
 package c8y.trackeragent.devicebootstrap;
 
+import static java.util.Arrays.asList;
 import static org.fest.assertions.Assertions.assertThat;
 
 import java.io.File;
@@ -20,10 +21,11 @@ public class DeviceCredentialsRepositoryTest {
 	private DeviceCredentialsRepository credentialsRepository;
 	private DeviceCredentials deviceCredentials = DeviceCredentials.forDevice(IMEI, TENANT);
 	private DeviceCredentials agentCredentials = DeviceCredentials.forAgent(TENANT, "john", "secret");
+	private File file;
 	
 	@Before
 	public void init() throws Exception {
-		File file = assureDevicePropertiesFile();
+		file = assureDevicePropertiesFile();
 		credentialsRepository = new DeviceCredentialsRepository(file.getAbsolutePath());
 		credentialsRepository.refresh();
 	}
@@ -32,6 +34,14 @@ public class DeviceCredentialsRepositoryTest {
 		File file = new File("target/device.properties");
 		FileUtils.deleteQuietly(file);
 		return file;
+	}
+	
+	@Test
+	public void findAgentCredentials() throws Exception {
+		FileUtils.writeLines(file, asList("tenant-management.password=secret123", "tenant-management.user=device_tracker-agent-management"));
+		credentialsRepository.refresh();
+		
+		credentialsRepository.getAgentCredentials("management");
 	}
 	
 	@Test
