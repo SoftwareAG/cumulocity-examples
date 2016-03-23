@@ -43,6 +43,8 @@ import com.cumulocity.rest.representation.event.EventRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
+import com.cumulocity.sdk.client.ResponseParser;
+import com.cumulocity.sdk.client.RestConnector;
 import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.alarm.AlarmApi;
 import com.cumulocity.sdk.client.alarm.AlarmFilter;
@@ -116,6 +118,7 @@ public class TrackerDevice extends DeviceManagedObject {
     private MeasurementRepresentation gprsSignalMsrmt = new MeasurementRepresentation();
     private SignalStrength gprsSignal = new SignalStrength();
     private TrackerConfiguration trackerConfig;
+    private UpdateIntervalProvider updateIntervalProvider;
 
     public TrackerDevice(TrackerPlatform platform, TrackerConfiguration trackerConfig, GId agentGid, String imei, 
             DeviceContextService contextService, InventoryRepository inventoryRepository, String agentUser, String agentPassword) throws SDKException {
@@ -125,7 +128,7 @@ public class TrackerDevice extends DeviceManagedObject {
         this.alarms = platform.getAlarmApi();
         this.measurements = platform.getMeasurementApi();
         this.deviceControl = platform.getDeviceControlApi();
-
+        this.updateIntervalProvider = new UpdateIntervalProvider(platform);
         this.imei = imei;
         createMo(agentGid);
         setupTemplates(gid);
@@ -496,6 +499,10 @@ public class TrackerDevice extends DeviceManagedObject {
     public Position getLastPosition() {
         EventRepresentation lastEvent = getLastLocationEvent();
         return lastEvent == null ? null : lastEvent.get(Position.class);
+    }
+    
+    public UpdateIntervalProvider getUpdateIntervalProvider() {
+        return updateIntervalProvider;
     }
 
 
