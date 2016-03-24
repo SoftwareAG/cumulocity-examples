@@ -23,6 +23,7 @@ import com.cumulocity.rest.representation.event.EventRepresentation;
 import c8y.SpeedMeasurement;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerDevice;
+import c8y.trackeragent.UpdateIntervalProvider;
 import c8y.trackeragent.protocol.coban.CobanDeviceMessages;
 import c8y.trackeragent.protocol.coban.device.CobanDevice;
 import c8y.trackeragent.protocol.coban.message.CobanServerMessages;
@@ -38,6 +39,7 @@ public abstract class CobanParserTestSupport {
     protected AlarmService alarmService = Mockito.mock(AlarmService.class);
     protected MeasurementService measurementService = Mockito.mock(MeasurementService.class);
     protected ByteArrayOutputStream out = new ByteArrayOutputStream();
+    private UpdateIntervalProvider updateIntervalProvider = mock(UpdateIntervalProvider.class);
     
     @Before
     public void baseInit() {
@@ -46,6 +48,8 @@ public abstract class CobanParserTestSupport {
         when(trackerAgent.getOrCreateTrackerDevice(anyString())).thenReturn(deviceMock);
         when(deviceMock.getGId()).thenReturn(GId.asGId("1001"));
         when(deviceMock.aLocationUpdateEvent()).thenReturn(new EventRepresentation());
+        when(deviceMock.getUpdateIntervalProvider()).thenReturn(updateIntervalProvider);
+        when(updateIntervalProvider.findUpdateInterval()).thenReturn(null);
     }
     
     @After

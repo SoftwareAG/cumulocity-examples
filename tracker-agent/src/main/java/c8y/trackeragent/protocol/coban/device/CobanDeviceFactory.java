@@ -27,7 +27,7 @@ public class CobanDeviceFactory {
         return result;
     }
 
-    static String formatLocationReportInterval(Integer locationReportInterval) {
+    public static String formatLocationReportInterval(Integer locationReportInterval) {
         String unit = "s";
         if (locationReportInterval >= 60) {
             locationReportInterval = locationReportInterval / 60;

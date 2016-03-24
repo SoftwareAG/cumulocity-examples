@@ -79,7 +79,7 @@ public class PositionUpdateRFV16Parser extends RFV16Parser implements Parser {
         // @formatter:on
         device.setPosition(locationEvent.build());
         if (!reportCtx.isConnectionFlagOn(CONNECTION_PARAM_CONTROL_COMMANDS_SENT)) {
-            sendControllCommands(reportCtx);
+            sendControllCommands(device, reportCtx);
         }
     }
 
@@ -111,10 +111,19 @@ public class PositionUpdateRFV16Parser extends RFV16Parser implements Parser {
         }
     }
 
-    private void sendControllCommands(ReportContext reportCtx) {
+    private void sendControllCommands(TrackerDevice device, ReportContext reportCtx) {
         TrackerMessage reportMonitoringCommand = serverMessages.reportMonitoringCommand(reportCtx.getImei(),
-                config.getRfv16LocationReportTimeInterval().toString());
+                getLocationReportInterval(device));
         reportCtx.writeOut(reportMonitoringCommand);
+    }
+
+    private String getLocationReportInterval(TrackerDevice device) {
+        Integer locationReportInterval = device.getUpdateIntervalProvider().findUpdateInterval();
+        if (locationReportInterval == null) {
+            return config.getRfv16LocationReportTimeInterval().toString();
+        } else {
+            return locationReportInterval.toString();
+        }
     }
 
     private boolean isV1Report(ReportContext reportCtx) {

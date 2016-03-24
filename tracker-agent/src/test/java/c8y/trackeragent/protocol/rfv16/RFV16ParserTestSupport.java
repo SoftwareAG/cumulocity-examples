@@ -23,6 +23,7 @@ import com.cumulocity.rest.representation.event.EventRepresentation;
 import c8y.RFV16Config;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerDevice;
+import c8y.trackeragent.UpdateIntervalProvider;
 import c8y.trackeragent.protocol.rfv16.message.RFV16DeviceMessages;
 import c8y.trackeragent.protocol.rfv16.message.RFV16ServerMessages;
 import c8y.trackeragent.protocol.rfv16.parser.RFV16AlarmType;
@@ -42,6 +43,7 @@ public class RFV16ParserTestSupport {
     protected MeasurementService measurementService = mock(MeasurementService.class);
     protected AlarmService alarmService = mock(AlarmService.class);
     protected ByteArrayOutputStream out = new ByteArrayOutputStream();
+    private UpdateIntervalProvider updateIntervalProvider = mock(UpdateIntervalProvider.class);
     
     @Before
     public void baseInit() {
@@ -49,6 +51,8 @@ public class RFV16ParserTestSupport {
         when(trackerAgent.getOrCreateTrackerDevice(Mockito.anyString())).thenReturn(deviceMock);
         when(deviceMock.getGId()).thenReturn(GId.asGId("1001"));
         when(deviceMock.aLocationUpdateEvent()).thenReturn(new EventRepresentation());
+        when(deviceMock.getUpdateIntervalProvider()).thenReturn(updateIntervalProvider);
+        when(updateIntervalProvider.findUpdateInterval()).thenReturn(null);
     }
     
     @After
