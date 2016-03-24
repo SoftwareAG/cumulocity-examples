@@ -2,9 +2,6 @@ package c8y.trackeragent;
 
 import static com.cumulocity.rest.representation.tenant.OptionMediaType.OPTION;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-
 import org.apache.commons.httpclient.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +15,7 @@ public class UpdateIntervalProvider {
     
     private Logger logger = LoggerFactory.getLogger(UpdateIntervalProvider.class);
 
-    private final static String optionEndpoint = "/system/options/device/update.interval";
+    private final static String optionEndpoint = "/tenant/system/options/device/update.interval";
     private String path;
     private RestConnector connector;
 
@@ -28,12 +25,8 @@ public class UpdateIntervalProvider {
             throw new RuntimeException("Host cannot be null for options repository.");
         }
         
-        try {
-            this.path = URLEncoder.encode(host + optionEndpoint, "UTF-8");
-            logger.info("Will use the following path to get update interval option: {}", path);
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException("Failed to encode options url.");
-        }
+        this.path = host + optionEndpoint;
+        logger.info("Will use the following path to get update interval option: {}", path);
         connector = new RestConnector(platform.getPlatformParameters(), new ResponseParser());
     }
     
@@ -46,6 +39,10 @@ public class UpdateIntervalProvider {
         } catch (SDKException ex) {
             if (ex.getHttpStatus() == HttpStatus.SC_NOT_FOUND) {
                 logger.info("Interval option not found.");
+                return null;
+            } else if (ex.getHttpStatus() == HttpStatus.SC_UNAUTHORIZED 
+                    || ex.getHttpStatus() == HttpStatus.SC_FORBIDDEN) {
+                logger.info("Access to tenant options forbidden. User does not have access...");
                 return null;
             } else {
                 throw ex;
