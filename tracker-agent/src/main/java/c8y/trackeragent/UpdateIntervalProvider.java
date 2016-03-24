@@ -15,7 +15,7 @@ public class UpdateIntervalProvider {
     
     private Logger logger = LoggerFactory.getLogger(UpdateIntervalProvider.class);
 
-    private final static String optionEndpoint = "/tenant/system/options/device/update.interval";
+    private final static String optionEndpoint = "tenant/system/options/device/update.interval";
     private String path;
     private RestConnector connector;
 
