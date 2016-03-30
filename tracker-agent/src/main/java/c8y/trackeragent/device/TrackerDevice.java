@@ -614,7 +614,7 @@ public class TrackerDevice {
 	    return tryGetBinding(imeiAsId(imei)) != null;
 	}
 
-    protected static ID imeiAsId(String imei) {
+    public static ID imeiAsId(String imei) {
         ID extId = new ID(imei);
         extId.setType(TrackerDevice.XTID_TYPE);
         return extId;

@@ -1,10 +1,10 @@
-package c8y.migration;
+package c8y.migration.model;
 
-public class DeviceMigrationRequest {
+public class DeviceMigrationResponse {
 
 	private final String imei;
 
-	public DeviceMigrationRequest(String imei) {
+	public DeviceMigrationResponse(String imei) {
 		this.imei = imei;
 	}
 
@@ -16,5 +16,5 @@ public class DeviceMigrationRequest {
 	public String toString() {
 		return imei;
 	}
-
+	
 }

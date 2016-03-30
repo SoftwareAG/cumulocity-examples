@@ -31,7 +31,7 @@ import com.cumulocity.agent.server.feature.RepositoryFeature;
  */
 @Configuration
 @EnableAutoConfiguration
-@ComponentScan("c8y.migration")
+@ComponentScan(value = { "c8y.migration"})
 public class MigrationApp {
 	
     private static final Logger logger = LoggerFactory.getLogger(MigrationApp.class);
@@ -53,5 +53,5 @@ public class MigrationApp {
             .useWebEnvironment(false);
         //@formatter:on
     }
-
+    
 }

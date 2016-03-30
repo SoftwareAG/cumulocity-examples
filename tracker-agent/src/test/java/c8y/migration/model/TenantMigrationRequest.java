@@ -1,4 +1,4 @@
-package c8y.migration;
+package c8y.migration.model;
 
 import java.util.ArrayList;
 import java.util.List;
