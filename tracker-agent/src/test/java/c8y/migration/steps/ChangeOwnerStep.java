@@ -64,8 +64,8 @@ public class ChangeOwnerStep extends MigrationStep {
 
 	private void changeOwner(ID externalId, String newOwner, Platform platform) {
 		GId globalId = asGlobalId(externalId, platform);
-		ManagedObjectRepresentation agent = inventoryRepository.findById(globalId);
-		logger.info("change owner from {} to {}", agent.getOwner(), newOwner);
+		ManagedObjectRepresentation mo = inventoryRepository.findById(globalId);
+		logger.info("change owner from {} to {}", mo.getOwner(), newOwner);
 		ManagedObjectRepresentation agentUpdate = new ManagedObjectRepresentation();
 		agentUpdate.setId(globalId);
 		agentUpdate.setOwner(newOwner);
@@ -80,10 +80,9 @@ public class ChangeOwnerStep extends MigrationStep {
 
 	public GId asGlobalId(ID externalId, Platform platform) {
 		logger.info("Will try get global id for external id {}", externalId);
-		ID agentExternalId = TrackerDevice.getAgentExternalId();
-		ExternalIDRepresentation externalIdRep = platform.getIdentityApi().getExternalId(agentExternalId);
+		ExternalIDRepresentation externalIdRep = platform.getIdentityApi().getExternalId(externalId);
 		if (externalIdRep == null) {
-			throw new MigrationException("There is no id mapping for " + agentExternalId);
+			throw new MigrationException("There is no id mapping for " + externalId);
 		}
 		GId result = externalIdRep.getManagedObject().getId();
 		logger.info("Global id is: {}", result);
