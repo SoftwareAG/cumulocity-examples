@@ -230,7 +230,9 @@ public abstract class TrackerITSupport {
         try {
             NewDeviceRequestRepresentation representation = new NewDeviceRequestRepresentation();
             representation.setStatus("ACCEPTED");
-            restConnector.put(newDeviceRequestUri(deviceId), NEW_DEVICE_REQUEST, representation);
+            String newDeviceRequestUri = newDeviceRequestUri(deviceId);
+            logger.info("Send request to: {}", newDeviceRequestUri);
+			restConnector.put(newDeviceRequestUri, NEW_DEVICE_REQUEST, representation);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -250,9 +252,14 @@ public abstract class TrackerITSupport {
         Thread.sleep(5000);
         // PENDING_ACCEPTANCE status
         
-        logger.info("accept request for imei: {}");
+        logger.info("accept request for imei: {}", imei);
         acceptNewDeviceRequest(imei);
+        logger.info("Request for imei: {} ACCEPTED", imei);
         // ACCEPTED status
+        
+        writeInNewConnection(deviceMessage);
+        Thread.sleep(1000);
+        // Device credentials got
         
         DeviceCredentials credentials = pollCredentials(imei);
         logger.info("Created credentails: {}", credentials);
