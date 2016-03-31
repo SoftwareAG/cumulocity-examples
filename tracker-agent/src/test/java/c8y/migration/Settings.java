@@ -28,7 +28,7 @@ public class Settings {
 	@Value("${C8Y.devicebootstrap.tenant}")
 	private String bootstrapTenant;
 	
-	@Value("${C8Y.tenants:}")
+	@Value("${C8Y.tenants:#{null}}")
 	private List<String> tenants;
 
 
