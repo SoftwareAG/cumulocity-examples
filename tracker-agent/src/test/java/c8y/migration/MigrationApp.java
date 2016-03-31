@@ -25,8 +25,8 @@ import com.cumulocity.agent.server.feature.RepositoryFeature;
 	2. File /etc/tracker-agent-migration/device.properties - device.properties file from target platform
 	
 	Output:
-	1. File /etc/tracker-agent-migration/device_migrated.properties 
-	2. Files /etc/tracker-agent-migration/device_migrated-{tenant}.properties - one per tenant 
+	1. File /etc/tracker-agent-migration/output/device.properties 
+	2. Files /etc/tracker-agent-migration/output/device-{tenant}.properties - one per tenant 
  *
  */
 @Configuration

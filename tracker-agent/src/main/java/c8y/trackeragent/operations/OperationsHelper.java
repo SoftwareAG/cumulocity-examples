@@ -6,7 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import com.cumulocity.agent.server.context.DeviceContextService;
 import com.cumulocity.agent.server.logging.LoggingService;
+import com.cumulocity.agent.server.repository.IdentityRepository;
+import com.cumulocity.model.idtype.GId;
 import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
@@ -27,11 +30,13 @@ public class OperationsHelper {
 	
 	private final DeviceControlApi deviceControlApi;
 	private final LoggingService loggingService;
+	private final IdentityRepository identityRepository;
 	
 	@Autowired
-    public OperationsHelper(DeviceControlApi deviceControlApi, LoggingService loggingService) {
+    public OperationsHelper(DeviceControlApi deviceControlApi, LoggingService loggingService, IdentityRepository identityRepository) {
 		this.deviceControlApi = deviceControlApi;
 		this.loggingService = loggingService;
+		this.identityRepository = identityRepository;
 	}
 
     public void executePendingOp(OperationRepresentation operation, TrackerDevice device) {
@@ -80,7 +85,8 @@ public class OperationsHelper {
     public void finishExecutingOps() throws SDKException {
         logger.debug("Cancelling hanging operations");
         try {
-            for (OperationRepresentation operation : getOperationsByStatus(OperationStatus.EXECUTING)) {
+            for (OperationRepresentation operation : getOperationsByStatusAndAgent(OperationStatus.EXECUTING)) {
+            	logger.debug("Finish operation: {}", operation);
                 operation.setStatus(OperationStatus.FAILED.toString());
                 deviceControlApi.update(operation);
             }
@@ -90,8 +96,9 @@ public class OperationsHelper {
     }
     
 
-    public Iterable<OperationRepresentation> getOperationsByStatus(OperationStatus status) throws SDKException {
-        OperationFilter opsFilter = new OperationFilter().byStatus(status);
+    public Iterable<OperationRepresentation> getOperationsByStatusAndAgent(OperationStatus status) throws SDKException {
+    	GId agentId = identityRepository.find(TrackerDevice.getAgentExternalId());
+        OperationFilter opsFilter = new OperationFilter().byStatus(status).byAgent(agentId.getValue());
         return deviceControlApi.getOperationsByFilter(opsFilter).get().allPages();
     }
 

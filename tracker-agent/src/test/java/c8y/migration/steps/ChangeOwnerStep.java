@@ -27,7 +27,6 @@ import c8y.migration.model.DeviceMigrationResponse;
 import c8y.migration.model.MigrationException;
 import c8y.migration.model.TenantMigrationRequest;
 import c8y.migration.model.TenantMigrationResponse;
-import c8y.trackeragent.device.TrackerDevice;
 
 @Component
 @Order(value = 20)
@@ -48,6 +47,7 @@ public class ChangeOwnerStep extends MigrationStep {
 	public void execute(TenantMigrationRequest req, TenantMigrationResponse response) {
 		String newOwner = response.getAgentOwner().getUsername();
 		List<DeviceMigrationRequest> devices = req.getDevices();
+		// take the user from created agent
 		Platform platform = platform(req.getTenant(), devices.get(0));
 		ID agentExternalId = getAgentExternalId();
 		logger.info("Will change owner for agent {}", agentExternalId);

@@ -104,7 +104,7 @@ public class OperationDispatcher implements Runnable {
     private Iterable<OperationRepresentation> getOperationsByStatus(OperationStatus status) throws SDKException {
         Iterable<OperationRepresentation> operationsIterable = Collections.emptyList();
         try {
-            operationsIterable = operationHelper.getOperationsByStatus(status);
+            operationsIterable = operationHelper.getOperationsByStatusAndAgent(status);
         } catch (SDKException e) {
             if (hasIncorrectStatus(e) && self != null) {
                 self.cancel(false);
