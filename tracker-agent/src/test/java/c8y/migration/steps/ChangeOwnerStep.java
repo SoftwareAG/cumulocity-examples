@@ -16,6 +16,7 @@ import com.cumulocity.agent.server.repository.InventoryRepository;
 import com.cumulocity.model.ID;
 import com.cumulocity.model.authentication.CumulocityCredentials;
 import com.cumulocity.model.idtype.GId;
+import com.cumulocity.rest.representation.devicebootstrap.DeviceCredentialsRepresentation;
 import com.cumulocity.rest.representation.identity.ExternalIDRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.Platform;
@@ -48,14 +49,13 @@ public class ChangeOwnerStep extends MigrationStep {
 		String newOwner = response.getAgentOwner().getUsername();
 		List<DeviceMigrationRequest> devices = req.getDevices();
 		// take the user from created agent
-		Platform platform = platform(req.getTenant(), devices.get(0));
+		Platform platform = platform(req.getTenant(), response.getAgentOwner());
 		ID agentExternalId = getAgentExternalId();
 		logger.info("Will change owner for agent {}", agentExternalId);
 		changeOwner(agentExternalId, newOwner, platform);
 		for (DeviceMigrationRequest device : devices) {
 			ID deviceExternalId = imeiAsId(device.getImei());
 			logger.info("Will change owner for device {}", deviceExternalId);
-			platform = platform(req.getTenant(), device);
 			changeOwner(deviceExternalId, newOwner, platform);
 			DeviceMigrationResponse deviceResponse = new DeviceMigrationResponse(device.getImei());
 			response.getDeviceResponses().add(deviceResponse);
@@ -89,8 +89,8 @@ public class ChangeOwnerStep extends MigrationStep {
 		return result;
 	}
 
-	private Platform platform(String tenant, DeviceMigrationRequest device) {
-		CumulocityCredentials credentials = cumulocityCredentials(device.getUser(), device.getPassword())
+	private Platform platform(String tenant, DeviceCredentialsRepresentation credentialsRep) {
+		CumulocityCredentials credentials = cumulocityCredentials(credentialsRep.getUsername(), credentialsRep.getPassword())
 				.withTenantId(tenant).build();
 		return new PlatformImpl(settings.getC8yHost(), credentials);
 	}
