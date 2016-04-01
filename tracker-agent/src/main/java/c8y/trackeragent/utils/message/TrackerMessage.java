@@ -44,6 +44,11 @@ public class TrackerMessage {
         }
         return this;
     }
+    
+    public TrackerMessage set(int index, String field) {
+    	reports.get(0).set(index, field);
+    	return this;
+    }
 
     private String stripPrefixAndLastReportSep(String text) {
         if (!reportPrefix.isEmpty() && text.startsWith(reportPrefix)) {
@@ -139,6 +144,10 @@ public class TrackerMessage {
 
         void appendField(String field) {
             fields.add(field);
+        }
+        
+        void set(int index, String field) {
+        	fields.set(index, field);
         }
 
         @Override

@@ -21,6 +21,7 @@ import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.protocol.CommonConstants;
+import c8y.trackeragent.protocol.telic.TelicConstants;
 import c8y.trackeragent.protocol.telic.parser.FixType;
 import c8y.trackeragent.protocol.telic.parser.LogCodeType;
 import c8y.trackeragent.protocol.telic.parser.TelicLocationReport;
@@ -110,6 +111,17 @@ public class TelicLocationReportTest {
         verifyReport();
         Object actualFixType = positionCaptor.getValue().getProperty(TelicConstants.FIX_TYPE);
         assertThat(actualFixType).isEqualTo(FixType._3D.getLabel());
+    }
+    
+    @Test
+    public void shouldSendFixTypeInPositionFragmentEvenWhenItsNotStandard() throws Exception {
+    	String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1).set(TelicLocationReport.FIX_TYPE, "100").asArray();
+    	
+    	telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
+    	
+    	verifyReport();
+    	Object actualFixType = positionCaptor.getValue().getProperty(TelicConstants.FIX_TYPE);
+    	assertThat(actualFixType).isEqualTo("100");
     }
     
     @Test

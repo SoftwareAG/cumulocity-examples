@@ -40,29 +40,29 @@ public class TelicLocationReport implements Parser, TelicFragment {
 
     private static Logger logger = LoggerFactory.getLogger(TelicLocationReport.class);
 
-    private static final int LOG_CODE = 0;
+    static final int LOG_CODE = 0;
 
-    private static final int LOG_TIMESTAMP = 1;
+    static final int LOG_TIMESTAMP = 1;
 
-    private static final int GPS_TIMESTAMP = 3;
+    static final int GPS_TIMESTAMP = 3;
 
-    private static final int LONGITUDE = 4;
+    static final int LONGITUDE = 4;
 
-    private static final int LATITUDE = 5;
+    static final int LATITUDE = 5;
 
-    private static final int FIX_TYPE = 6;
+    public static final int FIX_TYPE = 6;
 
-    private static final int SPEED = 7;
+    static final int SPEED = 7;
 
-    private static final int SATELLITES_FOR_CALCULATION = 9;
+    static final int SATELLITES_FOR_CALCULATION = 9;
 
-    private static final int ALTITUDE = 12;
+    static final int ALTITUDE = 12;
     
-    private static final int MILEAGE = 13;
+    static final int MILEAGE = 13;
     
-    private static final int DIGITAL_INPUT = 15;
+    static final int DIGITAL_INPUT = 15;
     
-    private static final int BATTERY = 17;
+    static final int BATTERY = 17;
     
 
     public static final BigDecimal MILEAGE_DIVISOR = new BigDecimal(1000);
@@ -116,9 +116,9 @@ public class TelicLocationReport implements Parser, TelicFragment {
         }
         locationUpdateEvent.setTime(dateTime.toDate());
         position.setProperty(CommonConstants.TRACKING_PROTOCOL, TrackingProtocol.TELIC);
-        FixType fixType = getFixType(reportCtx);
+        String fixType = getFixType(reportCtx);
         if (fixType != null) {
-            position.setProperty(TelicConstants.FIX_TYPE, fixType.getLabel());
+            position.setProperty(TelicConstants.FIX_TYPE, fixType);
         }
         Integer satellitesForCalculation = getSatellitesForCalculation(reportCtx);
         if (satellitesForCalculation != null) {
@@ -188,13 +188,13 @@ public class TelicLocationReport implements Parser, TelicFragment {
         return new BigDecimal(reportCtx.getEntry(ALTITUDE));
     }
 
-    private FixType getFixType(ReportContext reportCtx) {
+    private String getFixType(ReportContext reportCtx) {
         String fixTypeStr = reportCtx.getEntry(FIX_TYPE);
         FixType fixType = FixType.forValue(fixTypeStr);
         if (fixType == null) {
-            logger.warn("Cant establish fix type for value {} in report {}", fixTypeStr, reportCtx);
+        	return fixTypeStr;
         }
-        return fixType;
+        return fixType.getLabel();
     }
 
     private BigDecimal getSpeed(ReportContext reportCtx) {
