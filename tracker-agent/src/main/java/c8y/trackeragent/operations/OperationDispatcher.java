@@ -72,7 +72,7 @@ public class OperationDispatcher implements Runnable {
 
     @Override
     public void run() {
-        logger.debug("Executing queued operations");
+        logger.trace("Executing queued operations");
         try {
             contextService.enterContext(tenantCredentials.getTenant());
             executePendingOps();
@@ -89,7 +89,7 @@ public class OperationDispatcher implements Runnable {
         	GId deviceId = operation.getDeviceId();
         	TrackerDevice device = ManagedObjectCache.instance().get(deviceId);
         	if (device == null) {
-        		logger.debug("Ignore operation with ID {} -> device with id {} hasn't been identified yet", operation.getId(), deviceId);
+        		logger.trace("Ignore operation with ID {} -> device with id {} hasn't been identified yet", operation.getId(), deviceId);
         		continue; // Device hasn't been identified yet
         	}
         	contextService.enterContext(tenantCredentials.getTenant(), device.getImei());
