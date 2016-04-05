@@ -35,7 +35,7 @@ public enum FixType {
                 return fixType;
             }
         }
-        logger.warn("Unexpected FixType value = {}.", value);
+        logger.debug("Unexpected FixType value = {}.", value);
         return null;
     }
 

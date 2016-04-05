@@ -20,6 +20,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,29 +29,27 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import c8y.trackeragent.DeviceManagedObject;
-import c8y.trackeragent.TrackerAgent;
-import c8y.trackeragent.TrackerDevice;
-import c8y.trackeragent.TrackerPlatform;
-import c8y.trackeragent.devicebootstrap.DeviceCredentials;
-import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
-import c8y.trackeragent.exception.UnknownDeviceException;
-import c8y.trackeragent.protocol.mapping.TrackingProtocol;
-import c8y.trackeragent.service.AlarmMappingService;
-import c8y.trackeragent.service.AlarmType;
-import c8y.trackeragent.utils.ConfigUtils;
-import c8y.trackeragent.utils.TrackerConfiguration;
-import c8y.trackeragent.utils.message.TrackerMessage;
-
+import com.cumulocity.agent.server.context.DeviceContext;
 import com.cumulocity.agent.server.context.DeviceContextService;
 import com.cumulocity.agent.server.repository.InventoryRepository;
 import com.cumulocity.model.authentication.CumulocityCredentials;
-import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
 import com.cumulocity.rest.representation.devicebootstrap.NewDeviceRequestRepresentation;
 import com.cumulocity.sdk.client.PlatformImpl;
 import com.cumulocity.sdk.client.ResponseParser;
 import com.cumulocity.sdk.client.RestConnector;
+
+import c8y.trackeragent.TrackerAgent;
+import c8y.trackeragent.TrackerPlatform;
+import c8y.trackeragent.configuration.ConfigUtils;
+import c8y.trackeragent.configuration.TrackerConfiguration;
+import c8y.trackeragent.device.TrackerDevice;
+import c8y.trackeragent.devicebootstrap.DeviceCredentials;
+import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
+import c8y.trackeragent.protocol.mapping.TrackingProtocol;
+import c8y.trackeragent.service.AlarmMappingService;
+import c8y.trackeragent.service.AlarmType;
+import c8y.trackeragent.utils.message.TrackerMessage;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = ITConfiguration.class)
@@ -60,16 +59,15 @@ public abstract class TrackerITSupport {
     
     @Value("${C8Y.tenant}")
     private String tenant;
+    
     @Value("${C8Y.username}")
     private String username;
+    
     @Value("${C8Y.password}")
     private String password;
+    
     @Value("${tracker-agent.host}")
     private String trackerAgentHost;
-    @Value("${C8Y.agent.user}") 
-    private String agentUser;
-    @Value("${C8Y.agent.password}") 
-    private String agentPassword;
     
     @Autowired
     protected TrackerConfiguration trackerAgentConfig;
@@ -86,11 +84,20 @@ public abstract class TrackerITSupport {
     @Autowired
     protected InventoryRepository inventoryRepository;
     
+    @Autowired
+    protected DeviceCredentialsRepository deviceCredentialsRepository;
+    
     protected TrackerPlatform trackerPlatform;
+    protected TrackerPlatform bootstrapPlatform;
     protected TestConfiguration testConfig;
     protected RestConnector restConnector;
     private final ExecutorService executor = Executors.newFixedThreadPool(1);
     private final Collection<Socket> sockets = new HashSet<Socket>();
+    
+    @BeforeClass
+    public static void baseClassSetup() throws IOException {
+    	clearPersistedDevices();    	
+    }
 
     @Before
     public void baseSetUp() throws Exception {
@@ -98,11 +105,16 @@ public abstract class TrackerITSupport {
         testConfig = getTestConfig();
         System.out.println(testConfig);
         System.out.println(trackerAgentConfig);
-        if (isLocalTrackerTest()) {
-            clearPersistedDevices();
-        }
         trackerPlatform = createTrackerPlatform();
+        bootstrapPlatform = createBootstrapPlatform();
         restConnector = new RestConnector(trackerPlatform.getPlatformParameters(), new ResponseParser());
+        deleteExistingAgentRequest();
+    }
+    
+    @After
+    public void baseTearDown() throws IOException {
+    	executor.shutdownNow();
+    	destroySockets();
     }
 
     protected final int getLocalPort() {
@@ -111,24 +123,14 @@ public abstract class TrackerITSupport {
     
     protected abstract TrackingProtocol getTrackerProtocol();
 
-    private boolean isLocalTrackerTest() {
-        return testConfig.getTrackerAgentHost().equals("localhost");
-    }
 
-    private void clearPersistedDevices() throws IOException {
-        String filePath = ConfigUtils.get().getConfigFilePath(ConfigUtils.DEVICES_FILE_NAME);
+    private static void clearPersistedDevices() throws IOException {
+        String filePath = "/etc/tracker-agent/" + ConfigUtils.DEVICES_FILE_NAME;
         File devicesFile = new File(filePath);
         FileUtils.deleteQuietly(devicesFile);
         devicesFile.createNewFile();
     }
 
-    @After
-    public void baseTearDown() throws IOException {
-        if (isLocalTrackerTest()) {
-            executor.shutdownNow();
-        }
-        destroySockets();
-    }
 
     private void destroySockets() throws IOException {
         for (Socket socket : sockets) {
@@ -140,20 +142,17 @@ public abstract class TrackerITSupport {
     }
 
     protected TrackerPlatform createTrackerPlatform() {
-        CumulocityCredentials credentials = cumulocityCredentials(testConfig.getC8yUser(),testConfig.getC8yPassword())
+        CumulocityCredentials credentials = cumulocityCredentials(testConfig.getC8yUser(), testConfig.getC8yPassword())
                 .withTenantId(testConfig.getC8yTenant()).build();
         PlatformImpl platform = new PlatformImpl(trackerAgentConfig.getPlatformHost(), credentials);
         return new TrackerPlatform(platform);
     }
-
-    protected DeviceCredentials pollCredentials(String imei) throws InterruptedException {
-        try {
-            Thread.sleep(5000);
-            return DeviceCredentialsRepository.get().getCredentials(imei);
-        } catch (UnknownDeviceException uex) {
-            Thread.sleep(5000);
-            return DeviceCredentialsRepository.get().getCredentials(imei);
-        }
+    
+    protected TrackerPlatform createBootstrapPlatform() {
+    	CumulocityCredentials credentials = cumulocityCredentials(trackerAgentConfig.getBootstrapUser(), trackerAgentConfig.getBootstrapPassword())
+    			.withTenantId(testConfig.getC8yTenant()).build();
+    	PlatformImpl platform = new PlatformImpl(trackerAgentConfig.getPlatformHost(), credentials);
+    	return new TrackerPlatform(platform);
     }
 
     protected Socket writeInNewConnectionAndKeepOpen(byte[] bis) throws Exception {
@@ -195,7 +194,8 @@ public abstract class TrackerITSupport {
             sum = sum.appendReport(deviceMessages[index]);
         }
         logger.info("Send message: {}", sum);
-        return writeInNewConnection(newSocket(), sum.asBytes());
+        Socket newSocket = newSocket();
+		return writeInNewConnection(newSocket, sum.asBytes());
     }
         
     protected Socket newSocket() throws IOException {
@@ -203,7 +203,7 @@ public abstract class TrackerITSupport {
         String socketHost = testConfig.getTrackerAgentHost();
         try {
             Socket socket = new Socket(socketHost, getLocalPort());
-            socket.setSoTimeout(6000);
+            socket.setSoTimeout(2000);
             sockets.add(socket);
             return socket;
         } catch (IOException ex) {
@@ -212,10 +212,18 @@ public abstract class TrackerITSupport {
         }
     }
 
-    protected synchronized void createNewDeviceRequest(String deviceId) {
+    private synchronized void createNewDeviceRequest(String deviceId) {
         NewDeviceRequestRepresentation representation = new NewDeviceRequestRepresentation();
         representation.setId(deviceId);
         restConnector.post(newDeviceRequestsUri(), NEW_DEVICE_REQUEST, representation);
+    }
+    
+    private synchronized void deleteExistingAgentRequest() {
+    	try {
+    		restConnector.delete(newDeviceRequestsUri() + "/" + bootstrapAgentRequestId());
+    	} catch (Exception ex) {
+    		logger.info("OK, there is no legacy device request for tracker agent.");
+    	}
     }
 
     protected String newDeviceRequestsUri() {
@@ -230,41 +238,85 @@ public abstract class TrackerITSupport {
         try {
             NewDeviceRequestRepresentation representation = new NewDeviceRequestRepresentation();
             representation.setStatus("ACCEPTED");
-            String newDeviceRequestUri = newDeviceRequestUri(deviceId);
-            logger.info("Send request to: {}", newDeviceRequestUri);
-			restConnector.put(newDeviceRequestUri, NEW_DEVICE_REQUEST, representation);
+            restConnector.put(newDeviceRequestUri(deviceId), NEW_DEVICE_REQUEST, representation);
+            logger.info("Device with id {} accepted.", deviceId);
         } catch (Exception ex) {
-            ex.printStackTrace();
+        	logger.info("Device with id {} not accepted.", deviceId);
         }
+    }
+    
+    protected void connectNewDeviceRequest(String deviceId) throws Exception {
+    	try {
+    		bootstrapPlatform.getDeviceCredentialsApi().pollCredentials(deviceId);
+    		logger.info("Device with id {} connected.", deviceId);
+    	} catch (Exception ex) {
+    		logger.info("Device with id {} not connected.", deviceId);
+    	}
     }
 
     protected TrackerDevice getTrackerDevice(String imei) {
-        DeviceManagedObject deviceManagedObject = new DeviceManagedObject(trackerPlatform, contextService, inventoryRepository, agentUser, agentPassword);
-        GId agentId = deviceManagedObject.getAgentId();
-        return new TrackerDevice(trackerPlatform, trackerAgentConfig, agentId, imei, contextService, inventoryRepository, agentUser, agentPassword);
+    	return trackerAgent.getOrCreateTrackerDevice(imei);
     }
     
-    protected void bootstrap(String imei, TrackerMessage deviceMessage) throws UnsupportedEncodingException, Exception, InterruptedException {
+    private void bootstrapAgent(TrackerMessage deviceMessage) throws UnsupportedEncodingException, Exception, InterruptedException {
+    	String id = bootstrapAgentRequestId();
+    	
+    	NewDeviceRequestRepresentation newDeviceRequest = new NewDeviceRequestRepresentation();
+    	newDeviceRequest.setId(id);
+    	try {
+    		bootstrapPlatform.getDeviceCredentialsApi().delete(newDeviceRequest);
+    	} catch (Exception ex) {
+    		
+    	}
+    	// agent request deleted
+    	
+    	createNewDeviceRequest(id);
+        // WAITING_FOR_CONNECTION
+    	
+    	connectNewDeviceRequest(id);
+    	// PENDING_ACCEPTANCE
+    	
+    	acceptNewDeviceRequest(id);
+    	// ACCEPTED status
+    	
+    }
+
+	private String bootstrapAgentRequestId() {
+		return "tracker-agent-" + tenant;
+	}
+    
+    protected void bootstrapDevice(String imei, TrackerMessage deviceMessage) throws Exception {
+		if (!deviceCredentialsRepository.hasAgentCredentials(tenant)) {
+			bootstrapAgent(deviceMessage);
+		}    	    	
         createNewDeviceRequest(imei);
+        Thread.sleep(1000);
         // WAITING_FOR_CONNECTION status
         
         writeInNewConnection(deviceMessage);
-        Thread.sleep(5000);
+        Thread.sleep(1000);
         // PENDING_ACCEPTANCE status
         
-        logger.info("accept request for imei: {}", imei);
+        logger.info("accept request for imei: {}");
         acceptNewDeviceRequest(imei);
-        logger.info("Request for imei: {} ACCEPTED", imei);
         // ACCEPTED status
         
         writeInNewConnection(deviceMessage);
         Thread.sleep(1000);
         // Device credentials got
         
-        DeviceCredentials credentials = pollCredentials(imei);
+        DeviceCredentials credentials = deviceCredentialsRepository.getDeviceCredentials(imei);
         logger.info("Created credentails: {}", credentials);
         assertThat(credentials).isNotNull();
+    	enterDeviceContext(imei);
     }
+
+	private void enterDeviceContext(String imei) {
+		DeviceCredentials deviceCredentials = deviceCredentialsRepository.getDeviceCredentials(imei);
+    	DeviceCredentials agentCredentials = deviceCredentialsRepository.getAgentCredentials(deviceCredentials.getTenant());
+    	DeviceContext deviceContext = new DeviceContext(agentCredentials);
+    	contextService.enterContext(deviceContext);
+	}
     
     private TestConfiguration getTestConfig() {
         //@formatter:off

@@ -1,4 +1,4 @@
-package c8y.trackeragent.utils;
+package c8y.trackeragent.configuration;
 
 import java.util.Arrays;
 import java.util.Collection;

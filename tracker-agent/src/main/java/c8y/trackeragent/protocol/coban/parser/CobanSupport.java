@@ -1,7 +1,7 @@
 package c8y.trackeragent.protocol.coban.parser;
 
 import c8y.trackeragent.TrackerAgent;
-import c8y.trackeragent.TrackerDevice;
+import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.protocol.coban.device.CobanDevice;
 
 public class CobanSupport implements CobanFragment {

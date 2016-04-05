@@ -18,7 +18,7 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package c8y.trackeragent;
+package c8y.trackeragent.device;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
 
@@ -31,8 +31,8 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.cumulocity.agent.server.context.DeviceContextService;
 import com.cumulocity.agent.server.repository.InventoryRepository;
+import com.cumulocity.model.Agent;
 import com.cumulocity.model.ID;
 import com.cumulocity.model.event.CumulocityAlarmStatuses;
 import com.cumulocity.model.event.CumulocitySeverities;
@@ -40,11 +40,10 @@ import com.cumulocity.model.idtype.GId;
 import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
 import com.cumulocity.rest.representation.event.EventRepresentation;
+import com.cumulocity.rest.representation.identity.ExternalIDRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
-import com.cumulocity.sdk.client.ResponseParser;
-import com.cumulocity.sdk.client.RestConnector;
 import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.alarm.AlarmApi;
 import com.cumulocity.sdk.client.alarm.AlarmFilter;
@@ -52,6 +51,8 @@ import com.cumulocity.sdk.client.devicecontrol.DeviceControlApi;
 import com.cumulocity.sdk.client.event.EventApi;
 import com.cumulocity.sdk.client.event.EventCollection;
 import com.cumulocity.sdk.client.event.EventFilter;
+import com.cumulocity.sdk.client.identity.IdentityApi;
+import com.cumulocity.sdk.client.inventory.InventoryApi;
 import com.cumulocity.sdk.client.measurement.MeasurementApi;
 import com.google.common.collect.Iterables;
 
@@ -67,20 +68,20 @@ import c8y.RequiredAvailability;
 import c8y.Restart;
 import c8y.SignalStrength;
 import c8y.SupportedOperations;
+import c8y.trackeragent.UpdateIntervalProvider;
+import c8y.trackeragent.configuration.TrackerConfiguration;
 import c8y.trackeragent.protocol.coban.device.CobanDevice;
 import c8y.trackeragent.protocol.coban.device.CobanDeviceFactory;
-import c8y.trackeragent.utils.TrackerConfiguration;
 
-public class TrackerDevice extends DeviceManagedObject {
+public class TrackerDevice {
     
-    private Logger logger = LoggerFactory.getLogger(getClass());
+    private Logger logger = LoggerFactory.getLogger(TrackerDevice.class);
     
     public static final String TYPE = "c8y_Tracker";
     public static final String XTID_TYPE = "c8y_Imei";
     public static final String VIN_XT_TYPE = "c8y_VIN";
     public static final String BAT_TYPE = "c8y_Battery";
     public static final String SIG_TYPE = "c8y_TrackerSignal";
-
     // TODO These should really come device-capabilities/sensor library.
     public static final String LU_EVENT_TYPE = "c8y_LocationUpdate";
     public static final String GEO_ALARM_TYPE = "c8y_GeofenceAlarm";
@@ -90,49 +91,70 @@ public class TrackerDevice extends DeviceManagedObject {
     public static final String GEOFENCE_ENTER = "c8y_GeofenceEnter";
     public static final String GEOFENCE_EXIT = "c8y_GeofenceExit";
     public static final String POWER_ALARM_TYPE = "c8y_PowerAlarm";
-
-
-    private EventApi events;
-    private AlarmApi alarms;
-    private MeasurementApi measurements;
-    private DeviceControlApi deviceControl;
-
-    private String imei;
-    private GId gid;
-    private String self;
+    
     private Mobile mobile;
-
     private EventRepresentation eventMotionDetected = new EventRepresentation();
     private EventRepresentation eventMotionEnded = new EventRepresentation();
     private EventRepresentation geofenceEnter = new EventRepresentation();
     private EventRepresentation geofenceExit = new EventRepresentation();
     private EventRepresentation chargerConnected = new EventRepresentation();
-
     private AlarmRepresentation fenceAlarm = new AlarmRepresentation();
     private AlarmRepresentation powerAlarm = new AlarmRepresentation();
     private AlarmFilter alarmFilter = new AlarmFilter();
     private EventFilter eventFilter = new EventFilter();
-
     private MeasurementRepresentation batteryMsrmt = new MeasurementRepresentation();
     private Battery battery = new Battery();
     private MeasurementRepresentation gprsSignalMsrmt = new MeasurementRepresentation();
     private SignalStrength gprsSignal = new SignalStrength();
-    private TrackerConfiguration trackerConfig;
-    private UpdateIntervalProvider updateIntervalProvider;
+    private TrackerConfiguration configuration;
 
-    public TrackerDevice(TrackerPlatform platform, TrackerConfiguration trackerConfig, GId agentGid, String imei, 
-            DeviceContextService contextService, InventoryRepository inventoryRepository, String agentUser, String agentPassword) throws SDKException {
-        super(platform, contextService, inventoryRepository, agentUser, agentPassword);
-        this.trackerConfig = trackerConfig;
-        this.events = platform.getEventApi();
-        this.alarms = platform.getAlarmApi();
-        this.measurements = platform.getMeasurementApi();
-        this.deviceControl = platform.getDeviceControlApi();
-        this.updateIntervalProvider = new UpdateIntervalProvider(platform);
-        this.imei = imei;
-        createMo(agentGid);
-        setupTemplates(gid);
+    private EventApi events;
+    private AlarmApi alarms;
+    private MeasurementApi measurements;
+    private DeviceControlApi deviceControl;
+	protected IdentityApi identities;
+	protected InventoryApi inventory;
+	protected InventoryRepository inventoryRepository;
+
+	protected String tenant;
+    private String imei;
+    private GId gid;
+    private String self;
+
+	private UpdateIntervalProvider updateIntervalProvider;
+    
+    public TrackerDevice(
+    		// @formatter:off
+    		String tenant, 
+    		String imei, 
+    		TrackerConfiguration configuration, 
+            InventoryRepository inventoryRepository, 
+            EventApi events, 
+            AlarmApi alarms, 
+            MeasurementApi measurements, 
+            DeviceControlApi deviceControl, 
+            IdentityApi identities, 
+            InventoryApi inventory,
+            UpdateIntervalProvider updateIntervalProvider) throws SDKException {
+    	// @formatter:on
+    	this.tenant = tenant;
+    	this.imei = imei;
+        this.configuration = configuration;
+		this.inventoryRepository = inventoryRepository;
+        this.events = events;
+        this.alarms = alarms;
+        this.measurements = measurements;
+        this.deviceControl = deviceControl;
+        this.identities = identities;
+        this.inventory = inventory;
+		this.updateIntervalProvider = updateIntervalProvider;
     }
+
+	public void init() {
+		logger.info("Init new tracker device for imei: {}", imei);
+		createMo();
+        setupTemplates(gid);
+	}
 
     public String getImei() {
         return imei;
@@ -150,14 +172,13 @@ public class TrackerDevice extends DeviceManagedObject {
     public void setPosition(EventRepresentation event) {
         setPosition(event, event.get(Position.class));
     }
-
     
     public void setPosition(EventRepresentation event, Position position) {
         ManagedObjectRepresentation device = aDevice();        
         logger.debug("Updating location of {} to {}.", imei, position);
         device.set(position);
         event.set(position);
-        getInventory().update(device);        
+        inventory.update(device);        
         events.create(event);
     }
     
@@ -190,7 +211,7 @@ public class TrackerDevice extends DeviceManagedObject {
         ManagedObjectRepresentation device = new ManagedObjectRepresentation();
         device.set(fence);
         device.setId(gid);
-        getInventory().update(device);
+        inventory.update(device);
     }
 
     public void geofenceAlarm(boolean raise) throws SDKException {
@@ -206,7 +227,7 @@ public class TrackerDevice extends DeviceManagedObject {
         motion.setActive(active);
         device.set(motion);
         device.setId(gid);
-        getInventory().update(device);
+        inventory.update(device);
     }
 
     public void motionEvent(boolean moving) throws SDKException {
@@ -271,14 +292,14 @@ public class TrackerDevice extends DeviceManagedObject {
         mobile.setCellId(cellId);
         device.set(mobile);
         device.setId(gid);
-        getInventory().update(device);
+        inventory.update(device);
     }
     
     public void ping() throws SDKException {
         logger.info("Ping to device with id {}.", gid);
         ManagedObjectRepresentation device = new ManagedObjectRepresentation();
         device.setId(gid);
-        getInventory().update(device);
+        inventory.update(device);
     }
     
     public AlarmRepresentation createAlarm(AlarmRepresentation newAlarm) throws SDKException { 
@@ -389,7 +410,7 @@ public class TrackerDevice extends DeviceManagedObject {
         return source;
     }
 
-    private void createMo(GId agentGid) throws SDKException {
+    private void createMo() throws SDKException {
         ManagedObjectRepresentation device = new ManagedObjectRepresentation();
 
         RequiredAvailability availability = new RequiredAvailability(15);
@@ -419,7 +440,7 @@ public class TrackerDevice extends DeviceManagedObject {
         device.setType(TYPE);
         device.setName("Tracker " + imei);
 
-        createOrUpdate(device, extId, agentGid);
+        createOrUpdate(device, extId);
         gid = device.getId();
         self = device.getSelf();
     }
@@ -453,7 +474,7 @@ public class TrackerDevice extends DeviceManagedObject {
 
     public CobanDevice getCobanDevice() {
         ManagedObjectRepresentation mo = getManagedObject();
-        CobanDevice cobanDevice = new CobanDeviceFactory(trackerConfig, mo).create();
+        CobanDevice cobanDevice = new CobanDeviceFactory(configuration, mo).create();
         logger.info("Received coban device config: {} for imei: {}", cobanDevice, imei);
         return cobanDevice;
     }
@@ -462,7 +483,7 @@ public class TrackerDevice extends DeviceManagedObject {
         logger.info("Update {} for imei: {}", newDeviceConfig, imei);
         ManagedObjectRepresentation device = aDevice();
         device.set(newDeviceConfig);
-        getInventory().update(device);        
+        inventory.update(device);        
     }
     
     public RFV16Config getRFV16Config() {
@@ -474,7 +495,7 @@ public class TrackerDevice extends DeviceManagedObject {
         ManagedObjectRepresentation device = aDevice();        
         logger.debug("Updating mobile of {} to {}.", imei, mobile);
         device.set(mobile);
-        getInventory().update(device);        
+        inventory.update(device);        
     }
     
     public void setOperationSuccessful(OperationRepresentation operation) {
@@ -500,11 +521,123 @@ public class TrackerDevice extends DeviceManagedObject {
         EventRepresentation lastEvent = getLastLocationEvent();
         return lastEvent == null ? null : lastEvent.get(Position.class);
     }
+
+	/**
+	 * Create a managed object if it does not exist, or update it if it exists
+	 * already. Optionally, link to parent managed object as child device.
+	 * 
+	 * @param mo
+	 *            Representation of the managed object to create or update
+	 * @param parentId
+	 *            ID of the parent to link to, or null if no link is needed.
+	 */
+	protected void createOrUpdate(ManagedObjectRepresentation mo, ID extId) throws SDKException {
+	    GId gid = tryGetBinding(extId);
+	    ManagedObjectRepresentation returnedMo;
+		if (gid == null) {
+			returnedMo = create(mo, extId);
+	    } else {
+	    	returnedMo = update(mo, gid);
+	    }
+	    copyProps(returnedMo, mo);
+	}
+
+	private ManagedObjectRepresentation assureTrackerAgentExisting() {
+	    ID extId = getAgentExternalId();
+	    GId gid = tryGetBinding(extId);
+		if (gid == null) {
+			logger.info("Agent not create yet for tenant " + tenant + " will create it!");
+	        ManagedObjectRepresentation agentMo = new ManagedObjectRepresentation();
+	        agentMo.setType("c8y_TrackerAgent");
+	        agentMo.setName("Tracker agent");
+	        agentMo.set(new Agent());            
+	        agentMo = inventory.create(agentMo);
+	        bind(agentMo, extId);
+	        return agentMo;
+	    } else {
+	        return inventory.get(gid);
+	    }
+	}
+
+	public boolean updateIfExists(ManagedObjectRepresentation mo, ID extId) throws SDKException {
+	    GId gid = tryGetBinding(extId);
+	    if (gid == null) {
+	        return false;
+	    }
+	    ManagedObjectRepresentation returnedMo = update(mo, gid);
+	    copyProps(returnedMo, mo);
+	    return true;
+	}
+
+	private ManagedObjectRepresentation create(ManagedObjectRepresentation mo, ID extId) throws SDKException {
+	    final ManagedObjectRepresentation returnedMo = inventory.create(mo);
+	    ManagedObjectRepresentation agent = assureTrackerAgentExisting();
+	    logger.info("Bind device to agent for tenant {}", tenant);
+	    inventoryRepository.bindToParent(agent.getId(), returnedMo.getId());
+	    bind(returnedMo, extId);
+	    return returnedMo;
+	}
+
+	private ManagedObjectRepresentation update(ManagedObjectRepresentation mo, GId gid) throws SDKException {
+	    mo.setName(null); // Don't overwrite user-modified names
+	    mo.setId(gid);
+	    return inventory.update(mo);
+	}
+
+	private void copyProps(ManagedObjectRepresentation returnedMo, ManagedObjectRepresentation mo) {
+	    mo.setId(returnedMo.getId());
+	    mo.setName(returnedMo.getName());
+	    mo.setSelf(returnedMo.getSelf());
+	}
+
+	public GId getAgentId() {
+	    ID agentExternalId = getAgentExternalId();
+	    return tryGetBinding(agentExternalId);
+	}
+
+	public GId tryGetBinding(ID extId) throws SDKException {
+	    ExternalIDRepresentation eir = null;
+	    try {
+	        eir = identities.getExternalId(extId);
+	    } catch (SDKException x) {
+	        if (x.getHttpStatus() != 404) {
+	            throw x;
+	        }
+	    }
+	    return eir != null ? eir.getManagedObject().getId() : null;
+	}
+
+	public void bind(ManagedObjectRepresentation mo, ID extId) throws SDKException {
+	    ExternalIDRepresentation eir = new ExternalIDRepresentation();
+	    eir.setExternalId(extId.getValue());
+	    eir.setType(extId.getType());
+	    eir.setManagedObject(mo);
+	    identities.create(eir);
+	}
+
+	public boolean existsDevice(String imei) {
+	    return tryGetBinding(imeiAsId(imei)) != null;
+	}
+
+    public static ID imeiAsId(String imei) {
+        ID extId = new ID(imei);
+        extId.setType(TrackerDevice.XTID_TYPE);
+        return extId;
+    }
     
-    public UpdateIntervalProvider getUpdateIntervalProvider() {
-        return updateIntervalProvider;
+    public static ID getAgentExternalId() {
+        ID extId = new ID("c8y_TrackerAgent");
+        extId.setType("c8y_ServerSideAgent");
+        return extId;
     }
 
+	public UpdateIntervalProvider getUpdateIntervalProvider() {
+		return updateIntervalProvider;
+	}
 
+	public void setUpdateIntervalProvider(UpdateIntervalProvider updateIntervalProvider) {
+		this.updateIntervalProvider = updateIntervalProvider;
+	}
+    
 
 }

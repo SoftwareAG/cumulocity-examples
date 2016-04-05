@@ -12,8 +12,8 @@ import org.mockito.ArgumentCaptor;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 
 import c8y.Mobile;
-import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.context.ReportContext;
+import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.protocol.rfv16.RFV16ParserTestSupport;
 import c8y.trackeragent.utils.message.TrackerMessage;
 

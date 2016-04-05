@@ -1,65 +1,52 @@
 package c8y.trackeragent.utils;
 
 import static com.cumulocity.model.authentication.CumulocityCredentials.Builder.cumulocityCredentials;
-import static com.google.common.collect.FluentIterable.from;
 
 import java.util.concurrent.Callable;
 
-import c8y.trackeragent.DeviceManagedObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.cumulocity.model.authentication.CumulocityCredentials;
+import com.cumulocity.sdk.client.ClientConfiguration;
+import com.cumulocity.sdk.client.PlatformImpl;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+
 import c8y.trackeragent.TrackerPlatform;
+import c8y.trackeragent.configuration.TrackerConfiguration;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.exception.SDKExceptions;
 
-import com.cumulocity.agent.server.context.DeviceContextService;
-import com.cumulocity.agent.server.repository.InventoryRepository;
-import com.cumulocity.model.authentication.CumulocityCredentials;
-import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
-import com.cumulocity.sdk.client.ClientConfiguration;
-import com.cumulocity.sdk.client.PlatformImpl;
-import com.google.common.base.Predicate;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-
+@Component
 public class TrackerPlatformProvider {
+	
+	private static final Logger logger = LoggerFactory.getLogger(TrackerPlatformProvider.class);
 
     private final DeviceCredentialsRepository deviceCredentialsRepository;
     private final Cache<PlatformKey, TrackerPlatform> cache;
     private final TrackerConfiguration config;
-    private final Object lock = new Object();
-    private final DeviceContextService contextService;
-    private final InventoryRepository inventoryRepository;
-    private final String agentUser;
-    private final String agentPassword;
 
-    public TrackerPlatformProvider(TrackerConfiguration config, DeviceCredentialsRepository deviceCredentialsRepository,
-            DeviceContextService contextService, InventoryRepository inventoryRepository, String agentUser, String agentPassword) {
+    @Autowired
+    public TrackerPlatformProvider(TrackerConfiguration config, DeviceCredentialsRepository deviceCredentialsRepository) {
         this.config = config;
         this.deviceCredentialsRepository = deviceCredentialsRepository;
         this.cache = CacheBuilder.newBuilder().build();
-        this.contextService = contextService;
-        this.inventoryRepository = inventoryRepository;
-        this.agentUser = agentUser;
-        this.agentPassword = agentPassword;
-    }
-
-    public TrackerPlatform getDevicePlatformForTenant(final String tenantId) {
-        return from(cache.asMap().values()).filter(new Predicate<TrackerPlatform>() {
-            public boolean apply(TrackerPlatform platform) {
-                return tenantId.equals(platform.getTenantId());
-            }
-        }).last().orNull();
     }
     
-    public TrackerPlatform getDevicePlatform(final String imei) {
-        if (imei == null) {
-            throw new IllegalArgumentException("Imei must not be null!");
-        }
-        return getPlatform(new PlatformKey(imei));
+    public void initTenantPlatform(final String tenantId) {
+    	getTenantPlatform(tenantId);
     }
 
+    public TrackerPlatform getTenantPlatform(final String tenantId) {
+    	return getPlatform(PlatformKey.forTenant(tenantId));
+    }
+    
     public TrackerPlatform getBootstrapPlatform() {
-        return getPlatform(new PlatformKey(null));
+        return getPlatform(PlatformKey.forBootstrap());
     }
 
     private TrackerPlatform getPlatform(final PlatformKey key) {
@@ -68,7 +55,7 @@ public class TrackerPlatformProvider {
 
                 @Override
                 public TrackerPlatform call() throws Exception {
-                    return createPlatform(key);
+                    return createAndCachePlatform(key);
                 }
 
             });
@@ -77,28 +64,26 @@ public class TrackerPlatformProvider {
         }
     }
 
-    private TrackerPlatform createPlatform(PlatformKey key) {
+    private TrackerPlatform createAndCachePlatform(PlatformKey key) {
         if (key.isBootstrap()) {
             return createBootstrapPlatform();
         } else {
-            return createDevicePlatform(key.getImei());
+            return createTenantPlatform(key.getTenant());
         }
-    }
-
-    private TrackerPlatform createDevicePlatform(String imei) {
-        DeviceCredentials deviceCredentials = deviceCredentialsRepository.getCredentials(imei);
-        String tenantId = deviceCredentials.getTenant();
-        CumulocityCredentials credentials = cumulocityCredentials(deviceCredentials.getUsername(), deviceCredentials.getPassword()).withTenantId(tenantId).build();
-        PlatformImpl platform = c8yPlatform(credentials);
-        TrackerPlatform trackerPlatform = new TrackerPlatform(platform);
-        setupAgent(trackerPlatform);
-        return trackerPlatform;
     }
 
     private TrackerPlatform createBootstrapPlatform() {
         CumulocityCredentials credentials = cumulocityCredentials(config.getBootstrapUser(), config.getBootstrapPassword()).withTenantId(config.getBootstrapTenant()).build();
         PlatformImpl paltform = c8yPlatform(credentials);
         return new TrackerPlatform(paltform);
+    }
+    
+    private TrackerPlatform createTenantPlatform(String tenant) {
+    	DeviceCredentials agentCredentials = deviceCredentialsRepository.getAgentCredentials(tenant);
+    	CumulocityCredentials credentials = cumulocityCredentials(agentCredentials.getUsername(), agentCredentials.getPassword()).withTenantId(tenant).build();
+    	PlatformImpl platform = c8yPlatform(credentials);
+    	TrackerPlatform trackerPlatform = new TrackerPlatform(platform);
+    	return trackerPlatform;
     }
 
     private PlatformImpl c8yPlatform(CumulocityCredentials credentials) {
@@ -107,35 +92,35 @@ public class TrackerPlatformProvider {
         return platform;
     }
 
-    private void setupAgent(TrackerPlatform platform) {
-        synchronized (lock) {
-            DeviceManagedObject deviceManagedObject = new DeviceManagedObject(platform, contextService, inventoryRepository, agentUser, agentPassword);
-            ManagedObjectRepresentation agentMo = deviceManagedObject.assureTrackerAgentExisting();
-            platform.setAgent(agentMo);
-        }
-    }
-
     private static class PlatformKey {
 
-        private final String imei;
-
-        PlatformKey(String imei) {
-            this.imei = imei;
+        private final String tenant;
+        
+        public static PlatformKey forBootstrap() {
+        	return new PlatformKey(null);
+        }
+        
+        public static PlatformKey forTenant(String tenant) {
+        	return new PlatformKey(tenant);
         }
 
-        String getImei() {
-            return imei;
+        private PlatformKey(String tenant) {
+            this.tenant = tenant;
+        }
+
+        String getTenant() {
+            return tenant;
         }
 
         boolean isBootstrap() {
-            return imei == null;
+            return tenant == null;
         }
 
         @Override
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + ((imei == null) ? 0 : imei.hashCode());
+            result = prime * result + ((tenant == null) ? 0 : tenant.hashCode());
             return result;
         }
 
@@ -148,17 +133,17 @@ public class TrackerPlatformProvider {
             if (getClass() != obj.getClass())
                 return false;
             PlatformKey other = (PlatformKey) obj;
-            if (imei == null) {
-                if (other.imei != null)
+            if (tenant == null) {
+                if (other.tenant != null)
                     return false;
-            } else if (!imei.equals(other.imei))
+            } else if (!tenant.equals(other.tenant))
                 return false;
             return true;
         }
         
         @Override
         public String toString() {
-            return isBootstrap() ? "bootstrap" : "imei: " + imei;
+            return isBootstrap() ? "bootstrap" : "tenant: " + tenant;
         }
     }
 }

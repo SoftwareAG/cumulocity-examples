@@ -16,7 +16,7 @@ import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
 import c8y.Battery;
 import c8y.SignalStrength;
 import c8y.SpeedMeasurement;
-import c8y.trackeragent.TrackerDevice;
+import c8y.trackeragent.device.TrackerDevice;
 
 @Component
 public class MeasurementService {

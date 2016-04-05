@@ -39,7 +39,7 @@ public class TrackerStabilityIT extends TrackerITSupport {
 
     private String executeFirstStep() throws Exception {
         String imei = Devices.randomImei();
-        bootstrap(imei, deviceMessages.logon(imei));
+        bootstrapDevice(imei, deviceMessages.logon(imei));
         return imei;
     }
 

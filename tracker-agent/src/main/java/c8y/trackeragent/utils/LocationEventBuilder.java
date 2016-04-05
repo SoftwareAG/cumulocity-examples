@@ -21,7 +21,7 @@ import com.google.common.base.Joiner;
 
 import c8y.Position;
 import c8y.SpeedMeasurement;
-import c8y.trackeragent.TrackerDevice;
+import c8y.trackeragent.device.TrackerDevice;
 
 public class LocationEventBuilder {
 

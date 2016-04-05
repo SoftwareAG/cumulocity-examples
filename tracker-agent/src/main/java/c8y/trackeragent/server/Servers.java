@@ -6,7 +6,7 @@ import java.util.concurrent.Executors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import c8y.trackeragent.utils.TrackerConfiguration;
+import c8y.trackeragent.configuration.TrackerConfiguration;
 
 @Component
 public class Servers {

@@ -18,10 +18,10 @@ import com.cumulocity.rest.representation.event.EventRepresentation;
 
 import c8y.Position;
 import c8y.trackeragent.TrackerAgent;
-import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.context.ReportContext;
-import c8y.trackeragent.context.TrackerContext;
+import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.protocol.CommonConstants;
+import c8y.trackeragent.protocol.telic.TelicConstants;
 import c8y.trackeragent.protocol.telic.parser.FixType;
 import c8y.trackeragent.protocol.telic.parser.LogCodeType;
 import c8y.trackeragent.protocol.telic.parser.TelicLocationReport;
@@ -34,7 +34,6 @@ public class TelicLocationReportTest {
     private TelicDeviceMessages deviceMessages = new TelicDeviceMessages();
     private MeasurementService measurementService = Mockito.mock(MeasurementService.class);
     private TrackerAgent trackerAgent = mock(TrackerAgent.class);
-    private TrackerContext trackerContext = mock(TrackerContext.class);
     private TrackerDevice device = mock(TrackerDevice.class);
     private TelicLocationReport telic = new TelicLocationReport(trackerAgent, measurementService);
     private ArgumentCaptor<EventRepresentation> locationEventCaptor = ArgumentCaptor.forClass(EventRepresentation.class); 
@@ -43,7 +42,6 @@ public class TelicLocationReportTest {
     @Before
     public void setup() throws Exception {
         when(trackerAgent.getOrCreateTrackerDevice(anyString())).thenReturn(device);
-        when(trackerAgent.getContext()).thenReturn(trackerContext);
         when(device.aLocationUpdateEvent()).thenReturn(new EventRepresentation());
     }
     
@@ -113,6 +111,17 @@ public class TelicLocationReportTest {
         verifyReport();
         Object actualFixType = positionCaptor.getValue().getProperty(TelicConstants.FIX_TYPE);
         assertThat(actualFixType).isEqualTo(FixType._3D.getLabel());
+    }
+    
+    @Test
+    public void shouldSendFixTypeInPositionFragmentEvenWhenItsNotStandard() throws Exception {
+    	String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1).set(TelicLocationReport.FIX_TYPE, "100").asArray();
+    	
+    	telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
+    	
+    	verifyReport();
+    	Object actualFixType = positionCaptor.getValue().getProperty(TelicConstants.FIX_TYPE);
+    	assertThat(actualFixType).isEqualTo("100");
     }
     
     @Test

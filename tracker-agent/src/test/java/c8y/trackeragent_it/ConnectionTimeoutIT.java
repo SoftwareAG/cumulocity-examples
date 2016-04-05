@@ -5,7 +5,7 @@ import java.net.Socket;
 
 import org.junit.Test;
 
-import c8y.trackeragent.TrackerDevice;
+import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.protocol.mapping.TrackingProtocol;
 import c8y.trackeragent.protocol.telic.TelicDeviceMessages;
 import c8y.trackeragent.utils.Devices;
@@ -26,7 +26,7 @@ public class ConnectionTimeoutIT extends TrackerITSupport {
         timeoutConnection();
         
         String imei = Devices.randomImei();
-        bootstrap(imei, deviceMessages.positionUpdate(imei, Positions.ZERO));  
+        bootstrapDevice(imei, deviceMessages.positionUpdate(imei, Positions.ZERO));  
         
         // trigger regular report 
         TrackerMessage message = deviceMessages.positionUpdate(imei, Positions.SAMPLE_4);

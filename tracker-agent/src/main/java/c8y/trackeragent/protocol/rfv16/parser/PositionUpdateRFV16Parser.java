@@ -19,15 +19,15 @@ import c8y.Position;
 import c8y.SpeedMeasurement;
 import c8y.trackeragent.Parser;
 import c8y.trackeragent.TrackerAgent;
-import c8y.trackeragent.TrackerDevice;
+import c8y.trackeragent.configuration.TrackerConfiguration;
 import c8y.trackeragent.context.ReportContext;
+import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.protocol.rfv16.RFV16Constants;
 import c8y.trackeragent.protocol.rfv16.message.RFV16ServerMessages;
 import c8y.trackeragent.service.AlarmService;
 import c8y.trackeragent.service.MeasurementService;
 import c8y.trackeragent.utils.LocationEventBuilder;
 import c8y.trackeragent.utils.TK10xCoordinatesTranslator;
-import c8y.trackeragent.utils.TrackerConfiguration;
 import c8y.trackeragent.utils.message.TrackerMessage;
 
 @Component
