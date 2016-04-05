@@ -15,7 +15,7 @@
 			<id>develop</id>
 			<properties>
 				<!-- current SNAPSHOT version of c8y-client -->
-				<c8y.version>7.22.0-SNAPSHOT</c8y.version>				
+				<c8y.version>7.23.0-SNAPSHOT</c8y.version>				
 			</properties>
 			<distributionManagement>
 				<snapshotRepository>
