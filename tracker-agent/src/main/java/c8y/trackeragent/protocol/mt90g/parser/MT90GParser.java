@@ -1,6 +1,7 @@
 package c8y.trackeragent.protocol.mt90g.parser;
 
 import static c8y.trackeragent.utils.LocationEventBuilder.aLocationEvent;
+import static com.cumulocity.model.DateConverter.date2String;
 import static java.math.BigDecimal.valueOf;
 
 import java.math.BigDecimal;
@@ -13,13 +14,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import com.cumulocity.rest.representation.event.EventRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 
-import c8y.SpeedMeasurement;
+import c8y.Position;
 import c8y.trackeragent.Parser;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.device.TrackerDevice;
+import c8y.trackeragent.protocol.mt90g.MT90GConstants;
+import c8y.trackeragent.protocol.telic.TelicConstants;
 import c8y.trackeragent.service.MeasurementService;
 import c8y.trackeragent.utils.LocationEventBuilder;
 
@@ -55,37 +59,66 @@ public class MT90GParser implements MT90GFragment, Parser {
         double lng = parseOrDefault(reportCtx.getEntry(5));
         double alt = parseOrDefault(reportCtx.getEntry(13));
         
-        LocationEventBuilder locationEvent = aLocationEvent()
+        LocationEventBuilder locationEventBuilder = aLocationEvent()
                 .withSourceId(device.getGId())
                 .withLat(valueOf(lat))
                 .withLng(valueOf(lng))
                 .withAlt(valueOf(alt));
+        EventRepresentation locationEvent = locationEventBuilder.build();
+        Position position = locationEvent.get(Position.class);
         
+        Integer satellitesForCalculation = reportCtx.getEntryAsInt(8);
+        if (satellitesForCalculation != null) {
+            position.setProperty(TelicConstants.SATELLITES, satellitesForCalculation);
+        }
+        DateTime gpsTimestamp = getTimestamp(reportCtx,6);
+        if (gpsTimestamp != null) {
+            position.setProperty(TelicConstants.GPS_TIMESTAMP, date2String(gpsTimestamp.toDate()));
+        }
+        Integer accuracy = reportCtx.getEntryAsInt(12);
+        if (accuracy != null) {
+            position.setAccuracy(accuracy);
+        }
+        device.setPosition(locationEvent, position);
+        
+        createMeasurements(reportCtx, device);
+        return true;
+    }
+
+    private void createMeasurements(ReportContext reportCtx, TrackerDevice device) {
         BigDecimal speedValue = parseToBigDecimalOrNull(reportCtx.getEntry(10));
         if (speedValue != null) {
-            logger.debug("Parsed speed for imei: {} to: {}.", reportCtx.getImei(), speedValue);
-            SpeedMeasurement speed = measurementService.createSpeedMeasurement(speedValue, device);
-            locationEvent.withSpeedMeasurement(speed);
+            measurementService.createSpeedMeasurement(speedValue, device);
         }
-        device.setPosition(locationEvent.build());
-        
         BigDecimal gsmLevel = reportCtx.getEntryAsNumber(9);
         if (gsmLevel != null) {
             measurementService.createGSMLevelMeasurement(gsmLevel, device, new DateTime());
         }
         BigDecimal mileage = reportCtx.getEntryAsNumber(14);
         if (mileage != null) {
-            BigDecimal mileageInKM = convertToKm(mileage);
+            BigDecimal mileageInKM = convertToKm(mileage, reportCtx);
             measurementService.createMileageMeasurement(mileageInKM, device, new DateTime());
         }
-        return true;
+    }
+    
+    private DateTime getTimestamp(ReportContext reportCtx, int index) {
+        String timestampStr = reportCtx.getEntry(index);
+        if(timestampStr == null) {
+            return null;
+        }
+        try {
+            return MT90GConstants.TIMESTAMP_FORMATTER.parseDateTime(timestampStr);
+        } catch (Exception e) {
+            logger.warn("Failed to parse tracker {} gps time: {}", reportCtx.getImei(), timestampStr);
+        }
+        return null;
     }
 
-    private BigDecimal convertToKm(BigDecimal mileage) {
+    private BigDecimal convertToKm(BigDecimal mileage, ReportContext reportCtx) {
         try {
             return mileage.divide(new BigDecimal(1000), RoundingMode.HALF_DOWN);
         } catch (Exception e) {
-            logger.warn("Failed to convert mileage to KM");
+            logger.warn("Failed to convert tracker {} mileage {} to KM", reportCtx.getImei(), mileage);
         }
         return BigDecimal.ZERO;
     }
