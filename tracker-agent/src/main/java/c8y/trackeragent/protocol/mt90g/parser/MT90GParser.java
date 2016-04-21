@@ -35,6 +35,8 @@ import c8y.trackeragent.utils.LocationEventBuilder;
 @Component
 public class MT90GParser implements MT90GFragment, Parser {
     
+    private static final BigDecimal KM_DIVISOR = new BigDecimal(1000);
+
     private static final Logger logger = LoggerFactory.getLogger(MT90GParser.class);
     
     private final TrackerAgent trackerAgent;
@@ -72,7 +74,7 @@ public class MT90GParser implements MT90GFragment, Parser {
         EventRepresentation locationEvent = locationEventBuilder.build();
         Position position = locationEvent.get(Position.class);
         
-        Integer satellitesForCalculation = reportCtx.getEntryAsInt(8);
+        Double satellitesForCalculation = parseOrNull(reportCtx.getEntry(8));
         if (satellitesForCalculation != null) {
             position.setProperty(TelicConstants.SATELLITES, satellitesForCalculation);
         }
@@ -80,11 +82,11 @@ public class MT90GParser implements MT90GFragment, Parser {
         if (gpsTimestamp != null) {
             position.setProperty(TelicConstants.GPS_TIMESTAMP, date2String(gpsTimestamp.toDate()));
         }
-        Integer accuracy = reportCtx.getEntryAsInt(12);
+        Double accuracy = parseOrNull(reportCtx.getEntry(12));
         if (accuracy != null) {
-            position.setAccuracy(accuracy);
+            position.setAccuracy(accuracy.longValue());
         }
-        Integer direction = reportCtx.getEntryAsInt(11);
+        Double direction = parseOrNull(reportCtx.getEntry(11));
         if (direction != null) {
             position.setProperty(MT90GConstants.DIRECTION, direction);
         }
@@ -99,11 +101,11 @@ public class MT90GParser implements MT90GFragment, Parser {
         if (speedValue != null) {
             measurementService.createSpeedMeasurement(speedValue, device);
         }
-        BigDecimal gsmLevel = reportCtx.getEntryAsNumber(9);
+        BigDecimal gsmLevel = parseToBigDecimalOrNull(reportCtx.getEntry(9));
         if (gsmLevel != null) {
             measurementService.createGSMLevelMeasurement(gsmLevel, device, new DateTime());
         }
-        BigDecimal mileage = reportCtx.getEntryAsNumber(14);
+        BigDecimal mileage = parseToBigDecimalOrNull(reportCtx.getEntry(14));
         if (mileage != null) {
             BigDecimal mileageInKM = convertToKm(mileage, reportCtx);
             measurementService.createMileageMeasurement(mileageInKM, device, new DateTime());
@@ -125,7 +127,7 @@ public class MT90GParser implements MT90GFragment, Parser {
 
     private BigDecimal convertToKm(BigDecimal mileage, ReportContext reportCtx) {
         try {
-            return mileage.divide(new BigDecimal(1000), RoundingMode.HALF_DOWN);
+            return mileage.divide(KM_DIVISOR, RoundingMode.HALF_DOWN);
         } catch (Exception e) {
             logger.warn("Failed to convert tracker {} mileage {} to KM", reportCtx.getImei(), mileage);
         }
@@ -137,11 +139,23 @@ public class MT90GParser implements MT90GFragment, Parser {
             return 0;
         }
         try {
-            return Double.parseDouble(value);
+            return Double.parseDouble(value.trim());
         } catch (Exception e) {
             logger.info("Cannot parse to double value: " + value);
         }
         return 0;
+    }
+    
+    private Double parseOrNull(String value) {
+        if (StringUtils.isEmpty(value)) {
+            return null;
+        }
+        try {
+            return Double.valueOf(value.trim());
+        } catch (Exception e) {
+            logger.info("Cannot parse to double value: " + value);
+        }
+        return null;
     }
     
     private BigDecimal parseToBigDecimalOrNull(String value) {
@@ -149,7 +163,7 @@ public class MT90GParser implements MT90GFragment, Parser {
             return null;
         }
         try {
-            return new BigDecimal(value);
+            return new BigDecimal(value.trim());
         } catch (Exception e) {
             logger.info("Cannot parse to BigDecimal value: " + value);
         }
