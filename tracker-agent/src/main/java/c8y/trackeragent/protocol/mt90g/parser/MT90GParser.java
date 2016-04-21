@@ -5,6 +5,7 @@ import static com.cumulocity.model.DateConverter.date2String;
 import static java.math.BigDecimal.valueOf;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.math.RoundingMode;
 
 import org.joda.time.DateTime;
@@ -41,6 +42,8 @@ public class MT90GParser implements MT90GFragment, Parser {
     
     private final TrackerAgent trackerAgent;
     private final MeasurementService measurementService;
+    
+    public static final MathContext BATTERY_CALCULATION_MODE = new MathContext(3, RoundingMode.HALF_DOWN);
     
     @Autowired
     public MT90GParser(TrackerAgent trackerAgent, MeasurementService measurementService) {
@@ -97,21 +100,58 @@ public class MT90GParser implements MT90GFragment, Parser {
     }
 
     private void createMeasurements(ReportContext reportCtx, TrackerDevice device) {
+        DateTime date = new DateTime();
+
         BigDecimal speedValue = parseToBigDecimalOrNull(reportCtx.getEntry(10));
         if (speedValue != null) {
             measurementService.createSpeedMeasurement(speedValue, device);
         }
         BigDecimal gsmLevel = parseToBigDecimalOrNull(reportCtx.getEntry(9));
         if (gsmLevel != null) {
-            measurementService.createGSMLevelMeasurement(gsmLevel, device, new DateTime());
+            measurementService.createGSMLevelMeasurement(gsmLevel, device, date);
         }
         BigDecimal mileage = parseToBigDecimalOrNull(reportCtx.getEntry(14));
         if (mileage != null) {
             BigDecimal mileageInKM = convertToKm(mileage, reportCtx);
-            measurementService.createMileageMeasurement(mileageInKM, device, new DateTime());
+            measurementService.createMileageMeasurement(mileageInKM, device, date);
+        }
+        BigDecimal batteryVoltage = getBattery(reportCtx.getEntry(18));
+        if (batteryVoltage != null) {
+            measurementService.createBatteryLevelMeasurement(batteryVoltage, device, date, "V");
         }
     }
     
+    private BigDecimal getBattery(String analogEntry) {
+        if (!StringUtils.isEmpty(analogEntry)) {
+            return null;
+        }
+        String[] entries = analogEntry.split("|");
+        if (entries.length > 4) {
+            Integer ad4Int = getBatteryAnalogEntry(entries[3]);
+            return calculateBatteryVoltage(ad4Int);
+        }
+        return null;
+    }
+
+    private BigDecimal calculateBatteryVoltage(Integer ad4Int) {
+        if (ad4Int == null) {
+            return null;
+        }
+        BigDecimal ad4 = new BigDecimal(ad4Int);
+        BigDecimal result = ad4.multiply(new BigDecimal(3.3), BATTERY_CALCULATION_MODE)
+                                    .multiply(new BigDecimal(2), BATTERY_CALCULATION_MODE);
+        return result.divide(new BigDecimal(4096), BATTERY_CALCULATION_MODE);
+    }
+
+    private Integer getBatteryAnalogEntry(String hexAd4) {
+        try {
+            return Integer.parseInt(hexAd4, 16);
+        } catch (NumberFormatException e) {
+            logger.warn("Failed to parse tracker battery ad4 value to decimal: {}", hexAd4);
+        }
+        return null;
+    }
+
     private DateTime getTimestamp(ReportContext reportCtx, int index) {
         String timestampStr = reportCtx.getEntry(index);
         if(timestampStr == null) {
