@@ -9,5 +9,7 @@ public class MT90GConstants {
     public static final char REPORT_SEP = '\n';
     
     public static final DateTimeFormatter TIMESTAMP_FORMATTER = DateTimeFormat.forPattern("yyMMddHHmmss");
+    
+    public static final String DIRECTION = "direction";
 
 }

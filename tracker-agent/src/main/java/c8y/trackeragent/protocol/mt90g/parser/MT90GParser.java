@@ -27,6 +27,11 @@ import c8y.trackeragent.protocol.telic.TelicConstants;
 import c8y.trackeragent.service.MeasurementService;
 import c8y.trackeragent.utils.LocationEventBuilder;
 
+/**
+ * example command: $$_157,358884051405608,AAA,35,35.713820,139.770668,160421082033,
+ * V,0,4,0,111,0.0,627,121490,245809,440|10|0085|0439C053,0000,00D2|0000|0000|0ACB|0002,00000001,*8B
+ *
+ */
 @Component
 public class MT90GParser implements MT90GFragment, Parser {
     
@@ -78,6 +83,10 @@ public class MT90GParser implements MT90GFragment, Parser {
         Integer accuracy = reportCtx.getEntryAsInt(12);
         if (accuracy != null) {
             position.setAccuracy(accuracy);
+        }
+        Integer direction = reportCtx.getEntryAsInt(11);
+        if (direction != null) {
+            position.setProperty(MT90GConstants.DIRECTION, direction);
         }
         device.setPosition(locationEvent, position);
         
