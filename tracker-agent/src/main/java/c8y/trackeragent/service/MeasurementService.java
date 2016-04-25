@@ -85,7 +85,7 @@ public class MeasurementService {
     public MeasurementRepresentation createBatteryLevelMeasurement(BigDecimal batteryLevel, TrackerDevice device, DateTime date, String unit) {
         // TODO align with TrackerDevice
         MeasurementRepresentation measurement = new MeasurementRepresentation();
-        Battery batteryFragment = getBatteryFragment(batteryLevel, unit);
+        Battery batteryFragment = createBatteryFragment(batteryLevel, unit);
         measurement.set(batteryFragment);
         measurement.setType(TrackerDevice.BAT_TYPE);
         measurement.setSource(asSource(device));
@@ -94,7 +94,7 @@ public class MeasurementService {
         return measurement;
     }
 
-    public static Battery getBatteryFragment(BigDecimal batteryLevel, String unit) {
+    public static Battery createBatteryFragment(BigDecimal batteryLevel, String unit) {
         Battery batteryFragment = new Battery();
         batteryFragment.setLevel(measurementValue(batteryLevel, unit));
         return batteryFragment;
@@ -103,7 +103,7 @@ public class MeasurementService {
     public MeasurementRepresentation createGSMLevelMeasurement(BigDecimal percentageGSMLevel, TrackerDevice device, DateTime date) {
         // TODO align with TrackerDevice
         MeasurementRepresentation measurement = new MeasurementRepresentation();
-        SignalStrength signalFragment = getSignalStrength(percentageGSMLevel);
+        SignalStrength signalFragment = createSignalStrengthFragment(percentageGSMLevel);
         measurement.set(signalFragment,"c8y_SignalStrength");
         measurement.setType("c8y_SignalStrength");
         measurement.setSource(asSource(device));
@@ -112,7 +112,7 @@ public class MeasurementService {
         return measurement;
     }
 
-    public static SignalStrength getSignalStrength(BigDecimal percentageGSMLevel) {
+    public static SignalStrength createSignalStrengthFragment(BigDecimal percentageGSMLevel) {
         SignalStrength signalFragment = new SignalStrength();
         signalFragment.setProperty("quality", measurementValue(percentageGSMLevel, "%"));
         return signalFragment;
@@ -162,7 +162,7 @@ public class MeasurementService {
         return representation;
     }
     
-    public static DistanceMeasurement getDistanceMeasurement(BigDecimal mileage) {
+    public static DistanceMeasurement createDistanceMeasurementFragment(BigDecimal mileage) {
         DistanceMeasurement distanceMeasurement = new DistanceMeasurement();
         MeasurementValue measurementValue = new MeasurementValue();
         measurementValue.setUnit("km");

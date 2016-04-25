@@ -16,7 +16,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import com.cumulocity.rest.representation.event.EventRepresentation;
-import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 
@@ -111,18 +110,18 @@ public class MT90GParser implements MT90GFragment, Parser {
         }
         BigDecimal gsmLevel = reportCtx.getEntryAsNumber(9);
         if (gsmLevel != null) {
-            SignalStrength signalStrength = measurementService.getSignalStrength(gsmLevel);
+            SignalStrength signalStrength = measurementService.createSignalStrengthFragment(gsmLevel);
             measurement.set(signalStrength);
         }
         BigDecimal mileage = reportCtx.getEntryAsNumber(14);
         if (mileage != null) {
             BigDecimal mileageInKM = convertToKm(mileage, reportCtx);
-            DistanceMeasurement distanceMeasurement = measurementService.getDistanceMeasurement(mileageInKM);
+            DistanceMeasurement distanceMeasurement = measurementService.createDistanceMeasurementFragment(mileageInKM);
             measurement.set(distanceMeasurement);
         }
         BigDecimal batteryVoltage = getBattery(reportCtx.getEntry(18));
         if (batteryVoltage != null) {
-            Battery batteryFragment = measurementService.getBatteryFragment(batteryVoltage, "V");
+            Battery batteryFragment = measurementService.createBatteryFragment(batteryVoltage, "V");
             measurement.set(batteryFragment);
         }
         if (!measurement.getAttrs().isEmpty()) {
