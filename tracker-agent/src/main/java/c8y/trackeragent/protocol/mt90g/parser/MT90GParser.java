@@ -16,9 +16,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import com.cumulocity.rest.representation.event.EventRepresentation;
+import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
+import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 
-import c8y.Position;
+import c8y.*;
 import c8y.trackeragent.Parser;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.context.ReportContext;
@@ -100,24 +102,31 @@ public class MT90GParser implements MT90GFragment, Parser {
     }
 
     private void createMeasurements(ReportContext reportCtx, TrackerDevice device) {
-        DateTime date = new DateTime();
-
+        MeasurementRepresentation measurement = measurementService.getMeasurement(new DateTime(), "c8y_TrackerMeasurement", device);
+        
         BigDecimal speedValue = reportCtx.getEntryAsNumber(10);
         if (speedValue != null) {
-            measurementService.createSpeedMeasurement(speedValue, device);
+            SpeedMeasurement speedFragment = measurementService.createSpeedFragment(speedValue);
+            measurement.set(speedFragment);
         }
         BigDecimal gsmLevel = reportCtx.getEntryAsNumber(9);
         if (gsmLevel != null) {
-            measurementService.createGSMLevelMeasurement(gsmLevel, device, date);
+            SignalStrength signalStrength = measurementService.getSignalStrength(gsmLevel);
+            measurement.set(signalStrength);
         }
         BigDecimal mileage = reportCtx.getEntryAsNumber(14);
         if (mileage != null) {
             BigDecimal mileageInKM = convertToKm(mileage, reportCtx);
-            measurementService.createMileageMeasurement(mileageInKM, device, date);
+            DistanceMeasurement distanceMeasurement = measurementService.getDistanceMeasurement(mileageInKM);
+            measurement.set(distanceMeasurement);
         }
         BigDecimal batteryVoltage = getBattery(reportCtx.getEntry(18));
         if (batteryVoltage != null) {
-            measurementService.createBatteryLevelMeasurement(batteryVoltage, device, date, "V");
+            Battery batteryFragment = measurementService.getBatteryFragment(batteryVoltage, "V");
+            measurement.set(batteryFragment);
+        }
+        if (!measurement.getAttrs().isEmpty()) {
+            device.createMeasurement(measurement);
         }
     }
     

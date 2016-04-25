@@ -14,6 +14,7 @@ import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
 
 import c8y.Battery;
+import c8y.DistanceMeasurement;
 import c8y.SignalStrength;
 import c8y.SpeedMeasurement;
 import c8y.trackeragent.device.TrackerDevice;
@@ -84,8 +85,7 @@ public class MeasurementService {
     public MeasurementRepresentation createBatteryLevelMeasurement(BigDecimal batteryLevel, TrackerDevice device, DateTime date, String unit) {
         // TODO align with TrackerDevice
         MeasurementRepresentation measurement = new MeasurementRepresentation();
-        Battery batteryFragment = new Battery();
-        batteryFragment.setLevel(measurementValue(batteryLevel, unit));
+        Battery batteryFragment = getBatteryFragment(batteryLevel, unit);
         measurement.set(batteryFragment);
         measurement.setType(TrackerDevice.BAT_TYPE);
         measurement.setSource(asSource(device));
@@ -94,17 +94,28 @@ public class MeasurementService {
         return measurement;
     }
 
+    public static Battery getBatteryFragment(BigDecimal batteryLevel, String unit) {
+        Battery batteryFragment = new Battery();
+        batteryFragment.setLevel(measurementValue(batteryLevel, unit));
+        return batteryFragment;
+    }
+
     public MeasurementRepresentation createGSMLevelMeasurement(BigDecimal percentageGSMLevel, TrackerDevice device, DateTime date) {
         // TODO align with TrackerDevice
         MeasurementRepresentation measurement = new MeasurementRepresentation();
-        SignalStrength signalFragment = new SignalStrength();
-        signalFragment.setProperty("quality", measurementValue(percentageGSMLevel, "%"));
+        SignalStrength signalFragment = getSignalStrength(percentageGSMLevel);
         measurement.set(signalFragment,"c8y_SignalStrength");
         measurement.setType("c8y_SignalStrength");
         measurement.setSource(asSource(device));
         measurement.setTime(date.toDate());
         device.createMeasurement(measurement);
         return measurement;
+    }
+
+    public static SignalStrength getSignalStrength(BigDecimal percentageGSMLevel) {
+        SignalStrength signalFragment = new SignalStrength();
+        signalFragment.setProperty("quality", measurementValue(percentageGSMLevel, "%"));
+        return signalFragment;
     }
     
     private static MeasurementValue measurementValue(BigDecimal value, String unit) {
@@ -151,6 +162,15 @@ public class MeasurementService {
         return representation;
     }
     
+    public static DistanceMeasurement getDistanceMeasurement(BigDecimal mileage) {
+        DistanceMeasurement distanceMeasurement = new DistanceMeasurement();
+        MeasurementValue measurementValue = new MeasurementValue();
+        measurementValue.setUnit("km");
+        measurementValue.setValue(mileage);
+        distanceMeasurement.setDistance(measurementValue);
+        return distanceMeasurement;
+    }
+    
     public void createMotionMeasurement(boolean motion, TrackerDevice device, DateTime date) {
         MeasurementRepresentation measurement = asMeasurementWithMotion(motion, device, date);
         device.createMeasurement(measurement);
@@ -170,5 +190,13 @@ public class MeasurementService {
         representation.set(measurementSerie, "c8y_TrackerMotion");
         
         return representation;
+    }
+
+    public MeasurementRepresentation getMeasurement(DateTime dateTime, String type, TrackerDevice source) {
+        MeasurementRepresentation measurement = new MeasurementRepresentation();
+        measurement.setTime(new DateTime().toDate());
+        measurement.setType(type);
+        measurement.setSource(asSource(source));
+        return measurement;
     }
 }
