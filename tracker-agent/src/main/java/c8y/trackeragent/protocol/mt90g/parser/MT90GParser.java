@@ -134,7 +134,7 @@ public class MT90GParser implements MT90GFragment, Parser {
         if (StringUtils.isEmpty(analogEntry)) {
             return null;
         }
-        String[] entries = analogEntry.split("|");
+        String[] entries = analogEntry.split("\\|");
         if (entries.length > 4) {
             Integer ad4Int = getBatteryAnalogEntry(entries[3]);
             return calculateBatteryVoltage(ad4Int);
