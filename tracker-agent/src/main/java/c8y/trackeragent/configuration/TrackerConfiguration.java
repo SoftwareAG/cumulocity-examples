@@ -146,7 +146,8 @@ public class TrackerConfiguration {
     public Collection<TrackingProtocol> getLocalPort2Protocols() {
         return Arrays.asList(
                 TrackingProtocol.COBAN, 
-                TrackingProtocol.RFV16
+                TrackingProtocol.RFV16,
+                TrackingProtocol.MT90G
         );
     }
 

@@ -3,6 +3,7 @@ package c8y.trackeragent.protocol.mapping;
 import c8y.trackeragent.ConnectedTracker;
 import c8y.trackeragent.protocol.coban.ConnectedCobanTracker;
 import c8y.trackeragent.protocol.gl200.ConnectedGL200Tracker;
+import c8y.trackeragent.protocol.mt90g.ConnectedMT90GTracker;
 import c8y.trackeragent.protocol.rfv16.ConnectedRFV16Tracker;
 import c8y.trackeragent.protocol.telic.ConnectedTelicTracker;
 
@@ -35,6 +36,12 @@ public enum TrackingProtocol {
             return firstByte == '*';
         }
 
+    }, 
+    MT90G(ConnectedMT90GTracker.class) {
+        @Override
+        public boolean accept(byte firstByte) {
+            return firstByte == '$';
+        }
     };
 
     private final Class<? extends ConnectedTracker<?>> trackerClazz;

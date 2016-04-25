@@ -48,12 +48,33 @@ public class ReportContext extends ConnectionContext {
     
     public BigDecimal getEntryAsNumber(int index) {
         String entry = getEntry(index);
-        return StringUtils.isBlank(entry) ? null : new BigDecimal(entry.trim());
+        if (StringUtils.isBlank(entry)) { 
+            return null; 
+        }
+        try {
+            return new BigDecimal(entry.trim());
+        } catch (Exception e) {
+            logger.info("Cannot parse to BigDecimal value: " + entry);
+        }
+        return null;   
     }
     
     public Integer getEntryAsInt(int index) {
         String entry = getEntry(index);
         return StringUtils.isBlank(entry) ? null : Integer.parseInt(entry.trim());
+    }
+    
+    public Double getEntryAsDouble(int index) {
+        String entry = getEntry(index);
+        if (StringUtils.isEmpty(entry)) {
+            return null;
+        }
+        try {
+            return Double.valueOf(entry.trim());
+        } catch (Exception e) {
+            logger.info("Cannot parse to double value: " + entry);
+        }
+        return null;
     }
     
     public int getNumberOfEntries() {
