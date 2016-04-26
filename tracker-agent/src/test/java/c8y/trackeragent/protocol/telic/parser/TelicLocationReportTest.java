@@ -1,4 +1,4 @@
-package c8y.trackeragent.protocol.telic;
+package c8y.trackeragent.protocol.telic.parser;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Matchers.anyString;
@@ -22,6 +22,7 @@ import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.protocol.CommonConstants;
 import c8y.trackeragent.protocol.telic.TelicConstants;
+import c8y.trackeragent.protocol.telic.TelicDeviceMessages;
 import c8y.trackeragent.protocol.telic.parser.FixType;
 import c8y.trackeragent.protocol.telic.parser.LogCodeType;
 import c8y.trackeragent.protocol.telic.parser.TelicLocationReport;
@@ -238,5 +239,15 @@ public class TelicLocationReportTest {
     	assertThat(output).isEqualTo(new BigDecimal(4.22, TelicLocationReport.BATTERY_CALCULATION_MODE));
 		
 	}
+    
+    @Test
+    public void shouldNormalizeBatteryOnlyForCertainDevice() throws Exception {
+        String[] report = new String[21];
+        report[20] = TelicLocationReport.devicesRequireBatteryCalculation.get(0);
+        report[17] = "238";
+        BigDecimal batteryLevel = telic.getBatteryLevel(new ReportContext(report, Devices.IMEI_1, null));
+        
+        assertThat(batteryLevel).isEqualTo(new BigDecimal(4.22, TelicLocationReport.BATTERY_CALCULATION_MODE));
+    }
     
 }

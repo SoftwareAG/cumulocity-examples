@@ -75,7 +75,7 @@ public class TelicLocationReport implements Parser, TelicFragment {
     public static final MathContext BATTERY_CALCULATION_MODE = new MathContext(3, RoundingMode.HALF_DOWN);
     public static final BigDecimal BATTERY_DIVISOR = new BigDecimal(1000);
     
-    private static final List<String> devicesRequireBatteryCalculation = asList("0108", "0109");
+    public static final List<String> devicesRequireBatteryCalculation = asList("0108", "0109");
 
     private TrackerAgent trackerAgent;
 
@@ -217,7 +217,7 @@ public class TelicLocationReport implements Parser, TelicFragment {
         return mileage == null ? null : mileage.divide(MILEAGE_DIVISOR);
     }
     
-    private BigDecimal getBatteryLevel(ReportContext reportCtx) {
+    BigDecimal getBatteryLevel(ReportContext reportCtx) {
         BigDecimal batteryLevel = reportCtx.getEntryAsNumber(BATTERY);
         if (batteryLevel == null) {
             return null;
