@@ -66,7 +66,7 @@ public class TelicLocationReport implements Parser, TelicFragment {
     
     static final int BATTERY = 17;
     
-    static final int DEVICE_ID = 20;//or 21
+    static final int DEVICE_ID = 20;
     
 
     public static final BigDecimal MILEAGE_DIVISOR = new BigDecimal(1000);
@@ -75,7 +75,7 @@ public class TelicLocationReport implements Parser, TelicFragment {
     public static final MathContext BATTERY_CALCULATION_MODE = new MathContext(3, RoundingMode.HALF_DOWN);
     public static final BigDecimal BATTERY_DIVISOR = new BigDecimal(1000);
     
-    private static final List<String> devicesWithCalculatedBatteryLvl = asList("0204", "0208", "0209");
+    private static final List<String> devicesRequireBatteryCalculation = asList("0108", "0109");
 
     private TrackerAgent trackerAgent;
 
@@ -233,9 +233,9 @@ public class TelicLocationReport implements Parser, TelicFragment {
 	private boolean isRequiredCalculation(ReportContext reportCtx) {
         String deviceId = reportCtx.getEntry(DEVICE_ID);
         if (deviceId == null) {
-            return true;
+            return false;
         }
-        return !(devicesWithCalculatedBatteryLvl.contains(deviceId));
+        return devicesRequireBatteryCalculation.contains(deviceId);
     }
 
     private BigDecimal convertToVolt(BigDecimal batteryLevel) {
