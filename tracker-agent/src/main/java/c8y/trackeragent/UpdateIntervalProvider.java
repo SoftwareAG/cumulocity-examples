@@ -35,6 +35,9 @@ public class UpdateIntervalProvider {
 		if (host == null) {
 			throw new RuntimeException("Host cannot be null for options repository.");
 		}
+		if (host.charAt(host.length() - 1) != '/') {
+            host = host + "/";
+        }
 
 		this.path = host + optionEndpoint;
 		logger.info("Will use the following path to get update interval option: {}", path);
