@@ -242,9 +242,22 @@ public class TelicLocationReportTest {
     
     @Test
     public void shouldNormalizeBatteryOnlyForCertainDevice() throws Exception {
+        String battery = "238";
         String[] report = new String[21];
         report[20] = TelicLocationReport.devicesRequireBatteryCalculation.get(0);
-        report[17] = "238";
+        report[17] = battery;
+        BigDecimal batteryLevel = telic.getBatteryLevel(new ReportContext(report, Devices.IMEI_1, null));
+        
+        assertThat(batteryLevel).isEqualTo(new BigDecimal(4.22, TelicLocationReport.BATTERY_CALCULATION_MODE));
+    }
+    
+    @Test
+    public void shouldNotNormalizeBattery() throws Exception {
+        String deviceId = "0209";
+        String battery = "4220";
+        String[] report = new String[21];
+        report[20] = deviceId;
+        report[17] = battery;
         BigDecimal batteryLevel = telic.getBatteryLevel(new ReportContext(report, Devices.IMEI_1, null));
         
         assertThat(batteryLevel).isEqualTo(new BigDecimal(4.22, TelicLocationReport.BATTERY_CALCULATION_MODE));

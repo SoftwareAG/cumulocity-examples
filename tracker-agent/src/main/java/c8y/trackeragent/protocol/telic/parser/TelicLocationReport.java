@@ -224,7 +224,7 @@ public class TelicLocationReport implements Parser, TelicFragment {
         }
         
         if (isRequiredCalculation(reportCtx)) {
-            return convertToVolt(normalizeBatteryLevel(batteryLevel));
+            return normalizeBatteryLevel(batteryLevel);
         } else {
             return convertToVolt(batteryLevel);
         }
