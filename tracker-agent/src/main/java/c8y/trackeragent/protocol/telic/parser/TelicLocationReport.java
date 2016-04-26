@@ -1,10 +1,12 @@
 package c8y.trackeragent.protocol.telic.parser;
 
 import static com.cumulocity.model.DateConverter.date2String;
+import static java.util.Arrays.asList;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.util.List;
 
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -64,11 +66,16 @@ public class TelicLocationReport implements Parser, TelicFragment {
     
     static final int BATTERY = 17;
     
+    static final int DEVICE_ID = 20;
+    
 
     public static final BigDecimal MILEAGE_DIVISOR = new BigDecimal(1000);
     public static final BigDecimal BATTERY_MULTIPLIER = new BigDecimal(0.00345);
     public static final BigDecimal BATTERY_INCREMENTOR = new BigDecimal(3.4);
     public static final MathContext BATTERY_CALCULATION_MODE = new MathContext(3, RoundingMode.HALF_DOWN);
+    public static final BigDecimal BATTERY_DIVISOR = new BigDecimal(1000);
+    
+    public static final List<String> devicesRequireBatteryCalculation = asList("0108", "0109");
 
     private TrackerAgent trackerAgent;
 
@@ -210,16 +217,32 @@ public class TelicLocationReport implements Parser, TelicFragment {
         return mileage == null ? null : mileage.divide(MILEAGE_DIVISOR);
     }
     
-    private BigDecimal getBatteryLevel(ReportContext reportCtx) {
+    BigDecimal getBatteryLevel(ReportContext reportCtx) {
         BigDecimal batteryLevel = reportCtx.getEntryAsNumber(BATTERY);
-		if (batteryLevel == null) {
-			return null;
-		} else {
-			return normalizeBatteryLevel(batteryLevel);
-		}
+        if (batteryLevel == null) {
+            return null;
+        }
+        
+        if (isRequiredCalculation(reportCtx)) {
+            return normalizeBatteryLevel(batteryLevel);
+        } else {
+            return convertToVolt(batteryLevel);
+        }
     }
 
-	public static BigDecimal normalizeBatteryLevel(BigDecimal batteryLevel) {
+	private boolean isRequiredCalculation(ReportContext reportCtx) {
+        String deviceId = reportCtx.getEntry(DEVICE_ID);
+        if (deviceId == null) {
+            return false;
+        }
+        return devicesRequireBatteryCalculation.contains(deviceId);
+    }
+
+    private BigDecimal convertToVolt(BigDecimal batteryLevel) {
+        return batteryLevel.divide(BATTERY_DIVISOR);
+    }
+
+    public static BigDecimal normalizeBatteryLevel(BigDecimal batteryLevel) {
 		return batteryLevel.multiply(BATTERY_MULTIPLIER, BATTERY_CALCULATION_MODE).add(BATTERY_INCREMENTOR, BATTERY_CALCULATION_MODE);
 	}
     
