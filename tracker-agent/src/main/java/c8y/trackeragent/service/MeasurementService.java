@@ -68,7 +68,7 @@ public class MeasurementService {
         measurement.set(speedFragment);
         measurement.setType("c8y_Speed");
         measurement.setSource(asSource(device));
-        measurement.setTime(date.toDate());
+        measurement.setDateTime(date);
         return measurement;
     }
 
@@ -89,7 +89,7 @@ public class MeasurementService {
         measurement.set(batteryFragment);
         measurement.setType(TrackerDevice.BAT_TYPE);
         measurement.setSource(asSource(device));
-        measurement.setTime(date.toDate());
+        measurement.setDateTime(date);
         device.createMeasurement(measurement);
         return measurement;
     }
@@ -107,7 +107,7 @@ public class MeasurementService {
         measurement.set(signalFragment,"c8y_SignalStrength");
         measurement.setType("c8y_SignalStrength");
         measurement.setSource(asSource(device));
-        measurement.setTime(date.toDate());
+        measurement.setDateTime(date);
         device.createMeasurement(measurement);
         return measurement;
     }
