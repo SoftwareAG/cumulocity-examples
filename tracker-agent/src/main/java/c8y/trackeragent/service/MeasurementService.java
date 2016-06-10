@@ -15,6 +15,7 @@ import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
 
 import c8y.Battery;
 import c8y.DistanceMeasurement;
+import c8y.GpsQuality;
 import c8y.SignalStrength;
 import c8y.SpeedMeasurement;
 import c8y.trackeragent.device.TrackerDevice;
@@ -198,5 +199,22 @@ public class MeasurementService {
         measurement.setType(type);
         measurement.setSource(asSource(source));
         return measurement;
+    }
+    
+    public void createGpsQualityMeasurement(int satellites, BigDecimal quality, TrackerDevice device, DateTime date) {
+        MeasurementRepresentation measurement = asMeasurementWithGpsQuality(satellites, quality, device, date);
+        device.createMeasurement(measurement);
+    }
+    
+    private MeasurementRepresentation asMeasurementWithGpsQuality(int satellites, BigDecimal quality, TrackerDevice device, DateTime date) {
+        MeasurementRepresentation representation = new MeasurementRepresentation();
+        representation.setDateTime(date);
+        representation.setSource(asSource(device));
+        representation.setType("c8y_GpsQuality");
+        GpsQuality gpsQuality = new GpsQuality();
+        gpsQuality.setSatellitesValue(satellites);
+        gpsQuality.setQualityValue(quality);
+        representation.set(gpsQuality);
+        return representation;
     }
 }

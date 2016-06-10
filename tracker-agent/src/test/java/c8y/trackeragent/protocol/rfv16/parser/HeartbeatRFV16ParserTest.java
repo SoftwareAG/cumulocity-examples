@@ -96,6 +96,15 @@ public class HeartbeatRFV16ParserTest extends RFV16ParserTestSupport {
         
     }
     
+    @Test
+    public void shouldCreateGpsQualityMeasurement() throws Exception {
+        TrackerMessage msg = deviceMessages.heartbeat("DB", IMEI, null, null, 8);
+        
+        processMessage(msg);
+        
+        verify(measurementService).createGpsQualityMeasurement(eq(8), eq(new BigDecimal(60)), any(TrackerDevice.class), any(DateTime.class));
+    }
+    
     private void processMessage(TrackerMessage msg) {
         ReportContext reportCtx = new ReportContext(msg.asArray(), IMEI, out);
         parser.onParsed(reportCtx);

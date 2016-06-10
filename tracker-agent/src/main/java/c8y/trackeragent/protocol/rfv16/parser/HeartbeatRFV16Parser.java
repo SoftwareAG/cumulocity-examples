@@ -72,7 +72,21 @@ public class HeartbeatRFV16Parser extends RFV16Parser implements Parser {
         if (gsmLevel != null) {
             measurementService.createGSMLevelMeasurement(gsmLevel, device, new DateTime());
         }
+        Integer satellites = getGPSSatellites(reportCtx);
+        if (satellites != null) {
+            BigDecimal quality = resolveQualityLevel(satellites);
+            measurementService.createGpsQualityMeasurement(satellites.intValue(), quality, device, new DateTime());
+        }
+        
         return true;
+    }
+
+    private BigDecimal resolveQualityLevel(Integer satellites) {
+        if (satellites > 11) {
+            return new BigDecimal(100);
+        } else {
+            return new BigDecimal((satellites - 2) * 10);
+        }
     }
 
     private void sendAlarmsWithLastPosition(ReportContext reportCtx, TrackerDevice device, Collection<AlarmRepresentation> alarms) {
@@ -107,6 +121,10 @@ public class HeartbeatRFV16Parser extends RFV16Parser implements Parser {
     
     private BigDecimal getGSMPercentageLevel(ReportContext reportCtx) {
         return reportCtx.getEntryAsNumber(4);
+    }
+    
+    private Integer getGPSSatellites(ReportContext reportCtx) {
+        return reportCtx.getEntryAsInt(5);
     }
 
 

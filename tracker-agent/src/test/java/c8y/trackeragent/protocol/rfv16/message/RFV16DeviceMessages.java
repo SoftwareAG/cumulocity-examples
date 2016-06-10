@@ -117,6 +117,21 @@ public class RFV16DeviceMessages extends RFV16ServerMessages {
                 .appendField(currDate())  
                 .appendField(DEFAULT_TRACKER_STATUS);
     }
+    
+    public TrackerMessage heartbeat(String maker, String imei, Integer gsmPercentage, Integer bateryPercentage, Integer satellites) {
+        return msg()
+                .appendField(maker)
+                .appendField(imei)
+                .appendField(RFV16Constants.MESSAGE_TYPE_LINK)
+                .appendField(currTime())
+                .appendField(nullToEmpty(gsmPercentage))    //GSM 
+                .appendField(nullToEmpty(satellites)) //GPS
+                .appendField(nullToEmpty(bateryPercentage)) //BAT
+                .appendField("") //STEP
+                .appendField("") //TUNROVER
+                .appendField(currDate())  
+                .appendField(DEFAULT_TRACKER_STATUS);
+    }
 
     /**
      * @param maker
