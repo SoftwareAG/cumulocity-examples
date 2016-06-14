@@ -4,6 +4,7 @@ public enum LogCodeType {
     
     POWER_EVENT_ON("Power ON Event", "1"),
     EMERGENCY("Emergency", "2"),
+    POSITION_LOCK_ALARM("Position Lock Alarm", "3"), 
     ALARM_TRACKING("Alarm Tracking", "4"),
     POWER_EVENT_OFF("Power OFF Event", "5"),
     ANGULAR_CHANGE_EVENT("Angular Change Event", "6"),
@@ -13,6 +14,8 @@ public enum LogCodeType {
     PERIODIC_WAKEUP("Periodic Wakeup", "10"),
     MOTION_SENSOR_MOTION("Motion Start", "25"),
     MOTION_SENSOR_STATIONARY("Motion Stop", "26"),
+    INCOMING_CALL_EVENT("Incoming Call Event", "30"),
+    HEARTBEAT_EVENT("Heartbeat Event", "32"),
     DISTANCE_EVENT("Distance Event", "98"),
     TIME_EVENT("Time Event", "99");
     
