@@ -20,6 +20,7 @@
 
 package c8y.trackeragent;
 
+import static java.util.Arrays.asList;
 import static org.fest.assertions.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -40,11 +41,17 @@ import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 
-import c8y.trackeragent.event.TrackerAgentEvents;
-import c8y.trackeragent.operations.OperationContext;
-import c8y.trackeragent.utils.TrackerContext;
-
 import com.cumulocity.sdk.client.SDKException;
+
+import c8y.trackeragent.context.OperationContext;
+import c8y.trackeragent.context.ReportContext;
+import c8y.trackeragent.devicebootstrap.DeviceBootstrapProcessor;
+import c8y.trackeragent.devicebootstrap.DeviceCredentials;
+import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
+import c8y.trackeragent.exception.UnknownDeviceException;
+import c8y.trackeragent.exception.UnknownTenantException;
+import c8y.trackeragent.protocol.gl200.GL200Constants;
+import c8y.trackeragent.service.TrackerDeviceContextService;
 
 public class ConnectedTrackerTest {
     
@@ -52,55 +59,63 @@ public class ConnectedTrackerTest {
     public static final String REPORT2 = "field3|field4";
     private static final Charset CHARSET = Charset.forName("US-ASCII");
 
+    private TrackerDeviceContextService contextService = mock(TrackerDeviceContextService.class);
     private Socket client = mock(Socket.class);
-    private BufferedInputStream bis = mock(BufferedInputStream.class);
+    private BufferedInputStream in = mock(BufferedInputStream.class);
     private OutputStream out = mock(OutputStream.class);
     private Translator translator = mock(Translator.class);
     private Parser parser = mock(Parser.class);
-    private TrackerAgent trackerAgent = mock(TrackerAgent.class);
-    private TrackerContext trackerContext = mock(TrackerContext.class);
-    private ConnectedTracker tracker;
+    private DeviceBootstrapProcessor bootstrapProcessor = mock(DeviceBootstrapProcessor.class);
+    private DeviceCredentialsRepository credentialsRepository = mock(DeviceCredentialsRepository.class);
+    private ConnectedTracker<Fragment> tracker;
 
     @Before
-    public void setup() throws IOException {
+    public void setup() throws Exception {
         ConnectionRegistry.instance().remove("imei");
-        when(trackerAgent.getContext()).thenReturn(trackerContext);
-        tracker = new ConnectedTracker(client, bis, GL200Constants.REPORT_SEP, GL200Constants.FIELD_SEP, trackerAgent);
-        tracker.addFragment(translator);
-        tracker.addFragment(parser);
+        tracker = new ConnectedTracker<Fragment>(
+        		GL200Constants.REPORT_SEP, 
+        		GL200Constants.FIELD_SEP,
+        		asList(translator, parser),
+        		bootstrapProcessor,
+        		credentialsRepository,
+        		contextService);
+        tracker.init(client, in);
         tracker.setOut(out);
     }
 
     @Test
-    public void singleReportProcessing() throws SDKException {
+    public void singleReportProcessing() throws Exception {
+    	when(credentialsRepository.getDeviceCredentials("imei")).thenReturn(DeviceCredentials.forDevice("imei", "tenant"));
+    	when(credentialsRepository.getAgentCredentials("tenant")).thenReturn(DeviceCredentials.forAgent("tenant", "user", "password"));
         String[] dummyReport = null;
         when(parser.parse(dummyReport)).thenReturn("imei");
         when(parser.onParsed(new ReportContext(dummyReport, "imei", null))).thenReturn(true);
-        when(trackerContext.isDeviceRegistered("imei")).thenReturn(true);
 
         tracker.processReport(dummyReport);
 
         verify(parser).parse(dummyReport);
-        verify(parser).onParsed(new ReportContext(dummyReport, "imei", null));
         verifyZeroInteractions(translator);
         assertEquals(tracker, ConnectionRegistry.instance().get("imei"));
     }
     
     @Test
     public void singleReportProcessingForNewImei() throws SDKException {
+    	when(credentialsRepository.getDeviceCredentials("imei")).thenThrow(UnknownDeviceException.forImei("imei"));
+    	when(credentialsRepository.getAgentCredentials("tenant")).thenThrow(UnknownTenantException.forTenantId("tenant"));
         String[] dummyReport = null;
         when(parser.parse(dummyReport)).thenReturn("imei");
-        when(trackerContext.isDeviceRegistered("imei")).thenReturn(false);
         
         tracker.processReport(dummyReport);
         
         assertThat(ConnectionRegistry.instance()).isEmpty();
-        verify(tracker.trackerAgent).sendEvent(any(TrackerAgentEvents.NewDeviceEvent.class));
+        verify(bootstrapProcessor).tryAccessDeviceCredentials("imei");
         verifyZeroInteractions(translator);
     }
 
     @Test
     public void reportReading() throws IOException {
+    	when(credentialsRepository.getDeviceCredentials("imei")).thenThrow(UnknownDeviceException.forImei("imei"));
+    	when(credentialsRepository.getAgentCredentials("tenant")).thenThrow(UnknownTenantException.forTenantId("tenant"));
         String reports = REPORT1 + GL200Constants.REPORT_SEP + REPORT2 + GL200Constants.REPORT_SEP;
         ByteArrayInputStream is = null;
         try {
@@ -118,8 +133,9 @@ public class ConnectedTrackerTest {
 
     @Test
     public void continuousReportProcessing() throws IOException, SDKException {
+    	when(credentialsRepository.getDeviceCredentials("imei")).thenReturn(DeviceCredentials.forDevice("imei", "tenant"));
+    	when(credentialsRepository.getAgentCredentials("tenant")).thenReturn(DeviceCredentials.forAgent("tenant", "user", "password"));    	
         when(parser.parse(any(String[].class))).thenReturn("imei");
-        when(trackerContext.isDeviceRegistered("imei")).thenReturn(true);
 
         String reports = REPORT1 + GL200Constants.REPORT_SEP + REPORT2 + GL200Constants.REPORT_SEP;
 
@@ -138,6 +154,8 @@ public class ConnectedTrackerTest {
 
     @Test
     public void testExecute() throws IOException {
+    	when(credentialsRepository.getDeviceCredentials("imei")).thenThrow(UnknownDeviceException.forImei("imei"));
+    	when(credentialsRepository.getAgentCredentials("tenant")).thenThrow(UnknownTenantException.forTenantId("tenant"));    	
         String translation = "translation";
 
         OperationContext operation = mock(OperationContext.class);

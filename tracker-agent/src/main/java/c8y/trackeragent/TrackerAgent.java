@@ -1,60 +1,52 @@
 package c8y.trackeragent;
 
-import c8y.trackeragent.event.TrackerAgentEventListener;
-import c8y.trackeragent.exception.UnknownTenantException;
-import c8y.trackeragent.utils.TrackerContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
-import com.google.common.eventbus.EventBus;
 
+import c8y.trackeragent.device.ManagedObjectCache;
+import c8y.trackeragent.device.TrackerDevice;
+import c8y.trackeragent.device.TrackerDeviceProvider;
+import c8y.trackeragent.devicebootstrap.DeviceCredentials;
+import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
+import c8y.trackeragent.exception.UnknownTenantException;
+import c8y.trackeragent.utils.TrackerPlatformProvider;
+
+@Component
 public class TrackerAgent {
     
-    /**
-     * @deprecated
-     * TODO remove and replace with direct invocations 
-     */
-    private final EventBus eventBus;
-    private final TrackerContext context;
-
-    public TrackerAgent(TrackerContext trackerContext) {
-        this.context = trackerContext;
-        this.eventBus = new EventBus("tracker-agent");
+	private final DeviceCredentialsRepository credentialsRepository;
+	private final TrackerPlatformProvider platformProvider;
+	private final TrackerDeviceProvider trackerDeviceProvider;
+	
+    @Autowired
+    public TrackerAgent(TrackerDeviceProvider trackerDeviceProvider, DeviceCredentialsRepository credentialsRepository,  TrackerPlatformProvider platformProvider) {
+		this.trackerDeviceProvider = trackerDeviceProvider;
+		this.credentialsRepository = credentialsRepository;
+		this.platformProvider = platformProvider;
     }
 
     public TrackerDevice getOrCreateTrackerDevice(String imei) throws SDKException {
-        TrackerDevice device = ManagedObjectCache.instance().get(imei);
-        if (device == null) {
-            TrackerPlatform platform = context.getDevicePlatform(imei);
-            device = new TrackerDevice(platform, context.getConfiguration(), platform.getAgentId(), imei);
-            ManagedObjectCache.instance().put(device);
-        }
-        return device;
+    	DeviceCredentials deviceCredentials = credentialsRepository.getDeviceCredentials(imei);
+    	return trackerDeviceProvider.getOrCreate(deviceCredentials.getTenant(), imei);
     }
-
+    
     public void finish(String deviceImei, OperationRepresentation operation) throws UnknownTenantException {
         operation.setStatus(OperationStatus.SUCCESSFUL.toString());
-        context.getDevicePlatform(deviceImei).getDeviceControlApi().update(operation);
+        getPlatform(deviceImei).getDeviceControlApi().update(operation);
     }
 
     public void fail(String deviceImei, OperationRepresentation operation, String text, SDKException ex) {
         operation.setStatus(OperationStatus.FAILED.toString());
         operation.setFailureReason(text + " " + ex.getMessage());
-        context.getDevicePlatform(deviceImei).getDeviceControlApi().update(operation);
+        getPlatform(deviceImei).getDeviceControlApi().update(operation);
     }
-    
-    public void registerEventListener(TrackerAgentEventListener... eventListeners) {
-        for (Object eventListener : eventListeners) {
-            eventBus.register(eventListener);
-        }
-    }
-    
-    public TrackerContext getContext() {
-        return context;
-    }
-
-    public void sendEvent(Object event) {
-        eventBus.post(event);
+        
+    private TrackerPlatform getPlatform(String imei) {
+    	DeviceCredentials deviceCredentials = credentialsRepository.getDeviceCredentials(imei);
+    	return platformProvider.getTenantPlatform(deviceCredentials.getTenant());
     }
 }

@@ -5,7 +5,7 @@ import static org.fest.assertions.Assertions.assertThat;
 import org.junit.Before;
 import org.junit.Test;
 
-import c8y.trackeragent.operations.OperationContext;
+import c8y.trackeragent.context.OperationContext;
 import c8y.trackeragent.protocol.coban.device.CobanDevice;
 import c8y.trackeragent.utils.message.TrackerMessage;
 

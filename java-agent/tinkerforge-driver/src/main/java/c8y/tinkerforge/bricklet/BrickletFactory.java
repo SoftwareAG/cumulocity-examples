@@ -33,7 +33,6 @@ import c8y.tinkerforge.bricklet.TemperatureBricklet;
 
 import com.tinkerforge.BrickMaster;
 import com.tinkerforge.BrickletAmbientLight;
-import com.tinkerforge.BrickletAnalogIn;
 import com.tinkerforge.BrickletBarometer;
 import com.tinkerforge.BrickletCurrent12;
 import com.tinkerforge.BrickletCurrent25;
@@ -111,8 +110,6 @@ public class BrickletFactory {
 			return null;
 		case BrickletAmbientLight.DEVICE_IDENTIFIER:
 			return new LightBricklet(uid, new BrickletAmbientLight(uid, ipcon));
-		case BrickletAnalogIn.DEVICE_IDENTIFIER:
-			return new AnalogInBricklet(uid, new BrickletAnalogIn(uid, ipcon));
 		case BrickletBarometer.DEVICE_IDENTIFIER:
 			return new BarometerBricklet(uid, new BrickletBarometer(uid, ipcon));
 		case BrickletDistanceIR.DEVICE_IDENTIFIER:

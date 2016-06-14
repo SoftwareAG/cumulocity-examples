@@ -26,26 +26,16 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import c8y.Geofence;
-import c8y.IsDevice;
-import c8y.MotionTracking;
-import c8y.Position;
-import c8y.SupportedOperations;
-import c8y.trackeragent.ConnectionRegistry;
-import c8y.trackeragent.Executor;
-import c8y.trackeragent.TrackerAgent;
-import c8y.trackeragent.TrackerDevice;
-import c8y.trackeragent.devicebootstrap.DeviceCredentials;
-import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
-import c8y.trackeragent.operations.OperationContext;
-import c8y.trackeragent.utils.Devices;
-import c8y.trackeragent.utils.TrackerContext;
-
+import com.cumulocity.agent.server.context.DeviceContext;
 import com.cumulocity.model.ID;
 import com.cumulocity.model.event.CumulocityAlarmStatuses;
 import com.cumulocity.model.idtype.GId;
@@ -61,10 +51,26 @@ import com.cumulocity.sdk.client.measurement.MeasurementApi;
 import com.cumulocity.sdk.client.measurement.MeasurementCollection;
 import com.cumulocity.sdk.client.measurement.MeasurementFilter;
 
-public class TrackerDeviceIT extends TrackerITSupport {
+import c8y.Geofence;
+import c8y.IsDevice;
+import c8y.MotionTracking;
+import c8y.Position;
+import c8y.SupportedOperations;
+import c8y.trackeragent.ConnectedTracker;
+import c8y.trackeragent.ConnectionRegistry;
+import c8y.trackeragent.Executor;
+import c8y.trackeragent.context.OperationContext;
+import c8y.trackeragent.device.TrackerDevice;
+import c8y.trackeragent.devicebootstrap.DeviceCredentials;
+import c8y.trackeragent.protocol.mapping.TrackingProtocol;
+import c8y.trackeragent.utils.Devices;
 
-    public static final String IMEI = Devices.IMEI_1;
-    public static final ID extId = new ID(IMEI);
+public class TrackerDeviceIT extends TrackerITSupport {
+    
+    protected static Logger logger = LoggerFactory.getLogger(ConnectedTracker.class);
+
+    private String imei = Devices.IMEI_1;
+    private ID extId = new ID(imei);
     public static final BigDecimal LATITUDE = new BigDecimal(37.0625);
     public static final BigDecimal LONGITUDE = new BigDecimal(-95.677068);
     public static final BigDecimal ALTITUDE = new BigDecimal(1);
@@ -72,35 +78,52 @@ public class TrackerDeviceIT extends TrackerITSupport {
 
     @Before
     public void setup() throws IOException {
+        this.imei = Devices.randomImei();
+        this.extId = new ID(imei);
         // Clean up previous tests
         try {
             extId.setType("c8y_Imei");
-            ExternalIDRepresentation eir = testPlatform.getIdentityApi().getExternalId(extId);
+            ExternalIDRepresentation eir = trackerPlatform.getIdentityApi().getExternalId(extId);
             GId gid = eir.getManagedObject().getId();
-            testPlatform.getInventoryApi().delete(gid);
+            trackerPlatform.getInventoryApi().delete(gid);
         } catch (SDKException e) {
         }
 
-        ConnectionRegistry.instance().put(IMEI, new Executor() {
+        ConnectionRegistry.instance().put(imei, new Executor() {
             @Override
             public void execute(OperationContext operation) throws IOException {
                 // Nothing
             }
+
+			@Override
+			public Map<String, Object> getConnectionParams() {
+				return new HashMap<String, Object>();
+			}
+            
         });
+    }
+    
+    @Override
+    protected TrackingProtocol getTrackerProtocol() {
+        return TrackingProtocol.TELIC;
     }
 
     @Test
     public void shouldSetTrackerData() throws SDKException, InterruptedException {
-        bindTestPlatformCredentials(IMEI);
+    	deviceCredentialsRepository.saveDeviceCredentials(DeviceCredentials.forDevice(imei, trackerPlatform.getTenantId()));
+        DeviceCredentials agentCredentials = DeviceCredentials.forAgent(trackerPlatform.getTenantId(), trackerPlatform.getUser(), trackerPlatform.getPassword());
+        deviceCredentialsRepository.saveAgentCredentials(agentCredentials);    	
+    	DeviceContext deviceContext = new DeviceContext(agentCredentials);
+    	contextService.enterContext(deviceContext);
+        saveAgentCredentials(imei);
         GId gid = createTrackerData();
         validateTrackerData(gid);
     }
 
     private GId createTrackerData() throws SDKException, InterruptedException {
-
-        TrackerContext trackerContext = new TrackerContext(trackerAgentConfig);
-        TrackerAgent trackerAgent = new TrackerAgent(trackerContext);
-        TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(IMEI);
+        TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(imei);
+        
+        logger.info("Device created for id {} (agentId: {})", device.getGId(), device.getAgentId());        
 
         Geofence fence = new Geofence();
         fence.setLat(LATITUDE);
@@ -140,7 +163,7 @@ public class TrackerDeviceIT extends TrackerITSupport {
     }
 
     private void validateTrackerData(GId gid) throws SDKException {
-        InventoryApi inventory = testPlatform.getInventoryApi();
+        InventoryApi inventory = trackerPlatform.getInventoryApi();
         ManagedObjectRepresentation mo = inventory.get(gid);
 
         assertNotNull(mo.get(IsDevice.class));
@@ -163,7 +186,7 @@ public class TrackerDeviceIT extends TrackerITSupport {
         assertNotNull(tracking);
         assertTrue(tracking.isActive());
 
-        AlarmApi alarms = testPlatform.getAlarmApi();
+        AlarmApi alarms = trackerPlatform.getAlarmApi();
 
         AlarmFilter filter = new AlarmFilter();
         filter.bySource(mo.getId());
@@ -171,7 +194,7 @@ public class TrackerDeviceIT extends TrackerITSupport {
             assertEquals(CumulocityAlarmStatuses.CLEARED.toString(), alarm.getStatus());
         }
 
-        MeasurementApi measurements = testPlatform.getMeasurementApi();
+        MeasurementApi measurements = trackerPlatform.getMeasurementApi();
         MeasurementFilter mf = new MeasurementFilter();
         mf.bySource(mo.getId());
         MeasurementCollection mpcr = measurements.getMeasurementsByFilter(mf);
@@ -183,14 +206,11 @@ public class TrackerDeviceIT extends TrackerITSupport {
         assertEquals(one.doubleValue(), two.doubleValue(), 0.01);
     }
     
-    private void bindTestPlatformCredentials(String imei) {
-        //@formatter:off
-        DeviceCredentials deviceCredentials = new DeviceCredentials()
-            .setTenantId(testPlatform.getTenantId())
-            .setImei(imei)
-            .setUser(testPlatform.getUser())
-            .setPassword(testPlatform.getPassword());
-        DeviceCredentialsRepository.get().saveCredentials(deviceCredentials);
-        //@formatter:on
+    private DeviceCredentials saveAgentCredentials(String imei) {
+    	DeviceCredentials deviceCredentials = DeviceCredentials.forDevice(imei, trackerPlatform.getTenantId());
+        deviceCredentialsRepository.saveDeviceCredentials(deviceCredentials);
+        DeviceCredentials agentCredentials = DeviceCredentials.forAgent(trackerPlatform.getTenantId(), trackerPlatform.getUser(), trackerPlatform.getPassword());
+        deviceCredentialsRepository.saveAgentCredentials(agentCredentials);
+        return agentCredentials;
     }
 }

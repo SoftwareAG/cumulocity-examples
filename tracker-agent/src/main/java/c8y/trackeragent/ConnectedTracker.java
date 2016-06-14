@@ -24,66 +24,95 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import c8y.trackeragent.event.TrackerAgentEvents;
-import c8y.trackeragent.operations.OperationContext;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.cumulocity.model.operation.OperationStatus;
-import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
+import com.google.common.collect.Iterables;
+
+import c8y.trackeragent.context.OperationContext;
+import c8y.trackeragent.context.ReportContext;
+import c8y.trackeragent.device.ManagedObjectCache;
+import c8y.trackeragent.devicebootstrap.DeviceBootstrapProcessor;
+import c8y.trackeragent.devicebootstrap.DeviceCredentials;
+import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
+import c8y.trackeragent.exception.UnknownDeviceException;
+import c8y.trackeragent.exception.UnknownTenantException;
+import c8y.trackeragent.service.TrackerDeviceContextService;
 
 /**
  * Performs the communication with a connected device. Accepts reports from the
  * input stream and sends commands to the output stream.
  */
-public class ConnectedTracker implements Runnable, Executor {
-
+public class ConnectedTracker<F extends Fragment> implements Runnable, Executor {
+    
     protected static Logger logger = LoggerFactory.getLogger(ConnectedTracker.class);
 
     private final char reportSeparator;
     private final String fieldSeparator;
-    private final Socket client;
-    private final InputStream bis;
-    private final List<Object> fragments = new ArrayList<Object>();
-    final TrackerAgent trackerAgent;
-
+    private final Map<String, Object> connectionParams = new HashMap<String, Object>();
+    private Socket client;
+    private InputStream in;
     private OutputStream out;
     private String imei;
+    
+    @Autowired
+    protected List<F> fragments = new ArrayList<F>();
+    @Autowired
+    protected DeviceBootstrapProcessor bootstrapProcessor;
+    @Autowired
+    protected DeviceCredentialsRepository credentialsRepository;
+    @Autowired
+    protected TrackerDeviceContextService contextService;
+    
+    ConnectedTracker(char reportSeparator, String fieldSeparator, List<F> fragments,
+			DeviceBootstrapProcessor bootstrapProcessor, DeviceCredentialsRepository credentialsRepository, 
+			TrackerDeviceContextService contextService) {
+		this.reportSeparator = reportSeparator;
+		this.fieldSeparator = fieldSeparator;
+		this.fragments = fragments;
+		this.bootstrapProcessor = bootstrapProcessor;
+		this.credentialsRepository = credentialsRepository;
+		this.contextService = contextService;
+	}
 
-    public ConnectedTracker(Socket client, InputStream bis, char reportSeparator, String fieldSeparator, TrackerAgent trackerAgent) {
-        this.client = client;
-        this.bis = bis;
+	public ConnectedTracker(char reportSeparator, String fieldSeparator) {
         this.reportSeparator = reportSeparator;
         this.fieldSeparator = fieldSeparator;
-        this.trackerAgent = trackerAgent;
     }
-
-    public void addFragment(Object o) {
-        fragments.add(o);
+    
+    public void init(Socket client, InputStream in) throws Exception {
+        this.client = client;
+        this.in = in;
     }
 
     @Override
     public void run() {
-        if(bis == null) {
+        if(in == null) {
             return;
         }
         try {
             out = client.getOutputStream();
-            processReports(bis);
+            processReports(in);
+        } catch (SocketException e) {
+            logger.warn("Error during communication with client device: " + e.getMessage());           
         } catch (IOException e) {
             logger.warn("Error during communication with client device", e);
         } catch (SDKException e) {
             logger.warn("Error during communication with the platform", e);
         } finally {
             IOUtils.closeQuietly(out);
-            IOUtils.closeQuietly(bis);
+            IOUtils.closeQuietly(in);
             try {
                 client.close();
             } catch (IOException e) {
@@ -95,6 +124,7 @@ public class ConnectedTracker implements Runnable, Executor {
     void processReports(InputStream is) throws IOException, SDKException {
         String reportStr;
         while ((reportStr = readReport(is)) != null) {
+            logger.debug("Successfully read report");
             String[] report = reportStr.split(fieldSeparator);
             tryProcessReport(report);
         }
@@ -126,7 +156,7 @@ public class ConnectedTracker implements Runnable, Executor {
         }
     }
 
-    String readReport(InputStream is) throws IOException {
+    public String readReport(InputStream is) throws IOException {
         StringBuffer result = new StringBuffer();
         int c;
 
@@ -149,33 +179,56 @@ public class ConnectedTracker implements Runnable, Executor {
         return result.toString();
     }
 
-    void processReport(String[] report) throws SDKException {
-        for (Object fragment : fragments) {
-            if (fragment instanceof Parser) {
-                Parser parser = (Parser) fragment;
-                String imei = parser.parse(report);
-                if (imei != null) {
-                    boolean registered = checkIfDeviceRegistered(imei);
-                    if (registered) {
-                        ReportContext reportContext = new ReportContext(report, imei, out);
-                        boolean success = parser.onParsed(reportContext);
-                        if (success) {
-                            this.imei = imei;
-                            ConnectionRegistry.instance().put(imei, this);
-                            break;
-                        }
-                    } 
-                }
+    void processReport(String[] report) {
+        for (final Parser parser : Iterables.filter(fragments, Parser.class)) {
+            logger.debug("Using parser "+ parser.getClass());
+            String imei = parser.parse(report);
+			if (imei == null) {
+				continue;
+			}
+            logger.debug("Got report from IMEI: " + imei);
+            DeviceCredentials deviceCredentials;
+			try {
+				deviceCredentials = credentialsRepository.getDeviceCredentials(imei);
+			} catch (UnknownDeviceException ex) {
+				logger.debug("Device with imei {} not yet bootstraped. Will try bootstrap the device.", imei);
+				deviceCredentials = bootstrapProcessor.tryAccessDeviceCredentials(imei);
+				if (deviceCredentials == null) {
+					logger.debug("Device with imei {} not yet available. Will skip the report.", imei);
+					break;
+				} else {
+					logger.debug("Device with imei {} available.", imei);
+				}
+			}
+            final String tenant = deviceCredentials.getTenant();
+            DeviceCredentials agentCredentials;
+            try {
+            	agentCredentials = credentialsRepository.getAgentCredentials(tenant);
+            } catch (UnknownTenantException ex) {
+            	logger.debug("Agent for tenant {} not yet bootstraped. Will try bootstrap the agent.", tenant);
+            	agentCredentials = bootstrapProcessor.tryAccessAgentCredentials(tenant);
+				if (agentCredentials == null) {
+					logger.debug("Agent for tenant {} not yet available. Will skip the report.", tenant);
+					break;
+				} else {
+					logger.debug("Agent for tenant {} available.", tenant);					
+				}
+            	
             }
+            final ReportContext reportContext = new ReportContext(report, imei, out, connectionParams);
+            try {
+            	contextService.enterContext(tenant, imei);
+            	if (parser.onParsed(reportContext)) {
+            		this.imei = imei;
+            		ConnectionRegistry.instance().put(imei, this);
+            	}
+            } catch (Exception e) {
+                logger.error("Error on parsing request", e);
+            } finally {
+				 contextService.leaveContext();
+			}
         }
-    }
-
-    private boolean checkIfDeviceRegistered(String imei) {
-        boolean registered = trackerAgent.getContext().isDeviceRegistered(imei);
-        if (!registered) {
-            trackerAgent.sendEvent(new TrackerAgentEvents.NewDeviceEvent(imei));
-        }
-        return registered;
+        logger.debug("Finished processing report");
     }
 
     @Override
@@ -209,4 +262,8 @@ public class ConnectedTracker implements Runnable, Executor {
     void setOut(OutputStream out) {
         this.out = out;
     }
+
+	public Map<String, Object> getConnectionParams() {
+		return connectionParams;
+	}
 }

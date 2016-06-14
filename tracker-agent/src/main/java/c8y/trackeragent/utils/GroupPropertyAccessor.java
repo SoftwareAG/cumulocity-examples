@@ -22,6 +22,8 @@ import org.slf4j.LoggerFactory;
 
 import com.cumulocity.sdk.client.SDKException;
 
+import c8y.trackeragent.configuration.ConfigUtils;
+
 /**
  * TODO: use JSON format instead key-value format 
  * 
@@ -47,7 +49,7 @@ public class GroupPropertyAccessor {
     }
 
     public GroupPropertyAccessor refresh() {
-        source = ConfigUtils.get().getProperties(sourceFilePath);
+        source = ConfigUtils.getProperties(sourceFilePath);
         groups.clear();
         for (Object entry : source.keySet()) {
             tryReadEntry(String.valueOf(entry));

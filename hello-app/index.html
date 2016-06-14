@@ -9,7 +9,7 @@
     <title>Hello, world!</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width">
-    <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.no-icons.min.css" rel="stylesheet">
+    <link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.no-icons.min.css" rel="stylesheet">
     <link href="style.css" rel="stylesheet" >
   </head>
   <body data-ng-app="app" data-ng-controller="Main">
@@ -31,12 +31,12 @@
       </table>
     </div>
     
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.js"></script>
-    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.1.4/angular.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.1.4/angular.js"></script>
     <script src="sdk.js"></script>
 
     <script>
-        angular.module('c8y.config', []).constant('configApp', { baseUrl: '/'});
+        angular.module('c8y.config', []).constant('configApp', { baseUrl: 'https://developer.cumulocity.com/'});
         angular.module('app', ['c8y.core', 'c8y.parts.tpls', 'c8y.smartui']);
 
         angular.module('app')

@@ -2,10 +2,11 @@ package c8y.trackeragent.protocol.coban.device;
 
 import java.util.Map;
 
+import c8y.trackeragent.configuration.TrackerConfiguration;
 import c8y.trackeragent.protocol.coban.CobanConstants;
-import c8y.trackeragent.utils.TrackerConfiguration;
 
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
+import com.google.common.base.Strings;
 
 public class CobanDeviceFactory {
 
@@ -20,9 +21,19 @@ public class CobanDeviceFactory {
 
     public CobanDevice create() {
         CobanDevice result = new CobanDevice();
-        String defaultLocationReportInterval = trackerConfig.getCobanLocationReportTimeInterval();
-        result.setLocationReportInterval(getValue(CobanConstants.DEVICE_CONFIG_KEY_LOCATION_REPORT_TIME_INTERVAL, defaultLocationReportInterval));
+        Integer defaultLocationReportInterval = trackerConfig.getCobanLocationReportTimeInterval();
+        Integer locationReportInterval = getValue(CobanConstants.DEVICE_CONFIG_KEY_LOCATION_REPORT_TIME_INTERVAL, defaultLocationReportInterval);
+        result.setLocationReportInterval(formatLocationReportInterval(locationReportInterval));
         return result;
+    }
+
+    public static String formatLocationReportInterval(Integer locationReportInterval) {
+        String unit = "s";
+        if (locationReportInterval >= 60) {
+            locationReportInterval = locationReportInterval / 60;
+            unit = "m";
+        }
+        return Strings.padStart(locationReportInterval.toString(), 2, '0') + unit;
     }
 
     @SuppressWarnings("unchecked")

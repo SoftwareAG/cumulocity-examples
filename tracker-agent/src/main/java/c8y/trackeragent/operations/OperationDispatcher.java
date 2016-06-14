@@ -27,19 +27,17 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 
 import org.slf4j.Logger;
-
-import c8y.trackeragent.ConnectionRegistry;
-import c8y.trackeragent.Executor;
-import c8y.trackeragent.ManagedObjectCache;
-import c8y.trackeragent.TrackerDevice;
-import c8y.trackeragent.TrackerPlatform;
-import c8y.trackeragent.logger.PlatformLogger;
+import org.slf4j.LoggerFactory;
 
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
-import com.cumulocity.sdk.client.devicecontrol.OperationFilter;
+
+import c8y.trackeragent.device.ManagedObjectCache;
+import c8y.trackeragent.device.TrackerDevice;
+import c8y.trackeragent.devicebootstrap.DeviceCredentials;
+import c8y.trackeragent.service.TrackerDeviceContextService;
 
 /**
  * Polls the platform for pending operations, executes the operations and
@@ -50,96 +48,63 @@ import com.cumulocity.sdk.client.devicecontrol.OperationFilter;
  */
 public class OperationDispatcher implements Runnable {
     
+	private static Logger logger = LoggerFactory.getLogger(OperationDispatcher.class);
+	
     private static final long POLLING_DELAY = 10;
     private static final long POLLING_INTERVAL = 10;
     
-    private final Logger logger;
-    private final TrackerDevice trackerDevice;
-    private TrackerPlatform platform;
+    private final TrackerDeviceContextService contextService;
+    private final DeviceCredentials tenantCredentials;
+    private final OperationsHelper operationHelper;
     private volatile ScheduledFuture<?> self;
 
-    /**
-     * @param platform
-     *            The connection to the platform.
-     * @param agent
-     *            The ID of this agent.
-     */
-    public OperationDispatcher(TrackerPlatform platform, TrackerDevice trackerDevice) throws SDKException {
-        this.platform = platform;
-        this.trackerDevice = trackerDevice;
-        this.logger = PlatformLogger.getLogger(trackerDevice.getImei());
-        
-        finishExecutingOps();
-    }
 
-    /**
-     * Clean up operations that are stuck in "executing" state.
-     */
-    private void finishExecutingOps() throws SDKException {
-        logger.debug("Cancelling hanging operations");
-        try {
-            for (OperationRepresentation operation : byStatusAndDeviceId(OperationStatus.EXECUTING)) {
-                operation.setStatus(OperationStatus.FAILED.toString());
-                platform.getDeviceControlApi().update(operation);
-            }
-        } catch (Exception e) {
-            logger.error("Error while finishing executing operations", e);
-        }
+    public OperationDispatcher(DeviceCredentials tenantCredentials,  
+    		TrackerDeviceContextService contextService, OperationsHelper operationHelper) throws SDKException {
+		this.tenantCredentials = tenantCredentials;
+        this.contextService = contextService;
+		this.operationHelper = operationHelper;
+    }
+    
+    public void startPolling(ScheduledExecutorService operationsExecutor) {
+        self = operationsExecutor.scheduleWithFixedDelay(this, POLLING_DELAY, POLLING_INTERVAL, SECONDS);
     }
 
     @Override
     public void run() {
-        logger.debug("Executing queued operations");
+        logger.trace("Executing queued operations");
         try {
+            contextService.enterContext(tenantCredentials.getTenant());
             executePendingOps();
+            contextService.leaveContext();
         } catch (Exception x) {
             logger.warn("Error while executing operations", x);
         }
     }
 
     private void executePendingOps() throws SDKException {
-        for (OperationRepresentation operation : byStatusAndDeviceId(OperationStatus.PENDING)) {
-            GId gid = operation.getDeviceId();
-
-            TrackerDevice device = ManagedObjectCache.instance().get(gid);
-            if (device == null) {
-                continue; // Device hasn't been identified yet
-            }
-
-            Executor exec = ConnectionRegistry.instance().get(device.getImei());
-
-            if (exec != null) {
-                // Device is currently connected, execute on device
-                executeOperation(exec, operation);
-                if (OperationStatus.FAILED.toString().equals(operation.getStatus())) {
-                    // Connection error, remove device
-                    ConnectionRegistry.instance().remove(device.getImei());
-                }
-            }
+        logger.debug("Querying for pending operations");
+        for (OperationRepresentation operation : getOperationsByStatus(OperationStatus.PENDING)) {
+        	// TODO lest enter the context here 
+        	GId deviceId = operation.getDeviceId();
+        	TrackerDevice device = ManagedObjectCache.instance().get(deviceId);
+        	if (device == null) {
+        		logger.trace("Ignore operation with ID {} -> device with id {} hasn't been identified yet", operation.getId(), deviceId);
+        		continue; // Device hasn't been identified yet
+        	}
+        	contextService.enterContext(tenantCredentials.getTenant(), device.getImei());
+        	try {
+        		operationHelper.executePendingOp(operation, device);
+        	} finally {
+        		contextService.leaveContext();
+        	}
         }
     }
-
-    private void executeOperation(Executor exec, OperationRepresentation operation) throws SDKException {
-        operation.setStatus(OperationStatus.EXECUTING.toString());
-        platform.getDeviceControlApi().update(operation);
-        OperationContext operationContext = new OperationContext(operation, trackerDevice.getImei());
-        
-        try {
-            exec.execute(operationContext);
-        } catch (Exception x) {
-            String msg = "Error during communication with device " + operation.getDeviceId();
-            logger.warn(msg, x);
-            operation.setStatus(OperationStatus.FAILED.toString());
-            operation.setFailureReason(msg + x.getMessage());
-        }
-        platform.getDeviceControlApi().update(operation);
-    }
-
-    private Iterable<OperationRepresentation> byStatusAndDeviceId(OperationStatus status) throws SDKException {
-        OperationFilter opsFilter = new OperationFilter().byDevice(trackerDevice.getGId().getValue()).byStatus(status);
+    
+    private Iterable<OperationRepresentation> getOperationsByStatus(OperationStatus status) throws SDKException {
         Iterable<OperationRepresentation> operationsIterable = Collections.emptyList();
         try {
-            operationsIterable = platform.getDeviceControlApi().getOperationsByFilter(opsFilter).get().allPages();
+            operationsIterable = operationHelper.getOperationsByStatusAndAgent(status);
         } catch (SDKException e) {
             if (hasIncorrectStatus(e) && self != null) {
                 self.cancel(false);
@@ -153,7 +118,4 @@ public class OperationDispatcher implements Runnable {
         return e.getHttpStatus() == 404 || e.getHttpStatus() == 401;
     }
 
-    public void startPolling(ScheduledExecutorService operationsExecutor) {
-        self = operationsExecutor.scheduleWithFixedDelay(this, POLLING_DELAY, POLLING_INTERVAL, SECONDS);
-    }
 }

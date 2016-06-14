@@ -6,7 +6,7 @@
 
 	<groupId>c8y.example</groupId>
 	<artifactId>c8y-examples</artifactId>
-	<version>6.17.0</version>
+	<version>7.27.0</version>
 	<name>Cumulocity :: Examples</name>
 	<packaging>pom</packaging>
 	
@@ -15,7 +15,7 @@
 			<id>develop</id>
 			<properties>
 				<!-- current SNAPSHOT version of c8y-client -->
-				<c8y.version>6.17.0</c8y.version>				
+				<c8y.version>7.27.0</c8y.version>				
 			</properties>
 			<distributionManagement>
 				<snapshotRepository>
@@ -31,7 +31,7 @@
 			<id>production</id>
 			<properties>
 				<!-- current RELEASE version of c8y-client -->
-				<c8y.version>6.17.0</c8y.version>				
+				<c8y.version>7.27.0</c8y.version>				
 			</properties>
 			<distributionManagement>
 				<!-- TODO remove snapshotRepository after release -->
@@ -65,7 +65,6 @@
 		<module>kontron-shock-agent</module>
 		<module>java-agent</module>
 		<module>tracker-agent</module>
-		<module>tracker-agent-rpm</module>
 	</modules>
 
 	<licenses>
@@ -203,18 +202,4 @@
 			</plugins>
 		</pluginManagement>
 	</build>
-    
-    <repositories>
-        <repository>
-            <id>com.springsource.repository.bundles.release</id>
-            <name>SpringSource Enterprise Bundle Repository - SpringSource Bundle Releases</name>
-            <url>http://repository.springsource.com/maven/bundles/release</url>
-        </repository>
-        <repository>
-            <id>com.springsource.repository.bundles.external</id>
-            <name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name>
-            <url>http://repository.springsource.com/maven/bundles/external</url>
-        </repository>
-    </repositories>
-    
 </project>

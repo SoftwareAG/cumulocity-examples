@@ -1,9 +1,12 @@
 package c8y.trackeragent.protocol.coban.parser;
 
 import static org.fest.assertions.Assertions.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.math.BigDecimal;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -13,30 +16,41 @@ import org.mockito.Mockito;
 import c8y.MotionTracking;
 import c8y.Position;
 import c8y.SpeedMeasurement;
-import c8y.trackeragent.ReportContext;
-import c8y.trackeragent.operations.OperationContext;
+import c8y.trackeragent.context.OperationContext;
+import c8y.trackeragent.context.ReportContext;
+import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.utils.Positions;
 import c8y.trackeragent.utils.TK10xCoordinatesTranslator;
 import c8y.trackeragent.utils.message.TrackerMessage;
 
-import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
+import com.cumulocity.rest.representation.event.EventRepresentation;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 
 public class PositionUpdateCobanParserTest extends CobanParserTestSupport {
 
     private PositionUpdateCobanParser cobanParser;
 
+    private ArgumentCaptor<EventRepresentation> eventCaptor;
+
+    private ArgumentCaptor<BigDecimal> speedCaptor;
+
+    private ArgumentCaptor<CobanAlarmType> alarmTypeCaptor;
+
     @Before
     public void init() {
         cobanParser = new PositionUpdateCobanParser(trackerAgent, serverMessages, alarmService, measurementService);
+        alarmTypeCaptor = ArgumentCaptor.forClass(CobanAlarmType.class);
+        eventCaptor = ArgumentCaptor.forClass(EventRepresentation.class);
+        speedCaptor = ArgumentCaptor.forClass(BigDecimal.class);
+        when(measurementService.createSpeedMeasurement(any(BigDecimal.class), any(TrackerDevice.class))).thenAnswer(new CreateSpeedMeasurementAnswer());
     }
+
     @Test
-    
     public void shouldAcceptCobanPositionMessage() throws Exception {
         boolean actual = cobanParser.accept(deviceMessages.positionUpdate("ABCD", Positions.ZERO).asArray());
-        
+
         assertThat(actual).isTrue();
-        
+
     }
 
     @Test
@@ -52,14 +66,14 @@ public class PositionUpdateCobanParserTest extends CobanParserTestSupport {
         TrackerMessage deviceMessage = deviceMessages.positionUpdate("ABCD", Positions.TK10xSample);
         when(trackerAgent.getOrCreateTrackerDevice("ABCD")).thenReturn(deviceMock);
         ReportContext reportCtx = new ReportContext(deviceMessage.asArray(), "ABCD", null);
-        ArgumentCaptor<Position> positionCaptor = ArgumentCaptor.forClass(Position.class);
-        ArgumentCaptor<SpeedMeasurement> speedCaptor = ArgumentCaptor.forClass(SpeedMeasurement.class);
 
         boolean success = cobanParser.onParsed(reportCtx);
 
-        verify(deviceMock).setPositionAndSpeed(positionCaptor.capture(), speedCaptor.capture());
+        verify(deviceMock).setPosition(eventCaptor.capture());
         assertThat(success).isTrue();
-        assertThat(positionCaptor.getValue()).isEqualTo(TK10xCoordinatesTranslator.parse(Positions.TK10xSample));
+        assertThat(eventCaptor.getValue().get(SpeedMeasurement.class)).isNotNull();
+        Position position = eventCaptor.getValue().get(Position.class);
+        assertThat(position).isEqualTo(TK10xCoordinatesTranslator.parse(Positions.TK10xSample));
     }
 
     @Test
@@ -70,13 +84,13 @@ public class PositionUpdateCobanParserTest extends CobanParserTestSupport {
         OperationRepresentation operation = new OperationRepresentation();
         operation.set(motionTracking);
         OperationContext operationCtx = new OperationContext(operation, "12345");
-        
+
         String msg = cobanParser.translate(operationCtx);
-        
+
         assertThat(operation.get(CobanSupport.OPERATION_FRAGMENT_SERVER_COMMAND)).isEqualTo("**,imei:12345,101,30m;");
         assertThat(msg).isEqualTo("**,imei:12345,101,30m;");
     }
-    
+
     @Test
     public void shouldSendAlarmIfNoGpsSignal() throws Exception {
         TrackerMessage deviceMessage = deviceMessages.positionUpdateNoGPS("ABCD");
@@ -86,8 +100,44 @@ public class PositionUpdateCobanParserTest extends CobanParserTestSupport {
 
         verify(deviceMock, never()).setPosition(Mockito.any(Position.class));
         assertThat(success).isTrue();
-        verify(deviceMock).createAlarm(Mockito.any(AlarmRepresentation.class));
-        
+        verify(alarmService).createAlarm(any(ReportContext.class), alarmTypeCaptor.capture(), any(TrackerDevice.class));
+        assertThat(alarmTypeCaptor.getValue()).isEqualTo(CobanAlarmType.NO_GPS_SIGNAL);
+    }
+
+    @Test
+    public void shouldAcceptAlarms() throws Exception {
+        for (CobanAlarmType alarmType : CobanAlarmType.values()) {
+            TrackerMessage msg = deviceMessages.alarm("ABCD", alarmType);
+
+            assertThat(cobanParser.accept(msg.asArray())).isTrue();
+        }
+    }
+
+    @Test
+    public void shouldCreateLowBatteryAlarm() throws Exception {
+        cobanParser.onParsed(anAlarmReport(CobanAlarmType.LOW_BATTERY));
+
+        verify(alarmService).createAlarm(any(ReportContext.class), alarmTypeCaptor.capture(), any(TrackerDevice.class));
+        CobanAlarmType cobanAlarmType = alarmTypeCaptor.getValue();
+        assertThat(cobanAlarmType).isEqualTo(CobanAlarmType.LOW_BATTERY);
+    }
+
+    @Test
+    public void shouldCreateSpeedMeasurement() throws Exception {
+        TrackerMessage report = deviceMessages.positionUpdate("ABCD", 154);
+        ReportContext reportCtx = new ReportContext(report.asArray(), "ABCD", out);
+
+        cobanParser.onParsed(reportCtx);
+
+        verify(measurementService).createSpeedMeasurement(speedCaptor.capture(), any(TrackerDevice.class));
+        assertThat(speedCaptor.getValue())
+                .isEqualTo((new BigDecimal(154)).multiply(CobanParser.COBAN_SPEED_MEASUREMENT_FACTOR).setScale(0, BigDecimal.ROUND_DOWN));
+
+    }
+
+    private ReportContext anAlarmReport(CobanAlarmType alarmType) {
+        String[] report = deviceMessages.alarm("ABCD", alarmType).asArray();
+        return new ReportContext(report, "ABCD", out);
     }
 
 }

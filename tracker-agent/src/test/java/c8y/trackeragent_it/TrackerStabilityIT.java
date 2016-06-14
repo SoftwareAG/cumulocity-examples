@@ -7,17 +7,25 @@ import java.util.concurrent.Executors;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import c8y.trackeragent.protocol.coban.CobanDeviceMessages;
+import c8y.trackeragent.protocol.mapping.TrackingProtocol;
 import c8y.trackeragent.utils.Devices;
 import c8y.trackeragent.utils.Positions;
-import c8y.trackeragent.utils.TelicReports;
+import c8y.trackeragent.utils.message.TrackerMessage;
 
 @Ignore
 public class TrackerStabilityIT extends TrackerITSupport {
 
     private ExecutorService executorService = Executors.newFixedThreadPool(10);
+    private CobanDeviceMessages deviceMessages = new CobanDeviceMessages();
 
     private final int parallelIndex = 2;
     private final static Random random = new Random();
+    
+    @Override
+    protected TrackingProtocol getTrackerProtocol() {
+        return TrackingProtocol.TELIC;
+    }
     
     @Test
     public void shouldWork() throws Exception {
@@ -30,26 +38,18 @@ public class TrackerStabilityIT extends TrackerITSupport {
     }
 
     private String executeFirstStep() throws Exception {
-        writeInNewConnection(new byte[]{});
         String imei = Devices.randomImei();
-        createNewDeviceRequest(imei);
-        byte[] report = TelicReports.getTelicReportBytes(imei, Positions.ZERO, Positions.SAMPLE_1, Positions.SAMPLE_2, Positions.SAMPLE_3);
-
-        // trigger bootstrap
-        writeInNewConnection(report);
-        Thread.sleep(8000);
-        acceptNewDeviceRequest(imei);
+        bootstrapDevice(imei, deviceMessages.logon(imei));
         return imei;
     }
 
     private void executeStep(String imei) throws Exception {
-        byte[] report = null;
-        report = TelicReports.getTelicReportBytes(imei, Positions.random(), Positions.random(), Positions.random(), Positions.random());
-        
-        if(random.nextInt(2) == 0) {
-            System.out.println("send empty report");
-            report = new byte[]{};
-        } 
+        TrackerMessage report;
+        if (random.nextBoolean()) {
+            report = deviceMessages.msg();
+        } else {
+            report = deviceMessages.positionUpdate(imei, Positions.random());
+        }
         writeInNewConnection(report);
     }
 
