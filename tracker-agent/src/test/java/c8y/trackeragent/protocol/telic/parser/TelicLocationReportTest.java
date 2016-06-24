@@ -2,13 +2,11 @@ package c8y.trackeragent.protocol.telic.parser;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
 
+import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -196,7 +194,7 @@ public class TelicLocationReportTest {
         
         telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
         
-        verify(device).motionEvent(true);
+        verify(device).motionEvent(eq(true), any(DateTime.class));
         verify(measurementService).createMotionMeasurement(true, device, TelicDeviceMessages.LOG_TIMESTAMP);
     }
     
@@ -206,7 +204,7 @@ public class TelicLocationReportTest {
         
         telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
         
-        verify(device).motionEvent(false);
+        verify(device).motionEvent(eq(false), any(DateTime.class));
         verify(measurementService).createMotionMeasurement(false, device, TelicDeviceMessages.LOG_TIMESTAMP);
     }
     

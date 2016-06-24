@@ -28,6 +28,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -229,33 +230,39 @@ public class TrackerDevice {
         device.setId(gid);
         inventory.update(device);
     }
-
+    
     public void motionEvent(boolean moving) throws SDKException {
-        if (moving) {
-    		eventMotionDetected.setTime(new Date());
-    		events.create(eventMotionDetected);
-    		logger.debug("{} is moving", imei);
-    	} else {
-    		eventMotionEnded.setTime(new Date());
-    		events.create(eventMotionEnded);
-    		logger.debug("{} stopped moving", imei);
-    	}
+        motionEvent(moving, new DateTime());
     }
     
+    public void motionEvent(boolean moving, DateTime date) throws SDKException {
+        if (moving) {
+            eventMotionDetected.setDateTime(date);
+            events.create(eventMotionDetected);
+            logger.debug("{} is moving", imei);
+        } else {
+            eventMotionEnded.setDateTime(date);
+            events.create(eventMotionEnded);
+            logger.debug("{} stopped moving", imei);
+        }
+    }
+
+
+    
     public void geofenceEnter(DateTime dateTime) throws SDKException {
-        geofenceEnter.setTime(dateTime.toDate());
+        geofenceEnter.setDateTime(dateTime);
         events.create(geofenceEnter);
         logger.info("{} enter geofence", imei);
     }
     
     public void geofenceExit(DateTime dateTime) throws SDKException {
-        geofenceExit.setTime(dateTime.toDate());
+        geofenceExit.setDateTime(dateTime);
         events.create(geofenceExit);
         logger.info("{} exit geofence", imei);
     }
     
     public void chargerConnected(DateTime dateTime) throws SDKException {
-        chargerConnected.setTime(dateTime.toDate());
+        chargerConnected.setDateTime(dateTime);
         events.create(chargerConnected);
         logger.debug("Charger connected to {}", imei);
     }
@@ -271,7 +278,7 @@ public class TrackerDevice {
     public void batteryLevel(int level) throws SDKException {
         logger.debug("Battery level for {} is at {}", imei, level);
         battery.setLevelValue(new BigDecimal(level));
-        batteryMsrmt.setTime(new Date());
+        batteryMsrmt.setDateTime(new DateTime());
         measurements.create(batteryMsrmt);
     }
 
@@ -283,7 +290,7 @@ public class TrackerDevice {
         if (ber != null) {
             gprsSignal.setBerValue(ber);
         }
-        gprsSignalMsrmt.setTime(new Date());
+        gprsSignalMsrmt.setDateTime(new DateTime());
         measurements.create(gprsSignalMsrmt);
     }
 
@@ -317,11 +324,11 @@ public class TrackerDevice {
         AlarmRepresentation activeAlarm = findActiveAlarm(newAlarm.getType());
 
         if (activeAlarm != null) {
-            activeAlarm.setTime(new Date());
+            activeAlarm.setDateTime(new DateTime());
             activeAlarm.setStatus(newStatus);
             return alarms.update(activeAlarm);
         } else {
-            newAlarm.setTime(new Date());
+            newAlarm.setDateTime(new DateTime());
             newAlarm.setStatus(newStatus);
             return alarms.create(newAlarm);
         }
@@ -352,7 +359,7 @@ public class TrackerDevice {
         locationUpdate.setType(LU_EVENT_TYPE);
         locationUpdate.setText("Location updated");
         locationUpdate.setSource(source);
-        locationUpdate.setTime(new Date());
+        locationUpdate.setDateTime(new DateTime());
         return locationUpdate;
     }
 

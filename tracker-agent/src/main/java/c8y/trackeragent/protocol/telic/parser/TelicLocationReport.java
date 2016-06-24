@@ -1,6 +1,6 @@
 package c8y.trackeragent.protocol.telic.parser;
 
-import static com.cumulocity.model.DateConverter.date2String;
+import static com.cumulocity.model.DateTimeConverter.date2String;
 import static java.util.Arrays.asList;
 
 import java.math.BigDecimal;
@@ -9,6 +9,7 @@ import java.math.RoundingMode;
 import java.util.List;
 
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,11 +103,11 @@ public class TelicLocationReport implements Parser, TelicFragment {
         if (dateTime == null) {
             dateTime = new DateTime();
         } else {
-            position.setProperty(TelicConstants.LOG_TIMESTAMP, date2String(dateTime.toDate()));
+            position.setProperty(TelicConstants.LOG_TIMESTAMP, date2String(dateTime));
         }
         DateTime gpsTimestamp = getGPSTimestamp(reportCtx);
         if (gpsTimestamp != null) {
-            position.setProperty(TelicConstants.GPS_TIMESTAMP, date2String(gpsTimestamp.toDate()));
+            position.setProperty(TelicConstants.GPS_TIMESTAMP, date2String(gpsTimestamp));
         }
         
         position.setLat(getLatitude(reportCtx));
@@ -259,11 +260,11 @@ public class TelicLocationReport implements Parser, TelicFragment {
             device.geofenceExit(dateTime);
             break;
         case MOTION_SENSOR_MOTION:
-            device.motionEvent(true);
+            device.motionEvent(true, dateTime);
             measurementService.createMotionMeasurement(true, device, dateTime);
             break;
         case MOTION_SENSOR_STATIONARY:
-            device.motionEvent(false);
+            device.motionEvent(false, dateTime);
             measurementService.createMotionMeasurement(false, device, dateTime);
             break;
         default:
