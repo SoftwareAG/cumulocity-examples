@@ -28,8 +28,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import c8y.trackeragent.RequestHandler;
+import c8y.trackeragent.configuration.TrackerConfiguration;
 import c8y.trackeragent.protocol.mapping.TrackerFactory;
-import c8y.trackeragent.utils.TrackerConfiguration;
 
 /**
  * The server listens to connections from devices and starts threads for

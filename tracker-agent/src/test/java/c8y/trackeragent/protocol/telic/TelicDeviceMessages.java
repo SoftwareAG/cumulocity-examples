@@ -3,6 +3,9 @@ package c8y.trackeragent.protocol.telic;
 import java.math.BigDecimal;
 
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+
+import com.cumulocity.model.DateTimeConverter;
 
 import c8y.Position;
 import c8y.trackeragent.utils.message.TrackerMessage;
@@ -14,6 +17,8 @@ public class TelicDeviceMessages extends TrackerMessageFactory<TrackerMessage> {
     private static final String GPS_TIMESTAMPS_STR = "020216141711";
     public static final DateTime LOG_TIMESTAMP = TelicConstants.TIMESTAMP_FORMATTER.parseDateTime(LOG_TIMESTAMP_STR);
     public static final DateTime GPS_TIMESTAMP = TelicConstants.TIMESTAMP_FORMATTER.parseDateTime(GPS_TIMESTAMPS_STR);
+    public static final String LOG_TIMESTAMP_C8Y_STR = DateTimeConverter.date2String(LOG_TIMESTAMP);
+    public static final String GPS_TIMESTAMP_C8Y_STR = DateTimeConverter.date2String(GPS_TIMESTAMP);
     
     @Override
     public TrackerMessage msg() {
@@ -38,7 +43,7 @@ public class TelicDeviceMessages extends TrackerMessageFactory<TrackerMessage> {
                 .appendField(asTelicStringCoord(position.getAlt())) //Altitude
                 .appendField("11032") //mileage
                 .appendField("")
-                .appendField("0010") //digital input status
+                .appendField("0100") //digital input status
                 .appendField("238") //digital output status
                 .appendField("211")   //analog input 1
                 .appendField("0")   //analog input 2

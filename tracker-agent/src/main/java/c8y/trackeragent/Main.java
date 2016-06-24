@@ -31,16 +31,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
-import c8y.trackeragent.devicebootstrap.DeviceBinder;
-import c8y.trackeragent.server.Servers;
-import c8y.trackeragent.utils.TrackerConfiguration;
-
 import com.cumulocity.agent.server.ServerBuilder;
 import com.cumulocity.agent.server.feature.ContextFeature;
 import com.cumulocity.agent.server.feature.RepositoryFeature;
 import com.cumulocity.agent.server.logging.LoggingService;
 import com.cumulocity.agent.server.repository.BinariesRepository;
 import com.cumulocity.agent.server.repository.DeviceControlRepository;
+
+import c8y.trackeragent.devicebootstrap.TenantBinder;
+import c8y.trackeragent.server.Servers;
 
 /**
  * Main class reading the configuration and starting the server.
@@ -56,10 +55,7 @@ public class Main {
     private Servers servers;
     
     @Autowired
-    private TrackerConfiguration config;
-    
-    @Autowired
-    private DeviceBinder deviceBinder;
+    private TenantBinder tenantBinder;
     
     public static void main(String[] args) {
         logger.info("tracker-agent is starting.");
@@ -82,7 +78,7 @@ public class Main {
     @PostConstruct
     public void onStart() {
         servers.startAll();
-        deviceBinder.init();
+        tenantBinder.init();
     }
     
     @Bean

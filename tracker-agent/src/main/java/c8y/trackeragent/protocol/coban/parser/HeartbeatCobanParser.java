@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 import com.cumulocity.sdk.client.SDKException;
 
 import c8y.trackeragent.TrackerAgent;
-import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.context.ReportContext;
+import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.protocol.coban.message.CobanServerMessages;
 
 @Component

@@ -24,28 +24,31 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import c8y.trackeragent.context.OperationContext;
-import c8y.trackeragent.context.ReportContext;
-import c8y.trackeragent.devicebootstrap.DeviceCredentials;
-import c8y.trackeragent.event.TrackerAgentEvents;
-
-import com.cumulocity.agent.server.context.DeviceContext;
-import com.cumulocity.agent.server.context.DeviceContextService;
 import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.sdk.client.SDKException;
 import com.google.common.collect.Iterables;
+
+import c8y.trackeragent.context.OperationContext;
+import c8y.trackeragent.context.ReportContext;
+import c8y.trackeragent.device.ManagedObjectCache;
+import c8y.trackeragent.devicebootstrap.DeviceBootstrapProcessor;
+import c8y.trackeragent.devicebootstrap.DeviceCredentials;
+import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
+import c8y.trackeragent.exception.UnknownDeviceException;
+import c8y.trackeragent.exception.UnknownTenantException;
+import c8y.trackeragent.service.TrackerDeviceContextService;
 
 /**
  * Performs the communication with a connected device. Accepts reports from the
@@ -57,23 +60,35 @@ public class ConnectedTracker<F extends Fragment> implements Runnable, Executor 
 
     private final char reportSeparator;
     private final String fieldSeparator;
-    private final List<F> fragments = new ArrayList<F>();
-    private final TrackerAgent trackerAgent;
-    private final DeviceContextService contextService;
     private final Map<String, Object> connectionParams = new HashMap<String, Object>();
-
     private Socket client;
     private InputStream in;
     private OutputStream out;
     private String imei;
+    
+    @Autowired
+    protected List<F> fragments = new ArrayList<F>();
+    @Autowired
+    protected DeviceBootstrapProcessor bootstrapProcessor;
+    @Autowired
+    protected DeviceCredentialsRepository credentialsRepository;
+    @Autowired
+    protected TrackerDeviceContextService contextService;
+    
+    ConnectedTracker(char reportSeparator, String fieldSeparator, List<F> fragments,
+			DeviceBootstrapProcessor bootstrapProcessor, DeviceCredentialsRepository credentialsRepository, 
+			TrackerDeviceContextService contextService) {
+		this.reportSeparator = reportSeparator;
+		this.fieldSeparator = fieldSeparator;
+		this.fragments = fragments;
+		this.bootstrapProcessor = bootstrapProcessor;
+		this.credentialsRepository = credentialsRepository;
+		this.contextService = contextService;
+	}
 
-    public ConnectedTracker(char reportSeparator, String fieldSeparator, 
-            TrackerAgent trackerAgent, DeviceContextService contextService, List<F> fragments) {
+	public ConnectedTracker(char reportSeparator, String fieldSeparator) {
         this.reportSeparator = reportSeparator;
         this.fieldSeparator = fieldSeparator;
-        this.trackerAgent = trackerAgent;
-        this.contextService = contextService;
-        this.fragments.addAll(fragments);
     }
     
     public void init(Socket client, InputStream in) throws Exception {
@@ -89,6 +104,8 @@ public class ConnectedTracker<F extends Fragment> implements Runnable, Executor 
         try {
             out = client.getOutputStream();
             processReports(in);
+        } catch (SocketException e) {
+            logger.warn("Error during communication with client device: " + e.getMessage());           
         } catch (IOException e) {
             logger.warn("Error during communication with client device", e);
         } catch (SDKException e) {
@@ -165,33 +182,51 @@ public class ConnectedTracker<F extends Fragment> implements Runnable, Executor 
     void processReport(String[] report) {
         for (final Parser parser : Iterables.filter(fragments, Parser.class)) {
             logger.debug("Using parser "+ parser.getClass());
-            final String imei = parser.parse(report);
-            if(imei == null) {
-                continue;
-            }
+            String imei = parser.parse(report);
+			if (imei == null) {
+				continue;
+			}
             logger.debug("Got report from IMEI: " + imei);
-            boolean deviceRegistered = trackerAgent.getContext().isDeviceRegistered(imei);
-            if (!deviceRegistered) {
-                trackerAgent.sendEvent(new TrackerAgentEvents.NewDeviceEvent(imei));
-                break;
+            DeviceCredentials deviceCredentials;
+			try {
+				deviceCredentials = credentialsRepository.getDeviceCredentials(imei);
+			} catch (UnknownDeviceException ex) {
+				logger.debug("Device with imei {} not yet bootstraped. Will try bootstrap the device.", imei);
+				deviceCredentials = bootstrapProcessor.tryAccessDeviceCredentials(imei);
+				if (deviceCredentials == null) {
+					logger.debug("Device with imei {} not yet available. Will skip the report.", imei);
+					break;
+				} else {
+					logger.debug("Device with imei {} available.", imei);
+				}
+			}
+            final String tenant = deviceCredentials.getTenant();
+            DeviceCredentials agentCredentials;
+            try {
+            	agentCredentials = credentialsRepository.getAgentCredentials(tenant);
+            } catch (UnknownTenantException ex) {
+            	logger.debug("Agent for tenant {} not yet bootstraped. Will try bootstrap the agent.", tenant);
+            	agentCredentials = bootstrapProcessor.tryAccessAgentCredentials(tenant);
+				if (agentCredentials == null) {
+					logger.debug("Agent for tenant {} not yet available. Will skip the report.", tenant);
+					break;
+				} else {
+					logger.debug("Agent for tenant {} available.", tenant);					
+				}
+            	
             }
             final ReportContext reportContext = new ReportContext(report, imei, out, connectionParams);
-            DeviceCredentials credentials = trackerAgent.getContext().getDeviceCredentials(imei);
             try {
-                boolean success = contextService.callWithinContext(new DeviceContext(credentials), new Callable<Boolean>() {
-                    @Override
-                    public Boolean call() throws Exception {
-                        return parser.onParsed(reportContext);
-                    }
-                });
-                if (success) {
-                    this.imei = imei;
-                    ConnectionRegistry.instance().put(imei, this);
-                }
-
+            	contextService.enterContext(tenant, imei);
+            	if (parser.onParsed(reportContext)) {
+            		this.imei = imei;
+            		ConnectionRegistry.instance().put(imei, this);
+            	}
             } catch (Exception e) {
                 logger.error("Error on parsing request", e);
-            }
+            } finally {
+				 contextService.leaveContext();
+			}
         }
         logger.debug("Finished processing report");
     }
@@ -228,7 +263,6 @@ public class ConnectedTracker<F extends Fragment> implements Runnable, Executor 
         this.out = out;
     }
 
-    @Autowired
 	public Map<String, Object> getConnectionParams() {
 		return connectionParams;
 	}

@@ -1,9 +1,15 @@
 package c8y.trackeragent.protocol.telic.parser;
 
+import static com.cumulocity.model.DateTimeConverter.date2String;
+import static java.util.Arrays.asList;
+
 import java.math.BigDecimal;
-import java.util.Date;
+import java.math.MathContext;
+import java.math.RoundingMode;
+import java.util.List;
 
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +21,10 @@ import com.cumulocity.sdk.client.SDKException;
 import c8y.Position;
 import c8y.trackeragent.Parser;
 import c8y.trackeragent.TrackerAgent;
-import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.context.ReportContext;
+import c8y.trackeragent.device.TrackerDevice;
+import c8y.trackeragent.protocol.CommonConstants;
+import c8y.trackeragent.protocol.mapping.TrackingProtocol;
 import c8y.trackeragent.protocol.telic.TelicConstants;
 import c8y.trackeragent.service.MeasurementService;
 
@@ -35,33 +43,40 @@ public class TelicLocationReport implements Parser, TelicFragment {
 
     private static Logger logger = LoggerFactory.getLogger(TelicLocationReport.class);
 
-    private static final int LOG_CODE = 0;
+    static final int LOG_CODE = 0;
 
-    private static final int LOG_TIMESTAMP = 1;
+    static final int LOG_TIMESTAMP = 1;
 
-    private static final int GPS_TIMESTAMP = 3;
+    static final int GPS_TIMESTAMP = 3;
 
-    private static final int LONGITUDE = 4;
+    static final int LONGITUDE = 4;
 
-    private static final int LATITUDE = 5;
+    static final int LATITUDE = 5;
 
-    private static final int FIX_TYPE = 6;
+    public static final int FIX_TYPE = 6;
 
-    private static final int SPEED = 7;
+    static final int SPEED = 7;
 
-    private static final int SATELLITES_FOR_CALCULATION = 9;
+    static final int SATELLITES_FOR_CALCULATION = 9;
 
-    private static final int ALTITUDE = 12;
+    static final int ALTITUDE = 12;
     
-    private static final int MILEAGE = 13;
+    static final int MILEAGE = 13;
     
-    private static final int DIGITAL_INPUT = 15;
+    static final int DIGITAL_INPUT = 15;
     
-    private static final int BATTERY = 17;
+    static final int BATTERY = 17;
+    
+    static final int DEVICE_ID = 20;
     
 
-    public static final BigDecimal LAT_AND_LNG_DIVISOR = new BigDecimal(10000);
     public static final BigDecimal MILEAGE_DIVISOR = new BigDecimal(1000);
+    public static final BigDecimal BATTERY_MULTIPLIER = new BigDecimal(0.00345);
+    public static final BigDecimal BATTERY_INCREMENTOR = new BigDecimal(3.4);
+    public static final MathContext BATTERY_CALCULATION_MODE = new MathContext(3, RoundingMode.HALF_DOWN);
+    public static final BigDecimal BATTERY_DIVISOR = new BigDecimal(1000);
+    
+    public static final List<String> devicesRequireBatteryCalculation = asList("0108", "0109");
 
     private TrackerAgent trackerAgent;
 
@@ -84,11 +99,15 @@ public class TelicLocationReport implements Parser, TelicFragment {
         TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(reportCtx.getImei());
         EventRepresentation locationUpdateEvent = device.aLocationUpdateEvent();
         Position position = new Position();
-        DateTime dateTime = getGPSTimestamp(reportCtx);
+        DateTime dateTime = getLogTimestamp(reportCtx);
         if (dateTime == null) {
             dateTime = new DateTime();
         } else {
-            position.setProperty(TelicConstants.GPS_TIMESTAMP, dateTime.toDate());
+            position.setProperty(TelicConstants.LOG_TIMESTAMP, date2String(dateTime));
+        }
+        DateTime gpsTimestamp = getGPSTimestamp(reportCtx);
+        if (gpsTimestamp != null) {
+            position.setProperty(TelicConstants.GPS_TIMESTAMP, date2String(gpsTimestamp));
         }
         
         position.setLat(getLatitude(reportCtx));
@@ -100,17 +119,14 @@ public class TelicLocationReport implements Parser, TelicFragment {
         }
         LogCodeType logCodeType = getLogCodeType(reportCtx);
         if (logCodeType != null) {
-            position.setProperty(TelicConstants.LOG_CODE_TYPE, logCodeType.getLabel());
+            position.setProperty(CommonConstants.REPORT_REASON, logCodeType.getLabel());
             handleLogCodeType(device, logCodeType, dateTime);
         }
-        Date logTimestamp = getLogTimestamp(reportCtx).toDate();
-        if (logTimestamp != null) {
-            position.setProperty(TelicConstants.LOG_TIMESTAMP, logTimestamp);
-        }
         locationUpdateEvent.setTime(dateTime.toDate());
-        FixType fixType = getFixType(reportCtx);
+        position.setProperty(CommonConstants.TRACKING_PROTOCOL, TrackingProtocol.TELIC);
+        String fixType = getFixType(reportCtx);
         if (fixType != null) {
-            position.setProperty(TelicConstants.FIX_TYPE, fixType.getLabel());
+            position.setProperty(TelicConstants.FIX_TYPE, fixType);
         }
         Integer satellitesForCalculation = getSatellitesForCalculation(reportCtx);
         if (satellitesForCalculation != null) {
@@ -130,11 +146,11 @@ public class TelicLocationReport implements Parser, TelicFragment {
         }
         String digitalInput = getDigitalInput(reportCtx);
         if(digitalInput != null) {
-            handleDigitalInput(device, digitalInput, dateTime);
+            handleDigitalInput(reportCtx, device, digitalInput, dateTime);
         }
         BigDecimal batteryLevel = getBatteryLevel(reportCtx);
         if (batteryLevel != null) {
-            measurementService.createBatteryLevelMeasurement(batteryLevel, device, dateTime, "mV");
+            measurementService.createBatteryLevelMeasurement(batteryLevel, device, dateTime, "V");
         }
         return true;
     }
@@ -160,33 +176,33 @@ public class TelicLocationReport implements Parser, TelicFragment {
 
     private DateTime getTimestamp(ReportContext reportCtx, int index) {
         String timestampStr = reportCtx.getEntry(index);
-        return timestampStr == null ? null : TelicConstants.TIMESTAMP_FORMATTER.parseDateTime(timestampStr);
+        if(timestampStr == null) {
+            return null;
+        }
+        return TelicConstants.TIMESTAMP_FORMATTER.parseDateTime(timestampStr);
     }
 
     private BigDecimal getLongitue(ReportContext reportCtx) {
-        return getCoord(reportCtx, LONGITUDE);
+        String value = reportCtx.getEntry(LONGITUDE);
+        return PositionParser.LONGITUDE_PARSER.parse(value);
     }
 
     private BigDecimal getLatitude(ReportContext reportCtx) {
-        return getCoord(reportCtx, LATITUDE);
+        String value = reportCtx.getEntry(LATITUDE);
+        return PositionParser.LATITUDE_PARSER.parse(value);
     }
 
     private BigDecimal getAltitude(ReportContext reportCtx) {
         return new BigDecimal(reportCtx.getEntry(ALTITUDE));
     }
 
-    private BigDecimal getCoord(ReportContext reportCtx, int index) {
-        BigDecimal incomingValue = new BigDecimal(reportCtx.getEntry(index));
-        return incomingValue.divide(LAT_AND_LNG_DIVISOR);
-    }
-
-    private FixType getFixType(ReportContext reportCtx) {
+    private String getFixType(ReportContext reportCtx) {
         String fixTypeStr = reportCtx.getEntry(FIX_TYPE);
         FixType fixType = FixType.forValue(fixTypeStr);
         if (fixType == null) {
-            logger.warn("Cant establish fix type for value {} in report {}", fixTypeStr, reportCtx);
+        	return fixTypeStr;
         }
-        return fixType;
+        return fixType.getLabel();
     }
 
     private BigDecimal getSpeed(ReportContext reportCtx) {
@@ -202,9 +218,34 @@ public class TelicLocationReport implements Parser, TelicFragment {
         return mileage == null ? null : mileage.divide(MILEAGE_DIVISOR);
     }
     
-    private BigDecimal getBatteryLevel(ReportContext reportCtx) {
-        return reportCtx.getEntryAsNumber(BATTERY);
+    BigDecimal getBatteryLevel(ReportContext reportCtx) {
+        BigDecimal batteryLevel = reportCtx.getEntryAsNumber(BATTERY);
+        if (batteryLevel == null) {
+            return null;
+        }
+        
+        if (isRequiredCalculation(reportCtx)) {
+            return normalizeBatteryLevel(batteryLevel);
+        } else {
+            return convertToVolt(batteryLevel);
+        }
     }
+
+	private boolean isRequiredCalculation(ReportContext reportCtx) {
+        String deviceId = reportCtx.getEntry(DEVICE_ID);
+        if (deviceId == null) {
+            return false;
+        }
+        return devicesRequireBatteryCalculation.contains(deviceId);
+    }
+
+    private BigDecimal convertToVolt(BigDecimal batteryLevel) {
+        return batteryLevel.divide(BATTERY_DIVISOR);
+    }
+
+    public static BigDecimal normalizeBatteryLevel(BigDecimal batteryLevel) {
+		return batteryLevel.multiply(BATTERY_MULTIPLIER, BATTERY_CALCULATION_MODE).add(BATTERY_INCREMENTOR, BATTERY_CALCULATION_MODE);
+	}
     
     private String getDigitalInput(ReportContext reportCtx) {
         return reportCtx.getEntry(DIGITAL_INPUT);
@@ -219,11 +260,11 @@ public class TelicLocationReport implements Parser, TelicFragment {
             device.geofenceExit(dateTime);
             break;
         case MOTION_SENSOR_MOTION:
-            device.motionEvent(true);
+            device.motionEvent(true, dateTime);
             measurementService.createMotionMeasurement(true, device, dateTime);
             break;
         case MOTION_SENSOR_STATIONARY:
-            device.motionEvent(false);
+            device.motionEvent(false, dateTime);
             measurementService.createMotionMeasurement(false, device, dateTime);
             break;
         default:
@@ -231,14 +272,20 @@ public class TelicLocationReport implements Parser, TelicFragment {
         }
     }
     
-    private void handleDigitalInput(TrackerDevice device, String digitalInput, DateTime dateTime) {
-        if (digitalInput.length() != 4) {
-            logger.warn("Digital input has unexpected size {} (expected 4)");
+    private void handleDigitalInput(ReportContext reportCtx, TrackerDevice device, String digitalInput, DateTime dateTime) {
+        if (digitalInput.length() < 2) {
+            logger.warn("Digital input has unexpected size {} (expected more than 1)");
         }
-        if (digitalInput.charAt(2) == '1') {
+        boolean chargerConnected = digitalInput.charAt(1) == '1';
+        boolean chargerConnectedEventSent = reportCtx.isConnectionFlagOn("chargerConnectedEventSent");
+        if (chargerConnected && !chargerConnectedEventSent) {
             device.chargerConnected(dateTime);
+            reportCtx.setConnectionParam("chargerConnectedEventSent", Boolean.TRUE);
+        } 
+        if (!chargerConnected) {
+            //reset connection state for next time when charger will be connected
+            reportCtx.setConnectionParam("chargerConnectedEventSent", Boolean.FALSE);
         }
-        
     }
 
 }

@@ -2,15 +2,22 @@ package c8y.trackeragent.protocol.telic.parser;
 
 public enum LogCodeType {
     
-    TIME_EVENT("Time Event", "99"),
-    DISTANCE_EVENT("Distance Event", "98"),
+    POWER_EVENT_ON("Power ON Event", "1"),
+    EMERGENCY("Emergency", "2"),
+    POSITION_LOCK_ALARM("Position Lock Alarm", "3"), 
+    ALARM_TRACKING("Alarm Tracking", "4"),
+    POWER_EVENT_OFF("Power OFF Event", "5"),
     ANGULAR_CHANGE_EVENT("Angular Change Event", "6"),
-    POWER_EVENT_ON("Power Event", "1"),
-    POWER_EVENT_OF("Power Event", "5"),
     GEOFENCE_ENTER("Geofence Area Enter", "7"),
     GEOFENCE_EXIT("Geofence Area Exit", "8"),
+    GPS_FIX_LOST("GPS Fix Lost", "9"),
+    PERIODIC_WAKEUP("Periodic Wakeup", "10"),
     MOTION_SENSOR_MOTION("Motion Start", "25"),
-    MOTION_SENSOR_STATIONARY("Motion Stop", "26");
+    MOTION_SENSOR_STATIONARY("Motion Stop", "26"),
+    INCOMING_CALL_EVENT("Incoming Call Event", "30"),
+    HEARTBEAT_EVENT("Heartbeat Event", "32"),
+    DISTANCE_EVENT("Distance Event", "98"),
+    TIME_EVENT("Time Event", "99");
     
     private final String label;
     private final String code;

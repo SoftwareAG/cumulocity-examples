@@ -1,5 +1,13 @@
 package c8y.trackeragent.protocol.rfv16.message;
 
+import static c8y.trackeragent.protocol.rfv16.RFV16Constants.COMMAND_ARM_DISARM_ALARM;
+import static c8y.trackeragent.protocol.rfv16.RFV16Constants.COMMAND_DISPLAY_DEVICE_SITUATION;
+import static c8y.trackeragent.protocol.rfv16.RFV16Constants.COMMAND_POSITION_MONITORING;
+import static c8y.trackeragent.protocol.rfv16.RFV16Constants.COMMAND_RESTART;
+import static c8y.trackeragent.protocol.rfv16.RFV16Constants.COMMAND_SET_SOS_NUMBER;
+import static c8y.trackeragent.protocol.rfv16.RFV16Constants.COMMAND_SINGLE_LOCATION;
+import static c8y.trackeragent.protocol.rfv16.RFV16Constants.DEFAULT_MAKER;
+
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -28,11 +36,11 @@ public class RFV16ServerMessages extends TrackerMessageFactory<TrackerMessage> {
      * Batch: The number of transferred batch, range from 1 to16, outside the range as 1.
      * When batch=1 as the real-time mode, when produce a record upload it, only support batch=1.
      */
-    public TrackerMessage reportMonitoringCommand(String maker, String imei, String intervalInSeconds) {
+    public TrackerMessage reportMonitoringCommand(String imei, String intervalInSeconds) {
         return msg()
-                .appendField(maker)
+                .appendField(DEFAULT_MAKER)
                 .appendField(imei)
-                .appendField(RFV16Constants.COMMAND_POSITION_MONITORING)
+                .appendField(COMMAND_POSITION_MONITORING)
                 .appendField(currTime())
                 .appendField(intervalInSeconds)
                 .appendField(1);                
@@ -41,47 +49,47 @@ public class RFV16ServerMessages extends TrackerMessageFactory<TrackerMessage> {
     /**
      * The device will wake up the GPS, and search the GPS for delayInSeconds, and then up load the location data to server.
      */
-    public TrackerMessage singleLocationCommand(String maker, String imei, String delayInSeconds) {
+    public TrackerMessage singleLocationCommand(String imei, String delayInSeconds) {
 	return msg()
-		.appendField(maker)
+		.appendField(DEFAULT_MAKER)
 		.appendField(imei)
-		.appendField(RFV16Constants.COMMAND_SINGLE_LOCATION)
+		.appendField(COMMAND_SINGLE_LOCATION)
 		.appendField(currTime())
 		.appendField(delayInSeconds);
     }
     
-    public TrackerMessage restartCommand(String maker, String imei) {
+    public TrackerMessage restartCommand(String imei) {
     	return msg()
-    		.appendField(maker)
+    		.appendField(DEFAULT_MAKER)
     		.appendField(imei)
-    		.appendField(RFV16Constants.COMMAND_RESTART)
+    		.appendField(COMMAND_RESTART)
     		.appendField(currTime());
     }
     
-    public TrackerMessage situationCommand(String maker, String imei) {
+    public TrackerMessage situationCommand(String imei) {
 	return msg()
-		.appendField(maker)
+		.appendField(DEFAULT_MAKER)
 		.appendField(imei)
-		.appendField(RFV16Constants.COMMAND_DISPLAY_DEVICE_SITUATION)
+		.appendField(COMMAND_DISPLAY_DEVICE_SITUATION)
 		.appendField(currTime());
     }
     
-    public TrackerMessage setSosNumberCommand(String maker, String imei, String phoneNumber) {
+    public TrackerMessage setSosNumberCommand(String imei, String phoneNumber) {
 	return msg()
-		.appendField(maker)
+		.appendField(DEFAULT_MAKER)
 		.appendField(imei)
-		.appendField(RFV16Constants.COMMAND_SET_SOS_NUMBER)
+		.appendField(COMMAND_SET_SOS_NUMBER)
 		.appendField(currTime())
 		.appendField(phoneNumber)
 		.appendField("")
 		.appendField("");
     }
     
-    public TrackerMessage armAlarm(String maker, String imei, String flag) {
+    public TrackerMessage armAlarm(String imei, String flag) {
 	return msg()
-		.appendField(maker)
+		.appendField(DEFAULT_MAKER)
 		.appendField(imei)
-		.appendField(RFV16Constants.COMMAND_ARM_DISARM_ALARM)
+		.appendField(COMMAND_ARM_DISARM_ALARM)
 		.appendField(currTime())
 		.appendField(0)
 		.appendField(flag);                

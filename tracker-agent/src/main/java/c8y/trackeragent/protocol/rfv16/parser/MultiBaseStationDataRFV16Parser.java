@@ -1,6 +1,5 @@
 package c8y.trackeragent.protocol.rfv16.parser;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 import org.slf4j.Logger;
@@ -15,8 +14,8 @@ import com.google.common.base.Strings;
 import c8y.Mobile;
 import c8y.trackeragent.Parser;
 import c8y.trackeragent.TrackerAgent;
-import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.context.ReportContext;
+import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.protocol.rfv16.RFV16Constants;
 import c8y.trackeragent.protocol.rfv16.message.RFV16ServerMessages;
 import c8y.trackeragent.service.AlarmService;
@@ -26,13 +25,10 @@ public class MultiBaseStationDataRFV16Parser extends RFV16Parser implements Pars
     
     private static Logger logger = LoggerFactory.getLogger(MultiBaseStationDataRFV16Parser.class);
     
-    private final AlarmService alarmService;
-    
     @Autowired
     public MultiBaseStationDataRFV16Parser(TrackerAgent trackerAgent, RFV16ServerMessages serverMessages,
             AlarmService alarmService) {
-        super(trackerAgent, serverMessages);
-        this.alarmService = alarmService;
+        super(trackerAgent, serverMessages, alarmService);
     }
 
     @Override
@@ -46,7 +42,6 @@ public class MultiBaseStationDataRFV16Parser extends RFV16Parser implements Pars
     }
 
     private void processPositionReport(ReportContext reportCtx) {
-    	reportCtx.setConnectionParam(RFV16Constants.CONNECTION_PARAM_MAKER, reportCtx.getEntry(0));
         TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(reportCtx.getImei());
         
         createAlarms(reportCtx, device);
@@ -81,14 +76,7 @@ public class MultiBaseStationDataRFV16Parser extends RFV16Parser implements Pars
 
     private Collection<AlarmRepresentation> createAlarms(ReportContext reportCtx, TrackerDevice device) {
         String status = reportCtx.getEntry(reportCtx.getNumberOfEntries() - 1);
-        Collection<AlarmRepresentation> alarms = new ArrayList<AlarmRepresentation>();
-        Collection<RFV16AlarmType> alarmTypes = AlarmTypeDecoder.getAlarmTypes(status);
-        logger.debug("Read status {} as alarms {} for device {}", status, reportCtx.getImei(), alarmTypes);
-        for (RFV16AlarmType alarmType : alarmTypes) {
-            AlarmRepresentation alarm = alarmService.createAlarm(reportCtx, alarmType, device);
-            alarms.add(alarm);
-        }
-        return alarms;
+        return createAlarms(reportCtx, device, status);
     }
 
     private boolean isNBRReport(ReportContext reportCtx) {

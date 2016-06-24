@@ -12,21 +12,20 @@ import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 
-import c8y.trackeragent.Main;
-import c8y.trackeragent.devicebootstrap.DeviceBinder;
-import c8y.trackeragent.server.Servers;
-
 import com.cumulocity.agent.server.feature.ContextFeature;
 import com.cumulocity.agent.server.feature.RepositoryFeature;
 import com.cumulocity.agent.server.logging.LoggingService;
 import com.cumulocity.agent.server.repository.BinariesRepository;
 import com.cumulocity.agent.server.repository.DeviceControlRepository;
 
+import c8y.trackeragent.Main;
+import c8y.trackeragent.devicebootstrap.TenantBinder;
+import c8y.trackeragent.server.Servers;
+
 @Configuration
 @EnableAutoConfiguration
-@ComponentScan(basePackages = {"c8y.trackeragent"},excludeFilters={
-  @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = Main.class)
-})
+@ComponentScan(basePackages = { "c8y.trackeragent" }, excludeFilters = {
+		@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = Main.class) })
 @Import({RepositoryFeature.class, ContextFeature.class})
 @PropertySource(value = { "file:/etc/tracker-agent/test.properties", 
         "file:/etc/tracker-agent/tracker-agent-server.properties" })
@@ -36,7 +35,7 @@ public class ITConfiguration {
     Servers servers;
     
     @Autowired
-    DeviceBinder deviceBinder;
+    TenantBinder tenantBinder;
     
     @Bean
     @Autowired
@@ -49,6 +48,6 @@ public class ITConfiguration {
     @PostConstruct
     public void startServer() {
         servers.startAll();
-        deviceBinder.init();
+        tenantBinder.init();
     }
 }

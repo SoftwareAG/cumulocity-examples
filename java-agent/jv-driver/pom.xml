@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>c8y.example</groupId>
 		<artifactId>c8y-jv</artifactId>
-        <version>6.18.0-SNAPSHOT</version>
+        <version>7.29.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>jv-driver</artifactId>

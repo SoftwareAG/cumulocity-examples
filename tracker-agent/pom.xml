@@ -4,7 +4,7 @@
     <parent>
         <groupId>c8y.example</groupId>
         <artifactId>c8y-examples</artifactId>
-        <version>6.18.0-SNAPSHOT</version>
+        <version>7.29.0-SNAPSHOT</version>
     </parent>
     <groupId>c8y</groupId>
     <artifactId>tracker-agent</artifactId>
@@ -12,8 +12,8 @@
     <packaging>war</packaging>
     <description>Server-side agent for tracking device based on TCP</description>
     <properties>
-        <maven.compiler.source>1.6</maven.compiler.source>
-        <maven.compiler.target>1.6</maven.compiler.target>
+        <maven.compiler.source>1.7</maven.compiler.source>
+        <maven.compiler.target>1.7</maven.compiler.target>
         <spring.boot.version>1.2.1.RELEASE</spring.boot.version>
         <package.name>tracker-agent-server</package.name>
         <package.directory>tracker-agent</package.directory>
@@ -120,6 +120,38 @@
         </dependency>
     </dependencies>
     <build>
+        <pluginManagement>
+            <plugins>
+	            <plugin>
+	                <groupId>com.nsn.cumulocity.clients-java</groupId>
+	                <artifactId>agent-framework-package</artifactId>
+	                <version>${c8y.version}</version>
+	                <executions>
+	                    <execution>
+	                        <phase>package</phase>
+	                        <goals>
+	                            <goal>agent-package</goal>
+	                        </goals>
+	                    </execution>
+	                </executions>
+	            </plugin>
+	            <plugin>
+	                <groupId>org.springframework.boot</groupId>
+	                <artifactId>spring-boot-maven-plugin</artifactId>
+	                <version>${spring.boot.version}</version>
+	                <configuration>
+	                    <mainClass>${agent.main.class}</mainClass>
+	                </configuration>
+	                <executions>
+	                    <execution>
+	                        <goals>
+	                            <goal>repackage</goal>
+	                        </goals>
+	                    </execution>
+	                </executions>
+	            </plugin>
+            </plugins>
+        </pluginManagement>    
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -130,44 +162,13 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>com.nsn.cumulocity.clients-java</groupId>
-                <artifactId>agent-framework-package</artifactId>
-                <version>${c8y.version}</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>agent-package</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>${spring.boot.version}</version>
-                <configuration>
-                    <mainClass>${agent.main.class}</mainClass>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>repackage</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>test-jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+                <groupId>com.nsn.cumulocity.clients-java</groupId>
+                <artifactId>agent-framework-package</artifactId>
+            </plugin>            
         </plugins>
         <resources>
             <resource>

@@ -1,5 +1,7 @@
 package c8y.trackeragent.protocol.rfv16.parser;
 
+import static c8y.trackeragent.utils.LocationEventBuilder.aLocationEvent;
+
 import java.math.BigDecimal;
 import java.util.Collection;
 
@@ -9,17 +11,20 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
+import com.cumulocity.sdk.client.SDKException;
+import com.google.common.base.Strings;
+
+import c8y.Position;
 import c8y.trackeragent.Parser;
 import c8y.trackeragent.TrackerAgent;
-import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.context.ReportContext;
+import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.protocol.rfv16.RFV16Constants;
 import c8y.trackeragent.protocol.rfv16.message.RFV16ServerMessages;
 import c8y.trackeragent.service.AlarmService;
 import c8y.trackeragent.service.MeasurementService;
-
-import com.cumulocity.sdk.client.SDKException;
-import com.google.common.base.Strings;
+import c8y.trackeragent.utils.LocationEventBuilder;
 
 /**
  * listen to HEARTBEAT (LINK) message
@@ -30,7 +35,6 @@ public class HeartbeatRFV16Parser extends RFV16Parser implements Parser {
 
     private static Logger logger = LoggerFactory.getLogger(HeartbeatRFV16Parser.class);
     
-    private final AlarmService alarmService;
     private final MeasurementService measurementService;
 
     @Autowired
@@ -39,8 +43,7 @@ public class HeartbeatRFV16Parser extends RFV16Parser implements Parser {
             AlarmService alarmService,
             MeasurementService measurementService
             ) {
-        super(trackerAgent, serverMessages);
-        this.alarmService = alarmService;
+        super(trackerAgent, serverMessages, alarmService);
         this.measurementService = measurementService;
     }
 
@@ -57,10 +60,9 @@ public class HeartbeatRFV16Parser extends RFV16Parser implements Parser {
             return false;
         }
         logger.debug("Read status {} as alarms for device {}", status, reportCtx.getImei());
-        Collection<RFV16AlarmType> alarmTypes = AlarmTypeDecoder.getAlarmTypes(status);
-        logger.debug("Read status {} as alarms {} for device {}", status, reportCtx.getImei(), alarmTypes);
-        for (RFV16AlarmType alarmType : alarmTypes) {
-            alarmService.createAlarm(reportCtx, alarmType, device);
+        Collection<AlarmRepresentation> alarms = createAlarms(reportCtx, device, status);
+		if (!alarms.isEmpty()) {
+        	sendAlarmsWithLastPosition(reportCtx, device, alarms);
         }
         BigDecimal batteryLevel = getBatteryPercentageLevel(reportCtx);
         if (batteryLevel != null) {
@@ -70,10 +72,37 @@ public class HeartbeatRFV16Parser extends RFV16Parser implements Parser {
         if (gsmLevel != null) {
             measurementService.createGSMLevelMeasurement(gsmLevel, device, new DateTime());
         }
+        Integer satellites = getGPSSatellites(reportCtx);
+        if (satellites != null) {
+            BigDecimal quality = resolveQualityLevel(satellites);
+            measurementService.createGpsQualityMeasurement(satellites.intValue(), quality, device, new DateTime());
+        }
+        
         return true;
     }
 
-    private boolean isHeartbeat(ReportContext reportCtx) {
+    private BigDecimal resolveQualityLevel(Integer satellites) {
+        if (satellites > 11) {
+            return new BigDecimal(100);
+        } else {
+            return new BigDecimal((satellites - 2) * 10);
+        }
+    }
+
+    private void sendAlarmsWithLastPosition(ReportContext reportCtx, TrackerDevice device, Collection<AlarmRepresentation> alarms) {
+        Position lastPosition = device.getLastPosition();
+        if (lastPosition == null) {
+            return;
+        }
+        LocationEventBuilder locationEvent = aLocationEvent()
+        		.withSourceId(device.getGId())
+        		.withPosition(lastPosition)
+        		.withAlarms(alarms);
+        device.setPosition(locationEvent.build());
+		
+	}
+
+	private boolean isHeartbeat(ReportContext reportCtx) {
         return RFV16Constants.MESSAGE_TYPE_LINK.equalsIgnoreCase(reportCtx.getEntry(2));
     }
 
@@ -92,6 +121,10 @@ public class HeartbeatRFV16Parser extends RFV16Parser implements Parser {
     
     private BigDecimal getGSMPercentageLevel(ReportContext reportCtx) {
         return reportCtx.getEntryAsNumber(4);
+    }
+    
+    private Integer getGPSSatellites(ReportContext reportCtx) {
+        return reportCtx.getEntryAsInt(5);
     }
 
 

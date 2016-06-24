@@ -22,6 +22,8 @@ import org.slf4j.LoggerFactory;
 
 import com.cumulocity.sdk.client.SDKException;
 
+import c8y.trackeragent.configuration.ConfigUtils;
+
 /**
  * TODO: use JSON format instead key-value format 
  * 

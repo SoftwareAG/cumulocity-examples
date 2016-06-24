@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.stereotype.Component;
 
-import c8y.trackeragent.utils.ConfigUtils;
+import c8y.trackeragent.configuration.ConfigUtils;
 
 @Component
 public class AlarmMappingServiceImpl extends ReloadableResourceBundleMessageSource implements AlarmMappingService {

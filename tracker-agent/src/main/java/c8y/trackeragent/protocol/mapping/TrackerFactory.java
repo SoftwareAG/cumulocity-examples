@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import c8y.trackeragent.ConnectedTracker;
-import c8y.trackeragent.utils.TrackerConfiguration;
+import c8y.trackeragent.configuration.TrackerConfiguration;
 
 @Component
 public class TrackerFactory {
@@ -40,10 +40,10 @@ public class TrackerFactory {
         }
     }
     
-    private ConnectedTracker<?> discoverTracker(Socket client, Collection<TrackerProtocol> available) throws Exception {
+    private ConnectedTracker<?> discoverTracker(Socket client, Collection<TrackingProtocol> available) throws Exception {
         InputStream in = asInput(client);
         byte[] markingBytes = firstBytes(in, 1);
-        for (TrackerProtocol trackerProtocol : available) {
+        for (TrackingProtocol trackerProtocol : available) {
             if (trackerProtocol.accept(markingBytes[0])) {
                 return create(trackerProtocol, client, in);
             }
@@ -70,7 +70,7 @@ public class TrackerFactory {
         return bytes;
     }
     
-    private ConnectedTracker<?> create(TrackerProtocol trackerProtocol, Socket client, InputStream in) throws Exception {
+    private ConnectedTracker<?> create(TrackingProtocol trackerProtocol, Socket client, InputStream in) throws Exception {
         ConnectedTracker<?> tracker = beanFactory.getBean(trackerProtocol.getTrackerClass());
         tracker.init(client, in);
         return tracker;

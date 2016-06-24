@@ -8,15 +8,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.cumulocity.sdk.client.SDKException;
+
 import c8y.trackeragent.Parser;
 import c8y.trackeragent.TrackerAgent;
-import c8y.trackeragent.TrackerDevice;
 import c8y.trackeragent.context.ReportContext;
+import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.protocol.rfv16.RFV16Constants;
 import c8y.trackeragent.protocol.rfv16.message.RFV16ServerMessages;
+import c8y.trackeragent.service.AlarmService;
 import c8y.trackeragent.service.MeasurementService;
-
-import com.cumulocity.sdk.client.SDKException;
 
 /**
  * listen to response on CK server command
@@ -32,9 +33,10 @@ public class DeviceSituationRFV16Parser extends RFV16Parser implements Parser {
     @Autowired
     public DeviceSituationRFV16Parser(TrackerAgent trackerAgent, 
             RFV16ServerMessages serverMessages, 
-            MeasurementService measurementService
+            MeasurementService measurementService,
+            AlarmService alarmService
             ) {
-        super(trackerAgent, serverMessages);
+        super(trackerAgent, serverMessages, alarmService);
         this.measurementService = measurementService;
     }
 

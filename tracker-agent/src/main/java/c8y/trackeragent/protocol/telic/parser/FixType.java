@@ -1,10 +1,16 @@
 package c8y.trackeragent.protocol.telic.parser;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public enum FixType {
 
-    _1D("1", "1D Fix"), 
+    _1D("1", "No Fix"), 
     _2D("2", "2D Fix"), 
-    _3D("3", "3D Fix");
+    _3D("3", "3D Fix"),
+    _6D("6", " GSM-Tracking");
+    
+    private static Logger logger = LoggerFactory.getLogger(FixType.class);
 
     private final String value;
 
@@ -29,6 +35,7 @@ public enum FixType {
                 return fixType;
             }
         }
+        logger.debug("Unexpected FixType value = {}.", value);
         return null;
     }
 

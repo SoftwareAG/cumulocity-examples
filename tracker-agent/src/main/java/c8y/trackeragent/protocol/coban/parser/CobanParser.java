@@ -6,12 +6,13 @@ import java.math.BigDecimal;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
+
+import com.cumulocity.sdk.client.SDKException;
 
 import c8y.trackeragent.Parser;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.context.ReportContext;
-
-import com.cumulocity.sdk.client.SDKException;
 
 public abstract class CobanParser  extends CobanSupport implements Parser {
     
@@ -39,7 +40,7 @@ public abstract class CobanParser  extends CobanSupport implements Parser {
     
     public static BigDecimal getSpeed(ReportContext reportCtx) {
         String entry = reportCtx.getEntry(11);
-        if (entry == null) {
+        if (!StringUtils.hasText(entry)) {
             logger.warn("There is no speed parameter in measurement");
             return null;
         }
