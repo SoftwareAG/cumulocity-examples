@@ -1,0 +1,17 @@
+<settings>
+  <activeProfiles>
+    <activeProfile>cumulocity</activeProfile>
+  </activeProfiles>
+
+  <profiles>
+    <profile>
+      <id>cumulocity</id>
+      <repositories>
+        <repository>
+          <id>cumulocity-maven-repo</id>
+          <url>http://resources.cumulocity.com/maven/repository</url>
+        </repository>
+      </repositories>
+    </profile>
+  </profiles>
+</settings>
