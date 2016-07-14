@@ -31,7 +31,7 @@ public class MeasurementService {
             return null;
         }
         MeasurementRepresentation measurement = asMeasurement(device, speedFragment, date);
-        logger.debug("Create speed measurement: ", measurement);
+        logger.debug("Create speed measurement: ", measurement.getAttrs());
         device.createMeasurement(measurement);
         return speedFragment;
     }
@@ -136,7 +136,7 @@ public class MeasurementService {
         measurement.setType("c8y_Altitude");
         measurement.setSource(asSource(device));
         measurement.setDateTime(date);
-        logger.debug("Create altitude measurement: ", measurement);
+        logger.debug("Create altitude measurement: ", measurement.getAttrs());
         device.createMeasurement(measurement);
         return altFragment;
     }

@@ -475,7 +475,7 @@ public class TrackerDevice {
     }
     
     public void createMeasurement(MeasurementRepresentation measurement) {
-        logger.debug("Create measurement {} for device {}", measurement, imei);
+        logger.debug("Create measurement with fragments {} for device {}", measurement.getAttrs(), imei);
         measurements.create(measurement);
     }
 
