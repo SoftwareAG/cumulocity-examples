@@ -92,7 +92,7 @@ public abstract class RFV16Parser implements Parser, RFV16Fragment {
             DateTime date = RFV16ServerMessages.DDMMYY.parseDateTime(reportCtx.getEntry(11));
             return time.withDate(date.getYear(), date.getMonthOfYear(), date.getDayOfMonth());
         } catch (Exception ex) {
-            logger.warn("Problem occured parsing timefrom {} and.ord date from {}", reportCtx.getEntry(3), reportCtx.getEntry(11));
+            logger.warn("Problem occured parsing timefrom {} and/or date from {}", reportCtx.getEntry(3), reportCtx.getEntry(11));
             return null;
         }
     }
