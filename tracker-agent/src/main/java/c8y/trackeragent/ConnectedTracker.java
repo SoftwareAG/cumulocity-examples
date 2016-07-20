@@ -31,7 +31,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +48,7 @@ import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.exception.UnknownDeviceException;
 import c8y.trackeragent.exception.UnknownTenantException;
 import c8y.trackeragent.service.TrackerDeviceContextService;
+import c8y.trackeragent.utils.ReportReader;
 
 /**
  * Performs the communication with a connected device. Accepts reports from the
@@ -62,7 +62,7 @@ public class ConnectedTracker<F extends Fragment> implements Runnable, Executor 
     private final String fieldSeparator;
     private final Map<String, Object> connectionParams = new HashMap<String, Object>();
     private Socket client;
-    private InputStream in;
+    protected InputStream in;
     private OutputStream out;
     private String imei;
     
@@ -74,6 +74,8 @@ public class ConnectedTracker<F extends Fragment> implements Runnable, Executor 
     protected DeviceCredentialsRepository credentialsRepository;
     @Autowired
     protected TrackerDeviceContextService contextService;
+
+    private ReportReader reportReader;
     
     ConnectedTracker(char reportSeparator, String fieldSeparator, List<F> fragments,
 			DeviceBootstrapProcessor bootstrapProcessor, DeviceCredentialsRepository credentialsRepository, 
@@ -94,7 +96,12 @@ public class ConnectedTracker<F extends Fragment> implements Runnable, Executor 
     public void init(Socket client, InputStream in) throws Exception {
         this.client = client;
         this.in = in;
+        this.reportReader = new ReportReader(in, reportSeparator);
     }
+    
+    public InputStream getIn() {
+        return in;
+    }    
 
     @Override
     public void run() {
@@ -121,7 +128,7 @@ public class ConnectedTracker<F extends Fragment> implements Runnable, Executor 
 
     void processReports(InputStream is) throws IOException, SDKException {
         String reportStr;
-        while ((reportStr = readReport(is)) != null) {
+        while ((reportStr = readReport()) != null) {
             logger.debug("Successfully read report");
             String[] report = reportStr.split(fieldSeparator);
             tryProcessReport(report);
@@ -154,27 +161,8 @@ public class ConnectedTracker<F extends Fragment> implements Runnable, Executor 
         }
     }
 
-    public String readReport(InputStream is) throws IOException {
-        StringBuffer result = new StringBuffer();
-        int c;
-
-        while ((c = is.read()) != -1) {
-            if ((char) c == reportSeparator) {
-                break;
-            }
-            if ((char) c == '\n') {
-                continue;
-            }
-            result.append((char) c);
-        }
-
-        logger.debug("Processing report: " + result.toString());
-
-        if (c == -1) {
-            return null;
-        }
-
-        return result.toString();
+    public String readReport() throws IOException {
+        return reportReader.readReport();
     }
 
     void processReport(String[] report) {

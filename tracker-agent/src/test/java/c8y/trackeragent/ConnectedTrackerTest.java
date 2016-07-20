@@ -113,25 +113,6 @@ public class ConnectedTrackerTest {
     }
 
     @Test
-    public void reportReading() throws IOException {
-    	when(credentialsRepository.getDeviceCredentials("imei")).thenThrow(UnknownDeviceException.forImei("imei"));
-    	when(credentialsRepository.getAgentCredentials("tenant")).thenThrow(UnknownTenantException.forTenantId("tenant"));
-        String reports = REPORT1 + GL200Constants.REPORT_SEP + REPORT2 + GL200Constants.REPORT_SEP;
-        ByteArrayInputStream is = null;
-        try {
-            is = new ByteArrayInputStream(reports.getBytes(CHARSET));
-            String report = tracker.readReport(is);
-            assertEquals(REPORT1, report);
-            report = tracker.readReport(is);
-            assertEquals(REPORT2, report);
-            report = tracker.readReport(is);
-            assertNull(report);
-        } finally {
-            IOUtils.closeQuietly(is);
-        }
-    }
-
-    @Test
     public void continuousReportProcessing() throws IOException, SDKException {
     	when(credentialsRepository.getDeviceCredentials("imei")).thenReturn(DeviceCredentials.forDevice("imei", "tenant"));
     	when(credentialsRepository.getAgentCredentials("tenant")).thenReturn(DeviceCredentials.forAgent("tenant", "user", "password"));    	

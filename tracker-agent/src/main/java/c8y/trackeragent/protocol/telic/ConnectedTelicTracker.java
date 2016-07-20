@@ -32,12 +32,12 @@ public class ConnectedTelicTracker extends ConnectedTracker<TelicFragment> {
     }
 
     @Override
-    public String readReport(InputStream is) throws IOException {
+    public String readReport() throws IOException {
         logger.debug("Start reading telic report");
-        if (eat(is, REPORT_SKIP) == null) {
+        if (eat(in, REPORT_SKIP) == null) {
             return null;
         }
-        return super.readReport(is);
+        return super.readReport();
     }
     
     private static InputStream eat(InputStream bis, int bytesToRead) throws IOException {
