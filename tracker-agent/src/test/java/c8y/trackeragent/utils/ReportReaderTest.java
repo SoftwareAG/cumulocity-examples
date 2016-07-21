@@ -14,8 +14,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import static c8y.trackeragent.utils.ReportReader.Result;
-
 import c8y.trackeragent.protocol.gl200.GL200Constants;
 
 public class ReportReaderTest {
@@ -84,12 +82,27 @@ public class ReportReaderTest {
         assertThat(reportReader.readReport().getText()).isEqualTo("hello");
     }
     
+    @Test
+    public void shouldReturnEndOfIfConnectionCLosed() throws Exception {
+        ReportReader reportReader = new ReportReader(serverSocket.accept().getInputStream(), ';');
+        
+        socketWriter.push("a");
+        socketWriter.stop();
+        
+        assertThat(reportReader.readReport().getType()).isEqualTo(ReportReader.ResulType.END_OF);
+    }
+    
     private class SocketWriter implements Runnable {
 
         volatile Deque<String> toW = new ArrayDeque<String>();
 
-        void push(String text) throws InterruptedException {
+        void push(String text) throws Exception {
             toW.addLast(text);
+            Thread.sleep(100);
+        }
+        
+        void stop() throws Exception {
+            socket.close();
             Thread.sleep(100);
         }
 
