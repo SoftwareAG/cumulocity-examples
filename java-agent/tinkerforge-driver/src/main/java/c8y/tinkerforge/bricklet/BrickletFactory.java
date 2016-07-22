@@ -47,6 +47,7 @@ import com.tinkerforge.BrickletMoisture;
 import com.tinkerforge.BrickletMotionDetector;
 import com.tinkerforge.BrickletPTC;
 import com.tinkerforge.BrickletRemoteSwitch;
+import com.tinkerforge.BrickletRotaryPoti;
 import com.tinkerforge.BrickletSegmentDisplay4x7;
 import com.tinkerforge.BrickletTemperature;
 import com.tinkerforge.BrickletVoltageCurrent;
@@ -144,6 +145,9 @@ public class BrickletFactory {
 			return new IO16Bricklet(uid, new BrickletIO16(uid, ipcon));
 		case BrickletVoltageCurrent.DEVICE_IDENTIFIER:
 			return new VoltageCurrentBricklet(uid, new BrickletVoltageCurrent(uid, ipcon));
+		case BrickletRotaryPoti.DEVICE_IDENTIFIER:
+			return new RotaryPotiBricklet(uid, new BrickletRotaryPoti(uid, ipcon));
+			
 		default:
 			throw new IllegalArgumentException("Unknown device identifier: "
 					+ deviceIdentifier);
