@@ -26,7 +26,7 @@ public class NioServerFuzzyTest extends NioServerTestSupport {
     }
 
     @Test
-    public void testName() throws Exception {
+    public void shouldReadManyReports() throws Exception {
         reportExecutorLatch = new CountDownLatch(TOTAL_WRITERS * TOTAL_REPORST_PER_WRITER);
 
         for (int reportNo = 0; reportNo < TOTAL_REPORST_PER_WRITER; reportNo++) {

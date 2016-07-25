@@ -95,7 +95,7 @@ public class NioServerTestSupport {
                     client.getOutputStream().write(b);
                     Thread.sleep(1);
                 } catch (Exception e) {
-                    System.out.println(e.getMessage());
+                    logger.error(e.getMessage());
                 }
             }
         }
