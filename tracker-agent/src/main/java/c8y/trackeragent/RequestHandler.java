@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import c8y.trackeragent.protocol.mapping.TrackerFactory;
 
+@Deprecated
 public class RequestHandler implements Runnable {
 
     private static final Logger logger = LoggerFactory.getLogger(RequestHandler.class);

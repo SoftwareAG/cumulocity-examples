@@ -23,8 +23,6 @@ package c8y.trackeragent;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.Socket;
-import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -47,24 +45,22 @@ import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.exception.UnknownDeviceException;
 import c8y.trackeragent.exception.UnknownTenantException;
+import c8y.trackeragent.nioserver.ReaderWorkerExecutor;
 import c8y.trackeragent.service.TrackerDeviceContextService;
-import c8y.trackeragent.utils.ReportReader;
 
 /**
  * Performs the communication with a connected device. Accepts reports from the
  * input stream and sends commands to the output stream.
  */
-public class ConnectedTracker<F extends Fragment> implements Runnable, Executor {
+public class ConnectedTracker<F extends Fragment> implements Executor, ReaderWorkerExecutor {
     
     protected static Logger logger = LoggerFactory.getLogger(ConnectedTracker.class);
 
     private final char reportSeparator;
     private final String fieldSeparator;
     private final Map<String, Object> connectionParams = new HashMap<String, Object>();
-    private Socket client;
-    protected InputStream in;
-    private OutputStream out;
     private String imei;
+    private OutputStream out;//TODO delete
     
     @Autowired
     protected List<F> fragments = new ArrayList<F>();
@@ -75,8 +71,6 @@ public class ConnectedTracker<F extends Fragment> implements Runnable, Executor 
     @Autowired
     protected TrackerDeviceContextService contextService;
 
-    private ReportReader reportReader;
-    
     ConnectedTracker(char reportSeparator, String fieldSeparator, List<F> fragments,
 			DeviceBootstrapProcessor bootstrapProcessor, DeviceCredentialsRepository credentialsRepository, 
 			TrackerDeviceContextService contextService) {
@@ -93,50 +87,16 @@ public class ConnectedTracker<F extends Fragment> implements Runnable, Executor 
         this.fieldSeparator = fieldSeparator;
     }
     
-    public void init(Socket client, InputStream in) throws Exception {
-        this.client = client;
-        this.in = in;
-        this.reportReader = new ReportReader(in, reportSeparator);
+    @Override
+    public void execute(String reportStr) {
+        String[] report = reportStr.split(fieldSeparator);
+        tryProcessReport(report);
+        
     }
-    
-    public InputStream getIn() {
-        return in;
-    }    
 
     @Override
-    public void run() {
-        if (in == null) {
-            return;
-        }
-        try {
-            out = client.getOutputStream();
-            processReports(in);
-        } catch (SocketException e) {
-            logger.warn("Error during communication with client device: " + e.getMessage());           
-        } catch (IOException e) {
-            logger.warn("Error during communication with client device", e);
-        } catch (SDKException e) {
-            logger.warn("Error during communication with the platform", e);
-        } finally {
-            try {
-                client.close();
-            } catch (IOException e) {
-                logger.warn("Error during closing socket", e);
-            }
-        }
-    }
-
-    void processReports(InputStream is) throws IOException, SDKException {
-        String reportStr;
-        while ((reportStr = readReport()) != null) {
-            logger.debug("Successfully read report");
-            String[] report = reportStr.split(fieldSeparator);
-            tryProcessReport(report);
-        }
-        if (imei != null) {
-            ConnectionRegistry.instance().remove(imei);
-        }
-        logger.debug("Connection closed by {} {} ", client.getRemoteSocketAddress(), imei);
+    public String getReportSeparator() {
+        return "" + reportSeparator;
     }
 
     private void tryProcessReport(String[] report) throws SDKException {
@@ -159,10 +119,6 @@ public class ConnectedTracker<F extends Fragment> implements Runnable, Executor 
             }
             processReport(report);
         }
-    }
-
-    public String readReport() throws IOException {
-        return reportReader.readReport();
     }
 
     void processReport(String[] report) {
@@ -243,10 +199,6 @@ public class ConnectedTracker<F extends Fragment> implements Runnable, Executor 
             }
         }
         return null;
-    }
-
-    void setOut(OutputStream out) {
-        this.out = out;
     }
 
 	public Map<String, Object> getConnectionParams() {

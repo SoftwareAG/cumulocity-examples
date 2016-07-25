@@ -20,6 +20,8 @@ import org.junit.Before;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import c8y.trackeragent.nioserver.NioServerEvent.ReadDataEvent;
+
 public class NioServerTestSupport {
     
     private static final Logger logger = LoggerFactory.getLogger(NioServerTestSupport.class);
@@ -105,9 +107,9 @@ public class NioServerTestSupport {
     protected class ReaderWorkerExecutorFactoryImpl implements ReaderWorkerExecutorFactory {
         
         @Override
-        public ReaderWorkerExecutor create(byte[] data) {
+        public ReaderWorkerExecutor create(ReadDataEvent readData) {
             ReaderWorkerExecutorImpl result = new ReaderWorkerExecutorImpl();
-            logger.info("Created executor for data " + new String(data, CHARSET));
+            logger.info("Created executor for data " + new String(readData.getData(), CHARSET));
             executors.add(result);
             logger.info("Total executors " + executors.size());
             return result;

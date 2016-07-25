@@ -16,6 +16,7 @@ import c8y.trackeragent.ConnectedTracker;
 import c8y.trackeragent.configuration.TrackerConfiguration;
 
 @Component
+@Deprecated
 public class TrackerFactory {
 
     private static final Logger logger = LoggerFactory.getLogger(TrackerFactory.class);

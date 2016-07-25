@@ -9,9 +9,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import c8y.trackeragent.nioserver.NioServerEvent.ReadDataEvent;
 
 public class NioServerEventHandler implements WorkerTaskProvider {
+    
+    private static final Logger logger = LoggerFactory.getLogger(NioServerEventHandler.class);
 
     private static final int NUMBER_OF_WORKERS = 10;
 
@@ -35,17 +40,21 @@ public class NioServerEventHandler implements WorkerTaskProvider {
         }
     }
 
-    public void handle(NioServerEvent.ReadDataEvent readData) {
+    public void handle(NioServerEvent.ReadDataEvent readDataEvent) {
         synchronized (channelStatesMonitor) {
-            SocketChannelState state = getChannelState(readData);
-            state.getDataBuffer().append(readData.getData(), readData.getNumRead());
+            try {
+                SocketChannelState state = getChannelState(readDataEvent);
+                state.getDataBuffer().append(readDataEvent.getData(), readDataEvent.getNumRead());
+            } catch (Exception e) {
+                logger.error("Exception handling read event " + readDataEvent, e);
+            }
         }
     }
 
-    private SocketChannelState getChannelState(ReadDataEvent readData) {
+    private SocketChannelState getChannelState(ReadDataEvent readData) throws Exception {
         SocketChannelState channelState = channelStatesIndex.get(readData.getChannel());
         if (channelState == null) {
-            ReaderWorkerExecutor executor = executorFactory.create(readData.getData());
+            ReaderWorkerExecutor executor = executorFactory.create(readData);
             channelState = new SocketChannelState(executor, new DataBuffer(executor.getReportSeparator()));
             channelStatesIndex.put(readData.getChannel(), channelState);
             channelStates.add(channelState);
