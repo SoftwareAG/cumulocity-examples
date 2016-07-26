@@ -9,11 +9,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
+import javax.annotation.PostConstruct;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import c8y.trackeragent.nioserver.NioServerEvent.ReadDataEvent;
 
+@Component
 public class NioServerEventHandler implements WorkerTaskProvider {
     
     private static final Logger logger = LoggerFactory.getLogger(NioServerEventHandler.class);
@@ -29,10 +34,12 @@ public class NioServerEventHandler implements WorkerTaskProvider {
 
     private final ReaderWorkerExecutorFactory executorFactory;
 
+    @Autowired
     public NioServerEventHandler(ReaderWorkerExecutorFactory executorFactory) {
         this.executorFactory = executorFactory;
     }
 
+    @PostConstruct
     public void init() {
         for (int i = 0; i < NUMBER_OF_WORKERS; i++) {
             ReaderWorker worker = new ReaderWorker((WorkerTaskProvider) this);

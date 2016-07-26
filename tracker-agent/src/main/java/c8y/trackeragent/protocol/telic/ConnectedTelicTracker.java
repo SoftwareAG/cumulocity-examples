@@ -1,8 +1,8 @@
 package c8y.trackeragent.protocol.telic;
 
+import static java.lang.String.format;
+
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.Socket;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,38 +16,37 @@ import c8y.trackeragent.protocol.telic.parser.TelicFragment;
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ConnectedTelicTracker extends ConnectedTracker<TelicFragment> {
-    
+
     protected static Logger logger = LoggerFactory.getLogger(ConnectedTelicTracker.class);
-    
+
     public static final int HEADER_LENGTH = 28;
     public static final int REPORT_SKIP = 4;
 
-	public ConnectedTelicTracker() throws IOException {
-		super(TelicConstants.REPORT_SEP, TelicConstants.FIELD_SEP);
-	}
-    
-    @Override
-    public void init(Socket client, InputStream in) throws Exception {
-        super.init(client, eat(in, HEADER_LENGTH));
+    private boolean firstReport = true;
+
+    public ConnectedTelicTracker() throws IOException {
+        super(TelicConstants.REPORT_SEP, TelicConstants.FIELD_SEP);
     }
 
     @Override
-    public String readReport() throws IOException {
-        logger.debug("Start reading telic report");
-        if (eat(in, REPORT_SKIP) == null) {
-            return null;
+    public void execute(String reportStr) {
+        try {
+            if (firstReport) {
+                reportStr = eat(reportStr, HEADER_LENGTH);
+            }
+            reportStr = eat(reportStr, REPORT_SKIP);
+            super.execute(reportStr);
+        } finally {
+            this.firstReport = false;
         }
-        return super.readReport();
     }
-    
-    private static InputStream eat(InputStream bis, int bytesToRead) throws IOException {
-        byte[] dummy = new byte[bytesToRead];
-        int bytesRead = bis.read(dummy, 0, bytesToRead);
-        if (bytesRead < bytesToRead) {
-            logger.warn("{} bytes read from header but expected at least {}, skip this report!", bytesRead, bytesToRead);
-            return null;
+
+    static String eat(String report, int bytesToRead) {
+        if (bytesToRead <= report.length()) {
+            return report.substring(bytesToRead);
+        } else {
+            String message = format("Report %s too short! Need at least %s bytes", report, bytesToRead);
+            throw new RuntimeException(message);
         }
-        return bis;
     }
-    
 }

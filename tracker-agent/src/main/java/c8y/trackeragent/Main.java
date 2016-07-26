@@ -20,6 +20,8 @@
 
 package c8y.trackeragent;
 
+import java.io.IOException;
+
 import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
@@ -76,7 +78,7 @@ public class Main {
     }
     
     @PostConstruct
-    public void onStart() {
+    public void onStart() throws IOException {
         servers.startAll();
         tenantBinder.init();
     }

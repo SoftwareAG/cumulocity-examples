@@ -1,5 +1,7 @@
 package c8y.trackeragent_it;
 
+import java.io.IOException;
+
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +48,7 @@ public class ITConfiguration {
     }
     
     @PostConstruct
-    public void startServer() {
+    public void startServer() throws IOException {
         servers.startAll();
         tenantBinder.init();
     }

@@ -23,21 +23,16 @@ package c8y.trackeragent;
 import static java.util.Arrays.asList;
 import static org.fest.assertions.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.Socket;
 import java.nio.charset.Charset;
 
-import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -60,8 +55,6 @@ public class ConnectedTrackerTest {
     private static final Charset CHARSET = Charset.forName("US-ASCII");
 
     private TrackerDeviceContextService contextService = mock(TrackerDeviceContextService.class);
-    private Socket client = mock(Socket.class);
-    private BufferedInputStream in = mock(BufferedInputStream.class);
     private OutputStream out = mock(OutputStream.class);
     private Translator translator = mock(Translator.class);
     private Parser parser = mock(Parser.class);
@@ -79,8 +72,6 @@ public class ConnectedTrackerTest {
         		bootstrapProcessor,
         		credentialsRepository,
         		contextService);
-        tracker.init(client, in);
-        tracker.setOut(out);
     }
 
     @Test
@@ -117,19 +108,10 @@ public class ConnectedTrackerTest {
     	when(credentialsRepository.getDeviceCredentials("imei")).thenReturn(DeviceCredentials.forDevice("imei", "tenant"));
     	when(credentialsRepository.getAgentCredentials("tenant")).thenReturn(DeviceCredentials.forAgent("tenant", "user", "password"));    	
         when(parser.parse(any(String[].class))).thenReturn("imei");
-
-        String reports = REPORT1 + GL200Constants.REPORT_SEP + REPORT2 + GL200Constants.REPORT_SEP;
-
-        ByteArrayInputStream is = null;
-        try {
-            is = new ByteArrayInputStream(reports.getBytes(CHARSET));
-            tracker.processReports(is);
-        } finally {
-            IOUtils.closeQuietly(is);
-        }
+        
+        tracker.execute(REPORT1);
 
         verify(parser).parse(REPORT1.split(GL200Constants.FIELD_SEP));
-        verify(parser).parse(REPORT2.split(GL200Constants.FIELD_SEP));
         verifyZeroInteractions(translator);
     }
 

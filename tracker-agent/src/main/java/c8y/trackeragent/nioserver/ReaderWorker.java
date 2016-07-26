@@ -32,7 +32,7 @@ public class ReaderWorker implements Runnable {
     private void process(SocketChannelState state) {
         String report = state.getDataBuffer().getReport();
         if (report != null) {
-            state.execute(report);
+            state.getReportExecutor().execute(report);
         }
     }
 

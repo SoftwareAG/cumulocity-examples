@@ -1,7 +1,6 @@
 package c8y.trackeragent.nioserver;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
@@ -18,23 +17,25 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
+@Component
+@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE) 
 public class NioServer implements Runnable {
     
     private static final Logger logger = LoggerFactory.getLogger(NioServer.class);
     
-    // The host:port combination to listen on
-    private final InetAddress hostAddress;
-    private final int port;
-
     // The channel on which we'll accept connections
     private ServerSocketChannel serverChannel;
 
     // The selector we'll be monitoring
-    private final Selector selector;
+    private Selector selector;
 
     // The buffer into which we'll read data when it's available
-    private ByteBuffer readBuffer = ByteBuffer.allocate(8192);
+    private final ByteBuffer readBuffer = ByteBuffer.allocate(8192);
 
     // A list of PendingChange instances
     private final List<ChangeRequest> pendingChanges = new LinkedList<ChangeRequest>();
@@ -44,12 +45,32 @@ public class NioServer implements Runnable {
     
     private final NioServerEventHandler eventHandler;
 
-    public NioServer(InetAddress hostAddress, int port, NioServerEventHandler eventHandler) throws IOException {
-        this.hostAddress = hostAddress;
-        this.port = port;
+    @Autowired
+    public NioServer(NioServerEventHandler eventHandler) throws IOException {
         this.eventHandler = eventHandler;
-        this.selector = this.initSelector();
     }
+    
+    public void start(int port) throws IOException {
+        if (serverChannel != null) {
+            throw new IllegalStateException("The instance of " + this.getClass().getSimpleName() + " have been already started");
+        }
+        logger.info("Will start listening on the port: {}", port);
+        // Create a new non-blocking server socket channel
+        serverChannel = ServerSocketChannel.open();
+        serverChannel.configureBlocking(false);
+
+        // Bind the server socket to the specified port
+        InetSocketAddress isa = new InetSocketAddress(port);
+        serverChannel.socket().bind(isa);
+
+        // Register the server socket channel, indicating an interest in
+        // accepting new connections
+        this.selector = SelectorProvider.provider().openSelector();
+        serverChannel.register(selector, SelectionKey.OP_ACCEPT);
+        
+        logger.info("Started listening on the port: {}", port);
+    }
+
 
     public void send(SocketChannel socket, byte[] data) {
         synchronized (this.pendingChanges) {
@@ -129,6 +150,9 @@ public class NioServer implements Runnable {
 
         // Accept the connection and make it non-blocking
         SocketChannel socketChannel = serverSocketChannel.accept();
+        if (socketChannel == null) {
+            return;
+        }
         socketChannel.configureBlocking(false);
 
         // Register the new SocketChannel with our Selector, indicating
@@ -192,25 +216,6 @@ public class NioServer implements Runnable {
                 key.interestOps(SelectionKey.OP_READ);
             }
         }
-    }
-
-    private Selector initSelector() throws IOException {
-        // Create a new selector
-        Selector socketSelector = SelectorProvider.provider().openSelector();
-
-        // Create a new non-blocking server socket channel
-        this.serverChannel = ServerSocketChannel.open();
-        serverChannel.configureBlocking(false);
-
-        // Bind the server socket to the specified address and port
-        InetSocketAddress isa = new InetSocketAddress(this.hostAddress, this.port);
-        serverChannel.socket().bind(isa);
-
-        // Register the server socket channel, indicating an interest in
-        // accepting new connections
-        serverChannel.register(socketSelector, SelectionKey.OP_ACCEPT);
-
-        return socketSelector;
     }
 
 

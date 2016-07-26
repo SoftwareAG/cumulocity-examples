@@ -37,9 +37,10 @@ public class NioServerTestSupport {
     @Before
     public void before() throws Exception {
         reportExecutorLatch = new CountDownLatch(0);
-        NioServerEventHandler eventHandler = new NioServerEventHandler(new ReaderWorkerExecutorFactoryImpl());
+        NioServerEventHandler eventHandler = new NioServerEventHandler(new TestReaderWorkerExecutorFactoryImpl());
         eventHandler.init();
-        server = new NioServer(null, PORT, eventHandler);
+        server = new NioServer(eventHandler);
+        server.start(PORT);
         executorService.execute(server);
     }
     
@@ -104,7 +105,7 @@ public class NioServerTestSupport {
 
     }
     
-    protected class ReaderWorkerExecutorFactoryImpl implements ReaderWorkerExecutorFactory {
+    protected class TestReaderWorkerExecutorFactoryImpl implements ReaderWorkerExecutorFactory {
         
         @Override
         public ReaderWorkerExecutor create(ReadDataEvent readData) {

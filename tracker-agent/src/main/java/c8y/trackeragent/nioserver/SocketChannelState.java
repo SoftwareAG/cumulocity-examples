@@ -9,11 +9,10 @@ public class SocketChannelState {
     public SocketChannelState(ReaderWorkerExecutor reportExecutor, DataBuffer dataBuffer) {
         this.reportExecutor = reportExecutor;
         this.dataBuffer = dataBuffer;
-        this.processing = false;
     }
 
-    public void execute(String report) {
-        reportExecutor.execute(report);
+    public ReaderWorkerExecutor getReportExecutor() {
+        return reportExecutor;
     }
 
     public DataBuffer getDataBuffer() {
@@ -27,6 +26,5 @@ public class SocketChannelState {
     public void setProcessing(boolean processing) {
         this.processing = processing;
     }
-    
-    
+
 }

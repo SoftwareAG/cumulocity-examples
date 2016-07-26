@@ -30,10 +30,12 @@ public class ConnectedTrackerFactory implements ReaderWorkerExecutorFactory {
     
     @Override
     public ReaderWorkerExecutor create(ReadDataEvent readData) throws Exception {
-        logger.debug("peek tracker for new connection...");
+        logger.debug("Will peek tracker for new connection...");
         int localPort = readData.getChannel().socket().getLocalPort();
         byte markingByte = readData.getData()[0];
-        return create(localPort, markingByte);
+        ReaderWorkerExecutor result = create(localPort, markingByte);
+        logger.debug("Tracker for new connection: {}", result.getClass().getSimpleName());
+        return result;
     }
 
     private ReaderWorkerExecutor create(int localPort, byte markingByte) throws Exception {

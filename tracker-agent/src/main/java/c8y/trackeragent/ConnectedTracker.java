@@ -21,7 +21,6 @@
 package c8y.trackeragent;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,7 +51,7 @@ import c8y.trackeragent.service.TrackerDeviceContextService;
  * Performs the communication with a connected device. Accepts reports from the
  * input stream and sends commands to the output stream.
  */
-public class ConnectedTracker<F extends Fragment> implements Executor, ReaderWorkerExecutor {
+public abstract class ConnectedTracker<F extends Fragment> implements Executor, ReaderWorkerExecutor {
     
     protected static Logger logger = LoggerFactory.getLogger(ConnectedTracker.class);
 
@@ -100,6 +99,7 @@ public class ConnectedTracker<F extends Fragment> implements Executor, ReaderWor
     }
 
     private void tryProcessReport(String[] report) throws SDKException {
+        logger.info("Process report: {}.", Arrays.toString(report));
         try {
             processReport(report);
         } catch (SDKException x) {

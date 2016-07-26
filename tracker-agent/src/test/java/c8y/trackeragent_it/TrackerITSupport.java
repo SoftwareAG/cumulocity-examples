@@ -241,7 +241,7 @@ public abstract class TrackerITSupport {
             restConnector.put(newDeviceRequestUri(deviceId), NEW_DEVICE_REQUEST, representation);
             logger.info("Device with id {} accepted.", deviceId);
         } catch (Exception ex) {
-        	logger.info("Device with id {} not accepted.", deviceId);
+        	logger.error("Device with id " + deviceId + " not accepted.", ex);
         }
     }
     
@@ -297,7 +297,7 @@ public abstract class TrackerITSupport {
         Thread.sleep(1000);
         // PENDING_ACCEPTANCE status
         
-        logger.info("accept request for imei: {}");
+        logger.info("accept request for imei: {}", imei);
         acceptNewDeviceRequest(imei);
         // ACCEPTED status
         
