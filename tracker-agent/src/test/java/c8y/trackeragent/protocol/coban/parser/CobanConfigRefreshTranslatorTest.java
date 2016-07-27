@@ -4,14 +4,17 @@ import static org.fest.assertions.Assertions.assertThat;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.runners.MockitoJUnitRunner;
+
+import com.cumulocity.model.operation.OperationStatus;
+import com.cumulocity.rest.representation.operation.OperationRepresentation;
 
 import c8y.trackeragent.context.OperationContext;
 import c8y.trackeragent.protocol.coban.device.CobanDevice;
 import c8y.trackeragent.utils.message.TrackerMessage;
 
-import com.cumulocity.model.operation.OperationStatus;
-import com.cumulocity.rest.representation.operation.OperationRepresentation;
-
+@RunWith(MockitoJUnitRunner.class)
 public class CobanConfigRefreshTranslatorTest extends CobanParserTestSupport {
     
     private CobanConfigRefreshTranslator bean;
@@ -19,13 +22,14 @@ public class CobanConfigRefreshTranslatorTest extends CobanParserTestSupport {
     @Before
     public void init() {
         bean = new CobanConfigRefreshTranslator(trackerAgent, serverMessages);
+        connectionDetails.setImei("123123");
     }
     
     @Test
     public void shouldHandleRefreshConfigOperation() throws Exception {
         OperationRepresentation operation = new OperationRepresentation();
         operation.set(new Object(), CobanConfigRefreshTranslator.OPERATION_MARKER);
-        OperationContext operationCtx = new OperationContext(operation, "123123");
+        OperationContext operationCtx = new OperationContext(connectionDetails, operation);
         currentCobanDeviceIs(new CobanDevice().setLocationReportInterval("30s"));
         
         String serverMessageText = bean.translate(operationCtx);

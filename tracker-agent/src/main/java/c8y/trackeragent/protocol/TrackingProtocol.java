@@ -1,11 +1,11 @@
-package c8y.trackeragent.protocol.mapping;
+package c8y.trackeragent.protocol;
 
-import c8y.trackeragent.ConnectedTracker;
 import c8y.trackeragent.protocol.coban.ConnectedCobanTracker;
 import c8y.trackeragent.protocol.gl200.ConnectedGL200Tracker;
 import c8y.trackeragent.protocol.mt90g.ConnectedMT90GTracker;
 import c8y.trackeragent.protocol.rfv16.ConnectedRFV16Tracker;
 import c8y.trackeragent.protocol.telic.ConnectedTelicTracker;
+import c8y.trackeragent.tracker.BaseConnectedTracker;
 
 public enum TrackingProtocol {
 
@@ -44,13 +44,13 @@ public enum TrackingProtocol {
         }
     };
 
-    private final Class<? extends ConnectedTracker<?>> trackerClazz;
+    private final Class<? extends BaseConnectedTracker<?>> trackerClazz;
 
-    private TrackingProtocol(Class<? extends ConnectedTracker<?>> trackerClazz) {
+    private TrackingProtocol(Class<? extends BaseConnectedTracker<?>> trackerClazz) {
         this.trackerClazz = trackerClazz;
     }
 
-    public Class<? extends ConnectedTracker<?>> getTrackerClass() {
+    public Class<? extends BaseConnectedTracker<?>> getTrackerClass() {
         return trackerClazz;
     }
 

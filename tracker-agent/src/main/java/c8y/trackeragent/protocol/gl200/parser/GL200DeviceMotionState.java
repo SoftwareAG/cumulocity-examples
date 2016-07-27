@@ -23,16 +23,16 @@ package c8y.trackeragent.protocol.gl200.parser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.cumulocity.rest.representation.operation.OperationRepresentation;
+import com.cumulocity.sdk.client.SDKException;
+
 import c8y.MotionTracking;
 import c8y.trackeragent.TrackerAgent;
-import c8y.trackeragent.Translator;
 import c8y.trackeragent.context.OperationContext;
 import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.protocol.gl200.GL200Constants;
-
-import com.cumulocity.rest.representation.operation.OperationRepresentation;
-import com.cumulocity.sdk.client.SDKException;
+import c8y.trackeragent.tracker.Translator;
 
 /**
  * <p>

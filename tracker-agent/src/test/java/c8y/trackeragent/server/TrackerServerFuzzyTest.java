@@ -1,4 +1,4 @@
-package c8y.trackeragent.nioserver;
+package c8y.trackeragent.server;
 
 import static org.fest.assertions.Assertions.assertThat;
 
@@ -10,10 +10,12 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
 
-public class NioServerFuzzyTest extends NioServerTestSupport {
+import c8y.trackeragent.tracker.ConnectedTracker;
 
-    private static final int TOTAL_WRITERS = 40;
-    private static final int TOTAL_REPORST_PER_WRITER = 100;
+public class TrackerServerFuzzyTest extends TrackerServerTestSupport {
+
+    private static final int TOTAL_WRITERS = 50;
+    private static final int TOTAL_REPORST_PER_WRITER = 120;
     private final List<SocketWriter> writers = new ArrayList<SocketWriter>();
     private final List<String> sendReports = new ArrayList<String>();
 
@@ -39,7 +41,7 @@ public class NioServerFuzzyTest extends NioServerTestSupport {
 
         reportExecutorLatch.await(2, TimeUnit.SECONDS);
         assertThat(reportExecutorLatch.getCount()).isEqualTo(0L);
-        for (ReaderWorkerExecutorImpl executor : executors) {
+        for (ConnectedTrackerImpl executor : executors) {
             assertThat(executor.getProcessed()).hasSize(TOTAL_REPORST_PER_WRITER);
             assertThat(executor.getProcessed()).isEqualTo(sendReports);
         }

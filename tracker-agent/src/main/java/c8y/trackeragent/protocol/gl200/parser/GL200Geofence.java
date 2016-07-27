@@ -28,11 +28,11 @@ import com.cumulocity.sdk.client.SDKException;
 
 import c8y.Geofence;
 import c8y.trackeragent.TrackerAgent;
-import c8y.trackeragent.Translator;
 import c8y.trackeragent.context.OperationContext;
 import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.service.MeasurementService;
+import c8y.trackeragent.tracker.Translator;
 
 /**
  * <p>

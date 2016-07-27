@@ -18,15 +18,12 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package c8y.trackeragent;
+package c8y.trackeragent.tracker;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,21 +41,19 @@ import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.exception.UnknownDeviceException;
 import c8y.trackeragent.exception.UnknownTenantException;
-import c8y.trackeragent.nioserver.ReaderWorkerExecutor;
+import c8y.trackeragent.server.ConnectionDetails;
 import c8y.trackeragent.service.TrackerDeviceContextService;
 
 /**
  * Performs the communication with a connected device. Accepts reports from the
  * input stream and sends commands to the output stream.
  */
-public abstract class ConnectedTracker<F extends Fragment> implements Executor, ReaderWorkerExecutor {
+public abstract class BaseConnectedTracker<F extends Fragment> implements ConnectedTracker {
     
-    protected static Logger logger = LoggerFactory.getLogger(ConnectedTracker.class);
+    protected static Logger logger = LoggerFactory.getLogger(BaseConnectedTracker.class);
 
     private final char reportSeparator;
     private final String fieldSeparator;
-    private final Map<String, Object> connectionParams = new HashMap<String, Object>();
-    private String imei;
     private OutputStream out;//TODO delete
     
     @Autowired
@@ -70,7 +65,7 @@ public abstract class ConnectedTracker<F extends Fragment> implements Executor, 
     @Autowired
     protected TrackerDeviceContextService contextService;
 
-    ConnectedTracker(char reportSeparator, String fieldSeparator, List<F> fragments,
+    BaseConnectedTracker(char reportSeparator, String fieldSeparator, List<F> fragments,
 			DeviceBootstrapProcessor bootstrapProcessor, DeviceCredentialsRepository credentialsRepository, 
 			TrackerDeviceContextService contextService) {
 		this.reportSeparator = reportSeparator;
@@ -81,50 +76,46 @@ public abstract class ConnectedTracker<F extends Fragment> implements Executor, 
 		this.contextService = contextService;
 	}
 
-	public ConnectedTracker(char reportSeparator, String fieldSeparator) {
+	public BaseConnectedTracker(char reportSeparator, String fieldSeparator) {
         this.reportSeparator = reportSeparator;
         this.fieldSeparator = fieldSeparator;
     }
     
     @Override
-    public void execute(String reportStr) {
+    public void executeReport(ConnectionDetails connectionDetails, String reportStr) {
+        logger.info("Process report: {}.", reportStr);
         String[] report = reportStr.split(fieldSeparator);
-        tryProcessReport(report);
+        ReportContext reportContext = new ReportContext(connectionDetails, report);
+        tryProcessReport(reportContext);
         
     }
 
-    @Override
-    public String getReportSeparator() {
-        return "" + reportSeparator;
-    }
-
-    private void tryProcessReport(String[] report) throws SDKException {
-        logger.info("Process report: {}.", Arrays.toString(report));
+    private void tryProcessReport(ReportContext reportContext) throws SDKException {
         try {
-            processReport(report);
-        } catch (SDKException x) {
-            logger.error("Error processing report " + Arrays.toString(report), x);
+            processReport(reportContext);
+        } catch (SDKException ex) {
+            logger.error("Error processing report: " + reportContext, ex);
             /*
              * What might have happened here? Either the connection to the
              * platform is down or the object has been deleted from the
              * platform. We'll evict the object from the ManagedObjectCache and
              * try again after a while. If that fails, we give up.
              */
-            if (imei != null) {
-                ManagedObjectCache.instance().evict(imei);
+            if (reportContext.getImei() != null) {
+                ManagedObjectCache.instance().evict(reportContext.getImei());
             }
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
             }
-            processReport(report);
+            processReport(reportContext);
         }
     }
 
-    void processReport(String[] report) {
+    void processReport(ReportContext reportContext) {
         for (final Parser parser : Iterables.filter(fragments, Parser.class)) {
             logger.debug("Using parser "+ parser.getClass());
-            String imei = parser.parse(report);
+            String imei = parser.parse(reportContext.getReport());
 			if (imei == null) {
 				continue;
 			}
@@ -157,12 +148,10 @@ public abstract class ConnectedTracker<F extends Fragment> implements Executor, 
 				}
             	
             }
-            final ReportContext reportContext = new ReportContext(report, imei, out, connectionParams);
             try {
             	contextService.enterContext(tenant, imei);
             	if (parser.onParsed(reportContext)) {
-            		this.imei = imei;
-            		ConnectionRegistry.instance().put(imei, this);
+            	    reportContext.setImei(imei);
             	}
             } catch (Exception e) {
                 logger.error("Error on parsing request", e);
@@ -174,7 +163,7 @@ public abstract class ConnectedTracker<F extends Fragment> implements Executor, 
     }
 
     @Override
-    public void execute(OperationContext operationCtx) throws IOException {
+    public void executeOperation(OperationContext operationCtx) throws IOException {
         String translation = translate(operationCtx);
         logger.debug("Executing operation\n{}\n{}", operationCtx, translation);
 
@@ -201,7 +190,9 @@ public abstract class ConnectedTracker<F extends Fragment> implements Executor, 
         return null;
     }
 
-	public Map<String, Object> getConnectionParams() {
-		return connectionParams;
-	}
+    @Override
+    public String getReportSeparator() {
+        return "" + reportSeparator;
+    }
+
 }

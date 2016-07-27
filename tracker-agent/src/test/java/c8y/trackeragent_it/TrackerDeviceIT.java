@@ -56,18 +56,18 @@ import c8y.IsDevice;
 import c8y.MotionTracking;
 import c8y.Position;
 import c8y.SupportedOperations;
-import c8y.trackeragent.ConnectedTracker;
 import c8y.trackeragent.ConnectionRegistry;
 import c8y.trackeragent.Executor;
 import c8y.trackeragent.context.OperationContext;
 import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
-import c8y.trackeragent.protocol.mapping.TrackingProtocol;
+import c8y.trackeragent.protocol.TrackingProtocol;
+import c8y.trackeragent.tracker.BaseConnectedTracker;
 import c8y.trackeragent.utils.Devices;
 
 public class TrackerDeviceIT extends TrackerITSupport {
     
-    protected static Logger logger = LoggerFactory.getLogger(ConnectedTracker.class);
+    protected static Logger logger = LoggerFactory.getLogger(BaseConnectedTracker.class);
 
     private String imei = Devices.IMEI_1;
     private ID extId = new ID(imei);
@@ -91,7 +91,7 @@ public class TrackerDeviceIT extends TrackerITSupport {
 
         ConnectionRegistry.instance().put(imei, new Executor() {
             @Override
-            public void execute(OperationContext operation) throws IOException {
+            public void executeOperation(OperationContext operation) throws IOException {
                 // Nothing
             }
 

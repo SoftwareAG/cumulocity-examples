@@ -18,6 +18,7 @@ public class HeartbeatCobanParserTest extends CobanParserTestSupport {
     @Before
     public void init() {
         cobanParser = new HeartbeatCobanParser(trackerAgent, serverMessages);
+        connectionDetails.setImei("ABCD");
     }
     
     @Test
@@ -33,7 +34,7 @@ public class HeartbeatCobanParserTest extends CobanParserTestSupport {
       when(trackerAgent.getOrCreateTrackerDevice("ABCD")).thenReturn(deviceMock);
       ByteArrayOutputStream out = new ByteArrayOutputStream();
       String[] report = deviceMessages.heartbeat("ABCD").asArray();
-      ReportContext reportCtx = new ReportContext(report, "ABCD", out);
+      ReportContext reportCtx = new ReportContext(connectionDetails, report);
       
       boolean success = cobanParser.onParsed(reportCtx);
       

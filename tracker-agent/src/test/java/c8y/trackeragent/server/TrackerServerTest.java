@@ -1,4 +1,4 @@
-package c8y.trackeragent.nioserver;
+package c8y.trackeragent.server;
 
 import static java.lang.Thread.sleep;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -9,10 +9,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class NioServerTest extends NioServerTestSupport {
+public class TrackerServerTest extends TrackerServerTestSupport {
     
     @SuppressWarnings("unused")
-    private static final Logger logger = LoggerFactory.getLogger(NioServerTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(TrackerServerTest.class);
 
     private SocketWriter writer1;
     private SocketWriter writer2;

@@ -10,12 +10,14 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import c8y.trackeragent.ConnectedTracker;
 import c8y.trackeragent.protocol.telic.parser.TelicFragment;
+import c8y.trackeragent.server.ActiveConnection;
+import c8y.trackeragent.server.ConnectionDetails;
+import c8y.trackeragent.tracker.BaseConnectedTracker;
 
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class ConnectedTelicTracker extends ConnectedTracker<TelicFragment> {
+public class ConnectedTelicTracker extends BaseConnectedTracker<TelicFragment> {
 
     protected static Logger logger = LoggerFactory.getLogger(ConnectedTelicTracker.class);
 
@@ -29,13 +31,13 @@ public class ConnectedTelicTracker extends ConnectedTracker<TelicFragment> {
     }
 
     @Override
-    public void execute(String reportStr) {
+    public void executeReport(ConnectionDetails connectionDetails, String reportStr) {
         try {
             if (firstReport) {
                 reportStr = eat(reportStr, HEADER_LENGTH);
             }
             reportStr = eat(reportStr, REPORT_SKIP);
-            super.execute(reportStr);
+            super.executeReport(connectionDetails, reportStr);
         } finally {
             this.firstReport = false;
         }

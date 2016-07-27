@@ -1,4 +1,4 @@
-package c8y.trackeragent.nioserver;
+package c8y.trackeragent.server;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,23 +16,24 @@ public class ReaderWorker implements Runnable {
     @Override
     public void run() {
         while (true) {
-            SocketChannelState state = taskProvider.next();
-            if (state == null) {
+            ActiveConnection connection = taskProvider.next();
+            if (connection == null) {
                 continue;
             }
             try {
-                process(state);
+                process(connection);
+            } catch (Exception ex) {
+                logger.error("Error processing connection " + connection + "!", ex);
             } finally {
-                state.setProcessing(false);
+                connection.setProcessing(false);
             }
         }
-
     }
 
-    private void process(SocketChannelState state) {
-        String report = state.getDataBuffer().getReport();
+    private void process(ActiveConnection connection) {
+        String report = connection.getDataBuffer().getReport();
         if (report != null) {
-            state.getReportExecutor().execute(report);
+            connection.getConnectedTracker().executeReport(connection.getConnectionDetails(), report);
         }
     }
 

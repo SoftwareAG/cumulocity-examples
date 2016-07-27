@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import com.cumulocity.agent.server.context.DeviceContextService;
 import com.cumulocity.agent.server.logging.LoggingService;
 import com.cumulocity.agent.server.repository.IdentityRepository;
 import com.cumulocity.model.idtype.GId;
@@ -18,26 +17,30 @@ import com.cumulocity.sdk.client.devicecontrol.DeviceControlApi;
 import com.cumulocity.sdk.client.devicecontrol.OperationFilter;
 
 import c8y.LogfileRequest;
-import c8y.trackeragent.ConnectionRegistry;
-import c8y.trackeragent.Executor;
 import c8y.trackeragent.context.OperationContext;
 import c8y.trackeragent.device.TrackerDevice;
+import c8y.trackeragent.server.ActiveConnection;
+import c8y.trackeragent.server.ConnectionsContainer;
+import c8y.trackeragent.tracker.ConnectedTracker;
 
 @Component
 public class OperationsHelper {
-	
-	private static Logger logger = LoggerFactory.getLogger(OperationsHelper.class);
-	
-	private final DeviceControlApi deviceControlApi;
-	private final LoggingService loggingService;
-	private final IdentityRepository identityRepository;
-	
-	@Autowired
-    public OperationsHelper(DeviceControlApi deviceControlApi, LoggingService loggingService, IdentityRepository identityRepository) {
-		this.deviceControlApi = deviceControlApi;
-		this.loggingService = loggingService;
-		this.identityRepository = identityRepository;
-	}
+
+    private static Logger logger = LoggerFactory.getLogger(OperationsHelper.class);
+
+    private final DeviceControlApi deviceControlApi;
+    private final LoggingService loggingService;
+    private final IdentityRepository identityRepository;
+    private final ConnectionsContainer connectionsContainer;
+
+    @Autowired
+    public OperationsHelper(DeviceControlApi deviceControlApi, LoggingService loggingService, IdentityRepository identityRepository,
+            ConnectionsContainer connectionsContainer) {
+        this.deviceControlApi = deviceControlApi;
+        this.loggingService = loggingService;
+        this.identityRepository = identityRepository;
+        this.connectionsContainer = connectionsContainer;
+    }
 
     public void executePendingOp(OperationRepresentation operation, TrackerDevice device) {
         logger.info("Received operation with ID: {}", operation.getId());
@@ -45,34 +48,36 @@ public class OperationsHelper {
         if (logfileRequest != null) {
             logger.info("Found AgentLogRequest operation");
             String user = logfileRequest.getDeviceUser();
-			if (StringUtils.isEmpty(user)) {
+            if (StringUtils.isEmpty(user)) {
                 ManagedObjectRepresentation deviceObj = device.getManagedObject();
                 logfileRequest.setDeviceUser(deviceObj.getOwner());
                 operation.set(logfileRequest, LogfileRequest.class);
             }
             loggingService.readLog(operation);
         }
-        Executor exec = ConnectionRegistry.instance().get(device.getImei());
-        if (exec != null) {
-            // Device is currently connected, execute on device
-            executeOperation(exec, device.getImei(), operation);
-            if (OperationStatus.FAILED.toString().equals(operation.getStatus())) {
-                // Connection error, remove device
-                ConnectionRegistry.instance().remove(device.getImei());
-            }
-        } else {
+        ActiveConnection connection = connectionsContainer.getActiveConnection(device.getImei());
+        if (connection == null) {
             logger.info("Ignore operation with ID {} -> device is currently not connected to agent", operation.getId());
-        }    	
+            return;
+        }
+        OperationContext operationContext = new OperationContext(connection.getConnectionDetails(), operation);
+        ConnectedTracker tracker = connection.getConnectedTracker();
+        // Device is currently connected, execute on device
+        executeOperation(tracker, operationContext);
+        if (OperationStatus.FAILED.toString().equals(operation.getStatus())) {
+            // Connection error, remove device
+            connectionsContainer.removeForImei(device.getImei());
+        }
     }
 
-    private void executeOperation(Executor exec, String imei, OperationRepresentation operation) throws SDKException {
+    private void executeOperation(ConnectedTracker tracker, OperationContext operationContext) throws SDKException {
+        OperationRepresentation operation = operationContext.getOperation();
         logger.info("Executing operation with ID: {}", operation.getId());
         operation.setStatus(OperationStatus.EXECUTING.toString());
         deviceControlApi.update(operation);
-        OperationContext operationContext = new OperationContext(operation, imei, exec.getConnectionParams());
-        
+
         try {
-            exec.execute(operationContext);
+            tracker.executeOperation(operationContext);
         } catch (Exception x) {
             String msg = "Error during communication with device " + operation.getDeviceId();
             logger.warn(msg, x);
@@ -81,12 +86,12 @@ public class OperationsHelper {
         }
         deviceControlApi.update(operation);
     }
-	
+
     public void finishExecutingOps() throws SDKException {
         logger.debug("Cancelling hanging operations");
         try {
             for (OperationRepresentation operation : getOperationsByStatusAndAgent(OperationStatus.EXECUTING)) {
-            	logger.debug("Finish operation: {}", operation);
+                logger.debug("Finish operation: {}", operation);
                 operation.setStatus(OperationStatus.FAILED.toString());
                 deviceControlApi.update(operation);
             }
@@ -94,10 +99,9 @@ public class OperationsHelper {
             logger.error("Error while finishing executing operations", e);
         }
     }
-    
 
     public Iterable<OperationRepresentation> getOperationsByStatusAndAgent(OperationStatus status) throws SDKException {
-    	GId agentId = identityRepository.find(TrackerDevice.getAgentExternalId());
+        GId agentId = identityRepository.find(TrackerDevice.getAgentExternalId());
         OperationFilter opsFilter = new OperationFilter().byStatus(status).byAgent(agentId.getValue());
         return deviceControlApi.getOperationsByFilter(opsFilter).get().allPages();
     }

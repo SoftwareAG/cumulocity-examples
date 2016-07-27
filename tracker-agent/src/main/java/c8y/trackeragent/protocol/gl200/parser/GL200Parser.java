@@ -1,8 +1,8 @@
 package c8y.trackeragent.protocol.gl200.parser;
 
-import c8y.trackeragent.Parser;
-
 import com.cumulocity.sdk.client.SDKException;
+
+import c8y.trackeragent.tracker.Parser;
 
 public abstract class GL200Parser implements Parser, GL200Fragment {
     

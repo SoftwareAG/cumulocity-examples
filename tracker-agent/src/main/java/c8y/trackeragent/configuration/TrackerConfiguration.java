@@ -4,9 +4,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import c8y.trackeragent.protocol.mapping.TrackingProtocol;
-
 import com.cumulocity.sdk.client.polling.PollingStrategy;
+
+import c8y.trackeragent.protocol.TrackingProtocol;
 
 public class TrackerConfiguration {
 

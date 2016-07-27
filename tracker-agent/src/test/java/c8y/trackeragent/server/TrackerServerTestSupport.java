@@ -1,4 +1,4 @@
-package c8y.trackeragent.nioserver;
+package c8y.trackeragent.server;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.synchronizedList;
@@ -20,26 +20,33 @@ import org.junit.Before;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import c8y.trackeragent.nioserver.NioServerEvent.ReadDataEvent;
+import c8y.trackeragent.context.OperationContext;
+import c8y.trackeragent.server.ConnectionDetails;
+import c8y.trackeragent.server.ConnectionsContainer;
+import c8y.trackeragent.server.TrackerServer;
+import c8y.trackeragent.server.TrackerServerEventHandler;
+import c8y.trackeragent.server.TrackerServerEvent.ReadDataEvent;
+import c8y.trackeragent.tracker.ConnectedTracker;
+import c8y.trackeragent.tracker.ConnectedTrackerFactory;
 
-public class NioServerTestSupport {
+public class TrackerServerTestSupport {
     
-    private static final Logger logger = LoggerFactory.getLogger(NioServerTestSupport.class);
+    private static final Logger logger = LoggerFactory.getLogger(TrackerServerTestSupport.class);
 
     protected static final int PORT = 5100;
     protected static final Charset CHARSET = Charset.forName("US-ASCII");
     
-    private NioServer server;
+    private TrackerServer server;
     private final ExecutorService executorService = newFixedThreadPool(100);
     protected CountDownLatch reportExecutorLatch;
-    protected final List<ReaderWorkerExecutorImpl> executors = synchronizedList(new ArrayList<ReaderWorkerExecutorImpl>());
+    protected final List<ConnectedTrackerImpl> executors = synchronizedList(new ArrayList<ConnectedTrackerImpl>());
     
     @Before
     public void before() throws Exception {
         reportExecutorLatch = new CountDownLatch(0);
-        NioServerEventHandler eventHandler = new NioServerEventHandler(new TestReaderWorkerExecutorFactoryImpl());
+        TrackerServerEventHandler eventHandler = new TrackerServerEventHandler(new TestConnectedTrackerFactoryImpl(), new ConnectionsContainer());
         eventHandler.init();
-        server = new NioServer(eventHandler);
+        server = new TrackerServer(eventHandler);
         server.start(PORT);
         executorService.execute(server);
     }
@@ -58,7 +65,7 @@ public class NioServerTestSupport {
     protected void assertThatReportsOnSocket(String... reports) {
         Object[] expected = new Object[reports.length];
         for (int index = 0; index < reports.length; index++) {
-            expected[index] = new ReaderWorkerExecutorImpl(reports[index]);
+            expected[index] = new ConnectedTrackerImpl(reports[index]);
         }
         assertThat(executors).contains(expected);
     }
@@ -105,11 +112,11 @@ public class NioServerTestSupport {
 
     }
     
-    protected class TestReaderWorkerExecutorFactoryImpl implements ReaderWorkerExecutorFactory {
+    protected class TestConnectedTrackerFactoryImpl implements ConnectedTrackerFactory {
         
         @Override
-        public ReaderWorkerExecutor create(ReadDataEvent readData) {
-            ReaderWorkerExecutorImpl result = new ReaderWorkerExecutorImpl();
+        public ConnectedTracker create(ReadDataEvent readData) {
+            ConnectedTrackerImpl result = new ConnectedTrackerImpl();
             logger.info("Created executor for data " + new String(readData.getData(), CHARSET));
             executors.add(result);
             logger.info("Total executors " + executors.size());
@@ -117,22 +124,27 @@ public class NioServerTestSupport {
         }
     }
     
-    protected class ReaderWorkerExecutorImpl implements ReaderWorkerExecutor {
+    protected class ConnectedTrackerImpl implements ConnectedTracker {
         
         private final List<String> processed;
         
-        public ReaderWorkerExecutorImpl(String... processed) {
+        public ConnectedTrackerImpl(String... processed) {
             this.processed = new ArrayList<String>();
             this.processed.addAll(asList(processed));
         }
-
+        
         @Override
-        public void execute(String report) {
+        public void executeOperation(OperationContext operation) throws Exception {
+            // TODO Auto-generated method stub
+            
+        }
+        @Override
+        public void executeReport(ConnectionDetails connectionDetails, String report) {
             logger.info("Handled report: \'{}\'", report);
             processed.add(report);
             reportExecutorLatch.countDown();
         }
-        
+
         @Override
         public String getReportSeparator() {
             return ";";
@@ -158,7 +170,7 @@ public class NioServerTestSupport {
                 return false;
             if (getClass() != obj.getClass())
                 return false;
-            ReaderWorkerExecutorImpl other = (ReaderWorkerExecutorImpl) obj;
+            ConnectedTrackerImpl other = (ConnectedTrackerImpl) obj;
             if (processed == null) {
                 if (other.processed != null)
                     return false;

@@ -1,4 +1,4 @@
-package c8y.trackeragent.nioserver;
+package c8y.trackeragent.server;
 
 import java.nio.charset.Charset;
 

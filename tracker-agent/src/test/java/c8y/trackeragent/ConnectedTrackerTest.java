@@ -47,6 +47,10 @@ import c8y.trackeragent.exception.UnknownDeviceException;
 import c8y.trackeragent.exception.UnknownTenantException;
 import c8y.trackeragent.protocol.gl200.GL200Constants;
 import c8y.trackeragent.service.TrackerDeviceContextService;
+import c8y.trackeragent.tracker.BaseConnectedTracker;
+import c8y.trackeragent.tracker.Fragment;
+import c8y.trackeragent.tracker.Parser;
+import c8y.trackeragent.tracker.Translator;
 
 public class ConnectedTrackerTest {
     
@@ -60,12 +64,12 @@ public class ConnectedTrackerTest {
     private Parser parser = mock(Parser.class);
     private DeviceBootstrapProcessor bootstrapProcessor = mock(DeviceBootstrapProcessor.class);
     private DeviceCredentialsRepository credentialsRepository = mock(DeviceCredentialsRepository.class);
-    private ConnectedTracker<Fragment> tracker;
+    private BaseConnectedTracker<Fragment> tracker;
 
     @Before
     public void setup() throws Exception {
         ConnectionRegistry.instance().remove("imei");
-        tracker = new ConnectedTracker<Fragment>(
+        tracker = new BaseConnectedTracker<Fragment>(
         		GL200Constants.REPORT_SEP, 
         		GL200Constants.FIELD_SEP,
         		asList(translator, parser),
@@ -109,7 +113,7 @@ public class ConnectedTrackerTest {
     	when(credentialsRepository.getAgentCredentials("tenant")).thenReturn(DeviceCredentials.forAgent("tenant", "user", "password"));    	
         when(parser.parse(any(String[].class))).thenReturn("imei");
         
-        tracker.execute(REPORT1);
+        tracker.executeOperation(REPORT1);
 
         verify(parser).parse(REPORT1.split(GL200Constants.FIELD_SEP));
         verifyZeroInteractions(translator);
@@ -124,7 +128,7 @@ public class ConnectedTrackerTest {
         OperationContext operation = mock(OperationContext.class);
         when(translator.translate(operation)).thenReturn(translation);
 
-        tracker.execute(operation);
+        tracker.executeOperation(operation);
 
         verifyZeroInteractions(parser);
         verify(translator).translate(operation);

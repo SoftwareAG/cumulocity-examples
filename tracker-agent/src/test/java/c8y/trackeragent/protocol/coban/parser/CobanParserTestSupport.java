@@ -27,6 +27,7 @@ import c8y.trackeragent.UpdateIntervalProvider;
 import c8y.trackeragent.protocol.coban.CobanDeviceMessages;
 import c8y.trackeragent.protocol.coban.device.CobanDevice;
 import c8y.trackeragent.protocol.coban.message.CobanServerMessages;
+import c8y.trackeragent.server.ConnectionDetails;
 import c8y.trackeragent.service.AlarmService;
 import c8y.trackeragent.service.MeasurementService;
 
@@ -39,6 +40,7 @@ public abstract class CobanParserTestSupport {
     protected AlarmService alarmService = Mockito.mock(AlarmService.class);
     protected MeasurementService measurementService = Mockito.mock(MeasurementService.class);
     protected ByteArrayOutputStream out = new ByteArrayOutputStream();
+    protected ConnectionDetails connectionDetails = new ConnectionDetails(null, null);
     private UpdateIntervalProvider updateIntervalProvider = mock(UpdateIntervalProvider.class);
     
     @Before

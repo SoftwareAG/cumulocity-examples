@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import c8y.trackeragent.configuration.TrackerConfiguration;
-import c8y.trackeragent.nioserver.NioServer;
 
 @Component
 public class Servers {
@@ -31,7 +30,7 @@ public class Servers {
     }
 
     private void startServer(int localPort) throws IOException {
-        NioServer server = beanFactory.getBean(NioServer.class);
+        TrackerServer server = beanFactory.getBean(TrackerServer.class);
         server.start(localPort);
         executorService.execute(server);
     }        

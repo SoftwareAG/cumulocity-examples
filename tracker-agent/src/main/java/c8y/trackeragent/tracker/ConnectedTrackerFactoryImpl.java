@@ -1,4 +1,4 @@
-package c8y.trackeragent.protocol.mapping;
+package c8y.trackeragent.tracker;
 
 import java.util.Collection;
 
@@ -8,37 +8,35 @@ import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import c8y.trackeragent.ConnectedTracker;
 import c8y.trackeragent.configuration.TrackerConfiguration;
-import c8y.trackeragent.nioserver.NioServerEvent.ReadDataEvent;
-import c8y.trackeragent.nioserver.ReaderWorkerExecutor;
-import c8y.trackeragent.nioserver.ReaderWorkerExecutorFactory;
+import c8y.trackeragent.protocol.TrackingProtocol;
+import c8y.trackeragent.server.TrackerServerEvent.ReadDataEvent;
 
 @Component
-public class ConnectedTrackerFactory implements ReaderWorkerExecutorFactory {
+public class ConnectedTrackerFactoryImpl implements ConnectedTrackerFactory {
 
-    private static final Logger logger = LoggerFactory.getLogger(ConnectedTrackerFactory.class);
+    private static final Logger logger = LoggerFactory.getLogger(ConnectedTrackerFactoryImpl.class);
 
     private final TrackerConfiguration config;
     private ListableBeanFactory beanFactory;
     
     @Autowired
-    public ConnectedTrackerFactory(TrackerConfiguration config, ListableBeanFactory beanFactory) {
+    public ConnectedTrackerFactoryImpl(TrackerConfiguration config, ListableBeanFactory beanFactory) {
         this.config = config;
         this.beanFactory = beanFactory;
     }
     
     @Override
-    public ReaderWorkerExecutor create(ReadDataEvent readData) throws Exception {
+    public ConnectedTracker create(ReadDataEvent readData) throws Exception {
         logger.debug("Will peek tracker for new connection...");
-        int localPort = readData.getChannel().socket().getLocalPort();
+        int localPort = readData.getConnectionDetails().getChannel().socket().getLocalPort();
         byte markingByte = readData.getData()[0];
-        ReaderWorkerExecutor result = create(localPort, markingByte);
+        ConnectedTracker result = create(localPort, markingByte);
         logger.debug("Tracker for new connection: {}", result.getClass().getSimpleName());
         return result;
     }
 
-    private ReaderWorkerExecutor create(int localPort, byte markingByte) throws Exception {
+    private ConnectedTracker create(int localPort, byte markingByte) throws Exception {
         if (localPort == config.getLocalPort1()) {
             return discoverTracker(markingByte, localPort, config.getLocalPort1Protocols());
         } else if (localPort == config.getLocalPort2()) {
@@ -48,7 +46,7 @@ public class ConnectedTrackerFactory implements ReaderWorkerExecutorFactory {
         }
     }
     
-    private ConnectedTracker<?> discoverTracker(byte markingByte, int localPort, Collection<TrackingProtocol> available) throws Exception {
+    private ConnectedTracker discoverTracker(byte markingByte, int localPort, Collection<TrackingProtocol> available) throws Exception {
         for (TrackingProtocol trackerProtocol : available) {
             if (trackerProtocol.accept(markingByte)) {
                 return beanFactory.getBean(trackerProtocol.getTrackerClass());

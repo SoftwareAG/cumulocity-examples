@@ -7,7 +7,6 @@ import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 
-import c8y.trackeragent.device.ManagedObjectCache;
 import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.device.TrackerDeviceProvider;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;

@@ -46,7 +46,7 @@ import c8y.trackeragent.configuration.TrackerConfiguration;
 import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
-import c8y.trackeragent.protocol.mapping.TrackingProtocol;
+import c8y.trackeragent.protocol.TrackingProtocol;
 import c8y.trackeragent.service.AlarmMappingService;
 import c8y.trackeragent.service.AlarmType;
 import c8y.trackeragent.utils.message.TrackerMessage;

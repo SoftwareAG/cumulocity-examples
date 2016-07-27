@@ -1,4 +1,4 @@
-package c8y.trackeragent.nioserver;
+package c8y.trackeragent.server;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -22,11 +22,13 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import c8y.trackeragent.utils.ByteHelper;
+
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE) 
-public class NioServer implements Runnable {
+public class TrackerServer implements Runnable {
     
-    private static final Logger logger = LoggerFactory.getLogger(NioServer.class);
+    private static final Logger logger = LoggerFactory.getLogger(TrackerServer.class);
     
     // The channel on which we'll accept connections
     private ServerSocketChannel serverChannel;
@@ -43,10 +45,10 @@ public class NioServer implements Runnable {
     // Maps a SocketChannel to a list of ByteBuffer instances
     private final Map<SocketChannel, List<ByteBuffer>> pendingData = new HashMap<SocketChannel, List<ByteBuffer>>();
     
-    private final NioServerEventHandler eventHandler;
+    private final TrackerServerEventHandler eventHandler;
 
     @Autowired
-    public NioServer(NioServerEventHandler eventHandler) throws IOException {
+    public TrackerServer(TrackerServerEventHandler eventHandler) throws IOException {
         this.eventHandler = eventHandler;
     }
     
@@ -72,7 +74,8 @@ public class NioServer implements Runnable {
     }
 
 
-    public void send(SocketChannel socket, byte[] data) {
+    public void send(SocketChannel socket, String text) {
+        final byte[] data = ByteHelper.getBytes(text);
         synchronized (this.pendingChanges) {
             // Indicate we want the interest ops set changed
             this.pendingChanges.add(new ChangeRequest(socket, ChangeRequest.CHANGEOPS, SelectionKey.OP_WRITE));
@@ -189,7 +192,8 @@ public class NioServer implements Runnable {
         }
 
         // Hand the data off to our worker thread
-        eventHandler.handle(new NioServerEvent.ReadDataEvent(channel, this.readBuffer.array(), numRead));
+        ConnectionDetails connectionDetails = new ConnectionDetails(this, channel);
+        eventHandler.handle(new TrackerServerEvent.ReadDataEvent(connectionDetails, this.readBuffer.array(), numRead));
     }
 
     private void write(SelectionKey key) throws IOException {
