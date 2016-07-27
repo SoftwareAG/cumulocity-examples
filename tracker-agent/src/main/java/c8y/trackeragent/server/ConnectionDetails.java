@@ -4,20 +4,22 @@ import java.nio.channels.SocketChannel;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import c8y.trackeragent.server.writer.OutWriter;
+
 public class ConnectionDetails {
 
-    private final TrackerServer server;
+    private final OutWriter outWriter;
     private final SocketChannel channel;
     private volatile String imei;
     private final Map<String, Object> params = new ConcurrentHashMap<String, Object>();
 
-    public ConnectionDetails(TrackerServer server, SocketChannel channel) {
-        this.server = server;
+    public ConnectionDetails(OutWriter outWriter, SocketChannel channel) {
+        this.outWriter = outWriter;
         this.channel = channel;
     }
-
-    public TrackerServer getServer() {
-        return server;
+    
+    public OutWriter getOutWriter() {
+        return outWriter;
     }
 
     public SocketChannel getChannel() {

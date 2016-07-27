@@ -8,6 +8,7 @@ import c8y.trackeragent.utils.message.TrackerMessage;
 
 public class ConnectionContext {
     
+    @SuppressWarnings("unused")
     private static Logger logger = LoggerFactory.getLogger(ConnectionContext.class);
 	
     private final ConnectionDetails connectionDetails;
@@ -65,13 +66,11 @@ public class ConnectionContext {
         return true;
     }
 
+    public void writeOut(String text) {
+        connectionDetails.getOutWriter().write(text);
+        
+    }
     public void writeOut(TrackerMessage msg) {
-        try {
-            String text = msg.asText();
-            logger.debug("Write to device: {}.", text);
-            connectionDetails.getServer().send(connectionDetails.getChannel(), text);
-        } catch (Exception ex) {
-            throw new RuntimeException(ex);
-        }
+        writeOut(msg.asText());
     }
 }

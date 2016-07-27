@@ -106,7 +106,7 @@ public class HeartbeatRFV16ParserTest extends RFV16ParserTestSupport {
     }
     
     private void processMessage(TrackerMessage msg) {
-        ReportContext reportCtx = new ReportContext(msg.asArray(), IMEI, out);
+        ReportContext reportCtx = new ReportContext(connectionDetails, msg.asArray());
         parser.onParsed(reportCtx);
     }
     

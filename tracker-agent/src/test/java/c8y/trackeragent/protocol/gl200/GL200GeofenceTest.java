@@ -37,6 +37,7 @@ import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.protocol.gl200.GL200Constants;
 import c8y.trackeragent.protocol.gl200.parser.GL200Geofence;
+import c8y.trackeragent.server.TestConnectionDetails;
 import c8y.trackeragent.service.MeasurementService;
 
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
@@ -59,6 +60,7 @@ public class GL200GeofenceTest {
 
     private OperationContext operationCtx;
     private Geofence fence;
+    private TestConnectionDetails connectionDetails = new TestConnectionDetails();
 
     @Before
     public void setup() throws SDKException {
@@ -70,7 +72,7 @@ public class GL200GeofenceTest {
         fence.setActive(true);
         operation.set(fence);
 
-        operationCtx = new OperationContext(operation, IMEI);
+        operationCtx = new OperationContext(connectionDetails, operation);
         
         gl200gf = new GL200Geofence(trackerAgent, measurementService);
 
@@ -86,10 +88,10 @@ public class GL200GeofenceTest {
     @Test
     public void acknowledgeGeofence() throws SDKException {
         gl200gf.translate(operationCtx);
-        String imei = gl200gf.parse(ACKFENCE);
-        gl200gf.onParsed(new ReportContext(ACKFENCE, imei, null));
+        connectionDetails.setImei(gl200gf.parse(ACKFENCE));
+        gl200gf.onParsed(new ReportContext(connectionDetails, ACKFENCE));
 
-        assertEquals(IMEI, imei);
+        assertEquals(IMEI, gl200gf.parse(ACKFENCE));
         verify(trackerAgent).getOrCreateTrackerDevice(IMEI);
         verify(device).setGeofence(fence);
     }
@@ -108,7 +110,8 @@ public class GL200GeofenceTest {
     @Test
     public void reportGeofence() throws SDKException {
         String imei = gl200gf.parse(REPFENCE);
-        gl200gf.onParsed(new ReportContext(REPFENCE, imei, null));
+        connectionDetails.setImei(imei);
+        gl200gf.onParsed(new ReportContext(connectionDetails, REPFENCE));
 
         assertEquals(IMEI, imei);
         verify(trackerAgent, times(2)).getOrCreateTrackerDevice(IMEI);

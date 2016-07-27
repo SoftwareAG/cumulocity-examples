@@ -31,7 +31,7 @@ public class ConfirmPositionMonitoringCommandRFV16ParserTest extends RFV16Parser
     @Test
     public void shouldSetupConnectionParam() throws Exception {
         TrackerMessage msg = deviceMessages.confirmPositionMonitoringCommand("DB", IMEI);
-        ReportContext reportContext = new ReportContext(msg.asArray(), IMEI, out);
+        ReportContext reportContext = new ReportContext(connectionDetails, msg.asArray());
 
         boolean result = parser.onParsed(reportContext);
 

@@ -22,6 +22,8 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import c8y.trackeragent.server.writer.OutWriter;
+import c8y.trackeragent.server.writer.OutWriterImpl;
 import c8y.trackeragent.utils.ByteHelper;
 
 @Component
@@ -192,7 +194,8 @@ public class TrackerServer implements Runnable {
         }
 
         // Hand the data off to our worker thread
-        ConnectionDetails connectionDetails = new ConnectionDetails(this, channel);
+        OutWriter outWriter = new OutWriterImpl(this, channel);
+        ConnectionDetails connectionDetails = new ConnectionDetails(outWriter, channel);
         eventHandler.handle(new TrackerServerEvent.ReadDataEvent(connectionDetails, this.readBuffer.array(), numRead));
     }
 

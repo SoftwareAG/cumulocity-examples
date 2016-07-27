@@ -38,6 +38,7 @@ import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.protocol.gl200.GL200Constants;
 import c8y.trackeragent.protocol.gl200.parser.GL200DeviceMotionState;
+import c8y.trackeragent.server.TestConnectionDetails;
 
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
@@ -62,13 +63,14 @@ public class GL200DeviceMotionStateTest {
     private TrackerDevice device = mock(TrackerDevice.class);
     private OperationContext operationCtx;
     private MotionTracking track = new MotionTracking();
+    private TestConnectionDetails connectionDetails = new TestConnectionDetails(IMEI);
 
 
     @Before
     public void setup() throws SDKException {
         OperationRepresentation operation = new OperationRepresentation();
         operation.set(track);
-        operationCtx = new OperationContext(operation, IMEI);
+        operationCtx = new OperationContext(connectionDetails, operation);
         gl200mot = new GL200DeviceMotionState(trackerAgent);
         when(trackerAgent.getOrCreateTrackerDevice(anyString())).thenReturn(device);
     }
@@ -90,7 +92,7 @@ public class GL200DeviceMotionStateTest {
         gl200mot.translate(operationCtx);
 
         String imei = gl200mot.parse(ACKMOTION);
-        ReportContext reportCtx = new ReportContext(ACKMOTION, imei, null);
+        ReportContext reportCtx = new ReportContext(connectionDetails, ACKMOTION);
         gl200mot.onParsed(reportCtx);
 
         assertEquals(IMEI, imei);
@@ -101,7 +103,7 @@ public class GL200DeviceMotionStateTest {
     @Test
     public void motionReport() throws SDKException {
         String imei = gl200mot.parse(REPMOTION);
-        ReportContext reportCtx = new ReportContext(REPMOTION, imei, null);
+        ReportContext reportCtx = new ReportContext(connectionDetails, REPMOTION);
         gl200mot.onParsed(reportCtx);
 
         assertEquals(IMEI, imei);
@@ -112,7 +114,7 @@ public class GL200DeviceMotionStateTest {
         String[] repNoMotion = REPMOTIONSTR.split(GL200Constants.FIELD_SEP);
         repNoMotion[4] = "41";
         imei = gl200mot.parse(repNoMotion);
-        reportCtx = new ReportContext(repNoMotion, imei, null);
+        reportCtx = new ReportContext(connectionDetails, repNoMotion);
         gl200mot.onParsed(reportCtx);
         verify(device, times(2)).motionEvent(anyBoolean());
         verify(device).motionEvent(false);
@@ -121,7 +123,7 @@ public class GL200DeviceMotionStateTest {
     @Test
     public void gv500MotionReport() throws SDKException {
         String imei = gl200mot.parse(GV500REPMOTION);
-        ReportContext reportCtx = new ReportContext(GV500REPMOTION, imei, null);
+        ReportContext reportCtx = new ReportContext(connectionDetails, GV500REPMOTION);
         gl200mot.onParsed(reportCtx);
         
         assertEquals(IMEI, imei);

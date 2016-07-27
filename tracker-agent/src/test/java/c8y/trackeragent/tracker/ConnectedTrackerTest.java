@@ -18,25 +18,19 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package c8y.trackeragent;
+package c8y.trackeragent.tracker;
 
+import static c8y.trackeragent.utils.Devices.IMEI_1;
 import static java.util.Arrays.asList;
 import static org.fest.assertions.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.charset.Charset;
-
 import org.junit.Before;
 import org.junit.Test;
-
-import com.cumulocity.sdk.client.SDKException;
 
 import c8y.trackeragent.context.OperationContext;
 import c8y.trackeragent.context.ReportContext;
@@ -46,29 +40,23 @@ import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.exception.UnknownDeviceException;
 import c8y.trackeragent.exception.UnknownTenantException;
 import c8y.trackeragent.protocol.gl200.GL200Constants;
+import c8y.trackeragent.server.TestConnectionDetails;
 import c8y.trackeragent.service.TrackerDeviceContextService;
-import c8y.trackeragent.tracker.BaseConnectedTracker;
-import c8y.trackeragent.tracker.Fragment;
-import c8y.trackeragent.tracker.Parser;
-import c8y.trackeragent.tracker.Translator;
 
 public class ConnectedTrackerTest {
     
-    public static final String REPORT1 = "field1|field2";
-    public static final String REPORT2 = "field3|field4";
-    private static final Charset CHARSET = Charset.forName("US-ASCII");
-
     private TrackerDeviceContextService contextService = mock(TrackerDeviceContextService.class);
-    private OutputStream out = mock(OutputStream.class);
     private Translator translator = mock(Translator.class);
     private Parser parser = mock(Parser.class);
     private DeviceBootstrapProcessor bootstrapProcessor = mock(DeviceBootstrapProcessor.class);
     private DeviceCredentialsRepository credentialsRepository = mock(DeviceCredentialsRepository.class);
-    private BaseConnectedTracker<Fragment> tracker;
+    private ConnectedTracker tracker;
+    private TestConnectionDetails connectionDetails = new TestConnectionDetails(); 
+    private String[] dummyReport = new String[] { "dummyReport" };
 
     @Before
     public void setup() throws Exception {
-        ConnectionRegistry.instance().remove("imei");
+        // @formatter:off
         tracker = new BaseConnectedTracker<Fragment>(
         		GL200Constants.REPORT_SEP, 
         		GL200Constants.FIELD_SEP,
@@ -76,62 +64,49 @@ public class ConnectedTrackerTest {
         		bootstrapProcessor,
         		credentialsRepository,
         		contextService);
+        // @formatter:on
     }
 
     @Test
-    public void singleReportProcessing() throws Exception {
-    	when(credentialsRepository.getDeviceCredentials("imei")).thenReturn(DeviceCredentials.forDevice("imei", "tenant"));
+    public void shouldProcessReportSucessfully() throws Exception {
+    	when(credentialsRepository.getDeviceCredentials(IMEI_1)).thenReturn(DeviceCredentials.forDevice(IMEI_1, "tenant"));
     	when(credentialsRepository.getAgentCredentials("tenant")).thenReturn(DeviceCredentials.forAgent("tenant", "user", "password"));
-        String[] dummyReport = null;
-        when(parser.parse(dummyReport)).thenReturn("imei");
-        when(parser.onParsed(new ReportContext(dummyReport, "imei", null))).thenReturn(true);
+        when(parser.parse(dummyReport)).thenReturn(IMEI_1);
+        when(parser.onParsed(any(ReportContext.class))).thenReturn(true);
 
-        tracker.processReport(dummyReport);
+        tracker.executeReport(connectionDetails, "dummyReport");
 
         verify(parser).parse(dummyReport);
         verifyZeroInteractions(translator);
-        assertEquals(tracker, ConnectionRegistry.instance().get("imei"));
+        assertThat(connectionDetails.getImei()).isEqualTo(IMEI_1);
     }
     
     @Test
-    public void singleReportProcessingForNewImei() throws SDKException {
-    	when(credentialsRepository.getDeviceCredentials("imei")).thenThrow(UnknownDeviceException.forImei("imei"));
+    public void singleIgnoreReportForUnknownImei() throws Exception {
+    	when(credentialsRepository.getDeviceCredentials(IMEI_1)).thenThrow(UnknownDeviceException.forImei(IMEI_1));
     	when(credentialsRepository.getAgentCredentials("tenant")).thenThrow(UnknownTenantException.forTenantId("tenant"));
-        String[] dummyReport = null;
-        when(parser.parse(dummyReport)).thenReturn("imei");
+        when(parser.parse(dummyReport)).thenReturn(IMEI_1);
+        when(parser.onParsed(any(ReportContext.class))).thenReturn(false);
         
-        tracker.processReport(dummyReport);
+        tracker.executeReport(connectionDetails, "dummyReport");
         
-        assertThat(ConnectionRegistry.instance()).isEmpty();
-        verify(bootstrapProcessor).tryAccessDeviceCredentials("imei");
+        assertThat(connectionDetails.getImei()).isNull();
+        verify(bootstrapProcessor).tryAccessDeviceCredentials(IMEI_1);
         verifyZeroInteractions(translator);
     }
 
     @Test
-    public void continuousReportProcessing() throws IOException, SDKException {
-    	when(credentialsRepository.getDeviceCredentials("imei")).thenReturn(DeviceCredentials.forDevice("imei", "tenant"));
-    	when(credentialsRepository.getAgentCredentials("tenant")).thenReturn(DeviceCredentials.forAgent("tenant", "user", "password"));    	
-        when(parser.parse(any(String[].class))).thenReturn("imei");
-        
-        tracker.executeOperation(REPORT1);
-
-        verify(parser).parse(REPORT1.split(GL200Constants.FIELD_SEP));
-        verifyZeroInteractions(translator);
-    }
-
-    @Test
-    public void testExecute() throws IOException {
-    	when(credentialsRepository.getDeviceCredentials("imei")).thenThrow(UnknownDeviceException.forImei("imei"));
+    public void operationExecution() throws Exception {
+    	when(credentialsRepository.getDeviceCredentials(IMEI_1)).thenThrow(UnknownDeviceException.forImei(IMEI_1));
     	when(credentialsRepository.getAgentCredentials("tenant")).thenThrow(UnknownTenantException.forTenantId("tenant"));    	
         String translation = "translation";
+        OperationContext operationContext = new OperationContext(connectionDetails, null);
+        when(translator.translate(operationContext)).thenReturn(translation);
 
-        OperationContext operation = mock(OperationContext.class);
-        when(translator.translate(operation)).thenReturn(translation);
-
-        tracker.executeOperation(operation);
+        tracker.executeOperation(operationContext);
 
         verifyZeroInteractions(parser);
-        verify(translator).translate(operation);
-        verify(out).write(translation.getBytes(CHARSET));
+        verify(translator).translate(operationContext);
+        assertThat(connectionDetails.getOut()).isEqualTo(translation);
     }
 }

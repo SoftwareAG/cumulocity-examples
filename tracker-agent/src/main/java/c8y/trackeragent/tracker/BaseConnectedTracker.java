@@ -48,7 +48,7 @@ import c8y.trackeragent.service.TrackerDeviceContextService;
  * Performs the communication with a connected device. Accepts reports from the
  * input stream and sends commands to the output stream.
  */
-public abstract class BaseConnectedTracker<F extends Fragment> implements ConnectedTracker {
+public class BaseConnectedTracker<F extends Fragment> implements ConnectedTracker {
     
     protected static Logger logger = LoggerFactory.getLogger(BaseConnectedTracker.class);
 
@@ -166,14 +166,11 @@ public abstract class BaseConnectedTracker<F extends Fragment> implements Connec
     public void executeOperation(OperationContext operationCtx) throws IOException {
         String translation = translate(operationCtx);
         logger.debug("Executing operation\n{}\n{}", operationCtx, translation);
-
         if (translation == null) {
             operationCtx.getOperation().setStatus(OperationStatus.FAILED.toString());
             operationCtx.getOperation().setFailureReason("Command currently not supported");
         } else {
-            logger.debug("Write to device: {}.", translation);
-            out.write(translation.getBytes("US-ASCII"));
-            out.flush();
+            operationCtx.writeOut(translation);
         }
     }
 

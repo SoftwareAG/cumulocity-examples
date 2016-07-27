@@ -33,7 +33,7 @@ public class MultiBaseStationRFV16ReportTest extends RFV16ParserTestSupport {
         when(deviceMock.getManagedObject()).thenReturn(aManagedObjectWithMobileFragment());
         
         TrackerMessage deviceMessage = deviceMessages.multiBaseStationDataReport("DB", IMEI, "262", "1", "16834", "FFFFFFFD");
-        ReportContext reportCtx = new ReportContext(deviceMessage.asArray(), IMEI, out);
+        ReportContext reportCtx = new ReportContext(connectionDetails, deviceMessage.asArray());
         
         parser.onParsed(reportCtx);
         

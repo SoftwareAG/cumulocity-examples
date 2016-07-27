@@ -126,8 +126,7 @@ public class RFV16CommandTranslatorTest extends RFV16ParserTestSupport {
     }
 
     private OperationContext asOperationContext(OperationRepresentation operation) {
-        HashMap<String, Object> connectionParams = new HashMap<String, Object>();
-        return new OperationContext(operation, IMEI, connectionParams);
+        return new OperationContext(connectionDetails, operation);
     }
 
 }

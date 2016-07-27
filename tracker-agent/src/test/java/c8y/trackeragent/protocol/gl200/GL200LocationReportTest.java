@@ -36,6 +36,7 @@ import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.protocol.gl200.GL200Constants;
 import c8y.trackeragent.protocol.gl200.parser.GL200LocationReport;
+import c8y.trackeragent.server.TestConnectionDetails;
 import c8y.trackeragent.service.MeasurementService;
 
 import com.cumulocity.sdk.client.SDKException;
@@ -59,6 +60,7 @@ public class GL200LocationReportTest {
 	private TrackerDevice device = mock(TrackerDevice.class);	
 	private MeasurementService measurementService = Mockito.mock(MeasurementService.class);
 	private GL200LocationReport locationReport = new GL200LocationReport(trackerAgent, measurementService);
+	private TestConnectionDetails connectionDetails = new TestConnectionDetails();
 
 	@Before
 	public void setup() throws SDKException {
@@ -76,7 +78,8 @@ public class GL200LocationReportTest {
 	@Test
 	public void testReportWithMultiplePoints() throws SDKException {
 		String imei = locationReport.parse(FIXEDREP);
-		locationReport.onParsed(new ReportContext(FIXEDREP, imei, null));
+		connectionDetails.setImei(imei);
+		locationReport.onParsed(new ReportContext(connectionDetails, FIXEDREP));
 		
 		assertEquals(IMEI, imei);
 		verify(trackerAgent).getOrCreateTrackerDevice(IMEI);
@@ -91,7 +94,8 @@ public class GL200LocationReportTest {
 	@Test
 	public void testReportWithSinglePoint() throws SDKException {
 	    String imei = locationReport.parse(DOGREP);
-	    locationReport.onParsed(new ReportContext(DOGREP, imei, null));
+	    connectionDetails.setImei(imei);
+	    locationReport.onParsed(new ReportContext(connectionDetails, DOGREP));
 	    
 	    assertEquals(IMEI, imei);
 	    verify(trackerAgent).getOrCreateTrackerDevice(IMEI);

@@ -18,7 +18,7 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package c8y.trackeragent;
+package c8y.trackeragent.protocol.gl200;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyString;
@@ -33,17 +33,19 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import com.cumulocity.sdk.client.SDKException;
+
 import c8y.Position;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.protocol.gl200.GL200Constants;
 import c8y.trackeragent.protocol.gl200.parser.GL200LocationReport;
+import c8y.trackeragent.server.TestConnectionDetails;
 import c8y.trackeragent.service.MeasurementService;
 
-import com.cumulocity.sdk.client.SDKException;
-
 public class GV500LocationReportTest {
+    
     public static final String IMEI = "135790246811220";
     public static final Position POS = new Position();
     public static final String LAC = "18d8";
@@ -60,6 +62,7 @@ public class GV500LocationReportTest {
     private TrackerDevice device = mock(TrackerDevice.class);
     private MeasurementService measurementService = Mockito.mock(MeasurementService.class);
     private GL200LocationReport locationReport = new GL200LocationReport(trackerAgent, measurementService);
+    private TestConnectionDetails connectionDetails = new TestConnectionDetails();
 
     @Before
     public void setup() throws SDKException {
@@ -73,7 +76,8 @@ public class GV500LocationReportTest {
     @Test
     public void gl500Report() throws SDKException {
         String imei = locationReport.parse(GV500REP);
-        locationReport.onParsed(new ReportContext(GV500REP, imei, null));
+        connectionDetails.setImei(imei);
+        locationReport.onParsed(new ReportContext(connectionDetails, GV500REP));
 
         assertEquals(IMEI, imei);
         verify(trackerAgent).getOrCreateTrackerDevice(IMEI);
@@ -85,7 +89,8 @@ public class GV500LocationReportTest {
     @Test
     public void gl500FRI() throws SDKException {
         String imei = locationReport.parse(GV500FRI);
-        locationReport.onParsed(new ReportContext(GV500FRI, imei, null));
+        connectionDetails.setImei(imei);
+        locationReport.onParsed(new ReportContext(connectionDetails, GV500FRI));
 
         assertEquals(IMEI2, imei);
         verify(trackerAgent).getOrCreateTrackerDevice(IMEI2);

@@ -16,6 +16,7 @@ public class LogonCobanParserTest extends CobanParserTestSupport {
     @Before
     public void init() {
         cobanParser = new LogonCobanParser(trackerAgent, serverMessages);
+        connectionDetails.setImei("ABCD");
     }
     
     @Test
@@ -29,7 +30,7 @@ public class LogonCobanParserTest extends CobanParserTestSupport {
   @Test
   public void shouldProcessLogon() throws Exception {
       String[] report = deviceMessages.logon("ABCD").asArray();
-      ReportContext reportCtx = new ReportContext(report, "ABCD", out);
+      ReportContext reportCtx = new ReportContext(connectionDetails, report);
       currentCobanDeviceIs(new CobanDevice().setLocationReportInterval("03m"));
       
       boolean success = cobanParser.onParsed(reportCtx);

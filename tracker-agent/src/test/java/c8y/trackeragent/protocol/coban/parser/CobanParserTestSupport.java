@@ -5,12 +5,9 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 
-import org.junit.After;
 import org.junit.Before;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
@@ -22,12 +19,12 @@ import com.cumulocity.rest.representation.event.EventRepresentation;
 
 import c8y.SpeedMeasurement;
 import c8y.trackeragent.TrackerAgent;
-import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.UpdateIntervalProvider;
+import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.protocol.coban.CobanDeviceMessages;
 import c8y.trackeragent.protocol.coban.device.CobanDevice;
 import c8y.trackeragent.protocol.coban.message.CobanServerMessages;
-import c8y.trackeragent.server.ConnectionDetails;
+import c8y.trackeragent.server.TestConnectionDetails;
 import c8y.trackeragent.service.AlarmService;
 import c8y.trackeragent.service.MeasurementService;
 
@@ -39,8 +36,7 @@ public abstract class CobanParserTestSupport {
     protected CobanDeviceMessages deviceMessages = new CobanDeviceMessages();
     protected AlarmService alarmService = Mockito.mock(AlarmService.class);
     protected MeasurementService measurementService = Mockito.mock(MeasurementService.class);
-    protected ByteArrayOutputStream out = new ByteArrayOutputStream();
-    protected ConnectionDetails connectionDetails = new ConnectionDetails(null, null);
+    protected TestConnectionDetails connectionDetails = new TestConnectionDetails();
     private UpdateIntervalProvider updateIntervalProvider = mock(UpdateIntervalProvider.class);
     
     @Before
@@ -54,17 +50,13 @@ public abstract class CobanParserTestSupport {
         when(updateIntervalProvider.findUpdateInterval()).thenReturn(null);
     }
     
-    @After
-    public void baseDestroy() throws IOException {
-        out.close();
-    }
     
     protected void currentCobanDeviceIs(CobanDevice cobanDevice) {
         when(deviceMock.getCobanDevice()).thenReturn(cobanDevice);
     }
     
     protected void assertOut(String expected) throws UnsupportedEncodingException {
-        assertThat(out.toString("US-ASCII")).isEqualTo(expected);
+        assertThat(connectionDetails.getOut()).isEqualTo(expected);
     }
     
     public static class CreateSpeedMeasurementAnswer implements Answer<SpeedMeasurement> {

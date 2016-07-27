@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import c8y.trackeragent.protocol.telic.parser.TelicFragment;
-import c8y.trackeragent.server.ActiveConnection;
 import c8y.trackeragent.server.ConnectionDetails;
 import c8y.trackeragent.tracker.BaseConnectedTracker;
 
