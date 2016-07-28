@@ -21,7 +21,6 @@
 package c8y.trackeragent.tracker;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,7 +53,6 @@ public class BaseConnectedTracker<F extends Fragment> implements ConnectedTracke
 
     private final char reportSeparator;
     private final String fieldSeparator;
-    private OutputStream out;//TODO delete
     
     @Autowired
     protected List<F> fragments = new ArrayList<F>();
