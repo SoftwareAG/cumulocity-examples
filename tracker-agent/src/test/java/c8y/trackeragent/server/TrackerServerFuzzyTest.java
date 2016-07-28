@@ -4,6 +4,7 @@ import static org.fest.assertions.Assertions.assertThat;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -23,6 +24,20 @@ public class TrackerServerFuzzyTest extends TrackerServerTestSupport {
         for (int i = 0; i < TOTAL_WRITERS; i++) {
             writers.add(newWriter());
         }
+        customTracker = new DummyConnectedTracker() {
+            
+            Random random = new Random();
+
+            @Override
+            public void executeReport(ConnectionDetails connectionDetails, String report) {
+                try {
+                    Thread.sleep(random.nextInt(5));
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            
+        };
     }
 
     @Test
@@ -35,14 +50,20 @@ public class TrackerServerFuzzyTest extends TrackerServerTestSupport {
             for (SocketWriter writer : writers) {
                 writer.push(report + ";");
             }
+            checkIfConnectionsContaintesCoherence();
         }
 
         reportExecutorLatch.await(2, TimeUnit.SECONDS);
         assertThat(reportExecutorLatch.getCount()).isEqualTo(0L);
-        for (ConnectedTrackerImpl executor : executors) {
+        for (TestConnectedTrackerImpl executor : executors) {
             assertThat(executor.getProcessed()).hasSize(TOTAL_REPORST_PER_WRITER);
             assertThat(executor.getProcessed()).isEqualTo(sendReports);
         }
+    }
+
+    private void checkIfConnectionsContaintesCoherence() {
+        assertThat(connectionsContainer.getConnections()).hasSize(connectionsContainer.getConnectionsIndex().size());
+        
     }
 
 }

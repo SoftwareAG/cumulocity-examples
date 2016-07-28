@@ -68,6 +68,22 @@ public class ConnectionsContainer {
 
     public void removeForImei(String imei) {
         // TODO Auto-generated method stub
+    }
+
+    protected List<ActiveConnection> getConnections() {
+        return connections;
+    }
+
+    protected Map<ConnectionDetails, ActiveConnection> getConnectionsIndex() {
+        return connectionsIndex;
+    }
+
+    public void remove(ConnectionDetails connectionDetails) {
+        ActiveConnection activeConnection = connectionsIndex.get(connectionDetails);
+        connections.remove(activeConnection);
+        connectionsIndex.remove(connectionDetails);
         
     }
+    
+    
 }

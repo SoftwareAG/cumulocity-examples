@@ -67,4 +67,11 @@ public class ConnectionDetails {
         return true;
     }
 
+    @Override
+    public String toString() {
+        return "ConnectionDetails [imei=" + imei + "]";
+    }
+    
+    
+
 }

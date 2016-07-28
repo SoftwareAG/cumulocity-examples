@@ -14,6 +14,7 @@ import java.util.Deque;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.After;
 import org.junit.Before;
@@ -29,7 +30,7 @@ import c8y.trackeragent.server.TrackerServerEvent.ReadDataEvent;
 import c8y.trackeragent.tracker.ConnectedTracker;
 import c8y.trackeragent.tracker.ConnectedTrackerFactory;
 
-public class TrackerServerTestSupport {
+public abstract class TrackerServerTestSupport {
     
     private static final Logger logger = LoggerFactory.getLogger(TrackerServerTestSupport.class);
 
@@ -39,12 +40,14 @@ public class TrackerServerTestSupport {
     private TrackerServer server;
     private final ExecutorService executorService = newFixedThreadPool(100);
     protected CountDownLatch reportExecutorLatch;
-    protected final List<ConnectedTrackerImpl> executors = synchronizedList(new ArrayList<ConnectedTrackerImpl>());
+    protected final List<TestConnectedTrackerImpl> executors = synchronizedList(new ArrayList<TestConnectedTrackerImpl>());
+    protected final ConnectionsContainer connectionsContainer = new ConnectionsContainer();
+    protected ConnectedTracker customTracker = null;
     
     @Before
     public void before() throws Exception {
         reportExecutorLatch = new CountDownLatch(0);
-        TrackerServerEventHandler eventHandler = new TrackerServerEventHandler(new TestConnectedTrackerFactoryImpl(), new ConnectionsContainer());
+        TrackerServerEventHandler eventHandler = new TrackerServerEventHandler(new TestConnectedTrackerFactoryImpl(), connectionsContainer);
         eventHandler.init();
         server = new TrackerServer(eventHandler);
         server.start(PORT);
@@ -65,9 +68,17 @@ public class TrackerServerTestSupport {
     protected void assertThatReportsHandled(String... reports) {
         Object[] expected = new Object[reports.length];
         for (int index = 0; index < reports.length; index++) {
-            expected[index] = new ConnectedTrackerImpl(reports[index]);
+            expected[index] = new TestConnectedTrackerImpl(reports[index]);
         }
         assertThat(executors).contains(expected);
+    }
+    
+    protected void setCountOfExpectedReports(int count) {
+        reportExecutorLatch = new CountDownLatch(count);
+    }
+    
+    protected void waitForReports() throws InterruptedException {
+        reportExecutorLatch.await(2, TimeUnit.SECONDS);
     }
     
     protected class SocketWriter implements Runnable {
@@ -116,7 +127,7 @@ public class TrackerServerTestSupport {
         
         @Override
         public ConnectedTracker create(ReadDataEvent readData) {
-            ConnectedTrackerImpl result = new ConnectedTrackerImpl();
+            TestConnectedTrackerImpl result = new TestConnectedTrackerImpl();
             logger.info("Created executor for data " + new String(readData.getData(), CHARSET));
             executors.add(result);
             logger.info("Total executors " + executors.size());
@@ -124,25 +135,19 @@ public class TrackerServerTestSupport {
         }
     }
     
-    protected class ConnectedTrackerImpl implements ConnectedTracker {
-        
-        private final List<String> processed;
-        
-        public ConnectedTrackerImpl(String... processed) {
-            this.processed = new ArrayList<String>();
-            this.processed.addAll(asList(processed));
-        }
-        
+    
+    protected class DummyConnectedTracker implements ConnectedTracker {
+
         @Override
         public void executeOperation(OperationContext operation) throws Exception {
             // TODO Auto-generated method stub
             
         }
+
         @Override
         public void executeReport(ConnectionDetails connectionDetails, String report) {
-            logger.info("Handled report: \'{}\'", report);
-            processed.add(report);
-            reportExecutorLatch.countDown();
+            // TODO Auto-generated method stub
+            
         }
 
         @Override
@@ -150,8 +155,35 @@ public class TrackerServerTestSupport {
             return ";";
         }
         
+    }
+    
+    protected class TestConnectedTrackerImpl extends DummyConnectedTracker {
+        
+        private final List<String> processed;
+        private ConnectionDetails connectionDetails;
+        
+        public TestConnectedTrackerImpl(String... processed) {
+            this.processed = new ArrayList<String>();
+            this.processed.addAll(asList(processed));
+        }
+        
+        @Override
+        public void executeReport(ConnectionDetails connectionDetails, String report) {
+            this.connectionDetails = connectionDetails;
+            logger.info("Handled report: \'{}\'", report);
+            if (customTracker != null) {
+                customTracker.executeReport(connectionDetails, report);
+            }
+            processed.add(report);
+            reportExecutorLatch.countDown();
+        }
+
         public List<String> getProcessed() {
             return processed;
+        }
+        
+        public ConnectionDetails getConnectionDetails() {
+            return connectionDetails;
         }
 
         @Override
@@ -170,7 +202,7 @@ public class TrackerServerTestSupport {
                 return false;
             if (getClass() != obj.getClass())
                 return false;
-            ConnectedTrackerImpl other = (ConnectedTrackerImpl) obj;
+            TestConnectedTrackerImpl other = (TestConnectedTrackerImpl) obj;
             if (processed == null) {
                 if (other.processed != null)
                     return false;
@@ -184,6 +216,7 @@ public class TrackerServerTestSupport {
             return processed.toString();
         }
     }
+
 
     
 }

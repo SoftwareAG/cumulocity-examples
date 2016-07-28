@@ -150,9 +150,8 @@ public class BaseConnectedTracker<F extends Fragment> implements ConnectedTracke
             }
             try {
             	contextService.enterContext(tenant, imei);
-            	if (parser.onParsed(reportContext)) {
-            	    reportContext.setImei(imei);
-            	}
+            	reportContext.setImei(imei);
+                parser.onParsed(reportContext);
             } catch (Exception e) {
                 logger.error("Error on parsing request", e);
             } finally {

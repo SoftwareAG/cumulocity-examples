@@ -1,16 +1,15 @@
 package c8y.trackeragent.server;
 
 import static java.lang.Thread.sleep;
-import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.fest.assertions.Assertions.assertThat;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class TrackerServerTest extends TrackerServerTestSupport {
-    
+
     @SuppressWarnings("unused")
     private static final Logger logger = LoggerFactory.getLogger(TrackerServerTest.class);
 
@@ -25,25 +24,53 @@ public class TrackerServerTest extends TrackerServerTestSupport {
         writer2 = newWriter();
         writer3 = newWriter();
     }
-        
+
     @Test
     public void shouldReadData() throws Exception {
+        setCountOfExpectedReports(3);
         writer1.push("#ABC;");
         writer2.push("$123;");
         writer3.push("abcd;");
-        sleep(SECONDS.toMillis(1));
         
-       assertThatReportsHandled("#ABC"); 
-       assertThatReportsHandled("$123"); 
-       assertThatReportsHandled("abcd"); 
+        waitForReports();
+
+        assertThatReportsHandled("#ABC");
+        assertThatReportsHandled("$123");
+        assertThatReportsHandled("abcd");
     }
-    
+
     @Test
     public void shouldHandleClose() throws Exception {
         writer1.push("ABC");
+        sleep(100);
+        
+        assertThat(connectionsContainer.getConnections()).hasSize(1);
+        
         writer1.stop();
-        sleep(SECONDS.toMillis(1));
+        sleep(100);
+        
+        assertThat(connectionsContainer.getConnections()).isEmpty();
     }
-    
-    
+
+    @Test
+    public void shouldRemeberConnectionParameter() throws Exception {
+        customTracker = new DummyConnectedTracker() {
+
+            @Override
+            public void executeReport(ConnectionDetails connectionDetails, String report) {
+                if (report.equals("FIRST_REPORT")) {
+                    connectionDetails.getParams().put("connection_parameter", 123);
+                }
+            }
+        };
+
+        setCountOfExpectedReports(2);
+        writer1.push("FIRST_REPORT;");
+        writer1.push("SECOND_REPORT;");
+        waitForReports();
+        
+        assertThat(executors).hasSize(1);
+        assertThat(executors.get(0).getConnectionDetails().getParams().get("connection_parameter")).isEqualTo(123);
+    }
+
 }

@@ -189,14 +189,19 @@ public class TrackerServer implements Runnable {
             // same from our end and cancel the channel.
             key.channel().close();
             key.cancel();
-            //reportReaderContainer.stop(channel);
+            ConnectionDetails connectionDetails = asConnectionDetails(channel);
+            eventHandler.handle(new TrackerServerEvent.CloseConnectionEvent(connectionDetails));
             return;
         }
 
         // Hand the data off to our worker thread
-        OutWriter outWriter = new OutWriterImpl(this, channel);
-        ConnectionDetails connectionDetails = new ConnectionDetails(outWriter, channel);
+        ConnectionDetails connectionDetails = asConnectionDetails(channel);
         eventHandler.handle(new TrackerServerEvent.ReadDataEvent(connectionDetails, this.readBuffer.array(), numRead));
+    }
+
+    private ConnectionDetails asConnectionDetails(SocketChannel channel) {
+        OutWriter outWriter = new OutWriterImpl(this, channel);
+        return new ConnectionDetails(outWriter, channel);
     }
 
     private void write(SelectionKey key) throws IOException {

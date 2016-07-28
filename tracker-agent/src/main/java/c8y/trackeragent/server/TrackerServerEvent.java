@@ -32,5 +32,12 @@ public class TrackerServerEvent {
         }
 
     }
+    
+    public static class CloseConnectionEvent extends TrackerServerEvent {
+        
+        public CloseConnectionEvent(ConnectionDetails connectionDetails) {
+            super(connectionDetails);
+        }
+    }
 
 }
