@@ -3,7 +3,6 @@ package c8y.trackeragent.protocol.telic;
 import java.math.BigDecimal;
 
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 
 import com.cumulocity.model.DateTimeConverter;
 
@@ -22,7 +21,7 @@ public class TelicDeviceMessages extends TrackerMessageFactory<TrackerMessage> {
     
     @Override
     public TrackerMessage msg() {
-        return new TelicMessage(TelicConstants.FIELD_SEP, "" + TelicConstants.REPORT_SEP);
+        return new TelicMessage();
     }
     
     public TrackerMessage positionUpdate(String imei, Position position, String eventCode) {

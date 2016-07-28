@@ -20,6 +20,7 @@
 
 package c8y.trackeragent.protocol.gl200;
 
+import static c8y.trackeragent.protocol.TrackingProtocol.GL200;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -39,7 +40,6 @@ import c8y.Position;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.device.TrackerDevice;
-import c8y.trackeragent.protocol.gl200.GL200Constants;
 import c8y.trackeragent.protocol.gl200.parser.GL200LocationReport;
 import c8y.trackeragent.server.TestConnectionDetails;
 import c8y.trackeragent.service.MeasurementService;
@@ -52,10 +52,10 @@ public class GV500LocationReportTest {
     public static final String CELLID = "6141";
 
     public static final String GV500REPSTR = "+RESP:GTTOW,1F0101,135790246811220,1G1JC5444R7252367,,,10,1,1,4.3,92,70.0,121.354335,31.222073,20090214013254,0460,0000,18d8,6141,00,2000.0,20090214093254,11F0$";
-    public static final String[] GV500REP = GV500REPSTR.split(GL200Constants.FIELD_SEP);
+    public static final String[] GV500REP = GV500REPSTR.split(GL200.getFieldSeparator());
 
     public static final String GV500FRISTR = "+RESP:GTFRI,1F0104,864251020004036,,,,10,1,0,,,,0,0,,0262,0007,18d8,6141,00,0.0,,,,77,420000,,,,20110101180334,001B";
-    public static final String[] GV500FRI = GV500FRISTR.split(GL200Constants.FIELD_SEP);
+    public static final String[] GV500FRI = GV500FRISTR.split(GL200.getFieldSeparator());
     public static final String IMEI2 = "864251020004036";
 
     private TrackerAgent trackerAgent = mock(TrackerAgent.class);

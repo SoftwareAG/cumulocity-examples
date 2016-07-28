@@ -1,15 +1,23 @@
 package c8y.trackeragent.server;
 
+import java.nio.channels.SocketChannel;
+
 public class TrackerServerEvent {
 
-    private final ConnectionDetails connectionDetails;
+    private final TrackerServer server;
+    private final SocketChannel channel;
 
-    public TrackerServerEvent(ConnectionDetails connectionDetails) {
-        this.connectionDetails = connectionDetails;
+    public TrackerServerEvent(TrackerServer server, SocketChannel channel) {
+        this.server = server;
+        this.channel = channel;
     }
 
-    public ConnectionDetails getConnectionDetails() {
-        return connectionDetails;
+    public TrackerServer getServer() {
+        return server;
+    }
+
+    public SocketChannel getChannel() {
+        return channel;
     }
 
     public static class ReadDataEvent extends TrackerServerEvent {
@@ -17,8 +25,8 @@ public class TrackerServerEvent {
         private final byte[] data;
         private final int numRead;
 
-        public ReadDataEvent(ConnectionDetails connectionDetails, byte[] data, int numRead) {
-            super(connectionDetails);
+        public ReadDataEvent(TrackerServer server, SocketChannel channel, byte[] data, int numRead) {
+            super(server, channel);
             this.data = data;
             this.numRead = numRead;
         }
@@ -32,11 +40,11 @@ public class TrackerServerEvent {
         }
 
     }
-    
+
     public static class CloseConnectionEvent extends TrackerServerEvent {
-        
-        public CloseConnectionEvent(ConnectionDetails connectionDetails) {
-            super(connectionDetails);
+
+        public CloseConnectionEvent(TrackerServer server, SocketChannel channel) {
+            super(server, channel);
         }
     }
 

@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import c8y.trackeragent.context.OperationContext;
+import c8y.trackeragent.protocol.TrackingProtocol;
 import c8y.trackeragent.server.ConnectionDetails;
 import c8y.trackeragent.server.ConnectionsContainer;
 import c8y.trackeragent.server.TrackerServer;
@@ -151,10 +152,9 @@ public abstract class TrackerServerTestSupport {
         }
 
         @Override
-        public String getReportSeparator() {
-            return ";";
+        public TrackingProtocol getTrackingProtocol() {
+            return TrackingProtocol.COBAN;
         }
-        
     }
     
     protected class TestConnectedTrackerImpl extends DummyConnectedTracker {

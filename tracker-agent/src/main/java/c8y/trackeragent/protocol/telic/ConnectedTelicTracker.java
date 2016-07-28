@@ -2,14 +2,13 @@ package c8y.trackeragent.protocol.telic;
 
 import static java.lang.String.format;
 
-import java.io.IOException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import c8y.trackeragent.protocol.TrackingProtocol;
 import c8y.trackeragent.protocol.telic.parser.TelicFragment;
 import c8y.trackeragent.server.ConnectionDetails;
 import c8y.trackeragent.tracker.BaseConnectedTracker;
@@ -24,10 +23,6 @@ public class ConnectedTelicTracker extends BaseConnectedTracker<TelicFragment> {
     public static final int REPORT_SKIP = 4;
 
     private boolean firstReport = true;
-
-    public ConnectedTelicTracker() throws IOException {
-        super(TelicConstants.REPORT_SEP, TelicConstants.FIELD_SEP);
-    }
 
     @Override
     public void executeReport(ConnectionDetails connectionDetails, String reportStr) {
@@ -50,4 +45,10 @@ public class ConnectedTelicTracker extends BaseConnectedTracker<TelicFragment> {
             throw new RuntimeException(message);
         }
     }
+    
+    @Override
+    public TrackingProtocol getTrackingProtocol() {
+        return TrackingProtocol.TELIC;
+    }
+
 }

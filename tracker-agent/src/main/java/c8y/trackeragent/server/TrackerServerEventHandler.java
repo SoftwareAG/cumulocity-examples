@@ -11,8 +11,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import c8y.trackeragent.protocol.TrackingProtocol;
 import c8y.trackeragent.server.TrackerServerEvent.CloseConnectionEvent;
 import c8y.trackeragent.server.TrackerServerEvent.ReadDataEvent;
+import c8y.trackeragent.server.writer.OutWriter;
+import c8y.trackeragent.server.writer.OutWriterImpl;
 import c8y.trackeragent.tracker.ConnectedTracker;
 import c8y.trackeragent.tracker.ConnectedTrackerFactory;
 
@@ -54,21 +57,26 @@ public class TrackerServerEventHandler implements ActiveConnectionProvider {
     
     public void handle(CloseConnectionEvent closeConnectionEvent) {
         synchronized (monitor) {
-            logger.info("Close connection for {}.", closeConnectionEvent.getConnectionDetails());
-            connectionsContainer.remove(closeConnectionEvent.getConnectionDetails());
+            connectionsContainer.remove(closeConnectionEvent.getChannel());
         }
     }
 
-
     private ActiveConnection getActiveConnection(ReadDataEvent readEvent) throws Exception {
-        ActiveConnection connection = connectionsContainer.get(readEvent.getConnectionDetails());
+        ActiveConnection connection = connectionsContainer.get(readEvent.getChannel());
         if (connection == null) {
-            ConnectedTracker connectedTracker = connectedTrackerFactory.create(readEvent);
-            ReportBuffer reportBuffer = new ReportBuffer(connectedTracker.getReportSeparator());
-            connection = new ActiveConnection(readEvent.getConnectionDetails(), connectedTracker, reportBuffer);
-            connectionsContainer.put(readEvent.getConnectionDetails(), connection);
+            connection = createConnection(readEvent);
+            connectionsContainer.store(connection);
         }
         return connection;
+    }
+
+    private ActiveConnection createConnection(ReadDataEvent readEvent) throws Exception {
+        ConnectedTracker connectedTracker = connectedTrackerFactory.create(readEvent);
+        TrackingProtocol trackingProtocol = connectedTracker.getTrackingProtocol();
+        ReportBuffer reportBuffer = new ReportBuffer(trackingProtocol.getReportSeparator());
+        OutWriter outWriter = new OutWriterImpl(readEvent.getServer(), readEvent.getChannel());
+        ConnectionDetails connectionDetails = new ConnectionDetails(trackingProtocol, outWriter, readEvent.getChannel());
+        return new ActiveConnection(connectionDetails, connectedTracker, reportBuffer);
     }
 
     @Override
@@ -77,8 +85,4 @@ public class TrackerServerEventHandler implements ActiveConnectionProvider {
             return connectionsContainer.next();
         }
     }
-
-    
-    
-
 }

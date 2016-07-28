@@ -35,4 +35,8 @@ public class ActiveConnection {
         return connectionDetails;
     }
 
+    @Override
+    public String toString() {
+        return "ActiveConnection [connectionDetails=" + connectionDetails + "]";
+    }
 }

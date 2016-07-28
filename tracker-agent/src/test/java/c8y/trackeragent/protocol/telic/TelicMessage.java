@@ -3,14 +3,15 @@ package c8y.trackeragent.protocol.telic;
 import com.google.common.base.Functions;
 import com.google.common.collect.Iterables;
 
+import c8y.trackeragent.protocol.TrackingProtocol;
 import c8y.trackeragent.utils.message.TrackerMessage;
 
 public class TelicMessage extends TrackerMessage {
     
     public static final String HEADER = "0000123456|262|02|003002016";
     
-    public TelicMessage(String fieldSep, String reportSep) {
-        super(fieldSep, reportSep);
+    public TelicMessage() {
+        super(TrackingProtocol.TELIC);
     }
 
     @Override

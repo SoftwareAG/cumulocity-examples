@@ -22,8 +22,8 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import c8y.trackeragent.server.writer.OutWriter;
-import c8y.trackeragent.server.writer.OutWriterImpl;
+import c8y.trackeragent.server.TrackerServerEvent.CloseConnectionEvent;
+import c8y.trackeragent.server.TrackerServerEvent.ReadDataEvent;
 import c8y.trackeragent.utils.ByteHelper;
 
 @Component
@@ -189,19 +189,12 @@ public class TrackerServer implements Runnable {
             // same from our end and cancel the channel.
             key.channel().close();
             key.cancel();
-            ConnectionDetails connectionDetails = asConnectionDetails(channel);
-            eventHandler.handle(new TrackerServerEvent.CloseConnectionEvent(connectionDetails));
+            eventHandler.handle(new CloseConnectionEvent(this, channel));
             return;
         }
 
         // Hand the data off to our worker thread
-        ConnectionDetails connectionDetails = asConnectionDetails(channel);
-        eventHandler.handle(new TrackerServerEvent.ReadDataEvent(connectionDetails, this.readBuffer.array(), numRead));
-    }
-
-    private ConnectionDetails asConnectionDetails(SocketChannel channel) {
-        OutWriter outWriter = new OutWriterImpl(this, channel);
-        return new ConnectionDetails(outWriter, channel);
+        eventHandler.handle(new ReadDataEvent(this, channel, this.readBuffer.array(), numRead));
     }
 
     private void write(SelectionKey key) throws IOException {

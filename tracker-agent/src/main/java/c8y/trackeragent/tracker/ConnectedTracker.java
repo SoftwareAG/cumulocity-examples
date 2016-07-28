@@ -1,6 +1,7 @@
 package c8y.trackeragent.tracker;
 
 import c8y.trackeragent.context.OperationContext;
+import c8y.trackeragent.protocol.TrackingProtocol;
 import c8y.trackeragent.server.ConnectionDetails;
 
 public interface ConnectedTracker {
@@ -9,6 +10,5 @@ public interface ConnectedTracker {
 
     void executeReport(ConnectionDetails connectionDetails, String report);
 
-    @Deprecated
-    String getReportSeparator();
+    TrackingProtocol getTrackingProtocol();
 }

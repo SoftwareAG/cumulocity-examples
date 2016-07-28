@@ -20,27 +20,32 @@
 
 package c8y.trackeragent.server;
 
+import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ConnectionsContainer {
 
-    private final Map<ConnectionDetails, ActiveConnection> connectionsIndex = new ConcurrentHashMap<ConnectionDetails, ActiveConnection>();
+    private static final Logger logger = LoggerFactory.getLogger(ConnectionsContainer.class);
+
+    private final Map<SocketChannel, ActiveConnection> connectionsIndex = new ConcurrentHashMap<SocketChannel, ActiveConnection>();
     private final List<ActiveConnection> connections = new ArrayList<ActiveConnection>();
 
     private int channelStatesPos = 0;
 
-    public ActiveConnection get(ConnectionDetails connectionDetails) {
-        return connectionsIndex.get(connectionDetails);
+    public ActiveConnection get(SocketChannel channel) {
+        return connectionsIndex.get(channel);
     }
 
-    public void put(ConnectionDetails key, ActiveConnection value) {
-        connectionsIndex.put(key, value);
+    public void store(ActiveConnection value) {
+        connectionsIndex.put(value.getConnectionDetails().getChannel(), value);
         connections.add(value);
     }
 
@@ -74,16 +79,19 @@ public class ConnectionsContainer {
         return connections;
     }
 
-    protected Map<ConnectionDetails, ActiveConnection> getConnectionsIndex() {
+    protected Map<SocketChannel, ActiveConnection> getConnectionsIndex() {
         return connectionsIndex;
     }
 
-    public void remove(ConnectionDetails connectionDetails) {
-        ActiveConnection activeConnection = connectionsIndex.get(connectionDetails);
-        connections.remove(activeConnection);
-        connectionsIndex.remove(connectionDetails);
-        
+    public void remove(SocketChannel channel) {
+        ActiveConnection activeConnection = get(channel);
+        if (activeConnection == null) {
+            logger.warn("Connection: {0} have been already removed.");
+        } else {
+            logger.info("Remove active connection: {0}", activeConnection.getConnectionDetails());
+            connections.remove(activeConnection);
+            connectionsIndex.remove(activeConnection.getConnectionDetails().getChannel());
+        }
     }
-    
-    
+
 }

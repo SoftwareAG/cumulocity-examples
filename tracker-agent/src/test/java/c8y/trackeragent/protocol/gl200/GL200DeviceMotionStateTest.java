@@ -20,6 +20,7 @@
 
 package c8y.trackeragent.protocol.gl200;
 
+import static c8y.trackeragent.protocol.TrackingProtocol.GL200;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
@@ -31,17 +32,16 @@ import static org.mockito.Mockito.when;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.cumulocity.rest.representation.operation.OperationRepresentation;
+import com.cumulocity.sdk.client.SDKException;
+
 import c8y.MotionTracking;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.context.OperationContext;
 import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.device.TrackerDevice;
-import c8y.trackeragent.protocol.gl200.GL200Constants;
 import c8y.trackeragent.protocol.gl200.parser.GL200DeviceMotionState;
 import c8y.trackeragent.server.TestConnectionDetails;
-
-import com.cumulocity.rest.representation.operation.OperationRepresentation;
-import com.cumulocity.sdk.client.SDKException;
 
 public class GL200DeviceMotionStateTest {
 
@@ -50,13 +50,13 @@ public class GL200DeviceMotionStateTest {
     public static final String SETTRACKINGSTR = "AT+GTCFG=gl200,,,,,,,,,,47,,,,,,,,,,,0001$";
 
     public static final String ACKMOTIONSTR = "+ACK:GTCFG,02010B,135790246811220,,0001,20100310172830,11F0$";
-    public static final String[] ACKMOTION = ACKMOTIONSTR.split(GL200Constants.FIELD_SEP);
+    public static final String[] ACKMOTION = ACKMOTIONSTR.split(GL200.getFieldSeparator());
 
     public static final String REPMOTIONSTR = "+RESP:GTSTT,02010B,135790246811220,,42,0,4.3,92,70.0,121.354335,31.222073,20090214013254,0460,0000,18d8,6141,00,20100214093254,11F0$";
-    public static final String[] REPMOTION = REPMOTIONSTR.split(GL200Constants.FIELD_SEP);
+    public static final String[] REPMOTION = REPMOTIONSTR.split(GL200.getFieldSeparator());
     
     public static final String GV500REPMOTSTR = "+RESP:GTSTT,1F0101,135790246811220,1G1JC5444R7252367,,16,0,4.3,92,70.0,121.354335,31.222073,20090214013254,0460,0000,18d8,6141,00,20090214093254,11F0$";
-    public static final String[] GV500REPMOTION = GV500REPMOTSTR.split(GL200Constants.FIELD_SEP);    
+    public static final String[] GV500REPMOTION = GV500REPMOTSTR.split(GL200.getFieldSeparator());    
     
     private GL200DeviceMotionState gl200mot;
     private TrackerAgent trackerAgent = mock(TrackerAgent.class);
@@ -111,7 +111,7 @@ public class GL200DeviceMotionStateTest {
         verify(device).motionEvent(anyBoolean());
         verify(device).motionEvent(true);
 
-        String[] repNoMotion = REPMOTIONSTR.split(GL200Constants.FIELD_SEP);
+        String[] repNoMotion = REPMOTIONSTR.split(GL200.getFieldSeparator());
         repNoMotion[4] = "41";
         imei = gl200mot.parse(repNoMotion);
         reportCtx = new ReportContext(connectionDetails, repNoMotion);

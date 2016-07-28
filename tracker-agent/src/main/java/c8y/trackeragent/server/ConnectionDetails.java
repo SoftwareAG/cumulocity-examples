@@ -4,20 +4,23 @@ import java.nio.channels.SocketChannel;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import c8y.trackeragent.protocol.TrackingProtocol;
 import c8y.trackeragent.server.writer.OutWriter;
 
 public class ConnectionDetails {
 
+    private final TrackingProtocol trackingProtocol;
     private final OutWriter outWriter;
     private final SocketChannel channel;
     private volatile String imei;
     private final Map<String, Object> params = new ConcurrentHashMap<String, Object>();
 
-    public ConnectionDetails(OutWriter outWriter, SocketChannel channel) {
+    public ConnectionDetails(TrackingProtocol trackingProtocol, OutWriter outWriter, SocketChannel channel) {
+        this.trackingProtocol = trackingProtocol;
         this.outWriter = outWriter;
         this.channel = channel;
     }
-    
+
     public OutWriter getOutWriter() {
         return outWriter;
     }
@@ -37,9 +40,13 @@ public class ConnectionDetails {
     public String getImei() {
         return imei;
     }
-    
+
     public Map<String, Object> getParams() {
         return params;
+    }
+
+    public TrackingProtocol getTrackingProtocol() {
+        return trackingProtocol;
     }
 
     @Override
@@ -69,9 +76,6 @@ public class ConnectionDetails {
 
     @Override
     public String toString() {
-        return "ConnectionDetails [imei=" + imei + "]";
+        return "ConnectionDetails [trackingProtocol=" + trackingProtocol + ", imei=" + imei + "]";
     }
-    
-    
-
 }

@@ -19,40 +19,43 @@ public class ConnectedTrackerFactoryImpl implements ConnectedTrackerFactory {
 
     private final TrackerConfiguration config;
     private ListableBeanFactory beanFactory;
-    
+
     @Autowired
     public ConnectedTrackerFactoryImpl(TrackerConfiguration config, ListableBeanFactory beanFactory) {
         this.config = config;
         this.beanFactory = beanFactory;
     }
-    
+
     @Override
     public ConnectedTracker create(ReadDataEvent readData) throws Exception {
         logger.debug("Will peek tracker for new connection...");
-        int localPort = readData.getConnectionDetails().getChannel().socket().getLocalPort();
+        int localPort = readData.getChannel().socket().getLocalPort();
         byte markingByte = readData.getData()[0];
         ConnectedTracker result = create(localPort, markingByte);
-        logger.debug("Tracker for new connection: {}", result.getClass().getSimpleName());
+        if (result == null) {
+            logger.error("No matching tracker found for first byte " + markingByte + " on port " + localPort);
+        } else {
+            logger.debug("Tracker for new connection: {}", result.getClass().getSimpleName());
+        }
         return result;
     }
 
     private ConnectedTracker create(int localPort, byte markingByte) throws Exception {
         if (localPort == config.getLocalPort1()) {
-            return discoverTracker(markingByte, localPort, config.getLocalPort1Protocols());
+            return discoverTracker(config.getLocalPort1Protocols(), markingByte);
         } else if (localPort == config.getLocalPort2()) {
-            return discoverTracker(markingByte, localPort, config.getLocalPort2Protocols());
+            return discoverTracker(config.getLocalPort2Protocols(), markingByte);
         } else {
             throw new RuntimeException("Only support local ports: " + config.getLocalPort1() + ", " + config.getLocalPort2());
         }
     }
-    
-    private ConnectedTracker discoverTracker(byte markingByte, int localPort, Collection<TrackingProtocol> available) throws Exception {
+
+    private ConnectedTracker discoverTracker(Collection<TrackingProtocol> available, byte markingByte) throws Exception {
         for (TrackingProtocol trackerProtocol : available) {
             if (trackerProtocol.accept(markingByte)) {
                 return beanFactory.getBean(trackerProtocol.getTrackerClass());
             }
         }
-        logger.warn("No matching tracker found for first byte " + markingByte + " on port " + localPort);
         return null;
     }
 }

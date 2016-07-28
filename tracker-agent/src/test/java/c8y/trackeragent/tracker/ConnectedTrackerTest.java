@@ -39,7 +39,7 @@ import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.exception.UnknownDeviceException;
 import c8y.trackeragent.exception.UnknownTenantException;
-import c8y.trackeragent.protocol.gl200.GL200Constants;
+import c8y.trackeragent.protocol.TrackingProtocol;
 import c8y.trackeragent.server.TestConnectionDetails;
 import c8y.trackeragent.service.TrackerDeviceContextService;
 
@@ -58,12 +58,17 @@ public class ConnectedTrackerTest {
     public void setup() throws Exception {
         // @formatter:off
         tracker = new BaseConnectedTracker<Fragment>(
-        		GL200Constants.REPORT_SEP, 
-        		GL200Constants.FIELD_SEP,
         		asList(translator, parser),
         		bootstrapProcessor,
         		credentialsRepository,
-        		contextService);
+        		contextService) {
+
+                    @Override
+                    public TrackingProtocol getTrackingProtocol() {
+                        return TestConnectionDetails.DEFAULT_PROTOCOL;
+                    }
+            
+        };
         // @formatter:on
     }
 

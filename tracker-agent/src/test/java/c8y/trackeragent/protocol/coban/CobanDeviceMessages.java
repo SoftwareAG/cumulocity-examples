@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import c8y.Position;
+import c8y.trackeragent.protocol.TrackingProtocol;
 import c8y.trackeragent.protocol.coban.parser.CobanAlarmType;
 import c8y.trackeragent.utils.Positions;
 import c8y.trackeragent.utils.SignedLocation;
@@ -29,7 +30,7 @@ public class CobanDeviceMessages extends TrackerMessageFactory<TrackerMessage> {
     
     @Override
     public TrackerMessage msg() {
-        return new TrackerMessage(CobanConstants.FIELD_SEP, "" + CobanConstants.REPORT_SEP);
+        return new TrackerMessage(TrackingProtocol.COBAN);
     }
 
 

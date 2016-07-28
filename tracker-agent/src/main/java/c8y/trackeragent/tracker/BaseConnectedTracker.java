@@ -47,13 +47,10 @@ import c8y.trackeragent.service.TrackerDeviceContextService;
  * Performs the communication with a connected device. Accepts reports from the
  * input stream and sends commands to the output stream.
  */
-public class BaseConnectedTracker<F extends Fragment> implements ConnectedTracker {
+public abstract class BaseConnectedTracker<F extends Fragment> implements ConnectedTracker {
     
     protected static Logger logger = LoggerFactory.getLogger(BaseConnectedTracker.class);
 
-    private final char reportSeparator;
-    private final String fieldSeparator;
-    
     @Autowired
     protected List<F> fragments = new ArrayList<F>();
     @Autowired
@@ -63,26 +60,21 @@ public class BaseConnectedTracker<F extends Fragment> implements ConnectedTracke
     @Autowired
     protected TrackerDeviceContextService contextService;
 
-    BaseConnectedTracker(char reportSeparator, String fieldSeparator, List<F> fragments,
+    BaseConnectedTracker(List<F> fragments,
 			DeviceBootstrapProcessor bootstrapProcessor, DeviceCredentialsRepository credentialsRepository, 
 			TrackerDeviceContextService contextService) {
-		this.reportSeparator = reportSeparator;
-		this.fieldSeparator = fieldSeparator;
 		this.fragments = fragments;
 		this.bootstrapProcessor = bootstrapProcessor;
 		this.credentialsRepository = credentialsRepository;
 		this.contextService = contextService;
 	}
 
-	public BaseConnectedTracker(char reportSeparator, String fieldSeparator) {
-        this.reportSeparator = reportSeparator;
-        this.fieldSeparator = fieldSeparator;
-    }
+	public BaseConnectedTracker() {}
     
     @Override
     public void executeReport(ConnectionDetails connectionDetails, String reportStr) {
         logger.info("Process report: {}.", reportStr);
-        String[] report = reportStr.split(fieldSeparator);
+        String[] report = reportStr.split(connectionDetails.getTrackingProtocol().getFieldSeparator());
         ReportContext reportContext = new ReportContext(connectionDetails, report);
         tryProcessReport(reportContext);
         
@@ -182,11 +174,6 @@ public class BaseConnectedTracker<F extends Fragment> implements ConnectedTracke
             }
         }
         return null;
-    }
-
-    @Override
-    public String getReportSeparator() {
-        return "" + reportSeparator;
     }
 
 }

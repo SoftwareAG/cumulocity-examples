@@ -1,11 +1,14 @@
 package c8y.trackeragent.server;
 
+import c8y.trackeragent.protocol.TrackingProtocol;
 import c8y.trackeragent.server.writer.OutWriter;
 
 public class TestConnectionDetails extends ConnectionDetails {
 
+    public static final TrackingProtocol DEFAULT_PROTOCOL = TrackingProtocol.COBAN;
+
     public TestConnectionDetails() {
-        super(new TestOutWriterImpl(), null);
+        super(DEFAULT_PROTOCOL, new TestOutWriterImpl(), null);
     }
     
     public TestConnectionDetails(String imei) {
