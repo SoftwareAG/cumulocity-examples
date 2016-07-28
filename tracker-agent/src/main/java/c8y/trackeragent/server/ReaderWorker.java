@@ -7,16 +7,16 @@ public class ReaderWorker implements Runnable {
 
     private static final Logger logger = LoggerFactory.getLogger(ReaderWorker.class);
 
-    private final WorkerTaskProvider taskProvider;
+    private final ActiveConnectionProvider connectionProvider;
 
-    public ReaderWorker(WorkerTaskProvider taskProvider) {
-        this.taskProvider = taskProvider;
+    public ReaderWorker(ActiveConnectionProvider taskProvider) {
+        this.connectionProvider = taskProvider;
     }
 
     @Override
     public void run() {
         while (true) {
-            ActiveConnection connection = taskProvider.next();
+            ActiveConnection connection = connectionProvider.next();
             if (connection == null) {
                 continue;
             }
@@ -31,7 +31,7 @@ public class ReaderWorker implements Runnable {
     }
 
     private void process(ActiveConnection connection) {
-        String report = connection.getDataBuffer().getReport();
+        String report = connection.getReportBuffer().getReport();
         if (report != null) {
             connection.getConnectedTracker().executeReport(connection.getConnectionDetails(), report);
         }

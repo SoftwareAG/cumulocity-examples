@@ -16,7 +16,7 @@ import c8y.trackeragent.tracker.ConnectedTracker;
 import c8y.trackeragent.tracker.ConnectedTrackerFactory;
 
 @Component
-public class TrackerServerEventHandler implements WorkerTaskProvider {
+public class TrackerServerEventHandler implements ActiveConnectionProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(TrackerServerEventHandler.class);
     private static final int NUMBER_OF_WORKERS = 10;
@@ -43,8 +43,8 @@ public class TrackerServerEventHandler implements WorkerTaskProvider {
     public void handle(TrackerServerEvent.ReadDataEvent readDataEvent) {
         try {
             synchronized (monitor) {
-                ActiveConnection state = getActiveConnection(readDataEvent);
-                state.getDataBuffer().append(readDataEvent.getData(), readDataEvent.getNumRead());
+                ActiveConnection connection = getActiveConnection(readDataEvent);
+                connection.getReportBuffer().append(readDataEvent.getData(), readDataEvent.getNumRead());
             }
         } catch (Exception e) {
             logger.error("Exception handling read event " + readDataEvent, e);
@@ -55,8 +55,8 @@ public class TrackerServerEventHandler implements WorkerTaskProvider {
         ActiveConnection connection = connectionsContainer.get(readEvent.getConnectionDetails());
         if (connection == null) {
             ConnectedTracker connectedTracker = connectedTrackerFactory.create(readEvent);
-            DataBuffer dataBuffer = new DataBuffer(connectedTracker.getReportSeparator());
-            connection = new ActiveConnection(readEvent.getConnectionDetails(), connectedTracker, dataBuffer);
+            ReportBuffer reportBuffer = new ReportBuffer(connectedTracker.getReportSeparator());
+            connection = new ActiveConnection(readEvent.getConnectionDetails(), connectedTracker, reportBuffer);
             connectionsContainer.put(readEvent.getConnectionDetails(), connection);
         }
         return connection;

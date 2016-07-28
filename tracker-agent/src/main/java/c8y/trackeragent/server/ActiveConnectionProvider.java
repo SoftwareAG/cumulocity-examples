@@ -1,6 +1,6 @@
 package c8y.trackeragent.server;
 
-public interface WorkerTaskProvider {
+public interface ActiveConnectionProvider {
 
     ActiveConnection next();
 }

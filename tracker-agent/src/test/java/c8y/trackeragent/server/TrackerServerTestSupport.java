@@ -62,7 +62,7 @@ public class TrackerServerTestSupport {
         return writer;
     }
     
-    protected void assertThatReportsOnSocket(String... reports) {
+    protected void assertThatReportsHandled(String... reports) {
         Object[] expected = new Object[reports.length];
         for (int index = 0; index < reports.length; index++) {
             expected[index] = new ConnectedTrackerImpl(reports[index]);

@@ -6,21 +6,21 @@ public class ActiveConnection {
 
     private final ConnectionDetails connectionDetails;
     private final ConnectedTracker connectedTracker;
-    private final DataBuffer dataBuffer;
+    private final ReportBuffer reportBuffer;
     private boolean processing;
 
-    public ActiveConnection(ConnectionDetails connectionDetails, ConnectedTracker reportExecutor, DataBuffer dataBuffer) {
+    public ActiveConnection(ConnectionDetails connectionDetails, ConnectedTracker reportExecutor, ReportBuffer reportBuffer) {
         this.connectionDetails = connectionDetails;
         this.connectedTracker = reportExecutor;
-        this.dataBuffer = dataBuffer;
+        this.reportBuffer = reportBuffer;
     }
 
     public ConnectedTracker getConnectedTracker() {
         return connectedTracker;
     }
 
-    public DataBuffer getDataBuffer() {
-        return dataBuffer;
+    public ReportBuffer getReportBuffer() {
+        return reportBuffer;
     }
 
     public boolean isProcessing() {

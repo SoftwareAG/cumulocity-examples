@@ -33,9 +33,9 @@ public class TrackerServerTest extends TrackerServerTestSupport {
         writer3.push("abcd;");
         sleep(SECONDS.toMillis(1));
         
-       assertThatReportsOnSocket("#ABC"); 
-       assertThatReportsOnSocket("$123"); 
-       assertThatReportsOnSocket("abcd"); 
+       assertThatReportsHandled("#ABC"); 
+       assertThatReportsHandled("$123"); 
+       assertThatReportsHandled("abcd"); 
     }
     
     @Test

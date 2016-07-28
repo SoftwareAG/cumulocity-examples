@@ -10,8 +10,6 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
 
-import c8y.trackeragent.tracker.ConnectedTracker;
-
 public class TrackerServerFuzzyTest extends TrackerServerTestSupport {
 
     private static final int TOTAL_WRITERS = 50;
