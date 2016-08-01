@@ -28,7 +28,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.sdk.client.SDKException;
 import com.google.common.collect.Iterables;
 
@@ -154,16 +153,14 @@ public abstract class BaseConnectedTracker<F extends Fragment> implements Connec
     @Override
     public void executeOperation(OperationContext operationCtx) throws IOException {
         String translation = translate(operationCtx);
-        logger.debug("Executing operation\n{}\n{}", operationCtx, translation);
         if (translation == null) {
-            operationCtx.getOperation().setStatus(OperationStatus.FAILED.toString());
-            operationCtx.getOperation().setFailureReason("Command currently not supported");
+            throw new RuntimeException("Command currently not supported!");
         } else {
             operationCtx.writeOut(translation);
         }
     }
 
-    public String translate(OperationContext operation) {
+    private String translate(OperationContext operation) {
         for (Object fragment : fragments) {
             if (fragment instanceof Translator) {
                 Translator translator = (Translator) fragment;

@@ -65,7 +65,7 @@ public class TrackerServerEventHandler implements ActiveConnectionProvider {
         ActiveConnection connection = connectionsContainer.get(readEvent.getChannel());
         if (connection == null) {
             connection = createConnection(readEvent);
-            connectionsContainer.store(connection);
+            connectionsContainer.add(connection);
         }
         return connection;
     }

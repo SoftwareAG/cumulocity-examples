@@ -14,5 +14,14 @@ public class ByteHelper {
             return null;
         }
     }
+    
+    public static String getString(byte[] bytes) {
+        try {
+            return new String(bytes, ASCII);
+        } catch (UnsupportedEncodingException e) {
+            // never happen
+            return null;
+        }
+    }
 
 }

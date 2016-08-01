@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import c8y.trackeragent.operations.OperationsHelper;
+import c8y.trackeragent.operations.OperationExecutor;
 import c8y.trackeragent.operations.OperationDispatcher;
 import c8y.trackeragent.service.TrackerDeviceContextService;
 
@@ -20,7 +20,7 @@ public class TenantBinder {
     private final DeviceCredentialsRepository credentialsRepository;
     private final TrackerDeviceContextService contextService;
 	private final ScheduledExecutorService operationsExecutor;
-	private final OperationsHelper operationHelper;
+	private final OperationExecutor operationHelper;
     
     private static final int OPERATIONS_THREAD_POOL_SIZE = 10;
 
@@ -28,7 +28,7 @@ public class TenantBinder {
     public TenantBinder(
     		TrackerDeviceContextService contextService, 
             DeviceCredentialsRepository deviceCredentialsRepository, 
-            OperationsHelper operationHelper) {
+            OperationExecutor operationHelper) {
         this.credentialsRepository = deviceCredentialsRepository;
         this.contextService = contextService;
 		this.operationHelper = operationHelper;
@@ -56,7 +56,7 @@ public class TenantBinder {
     public void startPollerFor(DeviceCredentials tenantCredentials) {
         contextService.enterContext(tenantCredentials.getTenant());
         try {
-        	operationHelper.finishExecutingOps();
+        	operationHelper.markOldExecutingOperationsFailed();
         } finally {
         	contextService.leaveContext();
         }

@@ -14,10 +14,10 @@ import c8y.trackeragent.protocol.TrackingProtocol;
 
 public class TrackerMessage {
     
-    private final LinkedList<Report> reports = new LinkedList<Report>();
-    private final String fieldSep;
-    private final String reportSep;
-    private final String reportPrefix;
+    protected final LinkedList<Report> reports = new LinkedList<Report>();
+    protected final String fieldSep;
+    protected final String reportSep;
+    protected final String reportPrefix;
     
     public TrackerMessage(String fieldSep, String reportSep) {
         this(fieldSep, reportSep, "");

@@ -44,12 +44,12 @@ public class TrackerServerTest extends TrackerServerTestSupport {
         writer1.push("ABC");
         sleep(100);
         
-        assertThat(connectionsContainer.getConnections()).hasSize(1);
+        assertThat(connectionsContainer.getAll()).hasSize(1);
         
         writer1.stop();
         sleep(100);
         
-        assertThat(connectionsContainer.getConnections()).isEmpty();
+        assertThat(connectionsContainer.getAll()).isEmpty();
     }
 
     @Test

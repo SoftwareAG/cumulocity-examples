@@ -49,6 +49,7 @@ import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.protocol.TrackingProtocol;
 import c8y.trackeragent.service.AlarmMappingService;
 import c8y.trackeragent.service.AlarmType;
+import c8y.trackeragent.utils.ByteHelper;
 import c8y.trackeragent.utils.message.TrackerMessage;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -166,6 +167,7 @@ public abstract class TrackerITSupport {
     
     protected String writeInNewConnection(Socket socket, byte[] bis) throws Exception {
         OutputStream out = socket.getOutputStream();
+        System.out.println("Write >> " + ByteHelper.getString(bis));
         out.write(bis);
         out.flush();
         Thread.sleep(1000);

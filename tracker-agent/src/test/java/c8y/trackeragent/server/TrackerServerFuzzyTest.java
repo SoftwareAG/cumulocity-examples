@@ -62,7 +62,7 @@ public class TrackerServerFuzzyTest extends TrackerServerTestSupport {
     }
 
     private void checkIfConnectionsContaintesCoherence() {
-        assertThat(connectionsContainer.getConnections()).hasSize(connectionsContainer.getConnectionsIndex().size());
+        assertThat(connectionsContainer.getAll()).hasSize(connectionsContainer.getAllIndex().size());
         
     }
 

@@ -44,9 +44,54 @@ public class ConnectionsContainer {
         return connectionsIndex.get(channel);
     }
 
-    public void store(ActiveConnection value) {
-        connectionsIndex.put(value.getConnectionDetails().getChannel(), value);
-        connections.add(value);
+    public ActiveConnection get(String imei) {
+        for (ActiveConnection connection : connections) {
+            if (imei.equals(connection.getConnectionDetails().getImei())) {
+                return connection;
+            }
+        }
+        return null;
+    }
+
+    public void add(ActiveConnection value) {
+        synchronized (connections) {
+            connectionsIndex.put(value.getConnectionDetails().getChannel(), value);
+            connections.add(value);
+        }
+    }
+
+    protected List<ActiveConnection> getAll() {
+        return connections;
+    }
+
+    protected Map<SocketChannel, ActiveConnection> getAllIndex() {
+        return connectionsIndex;
+    }
+
+    public void remove(String imei) {
+        ActiveConnection activeConnection = get(imei);
+        if (activeConnection == null) {
+            logger.warn("Connection for imei: {0} have been already removed.", imei);
+        } else {
+            remove(activeConnection);
+        }
+    }
+
+    public void remove(SocketChannel channel) {
+        ActiveConnection activeConnection = get(channel);
+        if (activeConnection == null) {
+            logger.warn("Connection foe channel: {0} have been already removed.", channel);
+        } else {
+            remove(activeConnection);
+        }
+    }
+
+    private void remove(ActiveConnection activeConnection) {
+        logger.info("Remove active connection: {0}", activeConnection.getConnectionDetails());
+        synchronized (connections) {
+            connections.remove(activeConnection);
+            connectionsIndex.remove(activeConnection.getConnectionDetails().getChannel());
+        }
     }
 
     public ActiveConnection next() {
@@ -60,38 +105,6 @@ public class ConnectionsContainer {
         }
         result.setProcessing(true);
         return result;
-    }
-
-    public ActiveConnection getActiveConnection(String imei) {
-        for (ActiveConnection connection : connections) {
-            if (imei.equals(connection.getConnectionDetails().getImei())) {
-                return connection;
-            }
-        }
-        return null;
-    }
-
-    public void removeForImei(String imei) {
-        // TODO Auto-generated method stub
-    }
-
-    protected List<ActiveConnection> getConnections() {
-        return connections;
-    }
-
-    protected Map<SocketChannel, ActiveConnection> getConnectionsIndex() {
-        return connectionsIndex;
-    }
-
-    public void remove(SocketChannel channel) {
-        ActiveConnection activeConnection = get(channel);
-        if (activeConnection == null) {
-            logger.warn("Connection: {0} have been already removed.");
-        } else {
-            logger.info("Remove active connection: {0}", activeConnection.getConnectionDetails());
-            connections.remove(activeConnection);
-            connectionsIndex.remove(activeConnection.getConnectionDetails().getChannel());
-        }
     }
 
 }

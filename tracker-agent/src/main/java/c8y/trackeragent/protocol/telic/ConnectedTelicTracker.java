@@ -31,6 +31,7 @@ public class ConnectedTelicTracker extends BaseConnectedTracker<TelicFragment> {
                 reportStr = eat(reportStr, HEADER_LENGTH);
             }
             reportStr = eat(reportStr, REPORT_SKIP);
+            System.out.println("reportStr = " + reportStr);
             super.executeReport(connectionDetails, reportStr);
         } finally {
             this.firstReport = false;
