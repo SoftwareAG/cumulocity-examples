@@ -25,11 +25,11 @@ public class ByteHelper {
         }
     }
     
-    public static byte[] stripHead(byte[] report, int length) {
+    public static byte[] stripHead(byte[] report, int headLength) {
         if (report == null) {
             return null;
-        } else if (length <= report.length) {
-            return Arrays.copyOfRange(report, length, report.length);
+        } else if (headLength <= report.length) {
+            return Arrays.copyOfRange(report, headLength, report.length);
         } else {
             return null;
         }
