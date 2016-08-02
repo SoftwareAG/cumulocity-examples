@@ -20,6 +20,8 @@
 
 package c8y.trackeragent.tracker;
 
+import static java.lang.String.format;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +39,7 @@ import c8y.trackeragent.device.ManagedObjectCache;
 import c8y.trackeragent.devicebootstrap.DeviceBootstrapProcessor;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
+import c8y.trackeragent.exception.NotBootstrapedException;
 import c8y.trackeragent.exception.UnknownDeviceException;
 import c8y.trackeragent.exception.UnknownTenantException;
 import c8y.trackeragent.server.ConnectionDetails;
@@ -59,7 +62,7 @@ public abstract class BaseConnectedTracker<F extends Fragment> implements Connec
     protected DeviceCredentialsRepository credentialsRepository;
     @Autowired
     protected TrackerDeviceContextService contextService;
-    
+
     protected final ReportSplitter reportSplitter;
 
     BaseConnectedTracker(List<F> fragments, DeviceBootstrapProcessor bootstrapProcessor, DeviceCredentialsRepository credentialsRepository,
@@ -74,11 +77,11 @@ public abstract class BaseConnectedTracker<F extends Fragment> implements Connec
     public BaseConnectedTracker(ReportSplitter reportSplitter) {
         this.reportSplitter = reportSplitter;
     }
-    
+
     public BaseConnectedTracker() {
         this.reportSplitter = new BaseReportSplitter(getTrackingProtocol().getReportSeparator());
     }
-    
+
     @Override
     public void executeReports(ConnectionDetails connectionDetails, byte[] reportsBytes) {
         List<String> reports = reportSplitter.split(reportsBytes);
@@ -120,52 +123,62 @@ public abstract class BaseConnectedTracker<F extends Fragment> implements Connec
     }
 
     void processReport(ReportContext reportContext) {
-        for (final Parser parser : Iterables.filter(fragments, Parser.class)) {
-            logger.debug("Using parser " + parser.getClass());
-            String imei = parser.parse(reportContext.getReport());
-            if (imei == null) {
-                continue;
+        try {
+            for (final Parser parser : Iterables.filter(fragments, Parser.class)) {
+                processReport(reportContext, parser);
             }
-            logger.debug("Got report from IMEI: " + imei);
-            DeviceCredentials deviceCredentials;
-            try {
-                deviceCredentials = credentialsRepository.getDeviceCredentials(imei);
-            } catch (UnknownDeviceException ex) {
-                logger.debug("Device with imei {} not yet bootstraped. Will try bootstrap the device.", imei);
-                deviceCredentials = bootstrapProcessor.tryAccessDeviceCredentials(imei);
-                if (deviceCredentials == null) {
-                    logger.debug("Device with imei {} not yet available. Will skip the report.", imei);
-                    break;
-                } else {
-                    logger.debug("Device with imei {} available.", imei);
-                }
-            }
-            final String tenant = deviceCredentials.getTenant();
-            DeviceCredentials agentCredentials;
-            try {
-                agentCredentials = credentialsRepository.getAgentCredentials(tenant);
-            } catch (UnknownTenantException ex) {
-                logger.debug("Agent for tenant {} not yet bootstraped. Will try bootstrap the agent.", tenant);
-                agentCredentials = bootstrapProcessor.tryAccessAgentCredentials(tenant);
-                if (agentCredentials == null) {
-                    logger.debug("Agent for tenant {} not yet available. Will skip the report.", tenant);
-                    break;
-                } else {
-                    logger.debug("Agent for tenant {} available.", tenant);
-                }
-
-            }
-            try {
-                contextService.enterContext(tenant, imei);
-                reportContext.setImei(imei);
-                parser.onParsed(reportContext);
-            } catch (Exception e) {
-                logger.error("Error on parsing request", e);
-            } finally {
-                contextService.leaveContext();
-            }
+            logger.debug("Finished processing report");
+        } catch (NotBootstrapedException nbex) {
+            logger.debug(nbex.getMessage());
         }
-        logger.debug("Finished processing report");
+    }
+
+    private void processReport(ReportContext reportContext, Parser parser) {
+        logger.debug("Using parser " + parser.getClass());
+        String imei = parser.parse(reportContext.getReport());
+        if (imei == null) {
+            return;
+        }
+        logger.debug("Got report from IMEI: " + imei);
+        String tenant = getTenant(imei);
+        checkAgentCredentials(tenant);
+        try {
+            contextService.enterContext(tenant, imei);
+            reportContext.setImei(imei);
+            parser.onParsed(reportContext);
+        } catch (Exception e) {
+            logger.error("Error on parsing request", e);
+        } finally {
+            contextService.leaveContext();
+        }
+    }
+
+    private String getTenant(String imei) {
+        DeviceCredentials deviceCredentials;
+        try {
+            deviceCredentials = credentialsRepository.getDeviceCredentials(imei);
+        } catch (UnknownDeviceException ex) {
+            logger.debug("Device with imei {} not yet bootstraped. Will try bootstrap the device.", imei);
+            deviceCredentials = bootstrapProcessor.tryAccessDeviceCredentials(imei);
+            if (deviceCredentials == null) {
+                throw new NotBootstrapedException(format("Device with imei %s not yet available. Will skip the report.", imei));
+            } 
+            logger.debug("Device with imei {} available.", imei);
+        }
+        return deviceCredentials.getTenant();
+    }
+
+    private void checkAgentCredentials(final String tenant) {
+        try {
+            credentialsRepository.getAgentCredentials(tenant);
+        } catch (UnknownTenantException ex) {
+            logger.debug("Agent for tenant {} not yet bootstraped. Will try bootstrap the agent.", tenant);
+            DeviceCredentials agentCredentials = bootstrapProcessor.tryAccessAgentCredentials(tenant);
+            if (agentCredentials == null) {
+                throw new NotBootstrapedException(format("Agent for tenant %s not yet available. Will skip the report.", tenant));
+            } 
+            logger.debug("Agent for tenant {} available.", tenant);
+        }
     }
 
     @Override
