@@ -4,7 +4,6 @@ import static org.fest.assertions.Assertions.assertThat;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -15,29 +14,14 @@ public class TrackerServerFuzzyTest extends TrackerServerTestSupport {
 
     private static final int TOTAL_WRITERS = 50;
     private static final int TOTAL_REPORST_PER_WRITER = 120;
-    private final List<SocketWriter> writers = new ArrayList<SocketWriter>();
-    private final List<String> sendReports = new ArrayList<String>();
+    private final List<String> sentReports = new ArrayList<String>();
 
     @Before
     public void before() throws Exception {
         super.before();
         for (int i = 0; i < TOTAL_WRITERS; i++) {
-            writers.add(newWriter());
+            newWriter();
         }
-        customTracker = new DummyConnectedTracker() {
-            
-            Random random = new Random();
-
-            @Override
-            public void executeReport(ConnectionDetails connectionDetails, String report) {
-                try {
-                    Thread.sleep(random.nextInt(5));
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-            
-        };
     }
 
     @Test
@@ -46,7 +30,7 @@ public class TrackerServerFuzzyTest extends TrackerServerTestSupport {
 
         for (int reportNo = 0; reportNo < TOTAL_REPORST_PER_WRITER; reportNo++) {
             String report = "" + reportNo;
-            sendReports.add(report);
+            sentReports.add(report);
             for (SocketWriter writer : writers) {
                 writer.push(report + ";");
             }
@@ -57,7 +41,7 @@ public class TrackerServerFuzzyTest extends TrackerServerTestSupport {
         assertThat(reportExecutorLatch.getCount()).isEqualTo(0L);
         for (TestConnectedTrackerImpl executor : executors) {
             assertThat(executor.getProcessed()).hasSize(TOTAL_REPORST_PER_WRITER);
-            assertThat(executor.getProcessed()).isEqualTo(sendReports);
+            assertThat(executor.getProcessed()).isEqualTo(sentReports);
         }
     }
 

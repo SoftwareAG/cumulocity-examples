@@ -1,6 +1,7 @@
 package c8y.trackeragent.utils;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 
 public class ByteHelper {
 
@@ -23,5 +24,16 @@ public class ByteHelper {
             return null;
         }
     }
+    
+    public static byte[] stripHead(byte[] report, int length) {
+        if (report == null) {
+            return null;
+        } else if (length <= report.length) {
+            return Arrays.copyOfRange(report, length, report.length);
+        } else {
+            return null;
+        }
+    }
+
 
 }

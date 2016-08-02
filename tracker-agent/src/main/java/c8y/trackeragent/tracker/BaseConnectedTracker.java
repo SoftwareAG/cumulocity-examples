@@ -41,13 +41,14 @@ import c8y.trackeragent.exception.UnknownDeviceException;
 import c8y.trackeragent.exception.UnknownTenantException;
 import c8y.trackeragent.server.ConnectionDetails;
 import c8y.trackeragent.service.TrackerDeviceContextService;
+import c8y.trackeragent.utils.ByteHelper;
 
 /**
  * Performs the communication with a connected device. Accepts reports from the
  * input stream and sends commands to the output stream.
  */
 public abstract class BaseConnectedTracker<F extends Fragment> implements ConnectedTracker {
-    
+
     protected static Logger logger = LoggerFactory.getLogger(BaseConnectedTracker.class);
 
     @Autowired
@@ -58,25 +59,42 @@ public abstract class BaseConnectedTracker<F extends Fragment> implements Connec
     protected DeviceCredentialsRepository credentialsRepository;
     @Autowired
     protected TrackerDeviceContextService contextService;
+    
+    protected final ReportSplitter reportSplitter;
 
-    BaseConnectedTracker(List<F> fragments,
-			DeviceBootstrapProcessor bootstrapProcessor, DeviceCredentialsRepository credentialsRepository, 
-			TrackerDeviceContextService contextService) {
-		this.fragments = fragments;
-		this.bootstrapProcessor = bootstrapProcessor;
-		this.credentialsRepository = credentialsRepository;
-		this.contextService = contextService;
-	}
+    BaseConnectedTracker(List<F> fragments, DeviceBootstrapProcessor bootstrapProcessor, DeviceCredentialsRepository credentialsRepository,
+            TrackerDeviceContextService contextService) {
+        this();
+        this.fragments = fragments;
+        this.bootstrapProcessor = bootstrapProcessor;
+        this.credentialsRepository = credentialsRepository;
+        this.contextService = contextService;
+    }
 
-	public BaseConnectedTracker() {}
+    public BaseConnectedTracker(ReportSplitter reportSplitter) {
+        this.reportSplitter = reportSplitter;
+    }
+    
+    public BaseConnectedTracker() {
+        this.reportSplitter = new BaseReportSplitter(getTrackingProtocol().getReportSeparator());
+    }
     
     @Override
+    public void executeReports(ConnectionDetails connectionDetails, byte[] reportsBytes) {
+        List<String> reports = reportSplitter.split(reportsBytes);
+        if (reports.isEmpty()) {
+            logger.warn("Report too short for connection {} : {}", connectionDetails, ByteHelper.getString(reportsBytes));
+        }
+        for (String report : reports) {
+            executeReport(connectionDetails, report);
+        }
+    }
+
     public void executeReport(ConnectionDetails connectionDetails, String reportStr) {
         logger.info("Process report: {}.", reportStr);
         String[] report = reportStr.split(connectionDetails.getTrackingProtocol().getFieldSeparator());
         ReportContext reportContext = new ReportContext(connectionDetails, report);
         tryProcessReport(reportContext);
-        
     }
 
     private void tryProcessReport(ReportContext reportContext) throws SDKException {
@@ -103,49 +121,49 @@ public abstract class BaseConnectedTracker<F extends Fragment> implements Connec
 
     void processReport(ReportContext reportContext) {
         for (final Parser parser : Iterables.filter(fragments, Parser.class)) {
-            logger.debug("Using parser "+ parser.getClass());
+            logger.debug("Using parser " + parser.getClass());
             String imei = parser.parse(reportContext.getReport());
-			if (imei == null) {
-				continue;
-			}
+            if (imei == null) {
+                continue;
+            }
             logger.debug("Got report from IMEI: " + imei);
             DeviceCredentials deviceCredentials;
-			try {
-				deviceCredentials = credentialsRepository.getDeviceCredentials(imei);
-			} catch (UnknownDeviceException ex) {
-				logger.debug("Device with imei {} not yet bootstraped. Will try bootstrap the device.", imei);
-				deviceCredentials = bootstrapProcessor.tryAccessDeviceCredentials(imei);
-				if (deviceCredentials == null) {
-					logger.debug("Device with imei {} not yet available. Will skip the report.", imei);
-					break;
-				} else {
-					logger.debug("Device with imei {} available.", imei);
-				}
-			}
+            try {
+                deviceCredentials = credentialsRepository.getDeviceCredentials(imei);
+            } catch (UnknownDeviceException ex) {
+                logger.debug("Device with imei {} not yet bootstraped. Will try bootstrap the device.", imei);
+                deviceCredentials = bootstrapProcessor.tryAccessDeviceCredentials(imei);
+                if (deviceCredentials == null) {
+                    logger.debug("Device with imei {} not yet available. Will skip the report.", imei);
+                    break;
+                } else {
+                    logger.debug("Device with imei {} available.", imei);
+                }
+            }
             final String tenant = deviceCredentials.getTenant();
             DeviceCredentials agentCredentials;
             try {
-            	agentCredentials = credentialsRepository.getAgentCredentials(tenant);
+                agentCredentials = credentialsRepository.getAgentCredentials(tenant);
             } catch (UnknownTenantException ex) {
-            	logger.debug("Agent for tenant {} not yet bootstraped. Will try bootstrap the agent.", tenant);
-            	agentCredentials = bootstrapProcessor.tryAccessAgentCredentials(tenant);
-				if (agentCredentials == null) {
-					logger.debug("Agent for tenant {} not yet available. Will skip the report.", tenant);
-					break;
-				} else {
-					logger.debug("Agent for tenant {} available.", tenant);					
-				}
-            	
+                logger.debug("Agent for tenant {} not yet bootstraped. Will try bootstrap the agent.", tenant);
+                agentCredentials = bootstrapProcessor.tryAccessAgentCredentials(tenant);
+                if (agentCredentials == null) {
+                    logger.debug("Agent for tenant {} not yet available. Will skip the report.", tenant);
+                    break;
+                } else {
+                    logger.debug("Agent for tenant {} available.", tenant);
+                }
+
             }
             try {
-            	contextService.enterContext(tenant, imei);
-            	reportContext.setImei(imei);
+                contextService.enterContext(tenant, imei);
+                reportContext.setImei(imei);
                 parser.onParsed(reportContext);
             } catch (Exception e) {
                 logger.error("Error on parsing request", e);
             } finally {
-				 contextService.leaveContext();
-			}
+                contextService.leaveContext();
+            }
         }
         logger.debug("Finished processing report");
     }
@@ -172,5 +190,4 @@ public abstract class BaseConnectedTracker<F extends Fragment> implements Connec
         }
         return null;
     }
-
 }

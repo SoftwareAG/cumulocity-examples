@@ -31,10 +31,11 @@ public class ReaderWorker implements Runnable {
     }
 
     private void process(ActiveConnection connection) {
-        String report = connection.getReportBuffer().getReport();
-        if (report != null) {
-            connection.getConnectedTracker().executeReport(connection.getConnectionDetails(), report);
-        }
+        byte[] data = connection.getReportBuffer().getReport();
+        if (data == null) {
+            return;
+        }        
+        connection.getConnectedTracker().executeReports(connection.getConnectionDetails(), data);
     }
 
 }

@@ -73,10 +73,9 @@ public class TrackerServerEventHandler implements ActiveConnectionProvider {
     private ActiveConnection createConnection(ReadDataEvent readEvent) throws Exception {
         ConnectedTracker connectedTracker = connectedTrackerFactory.create(readEvent);
         TrackingProtocol trackingProtocol = connectedTracker.getTrackingProtocol();
-        ReportBuffer reportBuffer = new ReportBuffer(trackingProtocol.getReportSeparator());
         OutWriter outWriter = new OutWriterImpl(readEvent.getServer(), readEvent.getChannel());
         ConnectionDetails connectionDetails = new ConnectionDetails(trackingProtocol, outWriter, readEvent.getChannel());
-        return new ActiveConnection(connectionDetails, connectedTracker, reportBuffer);
+        return new ActiveConnection(connectionDetails, connectedTracker);
     }
 
     @Override

@@ -8,7 +8,8 @@ public interface ConnectedTracker {
     
     void executeOperation(OperationContext operation) throws Exception;
 
-    void executeReport(ConnectionDetails connectionDetails, String report);
-
+    void executeReports(ConnectionDetails connectionDetails, byte[] reports);
+    
     TrackingProtocol getTrackingProtocol();
+    
 }

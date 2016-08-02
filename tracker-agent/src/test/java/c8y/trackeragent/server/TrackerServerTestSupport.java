@@ -1,5 +1,6 @@
 package c8y.trackeragent.server;
 
+import static c8y.trackeragent.utils.ByteHelper.getString;
 import static java.util.Arrays.asList;
 import static java.util.Collections.synchronizedList;
 import static java.util.concurrent.Executors.newFixedThreadPool;
@@ -7,7 +8,6 @@ import static org.fest.assertions.Assertions.assertThat;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.nio.charset.Charset;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -23,26 +23,23 @@ import org.slf4j.LoggerFactory;
 
 import c8y.trackeragent.context.OperationContext;
 import c8y.trackeragent.protocol.TrackingProtocol;
-import c8y.trackeragent.server.ConnectionDetails;
-import c8y.trackeragent.server.ConnectionsContainer;
-import c8y.trackeragent.server.TrackerServer;
-import c8y.trackeragent.server.TrackerServerEventHandler;
 import c8y.trackeragent.server.TrackerServerEvent.ReadDataEvent;
 import c8y.trackeragent.tracker.ConnectedTracker;
 import c8y.trackeragent.tracker.ConnectedTrackerFactory;
+import c8y.trackeragent.utils.ByteHelper;
 
 public abstract class TrackerServerTestSupport {
     
     private static final Logger logger = LoggerFactory.getLogger(TrackerServerTestSupport.class);
 
     protected static final int PORT = 5100;
-    protected static final Charset CHARSET = Charset.forName("US-ASCII");
     
     private TrackerServer server;
     private final ExecutorService executorService = newFixedThreadPool(100);
     protected CountDownLatch reportExecutorLatch;
     protected final List<TestConnectedTrackerImpl> executors = synchronizedList(new ArrayList<TestConnectedTrackerImpl>());
     protected final ConnectionsContainer connectionsContainer = new ConnectionsContainer();
+    protected final List<SocketWriter> writers = new ArrayList<SocketWriter>();
     protected ConnectedTracker customTracker = null;
     
     @Before
@@ -62,6 +59,7 @@ public abstract class TrackerServerTestSupport {
     
     protected SocketWriter newWriter() throws Exception {
         SocketWriter writer = new SocketWriter();
+        writers.add(writer);
         executorService.execute(writer);
         return writer;
     }
@@ -112,13 +110,11 @@ public abstract class TrackerServerTestSupport {
         }
 
         private void write(String toWrite) {
-            for (byte b : toWrite.getBytes(CHARSET)) {
-                try {
-                    client.getOutputStream().write(b);
-                    Thread.sleep(1);
-                } catch (Exception e) {
-                    logger.error(e.getMessage());
-                }
+            try {
+                client.getOutputStream().write(ByteHelper.getBytes(toWrite));
+                Thread.sleep(1);
+            } catch (Exception e) {
+                logger.error(e.getMessage());
             }
         }
 
@@ -129,7 +125,7 @@ public abstract class TrackerServerTestSupport {
         @Override
         public ConnectedTracker create(ReadDataEvent readData) {
             TestConnectedTrackerImpl result = new TestConnectedTrackerImpl();
-            logger.info("Created executor for data " + new String(readData.getData(), CHARSET));
+            logger.info("Created executor for data " + getString(readData.getData()));
             executors.add(result);
             logger.info("Total executors " + executors.size());
             return result;
@@ -146,7 +142,7 @@ public abstract class TrackerServerTestSupport {
         }
 
         @Override
-        public void executeReport(ConnectionDetails connectionDetails, String report) {
+        public void executeReports(ConnectionDetails connectionDetails, byte[] reports) {
             // TODO Auto-generated method stub
             
         }
@@ -168,14 +164,18 @@ public abstract class TrackerServerTestSupport {
         }
         
         @Override
-        public void executeReport(ConnectionDetails connectionDetails, String report) {
+        public void executeReports(ConnectionDetails connectionDetails, byte[] reports) {
             this.connectionDetails = connectionDetails;
-            logger.info("Handled report: \'{}\'", report);
+            logger.info("Handled report: \'{}\'", getString(reports));
             if (customTracker != null) {
-                customTracker.executeReport(connectionDetails, report);
+                customTracker.executeReports(connectionDetails, reports);
             }
-            processed.add(report);
-            reportExecutorLatch.countDown();
+            String reportsStr = getString(reports);
+            List<String> reportList = asList(reportsStr.split(";"));
+            for (String report : reportList) {
+                processed.add(report);
+                reportExecutorLatch.countDown();
+            }
         }
 
         public List<String> getProcessed() {

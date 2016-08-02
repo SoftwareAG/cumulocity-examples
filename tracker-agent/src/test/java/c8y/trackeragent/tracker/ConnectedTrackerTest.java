@@ -20,6 +20,7 @@
 
 package c8y.trackeragent.tracker;
 
+import static c8y.trackeragent.utils.ByteHelper.getBytes;
 import static c8y.trackeragent.utils.Devices.IMEI_1;
 import static java.util.Arrays.asList;
 import static org.fest.assertions.Assertions.assertThat;
@@ -79,7 +80,7 @@ public class ConnectedTrackerTest {
         when(parser.parse(dummyReport)).thenReturn(IMEI_1);
         when(parser.onParsed(any(ReportContext.class))).thenReturn(true);
 
-        tracker.executeReport(connectionDetails, "dummyReport");
+        tracker.executeReports(connectionDetails, getBytes("dummyReport"));
 
         verify(parser).parse(dummyReport);
         verifyZeroInteractions(translator);
@@ -93,7 +94,7 @@ public class ConnectedTrackerTest {
         when(parser.parse(dummyReport)).thenReturn(IMEI_1);
         when(parser.onParsed(any(ReportContext.class))).thenReturn(false);
         
-        tracker.executeReport(connectionDetails, "dummyReport");
+        tracker.executeReports(connectionDetails, getBytes("dummyReport"));
         
         assertThat(connectionDetails.getImei()).isNull();
         verify(bootstrapProcessor).tryAccessDeviceCredentials(IMEI_1);

@@ -6,13 +6,12 @@ public class ActiveConnection {
 
     private final ConnectionDetails connectionDetails;
     private final ConnectedTracker connectedTracker;
-    private final ReportBuffer reportBuffer;
+    private final ReportBuffer reportBuffer = new ReportBuffer();
     private boolean processing;
 
-    public ActiveConnection(ConnectionDetails connectionDetails, ConnectedTracker reportExecutor, ReportBuffer reportBuffer) {
+    public ActiveConnection(ConnectionDetails connectionDetails, ConnectedTracker reportExecutor) {
         this.connectionDetails = connectionDetails;
         this.connectedTracker = reportExecutor;
-        this.reportBuffer = reportBuffer;
     }
 
     public ConnectedTracker getConnectedTracker() {
