@@ -41,7 +41,9 @@ public class LocationEventBuilder {
     }
 
     public LocationEventBuilder withTime(Date time) {
-        this.time = time;
+        if (time != null) {
+            this.time = time;
+        }
         return this;
     }
     

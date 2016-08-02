@@ -5,6 +5,7 @@ import static java.math.BigDecimal.ROUND_DOWN;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -22,15 +23,15 @@ import c8y.trackeragent.protocol.rfv16.message.RFV16ServerMessages;
 import c8y.trackeragent.service.AlarmService;
 
 public abstract class RFV16Parser implements Parser, RFV16Fragment {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(RFV16Parser.class);
-    
+
     public static final BigDecimal RFV16_SPEED_MEASUREMENT_FACTOR = new BigDecimal(1.852);
-    
+
     protected final TrackerAgent trackerAgent;
     protected final RFV16ServerMessages serverMessages;
     protected final AlarmService alarmService;
-    
+
     public RFV16Parser(TrackerAgent trackerAgent, RFV16ServerMessages serverMessages, AlarmService alarmService) {
         this.trackerAgent = trackerAgent;
         this.serverMessages = serverMessages;
@@ -63,7 +64,7 @@ public abstract class RFV16Parser implements Parser, RFV16Fragment {
             return null;
         }
     }
-    
+
     protected Collection<AlarmRepresentation> createAlarms(ReportContext reportCtx, TrackerDevice device, String status) {
         Collection<AlarmRepresentation> alarms = new ArrayList<AlarmRepresentation>();
         Collection<RFV16AlarmType> alarmTypes = AlarmTypeDecoder.getAlarmTypes(status);
@@ -72,19 +73,28 @@ public abstract class RFV16Parser implements Parser, RFV16Fragment {
             AlarmRepresentation alarm = alarmService.createAlarm(reportCtx, alarmType, device);
             alarms.add(alarm);
         }
-		if (alarms.isEmpty()) {
-			logger.debug("There are no alarms");
+        if (alarms.isEmpty()) {
+            logger.debug("There are no alarms");
         } else {
-        	logger.debug("There are alarms {}.", alarms);        	
+            logger.debug("There are alarms {}.", alarms);
         }
         return alarms;
     }
 
-    
+    public static Date getDate(ReportContext reportCtx) {
+        DateTime dateTime = getDateTime(reportCtx);
+        return dateTime == null ? null : dateTime.toDate();
+    }
+
     public static DateTime getDateTime(ReportContext reportCtx) {
-        DateTime time = RFV16ServerMessages.HHMMSS.parseDateTime(reportCtx.getEntry(3));
-        DateTime date = RFV16ServerMessages.DDMMYY.parseDateTime(reportCtx.getEntry(11));
-        return time.withDate(date.getYear(), date.getMonthOfYear(), date.getDayOfMonth());
+        try {
+            DateTime time = RFV16ServerMessages.HHMMSS.parseDateTime(reportCtx.getEntry(3));
+            DateTime date = RFV16ServerMessages.DDMMYY.parseDateTime(reportCtx.getEntry(11));
+            return time.withDate(date.getYear(), date.getMonthOfYear(), date.getDayOfMonth());
+        } catch (Exception ex) {
+            logger.warn("Problem occured parsing timefrom {} and/or date from {}", reportCtx.getEntry(3), reportCtx.getEntry(11));
+            return null;
+        }
     }
 
 }

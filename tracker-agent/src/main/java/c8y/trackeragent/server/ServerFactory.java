@@ -16,7 +16,7 @@ public class ServerFactory {
     
     private static final Logger logger = LoggerFactory.getLogger(ServerFactory.class);
     
-    private static final int REPORTS_EXECUTOR_POOL_SIZE = 10;
+    private static final int REPORTS_EXECUTOR_POOL_SIZE = 100;
     private static final int REQUESTS_EXECUTOR_POOL_SIZE = 10;
 
     private final TrackerConfiguration config;

@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>c8y.example</groupId>
 		<artifactId>c8y-jv</artifactId>
-        <version>7.30.0</version>
+        <version>7.31.0</version>
 	</parent>
 	
 	<artifactId>piface-driver</artifactId>
@@ -20,7 +20,7 @@
         <dependency>
 			<groupId>com.pi4j</groupId>
 			<artifactId>pi4j-example</artifactId>
-			<version>0.0.5</version>
+			<version>1.0</version>
 		</dependency>
 	</dependencies>
 

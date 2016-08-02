@@ -98,7 +98,7 @@ public class ConnectedTracker<F extends Fragment> implements Runnable, Executor 
 
     @Override
     public void run() {
-        if(in == null) {
+        if (in == null) {
             return;
         }
         try {
@@ -111,8 +111,6 @@ public class ConnectedTracker<F extends Fragment> implements Runnable, Executor 
         } catch (SDKException e) {
             logger.warn("Error during communication with the platform", e);
         } finally {
-            IOUtils.closeQuietly(out);
-            IOUtils.closeQuietly(in);
             try {
                 client.close();
             } catch (IOException e) {
