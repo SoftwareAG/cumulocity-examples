@@ -53,10 +53,11 @@ public class ConnectionsContainer {
         return null;
     }
 
-    public void add(ActiveConnection value) {
+    public void add(ActiveConnection connection) {
         synchronized (connections) {
-            connectionsIndex.put(value.getConnectionDetails().getChannel(), value);
-            connections.add(value);
+            logger.info("Store connection: {}", connection);
+            connectionsIndex.put(connection.getConnectionDetails().getChannel(), connection);
+            connections.add(connection);
         }
     }
 
@@ -71,7 +72,7 @@ public class ConnectionsContainer {
     public void remove(String imei) {
         ActiveConnection activeConnection = get(imei);
         if (activeConnection == null) {
-            logger.warn("Connection for imei: {0} have been already removed.", imei);
+            logger.warn("Connection for imei: {} have been already removed.", imei);
         } else {
             remove(activeConnection);
         }
@@ -80,14 +81,14 @@ public class ConnectionsContainer {
     public void remove(SocketChannel channel) {
         ActiveConnection activeConnection = get(channel);
         if (activeConnection == null) {
-            logger.warn("Connection foe channel: {0} have been already removed.", channel);
+            logger.warn("Connection foe channel: {} have been already removed.", channel);
         } else {
             remove(activeConnection);
         }
     }
 
     private void remove(ActiveConnection activeConnection) {
-        logger.info("Remove active connection: {0}", activeConnection.getConnectionDetails());
+        logger.info("Remove connection: {}", activeConnection);
         synchronized (connections) {
             connections.remove(activeConnection);
             connectionsIndex.remove(activeConnection.getConnectionDetails().getChannel());

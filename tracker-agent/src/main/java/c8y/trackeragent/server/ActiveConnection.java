@@ -36,6 +36,6 @@ public class ActiveConnection {
 
     @Override
     public String toString() {
-        return "ActiveConnection [connectionDetails=" + connectionDetails + "]";
+        return connectionDetails.toString();
     }
 }

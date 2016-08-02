@@ -76,6 +76,18 @@ public class ConnectionDetails {
 
     @Override
     public String toString() {
-        return "ConnectionDetails [trackingProtocol=" + trackingProtocol + ", imei=" + imei + "]";
+        StringBuilder builder = new StringBuilder();
+        builder.append("ConnectionDetails [channel=");
+        builder.append(channel);
+        builder.append(", trackingProtocol=");
+        builder.append(trackingProtocol);
+        builder.append(", imei=");
+        builder.append(imei);
+        builder.append("]");
+        return builder.toString();
     }
+
+
+
+    
 }
