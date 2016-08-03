@@ -9,14 +9,16 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import c8y.trackeragent.server.WritersProvider.Writer;
+
 public class TrackerServerTest extends TrackerServerTestSupport {
 
     @SuppressWarnings("unused")
     private static final Logger logger = LoggerFactory.getLogger(TrackerServerTest.class);
 
-    private SocketWriter writer1;
-    private SocketWriter writer2;
-    private SocketWriter writer3;
+    private Writer writer1;
+    private Writer writer2;
+    private Writer writer3;
 
     @Before
     public void before() throws Exception {
@@ -29,9 +31,9 @@ public class TrackerServerTest extends TrackerServerTestSupport {
     @Test
     public void shouldReadData() throws Exception {
         setCountOfExpectedReports(3);
-        writer1.push("#ABC");
-        writer2.push("$123");
-        writer3.push("abcd");
+        writer1.write("#ABC");
+        writer2.write("$123");
+        writer3.write("abcd");
         
         waitForReports();
 
@@ -42,13 +44,13 @@ public class TrackerServerTest extends TrackerServerTestSupport {
 
     @Test
     public void shouldHandleClose() throws Exception {
-        writer1.push("ABC");
-        sleep(100);
+        writer1.write("ABC");
+        sleep(200);
         
         assertThat(connectionsContainer.getAll()).hasSize(1);
         
         writer1.stop();
-        sleep(100);
+        sleep(200);
         
         assertThat(connectionsContainer.getAll()).isEmpty();
     }
@@ -66,8 +68,9 @@ public class TrackerServerTest extends TrackerServerTestSupport {
         };
 
         setCountOfExpectedReports(2);
-        writer1.push("FIRST_REPORT");
-        writer1.push("SECOND_REPORT");
+        writer1.write("FIRST_REPORT");
+        Thread.sleep(100);
+        writer1.write("SECOND_REPORT");
         waitForReports();
         
         assertThat(executors).hasSize(1);

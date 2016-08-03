@@ -65,10 +65,6 @@ public class ConnectionsContainer {
         return connections;
     }
 
-    protected Map<SocketChannel, ActiveConnection> getAllIndex() {
-        return connectionsIndex;
-    }
-
     public void remove(String imei) {
         ActiveConnection activeConnection = get(imei);
         if (activeConnection == null) {

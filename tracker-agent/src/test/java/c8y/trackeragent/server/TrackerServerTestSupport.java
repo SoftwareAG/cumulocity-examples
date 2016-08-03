@@ -7,10 +7,7 @@ import static java.util.concurrent.Executors.newFixedThreadPool;
 import static org.fest.assertions.Assertions.assertThat;
 
 import java.io.IOException;
-import java.net.Socket;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Deque;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -24,9 +21,9 @@ import org.slf4j.LoggerFactory;
 import c8y.trackeragent.context.OperationContext;
 import c8y.trackeragent.protocol.TrackingProtocol;
 import c8y.trackeragent.server.TrackerServerEvent.ReadDataEvent;
+import c8y.trackeragent.server.WritersProvider.Writer;
 import c8y.trackeragent.tracker.ConnectedTracker;
 import c8y.trackeragent.tracker.ConnectedTrackerFactory;
-import c8y.trackeragent.utils.ByteHelper;
 
 public abstract class TrackerServerTestSupport {
     
@@ -35,12 +32,12 @@ public abstract class TrackerServerTestSupport {
     protected static final int PORT = 5100;
     
     private TrackerServer server;
-    private final ExecutorService executorService = newFixedThreadPool(100);
+    private final ExecutorService executorService = newFixedThreadPool(1);
     protected CountDownLatch reportExecutorLatch;
     protected final List<TestConnectedTrackerImpl> executors = synchronizedList(new ArrayList<TestConnectedTrackerImpl>());
     protected final ConnectionsContainer connectionsContainer = new ConnectionsContainer();
-    protected final List<SocketWriter> writers = new ArrayList<SocketWriter>();
     protected ConnectedTracker customTracker = null;
+    protected final WritersProvider writersProvider = new WritersProvider(PORT);
     
     @Before
     public void before() throws Exception {
@@ -50,18 +47,17 @@ public abstract class TrackerServerTestSupport {
         server = new TrackerServer(eventHandler);
         server.start(PORT);
         executorService.execute(server);
+        writersProvider.start();
     }
     
     @After
     public void after() throws IOException {
         server.close();
+        writersProvider.stop();
     }
     
-    protected SocketWriter newWriter() throws Exception {
-        SocketWriter writer = new SocketWriter();
-        writers.add(writer);
-        executorService.execute(writer);
-        return writer;
+    protected Writer newWriter() throws Exception {
+        return writersProvider.newWriter();
     }
     
     protected void assertThatReportsHandled(String... reports) {
@@ -77,47 +73,7 @@ public abstract class TrackerServerTestSupport {
     }
     
     protected void waitForReports() throws InterruptedException {
-        reportExecutorLatch.await(2, TimeUnit.SECONDS);
-    }
-    
-    protected class SocketWriter implements Runnable {
-
-        volatile Deque<String> toW = new ArrayDeque<String>();
-        Socket client;
-
-        public SocketWriter() throws Exception {
-            client = new Socket("localhost", PORT);
-        }
-
-        void push(String text) throws Exception {
-            toW.addLast(text);
-            Thread.sleep(1);
-        }
-                
-        void stop() throws Exception {
-            client.close();
-            Thread.sleep(1);
-        }
-
-        @Override
-        public void run() {
-            while (true) {
-                if (!toW.isEmpty()) {
-                    String toWrite = toW.removeFirst();
-                    write(toWrite);
-                }
-            }
-        }
-
-        private void write(String toWrite) {
-            try {
-                client.getOutputStream().write(ByteHelper.getBytes(toWrite));
-                Thread.sleep(1);
-            } catch (Exception e) {
-                logger.error(e.getMessage());
-            }
-        }
-
+        reportExecutorLatch.await(10, TimeUnit.SECONDS);
     }
     
     protected class TestConnectedTrackerFactoryImpl implements ConnectedTrackerFactory {

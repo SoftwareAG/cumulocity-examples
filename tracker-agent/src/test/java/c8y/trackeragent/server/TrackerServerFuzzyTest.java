@@ -10,9 +10,11 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
 
+import c8y.trackeragent.server.WritersProvider.Writer;
+
 public class TrackerServerFuzzyTest extends TrackerServerTestSupport {
 
-    private static final int TOTAL_WRITERS = 50;
+    private static final int TOTAL_WRITERS = 100;
     private static final int TOTAL_REPORST_PER_WRITER = 20;
     private final List<String> sentReports = new ArrayList<String>();
 
@@ -27,27 +29,22 @@ public class TrackerServerFuzzyTest extends TrackerServerTestSupport {
     @Test
     public void shouldReadManyReports() throws Exception {
         reportExecutorLatch = new CountDownLatch(TOTAL_WRITERS * TOTAL_REPORST_PER_WRITER);
-
+        List<Writer> writers = writersProvider.newWriters(TOTAL_WRITERS);
         for (int reportNo = 0; reportNo < TOTAL_REPORST_PER_WRITER; reportNo++) {
             String report = "" + reportNo;
             sentReports.add(report);
-            for (SocketWriter writer : writers) {
-                writer.push(report + ";");
+            for (Writer writer : writers) {
+                writer.write(report + ";");
             }
-            checkIfConnectionsContaintesCoherence();
+            Thread.sleep(100);
         }
 
-        reportExecutorLatch.await(2, TimeUnit.SECONDS);
+        reportExecutorLatch.await(15, TimeUnit.SECONDS);
         assertThat(reportExecutorLatch.getCount()).isEqualTo(0L);
         for (TestConnectedTrackerImpl executor : executors) {
             assertThat(executor.getProcessed()).hasSize(TOTAL_REPORST_PER_WRITER);
             assertThat(executor.getProcessed()).isEqualTo(sentReports);
         }
-    }
-
-    private void checkIfConnectionsContaintesCoherence() {
-        assertThat(connectionsContainer.getAll()).hasSize(connectionsContainer.getAllIndex().size());
-        
     }
 
 }
