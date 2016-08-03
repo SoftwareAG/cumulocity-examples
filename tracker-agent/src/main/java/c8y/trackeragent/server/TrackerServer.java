@@ -48,7 +48,7 @@ public class TrackerServer implements Runnable {
     private final Map<SocketChannel, List<ByteBuffer>> pendingData = new HashMap<SocketChannel, List<ByteBuffer>>();
     
     private final TrackerServerEventHandler eventHandler;
-
+    
     @Autowired
     public TrackerServer(TrackerServerEventHandler eventHandler) throws IOException {
         this.eventHandler = eventHandler;
@@ -148,7 +148,7 @@ public class TrackerServer implements Runnable {
     }
 
     private void accept(SelectionKey key) throws IOException {
-        logger.info("Accept connection for key {}.", key);
+        logger.info("Received new connection acceptance request.");
         // For an accept to be pending the channel must be a server socket
         // channel.
         ServerSocketChannel serverSocketChannel = (ServerSocketChannel) key.channel();
@@ -156,8 +156,10 @@ public class TrackerServer implements Runnable {
         // Accept the connection and make it non-blocking
         SocketChannel socketChannel = serverSocketChannel.accept();
         if (socketChannel == null) {
+            logger.info("Do no accept new connection since it was from not blocking channel.");
             return;
         }
+        logger.info("Accept new connection: {}.", socketChannel);
         socketChannel.configureBlocking(false);
 
         // Register the new SocketChannel with our Selector, indicating
