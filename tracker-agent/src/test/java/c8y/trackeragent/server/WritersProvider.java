@@ -14,90 +14,74 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class WritersProvider {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(WritersProvider.class);
 
-    private static final int TOTAL_WORKER_THREADS = 10;
+    private ExecutorService executorService;
 
-    private final ExecutorService executorService = newFixedThreadPool(TOTAL_WORKER_THREADS);
-    private final Queue<Task> tasks = new ConcurrentLinkedQueue<>();
     private final int remotePort;
-    
+
+    private final List<Writer> writers = new ArrayList<Writer>();
+
     public WritersProvider(int remotePort) {
         this.remotePort = remotePort;
     }
 
-    public void start() {
-        for (int i = 0; i < TOTAL_WORKER_THREADS; i++) {
-            executorService.submit(new Worker());
+    public void start(int totalWriters) throws Exception {
+        this.executorService = newFixedThreadPool(totalWriters);
+        for (int i = 0; i < totalWriters; i++) {
+            Writer writer = new Writer();
+            writers.add(writer);
+            executorService.submit(writer);
         }
     }
-    
+
     public void stop() {
         executorService.shutdown();
     }
 
-    public List<Writer> newWriters(int total) throws Exception {
-        List<Writer> clients = new ArrayList<Writer>();
-        for (int i = 0; i < total; i++) {
-            clients.add(newWriter());
-        }
-        return clients;
+    public List<Writer> getWriters() {
+        return writers;
     }
 
-    public Writer newWriter() throws Exception {
-        Socket socket = new Socket("localhost", remotePort);
-        return new Writer(socket);
+    public Writer getWriter(int no) {
+        return writers.get(no);
     }
 
-    public class Writer {
+    public class Writer implements Runnable {
 
-        Socket socket;
+        private final Queue<String> tasks = new ConcurrentLinkedQueue<String>();
+        private final Socket socket;
 
-        public Writer(Socket socket) {
-            this.socket = socket;
+        Writer() throws Exception {
+            socket = new Socket("localhost", remotePort);
         }
 
-        public void write(String textToWrite) {
-            tasks.add(new Task(socket, textToWrite));
+        public void write(String text) {
+            tasks.add(text);
         }
-        
-        public void stop() throws Exception {
-            socket.close();
-        }
-    }
-
-    private class Worker implements Runnable {
 
         @Override
         public void run() {
             while (true) {
-                Task task = tasks.poll();
-                if (task != null) {
-                    execute(task);
+                String text = tasks.poll();
+                if (text != null) {
+                    execute(text);
                 }
             }
         }
 
-        private void execute(Task task) {
+        private void execute(String text) {
             try {
-                task.socket.getOutputStream().write(getBytes(task.textToWrite));
+                socket.getOutputStream().write(getBytes(text));
             } catch (Exception e) {
                 logger.error(e.getMessage());
             }
         }
-    }
 
-    private static class Task {
-
-        final Socket socket;
-        final String textToWrite;
-
-        Task(Socket socket, String textToWrite) {
-            this.socket = socket;
-            this.textToWrite = textToWrite;
+        public void stop() throws Exception {
+            socket.close();
         }
-
     }
 
 }

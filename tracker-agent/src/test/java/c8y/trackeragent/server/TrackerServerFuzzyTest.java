@@ -14,22 +14,20 @@ import c8y.trackeragent.server.WritersProvider.Writer;
 
 public class TrackerServerFuzzyTest extends TrackerServerTestSupport {
 
-    private static final int TOTAL_WRITERS = 100;
+    private static final int TOTAL_WRITERS = 200;
     private static final int TOTAL_REPORST_PER_WRITER = 20;
     private final List<String> sentReports = new ArrayList<String>();
 
     @Before
     public void before() throws Exception {
         super.before();
-        for (int i = 0; i < TOTAL_WRITERS; i++) {
-            newWriter();
-        }
+        writersProvider.start(TOTAL_WRITERS);
     }
 
     @Test
     public void shouldReadManyReports() throws Exception {
         reportExecutorLatch = new CountDownLatch(TOTAL_WRITERS * TOTAL_REPORST_PER_WRITER);
-        List<Writer> writers = writersProvider.newWriters(TOTAL_WRITERS);
+        List<Writer> writers = writersProvider.getWriters();
         for (int reportNo = 0; reportNo < TOTAL_REPORST_PER_WRITER; reportNo++) {
             String report = "" + reportNo;
             sentReports.add(report);

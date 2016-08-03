@@ -23,9 +23,10 @@ public class TrackerServerTest extends TrackerServerTestSupport {
     @Before
     public void before() throws Exception {
         super.before();
-        writer1 = newWriter();
-        writer2 = newWriter();
-        writer3 = newWriter();
+        writersProvider.start(3);
+        writer1 = writersProvider.getWriter(0);
+        writer2 = writersProvider.getWriter(1);
+        writer3 = writersProvider.getWriter(2);
     }
 
     @Test

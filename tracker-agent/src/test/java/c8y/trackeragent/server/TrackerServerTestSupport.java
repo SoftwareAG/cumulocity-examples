@@ -21,7 +21,6 @@ import org.slf4j.LoggerFactory;
 import c8y.trackeragent.context.OperationContext;
 import c8y.trackeragent.protocol.TrackingProtocol;
 import c8y.trackeragent.server.TrackerServerEvent.ReadDataEvent;
-import c8y.trackeragent.server.WritersProvider.Writer;
 import c8y.trackeragent.tracker.ConnectedTracker;
 import c8y.trackeragent.tracker.ConnectedTrackerFactory;
 
@@ -47,17 +46,12 @@ public abstract class TrackerServerTestSupport {
         server = new TrackerServer(eventHandler);
         server.start(PORT);
         executorService.execute(server);
-        writersProvider.start();
     }
     
     @After
     public void after() throws IOException {
         server.close();
         writersProvider.stop();
-    }
-    
-    protected Writer newWriter() throws Exception {
-        return writersProvider.newWriter();
     }
     
     protected void assertThatReportsHandled(String... reports) {
@@ -83,7 +77,6 @@ public abstract class TrackerServerTestSupport {
             TestConnectedTrackerImpl result = new TestConnectedTrackerImpl();
             logger.info("Created executor for data " + getString(readData.getData()));
             executors.add(result);
-            logger.info("Total executors " + executors.size());
             return result;
         }
     }
