@@ -14,7 +14,7 @@ import c8y.trackeragent.server.WritersProvider.Writer;
 
 public class TrackerServerFuzzyTest extends TrackerServerTestSupport {
 
-    private static final int TOTAL_WRITERS = 200;
+    private static final int TOTAL_WRITERS = 50;
     private static final int TOTAL_REPORST_PER_WRITER = 20;
     private final List<String> sentReports = new ArrayList<String>();
 
@@ -39,7 +39,7 @@ public class TrackerServerFuzzyTest extends TrackerServerTestSupport {
 
         reportExecutorLatch.await(15, TimeUnit.SECONDS);
         assertThat(reportExecutorLatch.getCount()).isEqualTo(0L);
-        for (TestConnectedTrackerImpl executor : executors) {
+        for (TestConnectedTrackerImpl executor : getExecutors()) {
             assertThat(executor.getProcessed()).hasSize(TOTAL_REPORST_PER_WRITER);
             assertThat(executor.getProcessed()).isEqualTo(sentReports);
         }

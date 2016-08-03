@@ -2,15 +2,12 @@ package c8y.trackeragent.server;
 
 import static c8y.trackeragent.utils.ByteHelper.getString;
 import static java.util.Arrays.asList;
-import static java.util.Collections.synchronizedList;
-import static java.util.concurrent.Executors.newFixedThreadPool;
 import static org.fest.assertions.Assertions.assertThat;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.After;
@@ -28,24 +25,21 @@ public abstract class TrackerServerTestSupport {
     
     private static final Logger logger = LoggerFactory.getLogger(TrackerServerTestSupport.class);
 
-    protected static final int PORT = 5100;
+    private static final int PORT = 5100;
     
     private TrackerServer server;
-    private final ExecutorService executorService = newFixedThreadPool(1);
     protected CountDownLatch reportExecutorLatch;
-    protected final List<TestConnectedTrackerImpl> executors = synchronizedList(new ArrayList<TestConnectedTrackerImpl>());
     protected final ConnectionsContainer connectionsContainer = new ConnectionsContainer();
     protected ConnectedTracker customTracker = null;
     protected final WritersProvider writersProvider = new WritersProvider(PORT);
     
     @Before
     public void before() throws Exception {
-        reportExecutorLatch = new CountDownLatch(0);
         TrackerServerEventHandler eventHandler = new TrackerServerEventHandler(new TestConnectedTrackerFactoryImpl(), connectionsContainer);
         eventHandler.init();
         server = new TrackerServer(eventHandler);
         server.start(PORT);
-        executorService.execute(server);
+        new Thread(server).start();
     }
     
     @After
@@ -59,7 +53,16 @@ public abstract class TrackerServerTestSupport {
         for (int index = 0; index < reports.length; index++) {
             expected[index] = new TestConnectedTrackerImpl(reports[index]);
         }
+        List<TestConnectedTrackerImpl> executors = getExecutors();
         assertThat(executors).contains(expected);
+    }
+
+    protected List<TestConnectedTrackerImpl> getExecutors() {
+        List<TestConnectedTrackerImpl> executors = new ArrayList<TestConnectedTrackerImpl>();
+        for (ActiveConnection activeConnection : connectionsContainer.getAll()) {
+            executors.add((TestConnectedTrackerImpl) activeConnection.getConnectedTracker());
+        }
+        return executors;
     }
     
     protected void setCountOfExpectedReports(int count) {
@@ -76,7 +79,6 @@ public abstract class TrackerServerTestSupport {
         public ConnectedTracker create(ReadDataEvent readData) {
             TestConnectedTrackerImpl result = new TestConnectedTrackerImpl();
             logger.info("Created executor for data " + getString(readData.getData()));
-            executors.add(result);
             return result;
         }
     }
