@@ -13,7 +13,7 @@ import org.junit.Test;
 public class TrackerServerFuzzyTest extends TrackerServerTestSupport {
 
     private static final int TOTAL_WRITERS = 50;
-    private static final int TOTAL_REPORST_PER_WRITER = 120;
+    private static final int TOTAL_REPORST_PER_WRITER = 20;
     private final List<String> sentReports = new ArrayList<String>();
 
     @Before
