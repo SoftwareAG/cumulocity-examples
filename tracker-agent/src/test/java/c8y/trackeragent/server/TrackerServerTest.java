@@ -45,12 +45,12 @@ public class TrackerServerTest extends TrackerServerTestSupport {
     @Test
     public void shouldHandleClose() throws Exception {
         writer1.write("ABC");
-        sleep(200);
+        sleep(500);
         
         assertThat(connectionsContainer.getAll()).hasSize(1);
         
         writer1.stop();
-        sleep(200);
+        sleep(500);
         
         assertThat(connectionsContainer.getAll()).isEmpty();
     }
@@ -69,7 +69,7 @@ public class TrackerServerTest extends TrackerServerTestSupport {
 
         setCountOfExpectedReports(2);
         writer1.write("FIRST_REPORT");
-        Thread.sleep(100);
+        Thread.sleep(200);
         writer1.write("SECOND_REPORT");
         waitForReports();
         

@@ -88,27 +88,6 @@ public abstract class TrackerServerTestSupport {
         }
     }
     
-    
-    protected class DummyConnectedTracker implements ConnectedTracker {
-
-        @Override
-        public void executeOperation(OperationContext operation) throws Exception {
-            // TODO Auto-generated method stub
-            
-        }
-
-        @Override
-        public void executeReports(ConnectionDetails connectionDetails, byte[] reports) {
-            // TODO Auto-generated method stub
-            
-        }
-
-        @Override
-        public TrackingProtocol getTrackingProtocol() {
-            return TrackingProtocol.COBAN;
-        }
-    }
-    
     protected class TestConnectedTrackerImpl extends DummyConnectedTracker {
         
         private final List<String> processed;
@@ -173,6 +152,25 @@ public abstract class TrackerServerTestSupport {
         }
     }
 
+    protected class DummyConnectedTracker implements ConnectedTracker {
+
+        @Override
+        public void executeOperation(OperationContext operation) throws Exception {
+            // TODO Auto-generated method stub
+            
+        }
+
+        @Override
+        public void executeReports(ConnectionDetails connectionDetails, byte[] reports) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        @Override
+        public TrackingProtocol getTrackingProtocol() {
+            return TrackingProtocol.COBAN;
+        }
+    }
 
     
 }

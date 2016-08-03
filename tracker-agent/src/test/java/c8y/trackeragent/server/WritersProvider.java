@@ -64,7 +64,6 @@ public class WritersProvider {
         
         public void stop() throws Exception {
             socket.close();
-            Thread.sleep(1);
         }
     }
 
@@ -83,7 +82,6 @@ public class WritersProvider {
         private void execute(Task task) {
             try {
                 task.socket.getOutputStream().write(getBytes(task.textToWrite));
-                Thread.sleep(1);
             } catch (Exception e) {
                 logger.error(e.getMessage());
             }
