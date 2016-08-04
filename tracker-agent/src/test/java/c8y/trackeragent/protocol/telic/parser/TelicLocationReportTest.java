@@ -69,6 +69,28 @@ public class TelicLocationReportTest {
     }
     
     @Test
+    public void shouldUpdateDeviceGpsAccuracy() throws Exception {
+        String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_5).asArray();
+
+        telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
+
+        verifyReport();
+        assertThat(positionCaptor.getValue()).isEqualTo(Positions.SAMPLE_5);
+        assertThat(positionCaptor.getValue().getAccuracy()).isEqualTo(Positions.SAMPLE_5.getAccuracy());
+    }
+
+    @Test
+    public void shouldNotUpdateDeviceGpsAccuracy() throws Exception {
+        String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1).asArray();
+
+        telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
+
+        verifyReport();
+        assertThat(positionCaptor.getValue()).isEqualTo(Positions.SAMPLE_5);
+        assertThat(positionCaptor.getValue().getAccuracy()).isNull();
+    }
+
+    @Test
     public void shouldSendLogCodeTypeInPositionFragment() throws Exception {
         String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1).asArray();
         
