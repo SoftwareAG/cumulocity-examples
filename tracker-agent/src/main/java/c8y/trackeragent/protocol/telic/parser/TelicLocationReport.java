@@ -118,7 +118,6 @@ public class TelicLocationReport implements Parser, TelicFragment {
             measurementService.createAltitudeMeasurement(altitude, device, dateTime);
         }
         Long accuracy = getGpsAccuracy(reportCtx);
-        position.setAccuracy(accuracy);
         if (accuracy != null) {
             position.setAccuracy(accuracy);
         }
