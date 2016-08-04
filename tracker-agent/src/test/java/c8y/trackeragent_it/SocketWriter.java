@@ -5,8 +5,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
-import java.util.Collection;
-import java.util.HashSet;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.Logger;
@@ -19,7 +17,7 @@ public class SocketWriter {
     
     private static Logger logger = LoggerFactory.getLogger(SocketWriter.class);
     
-    private final Collection<Socket> sockets = new HashSet<Socket>();
+    //private static final Collection<Socket> sockets = new HashSet<Socket>();
     private final TestSettings testSettings;
     private Integer port;
     
@@ -48,12 +46,12 @@ public class SocketWriter {
     }
     
     public void destroySockets() throws IOException {
-        for (Socket socket : sockets) {
-            if (!socket.isClosed()) {
-                socket.close();
-            }
-        }
-        sockets.clear();
+//        for (Socket socket : sockets) {
+//            if (!socket.isClosed()) {
+//                socket.close();
+//            }
+//        }
+//        sockets.clear();
     }
     
     private String writeInNewConnection(Socket socket, byte[] bis) throws Exception {
@@ -87,7 +85,7 @@ public class SocketWriter {
         try {
             Socket socket = new Socket(socketHost, port);
             socket.setSoTimeout(2000);
-            sockets.add(socket);
+           // sockets.add(socket);
             return socket;
         } catch (IOException ex) {
             System.out.println("Cant connect to socket, host = " + socketHost + ", port = " + port);

@@ -1,5 +1,7 @@
 package c8y.trackeragent_it;
 
+import static com.cumulocity.model.authentication.CumulocityCredentials.Builder.cumulocityCredentials;
+
 import java.io.File;
 import java.io.IOException;
 
@@ -9,14 +11,18 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.cumulocity.agent.server.context.DeviceContextService;
 import com.cumulocity.agent.server.repository.InventoryRepository;
+import com.cumulocity.model.authentication.CumulocityCredentials;
 import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
+import com.cumulocity.sdk.client.PlatformImpl;
 
 import c8y.trackeragent.TrackerAgent;
+import c8y.trackeragent.TrackerPlatform;
 import c8y.trackeragent.configuration.ConfigUtils;
 import c8y.trackeragent.configuration.TrackerConfiguration;
 import c8y.trackeragent.device.TrackerDevice;
@@ -52,6 +58,8 @@ public abstract class TrackerITSupport {
 
     @Autowired
     protected DeviceCredentialsRepository deviceCredentialsRepository;
+    
+    protected TrackerPlatform trackerPlatform;
 
     protected Bootstraper bootstraper;
     protected SocketWriter socketWriter;
@@ -63,6 +71,7 @@ public abstract class TrackerITSupport {
 
     @Before
     public void baseSetUp() throws Exception {
+        trackerPlatform = trackerPlatform(testSettings);
         Thread.sleep(200);// avoid address already in use error
         System.out.println(testSettings);
         System.out.println(trackerAgentConfig);
@@ -100,6 +109,13 @@ public abstract class TrackerITSupport {
     protected AlarmRepresentation findAlarm(String imei, AlarmType alarmType) {
         String type = alarmMappingService.getType(alarmType.name());
         return getTrackerDevice(imei).findActiveAlarm(type);
+    }
+    
+    private TrackerPlatform trackerPlatform(TestSettings testSettings) {
+        CumulocityCredentials credentials = cumulocityCredentials(testSettings.getC8yUser(), testSettings.getC8yPassword())
+                .withTenantId(testSettings.getC8yTenant()).build();
+        PlatformImpl trackerPlatformImpl = new PlatformImpl(testSettings.getC8yHost(), credentials);
+        return new TrackerPlatform(trackerPlatformImpl);
     }
 
 }

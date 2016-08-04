@@ -27,7 +27,6 @@ public class TestConfiguration {
     @Value("${tracker-agent.host}")
     private String trackerAgentHost;
     
-    
     @Bean
     public TestSettings testSettings() {
         //@formatter:off
@@ -39,4 +38,5 @@ public class TestConfiguration {
             .setTrackerAgentHost(trackerAgentHost);
         //@formatter:on            
     }
+    
 }
