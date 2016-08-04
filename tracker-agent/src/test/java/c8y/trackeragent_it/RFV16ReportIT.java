@@ -62,7 +62,7 @@ public class RFV16ReportIT extends TrackerITSupport {
     //TODO work under the eclipse, not work under the maven
     public void setSosNumber() throws Exception {
         bootstrapDevice(imei, deviceMessages.positionUpdate("DB", imei, Positions.TK10xSample));
-        Socket socket = writeInNewConnectionAndKeepOpen(deviceMessages.heartbeat("DB", imei, "FFFDFFFF").asBytes());
+        Socket socket = socketWriter.writeInNewConnectionAndKeepOpen(deviceMessages.heartbeat("DB", imei, "FFFDFFFF").asBytes());
         TrackerDevice device = getTrackerDevice(imei);
         DeviceControlApi deviceControlApi = trackerPlatform.getDeviceControlApi();
         OperationRepresentation operation = new OperationRepresentation();
