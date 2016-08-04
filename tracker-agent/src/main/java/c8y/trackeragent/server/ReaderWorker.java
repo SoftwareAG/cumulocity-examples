@@ -18,7 +18,7 @@ public class ReaderWorker implements Runnable {
         while (true) {
             ActiveConnection connection = connectionProvider.next();
             if (connection == null) {
-                continue;
+                return;
             }
             try {
                 process(connection);

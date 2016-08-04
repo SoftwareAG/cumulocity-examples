@@ -42,10 +42,6 @@ public class TrackerServerEventHandler implements ActiveConnectionProvider {
     @PostConstruct
     public void init() {
         logger.info("Number of reader workers: {}.", trackerConfiguration.getNumberOfReaderWorkers());
-        for (int i = 0; i < trackerConfiguration.getNumberOfReaderWorkers(); i++) {
-            ReaderWorker worker = new ReaderWorker(this);
-            workers.execute(worker);
-        }
     }
     
     public void shutdownWorkers(){
@@ -57,6 +53,8 @@ public class TrackerServerEventHandler implements ActiveConnectionProvider {
             synchronized (monitor) {
                 ActiveConnection connection = getActiveConnection(readDataEvent);
                 connection.getReportBuffer().append(readDataEvent.getData(), readDataEvent.getNumRead());
+                ReaderWorker worker = new ReaderWorker(this);
+                workers.execute(worker);
             }
         } catch (Exception e) {
             logger.error("Exception handling read event " + readDataEvent, e);

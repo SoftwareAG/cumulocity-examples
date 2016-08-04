@@ -37,7 +37,7 @@ public abstract class TrackerServerTestSupport {
     
     @Before
     public void before() throws Exception {
-        TrackerConfiguration trackerConfiguration = new TrackerConfiguration().setNumberOfReaderWorkers(5);
+        TrackerConfiguration trackerConfiguration = new TrackerConfiguration().setNumberOfReaderWorkers(10);
         eventHandler = new TrackerServerEventHandler(new TestConnectedTrackerFactoryImpl(), connectionsContainer, trackerConfiguration);
         eventHandler.init();
         server = new TrackerServer(eventHandler);
