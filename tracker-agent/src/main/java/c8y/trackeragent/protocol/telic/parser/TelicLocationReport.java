@@ -219,7 +219,6 @@ public class TelicLocationReport implements Parser, TelicFragment {
     }
     
     private Long getGpsAccuracy(ReportContext reportCtx) {
-        
         BigDecimal accuracy = reportCtx.getEntryAsNumber(GPS_ACCURACY);
         return accuracy == null ? null : accuracy.longValue();
     }
