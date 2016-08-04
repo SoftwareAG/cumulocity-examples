@@ -1,7 +1,6 @@
 package c8y.trackeragent_it.service;
 
 import static com.cumulocity.model.authentication.CumulocityCredentials.Builder.cumulocityCredentials;
-import static com.cumulocity.rest.representation.operation.DeviceControlMediaType.NEW_DEVICE_REQUEST;
 import static org.fest.assertions.Assertions.assertThat;
 
 import java.io.UnsupportedEncodingException;
@@ -15,15 +14,12 @@ import com.cumulocity.model.authentication.CumulocityCredentials;
 import com.cumulocity.rest.representation.devicebootstrap.NewDeviceRequestRepresentation;
 import com.cumulocity.sdk.client.Platform;
 import com.cumulocity.sdk.client.PlatformImpl;
-import com.cumulocity.sdk.client.ResponseParser;
-import com.cumulocity.sdk.client.RestConnector;
 import com.cumulocity.sdk.client.inventory.InventoryApi;
 import com.cumulocity.sdk.client.inventory.InventoryFilter;
 
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.utils.message.TrackerMessage;
-import c8y.trackeragent_it.SocketWriter;
 import c8y.trackeragent_it.TestSettings;
 
 public class Bootstraper {
@@ -35,30 +31,30 @@ public class Bootstraper {
     private final Platform bootstrapPlatform;
     private final PlatformImpl trackerPlatform;
     private final TestSettings testSettings;
-    private final RestConnector restConnector;
     private final SocketWriter socketWriter;
     private final InventoryApi inventoryApi;
-    private Boolean isAgentBootstraped;
+    private final NewDeviceRequestService newDeviceRequestService;
 
     public Bootstraper(
             // @formatter:off
             TestSettings testSettings,
             DeviceContextService contextService, 
             DeviceCredentialsRepository deviceCredentialsRepository, 
-            SocketWriter socketWriter) {
+            SocketWriter socketWriter, 
+            NewDeviceRequestService newDeviceRequestService) {
             // @formatter:on
         this.testSettings = testSettings;
         this.contextService = contextService;
         this.deviceCredentialsRepository = deviceCredentialsRepository;
+        this.newDeviceRequestService = newDeviceRequestService;
         this.bootstrapPlatform = createBootstrapPlatform();
         this.trackerPlatform = createTrackerPlatform();
-        this.restConnector = new RestConnector(trackerPlatform, new ResponseParser());
         this.socketWriter = socketWriter;
         this.inventoryApi = this.trackerPlatform.getInventoryApi();
     }
 
-    public Bootstraper(TestSettings testSettings, SocketWriter socketWriter) {
-        this(testSettings, null, null, socketWriter);
+    public Bootstraper(TestSettings testSettings, SocketWriter socketWriter, NewDeviceRequestService newDeviceRequestService) {
+        this(testSettings, null, null, socketWriter, newDeviceRequestService);
     }
 
     public void bootstrapDevice(String imei, TrackerMessage deviceMessage) throws Exception {
@@ -69,7 +65,7 @@ public class Bootstraper {
             logger.info("Agent not boostraped");
             bootstrapAgent(deviceMessage);
         }
-        createNewDeviceRequest(imei);
+        newDeviceRequestService.create(imei);
         Thread.sleep(1000);
         // WAITING_FOR_CONNECTION status
 
@@ -78,7 +74,7 @@ public class Bootstraper {
         // PENDING_ACCEPTANCE status
 
         logger.info("accept request for imei: {}", imei);
-        acceptNewDeviceRequest(imei);
+        newDeviceRequestService.accept(imei);
         // ACCEPTED status
 
         socketWriter.writeInNewConnection(deviceMessage);
@@ -92,68 +88,50 @@ public class Bootstraper {
             enterDeviceContext(imei);
         }
     }
-
-    private boolean isAgentBootstraped() {
-//        if (isAgentBootstraped != null) {
-//            return isAgentBootstraped;
-//        }
-        InventoryFilter filter = new InventoryFilter().byType("c8y_TrackerAgent");
-        isAgentBootstraped = !inventoryApi.getManagedObjectsByFilter(filter).get().getManagedObjects().isEmpty();
-        return isAgentBootstraped;
-    }
-
+    
     public synchronized void bootstrapAgent(TrackerMessage deviceMessage)
             throws UnsupportedEncodingException, Exception, InterruptedException {
         logger.info("Boostrap agent");
         String id = bootstrapAgentRequestId();
-
+        logger.info("Request id: {}", id);
+        
         NewDeviceRequestRepresentation newDeviceRequest = new NewDeviceRequestRepresentation();
         newDeviceRequest.setId(id);
         try {
             bootstrapPlatform.getDeviceCredentialsApi().delete(newDeviceRequest);
         } catch (Exception ex) {
-
+            
         }
         // agent request deleted
-
-        createNewDeviceRequest(id);
+        
+        newDeviceRequestService.create(id);
+        Thread.sleep(1000);
         // WAITING_FOR_CONNECTION
-
+        
         connectNewDeviceRequest(id);
+        Thread.sleep(1000);
         // PENDING_ACCEPTANCE
-
-        acceptNewDeviceRequest(id);
+        
+        newDeviceRequestService.accept(id);
         // ACCEPTED status
     }
 
+    private boolean isAgentBootstraped() {
+        InventoryFilter filter = new InventoryFilter().byType("c8y_TrackerAgent");
+        return inventoryApi.getManagedObjectsByFilter(filter).get().getManagedObjects().size() > 0;
+    }
+
+
     public synchronized void deleteExistingAgentRequest() {
         try {
-            restConnector.delete(newDeviceRequestUri() + "/" + bootstrapAgentRequestId());
+            newDeviceRequestService.deleteSilent(bootstrapAgentRequestId());
         } catch (Exception ex) {
-            logger.info("OK, there is no legacy device request for tracker agent.");
+            ex.printStackTrace();
         }
     }
 
     private String bootstrapAgentRequestId() {
         return "tracker-agent-" + testSettings.getC8yTenant();
-    }
-
-    private synchronized void createNewDeviceRequest(String deviceId) {
-        NewDeviceRequestRepresentation newDeviceRequest = getNewDeviceRequest(deviceId);
-        if (newDeviceRequest != null) {
-            return;
-        }
-        NewDeviceRequestRepresentation representation = new NewDeviceRequestRepresentation();
-        representation.setId(deviceId);
-        restConnector.post(newDeviceRequestUri(), NEW_DEVICE_REQUEST, representation);
-    }
-
-    private NewDeviceRequestRepresentation getNewDeviceRequest(String deviceId) {
-        try {
-            return restConnector.get(newDeviceRequestUri(deviceId), NEW_DEVICE_REQUEST, NewDeviceRequestRepresentation.class);
-        } catch (Exception ex) {
-            return null;
-        }
     }
 
     protected void connectNewDeviceRequest(String deviceId) throws Exception {
@@ -162,25 +140,6 @@ public class Bootstraper {
             logger.info("Device with id {} connected.", deviceId);
         } catch (Exception ex) {
             logger.info("Device with id {} not connected.", deviceId);
-        }
-    }
-
-    private String newDeviceRequestUri() {
-        return testSettings.getC8yHost() + "/devicecontrol/newDeviceRequests";
-    }
-
-    private String newDeviceRequestUri(String deviceId) {
-        return newDeviceRequestUri() + "/" + deviceId;
-    }
-
-    private void acceptNewDeviceRequest(String deviceId) {
-        try {
-            NewDeviceRequestRepresentation representation = new NewDeviceRequestRepresentation();
-            representation.setStatus("ACCEPTED");
-            restConnector.put(newDeviceRequestUri(deviceId), NEW_DEVICE_REQUEST, representation);
-            logger.info("Device with id {} accepted.", deviceId);
-        } catch (Exception ex) {
-            logger.error("Device with id " + deviceId + " not accepted.", ex);
         }
     }
 

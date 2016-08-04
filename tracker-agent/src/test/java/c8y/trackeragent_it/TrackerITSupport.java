@@ -33,6 +33,8 @@ import c8y.trackeragent.utils.message.TrackerMessage;
 import c8y.trackeragent_it.config.ServerConfiguration;
 import c8y.trackeragent_it.config.TestConfiguration;
 import c8y.trackeragent_it.service.Bootstraper;
+import c8y.trackeragent_it.service.NewDeviceRequestService;
+import c8y.trackeragent_it.service.SocketWriter;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = { ServerConfiguration.class, TestConfiguration.class })
@@ -59,9 +61,8 @@ public abstract class TrackerITSupport {
     @Autowired
     protected DeviceCredentialsRepository deviceCredentialsRepository;
     
-    @Autowired
     protected TrackerPlatform trackerPlatform;
-
+    
     protected Bootstraper bootstraper;
     protected SocketWriter socketWriter;
 
@@ -77,7 +78,8 @@ public abstract class TrackerITSupport {
         System.out.println(testSettings);
         System.out.println(trackerAgentConfig);
         socketWriter = new SocketWriter(testSettings, trackerAgentConfig.getPort(getTrackerProtocol()));
-        bootstraper = new Bootstraper(testSettings, contextService, deviceCredentialsRepository, socketWriter);
+        NewDeviceRequestService newDeviceRequestService = new NewDeviceRequestService(trackerPlatform.getPlatformParameters(), testSettings);
+        bootstraper = new Bootstraper(testSettings, contextService, deviceCredentialsRepository, socketWriter, newDeviceRequestService);
         bootstraper.deleteExistingAgentRequest();
     }
 

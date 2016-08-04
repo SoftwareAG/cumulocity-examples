@@ -1,4 +1,4 @@
-package c8y.trackeragent_it;
+package c8y.trackeragent_it.service;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import c8y.trackeragent.utils.ByteHelper;
 import c8y.trackeragent.utils.message.TrackerMessage;
+import c8y.trackeragent_it.TestSettings;
 
 public class SocketWriter {
     

@@ -1,9 +1,5 @@
 package c8y.trackeragent_it.simulator;
 
-import static org.fest.assertions.Assertions.assertThat;
-import static org.junit.Assert.*;
-
-import org.fest.assertions.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,19 +7,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.cumulocity.rest.representation.devicebootstrap.NewDeviceRequestRepresentation;
 import com.cumulocity.sdk.client.PlatformImpl;
 
-import c8y.trackeragent.TrackerPlatform;
 import c8y.trackeragent.protocol.telic.TelicDeviceMessages;
+import c8y.trackeragent.utils.Devices;
 import c8y.trackeragent.utils.Positions;
 import c8y.trackeragent.utils.message.TrackerMessage;
-import c8y.trackeragent_it.SocketWriter;
 import c8y.trackeragent_it.TestSettings;
 import c8y.trackeragent_it.TrackerITSupport;
 import c8y.trackeragent_it.config.TestConfiguration;
 import c8y.trackeragent_it.service.Bootstraper;
 import c8y.trackeragent_it.service.NewDeviceRequestService;
+import c8y.trackeragent_it.service.SocketWriter;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = { TestConfiguration.class })
@@ -37,35 +32,33 @@ public class LoadIT {
     private Bootstraper bootstraper;
     
     private NewDeviceRequestService newDeviceRequestService;
+
+    private SocketWriter socketWriter;
     
     @Before
-    public void init() {
+    public void before() {
         PlatformImpl platform = TrackerITSupport.platform(testSettings);
         newDeviceRequestService = new NewDeviceRequestService(platform, testSettings);
-        SocketWriter socketWriter = new SocketWriter(testSettings, 9090);
-        bootstraper = new Bootstraper(testSettings, socketWriter);
+        socketWriter = new SocketWriter(testSettings, 9090);
+        bootstraper = new Bootstraper(testSettings, socketWriter, newDeviceRequestService);
+        newDeviceRequestService.deleteAll();
     }
     
     @Test
-    public void shouldCreateNewDeviceRequest() throws Exception {
-        newDeviceRequestService.create("abc");
-        
-        assertThat(newDeviceRequestService.get("abc")).isNotNull();
-        assertThat(newDeviceRequestService.get("cde")).isNull();
-        
-        assertThat(newDeviceRequestService.exists("abc")).isTrue();
-        assertThat(newDeviceRequestService.exists("cde")).isFalse();
-        
-        newDeviceRequestService.delete("abc");
-        
-        assertThat(newDeviceRequestService.get("abc")).isNull();
-        assertThat(newDeviceRequestService.exists("abc")).isFalse();
+    public void assureAgentBootstraped() throws Exception {
+        String imei = Devices.randomImei();
+        bootstrapDevice(bootstraper, imei);
+        Thread.sleep(5000);
+        socketWriter.writeInNewConnection(deviceMessages.positionUpdate(imei, Positions.ZERO));
+        Thread.sleep(5000);
+        socketWriter.writeInNewConnection(deviceMessages.positionUpdate(imei, Positions.ZERO));
+        Thread.sleep(5000);
     }
     
     @Test
     public void shouldBootstrapMultiplyTelicDevices() throws Exception {
-        int imeiStart = 100020;
-        int imeiStop =  100021;
+        int imeiStart = 100000;
+        int imeiStop =  100001;
         for(int imei = imeiStart; imei <= imeiStop; imei++) {
             bootstrapDevice(bootstraper, "" + imei);
         }

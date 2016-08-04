@@ -32,22 +32,6 @@ public class NewDeviceRequestServiceTest {
     }
     
     @Test
-    public void shouldManageNewDeviceRequest() throws Exception {
-        newDeviceRequestService.create("abc");
-        
-        assertThat(newDeviceRequestService.get("abc")).isNotNull();
-        assertThat(newDeviceRequestService.get("cde")).isNull();
-        
-        assertThat(newDeviceRequestService.exists("abc")).isTrue();
-        assertThat(newDeviceRequestService.exists("cde")).isFalse();
-        
-        newDeviceRequestService.delete("abc");
-        
-        assertThat(newDeviceRequestService.get("abc")).isNull();
-        assertThat(newDeviceRequestService.exists("abc")).isFalse();
-    }
-    
-    @Test
     public void shouldGetAllNewDeviceRequest() throws Exception {
         newDeviceRequestService.create("abc");
         newDeviceRequestService.create("cde");
