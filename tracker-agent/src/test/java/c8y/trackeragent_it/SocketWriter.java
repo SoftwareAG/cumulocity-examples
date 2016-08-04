@@ -22,13 +22,13 @@ public class SocketWriter {
     private static Logger logger = LoggerFactory.getLogger(SocketWriter.class);
     
     private final Collection<Socket> sockets = new HashSet<Socket>();
-    private final TestConfiguration testConfig;
+    private final TestSettings testSettings;
     private final TrackerConfiguration trackerAgentConfig;
     private final TrackingProtocol trackingProtocol;
     
-    public SocketWriter(TrackerConfiguration trackerAgentConfig, TestConfiguration testConfig, TrackingProtocol trackingProtocol) {
+    public SocketWriter(TrackerConfiguration trackerAgentConfig, TestSettings testSettings, TrackingProtocol trackingProtocol) {
         this.trackerAgentConfig = trackerAgentConfig;
-        this.testConfig = testConfig;
+        this.testSettings = testSettings;
         this.trackingProtocol = trackingProtocol;
     }
 
@@ -87,7 +87,7 @@ public class SocketWriter {
     
     private Socket newSocket() throws IOException {
         destroySockets();
-        String socketHost = testConfig.getTrackerAgentHost();
+        String socketHost = testSettings.getTrackerAgentHost();
         try {
             Socket socket = new Socket(socketHost, getLocalPort());
             socket.setSoTimeout(2000);

@@ -4,15 +4,8 @@ import static com.cumulocity.model.authentication.CumulocityCredentials.Builder.
 import static com.cumulocity.rest.representation.operation.DeviceControlMediaType.NEW_DEVICE_REQUEST;
 import static org.fest.assertions.Assertions.assertThat;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.Socket;
-import java.net.SocketTimeoutException;
-import java.util.Collection;
 
-import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,8 +22,6 @@ import com.cumulocity.sdk.client.RestConnector;
 import c8y.trackeragent.configuration.TrackerConfiguration;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
-import c8y.trackeragent.protocol.TrackingProtocol;
-import c8y.trackeragent.utils.ByteHelper;
 import c8y.trackeragent.utils.message.TrackerMessage;
 
 public class Bootstraper {
@@ -41,20 +32,20 @@ public class Bootstraper {
     private final DeviceContextService contextService;
     private final DeviceCredentialsRepository deviceCredentialsRepository;
     private final Platform bootstrapPlatform;
-    private final TestConfiguration testConfig;
+    private final TestSettings testSettings;
     private final RestConnector restConnector;
     private final SocketWriter socketWriter;
 
     public Bootstraper(
             // @formatter:off
             TrackerConfiguration trackerAgentConfig, 
-            TestConfiguration testConfig,
+            TestSettings testSettings,
             DeviceContextService contextService, 
             DeviceCredentialsRepository deviceCredentialsRepository, 
             SocketWriter socketWriter) {
             // @formatter:on
         this.trackerAgentConfig = trackerAgentConfig;
-        this.testConfig = testConfig;
+        this.testSettings = testSettings;
         this.contextService = contextService;
         this.deviceCredentialsRepository = deviceCredentialsRepository;
         this.bootstrapPlatform = createBootstrapPlatform();
@@ -63,7 +54,7 @@ public class Bootstraper {
     }
 
     public void bootstrapDevice(String imei, TrackerMessage deviceMessage) throws Exception {
-        if (!deviceCredentialsRepository.hasAgentCredentials(testConfig.getC8yTenant())) {
+        if (!deviceCredentialsRepository.hasAgentCredentials(testSettings.getC8yTenant())) {
             bootstrapAgent(deviceMessage);
         }
         createNewDeviceRequest(imei);
@@ -112,7 +103,7 @@ public class Bootstraper {
     }
 
     private String bootstrapAgentRequestId() {
-        return "tracker-agent-" + testConfig.getC8yTenant();
+        return "tracker-agent-" + testSettings.getC8yTenant();
     }
 
     private synchronized void createNewDeviceRequest(String deviceId) {
@@ -166,13 +157,13 @@ public class Bootstraper {
 
     private Platform createBootstrapPlatform() {
         CumulocityCredentials credentials = cumulocityCredentials(trackerAgentConfig.getBootstrapUser(),
-                trackerAgentConfig.getBootstrapPassword()).withTenantId(testConfig.getC8yTenant()).build();
+                trackerAgentConfig.getBootstrapPassword()).withTenantId(testSettings.getC8yTenant()).build();
         return new PlatformImpl(trackerAgentConfig.getPlatformHost(), credentials);
     }
 
     protected PlatformParameters createPlatformParameters() {
-        CumulocityCredentials credentials = cumulocityCredentials(testConfig.getC8yUser(), testConfig.getC8yPassword())
-                .withTenantId(testConfig.getC8yTenant()).build();
+        CumulocityCredentials credentials = cumulocityCredentials(testSettings.getC8yUser(), testSettings.getC8yPassword())
+                .withTenantId(testSettings.getC8yTenant()).build();
         return new PlatformImpl(trackerAgentConfig.getPlatformHost(), credentials);
     }
 }

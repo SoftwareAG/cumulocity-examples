@@ -1,4 +1,4 @@
-package c8y.trackeragent_it;
+package c8y.trackeragent_it.config;
 
 import java.io.IOException;
 
@@ -29,9 +29,8 @@ import c8y.trackeragent.server.Servers;
 @ComponentScan(basePackages = { "c8y.trackeragent" }, excludeFilters = {
 		@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = Main.class) })
 @Import({RepositoryFeature.class, ContextFeature.class})
-@PropertySource(value = { "file:/etc/tracker-agent/test.properties", 
-        "file:/etc/tracker-agent/tracker-agent-server.properties" })
-public class ITConfiguration {
+@PropertySource(value = { "file:/etc/tracker-agent/tracker-agent-server.properties" })
+public class ServerConfiguration {
 
     @Autowired
     Servers servers;
