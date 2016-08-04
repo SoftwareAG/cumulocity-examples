@@ -10,7 +10,7 @@ import c8y.trackeragent_it.TestSettings;
 @Configuration
 @PropertySource(value = { 
         "file:/etc/tracker-agent/test.properties" })
-public class ClientConfiguration {
+public class TestConfiguration {
     
     @Value("${C8Y.tenant}")
     private String tenant;
@@ -39,5 +39,4 @@ public class ClientConfiguration {
             .setTrackerAgentHost(trackerAgentHost);
         //@formatter:on            
     }
-
 }
