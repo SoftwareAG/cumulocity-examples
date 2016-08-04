@@ -15,6 +15,7 @@ import org.junit.Before;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import c8y.trackeragent.configuration.TrackerConfiguration;
 import c8y.trackeragent.context.OperationContext;
 import c8y.trackeragent.protocol.TrackingProtocol;
 import c8y.trackeragent.server.TrackerServerEvent.ReadDataEvent;
@@ -32,10 +33,12 @@ public abstract class TrackerServerTestSupport {
     protected final ConnectionsContainer connectionsContainer = new ConnectionsContainer();
     protected ConnectedTracker customTracker = null;
     protected final WritersProvider writersProvider = new WritersProvider(PORT);
+    private TrackerServerEventHandler eventHandler;
     
     @Before
     public void before() throws Exception {
-        TrackerServerEventHandler eventHandler = new TrackerServerEventHandler(new TestConnectedTrackerFactoryImpl(), connectionsContainer);
+        TrackerConfiguration trackerConfiguration = new TrackerConfiguration().setNumberOfReaderWorkers(5);
+        eventHandler = new TrackerServerEventHandler(new TestConnectedTrackerFactoryImpl(), connectionsContainer, trackerConfiguration);
         eventHandler.init();
         server = new TrackerServer(eventHandler);
         server.start(PORT);
@@ -46,6 +49,7 @@ public abstract class TrackerServerTestSupport {
     public void after() throws IOException {
         server.close();
         writersProvider.stop();
+        eventHandler.shutdownWorkers();
     }
     
     protected void assertThatReportsHandled(String... reports) {

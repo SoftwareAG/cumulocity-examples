@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import c8y.trackeragent.configuration.TrackerConfiguration;
 import c8y.trackeragent.protocol.TrackingProtocol;
 import c8y.trackeragent.server.TrackerServerEvent.CloseConnectionEvent;
 import c8y.trackeragent.server.TrackerServerEvent.ReadDataEvent;
@@ -23,25 +24,32 @@ import c8y.trackeragent.tracker.ConnectedTrackerFactory;
 public class TrackerServerEventHandler implements ActiveConnectionProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(TrackerServerEventHandler.class);
-    private static final int NUMBER_OF_WORKERS = 10;
 
-    private final ExecutorService workers = newFixedThreadPool(NUMBER_OF_WORKERS);
+    private final ExecutorService workers;
     private final ConnectedTrackerFactory connectedTrackerFactory;    
     private final ConnectionsContainer connectionsContainer;    
     private final Object monitor = new Object();
+    private final TrackerConfiguration trackerConfiguration;
 
     @Autowired
-    public TrackerServerEventHandler(ConnectedTrackerFactory connectedTrackerFactory, ConnectionsContainer connectionsContainer) {
+    public TrackerServerEventHandler(ConnectedTrackerFactory connectedTrackerFactory, ConnectionsContainer connectionsContainer, TrackerConfiguration trackerConfiguration) {
         this.connectedTrackerFactory = connectedTrackerFactory;
         this.connectionsContainer = connectionsContainer;
+        this.trackerConfiguration = trackerConfiguration;
+        this.workers = newFixedThreadPool(trackerConfiguration.getNumberOfReaderWorkers());
     }
 
     @PostConstruct
     public void init() {
-        for (int i = 0; i < NUMBER_OF_WORKERS; i++) {
+        logger.info("Number of reader workers: {}.", trackerConfiguration.getNumberOfReaderWorkers());
+        for (int i = 0; i < trackerConfiguration.getNumberOfReaderWorkers(); i++) {
             ReaderWorker worker = new ReaderWorker(this);
             workers.execute(worker);
         }
+    }
+    
+    public void shutdownWorkers(){
+        this.workers.shutdown();
     }
 
     public void handle(ReadDataEvent readDataEvent) {

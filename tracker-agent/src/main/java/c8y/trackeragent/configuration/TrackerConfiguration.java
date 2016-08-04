@@ -21,6 +21,7 @@ public class TrackerConfiguration {
     private Integer cobanLocationReportTimeInterval;
     private Integer rfv16LocationReportTimeInterval;
     private boolean forceInitialHost;
+    private int numberOfReaderWorkers;
     
     public TrackerConfiguration() {
         this.bootstrapPollIntervals = Arrays.asList(PollingStrategy.DEFAULT_POLL_INTERVALS);
@@ -126,6 +127,15 @@ public class TrackerConfiguration {
         return this;
     }
     
+    public int getNumberOfReaderWorkers() {
+        return numberOfReaderWorkers;
+    }
+
+    public TrackerConfiguration setNumberOfReaderWorkers(int numberOfReaderWorkers) {
+        this.numberOfReaderWorkers = numberOfReaderWorkers;
+        return this;
+    }
+
     public int getPort(TrackingProtocol protocol) {
         if (getLocalPort1Protocols().contains(protocol)) {
             return getLocalPort1();
@@ -153,11 +163,33 @@ public class TrackerConfiguration {
 
     @Override
     public String toString() {
-        return String
-                .format("TrackerConfiguration [platformHost=%s, localPort1=%s, localPort2=%s, bootstrapUser=%s, bootstrapPassword=%s, bootstrapTenant=%s, clientTimeout=%s, bootstrapPollIntervals=%s, cobanLocationReportTimeInterval=%s, rfv16LocationReportTimeInterval=%s, forceInitialHost=%s, getLocalPort1Protocols()=%s, getLocalPort2Protocols()=%s]",
-                        platformHost, localPort1, localPort2, bootstrapUser, bootstrapPassword, bootstrapTenant,
-                        clientTimeout, bootstrapPollIntervals, cobanLocationReportTimeInterval,
-                        rfv16LocationReportTimeInterval, forceInitialHost, getLocalPort1Protocols(), getLocalPort2Protocols());
+        StringBuilder builder = new StringBuilder();
+        builder.append("TrackerConfiguration [platformHost=");
+        builder.append(platformHost);
+        builder.append(", localPort1=");
+        builder.append(localPort1);
+        builder.append(", localPort2=");
+        builder.append(localPort2);
+        builder.append(", bootstrapUser=");
+        builder.append(bootstrapUser);
+        builder.append(", bootstrapTenant=");
+        builder.append(bootstrapTenant);
+        builder.append(", clientTimeout=");
+        builder.append(clientTimeout);
+        builder.append(", bootstrapPollIntervals=");
+        builder.append(bootstrapPollIntervals);
+        builder.append(", cobanLocationReportTimeInterval=");
+        builder.append(cobanLocationReportTimeInterval);
+        builder.append(", rfv16LocationReportTimeInterval=");
+        builder.append(rfv16LocationReportTimeInterval);
+        builder.append(", forceInitialHost=");
+        builder.append(forceInitialHost);
+        builder.append(", numberOfReaderWorkers=");
+        builder.append(numberOfReaderWorkers);
+        builder.append("]");
+        return builder.toString();
     }
+
+
     
 }

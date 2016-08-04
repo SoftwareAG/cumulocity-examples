@@ -39,9 +39,12 @@ public class ConfigUtils {
     private static final String COBAN_LOCATION_REPORT_INTERVAL_PROP = "coban.locationReport.timeInterval";
     private static final String RFV16_LOCATION_REPORT_INTERVAL_PROP = "rfv16.locationReport.timeInterval";
     private static final String DEFAULT_CLIENT_TIMEOUT = "" + TimeUnit.MINUTES.toMillis(5);
-    private static final Random random = new Random();
+    private static final String NUMBER_OF_READER_WORKERS = "numberOfReaderWorkers";
+    private static final Integer DEFAULT_NUMBER_OF_READER_WORKERS = 2;
     
+    private static final Random random = new Random();
     private static final ConfigUtils instance = new ConfigUtils();
+
     
     /**
      * Path to the folder with configuration files: common.properties and device.properties
@@ -90,7 +93,8 @@ public class ConfigUtils {
             .setBootstrapTenant("management")
             .setCobanLocationReportTimeInterval(getIntegerProperty(props, COBAN_LOCATION_REPORT_INTERVAL_PROP, CobanConstants.DEFAULT_LOCATION_REPORT_INTERVAL))
             .setRfv16LocationReportTimeInterval(getIntegerProperty(props, RFV16_LOCATION_REPORT_INTERVAL_PROP, RFV16Constants.DEFAULT_LOCATION_REPORT_INTERVAL))
-            .setClientTimeout(clientTimeout);
+            .setClientTimeout(clientTimeout)
+            .setNumberOfReaderWorkers(getIntegerProperty(props, NUMBER_OF_READER_WORKERS, DEFAULT_NUMBER_OF_READER_WORKERS));
         //@formatter:on
         logger.info(format("Configuration loaded from: %s: %s", sourceFilePath, config));
         return config;

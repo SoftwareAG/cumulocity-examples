@@ -17,7 +17,7 @@ import c8y.trackeragent_it.config.TestConfiguration;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = { TestConfiguration.class })
-public class NewDeviceRequestServiceTest {
+public class NewDeviceRequestServiceIT {
     
     @Autowired
     private TestSettings testSettings;

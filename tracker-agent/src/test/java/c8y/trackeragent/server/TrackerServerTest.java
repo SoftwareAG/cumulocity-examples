@@ -70,7 +70,7 @@ public class TrackerServerTest extends TrackerServerTestSupport {
 
         setCountOfExpectedReports(2);
         writer1.write("FIRST_REPORT");
-        Thread.sleep(200);
+        Thread.sleep(500);
         writer1.write("SECOND_REPORT");
         waitForReports();
         
