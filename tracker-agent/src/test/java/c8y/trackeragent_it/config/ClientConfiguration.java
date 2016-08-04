@@ -20,9 +20,13 @@ public class ClientConfiguration {
 
     @Value("${C8Y.password}")
     private String password;
+    
+    @Value("${C8Y.host}")
+    private String host;
 
     @Value("${tracker-agent.host}")
     private String trackerAgentHost;
+    
     
     @Bean
     public TestSettings testSettings() {
@@ -31,6 +35,7 @@ public class ClientConfiguration {
             .setC8yTenant(tenant)
             .setC8yUser(username)
             .setC8yPassword(password)
+            .setC8yHost(host)
             .setTrackerAgentHost(trackerAgentHost);
         //@formatter:on            
     }

@@ -36,7 +36,7 @@ public class Bootstraper {
     private final RestConnector restConnector;
     private final SocketWriter socketWriter;
 
-    public Bootstraper(
+    public Bootstraper (
             // @formatter:off
             TrackerConfiguration trackerAgentConfig, 
             TestSettings testSettings,
@@ -79,7 +79,7 @@ public class Bootstraper {
         enterDeviceContext(imei);
     }
 
-    private void bootstrapAgent(TrackerMessage deviceMessage) throws UnsupportedEncodingException, Exception, InterruptedException {
+    public synchronized void bootstrapAgent(TrackerMessage deviceMessage) throws UnsupportedEncodingException, Exception, InterruptedException {
         String id = bootstrapAgentRequestId();
 
         NewDeviceRequestRepresentation newDeviceRequest = new NewDeviceRequestRepresentation();
@@ -99,7 +99,14 @@ public class Bootstraper {
 
         acceptNewDeviceRequest(id);
         // ACCEPTED status
-
+    }
+    
+    public synchronized void deleteExistingAgentRequest() {
+        try {
+            restConnector.delete(newDeviceRequestsUri() + "/" + bootstrapAgentRequestId());
+        } catch (Exception ex) {
+            logger.info("OK, there is no legacy device request for tracker agent.");
+        }
     }
 
     private String bootstrapAgentRequestId() {
@@ -122,7 +129,7 @@ public class Bootstraper {
     }
 
     private String newDeviceRequestsUri() {
-        return trackerAgentConfig.getPlatformHost() + "/devicecontrol/newDeviceRequests";
+        return testSettings.getC8yHost() + "/devicecontrol/newDeviceRequests";
     }
 
     private String newDeviceRequestUri(String deviceId) {
@@ -147,23 +154,15 @@ public class Bootstraper {
         contextService.enterContext(deviceContext);
     }
 
-    public synchronized void deleteExistingAgentRequest() {
-        try {
-            restConnector.delete(newDeviceRequestsUri() + "/" + bootstrapAgentRequestId());
-        } catch (Exception ex) {
-            logger.info("OK, there is no legacy device request for tracker agent.");
-        }
-    }
-
     private Platform createBootstrapPlatform() {
         CumulocityCredentials credentials = cumulocityCredentials(trackerAgentConfig.getBootstrapUser(),
                 trackerAgentConfig.getBootstrapPassword()).withTenantId(testSettings.getC8yTenant()).build();
         return new PlatformImpl(trackerAgentConfig.getPlatformHost(), credentials);
     }
 
-    protected PlatformParameters createPlatformParameters() {
+    private PlatformParameters createPlatformParameters() {
         CumulocityCredentials credentials = cumulocityCredentials(testSettings.getC8yUser(), testSettings.getC8yPassword())
                 .withTenantId(testSettings.getC8yTenant()).build();
-        return new PlatformImpl(trackerAgentConfig.getPlatformHost(), credentials);
+        return new PlatformImpl(testSettings.getC8yHost(), credentials);
     }
 }
