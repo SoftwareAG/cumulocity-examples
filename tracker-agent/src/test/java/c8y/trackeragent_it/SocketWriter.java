@@ -12,8 +12,6 @@ import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import c8y.trackeragent.configuration.TrackerConfiguration;
-import c8y.trackeragent.protocol.TrackingProtocol;
 import c8y.trackeragent.utils.ByteHelper;
 import c8y.trackeragent.utils.message.TrackerMessage;
 
@@ -23,13 +21,11 @@ public class SocketWriter {
     
     private final Collection<Socket> sockets = new HashSet<Socket>();
     private final TestSettings testSettings;
-    private final TrackerConfiguration trackerAgentConfig;
-    private final TrackingProtocol trackingProtocol;
+    private Integer port;
     
-    public SocketWriter(TrackerConfiguration trackerAgentConfig, TestSettings testSettings, TrackingProtocol trackingProtocol) {
-        this.trackerAgentConfig = trackerAgentConfig;
+    public SocketWriter(TestSettings testSettings, Integer port) {
         this.testSettings = testSettings;
-        this.trackingProtocol = trackingProtocol;
+        this.port = port;
     }
 
     public Socket writeInNewConnectionAndKeepOpen(byte[] bis) throws Exception {
@@ -89,17 +85,14 @@ public class SocketWriter {
         destroySockets();
         String socketHost = testSettings.getTrackerAgentHost();
         try {
-            Socket socket = new Socket(socketHost, getLocalPort());
+            Socket socket = new Socket(socketHost, port);
             socket.setSoTimeout(2000);
             sockets.add(socket);
             return socket;
         } catch (IOException ex) {
-            System.out.println("Cant connect to socket, host = " + socketHost + ", port = " + getLocalPort());
+            System.out.println("Cant connect to socket, host = " + socketHost + ", port = " + port);
             throw ex;
         }
     }
     
-    private final int getLocalPort() {
-        return trackerAgentConfig.getPort(trackingProtocol);
-    }
 }

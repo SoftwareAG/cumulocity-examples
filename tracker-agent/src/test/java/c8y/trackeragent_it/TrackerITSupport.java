@@ -66,9 +66,7 @@ public abstract class TrackerITSupport {
         Thread.sleep(200);// avoid address already in use error
         System.out.println(testSettings);
         System.out.println(trackerAgentConfig);
-
-        socketWriter = new SocketWriter(trackerAgentConfig, testSettings, getTrackerProtocol());
-
+        socketWriter = new SocketWriter(testSettings, trackerAgentConfig.getPort(getTrackerProtocol()));
         bootstraper = new Bootstraper(trackerAgentConfig, testSettings, contextService, deviceCredentialsRepository, socketWriter);
         bootstraper.deleteExistingAgentRequest();
     }
