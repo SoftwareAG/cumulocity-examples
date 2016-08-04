@@ -27,6 +27,12 @@ public class TestConfiguration {
     @Value("${tracker-agent.host}")
     private String trackerAgentHost;
     
+    @Value("${C8Y.devicebootstrap.user}")
+    private String bootstrapUser;
+    
+    @Value("${C8Y.devicebootstrap.password}")
+    private String bootstrapPassword;
+    
     @Bean
     public TestSettings testSettings() {
         //@formatter:off
@@ -35,7 +41,9 @@ public class TestConfiguration {
             .setC8yUser(username)
             .setC8yPassword(password)
             .setC8yHost(host)
-            .setTrackerAgentHost(trackerAgentHost);
+            .setTrackerAgentHost(trackerAgentHost)
+            .setBootstrapUser(bootstrapUser)
+            .setBootstrapPassword(bootstrapPassword);
         //@formatter:on            
     }
     

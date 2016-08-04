@@ -15,11 +15,9 @@ import com.cumulocity.model.authentication.CumulocityCredentials;
 import com.cumulocity.rest.representation.devicebootstrap.NewDeviceRequestRepresentation;
 import com.cumulocity.sdk.client.Platform;
 import com.cumulocity.sdk.client.PlatformImpl;
-import com.cumulocity.sdk.client.PlatformParameters;
 import com.cumulocity.sdk.client.ResponseParser;
 import com.cumulocity.sdk.client.RestConnector;
 
-import c8y.trackeragent.configuration.TrackerConfiguration;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.utils.message.TrackerMessage;
@@ -28,7 +26,6 @@ public class Bootstraper {
 
     private static Logger logger = LoggerFactory.getLogger(Bootstraper.class);
 
-    private final TrackerConfiguration trackerAgentConfig;
     private final DeviceContextService contextService;
     private final DeviceCredentialsRepository deviceCredentialsRepository;
     private final Platform bootstrapPlatform;
@@ -36,15 +33,13 @@ public class Bootstraper {
     private final RestConnector restConnector;
     private final SocketWriter socketWriter;
 
-    public Bootstraper (
+    public Bootstraper(
             // @formatter:off
-            TrackerConfiguration trackerAgentConfig, 
             TestSettings testSettings,
             DeviceContextService contextService, 
             DeviceCredentialsRepository deviceCredentialsRepository, 
             SocketWriter socketWriter) {
             // @formatter:on
-        this.trackerAgentConfig = trackerAgentConfig;
         this.testSettings = testSettings;
         this.contextService = contextService;
         this.deviceCredentialsRepository = deviceCredentialsRepository;
@@ -79,7 +74,8 @@ public class Bootstraper {
         enterDeviceContext(imei);
     }
 
-    public synchronized void bootstrapAgent(TrackerMessage deviceMessage) throws UnsupportedEncodingException, Exception, InterruptedException {
+    public synchronized void bootstrapAgent(TrackerMessage deviceMessage)
+            throws UnsupportedEncodingException, Exception, InterruptedException {
         String id = bootstrapAgentRequestId();
 
         NewDeviceRequestRepresentation newDeviceRequest = new NewDeviceRequestRepresentation();
@@ -100,7 +96,7 @@ public class Bootstraper {
         acceptNewDeviceRequest(id);
         // ACCEPTED status
     }
-    
+
     public synchronized void deleteExistingAgentRequest() {
         try {
             restConnector.delete(newDeviceRequestsUri() + "/" + bootstrapAgentRequestId());
@@ -154,13 +150,13 @@ public class Bootstraper {
         contextService.enterContext(deviceContext);
     }
 
-    private Platform createBootstrapPlatform() {
-        CumulocityCredentials credentials = cumulocityCredentials(trackerAgentConfig.getBootstrapUser(),
-                trackerAgentConfig.getBootstrapPassword()).withTenantId(testSettings.getC8yTenant()).build();
-        return new PlatformImpl(trackerAgentConfig.getPlatformHost(), credentials);
+    private PlatformImpl createBootstrapPlatform() {
+        CumulocityCredentials credentials = cumulocityCredentials(testSettings.getBootstrapUser(), testSettings.getBootstrapPassword())
+                .withTenantId(testSettings.getC8yTenant()).build();
+        return new PlatformImpl(testSettings.getC8yHost(), credentials);
     }
 
-    private PlatformParameters createPlatformParameters() {
+    private PlatformImpl createPlatformParameters() {
         CumulocityCredentials credentials = cumulocityCredentials(testSettings.getC8yUser(), testSettings.getC8yPassword())
                 .withTenantId(testSettings.getC8yTenant()).build();
         return new PlatformImpl(testSettings.getC8yHost(), credentials);

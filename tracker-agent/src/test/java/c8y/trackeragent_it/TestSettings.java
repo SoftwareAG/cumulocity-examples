@@ -7,6 +7,8 @@ public class TestSettings {
     private String c8yTenant;
     private String c8yHost;
     private String trackerAgentHost;
+    private String bootstrapUser;
+    private String bootstrapPassword;
 
     public String getC8yUser() {
         return c8yUser;
@@ -52,6 +54,24 @@ public class TestSettings {
         this.c8yHost = c8yHost;
         return this;
     }
+    
+    public String getBootstrapUser() {
+        return bootstrapUser;
+    }
+
+    public TestSettings setBootstrapUser(String bootstrapUser) {
+        this.bootstrapUser = bootstrapUser;
+        return this;
+    }
+
+    public String getBootstrapPassword() {
+        return bootstrapPassword;
+    }
+
+    public TestSettings setBootstrapPassword(String bootstrapPassword) {
+        this.bootstrapPassword = bootstrapPassword;
+        return this;
+    }
 
     @Override
     public String toString() {
@@ -66,9 +86,13 @@ public class TestSettings {
         builder.append(c8yHost);
         builder.append(", trackerAgentHost=");
         builder.append(trackerAgentHost);
+        builder.append(", bootstrapUser=");
+        builder.append(bootstrapUser);
+        builder.append(", bootstrapPassword=");
+        builder.append(bootstrapPassword);
         builder.append("]");
         return builder.toString();
     }
-    
+
 
 }
