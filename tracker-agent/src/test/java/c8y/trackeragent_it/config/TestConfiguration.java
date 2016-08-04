@@ -1,13 +1,23 @@
 package c8y.trackeragent_it.config;
 
+import static com.cumulocity.model.authentication.CumulocityCredentials.Builder.cumulocityCredentials;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
+import com.cumulocity.model.authentication.CumulocityCredentials;
+import com.cumulocity.sdk.client.PlatformImpl;
+
+import c8y.trackeragent.TrackerPlatform;
 import c8y.trackeragent_it.TestSettings;
 
 @Configuration
+@EnableAutoConfiguration
 @PropertySource(value = { 
         "file:/etc/tracker-agent/test.properties" })
 public class TestConfiguration {
@@ -36,7 +46,7 @@ public class TestConfiguration {
     @Bean
     public TestSettings testSettings() {
         //@formatter:off
-        return new TestSettings()
+        TestSettings result = new TestSettings()
             .setC8yTenant(tenant)
             .setC8yUser(username)
             .setC8yPassword(password)
@@ -44,7 +54,8 @@ public class TestConfiguration {
             .setTrackerAgentHost(trackerAgentHost)
             .setBootstrapUser(bootstrapUser)
             .setBootstrapPassword(bootstrapPassword);
+        System.out.println(result);
+        return result;
         //@formatter:on            
     }
-    
 }

@@ -1,9 +1,7 @@
-package c8y.trackeragent_it.simulator;
+package c8y.trackeragent_it.service;
 
 import static org.fest.assertions.Assertions.assertThat;
-import static org.junit.Assert.*;
 
-import org.fest.assertions.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,30 +9,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.cumulocity.rest.representation.devicebootstrap.NewDeviceRequestRepresentation;
 import com.cumulocity.sdk.client.PlatformImpl;
 
-import c8y.trackeragent.TrackerPlatform;
-import c8y.trackeragent.protocol.telic.TelicDeviceMessages;
-import c8y.trackeragent.utils.Positions;
-import c8y.trackeragent.utils.message.TrackerMessage;
-import c8y.trackeragent_it.SocketWriter;
 import c8y.trackeragent_it.TestSettings;
 import c8y.trackeragent_it.TrackerITSupport;
 import c8y.trackeragent_it.config.TestConfiguration;
-import c8y.trackeragent_it.service.Bootstraper;
-import c8y.trackeragent_it.service.NewDeviceRequestService;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = { TestConfiguration.class })
-public class LoadIT {
+public class NewDeviceRequestServiceTest {
     
     @Autowired
     private TestSettings testSettings;
-    
-    private TelicDeviceMessages deviceMessages = new TelicDeviceMessages();
-
-    private Bootstraper bootstraper;
     
     private NewDeviceRequestService newDeviceRequestService;
     
@@ -42,12 +28,11 @@ public class LoadIT {
     public void init() {
         PlatformImpl platform = TrackerITSupport.platform(testSettings);
         newDeviceRequestService = new NewDeviceRequestService(platform, testSettings);
-        SocketWriter socketWriter = new SocketWriter(testSettings, 9090);
-        bootstraper = new Bootstraper(testSettings, socketWriter);
+        newDeviceRequestService.deleteAll();
     }
     
     @Test
-    public void shouldCreateNewDeviceRequest() throws Exception {
+    public void shouldManageNewDeviceRequest() throws Exception {
         newDeviceRequestService.create("abc");
         
         assertThat(newDeviceRequestService.get("abc")).isNotNull();
@@ -63,19 +48,24 @@ public class LoadIT {
     }
     
     @Test
-    public void shouldBootstrapMultiplyTelicDevices() throws Exception {
-        int imeiStart = 100020;
-        int imeiStop =  100021;
-        for(int imei = imeiStart; imei <= imeiStop; imei++) {
-            bootstrapDevice(bootstraper, "" + imei);
-        }
-    }
-
-    private void bootstrapDevice(Bootstraper bootstraper, String imei) throws Exception {
-        TrackerMessage message = deviceMessages.positionUpdate(imei, Positions.ZERO);
-        bootstraper.bootstrapDevice(imei, message);
+    public void shouldGetAllNewDeviceRequest() throws Exception {
+        newDeviceRequestService.create("abc");
+        newDeviceRequestService.create("cde");
+        
+        assertThat(newDeviceRequestService.getAll()).hasSize(2);
+        
+        newDeviceRequestService.delete("abc");
+        newDeviceRequestService.delete("cde");
     }
     
-    
+    @Test
+    public void shouldDeleteAllNewDeviceRequest() throws Exception {
+        newDeviceRequestService.create("abc");
+        newDeviceRequestService.create("cde");
+        
+        newDeviceRequestService.deleteAll();
+        
+        assertThat(newDeviceRequestService.getAll()).hasSize(0);
+    }
 
 }

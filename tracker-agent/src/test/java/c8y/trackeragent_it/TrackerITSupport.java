@@ -32,6 +32,7 @@ import c8y.trackeragent.service.AlarmType;
 import c8y.trackeragent.utils.message.TrackerMessage;
 import c8y.trackeragent_it.config.ServerConfiguration;
 import c8y.trackeragent_it.config.TestConfiguration;
+import c8y.trackeragent_it.service.Bootstraper;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = { ServerConfiguration.class, TestConfiguration.class })
@@ -58,6 +59,7 @@ public abstract class TrackerITSupport {
     @Autowired
     protected DeviceCredentialsRepository deviceCredentialsRepository;
     
+    @Autowired
     protected TrackerPlatform trackerPlatform;
 
     protected Bootstraper bootstraper;
@@ -110,11 +112,14 @@ public abstract class TrackerITSupport {
         return getTrackerDevice(imei).findActiveAlarm(type);
     }
     
-    private TrackerPlatform trackerPlatform(TestSettings testSettings) {
+    public static TrackerPlatform trackerPlatform(TestSettings testSettings) {
+        return new TrackerPlatform(platform(testSettings));
+    }
+    
+    public static PlatformImpl platform(TestSettings testSettings) {
         CumulocityCredentials credentials = cumulocityCredentials(testSettings.getC8yUser(), testSettings.getC8yPassword())
                 .withTenantId(testSettings.getC8yTenant()).build();
-        PlatformImpl trackerPlatformImpl = new PlatformImpl(testSettings.getC8yHost(), credentials);
-        return new TrackerPlatform(trackerPlatformImpl);
+        return new PlatformImpl(testSettings.getC8yHost(), credentials);
     }
 
 }

@@ -1,4 +1,4 @@
-package c8y.trackeragent_it;
+package c8y.trackeragent_it.service;
 
 import static com.cumulocity.model.authentication.CumulocityCredentials.Builder.cumulocityCredentials;
 import static com.cumulocity.rest.representation.operation.DeviceControlMediaType.NEW_DEVICE_REQUEST;
@@ -17,10 +17,14 @@ import com.cumulocity.sdk.client.Platform;
 import com.cumulocity.sdk.client.PlatformImpl;
 import com.cumulocity.sdk.client.ResponseParser;
 import com.cumulocity.sdk.client.RestConnector;
+import com.cumulocity.sdk.client.inventory.InventoryApi;
+import com.cumulocity.sdk.client.inventory.InventoryFilter;
 
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.utils.message.TrackerMessage;
+import c8y.trackeragent_it.SocketWriter;
+import c8y.trackeragent_it.TestSettings;
 
 public class Bootstraper {
 
@@ -29,9 +33,12 @@ public class Bootstraper {
     private final DeviceContextService contextService;
     private final DeviceCredentialsRepository deviceCredentialsRepository;
     private final Platform bootstrapPlatform;
+    private final PlatformImpl trackerPlatform;
     private final TestSettings testSettings;
     private final RestConnector restConnector;
     private final SocketWriter socketWriter;
+    private final InventoryApi inventoryApi;
+    private Boolean isAgentBootstraped;
 
     public Bootstraper(
             // @formatter:off
@@ -44,12 +51,22 @@ public class Bootstraper {
         this.contextService = contextService;
         this.deviceCredentialsRepository = deviceCredentialsRepository;
         this.bootstrapPlatform = createBootstrapPlatform();
-        this.restConnector = new RestConnector(createPlatformParameters(), new ResponseParser());
+        this.trackerPlatform = createTrackerPlatform();
+        this.restConnector = new RestConnector(trackerPlatform, new ResponseParser());
         this.socketWriter = socketWriter;
+        this.inventoryApi = this.trackerPlatform.getInventoryApi();
+    }
+
+    public Bootstraper(TestSettings testSettings, SocketWriter socketWriter) {
+        this(testSettings, null, null, socketWriter);
     }
 
     public void bootstrapDevice(String imei, TrackerMessage deviceMessage) throws Exception {
-        if (!deviceCredentialsRepository.hasAgentCredentials(testSettings.getC8yTenant())) {
+        logger.info("Bootstrap: {}", imei);
+        if (isAgentBootstraped()) {
+            logger.info("Agent boostraped");
+        } else {
+            logger.info("Agent not boostraped");
             bootstrapAgent(deviceMessage);
         }
         createNewDeviceRequest(imei);
@@ -68,14 +85,26 @@ public class Bootstraper {
         Thread.sleep(1000);
         // Device credentials got
 
-        DeviceCredentials credentials = deviceCredentialsRepository.getDeviceCredentials(imei);
-        logger.info("Created credentails: {}", credentials);
-        assertThat(credentials).isNotNull();
-        enterDeviceContext(imei);
+        if (deviceCredentialsRepository != null) {
+            DeviceCredentials credentials = deviceCredentialsRepository.getDeviceCredentials(imei);
+            logger.info("Created credentails: {}", credentials);
+            assertThat(credentials).isNotNull();
+            enterDeviceContext(imei);
+        }
+    }
+
+    private boolean isAgentBootstraped() {
+//        if (isAgentBootstraped != null) {
+//            return isAgentBootstraped;
+//        }
+        InventoryFilter filter = new InventoryFilter().byType("c8y_TrackerAgent");
+        isAgentBootstraped = !inventoryApi.getManagedObjectsByFilter(filter).get().getManagedObjects().isEmpty();
+        return isAgentBootstraped;
     }
 
     public synchronized void bootstrapAgent(TrackerMessage deviceMessage)
             throws UnsupportedEncodingException, Exception, InterruptedException {
+        logger.info("Boostrap agent");
         String id = bootstrapAgentRequestId();
 
         NewDeviceRequestRepresentation newDeviceRequest = new NewDeviceRequestRepresentation();
@@ -99,7 +128,7 @@ public class Bootstraper {
 
     public synchronized void deleteExistingAgentRequest() {
         try {
-            restConnector.delete(newDeviceRequestsUri() + "/" + bootstrapAgentRequestId());
+            restConnector.delete(newDeviceRequestUri() + "/" + bootstrapAgentRequestId());
         } catch (Exception ex) {
             logger.info("OK, there is no legacy device request for tracker agent.");
         }
@@ -110,9 +139,21 @@ public class Bootstraper {
     }
 
     private synchronized void createNewDeviceRequest(String deviceId) {
+        NewDeviceRequestRepresentation newDeviceRequest = getNewDeviceRequest(deviceId);
+        if (newDeviceRequest != null) {
+            return;
+        }
         NewDeviceRequestRepresentation representation = new NewDeviceRequestRepresentation();
         representation.setId(deviceId);
-        restConnector.post(newDeviceRequestsUri(), NEW_DEVICE_REQUEST, representation);
+        restConnector.post(newDeviceRequestUri(), NEW_DEVICE_REQUEST, representation);
+    }
+
+    private NewDeviceRequestRepresentation getNewDeviceRequest(String deviceId) {
+        try {
+            return restConnector.get(newDeviceRequestUri(deviceId), NEW_DEVICE_REQUEST, NewDeviceRequestRepresentation.class);
+        } catch (Exception ex) {
+            return null;
+        }
     }
 
     protected void connectNewDeviceRequest(String deviceId) throws Exception {
@@ -124,12 +165,12 @@ public class Bootstraper {
         }
     }
 
-    private String newDeviceRequestsUri() {
+    private String newDeviceRequestUri() {
         return testSettings.getC8yHost() + "/devicecontrol/newDeviceRequests";
     }
 
     private String newDeviceRequestUri(String deviceId) {
-        return newDeviceRequestsUri() + "/" + deviceId;
+        return newDeviceRequestUri() + "/" + deviceId;
     }
 
     private void acceptNewDeviceRequest(String deviceId) {
@@ -156,7 +197,7 @@ public class Bootstraper {
         return new PlatformImpl(testSettings.getC8yHost(), credentials);
     }
 
-    private PlatformImpl createPlatformParameters() {
+    private PlatformImpl createTrackerPlatform() {
         CumulocityCredentials credentials = cumulocityCredentials(testSettings.getC8yUser(), testSettings.getC8yPassword())
                 .withTenantId(testSettings.getC8yTenant()).build();
         return new PlatformImpl(testSettings.getC8yHost(), credentials);
