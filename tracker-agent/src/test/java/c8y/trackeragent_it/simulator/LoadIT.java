@@ -41,7 +41,7 @@ public class LoadIT {
         newDeviceRequestService = new NewDeviceRequestService(platform, testSettings);
         socketWriter = new SocketWriter(testSettings, 9090);
         bootstraper = new Bootstraper(testSettings, socketWriter, newDeviceRequestService);
-        newDeviceRequestService.deleteAll();
+        //newDeviceRequestService.deleteAll();
     }
     
     @Test

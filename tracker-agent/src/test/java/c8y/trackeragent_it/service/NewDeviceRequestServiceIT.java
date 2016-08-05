@@ -3,6 +3,7 @@ package c8y.trackeragent_it.service;
 import static org.fest.assertions.Assertions.assertThat;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import c8y.trackeragent_it.config.TestConfiguration;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = { TestConfiguration.class })
+@Ignore
 public class NewDeviceRequestServiceIT {
     
     @Autowired
