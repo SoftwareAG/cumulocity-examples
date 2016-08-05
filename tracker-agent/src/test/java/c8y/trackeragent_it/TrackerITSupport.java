@@ -68,7 +68,7 @@ public abstract class TrackerITSupport {
 
     @BeforeClass
     public static void baseClassSetup() throws IOException {
-        clearPersistedDevices();
+        //clearPersistedDevices();
     }
 
     @Before
