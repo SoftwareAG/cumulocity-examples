@@ -1,9 +1,12 @@
 package c8y.trackeragent_it;
 
+import org.fest.assertions.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 
-import c8y.trackeragent.device.TrackerDevice;
+import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
+
+import c8y.Position;
 import c8y.trackeragent.protocol.TrackingProtocol;
 import c8y.trackeragent.protocol.telic.TelicDeviceMessages;
 import c8y.trackeragent.utils.Devices;
@@ -33,8 +36,10 @@ public class TelicReportIT extends TrackerITSupport {
         writeInNewConnection(positionUpdate);
         
         Thread.sleep(1000);
-        TrackerDevice newDevice = getTrackerDevice(imei);
-        Positions.assertEqual(newDevice.getPosition(), Positions.SAMPLE_4);
+        
+        ManagedObjectRepresentation deviceMO = getDeviceMO(imei);
+        Assertions.assertThat(deviceMO).isNotNull();
+        Positions.assertEqual(deviceMO.get(Position.class), Positions.SAMPLE_4);
     }
 
 

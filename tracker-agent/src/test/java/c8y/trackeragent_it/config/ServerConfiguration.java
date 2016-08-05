@@ -48,7 +48,7 @@ public class ServerConfiguration {
     
     @PostConstruct
     public void startServer() throws IOException {
-        servers.startAll();
-        tenantBinder.init();
+//        servers.startAll();
+//        tenantBinder.init();
     }
 }

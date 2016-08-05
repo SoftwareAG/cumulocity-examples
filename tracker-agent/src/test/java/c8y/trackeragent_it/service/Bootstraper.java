@@ -1,15 +1,12 @@
 package c8y.trackeragent_it.service;
 
 import static com.cumulocity.model.authentication.CumulocityCredentials.Builder.cumulocityCredentials;
-import static org.fest.assertions.Assertions.assertThat;
 
 import java.io.UnsupportedEncodingException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.cumulocity.agent.server.context.DeviceContext;
-import com.cumulocity.agent.server.context.DeviceContextService;
 import com.cumulocity.model.authentication.CumulocityCredentials;
 import com.cumulocity.rest.representation.devicebootstrap.NewDeviceRequestRepresentation;
 import com.cumulocity.sdk.client.Platform;
@@ -17,8 +14,6 @@ import com.cumulocity.sdk.client.PlatformImpl;
 import com.cumulocity.sdk.client.inventory.InventoryApi;
 import com.cumulocity.sdk.client.inventory.InventoryFilter;
 
-import c8y.trackeragent.devicebootstrap.DeviceCredentials;
-import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.utils.message.TrackerMessage;
 import c8y.trackeragent_it.TestSettings;
 
@@ -26,8 +21,6 @@ public class Bootstraper {
 
     private static Logger logger = LoggerFactory.getLogger(Bootstraper.class);
 
-    private final DeviceContextService contextService;
-    private final DeviceCredentialsRepository deviceCredentialsRepository;
     private final Platform bootstrapPlatform;
     private final PlatformImpl trackerPlatform;
     private final TestSettings testSettings;
@@ -35,26 +28,13 @@ public class Bootstraper {
     private final InventoryApi inventoryApi;
     private final NewDeviceRequestService newDeviceRequestService;
 
-    public Bootstraper(
-            // @formatter:off
-            TestSettings testSettings,
-            DeviceContextService contextService, 
-            DeviceCredentialsRepository deviceCredentialsRepository, 
-            SocketWriter socketWriter, 
-            NewDeviceRequestService newDeviceRequestService) {
-            // @formatter:on
+    public Bootstraper(TestSettings testSettings, SocketWriter socketWriter, NewDeviceRequestService newDeviceRequestService) {
         this.testSettings = testSettings;
-        this.contextService = contextService;
-        this.deviceCredentialsRepository = deviceCredentialsRepository;
         this.newDeviceRequestService = newDeviceRequestService;
         this.bootstrapPlatform = createBootstrapPlatform();
         this.trackerPlatform = createTrackerPlatform();
         this.socketWriter = socketWriter;
         this.inventoryApi = this.trackerPlatform.getInventoryApi();
-    }
-
-    public Bootstraper(TestSettings testSettings, SocketWriter socketWriter, NewDeviceRequestService newDeviceRequestService) {
-        this(testSettings, null, null, socketWriter, newDeviceRequestService);
     }
 
     public void bootstrapDevice(String imei, TrackerMessage deviceMessage) throws Exception {
@@ -80,38 +60,31 @@ public class Bootstraper {
         socketWriter.writeInNewConnection(deviceMessage);
         Thread.sleep(1000);
         // Device credentials got
-
-        if (deviceCredentialsRepository != null) {
-            DeviceCredentials credentials = deviceCredentialsRepository.getDeviceCredentials(imei);
-            logger.info("Created credentails: {}", credentials);
-            assertThat(credentials).isNotNull();
-            enterDeviceContext(imei);
-        }
     }
-    
+
     public synchronized void bootstrapAgent(TrackerMessage deviceMessage)
             throws UnsupportedEncodingException, Exception, InterruptedException {
         logger.info("Boostrap agent");
         String id = bootstrapAgentRequestId();
         logger.info("Request id: {}", id);
-        
+
         NewDeviceRequestRepresentation newDeviceRequest = new NewDeviceRequestRepresentation();
         newDeviceRequest.setId(id);
         try {
             bootstrapPlatform.getDeviceCredentialsApi().delete(newDeviceRequest);
         } catch (Exception ex) {
-            
+
         }
         // agent request deleted
-        
+
         newDeviceRequestService.create(id);
         Thread.sleep(1000);
         // WAITING_FOR_CONNECTION
-        
+
         connectNewDeviceRequest(id);
         Thread.sleep(1000);
         // PENDING_ACCEPTANCE
-        
+
         newDeviceRequestService.accept(id);
         // ACCEPTED status
     }
@@ -120,7 +93,6 @@ public class Bootstraper {
         InventoryFilter filter = new InventoryFilter().byType("c8y_TrackerAgent");
         return inventoryApi.getManagedObjectsByFilter(filter).get().getManagedObjects().size() > 0;
     }
-
 
     public synchronized void deleteExistingAgentRequest() {
         try {
@@ -141,13 +113,6 @@ public class Bootstraper {
         } catch (Exception ex) {
             logger.info("Device with id {} not connected.", deviceId);
         }
-    }
-
-    private void enterDeviceContext(String imei) {
-        DeviceCredentials deviceCredentials = deviceCredentialsRepository.getDeviceCredentials(imei);
-        DeviceCredentials agentCredentials = deviceCredentialsRepository.getAgentCredentials(deviceCredentials.getTenant());
-        DeviceContext deviceContext = new DeviceContext(agentCredentials);
-        contextService.enterContext(deviceContext);
     }
 
     private PlatformImpl createBootstrapPlatform() {

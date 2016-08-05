@@ -2,13 +2,13 @@ package c8y.trackeragent_it;
 
 import static com.cumulocity.model.authentication.CumulocityCredentials.Builder.cumulocityCredentials;
 
-import java.io.File;
 import java.io.IOException;
+import java.util.Date;
+import java.util.List;
 
-import org.apache.commons.io.FileUtils;
+import org.joda.time.DateTime;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -16,13 +16,20 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.cumulocity.agent.server.context.DeviceContextService;
 import com.cumulocity.agent.server.repository.InventoryRepository;
+import com.cumulocity.model.ID;
 import com.cumulocity.model.authentication.CumulocityCredentials;
+import com.cumulocity.model.event.CumulocityAlarmStatuses;
+import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
+import com.cumulocity.rest.representation.event.EventRepresentation;
+import com.cumulocity.rest.representation.identity.ExternalIDRepresentation;
+import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.PlatformImpl;
+import com.cumulocity.sdk.client.alarm.AlarmFilter;
+import com.cumulocity.sdk.client.event.EventFilter;
 
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerPlatform;
-import c8y.trackeragent.configuration.ConfigUtils;
 import c8y.trackeragent.configuration.TrackerConfiguration;
 import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
@@ -53,6 +60,7 @@ public abstract class TrackerITSupport {
     protected AlarmMappingService alarmMappingService;
 
     @Autowired
+    @Deprecated
     protected DeviceContextService contextService;
 
     @Autowired
@@ -66,11 +74,6 @@ public abstract class TrackerITSupport {
     protected Bootstraper bootstraper;
     protected SocketWriter socketWriter;
 
-    @BeforeClass
-    public static void baseClassSetup() throws IOException {
-        //clearPersistedDevices();
-    }
-
     @Before
     public void baseSetUp() throws Exception {
         trackerPlatform = trackerPlatform(testSettings);
@@ -79,7 +82,7 @@ public abstract class TrackerITSupport {
         System.out.println(trackerAgentConfig);
         socketWriter = new SocketWriter(testSettings, trackerAgentConfig.getPort(getTrackerProtocol()));
         NewDeviceRequestService newDeviceRequestService = new NewDeviceRequestService(trackerPlatform.getPlatformParameters(), testSettings);
-        bootstraper = new Bootstraper(testSettings, contextService, deviceCredentialsRepository, socketWriter, newDeviceRequestService);
+        bootstraper = new Bootstraper(testSettings, socketWriter, newDeviceRequestService);
         bootstraper.deleteExistingAgentRequest();
     }
 
@@ -90,19 +93,19 @@ public abstract class TrackerITSupport {
 
     protected abstract TrackingProtocol getTrackerProtocol();
 
-    private static void clearPersistedDevices() throws IOException {
-        String filePath = "/etc/tracker-agent/" + ConfigUtils.DEVICES_FILE_NAME;
-        File devicesFile = new File(filePath);
-        FileUtils.deleteQuietly(devicesFile);
-        devicesFile.createNewFile();
-    }
-
     protected String writeInNewConnection(TrackerMessage... deviceMessages) throws Exception {
         return socketWriter.writeInNewConnection(deviceMessages);
     }
+    
+    protected ManagedObjectRepresentation getDeviceMO(String imei) {
+        GId gid = getGId(imei);
+        return trackerPlatform.getInventoryApi().get(gid);
+    }
 
-    protected TrackerDevice getTrackerDevice(String imei) {
-        return trackerAgent.getOrCreateTrackerDevice(imei);
+    private GId getGId(String imei) {
+        ID id = TrackerDevice.imeiAsId(imei);
+        ExternalIDRepresentation eir = trackerPlatform.getIdentityApi().getExternalId(id);
+        return eir.getManagedObject().getId();
     }
 
     protected void bootstrapDevice(String imei, TrackerMessage deviceMessage) throws Exception {
@@ -110,8 +113,20 @@ public abstract class TrackerITSupport {
     }
 
     protected AlarmRepresentation findAlarm(String imei, AlarmType alarmType) {
+        GId gId = getGId(imei);
         String type = alarmMappingService.getType(alarmType.name());
-        return getTrackerDevice(imei).findActiveAlarm(type);
+        AlarmFilter filter = new AlarmFilter().bySource(gId).byStatus(CumulocityAlarmStatuses.ACTIVE).byType(type);
+        List<AlarmRepresentation> alarms = trackerPlatform.getAlarmApi().getAlarmsByFilter(filter).get().getAlarms();
+        return alarms.isEmpty() ? null : alarms.get(0);
+    }
+    
+    protected EventRepresentation findLastEvent(String imei, String type) {
+        GId gId = getGId(imei);
+        Date fromDate = new Date(0);
+        Date toDate = new DateTime().plusDays(1).toDate();
+        EventFilter filter = new EventFilter().bySource(gId).byType(type).byDate(fromDate, toDate);
+        List<EventRepresentation> events = trackerPlatform.getEventApi().getEventsByFilter(filter).get().getEvents();
+        return events.isEmpty() ? null : events.get(0);
     }
     
     public static TrackerPlatform trackerPlatform(TestSettings testSettings) {

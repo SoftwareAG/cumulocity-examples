@@ -118,11 +118,11 @@ public class CobanReportIT extends TrackerITSupport {
 	}
 
 	private EventRepresentation actualPositionEvent() {
-		return getTrackerDevice(imei).findLastEvent(TrackerDevice.LU_EVENT_TYPE);
+	    return findLastEvent(imei, TrackerDevice.LU_EVENT_TYPE);
 	}
 
 	private Position actualPositionInTracker() {
-		return getTrackerDevice(imei).getPosition();
+	    return getDeviceMO(imei).get(Position.class);
 	}
 
 }
