@@ -38,8 +38,6 @@ public class ConnectionsContainer {
     private final Map<SocketChannel, ActiveConnection> connectionsIndex = new ConcurrentHashMap<SocketChannel, ActiveConnection>();
     private final List<ActiveConnection> connections = new ArrayList<ActiveConnection>();
 
-    private int channelStatesPos = 0;
-
     public ActiveConnection get(SocketChannel channel) {
         return connectionsIndex.get(channel);
     }
@@ -92,16 +90,17 @@ public class ConnectionsContainer {
     }
 
     public ActiveConnection next() {
-        if (connections.size() == 0) {
-            return null;
+        for (ActiveConnection connection : connections) {
+            if (connection.isProcessing()) {
+                continue;
+            }
+            if (connection.getReportBuffer().isEmpty()) {
+                continue;
+            }
+            connection.setProcessing(true);
+            return connection;
         }
-        channelStatesPos = (channelStatesPos + 1) % connections.size();
-        ActiveConnection result = connections.get(channelStatesPos);
-        if (result.isProcessing()) {
-            return null;
-        }
-        result.setProcessing(true);
-        return result;
+        return null;
     }
 
 }

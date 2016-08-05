@@ -18,7 +18,7 @@ public class ReaderWorker implements Runnable {
         while (true) {
             ActiveConnection connection = connectionProvider.next();
             if (connection == null) {
-                return;
+                break;
             }
             try {
                 process(connection);
@@ -31,7 +31,7 @@ public class ReaderWorker implements Runnable {
     }
 
     private void process(ActiveConnection connection) {
-        byte[] data = connection.getReportBuffer().getReport();
+        byte[] data = connection.getReportBuffer().pollReport();
         if (data == null) {
             return;
         }        

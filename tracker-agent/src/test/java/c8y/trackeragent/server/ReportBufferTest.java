@@ -11,15 +11,15 @@ public class ReportBufferTest {
     
     @Test
     public void shouldParseReport() throws Exception {
-        assertThat(reportBuffer.getReport()).isNull();
+        assertThat(reportBuffer.pollReport()).isNull();
         
         append("abc");
-        assertThat(reportBuffer.getReport()).isEqualTo(getBytes("abc"));
+        assertThat(reportBuffer.pollReport()).isEqualTo(getBytes("abc"));
         
-        assertThat(reportBuffer.getReport()).isNull();
+        assertThat(reportBuffer.pollReport()).isNull();
         
         append("abc", 1);
-        assertThat(reportBuffer.getReport()).isEqualTo(getBytes("a"));
+        assertThat(reportBuffer.pollReport()).isEqualTo(getBytes("a"));
     }
 
     private void append(String text) {

@@ -18,10 +18,14 @@ public class ReportBuffer {
         }
     }
 
-    public byte[] getReport() {
+    public byte[] pollReport() {
         synchronized (monitor) {
             return content.poll();
         }
+    }
+    
+    public boolean isEmpty() {
+        return content.isEmpty();
     }
     
     private static byte[] copy(byte[] data, int dataLength) {
