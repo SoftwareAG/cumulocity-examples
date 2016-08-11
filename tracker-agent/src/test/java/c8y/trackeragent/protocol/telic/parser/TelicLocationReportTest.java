@@ -80,6 +80,24 @@ public class TelicLocationReportTest {
     }
 
     @Test
+    public void shouldUpdateDeviceGpsAccuracyFromRaw1() throws Exception {
+        String msg1 = "002016217799,100816221715,0,100816221715,008796214,53057035,6,0,0,0,30,0,0,54945,26201,0010,00,154,0,0,0109,4533,69";
+        String[] report1 = msg1.split(",");
+        telic.onParsed(new ReportContext(report1, Devices.IMEI_1, null));
+        verifyReport();
+        assertThat(positionCaptor.getValue().getAccuracy()).isEqualTo(69);
+    }
+
+    @Test
+    public void shouldUpdateDeviceGpsAccuracyFromRaw2() throws Exception {
+        String msg2 = "002016108899,100816221727,0,100816221727,008795539,53056970,6,0,0,0,30,0,0,54976,26201,0010,00,143,0,0,0109,14263,119";
+        String[] report2 = msg2.split(",");
+        telic.onParsed(new ReportContext(report2, Devices.IMEI_1, null));
+        verifyReport();
+        assertThat(positionCaptor.getValue().getAccuracy()).isEqualTo(119);
+    }
+
+    @Test
     public void shouldNotUpdateDeviceGpsAccuracy() throws Exception {
         String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1).asArray();
 
