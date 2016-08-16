@@ -51,7 +51,7 @@ public class LoadIT {
 
 //    private static final int IMEI_START     = 200005;
 //    private static final int IMEI_STOP      = 200007;
-    private static final int IMEI_START     = 100136;
+    private static final int IMEI_START     = 100000;
     private static final int IMEI_STOP      = 100200;
     private static final int TOTAL_TASKS_PER_DEVICE = 200;
     private static final int TOTAL_THREADS = 1;
@@ -64,7 +64,7 @@ public class LoadIT {
         socketWriter = newSocketWritter();
         bootstraper = new Bootstraper(testSettings, socketWriter, newDeviceRequestService);
         for (int imeiNo = IMEI_START; imeiNo <= IMEI_STOP; imeiNo++) {
-            String imei = "" + imeiNo;
+            String imei = String.valueOf(imeiNo);
             imeis.add(imei);
             socketWriters.put(imei, newSocketWritter());
         }
@@ -92,7 +92,7 @@ public class LoadIT {
         for (int index = 0; index < TOTAL_THREADS; index++) {
             executorService.execute(new SimulatorWorker(simulatorContext));
         }
-        countDownLatch.await(60, TimeUnit.SECONDS);
+        countDownLatch.await(600, TimeUnit.SECONDS);
         Thread.sleep(TimeUnit.SECONDS.toMillis(20));
     }
 

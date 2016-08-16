@@ -127,7 +127,7 @@ public abstract class BaseConnectedTracker<F extends Fragment> implements Connec
             for (final Parser parser : Iterables.filter(fragments, Parser.class)) {
                 processReport(reportContext, parser);
             }
-            logger.debug("Finished processing report");
+            logger.info("Finished processing report");
         } catch (NotBootstrapedException nbex) {
             logger.debug(nbex.getMessage());
         }

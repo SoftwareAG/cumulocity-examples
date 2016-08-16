@@ -19,18 +19,9 @@ public class SimulatorWorker implements Runnable {
     public void run() {
         SimulatorTask task;
         do {
-            sleep();
             task = context.poll();
             processTask(task);
         } while (task != null);
-    }
-
-    private void sleep() {
-        try {
-            Thread.sleep(200);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 
     private void processTask(SimulatorTask task) {
