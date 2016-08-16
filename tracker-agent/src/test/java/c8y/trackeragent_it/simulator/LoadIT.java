@@ -49,8 +49,10 @@ public class LoadIT {
 
     private Map<String, SocketWriter> socketWriters = new HashMap<>();
 
-    private static final int IMEI_START     = 100101;
-    private static final int IMEI_STOP      = 100200;
+    private static final int IMEI_START     = 200001;
+    private static final int IMEI_STOP      = 200001;
+//    private static final int IMEI_START     = 100000;
+//    private static final int IMEI_STOP      = 100135;
     private static final int TOTAL_TASKS_PER_DEVICE = 200;
     private static final int TOTAL_THREADS = 1;
     private static final int REMOTE_PORT = 9091;
