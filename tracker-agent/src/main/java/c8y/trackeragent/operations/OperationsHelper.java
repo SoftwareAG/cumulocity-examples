@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import com.cumulocity.agent.server.context.DeviceContextService;
 import com.cumulocity.agent.server.logging.LoggingService;
 import com.cumulocity.agent.server.repository.IdentityRepository;
 import com.cumulocity.model.idtype.GId;
@@ -61,6 +60,9 @@ public class OperationsHelper {
                 ConnectionRegistry.instance().remove(device.getImei());
             }
         } else {
+            operation.setStatus(OperationStatus.FAILED.toString());
+            operation.setFailureReason("Tracker device is currently not connected, cannot send operation.");
+            deviceControlApi.update(operation);
             logger.info("Ignore operation with ID {} -> device is currently not connected to agent", operation.getId());
         }    	
     }
