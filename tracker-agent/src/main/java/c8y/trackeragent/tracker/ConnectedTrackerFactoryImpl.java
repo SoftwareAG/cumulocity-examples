@@ -33,7 +33,7 @@ public class ConnectedTrackerFactoryImpl implements ConnectedTrackerFactory {
         byte markingByte = readData.getData()[0];
         ConnectedTracker result = create(localPort, markingByte);
         if (result == null) {
-            logger.error("No matching tracker found for first byte " + markingByte + " on port " + localPort);
+            throw new RuntimeException("No matching tracker found for first byte " + markingByte + " on port " + localPort);
         } else {
             logger.debug("Tracker for new connection: {}", result.getClass().getSimpleName());
         }

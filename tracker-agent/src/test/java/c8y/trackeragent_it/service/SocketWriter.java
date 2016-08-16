@@ -15,27 +15,30 @@ import c8y.trackeragent.utils.message.TrackerMessage;
 import c8y.trackeragent_it.TestSettings;
 
 public class SocketWriter {
-    
+
     private static Logger logger = LoggerFactory.getLogger(SocketWriter.class);
-    
-    //private static final Collection<Socket> sockets = new HashSet<Socket>();
+
+    // private static final Collection<Socket> sockets = new HashSet<Socket>();
     private final TestSettings testSettings;
     private Integer port;
-    
+    private Socket socket;
+
     public SocketWriter(TestSettings testSettings, Integer port) {
         this.testSettings = testSettings;
         this.port = port;
     }
 
-    public Socket writeInNewConnectionAndKeepOpen(byte[] bis) throws Exception {
-        Socket socket = newSocket();
+    public Socket write(byte[] bis) throws Exception {
+        if (socket == null) {
+            socket = newSocket();
+        }
         OutputStream out = socket.getOutputStream();
+        logger.info("Write >> " + ByteHelper.getString(bis));
         out.write(bis);
-        out.flush();
-        Thread.sleep(1000);
+        //out.flush();
         return socket;
     }
-    
+
     public String writeInNewConnection(TrackerMessage... deviceMessages) throws Exception {
         TrackerMessage sum = deviceMessages[0];
         for (int index = 1; index < deviceMessages.length; index++) {
@@ -45,19 +48,19 @@ public class SocketWriter {
         Socket newSocket = newSocket();
         return writeInNewConnection(newSocket, sum.asBytes());
     }
-    
+
     public void destroySockets() throws IOException {
-//        for (Socket socket : sockets) {
-//            if (!socket.isClosed()) {
-//                socket.close();
-//            }
-//        }
-//        sockets.clear();
+        // for (Socket socket : sockets) {
+        // if (!socket.isClosed()) {
+        // socket.close();
+        // }
+        // }
+        // sockets.clear();
     }
-    
+
     private String writeInNewConnection(Socket socket, byte[] bis) throws Exception {
         OutputStream out = socket.getOutputStream();
-        System.out.println("Write >> " + ByteHelper.getString(bis));
+        logger.info("Write >> " + ByteHelper.getString(bis));
         out.write(bis);
         out.flush();
         Thread.sleep(1000);
@@ -76,22 +79,22 @@ public class SocketWriter {
             }
         } catch (SocketTimeoutException stex) {
             // nothing to do, simply end of input handled
-        } 
+        }
         return bytes.length == 0 ? null : new String(bytes, "US-ASCII");
     }
-    
+
     private Socket newSocket() throws IOException {
         destroySockets();
         String socketHost = testSettings.getTrackerAgentHost();
         try {
             Socket socket = new Socket(socketHost, port);
             socket.setSoTimeout(2000);
-           // sockets.add(socket);
+            // sockets.add(socket);
             return socket;
         } catch (IOException ex) {
             System.out.println("Cant connect to socket, host = " + socketHost + ", port = " + port);
             throw ex;
         }
     }
-    
+
 }

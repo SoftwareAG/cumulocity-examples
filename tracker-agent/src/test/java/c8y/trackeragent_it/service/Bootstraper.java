@@ -38,12 +38,20 @@ public class Bootstraper {
     }
 
     public void bootstrapDevice(String imei, TrackerMessage deviceMessage) throws Exception {
+        bootstrapDevice(imei, deviceMessage, true);
+    }
+    public void bootstrapDeviceNotAgentAware(String imei, TrackerMessage deviceMessage) throws Exception {
+        bootstrapDevice(imei, deviceMessage, false);
+    }
+    private void bootstrapDevice(String imei, TrackerMessage deviceMessage, boolean assureAgent) throws Exception {
         logger.info("Bootstrap: {}", imei);
-        if (isAgentBootstraped()) {
-            logger.info("Agent boostraped");
-        } else {
-            logger.info("Agent not boostraped");
-            bootstrapAgent(deviceMessage);
+        if (assureAgent) {
+            if (isAgentBootstraped()) {
+                logger.info("Agent boostraped");
+            } else {
+                logger.info("Agent not boostraped");
+                bootstrapAgent(deviceMessage);
+            }
         }
         newDeviceRequestService.create(imei);
         Thread.sleep(1000);

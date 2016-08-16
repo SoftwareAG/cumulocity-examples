@@ -75,7 +75,7 @@ public class ConnectionsContainer {
     public void remove(SocketChannel channel) {
         ActiveConnection activeConnection = get(channel);
         if (activeConnection == null) {
-            logger.warn("Connection foe channel: {} have been already removed.", channel);
+            logger.warn("Connection for channel: {} have been already removed.", channel);
         } else {
             remove(activeConnection);
         }
