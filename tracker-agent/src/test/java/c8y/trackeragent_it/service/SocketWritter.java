@@ -14,18 +14,22 @@ import c8y.trackeragent.utils.ByteHelper;
 import c8y.trackeragent.utils.message.TrackerMessage;
 import c8y.trackeragent_it.TestSettings;
 
-public class SocketWriter {
+public class SocketWritter {
 
-    private static Logger logger = LoggerFactory.getLogger(SocketWriter.class);
+    private static Logger logger = LoggerFactory.getLogger(SocketWritter.class);
 
     // private static final Collection<Socket> sockets = new HashSet<Socket>();
     private final TestSettings testSettings;
     private Integer port;
     private Socket socket;
 
-    public SocketWriter(TestSettings testSettings, Integer port) {
+    public SocketWritter(TestSettings testSettings, Integer port) {
         this.testSettings = testSettings;
         this.port = port;
+    }
+
+    public Socket write(TrackerMessage deviceMessage) throws Exception {
+        return write(deviceMessage.asBytes());
     }
 
     public Socket write(byte[] bis) throws Exception {
@@ -35,8 +39,14 @@ public class SocketWriter {
         OutputStream out = socket.getOutputStream();
         logger.info("Write >> " + ByteHelper.getString(bis));
         out.write(bis);
-        //out.flush();
         return socket;
+    }
+
+    public void closeExistingConnection() throws IOException {
+        if(socket != null) {
+            socket.close();
+            socket = null;
+        }
     }
 
     public String writeInNewConnection(TrackerMessage... deviceMessages) throws Exception {

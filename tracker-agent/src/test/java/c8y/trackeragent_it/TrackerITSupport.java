@@ -41,7 +41,7 @@ import c8y.trackeragent_it.config.ServerConfiguration;
 import c8y.trackeragent_it.config.TestConfiguration;
 import c8y.trackeragent_it.service.Bootstraper;
 import c8y.trackeragent_it.service.NewDeviceRequestService;
-import c8y.trackeragent_it.service.SocketWriter;
+import c8y.trackeragent_it.service.SocketWritter;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = { ServerConfiguration.class, TestConfiguration.class })
@@ -72,7 +72,7 @@ public abstract class TrackerITSupport {
     protected TrackerPlatform trackerPlatform;
     
     protected Bootstraper bootstraper;
-    protected SocketWriter socketWriter;
+    protected SocketWritter socketWriter;
 
     @Before
     public void baseSetUp() throws Exception {
@@ -80,7 +80,7 @@ public abstract class TrackerITSupport {
         Thread.sleep(200);// avoid address already in use error
         System.out.println(testSettings);
         System.out.println(trackerAgentConfig);
-        socketWriter = new SocketWriter(testSettings, trackerAgentConfig.getPort(getTrackerProtocol()));
+        socketWriter = new SocketWritter(testSettings, trackerAgentConfig.getPort(getTrackerProtocol()));
         NewDeviceRequestService newDeviceRequestService = new NewDeviceRequestService(trackerPlatform.getPlatformParameters(), testSettings);
         bootstraper = new Bootstraper(testSettings, socketWriter, newDeviceRequestService);
         bootstraper.deleteExistingAgentRequest();

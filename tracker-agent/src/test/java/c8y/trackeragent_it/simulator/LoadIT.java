@@ -26,7 +26,7 @@ import c8y.trackeragent_it.TrackerITSupport;
 import c8y.trackeragent_it.config.TestConfiguration;
 import c8y.trackeragent_it.service.Bootstraper;
 import c8y.trackeragent_it.service.NewDeviceRequestService;
-import c8y.trackeragent_it.service.SocketWriter;
+import c8y.trackeragent_it.service.SocketWritter;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = { TestConfiguration.class })
@@ -43,16 +43,16 @@ public class LoadIT {
 
     private ExecutorService executorService = Executors.newFixedThreadPool(TOTAL_THREADS);
 
-    private SocketWriter socketWriter;
+    private SocketWritter socketWriter;
 
     private List<String> imeis = new ArrayList<>();
 
-    private Map<String, SocketWriter> socketWriters = new HashMap<>();
+    private Map<String, SocketWritter> socketWriters = new HashMap<>();
 
-    private static final int IMEI_START     = 200001;
-    private static final int IMEI_STOP      = 200001;
-//    private static final int IMEI_START     = 100000;
-//    private static final int IMEI_STOP      = 100135;
+//    private static final int IMEI_START     = 200005;
+//    private static final int IMEI_STOP      = 200007;
+    private static final int IMEI_START     = 100136;
+    private static final int IMEI_STOP      = 100200;
     private static final int TOTAL_TASKS_PER_DEVICE = 200;
     private static final int TOTAL_THREADS = 1;
     private static final int REMOTE_PORT = 9091;
@@ -61,13 +61,12 @@ public class LoadIT {
     public void before() {
         PlatformImpl platform = TrackerITSupport.platform(testSettings);
         newDeviceRequestService = new NewDeviceRequestService(platform, testSettings);
-        socketWriter = new SocketWriter(testSettings, REMOTE_PORT);
+        socketWriter = newSocketWritter();
         bootstraper = new Bootstraper(testSettings, socketWriter, newDeviceRequestService);
         for (int imeiNo = IMEI_START; imeiNo <= IMEI_STOP; imeiNo++) {
-//            for (int imeiNo = IMEI_START; imeiNo <= IMEI_START; imeiNo++) {
             String imei = "" + imeiNo;
             imeis.add(imei);
-            socketWriters.put(imei, new SocketWriter(testSettings, REMOTE_PORT));
+            socketWriters.put(imei, newSocketWritter());
         }
     }
 
@@ -106,7 +105,7 @@ public class LoadIT {
     }
 
     private SimulatorTask asTask(String imei, TrackerMessage message) {
-        SocketWriter socketWriter = socketWriters.get(imei);
+        SocketWritter socketWriter = socketWriters.get(imei);
         return new SimulatorTask(socketWriter, message);
     }
 
@@ -114,5 +113,10 @@ public class LoadIT {
         TrackerMessage message = deviceMessages.logon(imei);
         bootstraper.bootstrapDeviceNotAgentAware(imei, message);
     }
+    
+    private SocketWritter newSocketWritter() {
+        return new SocketWritter(testSettings, REMOTE_PORT);
+    }
+
 
 }

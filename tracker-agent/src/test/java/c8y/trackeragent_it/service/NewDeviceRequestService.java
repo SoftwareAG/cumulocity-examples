@@ -40,7 +40,7 @@ public class NewDeviceRequestService {
     }
 
     public void accept(String deviceId) {
-        logger.info("Create newDeviceRequest for id: {}", deviceId);
+        logger.info("Accept newDeviceRequest for id: {}", deviceId);
         NewDeviceRequestRepresentation representation = new NewDeviceRequestRepresentation();
         representation.setStatus("ACCEPTED");
         restConnector.put(newDeviceRequestUri(deviceId), NEW_DEVICE_REQUEST, representation);

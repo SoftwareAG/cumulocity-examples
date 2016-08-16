@@ -24,11 +24,11 @@ public class Bootstraper {
     private final Platform bootstrapPlatform;
     private final PlatformImpl trackerPlatform;
     private final TestSettings testSettings;
-    private final SocketWriter socketWriter;
+    private final SocketWritter socketWriter;
     private final InventoryApi inventoryApi;
     private final NewDeviceRequestService newDeviceRequestService;
 
-    public Bootstraper(TestSettings testSettings, SocketWriter socketWriter, NewDeviceRequestService newDeviceRequestService) {
+    public Bootstraper(TestSettings testSettings, SocketWritter socketWriter, NewDeviceRequestService newDeviceRequestService) {
         this.testSettings = testSettings;
         this.newDeviceRequestService = newDeviceRequestService;
         this.bootstrapPlatform = createBootstrapPlatform();
@@ -56,7 +56,7 @@ public class Bootstraper {
         newDeviceRequestService.create(imei);
         // WAITING_FOR_CONNECTION status
 
-        socketWriter.writeInNewConnection(deviceMessage);
+        socketWriter.write(deviceMessage);
         Thread.sleep(1000);
         // PENDING_ACCEPTANCE status
 
@@ -64,9 +64,11 @@ public class Bootstraper {
         newDeviceRequestService.accept(imei);
         // ACCEPTED status
 
-        socketWriter.writeInNewConnection(deviceMessage);
+        socketWriter.write(deviceMessage);
         Thread.sleep(1000);
         // Device credentials got
+        
+        socketWriter.closeExistingConnection();
     }
 
     public synchronized void bootstrapAgent(TrackerMessage deviceMessage)
