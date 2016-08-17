@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -49,10 +48,8 @@ public class LoadIT {
 
     private Map<String, SocketWritter> socketWriters = new HashMap<>();
 
-//    private static final int IMEI_START     = 200005;
-//    private static final int IMEI_STOP      = 200007;
-    private static final int IMEI_START     = 100421;
-    private static final int IMEI_STOP      = 100421;
+    private static final int IMEI_START     = 100865;
+    private static final int IMEI_STOP      = 101000;
     private static final int TOTAL_TASKS_PER_DEVICE = 200;
     private static final int TOTAL_THREADS = 2;
     private static final int REMOTE_PORT = 9091;

@@ -87,7 +87,6 @@ public class Bootstraper {
         // agent request deleted
 
         newDeviceRequestService.create(id);
-        Thread.sleep(1000);
         // WAITING_FOR_CONNECTION
 
         connectNewDeviceRequest(id);

@@ -27,11 +27,11 @@ import c8y.trackeragent.server.TrackerServerEvent.ReadDataEvent;
 import c8y.trackeragent.utils.ByteHelper;
 
 @Component
-@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE) 
+@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class TrackerServer implements Runnable {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(TrackerServer.class);
-    
+
     // The channel on which we'll accept connections
     private ServerSocketChannel serverChannel;
 
@@ -46,14 +46,14 @@ public class TrackerServer implements Runnable {
 
     // Maps a SocketChannel to a list of ByteBuffer instances
     private final Map<SocketChannel, List<ByteBuffer>> pendingData = new HashMap<SocketChannel, List<ByteBuffer>>();
-    
+
     private final TrackerServerEventHandler eventHandler;
-    
+
     @Autowired
     public TrackerServer(TrackerServerEventHandler eventHandler) throws IOException {
         this.eventHandler = eventHandler;
     }
-    
+
     public void start(int port) throws IOException {
         if (serverChannel != null) {
             throw new IllegalStateException("The instance of " + this.getClass().getSimpleName() + " have been already started");
@@ -71,16 +71,16 @@ public class TrackerServer implements Runnable {
         // accepting new connections
         this.selector = SelectorProvider.provider().openSelector();
         serverChannel.register(selector, SelectionKey.OP_ACCEPT);
-        
+
         logger.info("Started listening on the port: {}", port);
     }
 
-
     public void send(SocketChannel socket, String text) {
+        logger.info("Enqueue text to device: {}", text);
         final byte[] data = ByteHelper.getBytes(text);
         synchronized (this.pendingChanges) {
             // Indicate we want the interest ops set changed
-            this.pendingChanges.add(new ChangeRequest(socket, ChangeRequest.CHANGEOPS, SelectionKey.OP_WRITE));
+            this.pendingChanges.add(new ChangeRequest(socket, SelectionKey.OP_WRITE));
 
             // And queue the data we want written
             synchronized (this.pendingData) {
@@ -97,25 +97,29 @@ public class TrackerServer implements Runnable {
         // changes
         this.selector.wakeup();
     }
-    
+
     public void close() throws IOException {
         serverChannel.close();
     }
 
     public void run() {
         while (true) {
+            logger.debug("Process main server loop");
             try {
                 // Process any pending changes
                 synchronized (this.pendingChanges) {
-                    Iterator<ChangeRequest> changes = this.pendingChanges.iterator();
-                    while (changes.hasNext()) {
-                        ChangeRequest change = changes.next();
-                        switch (change.type) {
-                        case ChangeRequest.CHANGEOPS:
-                            SelectionKey key = change.socket.keyFor(this.selector);
-                            key.interestOps(change.ops);
+                    for (ChangeRequest change : this.pendingChanges) {
+                        logger.debug("Process pending change: {}", change);
+                        SelectionKey key = change.getSocket().keyFor(this.selector);
+                        if (key == null) {
+                            logger.info(
+                                    "The channel is not currently registered with the selector. Connection was probably closed. Ignore change: {}.",
+                                    change);
+                        } else {
+                            key.interestOps(change.getOps());
                         }
                     }
+                    logger.debug("Finished pending changes loop");
                     this.pendingChanges.clear();
                 }
 
@@ -125,6 +129,7 @@ public class TrackerServer implements Runnable {
                 // Iterate over the set of keys for which events are available
                 Iterator<SelectionKey> selectedKeys = this.selector.selectedKeys().iterator();
                 while (selectedKeys.hasNext()) {
+                    logger.debug("Process reading selectors loop");
                     SelectionKey key = (SelectionKey) selectedKeys.next();
                     selectedKeys.remove();
 
@@ -142,7 +147,7 @@ public class TrackerServer implements Runnable {
                     }
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.error("Error in main server loop", e);
             }
         }
     }
@@ -224,6 +229,5 @@ public class TrackerServer implements Runnable {
             }
         }
     }
-
 
 }

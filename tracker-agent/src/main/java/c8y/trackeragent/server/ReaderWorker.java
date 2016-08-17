@@ -20,6 +20,7 @@ public class ReaderWorker implements Runnable {
             if (connection == null) {
                 break;
             }
+            logger.debug("Process next connection from the queue.");
             try {
                 process(connection);
             } catch (Exception ex) {
