@@ -21,7 +21,6 @@ import com.cumulocity.sdk.client.PlatformImpl;
 
 import c8y.Position;
 import c8y.trackeragent.protocol.coban.CobanDeviceMessages;
-import c8y.trackeragent.utils.Positions;
 import c8y.trackeragent.utils.message.TrackerMessage;
 import c8y.trackeragent_it.TestSettings;
 import c8y.trackeragent_it.TrackerITSupport;
