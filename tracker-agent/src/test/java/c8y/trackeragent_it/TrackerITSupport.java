@@ -86,11 +86,6 @@ public abstract class TrackerITSupport {
         bootstraper.deleteExistingAgentRequest();
     }
 
-    @After
-    public void baseTearDown() throws IOException {
-        socketWriter.destroySockets();
-    }
-
     protected abstract TrackingProtocol getTrackerProtocol();
 
     protected String writeInNewConnection(TrackerMessage... deviceMessages) throws Exception {

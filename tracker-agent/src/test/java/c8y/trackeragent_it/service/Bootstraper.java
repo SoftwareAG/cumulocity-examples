@@ -54,6 +54,7 @@ public class Bootstraper {
             }
         }
         newDeviceRequestService.create(imei);
+        Thread.sleep(1000);
         // WAITING_FOR_CONNECTION status
 
         socketWriter.write(deviceMessage);

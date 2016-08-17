@@ -59,15 +59,6 @@ public class SocketWritter {
         return writeInNewConnection(newSocket, sum.asBytes());
     }
 
-    public void destroySockets() throws IOException {
-        // for (Socket socket : sockets) {
-        // if (!socket.isClosed()) {
-        // socket.close();
-        // }
-        // }
-        // sockets.clear();
-    }
-
     private String writeInNewConnection(Socket socket, byte[] bis) throws Exception {
         OutputStream out = socket.getOutputStream();
         logger.info("Write >> " + ByteHelper.getString(bis));
@@ -94,7 +85,6 @@ public class SocketWritter {
     }
 
     private Socket newSocket() throws IOException {
-        destroySockets();
         String socketHost = testSettings.getTrackerAgentHost();
         try {
             Socket socket = new Socket(socketHost, port);

@@ -42,7 +42,8 @@ public class CobanReportIT extends TrackerITSupport {
 	@Test
 	public void shouldProcessLogonMessage() throws Exception {
 		String response = writeInNewConnection(deviceMessages.logon(imei));
-
+		
+		assertThat(response).isNotNull();
 		TrackerMessage actual = serverMessages.msg(response);
 		TrackerMessage expected = serverMessages.load()
 				.appendReport(serverMessages.timeIntervalLocationRequest(imei, "03m"));
