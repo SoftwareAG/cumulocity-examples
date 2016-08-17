@@ -7,11 +7,7 @@ import java.util.concurrent.CountDownLatch;
 public class SimulatorContext {
 
     private final Queue<SimulatorTask> tasks = new ConcurrentLinkedQueue<>();
-    private final CountDownLatch latch;
-
-    public SimulatorContext(CountDownLatch latch) {
-        this.latch = latch;
-    }
+    private CountDownLatch latch = new CountDownLatch(0);
 
     public synchronized SimulatorTask poll() {
         SimulatorTask task = tasks.poll();
@@ -24,4 +20,13 @@ public class SimulatorContext {
     public void addTask(SimulatorTask task) {
         tasks.offer(task);
     }
+
+    public void setLatch(int size) {
+        latch = new CountDownLatch(size);
+    }
+
+    public CountDownLatch getLatch() {
+        return latch;
+    }
+
 }

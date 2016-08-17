@@ -44,7 +44,7 @@ public class Bootstraper {
         bootstrapDevice(imei, deviceMessage, false);
     }
     private void bootstrapDevice(String imei, TrackerMessage deviceMessage, boolean assureAgent) throws Exception {
-        logger.info("Bootstrap: {}", imei);
+        logger.info("Will bootstrap: {} with message {}", imei, deviceMessage);
         if (assureAgent) {
             if (isAgentBootstraped()) {
                 logger.info("Agent boostraped");
@@ -57,7 +57,7 @@ public class Bootstraper {
         // WAITING_FOR_CONNECTION status
 
         socketWriter.write(deviceMessage);
-        Thread.sleep(1000);
+        Thread.sleep(2000);
         // PENDING_ACCEPTANCE status
 
         logger.info("accept request for imei: {}", imei);

@@ -51,10 +51,10 @@ public class LoadIT {
 
 //    private static final int IMEI_START     = 200005;
 //    private static final int IMEI_STOP      = 200007;
-    private static final int IMEI_START     = 100000;
-    private static final int IMEI_STOP      = 100200;
+    private static final int IMEI_START     = 100421;
+    private static final int IMEI_STOP      = 100421;
     private static final int TOTAL_TASKS_PER_DEVICE = 200;
-    private static final int TOTAL_THREADS = 1;
+    private static final int TOTAL_THREADS = 2;
     private static final int REMOTE_PORT = 9091;
 
     @Before
@@ -68,40 +68,52 @@ public class LoadIT {
             imeis.add(imei);
             socketWriters.put(imei, newSocketWritter());
         }
+        newDeviceRequestService.deleteAll();
     }
 
     @Test
     public void shouldBootstrapDevices() throws Exception {
-        for (int imei = IMEI_START; imei <= IMEI_STOP; imei++) {
-            bootstrapDevice(bootstraper, "" + imei);
+        for (String imei : imeis) {
+            TrackerMessage message = deviceMessages.logon(imei);
+            bootstraper.bootstrapDeviceNotAgentAware(imei, message);
         }
     }
 
     @Test
     public void shouldSimulateMultiplyDevices() throws Exception {
-        CountDownLatch countDownLatch = new CountDownLatch((IMEI_STOP - IMEI_START + 1) * TOTAL_TASKS_PER_DEVICE);
-        SimulatorContext simulatorContext = new SimulatorContext(countDownLatch);
+        SimulatorContext simulatorContext = new SimulatorContext();
+        
+        // connect all devices
+        simulatorContext.setLatch(imeis.size());
+        for (String imei : imeis) {
+            TrackerMessage message = deviceMessages.logon(imei);
+            sendMessage(simulatorContext, imei, message);
+        }
+        
+        // wait for all device connected
+        simulatorContext.getLatch().await(600, TimeUnit.SECONDS);
+        Thread.sleep(TimeUnit.SECONDS.toMillis(20));
 
-        for (int poolNo = 0; poolNo < TOTAL_TASKS_PER_DEVICE; poolNo++) {
+        // report all devices
+        simulatorContext.setLatch((IMEI_STOP - IMEI_START + 1) * TOTAL_TASKS_PER_DEVICE);
+        for (int loopIndex = 0; loopIndex < TOTAL_TASKS_PER_DEVICE; loopIndex++) {
             for (String imei : imeis) {
-                TrackerMessage message = getMessage(poolNo, imei);
-                SimulatorTask task = asTask(imei, message);
-                simulatorContext.addTask(task);
+                TrackerMessage message = deviceMessages.positionUpdate(imei, Positions.ZERO);
+                sendMessage(simulatorContext, imei, message);
             }
         }
-        for (int index = 0; index < TOTAL_THREADS; index++) {
-            executorService.execute(new SimulatorWorker(simulatorContext));
-        }
-        countDownLatch.await(600, TimeUnit.SECONDS);
+        
+        // wait for all report sending
+        simulatorContext.getLatch().await(600, TimeUnit.SECONDS);
+        
+        // wait for all report finishing
         Thread.sleep(TimeUnit.SECONDS.toMillis(20));
     }
-
-    private TrackerMessage getMessage(int poolNo, String imei) {
-        if (poolNo == 0) {
-            return deviceMessages.logon(imei);
-        } else {
-            return deviceMessages.positionUpdate(imei, Positions.ZERO);
-        }
+    
+    private void sendMessage(SimulatorContext simulatorContext, String imei, TrackerMessage message) {
+        SimulatorTask task = asTask(imei, message);
+        simulatorContext.addTask(task);
+        executorService.execute(new SimulatorWorker(simulatorContext));
     }
 
     private SimulatorTask asTask(String imei, TrackerMessage message) {
@@ -109,11 +121,6 @@ public class LoadIT {
         return new SimulatorTask(socketWriter, message);
     }
 
-    private void bootstrapDevice(Bootstraper bootstraper, String imei) throws Exception {
-        TrackerMessage message = deviceMessages.logon(imei);
-        bootstraper.bootstrapDeviceNotAgentAware(imei, message);
-    }
-    
     private SocketWritter newSocketWritter() {
         return new SocketWritter(testSettings, REMOTE_PORT);
     }

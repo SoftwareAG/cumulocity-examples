@@ -79,7 +79,7 @@ public class NewDeviceRequestService {
     }
 
     public void delete(String deviceId) {
-        logger.info("Create newDeviceRequest for id: {}", deviceId);
+        logger.info("Delete newDeviceRequest for id: {}", deviceId);
         restConnector.delete(newDeviceRequestUri(deviceId));
     }
 
