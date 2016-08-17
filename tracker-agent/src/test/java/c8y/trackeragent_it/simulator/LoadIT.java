@@ -11,12 +11,15 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.cumulocity.sdk.client.PlatformImpl;
 
+import c8y.Position;
 import c8y.trackeragent.protocol.coban.CobanDeviceMessages;
 import c8y.trackeragent.utils.Positions;
 import c8y.trackeragent.utils.message.TrackerMessage;
@@ -30,6 +33,8 @@ import c8y.trackeragent_it.service.SocketWritter;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = { TestConfiguration.class })
 public class LoadIT {
+    
+    private static Logger logger = LoggerFactory.getLogger(LoadIT.class);
 
     @Autowired
     private TestSettings testSettings;
@@ -47,11 +52,11 @@ public class LoadIT {
     private List<String> imeis = new ArrayList<>();
 
     private Map<String, SocketWritter> socketWriters = new HashMap<>();
-
-    private static final int IMEI_START     = 100865;
-    private static final int IMEI_STOP      = 101000;
-    private static final int TOTAL_TASKS_PER_DEVICE = 200;
-    private static final int TOTAL_THREADS = 2;
+    
+    private static final int IMEI_START     = 100000;
+    private static final int IMEI_STOP      = 101010;
+    private static final int TOTAL_TASKS_PER_DEVICE = 20;
+    private static final int TOTAL_THREADS = 10;
     private static final int REMOTE_PORT = 9091;
 
     @Before
@@ -92,10 +97,13 @@ public class LoadIT {
         Thread.sleep(TimeUnit.SECONDS.toMillis(20));
 
         // report all devices
+        PositionIterator positionIter = new PositionIterator(5114.3471, 00643.2373, 0.0001);
         simulatorContext.setLatch((IMEI_STOP - IMEI_START + 1) * TOTAL_TASKS_PER_DEVICE);
         for (int loopIndex = 0; loopIndex < TOTAL_TASKS_PER_DEVICE; loopIndex++) {
+            Position position = positionIter.next();
+            Thread.sleep(TimeUnit.SECONDS.toMillis(5));
             for (String imei : imeis) {
-                TrackerMessage message = deviceMessages.positionUpdate(imei, Positions.ZERO);
+                TrackerMessage message = deviceMessages.positionUpdate(imei, position);
                 sendMessage(simulatorContext, imei, message);
             }
         }
@@ -105,6 +113,8 @@ public class LoadIT {
         
         // wait for all report finishing
         Thread.sleep(TimeUnit.SECONDS.toMillis(20));
+        
+        logger.info("Final position is: {}", positionIter.current());
     }
     
     private void sendMessage(SimulatorContext simulatorContext, String imei, TrackerMessage message) {

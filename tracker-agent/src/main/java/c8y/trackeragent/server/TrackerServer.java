@@ -104,12 +104,12 @@ public class TrackerServer implements Runnable {
 
     public void run() {
         while (true) {
-            logger.debug("Process main server loop");
+            logger.trace("Process main server loop");
             try {
                 // Process any pending changes
                 synchronized (this.pendingChanges) {
                     for (ChangeRequest change : this.pendingChanges) {
-                        logger.debug("Process pending change: {}", change);
+                        logger.trace("Process pending change: {}", change);
                         SelectionKey key = change.getSocket().keyFor(this.selector);
                         if (key == null) {
                             logger.info(
@@ -119,7 +119,7 @@ public class TrackerServer implements Runnable {
                             key.interestOps(change.getOps());
                         }
                     }
-                    logger.debug("Finished pending changes loop");
+                    logger.trace("Finished pending changes loop");
                     this.pendingChanges.clear();
                 }
 
@@ -129,7 +129,7 @@ public class TrackerServer implements Runnable {
                 // Iterate over the set of keys for which events are available
                 Iterator<SelectionKey> selectedKeys = this.selector.selectedKeys().iterator();
                 while (selectedKeys.hasNext()) {
-                    logger.debug("Process reading selectors loop");
+                    logger.trace("Process reading selectors loop");
                     SelectionKey key = (SelectionKey) selectedKeys.next();
                     selectedKeys.remove();
 

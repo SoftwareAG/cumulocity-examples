@@ -40,7 +40,7 @@ public class ConfigUtils {
     private static final String RFV16_LOCATION_REPORT_INTERVAL_PROP = "rfv16.locationReport.timeInterval";
     private static final String DEFAULT_CLIENT_TIMEOUT = "" + TimeUnit.MINUTES.toMillis(5);
     private static final String NUMBER_OF_READER_WORKERS = "numberOfReaderWorkers";
-    private static final Integer DEFAULT_NUMBER_OF_READER_WORKERS = 2;
+    private static final Integer DEFAULT_NUMBER_OF_READER_WORKERS = 10;
     
     private static final Random random = new Random();
     private static final ConfigUtils instance = new ConfigUtils();
