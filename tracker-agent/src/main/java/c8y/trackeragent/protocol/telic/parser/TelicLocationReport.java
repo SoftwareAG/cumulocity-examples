@@ -68,6 +68,7 @@ public class TelicLocationReport implements Parser, TelicFragment {
     
     static final int DEVICE_ID = 20;
     
+    private static final int GPS_ACCURACY = 22;
 
     public static final BigDecimal MILEAGE_DIVISOR = new BigDecimal(1000);
     public static final BigDecimal BATTERY_MULTIPLIER = new BigDecimal(0.00345);
@@ -116,6 +117,11 @@ public class TelicLocationReport implements Parser, TelicFragment {
             position.setAlt(altitude);
             measurementService.createAltitudeMeasurement(altitude, device, dateTime);
         }
+        Long accuracy = getGpsAccuracy(reportCtx);
+        if (accuracy != null) {
+            position.setAccuracy(accuracy);
+        }
+
         LogCodeType logCodeType = getLogCodeType(reportCtx);
         if (logCodeType != null) {
             position.setProperty(CommonConstants.REPORT_REASON, logCodeType.getLabel());
@@ -212,6 +218,11 @@ public class TelicLocationReport implements Parser, TelicFragment {
         return reportCtx.getEntryAsInt(SATELLITES_FOR_CALCULATION);
     }
     
+    private Long getGpsAccuracy(ReportContext reportCtx) {
+        BigDecimal accuracy = reportCtx.getEntryAsNumber(GPS_ACCURACY);
+        return accuracy == null ? null : accuracy.longValue();
+    }
+
     private BigDecimal getMileage(ReportContext reportCtx) {
         BigDecimal mileage = reportCtx.getEntryAsNumber(MILEAGE);
         return mileage == null ? null : mileage.divide(MILEAGE_DIVISOR);

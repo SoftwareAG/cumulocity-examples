@@ -82,7 +82,9 @@ public class HeartbeatRFV16Parser extends RFV16Parser implements Parser {
     }
 
     private BigDecimal resolveQualityLevel(Integer satellites) {
-        if (satellites > 11) {
+        if (satellites < 2) {
+            return new BigDecimal(0);
+        } else if (satellites > 11) {
             return new BigDecimal(100);
         } else {
             return new BigDecimal((satellites - 2) * 10);

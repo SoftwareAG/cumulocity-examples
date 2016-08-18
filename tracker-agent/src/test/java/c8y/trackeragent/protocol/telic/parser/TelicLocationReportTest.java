@@ -72,6 +72,46 @@ public class TelicLocationReportTest {
     }
     
     @Test
+    public void shouldUpdateDeviceGpsAccuracy() throws Exception {
+        String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_5).asArray();
+
+        telic.onParsed(new ReportContext(connectionDetails, report));
+
+        verifyReport();
+        assertThat(positionCaptor.getValue()).isEqualTo(Positions.SAMPLE_5);
+        assertThat(positionCaptor.getValue().getAccuracy()).isEqualTo(Positions.SAMPLE_5.getAccuracy());
+    }
+
+    @Test
+    public void shouldNotUpdateDeviceGpsAccuracy() throws Exception {
+        String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1).asArray();
+
+        telic.onParsed(new ReportContext(connectionDetails, report));
+
+        verifyReport();
+        assertThat(positionCaptor.getValue()).isEqualTo(Positions.SAMPLE_5);
+        assertThat(positionCaptor.getValue().getAccuracy()).isNull();
+    }
+
+    @Test
+    public void shouldUpdateDeviceGpsAccuracyFromRaw1() throws Exception {
+        String msg1 = "0020xxxxxx99,100816221715,0,100816221715,008796214,53057035,6,0,0,0,30,0,0,54945,26201,0010,00,154,0,0,0109,4533,69";
+        String[] report1 = msg1.split(",");
+        telic.onParsed(new ReportContext(connectionDetails, report1));
+        verifyReport();
+        assertThat(positionCaptor.getValue().getAccuracy()).isEqualTo(69);
+    }
+
+    @Test
+    public void shouldUpdateDeviceGpsAccuracyFromRaw2() throws Exception {
+        String msg2 = "0020xxxxxx99,100816221727,0,100816221727,008795539,53056970,6,0,0,0,30,0,0,54976,26201,0010,00,143,0,0,0109,14263,119";
+        String[] report2 = msg2.split(",");
+        telic.onParsed(new ReportContext(connectionDetails, report2));
+        verifyReport();
+        assertThat(positionCaptor.getValue().getAccuracy()).isEqualTo(119);
+    }
+
+    @Test
     public void shouldSendLogCodeTypeInPositionFragment() throws Exception {
         String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1).asArray();
         
