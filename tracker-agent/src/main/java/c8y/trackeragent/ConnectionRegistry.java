@@ -22,6 +22,7 @@ package c8y.trackeragent;
 
 import java.util.concurrent.ConcurrentHashMap;
 
+@Deprecated
 public class ConnectionRegistry extends ConcurrentHashMap<String, Executor> {
     
     private static final long serialVersionUID = 5586917831953937323L;

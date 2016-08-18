@@ -8,6 +8,7 @@
     </appender>
 
     <logger name="com.cumulocity" level="INFO" />
+    <logger name="com.cumulocity.agent.server.context" level="DEBUG" />
     <logger name="c8y" level="DEBUG" />
     <logger name="httpclient.wire" level="INFO" />
 

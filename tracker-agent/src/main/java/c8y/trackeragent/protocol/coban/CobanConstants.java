@@ -2,8 +2,6 @@ package c8y.trackeragent.protocol.coban;
 
 public class CobanConstants {
 
-    public static final char REPORT_SEP = ';';
-    public static final String FIELD_SEP = ",";
     public static final Integer DEFAULT_LOCATION_REPORT_INTERVAL = 180;
     
     public static final String DEVICE_CONFIG_FRAGMENT = "coban_config";

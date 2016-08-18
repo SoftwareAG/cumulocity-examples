@@ -1,8 +1,11 @@
 package c8y.trackeragent.server;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import static java.util.concurrent.Executors.newFixedThreadPool;
 
+import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+
+import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -11,24 +14,25 @@ import c8y.trackeragent.configuration.TrackerConfiguration;
 @Component
 public class Servers {
     
-    private final ServerFactory serverFactory;
     private final TrackerConfiguration config;
+    private final ListableBeanFactory beanFactory;
+    private final ExecutorService executorService = newFixedThreadPool(2);
     
     @Autowired
-    public Servers(ServerFactory serverFactory, TrackerConfiguration config) {
-        this.serverFactory = serverFactory;
+    public Servers(TrackerConfiguration config, ListableBeanFactory beanFactory) {
         this.config = config;
+        this.beanFactory = beanFactory;
     }
 
-    public void startAll() {
+    public void startAll() throws IOException {
         startServer(config.getLocalPort1());
         startServer(config.getLocalPort2());
     }
 
-    private void startServer(int localPort) {
-        Server server = serverFactory.createServer(localPort);
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.submit(server);
+    private void startServer(int localPort) throws IOException {
+        TrackerServer server = beanFactory.getBean(TrackerServer.class);
+        server.start(localPort);
+        executorService.execute(server);
     }        
 
 }

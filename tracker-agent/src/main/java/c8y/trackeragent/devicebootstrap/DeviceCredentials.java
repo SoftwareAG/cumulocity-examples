@@ -49,8 +49,8 @@ public class DeviceCredentials extends com.cumulocity.agent.server.context.Devic
 		result = prime * result + ((imei == null) ? 0 : imei.hashCode());
 		return result;
 	}
-
-	@Override
+	
+    @Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;

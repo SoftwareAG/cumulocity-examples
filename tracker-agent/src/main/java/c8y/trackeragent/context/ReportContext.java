@@ -1,40 +1,27 @@
 package c8y.trackeragent.context;
 
-import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import c8y.trackeragent.utils.message.TrackerMessage;
+import c8y.trackeragent.server.ConnectionDetails;
 
 public class ReportContext extends ConnectionContext {
     
     private static Logger logger = LoggerFactory.getLogger(ReportContext.class);
     
     private final String[] report;
-    private final OutputStream out;
     
-    public ReportContext(String[] report, String imei, OutputStream out) {
-        this(report, imei, out, new HashMap<String, Object>());
-    }
-
-    public ReportContext(String[] report, String imei, OutputStream out, Map<String, Object> connectionParams) {
-    	super(imei, connectionParams);
+    public ReportContext(ConnectionDetails connectionDetails, String[] report) {
+        super(connectionDetails);
         this.report = report;
-        this.out = out;
     }
 
     public String[] getReport() {
         return report;
-    }
-
-    public OutputStream getOut() {
-        return out;
     }
     
     public String getEntry(int index) {
@@ -80,19 +67,11 @@ public class ReportContext extends ConnectionContext {
     public int getNumberOfEntries() {
         return report.length;
     }
-    
-    public void writeOut(TrackerMessage msg) {
-        try {
-            String text = msg.asText();
-            logger.debug("Write to device: {}.", text);
-            out.write(text.getBytes("US-ASCII"));
-            out.flush();
-        } catch (Exception ex) {
-            throw new RuntimeException(ex);
-        }
-    }
 
-    
+    @Override
+    public String toString() {
+        return Arrays.toString(report);
+    }
 
 
 }

@@ -20,13 +20,13 @@ import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 
 import c8y.*;
-import c8y.trackeragent.Parser;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.protocol.mt90g.MT90GConstants;
 import c8y.trackeragent.protocol.telic.TelicConstants;
 import c8y.trackeragent.service.MeasurementService;
+import c8y.trackeragent.tracker.Parser;
 import c8y.trackeragent.utils.LocationEventBuilder;
 
 /**

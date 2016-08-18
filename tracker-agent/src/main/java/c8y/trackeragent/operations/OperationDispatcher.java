@@ -55,19 +55,19 @@ public class OperationDispatcher implements Runnable {
     
     private final TrackerDeviceContextService contextService;
     private final DeviceCredentials tenantCredentials;
-    private final OperationsHelper operationHelper;
-    private volatile ScheduledFuture<?> self;
+    private final OperationExecutor operationHelper;
+    private volatile ScheduledFuture<?> future;
 
 
     public OperationDispatcher(DeviceCredentials tenantCredentials,  
-    		TrackerDeviceContextService contextService, OperationsHelper operationHelper) throws SDKException {
+    		TrackerDeviceContextService contextService, OperationExecutor operationHelper) throws SDKException {
 		this.tenantCredentials = tenantCredentials;
         this.contextService = contextService;
 		this.operationHelper = operationHelper;
     }
     
     public void startPolling(ScheduledExecutorService operationsExecutor) {
-        self = operationsExecutor.scheduleWithFixedDelay(this, POLLING_DELAY, POLLING_INTERVAL, SECONDS);
+        future = operationsExecutor.scheduleWithFixedDelay(this, POLLING_DELAY, POLLING_INTERVAL, SECONDS);
     }
 
     @Override
@@ -94,7 +94,7 @@ public class OperationDispatcher implements Runnable {
         	}
         	contextService.enterContext(tenantCredentials.getTenant(), device.getImei());
         	try {
-        		operationHelper.executePendingOp(operation, device);
+        		operationHelper.execute(operation, device);
         	} finally {
         		contextService.leaveContext();
         	}
@@ -106,8 +106,8 @@ public class OperationDispatcher implements Runnable {
         try {
             operationsIterable = operationHelper.getOperationsByStatusAndAgent(status);
         } catch (SDKException e) {
-            if (hasIncorrectStatus(e) && self != null) {
-                self.cancel(false);
+            if (hasIncorrectStatus(e) && future != null) {
+                future.cancel(false);
             }
         }
         return operationsIterable;

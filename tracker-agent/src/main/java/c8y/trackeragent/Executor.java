@@ -29,9 +29,9 @@ import c8y.trackeragent.context.OperationContext;
  * 
  * @return true if the operation was understood
  */
+@Deprecated
 public interface Executor {
 
-    void execute(OperationContext operation) throws Exception;
+    void executeOperation(OperationContext operation) throws Exception;
 
-	Map<String, Object> getConnectionParams();
 }

@@ -13,10 +13,10 @@ import com.cumulocity.rest.representation.event.EventRepresentation;
 import c8y.Position;
 import c8y.SpeedMeasurement;
 import c8y.trackeragent.device.TrackerDevice;
+import c8y.trackeragent.protocol.TrackingProtocol;
 import c8y.trackeragent.protocol.coban.CobanDeviceMessages;
 import c8y.trackeragent.protocol.coban.message.CobanServerMessages;
 import c8y.trackeragent.protocol.coban.parser.CobanAlarmType;
-import c8y.trackeragent.protocol.mapping.TrackingProtocol;
 import c8y.trackeragent.utils.Devices;
 import c8y.trackeragent.utils.Positions;
 import c8y.trackeragent.utils.TK10xCoordinatesTranslator;
@@ -42,7 +42,8 @@ public class CobanReportIT extends TrackerITSupport {
 	@Test
 	public void shouldProcessLogonMessage() throws Exception {
 		String response = writeInNewConnection(deviceMessages.logon(imei));
-
+		
+		assertThat(response).isNotNull();
 		TrackerMessage actual = serverMessages.msg(response);
 		TrackerMessage expected = serverMessages.load()
 				.appendReport(serverMessages.timeIntervalLocationRequest(imei, "03m"));
@@ -118,11 +119,11 @@ public class CobanReportIT extends TrackerITSupport {
 	}
 
 	private EventRepresentation actualPositionEvent() {
-		return getTrackerDevice(imei).findLastEvent(TrackerDevice.LU_EVENT_TYPE);
+	    return findLastEvent(imei, TrackerDevice.LU_EVENT_TYPE);
 	}
 
 	private Position actualPositionInTracker() {
-		return getTrackerDevice(imei).getPosition();
+	    return getDeviceMO(imei).get(Position.class);
 	}
 
 }

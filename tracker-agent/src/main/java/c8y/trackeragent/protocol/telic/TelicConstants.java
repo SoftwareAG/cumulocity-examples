@@ -26,13 +26,12 @@ import org.joda.time.format.DateTimeFormatter;
 
 public interface TelicConstants {
     
-    public static final char REPORT_SEP = '\0';
-    public static final String FIELD_SEP = ",";
     public static final DateTimeFormatter TIMESTAMP_FORMATTER = DateTimeFormat.forPattern("ddMMyyHHmmss").withZone(DateTimeZone.UTC);
 	
     public static final String LOG_TIMESTAMP = "logTimestamp";
     public static final String GPS_TIMESTAMP = "GPSTimestamp";
     public static final String FIX_TYPE = "fixType";
     public static final String SATELLITES = "satellitesForCalculation";
+    
     
 }

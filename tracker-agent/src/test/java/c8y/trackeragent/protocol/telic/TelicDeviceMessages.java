@@ -21,7 +21,7 @@ public class TelicDeviceMessages extends TrackerMessageFactory<TrackerMessage> {
     
     @Override
     public TrackerMessage msg() {
-        return new TelicMessage(TelicConstants.FIELD_SEP, "" + TelicConstants.REPORT_SEP);
+        return new TelicMessage();
     }
     
     public TrackerMessage positionUpdate(String imei, Position position, String eventCode) {

@@ -20,14 +20,22 @@
 
 package c8y.trackeragent.protocol.gl200;
 
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
+import static c8y.trackeragent.protocol.TrackingProtocol.GL200;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import com.cumulocity.rest.representation.operation.OperationRepresentation;
+import com.cumulocity.sdk.client.SDKException;
 
 import c8y.Geofence;
 import c8y.Position;
@@ -35,22 +43,19 @@ import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.context.OperationContext;
 import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.device.TrackerDevice;
-import c8y.trackeragent.protocol.gl200.GL200Constants;
 import c8y.trackeragent.protocol.gl200.parser.GL200Geofence;
+import c8y.trackeragent.server.TestConnectionDetails;
 import c8y.trackeragent.service.MeasurementService;
-
-import com.cumulocity.rest.representation.operation.OperationRepresentation;
-import com.cumulocity.sdk.client.SDKException;
 
 public class GL200GeofenceTest {
 
     public static final String IMEI = "135790246811220";
 
     public static final String SETFENCESTR = "AT+GTGEO=gl200,0,3,101.412248,21.187891,1000,30,,,,,,,,,0001$";
-    public static final String[] SETFENCE = SETFENCESTR.split(GL200Constants.FIELD_SEP);
-    public static final String[] ACKFENCE = "+ACK:GTGEO,02010B,135790246811220,,0,0001,20100310172830,11F0$".split(GL200Constants.FIELD_SEP);
+    public static final String[] SETFENCE = SETFENCESTR.split(GL200.getFieldSeparator());
+    public static final String[] ACKFENCE = "+ACK:GTGEO,02010B,135790246811220,,0,0001,20100310172830,11F0$".split(GL200.getFieldSeparator());
     public static final String[] REPFENCE = "+RESP:GTGEO,02010B,135790246811220,,0,0,1,1,4.3,92,70.0,121.354335,31.222073,2009 0214013254,0460,0000,18d8,6141,00,,20090214093254,11F0$"
-            .split(GL200Constants.FIELD_SEP);
+            .split(GL200.getFieldSeparator());
 
     private GL200Geofence gl200gf;
     private TrackerAgent trackerAgent = mock(TrackerAgent.class);
@@ -59,6 +64,7 @@ public class GL200GeofenceTest {
 
     private OperationContext operationCtx;
     private Geofence fence;
+    private TestConnectionDetails connectionDetails = new TestConnectionDetails();
 
     @Before
     public void setup() throws SDKException {
@@ -70,7 +76,7 @@ public class GL200GeofenceTest {
         fence.setActive(true);
         operation.set(fence);
 
-        operationCtx = new OperationContext(operation, IMEI);
+        operationCtx = new OperationContext(connectionDetails, operation);
         
         gl200gf = new GL200Geofence(trackerAgent, measurementService);
 
@@ -86,10 +92,10 @@ public class GL200GeofenceTest {
     @Test
     public void acknowledgeGeofence() throws SDKException {
         gl200gf.translate(operationCtx);
-        String imei = gl200gf.parse(ACKFENCE);
-        gl200gf.onParsed(new ReportContext(ACKFENCE, imei, null));
+        connectionDetails.setImei(gl200gf.parse(ACKFENCE));
+        gl200gf.onParsed(new ReportContext(connectionDetails, ACKFENCE));
 
-        assertEquals(IMEI, imei);
+        assertEquals(IMEI, gl200gf.parse(ACKFENCE));
         verify(trackerAgent).getOrCreateTrackerDevice(IMEI);
         verify(device).setGeofence(fence);
     }
@@ -108,7 +114,8 @@ public class GL200GeofenceTest {
     @Test
     public void reportGeofence() throws SDKException {
         String imei = gl200gf.parse(REPFENCE);
-        gl200gf.onParsed(new ReportContext(REPFENCE, imei, null));
+        connectionDetails.setImei(imei);
+        gl200gf.onParsed(new ReportContext(connectionDetails, REPFENCE));
 
         assertEquals(IMEI, imei);
         verify(trackerAgent, times(2)).getOrCreateTrackerDevice(IMEI);

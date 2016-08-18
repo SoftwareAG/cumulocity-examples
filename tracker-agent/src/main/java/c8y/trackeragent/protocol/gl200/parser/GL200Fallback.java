@@ -26,9 +26,9 @@ import org.springframework.stereotype.Component;
 import c8y.Configuration;
 import c8y.Restart;
 import c8y.trackeragent.TrackerAgent;
-import c8y.trackeragent.Translator;
 import c8y.trackeragent.context.OperationContext;
 import c8y.trackeragent.context.ReportContext;
+import c8y.trackeragent.tracker.Translator;
 
 import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;

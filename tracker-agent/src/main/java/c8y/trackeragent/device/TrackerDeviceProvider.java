@@ -49,8 +49,8 @@ public class TrackerDeviceProvider {
 		if (contextService.isInContext()) {
 			return trackerDeviceFactory.newTrackerDevice(tenant, imei);
 		}
-		DeviceCredentials deviceCredentials = credentialsRepository.getAgentCredentials(tenant);
-		contextService.enterContext(new DeviceContext(deviceCredentials));
+		DeviceCredentials agentCredentials = credentialsRepository.getAgentCredentials(tenant);
+		contextService.enterContext(new DeviceContext(agentCredentials));
 		try {
 			return trackerDeviceFactory.newTrackerDevice(tenant, imei);
 		} finally {
