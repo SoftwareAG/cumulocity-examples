@@ -171,14 +171,13 @@ public abstract class BaseConnectedTracker<F extends Fragment> implements Connec
     private void checkAgentCredentials(final String tenant) {
         try {
             credentialsRepository.getAgentCredentials(tenant);
-            logger.debug("Agent for tenant {} available.", tenant);
         } catch (UnknownTenantException ex) {
             logger.debug("Agent for tenant {} not yet bootstraped. Will try bootstrap the agent.", tenant);
             DeviceCredentials agentCredentials = bootstrapProcessor.tryAccessAgentCredentials(tenant);
             if (agentCredentials == null) {
                 throw new NotBootstrapedException(format("Agent for tenant %s not yet available. Will skip the report.", tenant));
             } 
-            logger.debug("Agent for tenant {} available.", tenant);
+            logger.info("Agent for tenant {} bootstraped.", tenant);
         }
     }
 
