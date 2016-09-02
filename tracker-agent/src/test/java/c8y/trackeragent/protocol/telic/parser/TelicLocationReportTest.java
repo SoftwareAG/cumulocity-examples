@@ -1,8 +1,12 @@
 package c8y.trackeragent.protocol.telic.parser;
 
 import static org.fest.assertions.Assertions.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 
@@ -21,9 +25,7 @@ import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.protocol.CommonConstants;
 import c8y.trackeragent.protocol.telic.TelicConstants;
 import c8y.trackeragent.protocol.telic.TelicDeviceMessages;
-import c8y.trackeragent.protocol.telic.parser.FixType;
-import c8y.trackeragent.protocol.telic.parser.LogCodeType;
-import c8y.trackeragent.protocol.telic.parser.TelicLocationReport;
+import c8y.trackeragent.server.TestConnectionDetails;
 import c8y.trackeragent.service.MeasurementService;
 import c8y.trackeragent.utils.Devices;
 import c8y.trackeragent.utils.Positions;
@@ -36,7 +38,8 @@ public class TelicLocationReportTest {
     private TrackerDevice device = mock(TrackerDevice.class);
     private TelicLocationReport telic = new TelicLocationReport(trackerAgent, measurementService);
     private ArgumentCaptor<EventRepresentation> locationEventCaptor = ArgumentCaptor.forClass(EventRepresentation.class); 
-    private ArgumentCaptor<Position> positionCaptor = ArgumentCaptor.forClass(Position.class); 
+    private ArgumentCaptor<Position> positionCaptor = ArgumentCaptor.forClass(Position.class);
+    private TestConnectionDetails connectionDetails = new TestConnectionDetails(Devices.IMEI_1);
 
     @Before
     public void setup() throws Exception {
@@ -62,17 +65,57 @@ public class TelicLocationReportTest {
     public void shouldUpdateDevicePosition() throws Exception {
         String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1).asArray();
         
-        telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
+        telic.onParsed(new ReportContext(connectionDetails, report));
         
         verifyReport();
         assertThat(positionCaptor.getValue()).isEqualTo(Positions.SAMPLE_1);
     }
     
     @Test
+    public void shouldUpdateDeviceGpsAccuracy() throws Exception {
+        String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_5).asArray();
+
+        telic.onParsed(new ReportContext(connectionDetails, report));
+
+        verifyReport();
+        assertThat(positionCaptor.getValue()).isEqualTo(Positions.SAMPLE_5);
+        assertThat(positionCaptor.getValue().getAccuracy()).isEqualTo(Positions.SAMPLE_5.getAccuracy());
+    }
+
+    @Test
+    public void shouldNotUpdateDeviceGpsAccuracy() throws Exception {
+        String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1).asArray();
+
+        telic.onParsed(new ReportContext(connectionDetails, report));
+
+        verifyReport();
+        assertThat(positionCaptor.getValue()).isEqualTo(Positions.SAMPLE_5);
+        assertThat(positionCaptor.getValue().getAccuracy()).isNull();
+    }
+
+    @Test
+    public void shouldUpdateDeviceGpsAccuracyFromRaw1() throws Exception {
+        String msg1 = "0020xxxxxx99,100816221715,0,100816221715,008796214,53057035,6,0,0,0,30,0,0,54945,26201,0010,00,154,0,0,0109,4533,69";
+        String[] report1 = msg1.split(",");
+        telic.onParsed(new ReportContext(connectionDetails, report1));
+        verifyReport();
+        assertThat(positionCaptor.getValue().getAccuracy()).isEqualTo(69);
+    }
+
+    @Test
+    public void shouldUpdateDeviceGpsAccuracyFromRaw2() throws Exception {
+        String msg2 = "0020xxxxxx99,100816221727,0,100816221727,008795539,53056970,6,0,0,0,30,0,0,54976,26201,0010,00,143,0,0,0109,14263,119";
+        String[] report2 = msg2.split(",");
+        telic.onParsed(new ReportContext(connectionDetails, report2));
+        verifyReport();
+        assertThat(positionCaptor.getValue().getAccuracy()).isEqualTo(119);
+    }
+
+    @Test
     public void shouldSendLogCodeTypeInPositionFragment() throws Exception {
         String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1).asArray();
         
-        telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
+        telic.onParsed(new ReportContext(connectionDetails, report));
         
         verifyReport();
         Object actualLogCodeType = positionCaptor.getValue().getProperty(CommonConstants.REPORT_REASON);
@@ -83,7 +126,7 @@ public class TelicLocationReportTest {
     public void shouldSendLogTimestampInPositionFragment() throws Exception {
         String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1).asArray();
         
-        telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
+        telic.onParsed(new ReportContext(connectionDetails, report));
         
         verifyReport();
         String actualLogTimestamp = (String) positionCaptor.getValue().getProperty(TelicConstants.LOG_TIMESTAMP);
@@ -94,7 +137,7 @@ public class TelicLocationReportTest {
     public void shouldSendGPSTimestampInPositionFragment() throws Exception {
         String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1).asArray();
         
-        telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
+        telic.onParsed(new ReportContext(connectionDetails, report));
         
         verifyReport();
         String actualLogTimestamp = (String) positionCaptor.getValue().getProperty(TelicConstants.LOG_TIMESTAMP);
@@ -105,7 +148,7 @@ public class TelicLocationReportTest {
     public void shouldSendFixTypeInPositionFragment() throws Exception {
         String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1).asArray();
         
-        telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
+        telic.onParsed(new ReportContext(connectionDetails, report));
         
         verifyReport();
         Object actualFixType = positionCaptor.getValue().getProperty(TelicConstants.FIX_TYPE);
@@ -116,7 +159,7 @@ public class TelicLocationReportTest {
     public void shouldSendFixTypeInPositionFragmentEvenWhenItsNotStandard() throws Exception {
     	String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1).set(TelicLocationReport.FIX_TYPE, "100").asArray();
     	
-    	telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
+    	telic.onParsed(new ReportContext(connectionDetails, report));
     	
     	verifyReport();
     	Object actualFixType = positionCaptor.getValue().getProperty(TelicConstants.FIX_TYPE);
@@ -127,7 +170,7 @@ public class TelicLocationReportTest {
     public void shouldSendSpeedAsMeasurement() throws Exception {
         String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1).asArray();
         
-        telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
+        telic.onParsed(new ReportContext(connectionDetails, report));
         
         verify(measurementService).createSpeedMeasurement(new BigDecimal(4), device, TelicDeviceMessages.LOG_TIMESTAMP);
     }
@@ -136,7 +179,7 @@ public class TelicLocationReportTest {
     public void shouldSendSatellitesInPositionFragment() throws Exception {
         String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1).asArray();
         
-        telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
+        telic.onParsed(new ReportContext(connectionDetails, report));
         
         verifyReport();
         Object actualSatellites = positionCaptor.getValue().getProperty(TelicConstants.SATELLITES);
@@ -147,7 +190,7 @@ public class TelicLocationReportTest {
     public void shouldSendAltitudeAsMeasurement() throws Exception {
         String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1).asArray();
         
-        telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
+        telic.onParsed(new ReportContext(connectionDetails, report));
         
         verify(measurementService).createAltitudeMeasurement(Positions.SAMPLE_1.getAlt(), device, TelicDeviceMessages.LOG_TIMESTAMP);
     }
@@ -156,7 +199,7 @@ public class TelicLocationReportTest {
     public void shouldSendMileageAsMeasurement() throws Exception {
         String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1).asArray();
         
-        telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
+        telic.onParsed(new ReportContext(connectionDetails, report));
         
         verify(measurementService).createMileageMeasurement(new BigDecimal("11.032"), device, TelicDeviceMessages.LOG_TIMESTAMP);
     }
@@ -165,7 +208,7 @@ public class TelicLocationReportTest {
     public void shouldSendBatteryAsMeasurement() throws Exception {
         String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1).asArray();
         
-        telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
+        telic.onParsed(new ReportContext(connectionDetails, report));
         
         verify(measurementService).createBatteryLevelMeasurement(any(BigDecimal.class), eq(device), eq(TelicDeviceMessages.LOG_TIMESTAMP), eq("V"));
     }
@@ -174,7 +217,7 @@ public class TelicLocationReportTest {
     public void shouldSendGeofenceEnterAsEvent() throws Exception {
         String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1, LogCodeType.GEOFENCE_ENTER.getCode()).asArray();
         
-        telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
+        telic.onParsed(new ReportContext(connectionDetails, report));
         
         verify(device).geofenceEnter(TelicDeviceMessages.LOG_TIMESTAMP);
     }
@@ -183,7 +226,7 @@ public class TelicLocationReportTest {
     public void shouldSendGeofenceExitAsEvent() throws Exception {
         String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1, LogCodeType.GEOFENCE_EXIT.getCode()).asArray();
         
-        telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
+        telic.onParsed(new ReportContext(connectionDetails, report));
         
         verify(device).geofenceExit(TelicDeviceMessages.LOG_TIMESTAMP);
     }
@@ -192,7 +235,7 @@ public class TelicLocationReportTest {
     public void shouldSendMotionStartAsEventAndMeasurement() throws Exception {
         String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1, LogCodeType.MOTION_SENSOR_MOTION.getCode()).asArray();
         
-        telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
+        telic.onParsed(new ReportContext(connectionDetails, report));
         
         verify(device).motionEvent(eq(true), any(DateTime.class));
         verify(measurementService).createMotionMeasurement(true, device, TelicDeviceMessages.LOG_TIMESTAMP);
@@ -202,7 +245,7 @@ public class TelicLocationReportTest {
     public void shouldSendMotionStopAsEventAndMeasurement() throws Exception {
         String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1, LogCodeType.MOTION_SENSOR_STATIONARY.getCode()).asArray();
         
-        telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
+        telic.onParsed(new ReportContext(connectionDetails, report));
         
         verify(device).motionEvent(eq(false), any(DateTime.class));
         verify(measurementService).createMotionMeasurement(false, device, TelicDeviceMessages.LOG_TIMESTAMP);
@@ -212,7 +255,7 @@ public class TelicLocationReportTest {
     public void shouldSendChargerConnectedAsEvent() throws Exception {
         String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1).asArray();
         
-        telic.onParsed(new ReportContext(report, Devices.IMEI_1, null));
+        telic.onParsed(new ReportContext(connectionDetails, report));
         
         verify(device).chargerConnected(TelicDeviceMessages.LOG_TIMESTAMP);
     }
@@ -220,7 +263,7 @@ public class TelicLocationReportTest {
     @Test
     public void shouldSendChargerConnectedAsEventOnceOnly() throws Exception {
         String[] report = deviceMessages.positionUpdate(Devices.IMEI_1, Positions.SAMPLE_1).asArray();
-        ReportContext reportCtx = new ReportContext(report, Devices.IMEI_1, null);
+        ReportContext reportCtx = new ReportContext(connectionDetails, report);
         
         telic.onParsed(reportCtx);
         telic.onParsed(reportCtx);
@@ -244,7 +287,7 @@ public class TelicLocationReportTest {
         String[] report = new String[21];
         report[20] = TelicLocationReport.devicesRequireBatteryCalculation.get(0);
         report[17] = battery;
-        BigDecimal batteryLevel = telic.getBatteryLevel(new ReportContext(report, Devices.IMEI_1, null));
+        BigDecimal batteryLevel = telic.getBatteryLevel(new ReportContext(connectionDetails, report));
         
         assertThat(batteryLevel).isEqualTo(new BigDecimal(4.22, TelicLocationReport.BATTERY_CALCULATION_MODE));
     }
@@ -256,7 +299,7 @@ public class TelicLocationReportTest {
         String[] report = new String[21];
         report[20] = deviceId;
         report[17] = battery;
-        BigDecimal batteryLevel = telic.getBatteryLevel(new ReportContext(report, Devices.IMEI_1, null));
+        BigDecimal batteryLevel = telic.getBatteryLevel(new ReportContext(connectionDetails, report));
         
         assertThat(batteryLevel).isEqualTo(new BigDecimal(4.22, TelicLocationReport.BATTERY_CALCULATION_MODE));
     }

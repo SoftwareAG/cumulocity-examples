@@ -3,7 +3,6 @@ package c8y.trackeragent.protocol.telic;
 import java.math.BigDecimal;
 
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 
 import com.cumulocity.model.DateTimeConverter;
 
@@ -22,12 +21,12 @@ public class TelicDeviceMessages extends TrackerMessageFactory<TrackerMessage> {
     
     @Override
     public TrackerMessage msg() {
-        return new TelicMessage(TelicConstants.FIELD_SEP, "" + TelicConstants.REPORT_SEP);
+        return new TelicMessage();
     }
     
     public TrackerMessage positionUpdate(String imei, Position position, String eventCode) {
         // @formatter:off
-        return msg()
+        TrackerMessage msg = msg()
                 .appendField("0721" + imei + eventCode)
                 .appendField(LOG_TIMESTAMP_STR) //Log Timestamp
                 .appendField("0")
@@ -47,9 +46,16 @@ public class TelicDeviceMessages extends TrackerMessageFactory<TrackerMessage> {
                 .appendField("238") //digital output status
                 .appendField("211")   //analog input 1
                 .appendField("0")   //analog input 2
-                .appendField("0");  //analog input 3
+                .appendField("0")  //analog input 3
+                .appendField("0109");   // Device Id
         // @formatter:on
-        
+
+        if (position.getAccuracy() != null) { // Extended Data mode
+            msg.appendField("1294"); // Motion Sensor stationary time
+            msg.appendField(position.getAccuracy().intValue()); // GPS Accuracy Estimation
+        }
+
+        return msg;
     }
     
     public TrackerMessage positionUpdate(String imei, Position position) {

@@ -2,8 +2,6 @@ package c8y.trackeragent.protocol.rfv16.parser;
 
 import static org.fest.assertions.Assertions.assertThat;
 
-import java.util.HashMap;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -126,8 +124,7 @@ public class RFV16CommandTranslatorTest extends RFV16ParserTestSupport {
     }
 
     private OperationContext asOperationContext(OperationRepresentation operation) {
-        HashMap<String, Object> connectionParams = new HashMap<String, Object>();
-        return new OperationContext(operation, IMEI, connectionParams);
+        return new OperationContext(connectionDetails, operation);
     }
 
 }

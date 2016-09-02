@@ -27,6 +27,7 @@ import c8y.trackeragent.UpdateIntervalProvider;
 import c8y.trackeragent.protocol.rfv16.message.RFV16DeviceMessages;
 import c8y.trackeragent.protocol.rfv16.message.RFV16ServerMessages;
 import c8y.trackeragent.protocol.rfv16.parser.RFV16AlarmType;
+import c8y.trackeragent.server.TestConnectionDetails;
 import c8y.trackeragent.service.AlarmService;
 import c8y.trackeragent.service.MeasurementService;
 
@@ -42,8 +43,9 @@ public class RFV16ParserTestSupport {
     protected RFV16DeviceMessages deviceMessages = new RFV16DeviceMessages();
     protected MeasurementService measurementService = mock(MeasurementService.class);
     protected AlarmService alarmService = mock(AlarmService.class);
-    protected ByteArrayOutputStream out = new ByteArrayOutputStream();
+    protected TestConnectionDetails connectionDetails = new TestConnectionDetails(IMEI);
     private UpdateIntervalProvider updateIntervalProvider = mock(UpdateIntervalProvider.class);
+    
     
     @Before
     public void baseInit() {
@@ -55,27 +57,18 @@ public class RFV16ParserTestSupport {
         when(updateIntervalProvider.findUpdateInterval()).thenReturn(null);
     }
     
-    @After
-    public void baseDestroy() throws IOException {
-        out.close();
-    }
-    
     protected void currentDeviceConfigIs(RFV16Config rFV16Config) {
         when(deviceMock.getRFV16Config()).thenReturn(rFV16Config);
     }
     
     protected void assertOut(String expected) throws UnsupportedEncodingException {
-        assertThat(outAsString()).isEqualTo(expected);
+        assertThat(connectionDetails.getOut()).isEqualTo(expected);
     }
     
     protected void assertNothingOut() throws UnsupportedEncodingException {
-        assertThat(outAsString()).isEmpty();
+        assertThat(connectionDetails.getOut()).isNull();
     }
 
-    protected String outAsString() throws UnsupportedEncodingException {
-        return out.toString("US-ASCII");
-    }
-    
     public static class CreateAlarmAnswer implements Answer<AlarmRepresentation> {
 
         @Override

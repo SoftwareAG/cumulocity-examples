@@ -10,9 +10,9 @@ import org.springframework.util.StringUtils;
 
 import com.cumulocity.sdk.client.SDKException;
 
-import c8y.trackeragent.Parser;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.context.ReportContext;
+import c8y.trackeragent.tracker.Parser;
 
 public abstract class CobanParser  extends CobanSupport implements Parser {
     

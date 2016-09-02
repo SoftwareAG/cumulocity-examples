@@ -43,6 +43,7 @@ public class PositionUpdateCobanParserTest extends CobanParserTestSupport {
         eventCaptor = ArgumentCaptor.forClass(EventRepresentation.class);
         speedCaptor = ArgumentCaptor.forClass(BigDecimal.class);
         when(measurementService.createSpeedMeasurement(any(BigDecimal.class), any(TrackerDevice.class))).thenAnswer(new CreateSpeedMeasurementAnswer());
+        connectionDetails.setImei("ABCD");
     }
 
     @Test
@@ -65,7 +66,7 @@ public class PositionUpdateCobanParserTest extends CobanParserTestSupport {
     public void shouldProcessPositionUpdate() throws Exception {
         TrackerMessage deviceMessage = deviceMessages.positionUpdate("ABCD", Positions.TK10xSample);
         when(trackerAgent.getOrCreateTrackerDevice("ABCD")).thenReturn(deviceMock);
-        ReportContext reportCtx = new ReportContext(deviceMessage.asArray(), "ABCD", null);
+        ReportContext reportCtx = new ReportContext(connectionDetails, deviceMessage.asArray());
 
         boolean success = cobanParser.onParsed(reportCtx);
 
@@ -83,18 +84,18 @@ public class PositionUpdateCobanParserTest extends CobanParserTestSupport {
         motionTracking.setProperty("cobanRequest", "101,30m");
         OperationRepresentation operation = new OperationRepresentation();
         operation.set(motionTracking);
-        OperationContext operationCtx = new OperationContext(operation, "12345");
+        OperationContext operationCtx = new OperationContext(connectionDetails, operation);
 
         String msg = cobanParser.translate(operationCtx);
 
-        assertThat(operation.get(CobanSupport.OPERATION_FRAGMENT_SERVER_COMMAND)).isEqualTo("**,imei:12345,101,30m;");
-        assertThat(msg).isEqualTo("**,imei:12345,101,30m;");
+        assertThat(operation.get(CobanSupport.OPERATION_FRAGMENT_SERVER_COMMAND)).isEqualTo("**,imei:ABCD,101,30m;");
+        assertThat(msg).isEqualTo("**,imei:ABCD,101,30m;");
     }
 
     @Test
     public void shouldSendAlarmIfNoGpsSignal() throws Exception {
         TrackerMessage deviceMessage = deviceMessages.positionUpdateNoGPS("ABCD");
-        ReportContext reportCtx = new ReportContext(deviceMessage.asArray(), "ABCD", null);
+        ReportContext reportCtx = new ReportContext(connectionDetails, deviceMessage.asArray());
 
         boolean success = cobanParser.onParsed(reportCtx);
 
@@ -125,7 +126,7 @@ public class PositionUpdateCobanParserTest extends CobanParserTestSupport {
     @Test
     public void shouldCreateSpeedMeasurement() throws Exception {
         TrackerMessage report = deviceMessages.positionUpdate("ABCD", 154);
-        ReportContext reportCtx = new ReportContext(report.asArray(), "ABCD", out);
+        ReportContext reportCtx = new ReportContext(connectionDetails, report.asArray());
 
         cobanParser.onParsed(reportCtx);
 
@@ -137,7 +138,7 @@ public class PositionUpdateCobanParserTest extends CobanParserTestSupport {
 
     private ReportContext anAlarmReport(CobanAlarmType alarmType) {
         String[] report = deviceMessages.alarm("ABCD", alarmType).asArray();
-        return new ReportContext(report, "ABCD", out);
+        return new ReportContext(connectionDetails, report);
     }
 
 }

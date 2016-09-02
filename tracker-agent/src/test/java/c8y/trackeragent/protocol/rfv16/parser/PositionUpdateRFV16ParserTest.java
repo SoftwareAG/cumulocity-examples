@@ -52,7 +52,7 @@ public class PositionUpdateRFV16ParserTest extends RFV16ParserTestSupport {
     @Test
     public void shouldProcessPositionUpdateV1() throws Exception {
         TrackerMessage deviceMessage = deviceMessages.positionUpdate("DB", IMEI, Positions.TK10xSample);
-        ReportContext reportCtx = new ReportContext(deviceMessage.asArray(), IMEI, out);
+        ReportContext reportCtx = new ReportContext(connectionDetails, deviceMessage.asArray());
         
         parser.onParsed(reportCtx);
         
@@ -68,7 +68,7 @@ public class PositionUpdateRFV16ParserTest extends RFV16ParserTestSupport {
     @Test
     public void shouldParseDateTime() throws Exception {
         TrackerMessage deviceMessage = deviceMessages.positionUpdate("DB", IMEI, Positions.TK10xSample);
-        ReportContext reportCtx = new ReportContext(deviceMessage.asArray(), IMEI, out);
+        ReportContext reportCtx = new ReportContext(connectionDetails, deviceMessage.asArray());
         DateTime dateTime = RFV16Parser.getDateTime(reportCtx);
         
         assertThat(dateTime).isEqualTo(SOME_DATE_TIME);
@@ -77,7 +77,7 @@ public class PositionUpdateRFV16ParserTest extends RFV16ParserTestSupport {
     @Test
     public void shouldCreateAlarmIfPresent() throws Exception {
         TrackerMessage deviceMessage = deviceMessages.positionUpdate("DB", IMEI, Positions.TK10xSample, "FFFDFFFF");
-        ReportContext reportCtx = new ReportContext(deviceMessage.asArray(), IMEI, out);
+        ReportContext reportCtx = new ReportContext(connectionDetails, deviceMessage.asArray());
         
         parser.onParsed(reportCtx);
         
@@ -88,7 +88,7 @@ public class PositionUpdateRFV16ParserTest extends RFV16ParserTestSupport {
     @Test
     public void shouldNotCreateAlarmIfNotPresent() throws Exception {
         TrackerMessage deviceMessage = deviceMessages.positionUpdate("DB", IMEI, Positions.TK10xSample, "FFFFFFFF");
-        ReportContext reportCtx = new ReportContext(deviceMessage.asArray(), IMEI, out);
+        ReportContext reportCtx = new ReportContext(connectionDetails, deviceMessage.asArray());
         
         parser.onParsed(reportCtx);
         
@@ -98,7 +98,7 @@ public class PositionUpdateRFV16ParserTest extends RFV16ParserTestSupport {
     @Test
     public void shouldNotSentControlCommandsIfAlreadySentForTheConnection() throws Exception {
         TrackerMessage deviceMessage = deviceMessages.positionUpdate("DB", IMEI, Positions.TK10xSample);
-        ReportContext reportCtx = new ReportContext(deviceMessage.asArray(), IMEI, out);
+        ReportContext reportCtx = new ReportContext(connectionDetails, deviceMessage.asArray());
         reportCtx.setConnectionParam(RFV16Constants.CONNECTION_PARAM_CONTROL_COMMANDS_SENT, true);
         
         parser.onParsed(reportCtx);
@@ -110,7 +110,7 @@ public class PositionUpdateRFV16ParserTest extends RFV16ParserTestSupport {
     public void shouldCreateSpeedMeasurement() throws Exception {
         ArgumentCaptor<BigDecimal> speedCaptor = ArgumentCaptor.forClass(BigDecimal.class);
         TrackerMessage deviceMessage = deviceMessages.positionUpdateWithSpeed("DB", IMEI, 60);
-        ReportContext reportCtx = new ReportContext(deviceMessage.asArray(), IMEI, out);
+        ReportContext reportCtx = new ReportContext(connectionDetails, deviceMessage.asArray());
         
         parser.onParsed(reportCtx);
         
@@ -122,7 +122,7 @@ public class PositionUpdateRFV16ParserTest extends RFV16ParserTestSupport {
     @Test
     public void shouldSendAlarmsEitherIfCurrentEventHasNoGpsData() throws Exception {
         TrackerMessage deviceMessage = deviceMessages.invalidPositionUpdate("DB", IMEI, "FFFDFFFF");
-        ReportContext reportCtx = new ReportContext(deviceMessage.asArray(), IMEI, out);
+        ReportContext reportCtx = new ReportContext(connectionDetails, deviceMessage.asArray());
         
         parser.onParsed(reportCtx);
         
@@ -133,7 +133,7 @@ public class PositionUpdateRFV16ParserTest extends RFV16ParserTestSupport {
     @Test
     public void shouldPutAlarmsToLastEventIfCurrentEventHasNoGpsData() throws Exception {
         TrackerMessage deviceMessage = deviceMessages.invalidPositionUpdate("DB", IMEI, "FFFDFFFF");
-        ReportContext reportCtx = new ReportContext(deviceMessage.asArray(), IMEI, out);
+        ReportContext reportCtx = new ReportContext(connectionDetails, deviceMessage.asArray());
         when(deviceMock.getLastPosition()).thenReturn(Positions.SAMPLE_1);
         
         parser.onParsed(reportCtx);

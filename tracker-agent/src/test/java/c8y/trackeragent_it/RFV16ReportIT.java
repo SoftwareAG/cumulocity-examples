@@ -2,21 +2,14 @@ package c8y.trackeragent_it;
 
 import static org.fest.assertions.Assertions.assertThat;
 
-import java.net.Socket;
-
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.cumulocity.rest.representation.event.EventRepresentation;
-import com.cumulocity.rest.representation.operation.OperationRepresentation;
-import com.cumulocity.sdk.client.devicecontrol.DeviceControlApi;
 
 import c8y.Position;
-import c8y.RFV16Config;
-import c8y.SetSosNumber;
 import c8y.trackeragent.device.TrackerDevice;
-import c8y.trackeragent.protocol.mapping.TrackingProtocol;
+import c8y.trackeragent.protocol.TrackingProtocol;
 import c8y.trackeragent.protocol.rfv16.message.RFV16DeviceMessages;
 import c8y.trackeragent.protocol.rfv16.parser.RFV16AlarmType;
 import c8y.trackeragent.utils.Devices;
@@ -57,37 +50,16 @@ public class RFV16ReportIT extends TrackerITSupport {
         assertThat(findAlarm(imei, RFV16AlarmType.LOW_BATTERY)).isNotNull();
     }
     
-    @Test
-    @Ignore
-    //TODO work under the eclipse, not work under the maven
-    public void setSosNumber() throws Exception {
-        bootstrapDevice(imei, deviceMessages.positionUpdate("DB", imei, Positions.TK10xSample));
-        Socket socket = writeInNewConnectionAndKeepOpen(deviceMessages.heartbeat("DB", imei, "FFFDFFFF").asBytes());
-        TrackerDevice device = getTrackerDevice(imei);
-        DeviceControlApi deviceControlApi = trackerPlatform.getDeviceControlApi();
-        OperationRepresentation operation = new OperationRepresentation();
-        operation.setDeviceId(device.getGId());
-        operation.set(new SetSosNumber("112"));
-        
-        deviceControlApi.create(operation);
-        Thread.sleep(15000);
-        
-        TrackerDevice trackerDevice = getTrackerDevice(imei);
-        RFV16Config rfv16Config = trackerDevice.getRFV16Config();
-        assertThat(rfv16Config.getSosNumber()).isEqualTo("112");
-        socket.close();
-    }
-    
     private Position actualPositionInEvent() {
         return actualPositionEvent().get(Position.class);
     }
 
     private EventRepresentation actualPositionEvent() {
-        return getTrackerDevice(imei).findLastEvent(TrackerDevice.LU_EVENT_TYPE);
+        return findLastEvent(imei, TrackerDevice.LU_EVENT_TYPE);
     }
     
     private Position actualPositionInTracker() {
-        return getTrackerDevice(imei).getPosition();
+        return getDeviceMO(imei).get(Position.class);
     }
 
 }

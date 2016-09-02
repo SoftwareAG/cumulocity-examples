@@ -7,7 +7,7 @@
     <parent>
         <groupId>c8y.example</groupId>
         <artifactId>c8y-jv</artifactId>
-        <version>7.32.0</version>
+        <version>7.33.0</version>
     </parent>
 
     <artifactId>jv-packages</artifactId>

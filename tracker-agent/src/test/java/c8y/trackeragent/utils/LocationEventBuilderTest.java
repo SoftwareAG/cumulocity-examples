@@ -35,7 +35,7 @@ public class LocationEventBuilderTest {
         assertThat(event.getSource()).isNotNull();
         assertThat(event.getText()).isNotNull();
         assertThat(event.getType()).isNotNull();
-        assertThat(event.getTime()).isNotNull();
+        assertThat(event.getDateTime()).isNotNull();
     }
     
     @Test

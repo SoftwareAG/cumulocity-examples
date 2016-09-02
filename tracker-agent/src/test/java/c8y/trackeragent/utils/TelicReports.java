@@ -6,10 +6,10 @@ import static java.util.Arrays.asList;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 
-import c8y.Position;
-import c8y.trackeragent.protocol.telic.TelicConstants;
-
 import com.google.common.base.Function;
+
+import c8y.Position;
+import c8y.trackeragent.protocol.TrackingProtocol;
 
 public class TelicReports {
     
@@ -61,7 +61,7 @@ public class TelicReports {
     }
     
     public static String[] getTelicReport(String imei, Position position) {
-        return getTelicReportStr(imei, position).split(TelicConstants.FIELD_SEP);
+        return getTelicReportStr(imei, position).split(TrackingProtocol.TELIC.getFieldSeparator());
     }
     
     private static String asTelicStringCoord(BigDecimal coord) {

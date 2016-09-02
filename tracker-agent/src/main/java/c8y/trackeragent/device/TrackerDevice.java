@@ -28,7 +28,6 @@ import java.util.Date;
 import java.util.List;
 
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -559,6 +558,7 @@ public class TrackerDevice {
 	        agentMo.setName("Tracker agent");
 	        agentMo.set(new Agent());            
 	        agentMo = inventory.create(agentMo);
+	        logger.info("Agent created: {}.", agentMo);
 	        bind(agentMo, extId);
 	        return agentMo;
 	    } else {
@@ -576,13 +576,15 @@ public class TrackerDevice {
 	    return true;
 	}
 
-	private ManagedObjectRepresentation create(ManagedObjectRepresentation mo, ID extId) throws SDKException {
-	    final ManagedObjectRepresentation returnedMo = inventory.create(mo);
+	private ManagedObjectRepresentation create(ManagedObjectRepresentation deviceMo, ID extId) throws SDKException {
+	    deviceMo = inventory.create(deviceMo);
+	    logger.info("Device MO created: {}", deviceMo);
 	    ManagedObjectRepresentation agent = assureTrackerAgentExisting();
-	    logger.info("Bind device to agent for tenant {}", tenant);
-	    inventoryRepository.bindToParent(agent.getId(), returnedMo.getId());
-	    bind(returnedMo, extId);
-	    return returnedMo;
+	    logger.info("Bind device {} to agent {} for tenant {}", deviceMo.getId(), agent.getId(), tenant);
+	    inventory.getManagedObjectApi(agent.getId()).addChildDevice(deviceMo.getId());
+	    //inventoryRepository.bindToParent(agent.getId(), returnedMo.getId());
+	    bind(deviceMo, extId);
+	    return deviceMo;
 	}
 
 	private ManagedObjectRepresentation update(ManagedObjectRepresentation mo, GId gid) throws SDKException {

@@ -20,6 +20,7 @@
 
 package c8y.trackeragent.protocol.gl200;
 
+import static c8y.trackeragent.protocol.TrackingProtocol.GL200;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -31,15 +32,15 @@ import java.math.BigDecimal;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.cumulocity.sdk.client.SDKException;
+
 import c8y.Position;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.device.TrackerDevice;
-import c8y.trackeragent.protocol.gl200.GL200Constants;
 import c8y.trackeragent.protocol.gl200.parser.GL200LocationReport;
+import c8y.trackeragent.server.TestConnectionDetails;
 import c8y.trackeragent.service.MeasurementService;
-
-import com.cumulocity.sdk.client.SDKException;
 
 public class GL500LocationReportTest {
     
@@ -49,12 +50,13 @@ public class GL500LocationReportTest {
     public static final String CELLID = "0873";
 
     public static final String GL500REPSTR = "+RESP:GTCTN,110103,135790246811220,GL500,0,0,0,25.0,81,0,0.1,0,0.3,121.390875,31.164600,20130312183936,0460,0000,1877,0873,,,,20130312190551,0304$";
-    public static final String[] GL500REP = GL500REPSTR.split(GL200Constants.FIELD_SEP);
+    public static final String[] GL500REP = GL500REPSTR.split(GL200.getFieldSeparator());
 
     private TrackerAgent trackerAgent = mock(TrackerAgent.class);
     private TrackerDevice device = mock(TrackerDevice.class);
     private MeasurementService measurementService = mock(MeasurementService.class);
     private GL200LocationReport locationReport = new GL200LocationReport(trackerAgent, measurementService);
+    private TestConnectionDetails connectionDetails = new TestConnectionDetails();
 
     @Before
     public void setup() throws SDKException {
@@ -68,7 +70,8 @@ public class GL500LocationReportTest {
     @Test
     public void gl500Report() throws SDKException {
         String imei = locationReport.parse(GL500REP);
-        locationReport.onParsed(new ReportContext(GL500REP, imei, null));
+        connectionDetails.setImei(imei);
+        locationReport.onParsed(new ReportContext(connectionDetails, GL500REP));
 
         assertEquals(IMEI, imei);
         verify(trackerAgent).getOrCreateTrackerDevice(IMEI);

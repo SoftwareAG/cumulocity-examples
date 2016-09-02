@@ -10,21 +10,31 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 
+import c8y.trackeragent.protocol.TrackingProtocol;
+
 public class TrackerMessage {
     
-    private final LinkedList<Report> reports = new LinkedList<Report>();
-    private final String fieldSep;
-    private final String reportSep;
-    private final String reportPrefix;
+    protected final LinkedList<Report> reports = new LinkedList<Report>();
+    protected final String fieldSep;
+    protected final String reportSep;
+    protected final String reportPrefix;
+    
+    public TrackerMessage(String fieldSep, String reportSep) {
+        this(fieldSep, reportSep, "");
+    }
     
     public TrackerMessage(String fieldSep, String reportSep, String reportPrefix) {
         this.fieldSep = fieldSep;
         this.reportSep = reportSep;
         this.reportPrefix = reportPrefix;
     }
+    
+    public TrackerMessage(TrackingProtocol trackingProtocol, String reportPrefix) {
+        this(trackingProtocol.getFieldSeparator(), trackingProtocol.getReportSeparator(), reportPrefix);
+    }
 
-    public TrackerMessage(String fieldSep, String reportSep) {
-        this(fieldSep, reportSep, "");
+    public TrackerMessage(TrackingProtocol trackingProtocol) {
+        this(trackingProtocol, "");
     }
     
     public byte[] asBytes() {

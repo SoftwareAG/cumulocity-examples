@@ -20,7 +20,6 @@ import c8y.RFV16Config;
 import c8y.Restart;
 import c8y.SetSosNumber;
 import c8y.trackeragent.TrackerAgent;
-import c8y.trackeragent.Translator;
 import c8y.trackeragent.context.ConnectionContext;
 import c8y.trackeragent.context.DeviceContext;
 import c8y.trackeragent.context.OperationContext;
@@ -29,6 +28,7 @@ import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.protocol.rfv16.RFV16Constants;
 import c8y.trackeragent.protocol.rfv16.message.RFV16ServerMessages;
 import c8y.trackeragent.service.AlarmService;
+import c8y.trackeragent.tracker.Translator;
 import c8y.trackeragent.utils.message.TrackerMessage;
 
 @Component
