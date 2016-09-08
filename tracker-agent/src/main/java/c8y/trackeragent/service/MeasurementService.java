@@ -176,6 +176,23 @@ public class MeasurementService {
         MeasurementRepresentation measurement = asMeasurementWithMotion(motion, device, date);
         device.createMeasurement(measurement);
     }
+
+    public void createShockMeasurement (BigDecimal maxAcceleration, TrackerDevice device, DateTime date) {
+        MeasurementRepresentation measurment = new MeasurementRepresentation();
+        measurment.setDateTime(date);
+        measurment.setSource(asSource(device));
+        measurment.setType("c8y_ShockMeasurement");
+
+        Map<String, Object> measurementValue = new HashMap<String, Object>();
+        measurementValue.put("value", maxAcceleration);
+        measurementValue.put("unit", "mG");
+        Map<String, Object> measurementSerie = new HashMap<String, Object>();
+        measurementSerie.put("maxAcceleration", measurementValue);
+
+        measurment.set(measurementSerie, "c8y_ShockMeasurement");
+
+        device.createMeasurement(measurment);
+    }
     
     private MeasurementRepresentation asMeasurementWithMotion(boolean motion, TrackerDevice device, DateTime date) {
         MeasurementRepresentation representation = new MeasurementRepresentation();

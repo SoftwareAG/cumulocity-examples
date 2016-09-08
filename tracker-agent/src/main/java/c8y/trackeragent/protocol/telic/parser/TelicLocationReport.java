@@ -46,6 +46,8 @@ public class TelicLocationReport implements Parser, TelicFragment {
 
     static final int LOG_TIMESTAMP = 1;
 
+    static final int MAX_SHOCK_ACCELERATION = 2;
+
     static final int GPS_TIMESTAMP = 3;
 
     static final int LONGITUDE = 4;
@@ -126,6 +128,8 @@ public class TelicLocationReport implements Parser, TelicFragment {
         if (logCodeType != null) {
             position.setProperty(CommonConstants.REPORT_REASON, logCodeType.getLabel());
             handleLogCodeType(device, logCodeType, dateTime);
+            if (logCodeType == LogCodeType.MOTION_SENSOR_MOTION)
+                measurementService.createShockMeasurement(reportCtx.getEntryAsNumber(MAX_SHOCK_ACCELERATION), device, dateTime);
         }
         locationUpdateEvent.setTime(dateTime.toDate());
         position.setProperty(CommonConstants.TRACKING_PROTOCOL, TrackingProtocol.TELIC);
