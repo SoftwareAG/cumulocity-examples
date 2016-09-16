@@ -149,7 +149,7 @@ public class TrackerConfiguration {
     public Collection<TrackingProtocol> getLocalPort1Protocols() {
         return Arrays.asList(
                 TrackingProtocol.TELIC, 
-                TrackingProtocol.GL200
+                TrackingProtocol.QUECLINK
         );
     }
     

@@ -18,7 +18,7 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package c8y.trackeragent.protocol.gl200.parser;
+package c8y.trackeragent.protocol.queclink.parser;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -54,7 +54,7 @@ import com.cumulocity.sdk.client.SDKException;
  * 
  */
 @Component
-public class GL200Power extends GL200Parser {
+public class QueclinkPower extends QueclinkParser {
     
     /**
      * Type of report: power on or power off.
@@ -68,7 +68,7 @@ public class GL200Power extends GL200Parser {
     private final TrackerAgent trackerAgent;
 
     @Autowired
-    public GL200Power(TrackerAgent trackerAgent) {
+    public QueclinkPower(TrackerAgent trackerAgent) {
         this.trackerAgent = trackerAgent;
     }
     

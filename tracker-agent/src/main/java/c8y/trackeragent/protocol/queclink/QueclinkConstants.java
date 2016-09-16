@@ -18,9 +18,9 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package c8y.trackeragent.protocol.gl200;
+package c8y.trackeragent.protocol.queclink;
 
-public interface GL200Constants {
+public interface QueclinkConstants {
     static final String GL500_ID = "11";
     static final String GV500_ID = "1F";
 }

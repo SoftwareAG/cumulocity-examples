@@ -18,7 +18,7 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package c8y.trackeragent.protocol.gl200.parser;
+package c8y.trackeragent.protocol.queclink.parser;
 
 import java.math.BigDecimal;
 
@@ -32,7 +32,7 @@ import c8y.Position;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.device.TrackerDevice;
-import c8y.trackeragent.protocol.gl200.GL200Constants;
+import c8y.trackeragent.protocol.queclink.QueclinkConstants;
 import c8y.trackeragent.service.MeasurementService;
 
 /**
@@ -46,7 +46,7 @@ import c8y.trackeragent.service.MeasurementService;
  * </pre>
  */
 @Component
-public class GL200LocationReport extends GL200Parser {
+public class QueclinkLocationReport extends QueclinkParser {
     
     /**
      * Online reports sent directly by the device when GPRS is available.
@@ -79,7 +79,7 @@ public class GL200LocationReport extends GL200Parser {
     protected final MeasurementService measurementService;
 
     @Autowired
-    public GL200LocationReport(TrackerAgent trackerAgent, MeasurementService measurementService) {
+    public QueclinkLocationReport(TrackerAgent trackerAgent, MeasurementService measurementService) {
         this.trackerAgent = trackerAgent;
         this.measurementService = measurementService;
     }
@@ -110,13 +110,13 @@ public class GL200LocationReport extends GL200Parser {
         int reportLength = 12;
         int reportEnd = reportStart + reportCtx.getEntryAsInt(6) * reportLength;
         
-        if (GL200Constants.GL500_ID.equals(deviceType)) {
+        if (QueclinkConstants.GL500_ID.equals(deviceType)) {
             reportStart = 9;
             reportLength = 11;
             reportEnd = reportStart + reportLength; // Only one report.
         }
 
-        if (GL200Constants.GV500_ID.equals(deviceType)) {
+        if (QueclinkConstants.GV500_ID.equals(deviceType)) {
             reportStart = 8;
             reportEnd = reportStart + reportCtx.getEntryAsInt(7) * reportLength;
         }

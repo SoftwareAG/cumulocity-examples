@@ -18,7 +18,7 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package c8y.trackeragent.protocol.gl200.parser;
+package c8y.trackeragent.protocol.queclink.parser;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -31,7 +31,7 @@ import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.context.OperationContext;
 import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.device.TrackerDevice;
-import c8y.trackeragent.protocol.gl200.GL200Constants;
+import c8y.trackeragent.protocol.queclink.QueclinkConstants;
 import c8y.trackeragent.tracker.Translator;
 
 /**
@@ -46,7 +46,7 @@ import c8y.trackeragent.tracker.Translator;
  * </pre>
  */
 @Component
-public class GL200DeviceMotionState extends GL200Parser implements Translator {
+public class QueclinkDeviceMotionState extends QueclinkParser implements Translator {
 
     /**
      * Type of report: Device Motion State Indication.
@@ -81,7 +81,7 @@ public class GL200DeviceMotionState extends GL200Parser implements Translator {
 
 
     @Autowired
-    public GL200DeviceMotionState(TrackerAgent trackerAgent) {
+    public QueclinkDeviceMotionState(TrackerAgent trackerAgent) {
         this.trackerAgent = trackerAgent;
         this.password = PASSWORD;
     }
@@ -102,7 +102,7 @@ public class GL200DeviceMotionState extends GL200Parser implements Translator {
         String motionState = report[4];
         String deviceType = report[1].substring(0, 2);
         
-        if (GL200Constants.GV500_ID.equals(deviceType)) {
+        if (QueclinkConstants.GV500_ID.equals(deviceType)) {
             motionState = report[5];
             }
         

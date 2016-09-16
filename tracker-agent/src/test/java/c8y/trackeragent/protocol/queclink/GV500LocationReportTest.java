@@ -18,12 +18,13 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package c8y.trackeragent.protocol.gl200;
+package c8y.trackeragent.protocol.queclink;
 
-import static c8y.trackeragent.protocol.TrackingProtocol.GL200;
+import static c8y.trackeragent.protocol.TrackingProtocol.QUECLINK;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -31,6 +32,7 @@ import java.math.BigDecimal;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import com.cumulocity.sdk.client.SDKException;
 
@@ -38,45 +40,62 @@ import c8y.Position;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.device.TrackerDevice;
-import c8y.trackeragent.protocol.gl200.parser.GL200LocationReport;
+import c8y.trackeragent.protocol.queclink.parser.QueclinkLocationReport;
 import c8y.trackeragent.server.TestConnectionDetails;
 import c8y.trackeragent.service.MeasurementService;
 
-public class GL500LocationReportTest {
+public class GV500LocationReportTest {
     
     public static final String IMEI = "135790246811220";
     public static final Position POS = new Position();
-    public static final String LAC = "1877";
-    public static final String CELLID = "0873";
+    public static final String LAC = "18d8";
+    public static final String CELLID = "6141";
 
-    public static final String GL500REPSTR = "+RESP:GTCTN,110103,135790246811220,GL500,0,0,0,25.0,81,0,0.1,0,0.3,121.390875,31.164600,20130312183936,0460,0000,1877,0873,,,,20130312190551,0304$";
-    public static final String[] GL500REP = GL500REPSTR.split(GL200.getFieldSeparator());
+    public static final String GV500REPSTR = "+RESP:GTTOW,1F0101,135790246811220,1G1JC5444R7252367,,,10,1,1,4.3,92,70.0,121.354335,31.222073,20090214013254,0460,0000,18d8,6141,00,2000.0,20090214093254,11F0$";
+    public static final String[] GV500REP = GV500REPSTR.split(QUECLINK.getFieldSeparator());
+
+    public static final String GV500FRISTR = "+RESP:GTFRI,1F0104,864251020004036,,,,10,1,0,,,,0,0,,0262,0007,18d8,6141,00,0.0,,,,77,420000,,,,20110101180334,001B";
+    public static final String[] GV500FRI = GV500FRISTR.split(QUECLINK.getFieldSeparator());
+    public static final String IMEI2 = "864251020004036";
 
     private TrackerAgent trackerAgent = mock(TrackerAgent.class);
     private TrackerDevice device = mock(TrackerDevice.class);
-    private MeasurementService measurementService = mock(MeasurementService.class);
-    private GL200LocationReport locationReport = new GL200LocationReport(trackerAgent, measurementService);
+    private MeasurementService measurementService = Mockito.mock(MeasurementService.class);
+    private QueclinkLocationReport locationReport = new QueclinkLocationReport(trackerAgent, measurementService);
     private TestConnectionDetails connectionDetails = new TestConnectionDetails();
 
     @Before
     public void setup() throws SDKException {
         when(trackerAgent.getOrCreateTrackerDevice(anyString())).thenReturn(device);
 
-        POS.setAlt(new BigDecimal("0.3"));
-        POS.setLng(new BigDecimal("121.390875"));
-        POS.setLat(new BigDecimal("31.164600"));
+        POS.setAlt(new BigDecimal("70.0"));
+        POS.setLng(new BigDecimal("121.354335"));
+        POS.setLat(new BigDecimal("31.222073"));
     }
 
     @Test
     public void gl500Report() throws SDKException {
-        String imei = locationReport.parse(GL500REP);
+        String imei = locationReport.parse(GV500REP);
         connectionDetails.setImei(imei);
-        locationReport.onParsed(new ReportContext(connectionDetails, GL500REP));
+        locationReport.onParsed(new ReportContext(connectionDetails, GV500REP));
 
         assertEquals(IMEI, imei);
         verify(trackerAgent).getOrCreateTrackerDevice(IMEI);
 
         verify(device).setPosition(POS);
+        verify(device).setCellId(LAC + "-" + CELLID);
+    }
+
+    @Test
+    public void gl500FRI() throws SDKException {
+        String imei = locationReport.parse(GV500FRI);
+        connectionDetails.setImei(imei);
+        locationReport.onParsed(new ReportContext(connectionDetails, GV500FRI));
+
+        assertEquals(IMEI2, imei);
+        verify(trackerAgent).getOrCreateTrackerDevice(IMEI2);
+
+        verify(device, never()).setPosition(POS);
         verify(device).setCellId(LAC + "-" + CELLID);
     }
 }

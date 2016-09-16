@@ -18,7 +18,7 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package c8y.trackeragent.protocol.gl200.parser;
+package c8y.trackeragent.protocol.queclink.parser;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -46,7 +46,7 @@ import c8y.trackeragent.tracker.Translator;
  * +RESP:GTGEO,02010B,135790246811220,,0,0,1,1,4.3,92,70.0,121.354335,31.222073,2009 0214013254,0460,0000,18d8,6141,00,,20090214093254,11F0$
  */
 @Component
-public class GL200Geofence extends GL200LocationReport implements Translator {
+public class QueclinkGeofence extends QueclinkLocationReport implements Translator {
     /**
      * Number of fence, device supports up to five fences.
      */
@@ -84,7 +84,7 @@ public class GL200Geofence extends GL200LocationReport implements Translator {
     private OperationRepresentation lastOperation;
 
     @Autowired
-    public GL200Geofence(TrackerAgent trackerAgent, MeasurementService measurementService) {
+    public QueclinkGeofence(TrackerAgent trackerAgent, MeasurementService measurementService) {
         super(trackerAgent, measurementService);
         this.password = PASSWORD;
     }

@@ -1,10 +1,10 @@
-package c8y.trackeragent.protocol.gl200.parser;
+package c8y.trackeragent.protocol.queclink.parser;
 
 import com.cumulocity.sdk.client.SDKException;
 
 import c8y.trackeragent.tracker.Parser;
 
-public abstract class GL200Parser implements Parser, GL200Fragment {
+public abstract class QueclinkParser implements Parser, QueclinkFragment {
     
     protected static final String PASSWORD = "gl200";
 

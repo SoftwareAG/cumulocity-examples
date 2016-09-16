@@ -18,9 +18,9 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package c8y.trackeragent.protocol.gl200;
+package c8y.trackeragent.protocol.queclink;
 
-import static c8y.trackeragent.protocol.TrackingProtocol.GL200;
+import static c8y.trackeragent.protocol.TrackingProtocol.QUECLINK;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.anyString;
@@ -40,7 +40,7 @@ import c8y.Position;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.device.TrackerDevice;
-import c8y.trackeragent.protocol.gl200.parser.GL200LocationReport;
+import c8y.trackeragent.protocol.queclink.parser.QueclinkLocationReport;
 import c8y.trackeragent.server.TestConnectionDetails;
 import c8y.trackeragent.service.MeasurementService;
 
@@ -54,15 +54,15 @@ public class GL200LocationReportTest {
 	public static final String FIXEDREPSTR = "+RESP:GTFRI,02010B,135790246811220,,0,0,2,1,4.3,92,70.0,121.354335,31.222073,20090214013254,0460,0000,18d8,6141,00,0,4.3,92,70.0,121.354336,31.222074,20090101000000,04 60,0000,18d8,6142,00,,20090214093254,11F0$";	
 
 	public static final String[] FIXEDREP = FIXEDREPSTR
-			.split(GL200.getFieldSeparator());
+			.split(QUECLINK.getFieldSeparator());
 
 	public static final String DOGREPSTR = "+RESP:GTDOG,02010B,135790246811220,,0,0,1,1,4.3,92,70.0,121.354335,31.222073,20090214013254,0460,0000,18d8,6141,00,2000.0,20090214093254,11F0$";
-	public static final String[] DOGREP = DOGREPSTR.split(GL200.getFieldSeparator());
+	public static final String[] DOGREP = DOGREPSTR.split(QUECLINK.getFieldSeparator());
 	
 	private TrackerAgent trackerAgent = mock(TrackerAgent.class);
 	private TrackerDevice device = mock(TrackerDevice.class);	
 	private MeasurementService measurementService = Mockito.mock(MeasurementService.class);
-	private GL200LocationReport locationReport = new GL200LocationReport(trackerAgent, measurementService);
+	private QueclinkLocationReport locationReport = new QueclinkLocationReport(trackerAgent, measurementService);
 	private TestConnectionDetails connectionDetails = new TestConnectionDetails();
 
 	@Before
@@ -113,12 +113,12 @@ public class GL200LocationReportTest {
 		String imei = locationReport.parse(nonsenseReport);
 		assertNull(imei);
 		
-		String[] buffReport = FIXEDREPSTR.split(GL200.getFieldSeparator());
+		String[] buffReport = FIXEDREPSTR.split(QUECLINK.getFieldSeparator());
 		buffReport[0] = "+BUFF:GTFRI";
 		imei = locationReport.parse(buffReport);
 		assertEquals(IMEI, imei);
 
-		String[] pnlReport = FIXEDREPSTR.split(GL200.getFieldSeparator());
+		String[] pnlReport = FIXEDREPSTR.split(QUECLINK.getFieldSeparator());
 		pnlReport[0] = "+BUFF:GTPNL";
 		imei = locationReport.parse(pnlReport);
 		assertEquals(IMEI, imei);
