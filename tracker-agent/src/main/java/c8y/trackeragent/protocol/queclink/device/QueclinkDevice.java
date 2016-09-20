@@ -1,5 +1,8 @@
 package c8y.trackeragent.protocol.queclink.device;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 
 import c8y.Hardware;
@@ -9,6 +12,8 @@ import c8y.trackeragent.device.TrackerDevice;
 
 public class QueclinkDevice {
    
+    private Logger logger = LoggerFactory.getLogger(QueclinkDevice.class);
+            
     protected final String model = "Queclink";
     
     private TrackerAgent trackerAgent;
@@ -20,24 +25,22 @@ public class QueclinkDevice {
         this.trackerAgent = trackerAgent;
     }
     
-    public QueclinkDevice create(String imei) {
-        
-        if (ManagedObjectCache.instance().get(imei) == null) { //initial setting
+    // Initial setting that updates managed object representation
+    public QueclinkDevice create(String imei) { 
 
-            this.serialNumber = imei;
-            trackerAgent.getOrCreateTrackerDevice(imei);
-            
-            //update managed object representation
-            representation = trackerDevice.getManagedObject();
-            setMoRepresentationType(representation);
-            setMoRepresentationHardware(representation);
-            
-            //update device (inventory)
-            trackerDevice.updateIfExists(representation, trackerDevice.getAgentId());
-            
-        } else {
-            trackerDevice = trackerAgent.getOrCreateTrackerDevice(imei);
-        }
+        this.serialNumber = imei;
+        trackerDevice = trackerAgent.getOrCreateTrackerDevice(imei);
+        
+        //update managed object representation
+        representation = trackerDevice.getManagedObject();
+        setMoRepresentationType(representation);
+        setMoRepresentationHardware(representation);
+        
+        //update device (inventory)
+        logger.info("Agent id: {}", trackerDevice.getAgentId());
+        trackerDevice.updateMoOfDevice(representation, trackerDevice.getGId());
+        
+        logger.info("Device MO updated: {}", representation);
         
         return this;
     }

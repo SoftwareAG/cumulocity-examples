@@ -28,8 +28,6 @@ import c8y.Restart;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.context.OperationContext;
 import c8y.trackeragent.context.ReportContext;
-import c8y.trackeragent.protocol.queclink.device.GL200Device;
-import c8y.trackeragent.protocol.queclink.device.QueclinkDevice;
 import c8y.trackeragent.tracker.Translator;
 
 import com.cumulocity.model.operation.OperationStatus;
@@ -45,7 +43,6 @@ import com.cumulocity.sdk.client.SDKException;
 public class QueclinkFallback extends QueclinkParser implements Translator {
 
     private final TrackerAgent trackerAgent;
-    private static QueclinkDevice queclinkDevice;
     private final String password;
 
     @Autowired
@@ -56,17 +53,7 @@ public class QueclinkFallback extends QueclinkParser implements Translator {
 
     @Override
     public boolean onParsed(ReportContext reportCtx) throws SDKException {
-
-        if (queclinkDevice == null) {
-            //distinguish device: gl200, gl300, gl505
-            queclinkDevice = new GL200Device();
-            //create device with custom configuration
-            queclinkDevice.setTrackerAgent(trackerAgent); //can be included in constructor
-            queclinkDevice.create(reportCtx.getImei());
-        } else {
-            trackerAgent.getOrCreateTrackerDevice(reportCtx.getImei());
-        }
-        
+        trackerAgent.getOrCreateTrackerDevice(reportCtx.getImei());
         return true;
     }
 

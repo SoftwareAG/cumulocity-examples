@@ -575,6 +575,10 @@ public class TrackerDevice {
 	    copyProps(returnedMo, mo);
 	    return true;
 	}
+	
+    public void updateMoOfDevice(ManagedObjectRepresentation mo, GId gid) {
+        update(mo, gid);
+    }
 
 	private ManagedObjectRepresentation create(ManagedObjectRepresentation deviceMo, ID extId) throws SDKException {
 	    deviceMo = inventory.create(deviceMo);
