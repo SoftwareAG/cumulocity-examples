@@ -22,5 +22,6 @@ package c8y.trackeragent.protocol.queclink;
 
 public interface QueclinkConstants {
     static final String GL500_ID = "11";
+    static final String GL505_ID = "40";
     static final String GV500_ID = "1F";
 }

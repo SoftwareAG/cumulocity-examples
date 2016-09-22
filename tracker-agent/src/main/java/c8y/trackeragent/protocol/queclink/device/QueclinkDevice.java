@@ -55,7 +55,7 @@ public class QueclinkDevice {
         representation = trackerDevice.getManagedObject();
         
         logger.info("representation type {}, configured type {}" , representation.getType(), configureType());
-        if (representation.getType() == null || !representation.getType().contains(configureType()) 
+        if (representation.getType() == null || !representation.getType().equals(configureType()) 
                 //|| (queclinkDevice.getManagedObjectHardware(imei) == null && 
                 //queclinkDevice.getManagedObjectHardware(imei).getRevision() != revision) 
                 )

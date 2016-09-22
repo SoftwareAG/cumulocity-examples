@@ -68,6 +68,7 @@ import c8y.RequiredAvailability;
 import c8y.Restart;
 import c8y.SignalStrength;
 import c8y.SupportedOperations;
+import c8y.CellInfo;
 import c8y.trackeragent.UpdateIntervalProvider;
 import c8y.trackeragent.configuration.TrackerConfiguration;
 import c8y.trackeragent.protocol.coban.device.CobanDevice;
@@ -297,6 +298,21 @@ public class TrackerDevice {
         ManagedObjectRepresentation device = new ManagedObjectRepresentation();
         mobile.setCellId(cellId);
         device.set(mobile);
+        device.setId(gid);
+        inventory.update(device);
+    }
+    
+    public void setMobile(Mobile mobile) throws SDKException {
+        ManagedObjectRepresentation device = new ManagedObjectRepresentation();
+        mobile.setImei(imei);
+        device.set(mobile);
+        device.setId(gid);
+        inventory.update(device);
+    }
+    
+    public void setCellInfo(CellInfo cellInfo) {
+        ManagedObjectRepresentation device = new ManagedObjectRepresentation();
+        device.set(cellInfo);
         device.setId(gid);
         inventory.update(device);
     }

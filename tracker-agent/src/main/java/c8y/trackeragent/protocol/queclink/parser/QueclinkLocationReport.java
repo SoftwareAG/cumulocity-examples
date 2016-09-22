@@ -66,9 +66,9 @@ public class QueclinkLocationReport extends QueclinkParser {
     public static final String[] LOCATION_REPORTS = {
         // Common commands
         "GTGEO", "GTRTL", "GTNMR",
-        // GL200-specific
+        // GL200 and GL300 specific
         "GTFRI", "GTSPD", "GTSOS", "GTPNL", "GTDIS", "GTDOG", "GTIGL", "GTDOG",
-        // GL500-specific
+        // GL500 and GL505 specific
         "GTCTN", "GTSTR", 
         // GV500-specific
         "GTTOW", "GTHBM"
@@ -110,7 +110,8 @@ public class QueclinkLocationReport extends QueclinkParser {
         int reportLength = 12;
         int reportEnd = reportStart + reportCtx.getEntryAsInt(6) * reportLength;
         
-        if (QueclinkConstants.GL500_ID.equals(deviceType)) {
+        if (QueclinkConstants.GL500_ID.equals(deviceType) || 
+                QueclinkConstants.GL505_ID.equals(deviceType)) {
             reportStart = 9;
             reportLength = 11;
             reportEnd = reportStart + reportLength; // Only one report.
@@ -149,6 +150,7 @@ public class QueclinkLocationReport extends QueclinkParser {
 			device.setPosition(pos);
 		}
 		
+		//TODO remove or update
 		if (report.getEntry(reportStart + 10).length() > 0) {
 			device.setCellId(report.getEntry(reportStart + 9) + "-" + report.getEntry(reportStart + 10));
 		}
