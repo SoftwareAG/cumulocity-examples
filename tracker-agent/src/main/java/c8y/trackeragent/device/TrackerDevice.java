@@ -577,7 +577,8 @@ public class TrackerDevice {
 	}
 	
     public void updateMoOfDevice(ManagedObjectRepresentation mo, GId gid) {
-        update(mo, gid);
+        ManagedObjectRepresentation returnedMo = update(mo, gid);
+        copyProps(returnedMo, mo);
     }
 
 	private ManagedObjectRepresentation create(ManagedObjectRepresentation deviceMo, ID extId) throws SDKException {
