@@ -22,7 +22,10 @@ package c8y.trackeragent.protocol.queclink.parser;
 
 import java.math.BigDecimal;
 
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -48,6 +51,7 @@ import c8y.trackeragent.service.MeasurementService;
 @Component
 public class QueclinkLocationReport extends QueclinkParser {
     
+    private Logger logger = LoggerFactory.getLogger(QueclinkLocationReport.class);
     /**
      * Online reports sent directly by the device when GPRS is available.
      */
@@ -109,12 +113,14 @@ public class QueclinkLocationReport extends QueclinkParser {
         int reportStart = 7;
         int reportLength = 12;
         int reportEnd = reportStart + reportCtx.getEntryAsInt(6) * reportLength;
+        int batteryInfoIndex = reportEnd;
         
         if (QueclinkConstants.GL500_ID.equals(deviceType) || 
                 QueclinkConstants.GL505_ID.equals(deviceType)) {
             reportStart = 9;
             reportLength = 11;
             reportEnd = reportStart + reportLength; // Only one report.
+            batteryInfoIndex = 8;
         }
 
         if (QueclinkConstants.GV500_ID.equals(deviceType)) {
@@ -125,10 +131,13 @@ public class QueclinkLocationReport extends QueclinkParser {
         for (; reportStart < reportEnd; reportStart += reportLength) {
             processLocationReportOnParsed(device, reportCtx, reportStart);
         }
+        
+        createBatteryMeasurement(device, reportCtx, batteryInfoIndex);
+
         return true;
     }
 
-    private void createMileageMeasurementIfAvailable(ReportContext reportCtx, TrackerDevice device) {
+    private void createMileageMeasurementIfAvailable(ReportContext reportCtx, TrackerDevice device) throws NumberFormatException {
         if (reportCtx.getNumberOfEntries() <= 20) {
             return;
         }
@@ -154,5 +163,17 @@ public class QueclinkLocationReport extends QueclinkParser {
 		if (report.getEntry(reportStart + 10).length() > 0) {
 			device.setCellId(report.getEntry(reportStart + 9) + "-" + report.getEntry(reportStart + 10));
 		}
+	}
+	
+	private void createBatteryMeasurement(TrackerDevice device, ReportContext reportCtx, int batteryInfoIndex) throws NumberFormatException {
+	    logger.info("Battery percentage: {}", reportCtx.getEntry(batteryInfoIndex));
+	    String batteryLevel = reportCtx.getEntry(batteryInfoIndex);
+	    if (!StringUtils.isBlank(batteryLevel)) {
+	        try {
+	            device.batteryLevel(Integer.parseInt(batteryLevel));
+	        } catch (NumberFormatException numberFormatException) {
+	            device.batteryLevel((int) Double.parseDouble(batteryLevel));
+	        }
+	    }
 	}
 }
