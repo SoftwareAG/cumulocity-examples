@@ -55,13 +55,11 @@ public class QueclinkDevice {
         representation = trackerDevice.getManagedObject();
         
         logger.info("representation type {}, configured type {}" , representation.getType(), configureType());
-        if (representation.getType() == null || !representation.getType().equals(configureType()) 
-                //|| (queclinkDevice.getManagedObjectHardware(imei) == null && 
-                //queclinkDevice.getManagedObjectHardware(imei).getRevision() != revision) 
-                )
+        if (representation.getType() == null || 
+                !representation.getType().equals(configureType()) ||
+                representation.get(Hardware.class) == null || 
+                !representation.get(Hardware.class).getRevision().equals(revision))
         { 
-            
-            // initial setting
             
             // update managed object representation
             setMoRepresentationType(representation);
@@ -76,7 +74,7 @@ public class QueclinkDevice {
 
         }
         
-        logger.info("Current MO is: {}", trackerAgent.getOrCreateTrackerDevice(imei).getManagedObject());
+        //logger.info("Current MO is: {}", trackerAgent.getOrCreateTrackerDevice(imei).getManagedObject());
         
         return trackerDevice;
     }
