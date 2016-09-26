@@ -132,7 +132,9 @@ public class QueclinkLocationReport extends QueclinkParser {
             processLocationReportOnParsed(device, reportCtx, reportStart);
         }
         
-        createBatteryMeasurement(device, reportCtx, batteryInfoIndex);
+        if (!QueclinkConstants.GV500_ID.equals(deviceType)) {
+            createBatteryMeasurement(device, reportCtx, batteryInfoIndex);
+        }
 
         return true;
     }
@@ -166,14 +168,13 @@ public class QueclinkLocationReport extends QueclinkParser {
 	}
 	
 	private void createBatteryMeasurement(TrackerDevice device, ReportContext reportCtx, int batteryInfoIndex) throws NumberFormatException {
-	    logger.info("Battery percentage: {}", reportCtx.getEntry(batteryInfoIndex));
-	    String batteryLevel = reportCtx.getEntry(batteryInfoIndex);
-	    if (!StringUtils.isBlank(batteryLevel)) {
-	        try {
-	            device.batteryLevel(Integer.parseInt(batteryLevel));
-	        } catch (NumberFormatException numberFormatException) {
-	            device.batteryLevel((int) Double.parseDouble(batteryLevel));
-	        }
+	    
+	    if (batteryInfoIndex > 0 && batteryInfoIndex < reportCtx.getReport().length) {
+    	    BigDecimal batteryLevel = reportCtx.getEntryAsNumber(batteryInfoIndex);
+    	    if (batteryLevel != null) {
+    	        logger.info("Battery percentage: {}", reportCtx.getEntry(batteryInfoIndex));
+    	        measurementService.createPercentageBatteryLevelMeasurement(batteryLevel, device, new DateTime());   	       
+    	    }
 	    }
 	}
 }

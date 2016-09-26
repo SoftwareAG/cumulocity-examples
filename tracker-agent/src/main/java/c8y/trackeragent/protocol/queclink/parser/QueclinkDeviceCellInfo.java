@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import c8y.Mobile;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.device.TrackerDevice;
+import c8y.trackeragent.service.MeasurementService;
 
 /**
  * GL300 report for the information of the service cell and the neighbor cells.
@@ -35,14 +37,16 @@ public class QueclinkDeviceCellInfo extends QueclinkParser {
     public static final String GSM_REPORT = "+RESP:GTGSM"; 
     
     private final TrackerAgent trackerAgent;
+    private final MeasurementService measurementService;
     
     private static final int totalCells = 7;
     private static final int cellInfoLength = 6;
     private CellInfo cellInfo;
     
     @Autowired
-    public QueclinkDeviceCellInfo(TrackerAgent trackerAgent) {
+    public QueclinkDeviceCellInfo(TrackerAgent trackerAgent, MeasurementService measurementService) {
         this.trackerAgent = trackerAgent;
+        this.measurementService = measurementService;
     }
 
     @Override
@@ -102,10 +106,19 @@ public class QueclinkDeviceCellInfo extends QueclinkParser {
         trackerDevice.setMobile(mobile);
         
         // record main cell's signal strength as measurement
-        // signal strength from report is shifted by 110 dBm (signal strength from report 0 - 63, actual signal strength -110 - -47 dBm)
-        int actualSignalStrength = Integer.parseInt(report[mainCellStartIndex + 4]) - 110;
-        trackerDevice.signalStrength(new BigDecimal(actualSignalStrength), null);
+        // convert signal strength to percentage
+        BigDecimal signalStrengthPercentage = asPercentage(new BigDecimal(report[mainCellStartIndex + 4]), 0, 63);
+        logger.info("Signal strength percentage {}", signalStrengthPercentage);
+        measurementService.createGSMLevelMeasurement(signalStrengthPercentage, trackerDevice, new DateTime());
         
         return true;
+    }
+    
+    private static BigDecimal asPercentage(BigDecimal val, int min, int max) {
+        if (val == null) {
+            return null;
+        }
+        int result = ((val.intValue() - min) * 100) / (max - min);
+        return new BigDecimal(result);
     }
 }
