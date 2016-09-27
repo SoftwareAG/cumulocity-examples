@@ -38,9 +38,19 @@ public class QueclinkDeviceCellInfoTest {
     
     private TestConnectionDetails connectionDetails;
     
-    public final String cellInfoStr = "0244,0091,0d9f,abea,1,,0244,0091,0d9f,abea,2,,0244,0091,0d9f,abea,3,,0244,0091,0d9f,abea,4,,0244,0091,0d9f,abea,5,,0244,0091,0d9f,abea,6,,";
-    public final String mobileInfoStr = "0244,0091,0d9f,abee,26";
-    public final String queclinkDeviceGSM_gl300 = "+RESP:GTGSM,300400,860599001073709,FRI,"+ cellInfoStr + mobileInfoStr + ",00,20160921072832,F50F$";
+    public final String[] testCellInfoStr = {
+            "0244,0091,0d9f,abea,1,,0244,0091,0d9f,abea,2,,0244,0091,0d9f,abea,3,,0244,0091,0d9f,abea,4,,0244,0091,0d9f,abea,5,,0244,0091,0d9f,abea,6,,",
+            "0244,0091,0d9f,abea,7,,0244,0091,0d9f,abea,8,,0244,0091,0d9f,abea,9,,0244,0091,0d9f,abea,10,,0244,0091,0d9f,abea,11,,0244,0091,0d9f,abea,12,,"
+    };
+    
+    public final String[] testMobileInfoStr = {
+            "0244,0091,0d9f,abee,26",
+            "0244,0091,0d9f,abee,27"
+    };
+    
+    public final String queclinkDeviceGSM_gl300 = "+RESP:GTGSM,300400,860599001073709,FRI,"+ testCellInfoStr[0] + testMobileInfoStr[0] + ",00,20160921072832,F50F$";
+    public final String queclinkDeviceGSM_gl505 = "+RESP:GTGSM,400100,135790246811220,CTN,"+ testCellInfoStr[1] + testMobileInfoStr[1] +",,20130316013544,034B$";
+    
     public final String[] queclinkDeviceGSMData = {queclinkDeviceGSM_gl300};
     
     public QueclinkDeviceCellInfo queclinkDeviceCellInfo = new QueclinkDeviceCellInfo(trackerAgent, measurementService);
@@ -53,8 +63,7 @@ public class QueclinkDeviceCellInfoTest {
 
     @Test
     public void testCellInfoSetting () {
-        // generate cell info list for testing
-        CellInfo cellInfo = generateCellInfo(cellInfoStr);
+        
         
         for (int i = 0; i < queclinkDeviceGSMData.length; ++i) {
             String[] queclinkData = queclinkDeviceGSMData[i].split(QUECLINK.getFieldSeparator());
@@ -65,14 +74,14 @@ public class QueclinkDeviceCellInfoTest {
             
             queclinkDeviceCellInfo.onParsed(new ReportContext(connectionDetails, queclinkData));
             
+            // generate cell info list for testing
+            CellInfo cellInfo = generateCellInfo(testCellInfoStr[i]);
             verify(device).setCellInfo(cellInfo);
         }
     }
     
     @Test
     public void testMobileSetting () {
-        // generate mobile structure for testing
-        Mobile mobile = generateMobileInfo(mobileInfoStr);
         
         for (int i = 0; i < queclinkDeviceGSMData.length; ++i) {
             String[] queclinkData = queclinkDeviceGSMData[i].split(QUECLINK.getFieldSeparator());
@@ -83,6 +92,8 @@ public class QueclinkDeviceCellInfoTest {
             
             queclinkDeviceCellInfo.onParsed(new ReportContext(connectionDetails, queclinkData));
 
+            // generate mobile structure for testing
+            Mobile mobile = generateMobileInfo(testMobileInfoStr[i]);
             verify(device).setMobile(mobile);
         }
     }
@@ -111,7 +122,6 @@ public class QueclinkDeviceCellInfoTest {
         List<CellTower> cellTowers = new ArrayList<CellTower>();
         CellInfo cellInfo = new CellInfo();
         
-        int test_signalStrength = 1;
         for (int i = 0; i < cellInfoData.length; i += 6) {
             
             CellTower cellTower = new CellTower();
@@ -121,7 +131,7 @@ public class QueclinkDeviceCellInfoTest {
             cellTower.setLocationAreaCode(Integer.parseInt("0d9f", 16));
             cellTower.setCellId(Integer.parseInt("abea", 16));
             // signal strength from report is shifted by 110 dBm (signal strength from report 0 - 63, actual signal strength -110 - -47 dBm)
-            int actualSignalStrength = (test_signalStrength++) - 110;
+            int actualSignalStrength = Integer.parseInt(cellInfoData[i + 4]) - 110;
             cellTower.setSignalStrength(actualSignalStrength);
             
             cellTowers.add(cellTower);
