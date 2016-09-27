@@ -64,12 +64,10 @@ public class QueclinkDeviceCellInfo extends QueclinkParser {
     private boolean parseCellInfo(String[] report, String imei, int startIndex, int endIndex) {
         
         cellInfo = new CellInfo();
-        cellInfo.setRadioType("gsm");
         List<CellTower> cellTowers = new ArrayList<CellTower>();
         
         // iterate over neighbor cells
         for (int i = startIndex; i < endIndex - totalCells; i += cellInfoLength) {
-            logger.info("mcc {}, mnc {}, lac {}, cellid {}, rxlevel {}", report[i], report[i+1], report[i+2], report[i+3], report[i+4]);
             
             CellTower cellTower = new CellTower();
             cellTower.setRadioType("gsm");
@@ -80,6 +78,12 @@ public class QueclinkDeviceCellInfo extends QueclinkParser {
             // signal strength from report is shifted by 110 dBm (signal strength from report 0 - 63, actual signal strength -110 - -47 dBm)
             int actualSignalStrength = Integer.parseInt(report[i + 4]) - 110;
             cellTower.setSignalStrength(actualSignalStrength);
+            
+            logger.info("mcc {}, mnc {}, lac {}, cellid {}, rxlevel {}", Integer.parseInt(report[i]), 
+                    Integer.parseInt(report[i + 1]), 
+                    Integer.parseInt(report[i + 2], 16),
+                    Integer.parseInt(report[i + 3], 16),
+                    Integer.parseInt(report[i + 4]) - 110);
             
             cellTowers.add(cellTower);
         }
@@ -109,6 +113,7 @@ public class QueclinkDeviceCellInfo extends QueclinkParser {
         // convert signal strength to percentage
         BigDecimal signalStrengthPercentage = asPercentage(new BigDecimal(report[mainCellStartIndex + 4]), 0, 63);
         logger.info("Signal strength percentage {}", signalStrengthPercentage);
+        //TODO remove new datetime, parse from input
         measurementService.createGSMLevelMeasurement(signalStrengthPercentage, trackerDevice, new DateTime());
         
         return true;
