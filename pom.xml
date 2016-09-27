@@ -61,8 +61,6 @@
 	</properties>
 
 	<modules>
-		<module>hello-agent</module>
-		<module>kontron-shock-agent</module>
 		<module>java-agent</module>
 		<module>tracker-agent</module>
 	</modules>
