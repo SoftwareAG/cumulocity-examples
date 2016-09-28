@@ -40,18 +40,20 @@ public class QueclinkDeviceCellInfoTest {
     
     public final String[] testCellInfoStr = {
             "0244,0091,0d9f,abea,1,,0244,0091,0d9f,abea,2,,0244,0091,0d9f,abea,3,,0244,0091,0d9f,abea,4,,0244,0091,0d9f,abea,5,,0244,0091,0d9f,abea,6,,",
-            "0244,0091,0d9f,abea,7,,0244,0091,0d9f,abea,8,,0244,0091,0d9f,abea,9,,0244,0091,0d9f,abea,10,,0244,0091,0d9f,abea,11,,0244,0091,0d9f,abea,12,,"
+            "0244,0091,0d9f,abea,7,,0244,0091,0d9f,abea,8,,0244,0091,0d9f,abea,9,,0244,0091,0d9f,abea,10,,0244,0091,0d9f,abea,11,,0244,0091,0d9f,abea,12,,",
+            "0244,0091,0d9f,abea,7,,0244,0091,0d9f,abea,8,,0244,0091,0d9f,abea,9,,0244,0091,0d9f,abea,10,,0244,0091,0d9f,abea,11,,0244,0091,0d9f,abea,13,,"
     };
     
     public final String[] testMobileInfoStr = {
             "0244,0091,0d9f,abee,26",
-            "0244,0091,0d9f,abee,27"
+            "0244,0091,0d9f,abec,27",
+            "0244,0091,0d9f,abed,28"
     };
     
     public final String queclinkDeviceGSM_gl300 = "+RESP:GTGSM,300400,860599001073709,FRI,"+ testCellInfoStr[0] + testMobileInfoStr[0] + ",00,20160921072832,F50F$";
     public final String queclinkDeviceGSM_gl505 = "+RESP:GTGSM,400100,135790246811220,CTN,"+ testCellInfoStr[1] + testMobileInfoStr[1] +",,20130316013544,034B$";
-    
-    public final String[] queclinkDeviceGSMData = {queclinkDeviceGSM_gl300};
+    public final String queclinkDeviceGSM_gv505 = "+RESP:GTGSM,1F0100,1357902468112201G1JC5444R7252367,,FRI," + testCellInfoStr[2] + testMobileInfoStr[2] + ",00,20090214093254,11F0$";
+    public final String[] queclinkDeviceGSMData = {queclinkDeviceGSM_gl300, queclinkDeviceGSM_gl505, queclinkDeviceGSM_gv505};
     
     public QueclinkDeviceCellInfo queclinkDeviceCellInfo = new QueclinkDeviceCellInfo(trackerAgent, measurementService);
 

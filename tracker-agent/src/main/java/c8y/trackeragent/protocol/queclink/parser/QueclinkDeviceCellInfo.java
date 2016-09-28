@@ -18,6 +18,7 @@ import c8y.Mobile;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.device.TrackerDevice;
+import c8y.trackeragent.protocol.queclink.QueclinkConstants;
 import c8y.trackeragent.service.MeasurementService;
 
 /**
@@ -53,7 +54,16 @@ public class QueclinkDeviceCellInfo extends QueclinkParser {
     public boolean onParsed(ReportContext reportCtx) throws SDKException {
         
         if (GSM_REPORT.equals(reportCtx.getEntry(0))) {
-            int startIndex = 4;
+            
+            String deviceType = reportCtx.getEntry(1).substring(0,2);
+            int startIndex;
+
+            if(QueclinkConstants.GV500_ID.equals(deviceType)) { // gv500
+                startIndex = 5;
+            } else { // gl200, gl300, gl500, gl505 
+                startIndex = 4;
+            }
+            
             int endIndex = startIndex + totalCells * cellInfoLength;
             return parseCellInfo(reportCtx.getReport(), reportCtx.getImei(), startIndex, endIndex);
         } else {
