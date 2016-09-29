@@ -31,6 +31,7 @@ import org.springframework.stereotype.Component;
 
 import com.cumulocity.sdk.client.SDKException;
 
+import c8y.Mobile;
 import c8y.Position;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.context.ReportContext;
@@ -135,6 +136,7 @@ public class QueclinkLocationReport extends QueclinkParser {
         if (!QueclinkConstants.GV500_ID.equals(deviceType)) {
             createBatteryMeasurement(device, reportCtx, batteryInfoIndex);
         }
+        
 
         return true;
     }
@@ -161,9 +163,8 @@ public class QueclinkLocationReport extends QueclinkParser {
 			device.setPosition(pos);
 		}
 		
-		//TODO remove or update
 		if (report.getEntry(reportStart + 10).length() > 0) {
-			device.setCellId(report.getEntry(reportStart + 9) + "-" + report.getEntry(reportStart + 10));
+		    createMobileInfo(device, report, reportStart + 7);
 		}
 	}
 	
@@ -176,5 +177,17 @@ public class QueclinkLocationReport extends QueclinkParser {
     	        measurementService.createPercentageBatteryLevelMeasurement(batteryLevel, device, new DateTime());   	       
     	    }
 	    }
+	}
+	
+	private void createMobileInfo(TrackerDevice device, ReportContext reportCtx, int mobileInfoIndex) {
+	    Mobile mobile = new Mobile();
+	    mobile.setMcc(reportCtx.getEntry(mobileInfoIndex));
+	    mobile.setMnc(reportCtx.getEntry(mobileInfoIndex + 1));
+	    int lacDecimal = Integer.parseInt(reportCtx.getEntry(mobileInfoIndex + 2), 16);
+	    mobile.setLac(String.valueOf(lacDecimal));
+	    int cellDecimal = Integer.parseInt(reportCtx.getEntry(mobileInfoIndex + 3), 16);
+        mobile.setCellId(String.valueOf(cellDecimal));
+	    
+        device.setMobile(mobile);
 	}
 }

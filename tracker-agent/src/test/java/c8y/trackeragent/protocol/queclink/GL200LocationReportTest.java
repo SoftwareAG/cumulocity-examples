@@ -36,6 +36,7 @@ import org.mockito.Mockito;
 
 import com.cumulocity.sdk.client.SDKException;
 
+import c8y.Mobile;
 import c8y.Position;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.context.ReportContext;
@@ -47,11 +48,10 @@ import c8y.trackeragent.service.MeasurementService;
 public class GL200LocationReportTest {
 	public static final String IMEI = "135790246811220";
 	public static final Position POS1 = new Position();
-	public static final String LAC = "18d8";
-	public static final String CELLID1 = "6141";
+	public static final String MOBILINFOSTR1 = "0460,0000,18d8,6141,00";
+	public static final String MOBILINFOSTR2 = "0460,0000,18d8,6142,00";
 	public static final Position POS2 = new Position();
-	public static final String CELLID2 = "6142";
-	public static final String FIXEDREPSTR = "+RESP:GTFRI,02010B,135790246811220,,0,0,2,1,4.3,92,70.0,121.354335,31.222073,20090214013254,0460,0000,18d8,6141,00,0,4.3,92,70.0,121.354336,31.222074,20090101000000,04 60,0000,18d8,6142,00,,20090214093254,11F0$";	
+	public static final String FIXEDREPSTR = "+RESP:GTFRI,02010B,135790246811220,,0,0,2,1,4.3,92,70.0,121.354335,31.222073,20090214013254,0460,0000,18d8,6141,00,0,4.3,92,70.0,121.354336,31.222074,20090101000000,0460,0000,18d8,6142,00,,20090214093254,11F0$";	
 
 	public static final String[] FIXEDREP = FIXEDREPSTR
 			.split(QUECLINK.getFieldSeparator());
@@ -88,10 +88,10 @@ public class GL200LocationReportTest {
 		verify(trackerAgent).getOrCreateTrackerDevice(IMEI);
 		
 		verify(device).setPosition(POS1);
-		verify(device).setCellId(LAC + "-" + CELLID1);
+		verify(device).setMobile(generateMobileInfo(MOBILINFOSTR1));
 		
-		verify(device).setPosition(POS2);
-		verify(device).setCellId(LAC + "-" + CELLID2);		
+		verify(device).setPosition(POS2);	
+		verify(device).setMobile(generateMobileInfo(MOBILINFOSTR2));
 	}
 	
 	@Test
@@ -104,7 +104,7 @@ public class GL200LocationReportTest {
 	    verify(trackerAgent).getOrCreateTrackerDevice(IMEI);
 	    
 	    verify(device).setPosition(POS1);
-	    verify(device).setCellId(LAC + "-" + CELLID1);
+	    verify(device).setMobile(generateMobileInfo(MOBILINFOSTR1));
 	}	
 	
 	@Test 
@@ -124,4 +124,18 @@ public class GL200LocationReportTest {
 		assertEquals(IMEI, imei);
 		
 	}
+	
+	private Mobile generateMobileInfo(String mobileInfo) {
+        String[] mobileData = mobileInfo.split(QUECLINK.getFieldSeparator());
+        
+        Mobile mobile = new Mobile();
+        mobile.setMcc(mobileData[0]);
+        mobile.setMnc(mobileData[1]);
+        int lacDecimal = Integer.parseInt(mobileData[2], 16);
+        mobile.setLac(String.valueOf(lacDecimal));
+        int cellDecimal = Integer.parseInt(mobileData[3], 16);
+        mobile.setCellId(String.valueOf(cellDecimal));
+        
+        return mobile;
+    }
 }

@@ -34,6 +34,7 @@ import org.junit.Test;
 
 import com.cumulocity.sdk.client.SDKException;
 
+import c8y.Mobile;
 import c8y.Position;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.context.ReportContext;
@@ -46,9 +47,7 @@ public class GL500LocationReportTest {
     
     public static final String IMEI = "135790246811220";
     public static final Position POS = new Position();
-    public static final String LAC = "1877";
-    public static final String CELLID = "0873";
-
+    public static final String MOBILEINFOSTR = "0460,0000,1877,0873,";
     public static final String GL500REPSTR = "+RESP:GTCTN,110103,135790246811220,GL500,0,0,0,25.0,81,0,0.1,0,0.3,121.390875,31.164600,20130312183936,0460,0000,1877,0873,,,,20130312190551,0304$";
     public static final String[] GL500REP = GL500REPSTR.split(QUECLINK.getFieldSeparator());
 
@@ -77,6 +76,20 @@ public class GL500LocationReportTest {
         verify(trackerAgent).getOrCreateTrackerDevice(IMEI);
 
         verify(device).setPosition(POS);
-        verify(device).setCellId(LAC + "-" + CELLID);
+        verify(device).setMobile(generateMobileInfo(MOBILEINFOSTR));
+    }
+    
+    private Mobile generateMobileInfo(String mobileInfo) {
+        String[] mobileData = mobileInfo.split(QUECLINK.getFieldSeparator());
+        
+        Mobile mobile = new Mobile();
+        mobile.setMcc(mobileData[0]);
+        mobile.setMnc(mobileData[1]);
+        int lacDecimal = Integer.parseInt(mobileData[2], 16);
+        mobile.setLac(String.valueOf(lacDecimal));
+        int cellDecimal = Integer.parseInt(mobileData[3], 16);
+        mobile.setCellId(String.valueOf(cellDecimal));
+        
+        return mobile;
     }
 }

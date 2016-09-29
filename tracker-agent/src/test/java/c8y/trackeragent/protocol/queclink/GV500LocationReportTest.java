@@ -36,6 +36,7 @@ import org.mockito.Mockito;
 
 import com.cumulocity.sdk.client.SDKException;
 
+import c8y.Mobile;
 import c8y.Position;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.context.ReportContext;
@@ -48,13 +49,11 @@ public class GV500LocationReportTest {
     
     public static final String IMEI = "135790246811220";
     public static final Position POS = new Position();
-    public static final String LAC = "18d8";
-    public static final String CELLID = "6141";
-
+    public static final String MOBILEINFOSTR = "0460,0000,18d8,6141,00";
     public static final String GV500REPSTR = "+RESP:GTTOW,1F0101,135790246811220,1G1JC5444R7252367,,,10,1,1,4.3,92,70.0,121.354335,31.222073,20090214013254,0460,0000,18d8,6141,00,2000.0,20090214093254,11F0$";
     public static final String[] GV500REP = GV500REPSTR.split(QUECLINK.getFieldSeparator());
 
-    public static final String GV500FRISTR = "+RESP:GTFRI,1F0104,864251020004036,,,,10,1,0,,,,0,0,,0262,0007,18d8,6141,00,0.0,,,,77,420000,,,,20110101180334,001B";
+    public static final String GV500FRISTR = "+RESP:GTFRI,1F0104,864251020004036,,,,10,1,0,,,,0,0,,0460,0000,18d8,6141,00,0.0,,,,77,420000,,,,20110101180334,001B";
     public static final String[] GV500FRI = GV500FRISTR.split(QUECLINK.getFieldSeparator());
     public static final String IMEI2 = "864251020004036";
 
@@ -83,7 +82,7 @@ public class GV500LocationReportTest {
         verify(trackerAgent).getOrCreateTrackerDevice(IMEI);
 
         verify(device).setPosition(POS);
-        verify(device).setCellId(LAC + "-" + CELLID);
+        verify(device).setMobile(generateMobileInfo(MOBILEINFOSTR));
     }
 
     @Test
@@ -96,6 +95,20 @@ public class GV500LocationReportTest {
         verify(trackerAgent).getOrCreateTrackerDevice(IMEI2);
 
         verify(device, never()).setPosition(POS);
-        verify(device).setCellId(LAC + "-" + CELLID);
+        verify(device).setMobile(generateMobileInfo(MOBILEINFOSTR));
+    }
+    
+    private Mobile generateMobileInfo(String mobileInfo) {
+        String[] mobileData = mobileInfo.split(QUECLINK.getFieldSeparator());
+        
+        Mobile mobile = new Mobile();
+        mobile.setMcc(mobileData[0]);
+        mobile.setMnc(mobileData[1]);
+        int lacDecimal = Integer.parseInt(mobileData[2], 16);
+        mobile.setLac(String.valueOf(lacDecimal));
+        int cellDecimal = Integer.parseInt(mobileData[3], 16);
+        mobile.setCellId(String.valueOf(cellDecimal));
+        
+        return mobile;
     }
 }
