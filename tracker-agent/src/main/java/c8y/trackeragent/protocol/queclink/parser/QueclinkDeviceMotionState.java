@@ -61,7 +61,7 @@ public class QueclinkDeviceMotionState extends QueclinkParser implements Transla
     /**
      * Change the event mask to include motion tracking.
      */
-    public static final String MOTION_TEMPLATE = "AT+GTCFG=%s,,,,,,,,,,%d,,,,,,,,,,,%04x$";
+    public static final String MOTION_TEMPLATE = "AT+GTCFG=%s,,,,,,,,,,%d,%d,,,,,,,,,,%04x$";
 
     /**
      * Events to set: Power on/off, external power on/off, battery low are
@@ -152,6 +152,6 @@ public class QueclinkDeviceMotionState extends QueclinkParser implements Transla
             lastOperation = operation;
         }
 
-        return String.format(MOTION_TEMPLATE, password, mTrack.isActive() ? MOTION_ON : MOTION_OFF, corrId);
+        return String.format(MOTION_TEMPLATE, password, mTrack.isActive() ? MOTION_ON : MOTION_OFF, mTrack.isActive() ? 1 : 0, corrId);
     }
 }

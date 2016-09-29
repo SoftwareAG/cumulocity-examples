@@ -47,7 +47,8 @@ public class GL200DeviceMotionStateTest {
 
     public static final String IMEI = "135790246811220";
 
-    public static final String SETTRACKINGSTR = "AT+GTCFG=gl200,,,,,,,,,,47,,,,,,,,,,,0001$";
+    public static final String SETNOTRACKINGSTR = "AT+GTCFG=gl200,,,,,,,,,,47,0,,,,,,,,,,0001$";
+    public static final String SETTRACKINGSTR = "AT+GTCFG=gl200,,,,,,,,,,303,1,,,,,,,,,,0002$";
 
     public static final String ACKMOTIONSTR = "+ACK:GTCFG,02010B,135790246811220,,0001,20100310172830,11F0$";
     public static final String[] ACKMOTION = ACKMOTIONSTR.split(QUECLINK.getFieldSeparator());
@@ -79,11 +80,11 @@ public class GL200DeviceMotionStateTest {
     public void setMotionTracking() {
         track.setActive(false);
         String asciiOperation = gl200mot.translate(operationCtx);
-        assertEquals(SETTRACKINGSTR, asciiOperation);
+        assertEquals(SETNOTRACKINGSTR, asciiOperation);
 
         track.setActive(true);
         asciiOperation = gl200mot.translate(operationCtx);
-        assertEquals(SETTRACKINGSTR.replace("47", "303").replace("0001", "0002"), asciiOperation);
+        assertEquals(SETTRACKINGSTR, asciiOperation);
     }
 
     @Test
