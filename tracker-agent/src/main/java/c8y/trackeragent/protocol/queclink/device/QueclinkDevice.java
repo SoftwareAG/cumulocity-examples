@@ -21,6 +21,7 @@ import c8y.trackeragent.UpdateIntervalProvider;
 import c8y.trackeragent.configuration.TrackerConfiguration;
 import c8y.trackeragent.device.ManagedObjectCache;
 import c8y.trackeragent.device.TrackerDevice;
+import c8y.trackeragent.protocol.queclink.QueclinkConstants;
 
 public class QueclinkDevice {
   
@@ -42,6 +43,19 @@ public class QueclinkDevice {
     
     public void setType(String type) {
        this.type = type;
+    }
+    
+    public void setProtocolVersion(String protocolVersion) {
+        //set type
+        if (getDeviceProtocolType(protocolVersion) != null) {
+            this.type = getDeviceProtocolType(protocolVersion);
+        } else {
+            this.type = getDeviceId(protocolVersion);
+        }
+        
+        //set revision
+        this.revision = getRevision(protocolVersion);
+        
     }
     
     public void setRevision(String revision) {
@@ -79,6 +93,14 @@ public class QueclinkDevice {
         return trackerDevice;
     }
     
+    public String getDevicePassword(String protocolVersion) {
+        String key = getDeviceId(protocolVersion);
+        if(QueclinkConstants.queclinkProperties.get(key) == null) {
+            return "gl200";
+        }
+        return QueclinkConstants.queclinkProperties.get(key)[0];
+    }
+    
     private void setMoRepresentationType(ManagedObjectRepresentation representation) {
         representation.setType(configureType());
     }
@@ -98,6 +120,22 @@ public class QueclinkDevice {
         hardware.setModel(model);
         hardware.setRevision(revision);
         return hardware;
+    }
+    
+    private String getDeviceId(String protocolVersion) {
+        return protocolVersion.substring(0, 2);
+    }
+    
+    private String getDeviceProtocolType(String protocolVersion) {
+        String key = getDeviceId(protocolVersion);
+        if(QueclinkConstants.queclinkProperties.get(key) == null) {
+            return null;
+        }
+        return QueclinkConstants.queclinkProperties.get(key)[0];
+    }
+    
+    private String getRevision(String protocolVersion) {
+        return protocolVersion.substring(2, 4) + "." + protocolVersion.substring(4, 6);
     }
     
 }

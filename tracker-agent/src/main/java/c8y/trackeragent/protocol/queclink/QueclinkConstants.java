@@ -20,8 +20,21 @@
 
 package c8y.trackeragent.protocol.queclink;
 
+import java.util.HashMap;
+
 public interface QueclinkConstants {
     static final String GL500_ID = "11";
     static final String GL505_ID = "40";
     static final String GV500_ID = "1F";
+    static final String GL300_ID = "30";
+    static final String GL200_ID = "02";
+    
+    static final HashMap<String, String[]> queclinkProperties = new HashMap<String, String[]>() {{
+        put(GL500_ID, new String[]{"gl500","gl500"}); //protocol, default password
+        put(GL505_ID, new String[]{"gl505","gl500"}); //protocol, default password
+        put(GV500_ID, new String[]{"gv500","gv500"}); //protocol, default password
+        put(GL300_ID, new String[]{"gl300","gl300"}); //protocol, default password
+        put(GL200_ID, new String[]{"gl200","gl200"}); //protocol, default password
+    }};
+    
 }

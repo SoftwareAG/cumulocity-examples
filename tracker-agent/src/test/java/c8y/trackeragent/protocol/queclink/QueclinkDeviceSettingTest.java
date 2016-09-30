@@ -32,7 +32,7 @@ public class QueclinkDeviceSettingTest {
     public final String queclinkDataStr3 = "+RESP:GTSTT,1F0101,860599001073711,1G1JC5444R7252367,,16,0,4.3,92,70.0,121.354335,31.222073,20090214013254,0460,0000,18d8,6141,00,20090214093254,11F0$";
     public final String[] queclinkDataStr = {queclinkDataStr1, queclinkDataStr2, queclinkDataStr3};
     
-    public final String[] types = {"queclink_30", "queclink_40", "queclink_1F"};
+    public final String[] types = {"queclink_gl300", "queclink_gl505", "queclink_gv500"};
     public final String[] IMEI = {"860599001073709", "860599001073710", "860599001073711"};
     
     public final Hardware queclinkHardware1 = new Hardware("Queclink", IMEI[0], "04.00");

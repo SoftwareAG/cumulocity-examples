@@ -9,6 +9,7 @@ import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 
+import c8y.Command;
 import c8y.Configuration;
 import c8y.MotionTracking;
 import c8y.trackeragent.TrackerAgent;
@@ -37,7 +38,7 @@ public class QueclinkDeviceSetting extends QueclinkParser implements Translator 
      * Set report interval on motion state
      * Template parameters: password, send interval, serial number
      */
-    public static final String REPORT_INTERVAL_ON_MOTION_TEMPLATE = "AT+GTFRI=%s,,,,,,,,%s,,,,,,,,,,,,,0001$";
+    public static final String REPORT_INTERVAL_ON_MOTION_TEMPLATE = "AT+GTFRI=%s,,,,,,,,%s,,,,,,,,,,,,,0002$";
     /**
      * Set report interval on no-motion state
      * Template parameters: password, rest send interval, serial number
@@ -59,13 +60,7 @@ public class QueclinkDeviceSetting extends QueclinkParser implements Translator 
 
     private QueclinkDevice setDeviceInfo(ReportContext reportCtx) {
         
-        String imei = reportCtx.getImei();
-        String protocolVersion = reportCtx.getEntry(1);
-        String type = protocolVersion.substring(0, 2);
-        String revision = protocolVersion.substring(2, 4) + "." + protocolVersion.substring(4, 6);
-        
-        queclinkDevice.setType(type);
-        queclinkDevice.setRevision(revision);
+        queclinkDevice.setProtocolVersion(reportCtx.getEntry(1));
         queclinkDevice.getOrUpdateTrackerDevice(reportCtx.getImei());
         
         return queclinkDevice;
@@ -74,9 +69,9 @@ public class QueclinkDeviceSetting extends QueclinkParser implements Translator 
     @Override
     public String translate(OperationContext operationCtx) {
         OperationRepresentation operation = operationCtx.getOperation();
-        Configuration conf = operation.get(Configuration.class);
+        Command command = operation.get(Command.class);
         
-        if (conf == null) {
+        if (command == null || command.getText().isEmpty()) {
             return null;
         }
         
@@ -89,29 +84,32 @@ public class QueclinkDeviceSetting extends QueclinkParser implements Translator 
         
         //or both
         
-        operation.setStatus(OperationStatus.SUCCESSFUL.toString());
-        String configurationString = conf.getConfig();
-        String[] configArr = configurationString.split("\n");
-        String command = new String();
+        
+        
+        String commandText = command.getText();
+        String[] commandArr = commandText.split("\n");
+        String device_command = new String();
         
         //TODO check why two concatenated commands gives failure on agent
-        for(int i = 0; i < configArr.length; ++i) {
+        for(int i = 0; i < commandArr.length; ++i) {
             
-            String configKeyandValue[] = configArr[i].split("=");
-            if (configKeyandValue[0].trim().equals("c8y.reportInterval.noMotion")) {
+            String configKeyandValue[] = commandArr[i].split(" ");
+            if (configKeyandValue[0].trim().equals("reportNoMotion")) {
                 if(!configKeyandValue[1].trim().isEmpty()) {
-                    command += String.format(REPORT_INTERVAL_NO_MOTION_TEMPLATE, "glpass", BITMASK_MODENOMOTION, configKeyandValue[1].trim());
+                    device_command += String.format(REPORT_INTERVAL_NO_MOTION_TEMPLATE, "gl300", BITMASK_MODENOMOTION, configKeyandValue[1].trim());
                 }
             }
             
-            if (configKeyandValue[0].trim().equals("c8y.reportInterval.onMotion")) {
+            if (configKeyandValue[0].trim().equals("reportOnMotion")) {
                 if(!configKeyandValue[1].trim().isEmpty()) {
-                    //command += String.format(REPORT_INTERVAL_NO_MOTION_TEMPLATE, "glpass", configKeyandValue[1].trim());
+                    device_command += String.format(REPORT_INTERVAL_ON_MOTION_TEMPLATE, PASSWORD, configKeyandValue[1].trim());
                 }
             }
         }
         
         
-        return (command.isEmpty())? null : command;
+        return (device_command.isEmpty())? null : device_command;
     }
+    
+
 }
