@@ -93,6 +93,11 @@ public class QueclinkDevice {
         return trackerDevice;
     }
     
+    public String fetchProtocolFromType(String type) {
+        String protocolName = type.substring(9);
+        return protocolName;
+    }
+    
     public String getDevicePassword(String protocolVersion) {
         String key = getDeviceId(protocolVersion);
         if(QueclinkConstants.queclinkProperties.get(key) == null) {

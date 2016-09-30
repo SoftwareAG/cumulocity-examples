@@ -33,18 +33,21 @@ public class QueclinkDeviceSetting extends QueclinkParser implements Translator 
      * Report message when it detects movement: 4 
      * Change the fix interval and send interval of FRI to <rest fix interval> and <rest send interval> when it detects non-movement: 8
      */
-    public static final int BITMASK_MODENOMOTION = 2 + 4 + 8;
+    public static final String BITMASK_MODENOMOTION = "E"; // 2 + 4 + 8
     /**
      * Set report interval on motion state
      * Template parameters: password, send interval, serial number
      */
-    public static final String REPORT_INTERVAL_ON_MOTION_TEMPLATE = "AT+GTFRI=%s,,,,,,,,%s,,,,,,,,,,,,,0002$";
+    public static final String REPORT_INTERVAL_ON_MOTION_TEMPLATE = "AT+GTFRI=%s,,,,,,,,%s,,,,,,,,,,,,0007$";
+    
+    public static final String REPORT_INTERVAL_ON_MOTION_ACK = "+ACK:GTFRI";
     /**
      * Set report interval on no-motion state
      * Template parameters: password, rest send interval, serial number
      */
-    public static final String REPORT_INTERVAL_NO_MOTION_TEMPLATE = "AT+GTNMD=%s,%d,,,,,%s,,,,,,,,0001$";
+    public static final String REPORT_INTERVAL_NO_MOTION_TEMPLATE = "AT+GTNMD=%s,%s,,,,,%s,,,,,,,,0005$";
     
+    public static final String REPORT_INTERVAL_NO_MOTION_ACK = "+ACK:GTNMD";
     @Autowired
     public QueclinkDeviceSetting(TrackerAgent trackerAgent) {
         this.trackerAgent = trackerAgent;
@@ -84,25 +87,27 @@ public class QueclinkDeviceSetting extends QueclinkParser implements Translator 
         
         //or both
         
-        
+        // queclink_protocolname
+        String imei = operation.getDeviceExternalIDs().getExternalIds().get(0).getExternalId();
+        String type = trackerAgent.getOrCreateTrackerDevice(imei).getManagedObject().getType();
+        String password = queclinkDevice.fetchProtocolFromType(type);
         
         String commandText = command.getText();
         String[] commandArr = commandText.split("\n");
         String device_command = new String();
         
-        //TODO check why two concatenated commands gives failure on agent
         for(int i = 0; i < commandArr.length; ++i) {
             
             String configKeyandValue[] = commandArr[i].split(" ");
             if (configKeyandValue[0].trim().equals("reportNoMotion")) {
                 if(!configKeyandValue[1].trim().isEmpty()) {
-                    device_command += String.format(REPORT_INTERVAL_NO_MOTION_TEMPLATE, "gl300", BITMASK_MODENOMOTION, configKeyandValue[1].trim());
+                    device_command += String.format(REPORT_INTERVAL_NO_MOTION_TEMPLATE, password, BITMASK_MODENOMOTION, configKeyandValue[1].trim());
                 }
             }
             
             if (configKeyandValue[0].trim().equals("reportOnMotion")) {
                 if(!configKeyandValue[1].trim().isEmpty()) {
-                    device_command += String.format(REPORT_INTERVAL_ON_MOTION_TEMPLATE, PASSWORD, configKeyandValue[1].trim());
+                    device_command += String.format(REPORT_INTERVAL_ON_MOTION_TEMPLATE, password, configKeyandValue[1].trim());
                 }
             }
         }
