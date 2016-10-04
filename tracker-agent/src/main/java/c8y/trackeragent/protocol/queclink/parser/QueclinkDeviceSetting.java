@@ -8,8 +8,9 @@ import org.springframework.stereotype.Component;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 
-import c8y.Command;
+import c8y.MotionTracking;
 import c8y.trackeragent.TrackerAgent;
+import c8y.Tracking;
 import c8y.trackeragent.context.OperationContext;
 import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.protocol.queclink.device.QueclinkDevice;
@@ -20,7 +21,6 @@ public class QueclinkDeviceSetting extends QueclinkParser implements Translator 
     
     private Logger logger = LoggerFactory.getLogger(QueclinkDeviceSetting.class);
     private final TrackerAgent trackerAgent;
-    private QueclinkDevice queclinkDevice = new QueclinkDevice();
     
     /**
      * Bitmask:
@@ -29,18 +29,12 @@ public class QueclinkDeviceSetting extends QueclinkParser implements Translator 
      * Change the fix interval and send interval of FRI to <rest fix interval> and <rest send interval> when it detects non-movement: 8
      */
     public static final String BITMASK_MODENOMOTION = "E"; // 2 + 4 + 8
-    /**
-     * Set report interval on motion state
-     * Template parameters: password, send interval, serial number
-     */
-    public static final String REPORT_INTERVAL_ON_MOTION_TEMPLATE = "AT+GTFRI=%s,,,,,,,,%s,,,,,,,,,,,,0007$";
-    
-    public static final String REPORT_INTERVAL_ON_MOTION_ACK = "+ACK:GTFRI";
+
     /**
      * Set report interval on no-motion state
-     * Template parameters: password, rest send interval, serial number
+     * Template parameters: password, rest fix interval, rest send interval, serial number
      */
-    public static final String REPORT_INTERVAL_NO_MOTION_TEMPLATE = "AT+GTNMD=%s,%s,,,,,%s,,,,,,,,0005$";
+    public static final String REPORT_INTERVAL_NO_MOTION_TEMPLATE = "AT+GTNMD=%s,%s,,,,10,%d,,,,,,,,0032$";
     
     public static final String REPORT_INTERVAL_NO_MOTION_ACK = "+ACK:GTNMD";
     @Autowired
@@ -66,11 +60,20 @@ public class QueclinkDeviceSetting extends QueclinkParser implements Translator 
     }
     @Override
     public String translate(OperationContext operationCtx) {
-        OperationRepresentation operation = operationCtx.getOperation();
-        Command command = operation.get(Command.class);
         
-        if (command == null || command.getText().isEmpty()) {
-            return null;
+        OperationRepresentation operation = operationCtx.getOperation();
+        Tracking tracking = operation.get(Tracking.class);
+        //MotionTracking m_tracking = operation.get(MotionTracking.class);
+        
+        String device_command = new String();
+        
+        if (tracking != null) {
+            
+            String password = queclinkDevice.getDevicePasswordFromGId(operation.getDeviceId());
+            if (tracking.getInterval() != 0) {
+                int interval = tracking.getInterval();
+                device_command = String.format(REPORT_INTERVAL_NO_MOTION_TEMPLATE, password, BITMASK_MODENOMOTION, interval);
+            }
         }
         
         
@@ -80,31 +83,7 @@ public class QueclinkDeviceSetting extends QueclinkParser implements Translator 
         //if on_motion_report interval is set
         //return REPORT_INTERVAL_ON_MOTION_TEMPLATE
         
-        //or both
-        
-        // queclink_protocolname
-        String password = queclinkDevice.getDevicePasswordFromGId(operation.getDeviceId());
-        
-        String commandText = command.getText();
-        String[] commandArr = commandText.split("\n"); // TODO change \n to something else &
-        String device_command = new String();
-        
-        for(int i = 0; i < commandArr.length; ++i) {
-            
-            String configKeyandValue[] = commandArr[i].split(" ");
-            if (configKeyandValue[0].trim().equals("reportNoMotion")) {
-                if(!configKeyandValue[1].trim().isEmpty()) {
-                    device_command += String.format(REPORT_INTERVAL_NO_MOTION_TEMPLATE, password, BITMASK_MODENOMOTION, configKeyandValue[1].trim());
-                }
-            }
-            
-            if (configKeyandValue[0].trim().equals("reportOnMotion")) {
-                if(!configKeyandValue[1].trim().isEmpty()) {
-                    device_command += String.format(REPORT_INTERVAL_ON_MOTION_TEMPLATE, password, configKeyandValue[1].trim());
-                }
-            }
-        }
-        
+        //or both    
         
         return (device_command.isEmpty())? null : device_command;
     }

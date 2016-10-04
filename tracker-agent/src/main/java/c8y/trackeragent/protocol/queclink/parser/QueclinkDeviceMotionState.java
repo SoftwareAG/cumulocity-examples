@@ -73,8 +73,16 @@ public class QueclinkDeviceMotionState extends QueclinkParser implements Transla
 
     public static final String MOTION_ACK = "+ACK:GTCFG";
 
+    /**
+     * Set report interval on motion state
+     * Template parameters: password, send interval, serial number
+     */
+    public static final String REPORT_INTERVAL_ON_MOTION_TEMPLATE = "AT+GTFRI=%s,1,,,,,,,%d,,,,,,,,,,,,0030$";
+    
+    public static final String REPORT_INTERVAL_ON_MOTION_ACK = "+ACK:GTFRI";
+    
     private final TrackerAgent trackerAgent;
-    private final String password;
+    //private final String password;
     private short corrId = 0;
     private boolean lastState;
     private OperationRepresentation lastOperation;
@@ -83,7 +91,6 @@ public class QueclinkDeviceMotionState extends QueclinkParser implements Transla
     @Autowired
     public QueclinkDeviceMotionState(TrackerAgent trackerAgent) {
         this.trackerAgent = trackerAgent;
-        this.password = PASSWORD;
     }
 
     @Override
@@ -99,6 +106,7 @@ public class QueclinkDeviceMotionState extends QueclinkParser implements Transla
     }
 
     private boolean onParsedMotion(String[] report, String imei) throws SDKException {
+        
         String motionState = report[4];
         String deviceType = report[1].substring(0, 2);
         
@@ -151,7 +159,18 @@ public class QueclinkDeviceMotionState extends QueclinkParser implements Transla
             lastState = mTrack.isActive();
             lastOperation = operation;
         }
+        
+        String password = queclinkDevice.getDevicePasswordFromGId(operation.getDeviceId());
+        
+        String device_command = new String(); 
+        
+        if (mTrack.getInterval() != 0) {
+            int interval = mTrack.getInterval();
+            device_command += String.format(REPORT_INTERVAL_ON_MOTION_TEMPLATE, password, interval);
+        }
+        
+        device_command += String.format(MOTION_TEMPLATE, password, mTrack.isActive() ? MOTION_ON : MOTION_OFF, mTrack.isActive() ? 1 : 0, corrId);
 
-        return String.format(MOTION_TEMPLATE, password, mTrack.isActive() ? MOTION_ON : MOTION_OFF, mTrack.isActive() ? 1 : 0, corrId);
+        return device_command;
     }
 }

@@ -1,28 +1,13 @@
 package c8y.trackeragent.protocol.queclink.device;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import java.util.Date;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.cumulocity.agent.server.repository.InventoryRepository;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
-import com.cumulocity.sdk.client.SDKException;
-import com.cumulocity.sdk.client.alarm.AlarmApi;
-import com.cumulocity.sdk.client.devicecontrol.DeviceControlApi;
-import com.cumulocity.sdk.client.event.EventApi;
-import com.cumulocity.sdk.client.identity.IdentityApi;
-import com.cumulocity.sdk.client.inventory.InventoryApi;
-import com.cumulocity.sdk.client.measurement.MeasurementApi;
 
 import c8y.Hardware;
 import c8y.trackeragent.TrackerAgent;
-import c8y.trackeragent.UpdateIntervalProvider;
-import c8y.trackeragent.configuration.TrackerConfiguration;
-import c8y.trackeragent.device.ManagedObjectCache;
 import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.protocol.queclink.QueclinkConstants;
 
@@ -112,7 +97,7 @@ public class QueclinkDevice {
     public String getDevicePassword(String protocolVersion) {
         String key = getDeviceId(protocolVersion);
         if(QueclinkConstants.queclinkProperties.get(key) == null) {
-            return null;
+            return "";
         }
         return QueclinkConstants.queclinkProperties.get(key)[0];
     }
