@@ -1,11 +1,14 @@
 package c8y.trackeragent.protocol.queclink.device;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import java.util.Date;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.cumulocity.agent.server.repository.InventoryRepository;
+import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.alarm.AlarmApi;
@@ -24,7 +27,6 @@ import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.protocol.queclink.QueclinkConstants;
 
 public class QueclinkDevice {
-  
 
     private Logger logger = LoggerFactory.getLogger(QueclinkDevice.class);
             
@@ -36,6 +38,7 @@ public class QueclinkDevice {
     private String serialNumber; 
     private String type;
     private String revision;
+    private String password;
     
     public void setTrackerAgent(TrackerAgent trackerAgent) {
         this.trackerAgent = trackerAgent;
@@ -55,6 +58,9 @@ public class QueclinkDevice {
         
         //set revision
         this.revision = getRevision(protocolVersion);
+        
+        //set password
+        this.password = getDevicePassword(protocolVersion);
         
     }
     
@@ -78,6 +84,11 @@ public class QueclinkDevice {
             // update managed object representation
             setMoRepresentationType(representation);
             setMoRepresentationHardware(representation);
+            
+            if(representation.get(password) == null) {
+                setMoRepresentationPassword(representation);
+            }
+            
             representation.setLastUpdatedDateTime(null);
             
             // update device (inventory)
@@ -101,9 +112,16 @@ public class QueclinkDevice {
     public String getDevicePassword(String protocolVersion) {
         String key = getDeviceId(protocolVersion);
         if(QueclinkConstants.queclinkProperties.get(key) == null) {
-            return "gl200";
+            return null;
         }
         return QueclinkConstants.queclinkProperties.get(key)[0];
+    }
+
+    
+    public String getDevicePasswordFromGId(GId id) {
+        
+        ManagedObjectRepresentation mo = trackerDevice.getManagedObject(id);
+        return (String) mo.get("password");    
     }
     
     private void setMoRepresentationType(ManagedObjectRepresentation representation) {
@@ -113,6 +131,10 @@ public class QueclinkDevice {
     private void setMoRepresentationHardware(ManagedObjectRepresentation representation) {
         Hardware queclink_hardware = configureHardware();
         representation.set(queclink_hardware);
+    }
+    
+    private void setMoRepresentationPassword(ManagedObjectRepresentation representation) {
+        representation.setProperty("password", password);
     }
     
     protected String configureType() {

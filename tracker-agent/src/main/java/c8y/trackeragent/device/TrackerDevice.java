@@ -201,6 +201,14 @@ public class TrackerDevice {
         }
         return mo;
     }
+    
+    public ManagedObjectRepresentation getManagedObject(GId gid) {
+        ManagedObjectRepresentation mo = inventory.get(gid);
+        if(mo == null) {
+            throw new RuntimeException("No device for id " + gid);
+        }
+        return mo;
+    }
 
     public void setGeofence(Geofence fence) throws SDKException {
         if (fence.isActive()) {

@@ -5,18 +5,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 
 import c8y.Command;
-import c8y.Configuration;
-import c8y.MotionTracking;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.context.OperationContext;
 import c8y.trackeragent.context.ReportContext;
-import c8y.trackeragent.device.ManagedObjectCache;
-import c8y.trackeragent.protocol.queclink.QueclinkConstants;
 import c8y.trackeragent.protocol.queclink.device.QueclinkDevice;
 import c8y.trackeragent.tracker.Translator;
 
@@ -88,12 +83,10 @@ public class QueclinkDeviceSetting extends QueclinkParser implements Translator 
         //or both
         
         // queclink_protocolname
-        String imei = operation.getDeviceExternalIDs().getExternalIds().get(0).getExternalId();
-        String type = trackerAgent.getOrCreateTrackerDevice(imei).getManagedObject().getType();
-        String password = queclinkDevice.fetchProtocolFromType(type);
+        String password = queclinkDevice.getDevicePasswordFromGId(operation.getDeviceId());
         
         String commandText = command.getText();
-        String[] commandArr = commandText.split("\n");
+        String[] commandArr = commandText.split("\n"); // TODO change \n to something else &
         String device_command = new String();
         
         for(int i = 0; i < commandArr.length; ++i) {
