@@ -68,6 +68,7 @@ import c8y.RequiredAvailability;
 import c8y.Restart;
 import c8y.SignalStrength;
 import c8y.SupportedOperations;
+import c8y.Tracking;
 import c8y.CellInfo;
 import c8y.trackeragent.UpdateIntervalProvider;
 import c8y.trackeragent.configuration.TrackerConfiguration;
@@ -235,6 +236,29 @@ public class TrackerDevice {
         MotionTracking motion = new MotionTracking();
         motion.setActive(active);
         device.set(motion);
+        device.setId(gid);
+        inventory.update(device);
+    }
+    
+    public void setMotionTracking(boolean active, int interval) throws SDKException {
+        logger.debug("Motion tracking for {} set to {}", imei, active);
+
+        ManagedObjectRepresentation device = new ManagedObjectRepresentation();
+        MotionTracking motion = new MotionTracking();
+        motion.setActive(active);
+        motion.setInterval(interval);
+        device.set(motion);
+        device.setId(gid);
+        inventory.update(device);
+    }
+    
+    public void setTracking(int interval) throws SDKException {
+        logger.debug("Tracking for {} set to {}", imei, interval);
+
+        ManagedObjectRepresentation device = new ManagedObjectRepresentation();
+        Tracking tracking = new Tracking();
+        tracking.setInterval(interval);
+        device.set(tracking);
         device.setId(gid);
         inventory.update(device);
     }

@@ -34,9 +34,13 @@ public class QueclinkDeviceSetting extends QueclinkParser implements Translator 
      * Set report interval on no-motion state
      * Template parameters: password, rest fix interval, rest send interval, serial number
      */
-    public static final String REPORT_INTERVAL_NO_MOTION_TEMPLATE = "AT+GTNMD=%s,%s,,,,10,%d,,,,,,,,0032$";
+    public static final String REPORT_INTERVAL_NO_MOTION_TEMPLATE = "AT+GTNMD=%s,%s,,,,%d,%d,,,,,,,,%04x$";
     
     public static final String REPORT_INTERVAL_NO_MOTION_ACK = "+ACK:GTNMD";
+    
+    private short commandSerialNum = 0;
+    private OperationRepresentation lastOperation;
+    
     @Autowired
     public QueclinkDeviceSetting(TrackerAgent trackerAgent) {
         this.trackerAgent = trackerAgent;
@@ -45,17 +49,43 @@ public class QueclinkDeviceSetting extends QueclinkParser implements Translator 
     @Override
     public boolean onParsed(ReportContext reportCtx) throws SDKException {
         
-        setDeviceInfo(reportCtx);
-       
-        return true;
+        if (REPORT_INTERVAL_NO_MOTION_ACK.equals(reportCtx.getEntry(0))) { //or only check ack
+            return onParsedAck(reportCtx, reportCtx.getImei());
+        }
+        else {
+            return setDeviceInfo(reportCtx);
+        }
     }
 
-    private QueclinkDevice setDeviceInfo(ReportContext reportCtx) {
+    private boolean onParsedAck(ReportContext reportCtx, String imei) {
+        
+        short returnedCommandSerialNum = Short.parseShort(reportCtx.getEntry(4), 16);
+        Tracking ackTracking;
+        
+        synchronized(this) {
+            if (returnedCommandSerialNum != commandSerialNum) {
+                return false;
+            }
+            ackTracking = lastOperation.get(Tracking.class);   
+        }
+        
+        try {
+            // store fragment to managed object
+            trackerAgent.getOrCreateTrackerDevice(imei).setTracking(ackTracking.getInterval());
+            trackerAgent.finish(imei, lastOperation);
+        
+        } catch (SDKException sdkException) {
+            trackerAgent.fail(imei, lastOperation, "Error setting tracking to managed object", sdkException);
+        }
+        
+        return true;
+    }
+    private boolean setDeviceInfo(ReportContext reportCtx) {
         
         queclinkDevice.setProtocolVersion(reportCtx.getEntry(1));
         queclinkDevice.getOrUpdateTrackerDevice(reportCtx.getImei());
         
-        return queclinkDevice;
+        return true;
         
     }
     @Override
@@ -63,16 +93,26 @@ public class QueclinkDeviceSetting extends QueclinkParser implements Translator 
         
         OperationRepresentation operation = operationCtx.getOperation();
         Tracking tracking = operation.get(Tracking.class);
-        //MotionTracking m_tracking = operation.get(MotionTracking.class);
         
+        if (tracking == null) {
+            return null;
+        }
         String device_command = new String();
+       
+        synchronized (this) {
+            commandSerialNum++;
+            lastOperation = operation;
+        }
         
         if (tracking != null) {
             
             String password = queclinkDevice.getDevicePasswordFromGId(operation.getDeviceId());
-            if (tracking.getInterval() != 0) {
+            if (tracking.getInterval() >= 0) {
                 int interval = tracking.getInterval();
-                device_command = String.format(REPORT_INTERVAL_NO_MOTION_TEMPLATE, password, BITMASK_MODENOMOTION, interval);
+                device_command = String.format(REPORT_INTERVAL_NO_MOTION_TEMPLATE, password, BITMASK_MODENOMOTION, interval, interval, commandSerialNum);
+                
+                // add restart command
+                device_command += String.format("AT+GTRTO=%s,3,,,,,,0001$", password);
             }
         }
         

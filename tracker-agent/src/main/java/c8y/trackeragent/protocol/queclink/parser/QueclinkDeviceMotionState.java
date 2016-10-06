@@ -77,14 +77,12 @@ public class QueclinkDeviceMotionState extends QueclinkParser implements Transla
      * Set report interval on motion state
      * Template parameters: password, send interval, serial number
      */
-    public static final String REPORT_INTERVAL_ON_MOTION_TEMPLATE = "AT+GTFRI=%s,1,,,,,,,%d,,,,,,,,,,,,0030$";
+    public static final String REPORT_INTERVAL_ON_MOTION_TEMPLATE = "AT+GTFRI=%s,1,,,,,,,%d,,,,,,,,,,,,%04x$";
     
     public static final String REPORT_INTERVAL_ON_MOTION_ACK = "+ACK:GTFRI";
     
     private final TrackerAgent trackerAgent;
-    //private final String password;
     private short corrId = 0;
-    private boolean lastState;
     private OperationRepresentation lastOperation;
 
 
@@ -125,19 +123,25 @@ public class QueclinkDeviceMotionState extends QueclinkParser implements Transla
 
     private boolean onParsedAck(String[] report, String imei) throws SDKException {
         short returnedCorr = Short.parseShort(report[4], 16);
-        boolean ackedState;
         OperationRepresentation ackOp;
-
+        MotionTracking ackMTrack;
+        
         synchronized (this) {
             if (returnedCorr != corrId) {
                 return false;
             }
-            ackedState = lastState;
             ackOp = lastOperation;
+            ackMTrack = ackOp.get(MotionTracking.class);
         }
 
         try {
-            trackerAgent.getOrCreateTrackerDevice(imei).setMotionTracking(ackedState);
+            
+            if (ackMTrack.getInterval() >= 0) {
+                trackerAgent.getOrCreateTrackerDevice(imei).setMotionTracking(ackMTrack.isActive(), ackMTrack.getInterval());
+            } else {
+                trackerAgent.getOrCreateTrackerDevice(imei).setMotionTracking(ackMTrack.isActive());
+            }
+            
             trackerAgent.finish(imei, ackOp);
         } catch (SDKException x) {
             trackerAgent.fail(imei, ackOp, "Error setting motion tracking", x);
@@ -156,7 +160,6 @@ public class QueclinkDeviceMotionState extends QueclinkParser implements Transla
 
         synchronized (this) {
             corrId++;
-            lastState = mTrack.isActive();
             lastOperation = operation;
         }
         
@@ -164,13 +167,16 @@ public class QueclinkDeviceMotionState extends QueclinkParser implements Transla
         
         String device_command = new String(); 
         
-        if (mTrack.getInterval() != 0) {
+        if (mTrack.getInterval() >= 0) {
             int interval = mTrack.getInterval();
-            device_command += String.format(REPORT_INTERVAL_ON_MOTION_TEMPLATE, password, interval);
+            device_command += String.format(REPORT_INTERVAL_ON_MOTION_TEMPLATE, password, interval, corrId);
         }
         
         device_command += String.format(MOTION_TEMPLATE, password, mTrack.isActive() ? MOTION_ON : MOTION_OFF, mTrack.isActive() ? 1 : 0, corrId);
 
+        // add restart command
+        device_command += String.format("AT+GTRTO=%s,3,,,,,,0001$", password);
+        
         return device_command;
     }
 }
