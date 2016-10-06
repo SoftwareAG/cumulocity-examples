@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 
@@ -13,6 +14,7 @@ import c8y.trackeragent.TrackerAgent;
 import c8y.Tracking;
 import c8y.trackeragent.context.OperationContext;
 import c8y.trackeragent.context.ReportContext;
+import c8y.trackeragent.protocol.queclink.QueclinkConstants;
 import c8y.trackeragent.protocol.queclink.device.QueclinkDevice;
 import c8y.trackeragent.tracker.Translator;
 
@@ -34,7 +36,10 @@ public class QueclinkDeviceSetting extends QueclinkParser implements Translator 
      * Set report interval on no-motion state
      * Template parameters: password, rest fix interval, rest send interval, serial number
      */
-    public static final String REPORT_INTERVAL_NO_MOTION_TEMPLATE = "AT+GTNMD=%s,%s,,,,%d,%d,,,,,,,,%04x$";
+    public static final String[] REPORT_INTERVAL_NO_MOTION_TEMPLATE = {
+            "AT+GTNMD=%s,%s,,,,%d,%d,,,,,,,,%04x$", // supported on gl200, gl300
+            "AT+GTNMD=%s,%s,,,,%d,,,,%04x$" // supported on gl50x
+            };
     
     public static final String REPORT_INTERVAL_NO_MOTION_ACK = "+ACK:GTNMD";
     
@@ -72,7 +77,7 @@ public class QueclinkDeviceSetting extends QueclinkParser implements Translator 
         try {
             // store fragment to managed object
             trackerAgent.getOrCreateTrackerDevice(imei).setTracking(ackTracking.getInterval());
-            trackerAgent.finish(imei, lastOperation);
+            //trackerAgent.finish(imei, lastOperation); //{error="devicecontrol/Not Found",message="Finding device data from database failed : No operation for gid '<operation id>'!",info="https://www.cumulocity.com/guides/reference-guide/#error_reporting",details="{exceptionMessage="Finding device data from database failed"
         
         } catch (SDKException sdkException) {
             trackerAgent.fail(imei, lastOperation, "Error setting tracking to managed object", sdkException);
@@ -82,8 +87,7 @@ public class QueclinkDeviceSetting extends QueclinkParser implements Translator 
     }
     private boolean setDeviceInfo(ReportContext reportCtx) {
         
-        queclinkDevice.setProtocolVersion(reportCtx.getEntry(1));
-        queclinkDevice.getOrUpdateTrackerDevice(reportCtx.getImei());
+        queclinkDevice.getOrUpdateTrackerDevice(reportCtx.getEntry(1), reportCtx.getImei());
         
         return true;
         
@@ -103,28 +107,27 @@ public class QueclinkDeviceSetting extends QueclinkParser implements Translator 
             commandSerialNum++;
             lastOperation = operation;
         }
+
+        ManagedObjectRepresentation deviceMo = queclinkDevice.getManagedObjectFromGId(operation.getDeviceId());
+        String password = (String) deviceMo.get("password");
         
-        if (tracking != null) {
+        if (tracking.getInterval() >= 0) {
+            int interval = tracking.getInterval();
             
-            String password = queclinkDevice.getDevicePasswordFromGId(operation.getDeviceId());
-            if (tracking.getInterval() >= 0) {
-                int interval = tracking.getInterval();
-                device_command = String.format(REPORT_INTERVAL_NO_MOTION_TEMPLATE, password, BITMASK_MODENOMOTION, interval, interval, commandSerialNum);
+            if (queclinkDevice.convertDeviceTypeToQueclinkType(QueclinkConstants.GL500_ID).equals(deviceMo.getType()) ||
+                    queclinkDevice.convertDeviceTypeToQueclinkType(QueclinkConstants.GL505_ID).equals(deviceMo.getType())) {
                 
-                // add restart command
-                device_command += String.format("AT+GTRTO=%s,3,,,,,,0001$", password);
+                int intervalInMins = interval / 60;
+                device_command = String.format(REPORT_INTERVAL_NO_MOTION_TEMPLATE[1], password, BITMASK_MODENOMOTION, intervalInMins, commandSerialNum);
+
+            } else {
+                device_command = String.format(REPORT_INTERVAL_NO_MOTION_TEMPLATE[0], password, BITMASK_MODENOMOTION, interval, interval, commandSerialNum);
             }
+            
+            // add restart command
+            device_command += String.format("AT+GTRTO=%s,3,,,,,,0001$", password);
         }
-        
-        
-        //if no_motion_report interval is set
-        //return REPORT_INTERVAL_NO_MOTION_TEMPLATE 
-        
-        //if on_motion_report interval is set
-        //return REPORT_INTERVAL_ON_MOTION_TEMPLATE
-        
-        //or both    
-        
+
         return (device_command.isEmpty())? null : device_command;
     }
     

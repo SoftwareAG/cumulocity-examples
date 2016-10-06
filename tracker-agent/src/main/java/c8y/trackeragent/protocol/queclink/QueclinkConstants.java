@@ -29,7 +29,12 @@ public interface QueclinkConstants {
     static final String GL300_ID = "30";
     static final String GL200_ID = "02";
     
-    static final HashMap<String, String[]> queclinkProperties = new HashMap<String, String[]>() {{
+    static final HashMap<String, String[]> queclinkProperties = new HashMap<String, String[]>() {/**
+         * 
+         */
+        private static final long serialVersionUID = -8919978143488659000L;
+
+    {
         put(GL500_ID, new String[]{"gl500","gl500"}); //protocol, default password
         put(GL505_ID, new String[]{"gl505","gl500"}); //protocol, default password
         put(GV500_ID, new String[]{"gv500","gv500"}); //protocol, default password

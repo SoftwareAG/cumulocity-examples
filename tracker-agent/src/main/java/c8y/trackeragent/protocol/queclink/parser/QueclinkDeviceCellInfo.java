@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -123,8 +125,12 @@ public class QueclinkDeviceCellInfo extends QueclinkParser {
         // convert signal strength to percentage
         BigDecimal signalStrengthPercentage = asPercentage(new BigDecimal(report[mainCellStartIndex + 4]), 0, 63);
         logger.info("Signal strength percentage {}", signalStrengthPercentage);
-        //TODO remove new datetime, parse from input
-        measurementService.createGSMLevelMeasurement(signalStrengthPercentage, trackerDevice, new DateTime());
+        
+        // include date time that comes from the device for gsm measurement
+        DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyyMMddHHmmss");
+        DateTime dateTime = formatter.parseDateTime(report[report.length - 2]);
+        
+        measurementService.createGSMLevelMeasurement(signalStrengthPercentage, trackerDevice, dateTime);
         
         return true;
     }

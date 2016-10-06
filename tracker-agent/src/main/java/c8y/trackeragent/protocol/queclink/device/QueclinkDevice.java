@@ -19,59 +19,44 @@ public class QueclinkDevice {
     
     private TrackerAgent trackerAgent;
     private TrackerDevice trackerDevice;
-    private ManagedObjectRepresentation representation;
-    private String serialNumber; 
-    private String type;
-    private String revision;
-    private String password;
     
     public void setTrackerAgent(TrackerAgent trackerAgent) {
         this.trackerAgent = trackerAgent;
     }
     
-    public void setType(String type) {
-       this.type = type;
+    public String convertDeviceTypeToQueclinkType(String deviceType) {
+       return "queclink_" + QueclinkConstants.queclinkProperties.get(deviceType)[0];
     }
     
-    public void setProtocolVersion(String protocolVersion) {
-        //set type
+    public TrackerDevice getOrUpdateTrackerDevice (String protocolVersion, String imei) {
+        
+        String type = new String();
+        String revision = new String();
+        String password = new String();
+        
         if (getDeviceProtocolType(protocolVersion) != null) {
-            this.type = getDeviceProtocolType(protocolVersion);
-        } else {
-            this.type = getDeviceId(protocolVersion);
+            type = getDeviceProtocolType(protocolVersion);
+            revision = getRevision(protocolVersion);
+            password = getDevicePassword(protocolVersion);
         }
         
-        //set revision
-        this.revision = getRevision(protocolVersion);
-        
-        //set password
-        this.password = getDevicePassword(protocolVersion);
-        
-    }
-    
-    public void setRevision(String revision) {
-        this.revision = revision;
-    }
-    
-    public TrackerDevice getOrUpdateTrackerDevice (String imei) {
-        
-        this.serialNumber = imei;
         trackerDevice = trackerAgent.getOrCreateTrackerDevice(imei);
-        representation = trackerDevice.getManagedObject();
+        ManagedObjectRepresentation representation = trackerDevice.getManagedObject();
         
-        logger.info("representation type {}, configured type {}" , representation.getType(), configureType());
+        logger.info("representation type {}, configured type {}" , representation.getType(), configureType(type));
+        
         if (representation.getType() == null || 
-                !representation.getType().equals(configureType()) ||
+                !representation.getType().equals(configureType(type)) ||
                 representation.get(Hardware.class) == null || 
                 !representation.get(Hardware.class).getRevision().equals(revision))
         { 
             
             // update managed object representation
-            setMoRepresentationType(representation);
-            setMoRepresentationHardware(representation);
+            setMoRepresentationType(representation, type);
+            setMoRepresentationHardware(representation, imei, revision);
             
             if(representation.get(password) == null) {
-                setMoRepresentationPassword(representation);
+                setMoRepresentationPassword(representation, password);
             }
             
             representation.setLastUpdatedDateTime(null);
@@ -109,24 +94,29 @@ public class QueclinkDevice {
         return (String) mo.get("password");    
     }
     
-    private void setMoRepresentationType(ManagedObjectRepresentation representation) {
-        representation.setType(configureType());
+    public ManagedObjectRepresentation getManagedObjectFromGId(GId id) {
+
+        return trackerDevice.getManagedObject(id);    
+    }
+
+    private void setMoRepresentationType(ManagedObjectRepresentation representation, String type) {
+        representation.setType(configureType(type));
     }
     
-    private void setMoRepresentationHardware(ManagedObjectRepresentation representation) {
-        Hardware queclink_hardware = configureHardware();
+    private void setMoRepresentationHardware(ManagedObjectRepresentation representation, String serialNumber, String revision) {
+        Hardware queclink_hardware = configureHardware(serialNumber, revision);
         representation.set(queclink_hardware);
     }
     
-    private void setMoRepresentationPassword(ManagedObjectRepresentation representation) {
+    private void setMoRepresentationPassword(ManagedObjectRepresentation representation, String password) {
         representation.setProperty("password", password);
     }
     
-    protected String configureType() {
+    protected String configureType(String type) {
         return model.toLowerCase() + "_" + type;
     } 
     
-    protected Hardware configureHardware() {
+    protected Hardware configureHardware(String serialNumber, String revision) {
         Hardware hardware = new Hardware();
         hardware.setSerialNumber(serialNumber);
         hardware.setModel(model);

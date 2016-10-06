@@ -23,6 +23,7 @@ package c8y.trackeragent.protocol.queclink.parser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 
@@ -51,7 +52,10 @@ public class QueclinkDeviceMotionState extends QueclinkParser implements Transla
     /**
      * Type of report: Device Motion State Indication.
      */
-    public static final String MOTION_REPORT = "+RESP:GTSTT";
+    public static final String[] MOTION_REPORT = {
+            "+RESP:GTSTT",
+            "+RESP:GTNMR"
+    };
 
     public static final String MOTION_DETECTED_IGNITION_OFF = "12";
     public static final String MOTION_DETECTED_IGNITION_ON = "22";
@@ -59,9 +63,12 @@ public class QueclinkDeviceMotionState extends QueclinkParser implements Transla
     public static final String BEING_TOWED = "16";
     
     /**
-     * Change the event mask to include motion tracking.
+     * Change the event mask to include motion tracking and enable/disable sensor.
      */
-    public static final String MOTION_TEMPLATE = "AT+GTCFG=%s,,,,,,,,,,%d,%d,,,,,,,,,,%04x$";
+    public static final String[] MOTION_TEMPLATE = {
+            "AT+GTCFG=%s,,,,,,,,,,%d,%d,,,,,,,,,,%04x$", // specific to gl200, gl300, gv500
+            "AT+GTGBC=%s,,,,,,,,,,,,,,,%d,,,,,,,,%04x$" // specific to gl50x
+    };
 
     /**
      * Events to set: Power on/off, external power on/off, battery low are
@@ -96,7 +103,7 @@ public class QueclinkDeviceMotionState extends QueclinkParser implements Transla
         String reportType = reportCtx.getReport()[0];
         if (MOTION_ACK.equals(reportType)) {
             return onParsedAck(reportCtx.getReport(), reportCtx.getImei());
-        } else if (MOTION_REPORT.equals(reportType)) {
+        } else if (MOTION_REPORT[0].equals(reportType) || MOTION_REPORT[1].equals(reportType)) {
             return onParsedMotion(reportCtx.getReport(), reportCtx.getImei());
         } else {
             return false;
@@ -105,17 +112,29 @@ public class QueclinkDeviceMotionState extends QueclinkParser implements Transla
 
     private boolean onParsedMotion(String[] report, String imei) throws SDKException {
         
-        String motionState = report[4];
+        
+        
         String deviceType = report[1].substring(0, 2);
+        boolean motion; 
+        if (report[0].equals(MOTION_REPORT[1])) {
+            String motionState = report[5];
+            motion = motionState.equals("1");
+            
+        }  else {
+            String motionState = report[4];
+            
+            if (QueclinkConstants.GV500_ID.equals(deviceType)) {
+                motionState = report[5];
+                }
+            
+            motion = MOTION_DETECTED.equals(motionState)
+                    || MOTION_DETECTED_IGNITION_OFF.equals(motionState)
+                    || MOTION_DETECTED_IGNITION_ON.equals(motionState)
+                    || BEING_TOWED.equals(motionState);
+            
+        }
         
-        if (QueclinkConstants.GV500_ID.equals(deviceType)) {
-            motionState = report[5];
-            }
         
-        boolean motion = MOTION_DETECTED.equals(motionState)
-                || MOTION_DETECTED_IGNITION_OFF.equals(motionState)
-                || MOTION_DETECTED_IGNITION_ON.equals(motionState)
-                || BEING_TOWED.equals(motionState);
         TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(imei);
         device.motionEvent(motion);
         return true;
@@ -163,17 +182,31 @@ public class QueclinkDeviceMotionState extends QueclinkParser implements Transla
             lastOperation = operation;
         }
         
-        String password = queclinkDevice.getDevicePasswordFromGId(operation.getDeviceId());
+        ManagedObjectRepresentation deviceMo = queclinkDevice.getManagedObjectFromGId(operation.getDeviceId());
+        String password = (String) deviceMo.get("password");
         
         String device_command = new String(); 
         
-        if (mTrack.getInterval() >= 0) {
-            int interval = mTrack.getInterval();
-            device_command += String.format(REPORT_INTERVAL_ON_MOTION_TEMPLATE, password, interval, corrId);
+        if (queclinkDevice.convertDeviceTypeToQueclinkType(QueclinkConstants.GL500_ID).equals(deviceMo.getType()) ||
+                queclinkDevice.convertDeviceTypeToQueclinkType(QueclinkConstants.GL505_ID).equals(deviceMo.getType())) {
+            if (mTrack.getInterval() >= 0) {
+                int interval = mTrack.getInterval();
+                device_command += String.format(REPORT_INTERVAL_ON_MOTION_TEMPLATE, password, interval, corrId);
+            }
+            
+            device_command += String.format(MOTION_TEMPLATE[1], password, mTrack.isActive() ? MOTION_ON : MOTION_OFF, mTrack.isActive() ? 1 : 0, corrId);
+
+        } else {
+            if (mTrack.getInterval() >= 0) {
+                int interval = mTrack.getInterval();
+                device_command += String.format(REPORT_INTERVAL_ON_MOTION_TEMPLATE, password, interval, corrId);
+            }
+            
+            device_command += String.format(MOTION_TEMPLATE[0], password, mTrack.isActive() ? MOTION_ON : MOTION_OFF, mTrack.isActive() ? 1 : 0, corrId);
+
         }
         
-        device_command += String.format(MOTION_TEMPLATE, password, mTrack.isActive() ? MOTION_ON : MOTION_OFF, mTrack.isActive() ? 1 : 0, corrId);
-
+        
         // add restart command
         device_command += String.format("AT+GTRTO=%s,3,,,,,,0001$", password);
         

@@ -24,6 +24,8 @@ import java.math.BigDecimal;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -170,11 +172,16 @@ public class QueclinkLocationReport extends QueclinkParser {
 	
 	private void createBatteryMeasurement(TrackerDevice device, ReportContext reportCtx, int batteryInfoIndex) throws NumberFormatException {
 	    
-	    if (batteryInfoIndex > 0 && batteryInfoIndex < reportCtx.getReport().length) {
+	    String[] report = reportCtx.getReport();
+	    if (batteryInfoIndex > 0 && batteryInfoIndex < report.length) {
     	    BigDecimal batteryLevel = reportCtx.getEntryAsNumber(batteryInfoIndex);
     	    if (batteryLevel != null) {
     	        logger.info("Battery percentage: {}", reportCtx.getEntry(batteryInfoIndex));
-    	        measurementService.createPercentageBatteryLevelMeasurement(batteryLevel, device, new DateTime());   	       
+    	        
+    	        DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyyMMddHHmmss");
+    	        DateTime dateTime = formatter.parseDateTime(report[report.length - 2]);
+    	        
+    	        measurementService.createPercentageBatteryLevelMeasurement(batteryLevel, device, dateTime);   	       
     	    }
 	    }
 	}

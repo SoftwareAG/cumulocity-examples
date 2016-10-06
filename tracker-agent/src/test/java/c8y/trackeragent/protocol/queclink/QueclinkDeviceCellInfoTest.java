@@ -11,6 +11,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Matchers.anyString;
 
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -103,6 +105,9 @@ public class QueclinkDeviceCellInfoTest {
 
     @Test
     public void testSignalStrengthMeasurement () {
+        
+        int[] signalPercentage = {41, 42, 44};
+        
         for (int i = 0; i < queclinkDeviceGSMData.length; ++i) {
             String[] queclinkData = queclinkDeviceGSMData[i].split(QUECLINK.getFieldSeparator());
             
@@ -112,7 +117,10 @@ public class QueclinkDeviceCellInfoTest {
             
             queclinkDeviceCellInfo.onParsed(new ReportContext(connectionDetails, queclinkData));
             
-            verify(measurementService).createGSMLevelMeasurement(new BigDecimal(41), device, new DateTime());
+            DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyyMMddHHmmss");
+            DateTime dateTime = formatter.parseDateTime(queclinkData[queclinkData.length - 2]);
+            
+            verify(measurementService).createGSMLevelMeasurement(new BigDecimal(signalPercentage[i]), device, dateTime);
             
         }
     }
