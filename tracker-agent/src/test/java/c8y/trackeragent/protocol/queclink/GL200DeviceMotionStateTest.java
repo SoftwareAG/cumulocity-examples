@@ -24,6 +24,7 @@ import static c8y.trackeragent.protocol.TrackingProtocol.QUECLINK;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -33,6 +34,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.cumulocity.model.idtype.GId;
+import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 
@@ -64,6 +66,7 @@ public class GL200DeviceMotionStateTest {
     private QueclinkDeviceMotionState gl200mot;
     private TrackerAgent trackerAgent = mock(TrackerAgent.class);
     private TrackerDevice device = mock(TrackerDevice.class);
+    private ManagedObjectRepresentation representation;
     private OperationContext operationCtx;
     private MotionTracking track = new MotionTracking();
     private TestConnectionDetails connectionDetails = new TestConnectionDetails(IMEI);
@@ -77,6 +80,8 @@ public class GL200DeviceMotionStateTest {
         operationCtx = new OperationContext(connectionDetails, operation);
         gl200mot = new QueclinkDeviceMotionState(trackerAgent);
         when(trackerAgent.getOrCreateTrackerDevice(anyString())).thenReturn(device);
+        when(device.getManagedObject((GId) any())).thenReturn(representation);
+        
     }
 
     //@Test

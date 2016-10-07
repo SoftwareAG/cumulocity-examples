@@ -43,7 +43,7 @@ public class QueclinkDeviceSetting extends QueclinkParser implements Translator 
     
     public static final String REPORT_INTERVAL_NO_MOTION_ACK = "+ACK:GTNMD";
     
-    private short commandSerialNum = 0;
+    private short commandSerialNum = 1;
     private OperationRepresentation lastOperation;
     
     @Autowired
