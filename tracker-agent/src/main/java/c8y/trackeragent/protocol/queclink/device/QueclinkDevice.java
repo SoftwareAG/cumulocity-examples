@@ -8,6 +8,7 @@ import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 
 import c8y.Hardware;
 import c8y.trackeragent.TrackerAgent;
+import c8y.trackeragent.device.ManagedObjectCache;
 import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.protocol.queclink.QueclinkConstants;
 
@@ -16,19 +17,12 @@ public class QueclinkDevice {
     private Logger logger = LoggerFactory.getLogger(QueclinkDevice.class);
             
     protected final String model = "Queclink";
-    
-    private TrackerAgent trackerAgent;
-    private TrackerDevice trackerDevice;
-    
-    public void setTrackerAgent(TrackerAgent trackerAgent) {
-        this.trackerAgent = trackerAgent;
-    }
-    
+
     public String convertDeviceTypeToQueclinkType(String deviceType) {
        return "queclink_" + QueclinkConstants.queclinkProperties.get(deviceType)[0];
     }
     
-    public TrackerDevice getOrUpdateTrackerDevice (String protocolVersion, String imei) {
+    public TrackerDevice getOrUpdateTrackerDevice (TrackerAgent trackerAgent, String protocolVersion, String imei) {
         
         String type = new String();
         String revision = new String();
@@ -40,7 +34,7 @@ public class QueclinkDevice {
             password = getDevicePassword(protocolVersion);
         }
         
-        trackerDevice = trackerAgent.getOrCreateTrackerDevice(imei);
+        TrackerDevice trackerDevice = trackerAgent.getOrCreateTrackerDevice(imei);
         ManagedObjectRepresentation representation = trackerDevice.getManagedObject();
         
         logger.info("representation type {}, configured type {}" , representation.getType(), configureType(type));
@@ -90,13 +84,14 @@ public class QueclinkDevice {
     
     public String getDevicePasswordFromGId(GId id) {
         
-        ManagedObjectRepresentation mo = trackerDevice.getManagedObject(id);
+        ManagedObjectRepresentation mo = ManagedObjectCache.instance().get(id).getManagedObject(); 
         return (String) mo.get("password");    
     }
     
     public ManagedObjectRepresentation getManagedObjectFromGId(GId id) {
-
-        return trackerDevice.getManagedObject(id);    
+         TrackerDevice trackerDevice = ManagedObjectCache.instance().get(id);
+         ManagedObjectRepresentation mo = trackerDevice.getManagedObject();
+        return mo;    
     }
 
     private void setMoRepresentationType(ManagedObjectRepresentation representation, String type) {

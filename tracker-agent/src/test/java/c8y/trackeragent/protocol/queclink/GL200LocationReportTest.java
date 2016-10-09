@@ -30,6 +30,9 @@ import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -51,7 +54,8 @@ public class GL200LocationReportTest {
 	public static final String MOBILINFOSTR1 = "0460,0000,18d8,6141,00";
 	public static final String MOBILINFOSTR2 = "0460,0000,18d8,6142,00";
 	public static final Position POS2 = new Position();
-	public static final String FIXEDREPSTR = "+RESP:GTFRI,02010B,135790246811220,,0,0,2,1,4.3,92,70.0,121.354335,31.222073,20090214013254,0460,0000,18d8,6141,00,0,4.3,92,70.0,121.354336,31.222074,20090101000000,0460,0000,18d8,6142,00,,20090214093254,11F0$";	
+	public static DateTime dateTime;
+	public static final String FIXEDREPSTR = "+RESP:GTFRI,02010B,135790246811220,,0,0,2,1,4.3,92,70.0,121.354335,31.222073,20090214013254,0460,0000,18d8,6141,00,0,4.3,92,70.0,121.354336,31.222074,20090101000000,0460,0000,18d8,6142,00,10,20090214093254,11F0$";	
 
 	public static final String[] FIXEDREP = FIXEDREPSTR
 			.split(QUECLINK.getFieldSeparator());
@@ -76,6 +80,9 @@ public class GL200LocationReportTest {
 		POS2.setAlt(new BigDecimal("70.0"));
 		POS2.setLng(new BigDecimal("121.354336"));
 		POS2.setLat(new BigDecimal("31.222074"));
+		
+		DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyyMMddHHmmss");
+        dateTime = formatter.parseDateTime("20090214093254");
 	}
 	
 	@Test
@@ -92,6 +99,8 @@ public class GL200LocationReportTest {
 		
 		verify(device).setPosition(POS2);	
 		verify(device).setMobile(generateMobileInfo(MOBILINFOSTR2));
+		
+		verify(measurementService).createPercentageBatteryLevelMeasurement(new BigDecimal(10), device, dateTime);
 	}
 	
 	@Test
@@ -105,6 +114,8 @@ public class GL200LocationReportTest {
 	    
 	    verify(device).setPosition(POS1);
 	    verify(device).setMobile(generateMobileInfo(MOBILINFOSTR1));
+	    
+	    verify(measurementService).createPercentageBatteryLevelMeasurement(new BigDecimal("2000.0"), device, dateTime);
 	}	
 	
 	@Test 
@@ -138,4 +149,6 @@ public class GL200LocationReportTest {
         
         return mobile;
     }
+	
+	
 }

@@ -66,7 +66,7 @@ public class QueclinkFallback extends QueclinkParser implements Translator {
         }
 
         if (operation.get(Restart.class) != null) {
-            String password = queclinkDevice.getDevicePasswordFromGId(operation.getDeviceId());
+            String password = getQueclinkDevice().getDevicePasswordFromGId(operation.getDeviceId());
             return String.format("AT+GTRTO=%s,3,,,,,,0001$", password);
         }
 

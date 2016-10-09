@@ -20,6 +20,8 @@
 
 package c8y.trackeragent.protocol.queclink.parser;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -33,6 +35,7 @@ import c8y.trackeragent.context.OperationContext;
 import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.protocol.queclink.QueclinkConstants;
+import c8y.trackeragent.protocol.queclink.device.QueclinkDevice;
 import c8y.trackeragent.tracker.Translator;
 
 /**
@@ -49,6 +52,9 @@ import c8y.trackeragent.tracker.Translator;
 @Component
 public class QueclinkDeviceMotionState extends QueclinkParser implements Translator {
 
+    private Logger logger = LoggerFactory.getLogger(QueclinkDeviceMotionState.class);
+    
+    QueclinkDevice queclinkDevice;
     /**
      * Type of report: Device Motion State Indication.
      */
@@ -78,7 +84,10 @@ public class QueclinkDeviceMotionState extends QueclinkParser implements Transla
     public static final int MOTION_OFF = 1 + 2 + 4 + 8 + 32;
     public static final int MOTION_ON = 1 + 2 + 4 + 8 + 32 + 256;
 
-    public static final String MOTION_ACK = "+ACK:GTCFG";
+    public static final String[] MOTION_ACK = {
+            "+ACK:GTCFG",
+            "+ACK:GTGBC"
+    };
 
     /**
      * Set report interval on motion state
@@ -101,7 +110,7 @@ public class QueclinkDeviceMotionState extends QueclinkParser implements Transla
     @Override
     public boolean onParsed(ReportContext reportCtx) throws SDKException {
         String reportType = reportCtx.getReport()[0];
-        if (MOTION_ACK.equals(reportType)) {
+        if (MOTION_ACK[0].equals(reportType) || MOTION_ACK[1].equals(reportType)) {
             return onParsedAck(reportCtx.getReport(), reportCtx.getImei());
         } else if (MOTION_REPORT[0].equals(reportType) || MOTION_REPORT[1].equals(reportType)) {
             return onParsedMotion(reportCtx.getReport(), reportCtx.getImei());
@@ -155,7 +164,7 @@ public class QueclinkDeviceMotionState extends QueclinkParser implements Transla
 
         try {
             
-            if (ackMTrack.getInterval() >= 0) {
+            if (ackMTrack.getInterval() > 0) {
                 trackerAgent.getOrCreateTrackerDevice(imei).setMotionTracking(ackMTrack.isActive(), ackMTrack.getInterval());
             } else {
                 trackerAgent.getOrCreateTrackerDevice(imei).setMotionTracking(ackMTrack.isActive());
@@ -182,17 +191,17 @@ public class QueclinkDeviceMotionState extends QueclinkParser implements Transla
             lastOperation = operation;
         }
         
-        ManagedObjectRepresentation deviceMo = queclinkDevice.getManagedObjectFromGId(operation.getDeviceId());
+        ManagedObjectRepresentation deviceMo = getQueclinkDevice().getManagedObjectFromGId(operation.getDeviceId());
         String password = (String) deviceMo.get("password");
         
         String device_command = new String(); 
         
-        if (queclinkDevice.convertDeviceTypeToQueclinkType(QueclinkConstants.GL500_ID).equals(deviceMo.getType()) ||
-                queclinkDevice.convertDeviceTypeToQueclinkType(QueclinkConstants.GL505_ID).equals(deviceMo.getType())) {
+        if (getQueclinkDevice().convertDeviceTypeToQueclinkType(QueclinkConstants.GL500_ID).equals(deviceMo.getType()) ||
+                getQueclinkDevice().convertDeviceTypeToQueclinkType(QueclinkConstants.GL505_ID).equals(deviceMo.getType())) {
             
             String intervalVal = "";
             
-            if (mTrack.getInterval() >= 0) {
+            if (mTrack.getInterval() > 0) {
                 int intervalMin = mTrack.getInterval() / 60; 
                 intervalVal = Integer.toString(intervalMin);
             }
@@ -203,7 +212,7 @@ public class QueclinkDeviceMotionState extends QueclinkParser implements Transla
                     mTrack.isActive() ? 1 : 0, corrId);
 
         } else {
-            if (mTrack.getInterval() >= 0) {
+            if (mTrack.getInterval() > 0) {
                 int interval = mTrack.getInterval();
                 device_command += String.format(REPORT_INTERVAL_ON_MOTION_TEMPLATE, password, interval, corrId);
             }
@@ -218,4 +227,5 @@ public class QueclinkDeviceMotionState extends QueclinkParser implements Transla
         
         return device_command;
     }
+    
 }

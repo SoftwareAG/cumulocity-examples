@@ -26,6 +26,7 @@ import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -45,16 +46,17 @@ import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.protocol.queclink.device.QueclinkDevice;
 import c8y.trackeragent.protocol.queclink.parser.QueclinkDeviceMotionState;
+import c8y.trackeragent.protocol.queclink.parser.QueclinkDeviceSetting;
 import c8y.trackeragent.server.TestConnectionDetails;
 
 public class GL200DeviceMotionStateTest {
 
     public static final String IMEI = "135790246811220";
 
-    public static final String SETNOTRACKINGSTR = "AT+GTCFG=,,,,,,,,,,47,0,,,,,,,,,,0001$";
-    public static final String SETTRACKINGSTR = "AT+GTCFG=,,,,,,,,,,303,1,,,,,,,,,,0002$";
+    public static final String SETNOTRACKINGSTR = "AT+GTCFG=gl200,,,,,,,,,,47,0,,,,,,,,,,0002$AT+GTRTO=gl200,3,,,,,,0001$";
+    public static final String SETTRACKINGSTR = "AT+GTCFG=gl200,,,,,,,,,,303,1,,,,,,,,,,0003$AT+GTRTO=gl200,3,,,,,,0001$";
 
-    public static final String ACKMOTIONSTR = "+ACK:GTCFG,02010B,135790246811220,,0001,20100310172830,11F0$";
+    public static final String ACKMOTIONSTR = "+ACK:GTCFG,02010B,135790246811220,,0002,20100310172830,11F0$";
     public static final String[] ACKMOTION = ACKMOTIONSTR.split(QUECLINK.getFieldSeparator());
 
     public static final String REPMOTIONSTR = "+RESP:GTSTT,02010B,135790246811220,,42,0,4.3,92,70.0,121.354335,31.222073,20090214013254,0460,0000,18d8,6141,00,20100214093254,11F0$";
@@ -66,11 +68,11 @@ public class GL200DeviceMotionStateTest {
     private QueclinkDeviceMotionState gl200mot;
     private TrackerAgent trackerAgent = mock(TrackerAgent.class);
     private TrackerDevice device = mock(TrackerDevice.class);
-    private ManagedObjectRepresentation representation;
     private OperationContext operationCtx;
     private MotionTracking track = new MotionTracking();
     private TestConnectionDetails connectionDetails = new TestConnectionDetails(IMEI);
-
+    private QueclinkDevice queclinkDevice;
+    private ManagedObjectRepresentation managedObject;
 
     @Before
     public void setup() throws SDKException {
@@ -80,12 +82,30 @@ public class GL200DeviceMotionStateTest {
         operationCtx = new OperationContext(connectionDetails, operation);
         gl200mot = new QueclinkDeviceMotionState(trackerAgent);
         when(trackerAgent.getOrCreateTrackerDevice(anyString())).thenReturn(device);
-        when(device.getManagedObject((GId) any())).thenReturn(representation);
+        
+    }
+    
+    public void translate_setup() {
+        gl200mot = spy(new QueclinkDeviceMotionState(trackerAgent));
+        queclinkDevice = mock(QueclinkDevice.class);
+        
+        when(gl200mot.getQueclinkDevice()).thenReturn(queclinkDevice);
+        when(queclinkDevice.convertDeviceTypeToQueclinkType(anyString())).thenCallRealMethod();
+    
+        // prepare managed object
+        managedObject = new ManagedObjectRepresentation();
+        managedObject.setProperty("password", "gl200");
+        managedObject.setType("queclink_" + "gl200");
+        when(queclinkDevice.getManagedObjectFromGId(any(GId.class))).thenReturn(managedObject);
+        
         
     }
 
-    //@Test
+    @Test
     public void setMotionTracking() {
+        
+        translate_setup();
+        
         track.setActive(false);
         String asciiOperation = gl200mot.translate(operationCtx);
         assertEquals(SETNOTRACKINGSTR, asciiOperation);
@@ -95,8 +115,11 @@ public class GL200DeviceMotionStateTest {
         assertEquals(SETTRACKINGSTR, asciiOperation);
     }
 
-    //@Test
+    @Test
     public void ackMotionTracking() throws SDKException {
+        
+        translate_setup();
+        
         track.setActive(false);
         gl200mot.translate(operationCtx);
 

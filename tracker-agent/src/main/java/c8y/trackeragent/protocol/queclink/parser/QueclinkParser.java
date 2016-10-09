@@ -8,11 +8,15 @@ import c8y.trackeragent.tracker.Parser;
 public abstract class QueclinkParser implements Parser, QueclinkFragment {
     
     protected static final String PASSWORD = "gl200";
-    protected static QueclinkDevice queclinkDevice = new QueclinkDevice();
+    private QueclinkDevice queclinkDevice = new QueclinkDevice();
 
     @Override
     public String parse(String[] report) throws SDKException {
         return report.length > 2 ? report[2] : null;
+    }
+    
+    public QueclinkDevice getQueclinkDevice() {
+        return queclinkDevice;
     }
 
 }

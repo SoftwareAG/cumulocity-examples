@@ -49,7 +49,6 @@ public class QueclinkDeviceSetting extends QueclinkParser implements Translator 
     @Autowired
     public QueclinkDeviceSetting(TrackerAgent trackerAgent) {
         this.trackerAgent = trackerAgent;
-        queclinkDevice.setTrackerAgent(trackerAgent);
     }
     @Override
     public boolean onParsed(ReportContext reportCtx) throws SDKException {
@@ -87,7 +86,7 @@ public class QueclinkDeviceSetting extends QueclinkParser implements Translator 
     }
     private boolean setDeviceInfo(ReportContext reportCtx) {
         
-        queclinkDevice.getOrUpdateTrackerDevice(reportCtx.getEntry(1), reportCtx.getImei());
+        getQueclinkDevice().getOrUpdateTrackerDevice(trackerAgent, reportCtx.getEntry(1), reportCtx.getImei());
         
         return true;
         
@@ -108,10 +107,11 @@ public class QueclinkDeviceSetting extends QueclinkParser implements Translator 
             lastOperation = operation;
         }
 
+        QueclinkDevice queclinkDevice = getQueclinkDevice();
         ManagedObjectRepresentation deviceMo = queclinkDevice.getManagedObjectFromGId(operation.getDeviceId());
         String password = (String) deviceMo.get("password");
         
-        if (tracking.getInterval() >= 0) {
+        if (tracking.getInterval() > 0) {
             int interval = tracking.getInterval();
             
             if (queclinkDevice.convertDeviceTypeToQueclinkType(QueclinkConstants.GL500_ID).equals(deviceMo.getType()) ||
@@ -129,7 +129,6 @@ public class QueclinkDeviceSetting extends QueclinkParser implements Translator 
         }
 
         return (device_command.isEmpty())? null : device_command;
-    }
-    
+    } 
 
 }
