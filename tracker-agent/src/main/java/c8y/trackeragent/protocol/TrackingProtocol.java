@@ -1,8 +1,8 @@
 package c8y.trackeragent.protocol;
 
 import c8y.trackeragent.protocol.coban.ConnectedCobanTracker;
-import c8y.trackeragent.protocol.gl200.ConnectedGL200Tracker;
 import c8y.trackeragent.protocol.mt90g.ConnectedMT90GTracker;
+import c8y.trackeragent.protocol.queclink.ConnectedQueclinkTracker;
 import c8y.trackeragent.protocol.rfv16.ConnectedRFV16Tracker;
 import c8y.trackeragent.protocol.telic.ConnectedTelicTracker;
 import c8y.trackeragent.tracker.BaseConnectedTracker;
@@ -16,7 +16,7 @@ public enum TrackingProtocol {
         }
 
     },
-    GL200(ConnectedGL200Tracker.class, "$", ",") {
+    QUECLINK(ConnectedQueclinkTracker.class, "$", ",") {
         @Override
         public boolean accept(byte firstByte) {
             return firstByte < '0' || firstByte > '9';

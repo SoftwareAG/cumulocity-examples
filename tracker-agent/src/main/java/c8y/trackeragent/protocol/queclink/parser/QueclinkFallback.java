@@ -18,7 +18,7 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package c8y.trackeragent.protocol.gl200.parser;
+package c8y.trackeragent.protocol.queclink.parser;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -40,15 +40,13 @@ import com.cumulocity.sdk.client.SDKException;
  * configuration widget.
  */
 @Component
-public class GL200Fallback extends GL200Parser implements Translator {
+public class QueclinkFallback extends QueclinkParser implements Translator {
 
     private final TrackerAgent trackerAgent;
-    private final String password;
 
     @Autowired
-    public GL200Fallback(TrackerAgent trackerAgent) {
+    public QueclinkFallback(TrackerAgent trackerAgent) {
         this.trackerAgent = trackerAgent;
-        this.password = PASSWORD;
     }
 
     @Override
@@ -68,6 +66,7 @@ public class GL200Fallback extends GL200Parser implements Translator {
         }
 
         if (operation.get(Restart.class) != null) {
+            String password = getQueclinkDevice().getDevicePasswordFromGId(operation.getDeviceId());
             return String.format("AT+GTRTO=%s,3,,,,,,0001$", password);
         }
 
