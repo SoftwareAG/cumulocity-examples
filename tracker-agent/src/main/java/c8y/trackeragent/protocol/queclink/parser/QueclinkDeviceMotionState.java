@@ -174,8 +174,6 @@ public class QueclinkDeviceMotionState extends QueclinkParser implements Transla
             } else {
                 trackerAgent.getOrCreateTrackerDevice(imei).setMotionTracking(ackMTrack.isActive());
             }
-
-            trackerAgent.finish(imei, ackOp);
         } catch (SDKException x) {
             trackerAgent.fail(imei, ackOp, "Error setting motion tracking", x);
         }

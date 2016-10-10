@@ -77,8 +77,7 @@ public class QueclinkDeviceSetting extends QueclinkParser implements Translator 
         try {
             // store fragment to managed object
             trackerAgent.getOrCreateTrackerDevice(imei).setTracking(ackTracking.getInterval());
-            //trackerAgent.finish(imei, lastOperation); //{error="devicecontrol/Not Found",message="Finding device data from database failed : No operation for gid '<operation id>'!",info="https://www.cumulocity.com/guides/reference-guide/#error_reporting",details="{exceptionMessage="Finding device data from database failed"
-
+            
         } catch (SDKException sdkException) {
             trackerAgent.fail(imei, lastOperation, "Error setting tracking to managed object", sdkException);
         }

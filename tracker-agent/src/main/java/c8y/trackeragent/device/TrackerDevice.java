@@ -611,8 +611,7 @@ public class TrackerDevice {
 	    if (gid == null) {
 	        return false;
 	    }
-	    ManagedObjectRepresentation returnedMo = update(mo, gid);
-	    copyProps(returnedMo, mo);
+	    updateMoOfDevice(mo, gid);
 	    return true;
 	}
 	
