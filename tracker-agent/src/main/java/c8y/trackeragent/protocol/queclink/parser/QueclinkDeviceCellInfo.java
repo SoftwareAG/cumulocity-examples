@@ -81,6 +81,13 @@ public class QueclinkDeviceCellInfo extends QueclinkParser {
         // iterate over neighbor cells
         for (int i = startIndex; i < endIndex - totalCells; i += cellInfoLength) {
             
+            if (report[i].isEmpty() ||
+                    report[i + 1].isEmpty() ||
+                    report[i + 2].isEmpty() ||
+                    report[i + 4].isEmpty()) {
+                continue;
+            }
+            
             CellTower cellTower = new CellTower();
             cellTower.setRadioType("gsm");
             cellTower.setMobileCountryCode(Integer.parseInt(report[i]));

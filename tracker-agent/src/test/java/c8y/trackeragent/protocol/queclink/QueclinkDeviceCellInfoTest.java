@@ -46,6 +46,7 @@ public class QueclinkDeviceCellInfoTest {
             "0244,0091,0d9f,abea,7,,0244,0091,0d9f,abea,8,,0244,0091,0d9f,abea,9,,0244,0091,0d9f,abea,10,,0244,0091,0d9f,abea,11,,0244,0091,0d9f,abea,13,,"
     };
     
+    public final String cellInfoWithEmptyField = ",,,,7,,0244,0091,0d9f,abea,8,,0244,0091,0d9f,abea,9,,0244,0091,0d9f,abea,10,,0244,0091,0d9f,abea,11,,0244,0091,0d9f,abea,13,,";
     public final String[] testMobileInfoStr = {
             "0244,0091,0d9f,abee,26",
             "0244,0091,0d9f,abec,27",
@@ -57,6 +58,8 @@ public class QueclinkDeviceCellInfoTest {
     public final String queclinkDeviceGSM_gv505 = "+RESP:GTGSM,1F0100,1357902468112201G1JC5444R7252367,,FRI," + testCellInfoStr[2] + testMobileInfoStr[2] + ",00,20090214093254,11F0$";
     public final String[] queclinkDeviceGSMData = {queclinkDeviceGSM_gl300, queclinkDeviceGSM_gl505, queclinkDeviceGSM_gv505};
     
+    public final String queclinkDeviceGSMWithEmptyField = "+RESP:GTGSM,300400,860599001073709,FRI,"+ cellInfoWithEmptyField + testMobileInfoStr[0] + ",00,20160921072832,F50F$";
+
     public QueclinkDeviceCellInfo queclinkDeviceCellInfo = new QueclinkDeviceCellInfo(trackerAgent, measurementService);
 
     
@@ -66,7 +69,7 @@ public class QueclinkDeviceCellInfoTest {
     }
 
     @Test
-    public void testCellInfoSetting () {
+    public void testCellInfoSetting() {
         
         
         for (int i = 0; i < queclinkDeviceGSMData.length; ++i) {
@@ -85,7 +88,25 @@ public class QueclinkDeviceCellInfoTest {
     }
     
     @Test
-    public void testMobileSetting () {
+    public void testCellInfoWithEmptyField() {
+        String[] queclinkData = queclinkDeviceGSMWithEmptyField.split(QUECLINK.getFieldSeparator());
+        
+        String imei = queclinkDeviceCellInfo.parse(queclinkData);
+        connectionDetails = new TestConnectionDetails();
+        connectionDetails.setImei(imei);
+        
+        queclinkDeviceCellInfo.onParsed(new ReportContext(connectionDetails, queclinkData));
+        CellInfo cellInfo = generateCellInfo(testCellInfoStr[2]);
+        
+        //remove first element of the test cellInfo.
+        List<CellTower> cellTowers = cellInfo.getCellTowers();
+        cellTowers.remove(0);
+        cellInfo.setCellTowers(cellTowers);
+        verify(device).setCellInfo(cellInfo);
+    }
+    
+    @Test
+    public void testMobileSetting() {
         
         for (int i = 0; i < queclinkDeviceGSMData.length; ++i) {
             String[] queclinkData = queclinkDeviceGSMData[i].split(QUECLINK.getFieldSeparator());
@@ -104,7 +125,7 @@ public class QueclinkDeviceCellInfoTest {
     
 
     @Test
-    public void testSignalStrengthMeasurement () {
+    public void testSignalStrengthMeasurement() {
         
         int[] signalPercentage = {41, 42, 44};
         
