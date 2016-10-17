@@ -65,9 +65,9 @@ public class QueclinkDeviceSettingTest {
 
     public final String[] IMEI = {"860599001073709", "860599001073710", "860599001073711"};
     
-    public final Hardware queclinkHardware1 = new Hardware("Queclink", IMEI[0], "04.00");
-    public final Hardware queclinkHardware2 = new Hardware("Queclink", IMEI[1], "02.01");
-    public final Hardware queclinkHardware3 = new Hardware("Queclink", IMEI[2], "01.01");
+    public final Hardware queclinkHardware1 = new Hardware("QUECLINK GL300", IMEI[0], "04.00");
+    public final Hardware queclinkHardware2 = new Hardware("QUECLINK GL505", IMEI[1], "02.01");
+    public final Hardware queclinkHardware3 = new Hardware("QUECLINK GV500", IMEI[2], "01.01");
     public final Hardware[] queclinkHardwares = {queclinkHardware1, queclinkHardware2, queclinkHardware3};
     
     public QueclinkDeviceSetting queclinkDeviceSetting = new QueclinkDeviceSetting(trackerAgent);

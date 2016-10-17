@@ -37,7 +37,7 @@ public class QueclinkDevice {
         TrackerDevice trackerDevice = trackerAgent.getOrCreateTrackerDevice(imei);
         ManagedObjectRepresentation representation = trackerDevice.getManagedObject();
         
-        logger.info("representation type {}, configured type {}" , representation.getType(), configureType(type));
+        logger.debug("representation type {}, configured type {}" , representation.getType(), configureType(type));
         
         if (representation.getType() == null || 
                 !representation.getType().equals(configureType(type)) ||
@@ -47,7 +47,7 @@ public class QueclinkDevice {
             
             // update managed object representation
             setMoRepresentationType(representation, type);
-            setMoRepresentationHardware(representation, imei, revision);
+            setMoRepresentationHardware(representation, imei, type, revision);
             
             if(representation.get(password) == null) {
                 setMoRepresentationPassword(representation, password);
@@ -56,10 +56,9 @@ public class QueclinkDevice {
             representation.setLastUpdatedDateTime(null);
             
             // update device (inventory)
-            logger.info("Agent id: {}", trackerDevice.getAgentId());
             trackerDevice.updateMoOfDevice(representation, trackerDevice.getGId());
             
-            logger.info("Device MO updated: {}", representation);
+            logger.debug("Device MO updated: {}", representation);
 
         }
         
@@ -98,8 +97,8 @@ public class QueclinkDevice {
         representation.setType(configureType(type));
     }
     
-    private void setMoRepresentationHardware(ManagedObjectRepresentation representation, String serialNumber, String revision) {
-        Hardware queclink_hardware = configureHardware(serialNumber, revision);
+    private void setMoRepresentationHardware(ManagedObjectRepresentation representation, String serialNumber, String deviceType, String revision) {
+        Hardware queclink_hardware = configureHardware(serialNumber, deviceType, revision);
         representation.set(queclink_hardware);
     }
     
@@ -111,9 +110,10 @@ public class QueclinkDevice {
         return model.toLowerCase() + "_" + type;
     } 
     
-    protected Hardware configureHardware(String serialNumber, String revision) {
+    protected Hardware configureHardware(String serialNumber, String deviceType, String revision) {
         Hardware hardware = new Hardware();
         hardware.setSerialNumber(serialNumber);
+        String model = this.model.toUpperCase() + " " + deviceType.toUpperCase();
         hardware.setModel(model);
         hardware.setRevision(revision);
         return hardware;
