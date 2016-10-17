@@ -111,48 +111,52 @@ public class QueclinkLocationReport extends QueclinkParser {
         String vin = reportCtx.getEntry(3);
         device.registerVIN(vin);
         
-        createMileageMeasurementIfAvailable(reportCtx, device);
-        
         int reportStart = 7;
         int reportLength = 12;
         int reportEnd = reportStart + reportCtx.getEntryAsInt(6) * reportLength;
-        int batteryInfoIndex = reportEnd;
+        
+        
+        if(QueclinkConstants.GL200_ID.equals(deviceType) || 
+                QueclinkConstants.GL300_ID.equals(deviceType)) {
+            int mileageIndex = reportEnd - 1; 
+            int batteryInfoIndex = reportEnd;
+            createMileageMeasurement(device, reportCtx, mileageIndex);
+            createBatteryMeasurement(device, reportCtx, batteryInfoIndex);
+        }
         
         if (QueclinkConstants.GL500_ID.equals(deviceType) || 
                 QueclinkConstants.GL505_ID.equals(deviceType)) {
             reportStart = 9;
             reportLength = 11;
             reportEnd = reportStart + reportLength; // Only one report.
-            batteryInfoIndex = 8;
+            int batteryInfoIndex = 8;
+            createBatteryMeasurement(device, reportCtx, batteryInfoIndex);
         }
 
         if (QueclinkConstants.GV500_ID.equals(deviceType)) {
             reportStart = 8;
             reportEnd = reportStart + reportCtx.getEntryAsInt(7) * reportLength;
+            int mileageIndex = reportEnd;
+            createMileageMeasurement(device, reportCtx, mileageIndex);
         }
 
         for (; reportStart < reportEnd; reportStart += reportLength) {
             processLocationReportOnParsed(device, reportCtx, reportStart);
         }
-        
-        if (!QueclinkConstants.GV500_ID.equals(deviceType)) {
-            createBatteryMeasurement(device, reportCtx, batteryInfoIndex);
-        }
-        
 
         return true;
     }
 
-    private void createMileageMeasurementIfAvailable(ReportContext reportCtx, TrackerDevice device) throws NumberFormatException {
-        if (reportCtx.getNumberOfEntries() <= 20) {
-            return;
-        }
-        BigDecimal mileage = reportCtx.getEntryAsNumber(20);
+    private void createMileageMeasurement(TrackerDevice device, ReportContext reportCtx, int mileageIndex) throws NumberFormatException {
+
+        BigDecimal mileage = reportCtx.getEntryAsNumber(mileageIndex);
         if (mileage != null) {
-            measurementService.createMileageMeasurement(mileage, device, new DateTime());
+            DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyyMMddHHmmss");
+            DateTime dateTime = formatter.parseDateTime(reportCtx.getEntry(reportCtx.getNumberOfEntries() - 2));
+            measurementService.createMileageMeasurement(mileage, device, dateTime);
         }
     }
-
+    
 	private void processLocationReportOnParsed(TrackerDevice device, ReportContext report,
 			int reportStart) throws SDKException {
 		if (report.getEntry(reportStart + 3).length() > 0
