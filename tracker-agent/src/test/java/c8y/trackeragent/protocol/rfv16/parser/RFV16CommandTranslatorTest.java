@@ -8,6 +8,7 @@ import org.junit.Test;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 
 import c8y.ArmAlarm;
+import c8y.Command;
 import c8y.MeasurementRequestOperation;
 import c8y.RFV16Config;
 import c8y.Restart;
@@ -45,6 +46,17 @@ public class RFV16CommandTranslatorTest extends RFV16ParserTestSupport {
         String response = commandTranslator.translate(asOperationContext(operation));
 
         assertThat(response).isEqualTo("*HQ,1234567890,R1,010000#");
+    }
+
+    @Test
+    public void shouldTranslateCommandOperation() throws Exception {
+        OperationRepresentation operation = new OperationRepresentation();
+        String text = "*HQ,6410031677,D1,120650,60,1#";
+        operation.set(new Command(text));
+
+        String response = commandTranslator.translate(asOperationContext(operation));
+
+        assertThat(response).isEqualTo(text);
     }
 
     @Test

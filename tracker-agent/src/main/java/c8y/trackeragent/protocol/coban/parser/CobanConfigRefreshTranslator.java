@@ -5,21 +5,23 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.cumulocity.model.operation.OperationStatus;
+import com.cumulocity.rest.representation.operation.OperationRepresentation;
+
+import c8y.Command;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.context.OperationContext;
+import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.protocol.coban.device.CobanDevice;
 import c8y.trackeragent.protocol.coban.message.CobanServerMessages;
 import c8y.trackeragent.tracker.Translator;
 import c8y.trackeragent.utils.message.TrackerMessage;
 
-import com.cumulocity.model.operation.OperationStatus;
-import com.cumulocity.rest.representation.operation.OperationRepresentation;
-
 @Component
 public class CobanConfigRefreshTranslator extends CobanSupport implements Translator {
 
     private static final Logger logger = LoggerFactory.getLogger(CobanConfigRefreshTranslator.class);
-    
+
     public static final String OPERATION_MARKER = "refreshConfiguration";
 
     private final CobanServerMessages serverMessages;
@@ -34,6 +36,13 @@ public class CobanConfigRefreshTranslator extends CobanSupport implements Transl
     public String translate(OperationContext operationCtx) {
         logger.info("Translate operation {}.", operationCtx);
         OperationRepresentation operation = operationCtx.getOperation();
+        Command command = operation.get(Command.class);
+        if (command != null) {
+            TrackerDevice cobanTrackerDevice = getTrackerDevice(operationCtx.getImei());
+            cobanTrackerDevice.setOperationSuccessful(operation);
+            return command.getText();
+        }
+
         if (operation.get(OPERATION_MARKER) == null) {
             return null;
         }

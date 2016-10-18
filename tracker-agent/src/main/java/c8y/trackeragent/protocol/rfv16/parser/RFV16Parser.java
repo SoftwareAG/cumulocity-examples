@@ -12,9 +12,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
+import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 import com.google.common.base.Strings;
 
+import c8y.SupportedOperations;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.device.TrackerDevice;
@@ -29,7 +31,9 @@ public abstract class RFV16Parser implements Parser, RFV16Fragment {
     public static final BigDecimal RFV16_SPEED_MEASUREMENT_FACTOR = new BigDecimal(1.852);
 
     protected final TrackerAgent trackerAgent;
+
     protected final RFV16ServerMessages serverMessages;
+
     protected final AlarmService alarmService;
 
     public RFV16Parser(TrackerAgent trackerAgent, RFV16ServerMessages serverMessages, AlarmService alarmService) {
@@ -95,6 +99,31 @@ public abstract class RFV16Parser implements Parser, RFV16Fragment {
             logger.warn("Problem occured parsing timefrom {} and/or date from {}", reportCtx.getEntry(3), reportCtx.getEntry(11));
             return null;
         }
+    }
+
+    protected TrackerDevice getTrackerDevice(String imei) {
+        TrackerDevice trackerDevice = trackerAgent.getOrCreateTrackerDevice(imei);
+        ManagedObjectRepresentation representation = trackerDevice.getManagedObject();
+
+        if (representation != null) {
+            SupportedOperations operationsProperty = representation.get(SupportedOperations.class);
+            if (operationsProperty == null) {
+                operationsProperty = new SupportedOperations();
+                representation.set(operationsProperty);
+            }
+
+            if (!operationsProperty.contains("c8y_Command")) {
+                operationsProperty.add("c8y_Command");
+                representation.setLastUpdatedDateTime(null);
+
+                // update device (inventory)
+                logger.info("Agent id: {}", trackerDevice.getAgentId());
+                trackerDevice.updateMoOfDevice(representation, trackerDevice.getGId());
+                logger.info("Device MO updated: {}", representation);
+            }
+        }
+
+        return trackerDevice;
     }
 
 }
