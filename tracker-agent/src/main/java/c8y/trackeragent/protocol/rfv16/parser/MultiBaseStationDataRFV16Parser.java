@@ -42,7 +42,7 @@ public class MultiBaseStationDataRFV16Parser extends RFV16Parser implements Pars
     }
 
     private void processPositionReport(ReportContext reportCtx) {
-        TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(reportCtx.getImei());
+        TrackerDevice device = getTrackerDevice(reportCtx.getImei());
         
         createAlarms(reportCtx, device);
         

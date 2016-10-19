@@ -3,16 +3,17 @@ package c8y.trackeragent.context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import c8y.trackeragent.protocol.TrackingProtocol;
 import c8y.trackeragent.server.ConnectionDetails;
 import c8y.trackeragent.utils.message.TrackerMessage;
 
 public class ConnectionContext {
-    
+
     @SuppressWarnings("unused")
     private static Logger logger = LoggerFactory.getLogger(ConnectionContext.class);
-	
+
     private final ConnectionDetails connectionDetails;
-	
+
     public ConnectionContext(ConnectionDetails connectionDetails) {
         this.connectionDetails = connectionDetails;
     }
@@ -20,28 +21,32 @@ public class ConnectionContext {
     public Object getConnectionParam(String paramName) {
         return connectionDetails.getParams().get(paramName);
     }
-    
+
     public boolean isConnectionFlagOn(String paramName) {
         return Boolean.TRUE.equals(getConnectionParam(paramName));
     }
-    
+
     public void setConnectionParam(String paramName, Object paramValue) {
         connectionDetails.getParams().put(paramName, paramValue);
     }
 
-	public String getImei() {
-		return connectionDetails.getImei();
-	}
-	
-	public void setImei(String imei) {
-	    connectionDetails.setImei(imei);
+    public String getImei() {
+        return connectionDetails.getImei();
+    }
+
+    protected TrackingProtocol getTrackingProtocol() {
+        return connectionDetails.getTrackingProtocol();
+    }
+
+    public void setImei(String imei) {
+        connectionDetails.setImei(imei);
     }
 
     public DeviceContext getDeviceContext() {
-	    return DeviceContextRegistry.get().get(getImei());
-	}
-    
-	@Override
+        return DeviceContextRegistry.get().get(getImei());
+    }
+
+    @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
@@ -68,8 +73,9 @@ public class ConnectionContext {
 
     public void writeOut(String text) {
         connectionDetails.getOutWriter().write(text);
-        
+
     }
+
     public void writeOut(TrackerMessage msg) {
         writeOut(msg.asText());
     }

@@ -63,7 +63,7 @@ public class PositionUpdateRFV16Parser extends RFV16Parser implements Parser {
     }
     
     private void processValidPositionReport(ReportContext reportCtx) {
-        TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(reportCtx.getImei());
+        TrackerDevice device = getTrackerDevice(reportCtx.getImei());
         Collection<AlarmRepresentation> alarms = createAlarms(reportCtx, device, reportCtx.getEntry(12));
         double lat = TK10xCoordinatesTranslator.parseLatitude(reportCtx.getEntry(5), reportCtx.getEntry(6));
         double lng = TK10xCoordinatesTranslator.parseLongitude(reportCtx.getEntry(7), reportCtx.getEntry(8));
@@ -85,7 +85,7 @@ public class PositionUpdateRFV16Parser extends RFV16Parser implements Parser {
     }
 
     private void processInvalidPositionReport(ReportContext reportCtx) {
-        TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(reportCtx.getImei());
+        TrackerDevice device = getTrackerDevice(reportCtx.getImei());
         Collection<AlarmRepresentation> alarms = createAlarms(reportCtx, device, reportCtx.getEntry(12));
         if (alarms.isEmpty()) {
             return;
