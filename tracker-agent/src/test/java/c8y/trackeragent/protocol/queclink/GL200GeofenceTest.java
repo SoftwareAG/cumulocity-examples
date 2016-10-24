@@ -18,9 +18,9 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package c8y.trackeragent.protocol.gl200;
+package c8y.trackeragent.protocol.queclink;
 
-import static c8y.trackeragent.protocol.TrackingProtocol.GL200;
+import static c8y.trackeragent.protocol.TrackingProtocol.QUECLINK;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -43,7 +43,7 @@ import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.context.OperationContext;
 import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.device.TrackerDevice;
-import c8y.trackeragent.protocol.gl200.parser.GL200Geofence;
+import c8y.trackeragent.protocol.queclink.parser.QueclinkGeofence;
 import c8y.trackeragent.server.TestConnectionDetails;
 import c8y.trackeragent.service.MeasurementService;
 
@@ -52,12 +52,12 @@ public class GL200GeofenceTest {
     public static final String IMEI = "135790246811220";
 
     public static final String SETFENCESTR = "AT+GTGEO=gl200,0,3,101.412248,21.187891,1000,30,,,,,,,,,0001$";
-    public static final String[] SETFENCE = SETFENCESTR.split(GL200.getFieldSeparator());
-    public static final String[] ACKFENCE = "+ACK:GTGEO,02010B,135790246811220,,0,0001,20100310172830,11F0$".split(GL200.getFieldSeparator());
+    public static final String[] SETFENCE = SETFENCESTR.split(QUECLINK.getFieldSeparator());
+    public static final String[] ACKFENCE = "+ACK:GTGEO,02010B,135790246811220,,0,0001,20100310172830,11F0$".split(QUECLINK.getFieldSeparator());
     public static final String[] REPFENCE = "+RESP:GTGEO,02010B,135790246811220,,0,0,1,1,4.3,92,70.0,121.354335,31.222073,2009 0214013254,0460,0000,18d8,6141,00,,20090214093254,11F0$"
-            .split(GL200.getFieldSeparator());
+            .split(QUECLINK.getFieldSeparator());
 
-    private GL200Geofence gl200gf;
+    private QueclinkGeofence gl200gf;
     private TrackerAgent trackerAgent = mock(TrackerAgent.class);
     private TrackerDevice device = mock(TrackerDevice.class);
     private MeasurementService measurementService = mock(MeasurementService.class);
@@ -78,7 +78,7 @@ public class GL200GeofenceTest {
 
         operationCtx = new OperationContext(connectionDetails, operation);
         
-        gl200gf = new GL200Geofence(trackerAgent, measurementService);
+        gl200gf = new QueclinkGeofence(trackerAgent, measurementService);
 
         when(trackerAgent.getOrCreateTrackerDevice(anyString())).thenReturn(device);
     }

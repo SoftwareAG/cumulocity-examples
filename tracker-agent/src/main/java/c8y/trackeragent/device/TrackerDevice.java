@@ -68,6 +68,8 @@ import c8y.RequiredAvailability;
 import c8y.Restart;
 import c8y.SignalStrength;
 import c8y.SupportedOperations;
+import c8y.Tracking;
+import c8y.CellInfo;
 import c8y.trackeragent.UpdateIntervalProvider;
 import c8y.trackeragent.configuration.TrackerConfiguration;
 import c8y.trackeragent.protocol.coban.device.CobanDevice;
@@ -230,6 +232,29 @@ public class TrackerDevice {
         inventory.update(device);
     }
     
+    public void setMotionTracking(boolean active, int interval) throws SDKException {
+        logger.debug("Motion tracking for {} set to {}", imei, active);
+
+        ManagedObjectRepresentation device = new ManagedObjectRepresentation();
+        MotionTracking motion = new MotionTracking();
+        motion.setActive(active);
+        motion.setInterval(interval);
+        device.set(motion);
+        device.setId(gid);
+        inventory.update(device);
+    }
+    
+    public void setTracking(int interval) throws SDKException {
+        logger.debug("Tracking for {} set to {}", imei, interval);
+
+        ManagedObjectRepresentation device = new ManagedObjectRepresentation();
+        Tracking tracking = new Tracking();
+        tracking.setInterval(interval);
+        device.set(tracking);
+        device.setId(gid);
+        inventory.update(device);
+    }
+    
     public void motionEvent(boolean moving) throws SDKException {
         motionEvent(moving, new DateTime());
     }
@@ -297,6 +322,21 @@ public class TrackerDevice {
         ManagedObjectRepresentation device = new ManagedObjectRepresentation();
         mobile.setCellId(cellId);
         device.set(mobile);
+        device.setId(gid);
+        inventory.update(device);
+    }
+    
+    public void setMobile(Mobile mobile) throws SDKException {
+        ManagedObjectRepresentation device = new ManagedObjectRepresentation();
+        mobile.setImei(imei);
+        device.set(mobile);
+        device.setId(gid);
+        inventory.update(device);
+    }
+    
+    public void setCellInfo(CellInfo cellInfo) {
+        ManagedObjectRepresentation device = new ManagedObjectRepresentation();
+        device.set(cellInfo);
         device.setId(gid);
         inventory.update(device);
     }
@@ -571,10 +611,14 @@ public class TrackerDevice {
 	    if (gid == null) {
 	        return false;
 	    }
-	    ManagedObjectRepresentation returnedMo = update(mo, gid);
-	    copyProps(returnedMo, mo);
+	    updateMoOfDevice(mo, gid);
 	    return true;
 	}
+	
+    public void updateMoOfDevice(ManagedObjectRepresentation mo, GId gid) {
+        ManagedObjectRepresentation returnedMo = update(mo, gid);
+        copyProps(returnedMo, mo);
+    }
 
 	private ManagedObjectRepresentation create(ManagedObjectRepresentation deviceMo, ID extId) throws SDKException {
 	    deviceMo = inventory.create(deviceMo);

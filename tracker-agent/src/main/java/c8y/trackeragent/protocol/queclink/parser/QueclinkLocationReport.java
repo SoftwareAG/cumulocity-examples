@@ -18,21 +18,27 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package c8y.trackeragent.protocol.gl200.parser;
+package c8y.trackeragent.protocol.queclink.parser;
 
 import java.math.BigDecimal;
 
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.cumulocity.sdk.client.SDKException;
 
+import c8y.Mobile;
 import c8y.Position;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.device.TrackerDevice;
-import c8y.trackeragent.protocol.gl200.GL200Constants;
+import c8y.trackeragent.protocol.queclink.QueclinkConstants;
 import c8y.trackeragent.service.MeasurementService;
 
 /**
@@ -46,8 +52,9 @@ import c8y.trackeragent.service.MeasurementService;
  * </pre>
  */
 @Component
-public class GL200LocationReport extends GL200Parser {
+public class QueclinkLocationReport extends QueclinkParser {
     
+    private Logger logger = LoggerFactory.getLogger(QueclinkLocationReport.class);
     /**
      * Online reports sent directly by the device when GPRS is available.
      */
@@ -66,9 +73,9 @@ public class GL200LocationReport extends GL200Parser {
     public static final String[] LOCATION_REPORTS = {
         // Common commands
         "GTGEO", "GTRTL", "GTNMR",
-        // GL200-specific
+        // GL200 and GL300 specific
         "GTFRI", "GTSPD", "GTSOS", "GTPNL", "GTDIS", "GTDOG", "GTIGL", "GTDOG",
-        // GL500-specific
+        // GL500 and GL505 specific
         "GTCTN", "GTSTR", 
         // GV500-specific
         "GTTOW", "GTHBM"
@@ -79,7 +86,7 @@ public class GL200LocationReport extends GL200Parser {
     protected final MeasurementService measurementService;
 
     @Autowired
-    public GL200LocationReport(TrackerAgent trackerAgent, MeasurementService measurementService) {
+    public QueclinkLocationReport(TrackerAgent trackerAgent, MeasurementService measurementService) {
         this.trackerAgent = trackerAgent;
         this.measurementService = measurementService;
     }
@@ -104,39 +111,52 @@ public class GL200LocationReport extends GL200Parser {
         String vin = reportCtx.getEntry(3);
         device.registerVIN(vin);
         
-        createMileageMeasurementIfAvailable(reportCtx, device);
-        
         int reportStart = 7;
         int reportLength = 12;
         int reportEnd = reportStart + reportCtx.getEntryAsInt(6) * reportLength;
         
-        if (GL200Constants.GL500_ID.equals(deviceType)) {
+        
+        if(QueclinkConstants.GL200_ID.equals(deviceType) || 
+                QueclinkConstants.GL300_ID.equals(deviceType)) {
+            int mileageIndex = reportEnd - 1; 
+            int batteryInfoIndex = reportEnd;
+            createMileageMeasurement(device, reportCtx, mileageIndex);
+            createBatteryMeasurement(device, reportCtx, batteryInfoIndex);
+        }
+        
+        if (QueclinkConstants.GL500_ID.equals(deviceType) || 
+                QueclinkConstants.GL505_ID.equals(deviceType)) {
             reportStart = 9;
             reportLength = 11;
             reportEnd = reportStart + reportLength; // Only one report.
+            int batteryInfoIndex = 8;
+            createBatteryMeasurement(device, reportCtx, batteryInfoIndex);
         }
 
-        if (GL200Constants.GV500_ID.equals(deviceType)) {
+        if (QueclinkConstants.GV500_ID.equals(deviceType)) {
             reportStart = 8;
             reportEnd = reportStart + reportCtx.getEntryAsInt(7) * reportLength;
+            int mileageIndex = reportEnd;
+            createMileageMeasurement(device, reportCtx, mileageIndex);
         }
 
         for (; reportStart < reportEnd; reportStart += reportLength) {
             processLocationReportOnParsed(device, reportCtx, reportStart);
         }
+
         return true;
     }
 
-    private void createMileageMeasurementIfAvailable(ReportContext reportCtx, TrackerDevice device) {
-        if (reportCtx.getNumberOfEntries() <= 20) {
-            return;
-        }
-        BigDecimal mileage = reportCtx.getEntryAsNumber(20);
+    private void createMileageMeasurement(TrackerDevice device, ReportContext reportCtx, int mileageIndex) throws NumberFormatException {
+
+        BigDecimal mileage = reportCtx.getEntryAsNumber(mileageIndex);
         if (mileage != null) {
-            measurementService.createMileageMeasurement(mileage, device, new DateTime());
+            DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyyMMddHHmmss");
+            DateTime dateTime = formatter.parseDateTime(reportCtx.getEntry(reportCtx.getNumberOfEntries() - 2));
+            measurementService.createMileageMeasurement(mileage, device, dateTime);
         }
     }
-
+    
 	private void processLocationReportOnParsed(TrackerDevice device, ReportContext report,
 			int reportStart) throws SDKException {
 		if (report.getEntry(reportStart + 3).length() > 0
@@ -150,7 +170,35 @@ public class GL200LocationReport extends GL200Parser {
 		}
 		
 		if (report.getEntry(reportStart + 10).length() > 0) {
-			device.setCellId(report.getEntry(reportStart + 9) + "-" + report.getEntry(reportStart + 10));
+		    createMobileInfo(device, report, reportStart + 7);
 		}
+	}
+	
+	private void createBatteryMeasurement(TrackerDevice device, ReportContext reportCtx, int batteryInfoIndex) throws NumberFormatException {
+	    
+	    String[] report = reportCtx.getReport();
+	    if (batteryInfoIndex > 0 && batteryInfoIndex < report.length) {
+    	    BigDecimal batteryLevel = reportCtx.getEntryAsNumber(batteryInfoIndex);
+    	    if (batteryLevel != null) {
+    	        logger.info("Battery percentage: {}", reportCtx.getEntry(batteryInfoIndex));
+    	        
+    	        DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyyMMddHHmmss");
+    	        DateTime dateTime = formatter.parseDateTime(report[report.length - 2]);
+    	        
+    	        measurementService.createPercentageBatteryLevelMeasurement(batteryLevel, device, dateTime);   	       
+    	    }
+	    }
+	}
+	
+	private void createMobileInfo(TrackerDevice device, ReportContext reportCtx, int mobileInfoIndex) {
+	    Mobile mobile = new Mobile();
+	    mobile.setMcc(reportCtx.getEntry(mobileInfoIndex));
+	    mobile.setMnc(reportCtx.getEntry(mobileInfoIndex + 1));
+	    int lacDecimal = Integer.parseInt(reportCtx.getEntry(mobileInfoIndex + 2), 16);
+	    mobile.setLac(String.valueOf(lacDecimal));
+	    int cellDecimal = Integer.parseInt(reportCtx.getEntry(mobileInfoIndex + 3), 16);
+        mobile.setCellId(String.valueOf(cellDecimal));
+	    
+        device.setMobile(mobile);
 	}
 }
