@@ -31,6 +31,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -40,6 +43,7 @@ import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 
 import c8y.MotionTracking;
+import c8y.Tracking;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.context.OperationContext;
 import c8y.trackeragent.context.ReportContext;
@@ -69,15 +73,16 @@ public class GL200DeviceMotionStateTest {
     private TrackerAgent trackerAgent = mock(TrackerAgent.class);
     private TrackerDevice device = mock(TrackerDevice.class);
     private OperationContext operationCtx;
-    private MotionTracking track = new MotionTracking();
+    private MotionTracking mtrack = new MotionTracking();
     private TestConnectionDetails connectionDetails = new TestConnectionDetails(IMEI);
     private QueclinkDevice queclinkDevice;
     private ManagedObjectRepresentation managedObject;
+    private Tracking track = new Tracking();
 
     @Before
     public void setup() throws SDKException {
         OperationRepresentation operation = new OperationRepresentation();
-        operation.set(track);
+        operation.set(mtrack);
         operation.setDeviceId(new GId("0"));
         operationCtx = new OperationContext(connectionDetails, operation);
         gl200mot = new QueclinkDeviceMotionState(trackerAgent);
@@ -97,7 +102,7 @@ public class GL200DeviceMotionStateTest {
         managedObject.setProperty("password", "gl200");
         managedObject.setType("queclink_" + "gl200");
         when(queclinkDevice.getManagedObjectFromGId(any(GId.class))).thenReturn(managedObject);
-        
+        managedObject.set(track);
         
     }
 
@@ -106,11 +111,11 @@ public class GL200DeviceMotionStateTest {
         
         translate_setup();
         
-        track.setActive(false);
+        mtrack.setActive(false);
         String asciiOperation = gl200mot.translate(operationCtx);
         assertEquals(SETNOTRACKINGSTR, asciiOperation);
 
-        track.setActive(true);
+        mtrack.setActive(true);
         asciiOperation = gl200mot.translate(operationCtx);
         assertEquals(SETTRACKINGSTR, asciiOperation);
     }
@@ -120,7 +125,7 @@ public class GL200DeviceMotionStateTest {
         
         translate_setup();
         
-        track.setActive(false);
+        mtrack.setActive(false);
         gl200mot.translate(operationCtx);
 
         String imei = gl200mot.parse(ACKMOTION);
@@ -138,18 +143,22 @@ public class GL200DeviceMotionStateTest {
         ReportContext reportCtx = new ReportContext(connectionDetails, REPMOTION);
         gl200mot.onParsed(reportCtx);
 
+        DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyyMMddHHmmss");
+        DateTime dateTime = formatter.parseDateTime("20100214093254");
+        
         assertEquals(IMEI, imei);
         verify(trackerAgent).getOrCreateTrackerDevice(IMEI);
-        verify(device).motionEvent(anyBoolean());
-        verify(device).motionEvent(true);
+        verify(device).motionEvent(anyBoolean(), any(DateTime.class));
+        verify(device).motionEvent(true, dateTime);
 
         String[] repNoMotion = REPMOTIONSTR.split(QUECLINK.getFieldSeparator());
         repNoMotion[4] = "41";
         imei = gl200mot.parse(repNoMotion);
         reportCtx = new ReportContext(connectionDetails, repNoMotion);
         gl200mot.onParsed(reportCtx);
-        verify(device, times(2)).motionEvent(anyBoolean());
-        verify(device).motionEvent(false);
+        verify(device, times(2)).motionEvent(anyBoolean(), any(DateTime.class));
+        
+        verify(device).motionEvent(false, dateTime);
     }
     
     @Test
@@ -159,7 +168,9 @@ public class GL200DeviceMotionStateTest {
         gl200mot.onParsed(reportCtx);
         
         assertEquals(IMEI, imei);
-        verify(device).motionEvent(true);       
+        DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyyMMddHHmmss");
+        DateTime dateTime = formatter.parseDateTime("20090214093254");
+        verify(device).motionEvent(true, dateTime);       
     }    
 
 }

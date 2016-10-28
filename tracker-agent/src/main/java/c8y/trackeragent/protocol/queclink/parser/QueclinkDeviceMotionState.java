@@ -20,6 +20,7 @@
 
 package c8y.trackeragent.protocol.queclink.parser;
 
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,7 @@ import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 
 import c8y.MotionTracking;
+import c8y.Tracking;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.context.OperationContext;
 import c8y.trackeragent.context.ReportContext;
@@ -55,7 +57,6 @@ public class QueclinkDeviceMotionState extends QueclinkParser implements Transla
 
     private Logger logger = LoggerFactory.getLogger(QueclinkDeviceMotionState.class);
 
-    QueclinkDevice queclinkDevice;
     /**
      * Type of report: Device Motion State Indication.
      */
@@ -74,6 +75,7 @@ public class QueclinkDeviceMotionState extends QueclinkParser implements Transla
      */
     public static final String[] MOTION_TEMPLATE = {
             "AT+GTCFG=%s,,,,,,,,,,%d,%d,,,,,,,,,,%04x$", // specific to gl200, gl300, gv500
+            "AT+GTGBC=%s,,,,,,,,,,,,,,,%d,,,,,,,%04x$", // specific to gl500
             "AT+GTGBC=%s,,,,,,,,,,,,,,,%d,,,,,,,,%04x$" // specific to gl50x
     };
 
@@ -97,8 +99,9 @@ public class QueclinkDeviceMotionState extends QueclinkParser implements Transla
      *          Template parameters: password, send interval (in minutes), sensor enable/disable, serial number
      */
     public static final String[] REPORT_INTERVAL_ON_MOTION_TEMPLATE = {
-            "AT+GTFRI=%s,1,,,,,,,%d,,,,,,,,,,,,%04x$", // specific to gl200, gl300
-            "AT+GTGBC=%s,,,,,,,,,,,,,%s,,%d,,,,,,,,%04x$" // specific to gl50x, 
+            "AT+GTFRI=%s,1,,,,,,%d,%d,,,,,,,,,,,,%04x$", // specific to gl200, gl300
+            "AT+GTGBC=%s,,,,,,,,,,,,,%s,,%d,,,,,,,%04x$", // specific to gl500
+            "AT+GTGBC=%s,,,,,,,,,,,,,%s,,%d,,,,,,,,%04x$" // specific to gl50x 
     };
 
 
@@ -150,7 +153,8 @@ public class QueclinkDeviceMotionState extends QueclinkParser implements Transla
 
 
         TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(imei);
-        device.motionEvent(motion);
+        DateTime dateTime = getQueclinkDevice().getReportDateTime(report);
+        device.motionEvent(motion, dateTime);
         return true;
     }
 
@@ -203,37 +207,62 @@ public class QueclinkDeviceMotionState extends QueclinkParser implements Transla
         String password = (String) deviceMo.get("password");
 
         String deviceCommand = new String(); 
+        
+        // if active field is false.
+        // update the gtfri report interval (c8y_MotionTracking) as gtnmd (c8y_Tracking) 
 
-        if (getQueclinkDevice().convertDeviceTypeToQueclinkType(QueclinkConstants.GL500_ID).equals(deviceMo.getType()) ||
-                getQueclinkDevice().convertDeviceTypeToQueclinkType(QueclinkConstants.GL505_ID).equals(deviceMo.getType())) {
-
+        int intervalInSeconds = 0;
+        if (mTrack.isActive()) {
             if (mTrack.getInterval() > 0) {
-                int intervalMin = mTrack.getInterval() / 60; 
+                intervalInSeconds = mTrack.getInterval();
+            } 
+        } else {
+            //set the value from c8y_Tracking
+            Tracking track = deviceMo.get(Tracking.class);
+            if (track.getInterval() > 0) {
+                intervalInSeconds = track.getInterval();
+            }  
+        }
+        
+        if (getQueclinkDevice().convertDeviceTypeToQueclinkType(QueclinkConstants.GL500_ID).equals(deviceMo.getType())) {
+            
+            if (intervalInSeconds > 0) {
+                int intervalMin = intervalInSeconds / 60; 
                 String intervalVal = Integer.toString(intervalMin);
 
                 // With this command motion report interval and sensor enable/disable options are given
-                deviceCommand = String.format(REPORT_INTERVAL_ON_MOTION_TEMPLATE[1],
-                        password,
-                        intervalVal,
-                        mTrack.isActive() ? 1 : 0, corrId);  
-
+                deviceCommand += getQueclinkDevice().getGL500().configureMotionCommand(password, mTrack.isActive(), intervalVal, corrId);
             } else {
-                deviceCommand = String.format(MOTION_TEMPLATE[1],
-                        password,
-                        mTrack.isActive() ? 1 : 0, corrId);  
+                deviceCommand += getQueclinkDevice().getGL500().configureMotionCommand(password, mTrack.isActive(), corrId);
+            }
+        }
+        
+        if (getQueclinkDevice().convertDeviceTypeToQueclinkType(QueclinkConstants.GL505_ID).equals(deviceMo.getType())) {
+
+            if (intervalInSeconds > 0) {
+                int intervalMin = intervalInSeconds / 60; 
+                String intervalVal = Integer.toString(intervalMin);
+
+                // With this command motion report interval and sensor enable/disable options are given
+                deviceCommand += getQueclinkDevice().getGL505().configureMotionCommand(password, mTrack.isActive(), intervalVal, corrId);
+            } else {
+                deviceCommand += getQueclinkDevice().getGL505().configureMotionCommand(password, mTrack.isActive(), corrId);
             }
 
         } else if (getQueclinkDevice().convertDeviceTypeToQueclinkType(QueclinkConstants.GL200_ID).equals(deviceMo.getType()) ||
-                getQueclinkDevice().convertDeviceTypeToQueclinkType(QueclinkConstants.GL300_ID).equals(deviceMo.getType())){
+                getQueclinkDevice().convertDeviceTypeToQueclinkType(QueclinkConstants.GL300_ID).equals(deviceMo.getType())) {
 
-            if (mTrack.getInterval() > 0) {
-                int interval = mTrack.getInterval();
-                deviceCommand += String.format(REPORT_INTERVAL_ON_MOTION_TEMPLATE[0], password, interval, corrId);
+            if (intervalInSeconds > 0) {
+                int interval = intervalInSeconds;
+                deviceCommand += String.format(REPORT_INTERVAL_ON_MOTION_TEMPLATE[0], password, interval, interval, corrId);
             }
 
             deviceCommand += String.format(MOTION_TEMPLATE[0], password, mTrack.isActive() ? MOTION_ON : MOTION_OFF, mTrack.isActive() ? 1 : 0, corrId);
         }
-
+        //update operation
+        mTrack.setInterval(intervalInSeconds);
+        lastOperation.set(mTrack);
+        
         // add restart command
         deviceCommand += String.format("AT+GTRTO=%s,3,,,,,,0001$", password);
         return deviceCommand;
