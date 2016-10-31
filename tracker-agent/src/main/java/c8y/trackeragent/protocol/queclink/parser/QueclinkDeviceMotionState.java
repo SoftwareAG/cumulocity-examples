@@ -91,6 +91,8 @@ public class QueclinkDeviceMotionState extends QueclinkParser implements Transla
             "+ACK:GTCFG",
             "+ACK:GTGBC"
     };
+    
+    public static final String REPORT_INTERVAL_NO_MOTION_ACK = "+ACK:GTNMD";
 
     /**
      * Set report interval on motion state
@@ -122,7 +124,9 @@ public class QueclinkDeviceMotionState extends QueclinkParser implements Transla
         String reportType = reportCtx.getReport()[0];
         if (MOTION_ACK[0].equals(reportType) || MOTION_ACK[1].equals(reportType)) {
             return onParsedAck(reportCtx.getReport(), reportCtx.getImei());
-        } else if (MOTION_REPORT[0].equals(reportType) || MOTION_REPORT[1].equals(reportType)) {
+        } else if (REPORT_INTERVAL_NO_MOTION_ACK.equals(reportType)) {
+           return onParsedTrackingAck(reportCtx, reportCtx.getImei());
+        }  else if (MOTION_REPORT[0].equals(reportType) || MOTION_REPORT[1].equals(reportType)) {
             return onParsedMotion(reportCtx.getReport(), reportCtx.getImei());
         } else {
             return false;
@@ -183,13 +187,39 @@ public class QueclinkDeviceMotionState extends QueclinkParser implements Transla
         }
         return true;
     }
+    
+    
+    private boolean onParsedTrackingAck(ReportContext reportCtx, String imei) {
+        short returnedCommandSerialNum = Short.parseShort(reportCtx.getEntry(4), 16);
+        Tracking ackTracking;
+        MotionTracking ackMTracking;
+
+        synchronized(this) {
+            if (returnedCommandSerialNum != corrId) {
+                return false;
+            }
+            ackTracking = lastOperation.get(Tracking.class);
+            ackMTracking = lastOperation.get(MotionTracking.class);
+        }
+
+        try {
+            // store fragment to managed object
+            trackerAgent.getOrCreateTrackerDevice(imei).setTracking(ackTracking.getInterval());
+            
+        } catch (SDKException sdkException) {
+            trackerAgent.fail(imei, lastOperation, "Error setting tracking to managed object", sdkException);
+        }
+
+        return true;
+    }
 
     @Override
     public String translate(OperationContext operationCtx) {
         OperationRepresentation operation = operationCtx.getOperation();
         MotionTracking mTrack = operation.get(MotionTracking.class);
-
-        if (mTrack == null) {
+        Tracking tracking = operation.get(Tracking.class);
+        
+        if (mTrack == null && tracking == null) {
             return null;
         }
 
@@ -198,16 +228,25 @@ public class QueclinkDeviceMotionState extends QueclinkParser implements Transla
             lastOperation = operation;
         }
 
-        String deviceCommand = setMotionTrackingOptionsOnDevice(operation.getDeviceId(), mTrack);
+        String deviceCommand = new String();
+        if (mTrack != null) {
+            deviceCommand += setMotionTrackingOptionsOnDevice(operation.getDeviceId(), mTrack);
+        }
+        
+        if (tracking != null) {
+            deviceCommand += setTrackingOptionsOnDevice(operation.getDeviceId(), tracking);
+        }
+        
         return (deviceCommand.isEmpty())? null : deviceCommand;
     }
 
     private String setMotionTrackingOptionsOnDevice(GId deviceId, MotionTracking mTrack) {
+        
         ManagedObjectRepresentation deviceMo = getQueclinkDevice().getManagedObjectFromGId(deviceId);
         String password = (String) deviceMo.get("password");
 
         String deviceCommand = new String(); 
-        
+
         // if active field is false.
         // update the gtfri report interval (c8y_MotionTracking) as gtnmd (c8y_Tracking) 
 
@@ -223,48 +262,48 @@ public class QueclinkDeviceMotionState extends QueclinkParser implements Transla
                 intervalInSeconds = track.getInterval();
             }  
         }
-        
-        if (getQueclinkDevice().convertDeviceTypeToQueclinkType(QueclinkConstants.GL500_ID).equals(deviceMo.getType())) {
+
+
+        if (intervalInSeconds > 0) {
+            // With this command motion report interval and sensor enable/disable options are given
+            deviceCommand += getQueclinkDevice().getDeviceByType(deviceMo.getType()).configureMotionTrackingCommand(password, mTrack.isActive(), intervalInSeconds, corrId);
+        } else {
             
-            if (intervalInSeconds > 0) {
-                int intervalMin = intervalInSeconds / 60; 
-                String intervalVal = Integer.toString(intervalMin);
-
-                // With this command motion report interval and sensor enable/disable options are given
-                deviceCommand += getQueclinkDevice().getGL500().configureMotionCommand(password, mTrack.isActive(), intervalVal, corrId);
-            } else {
-                deviceCommand += getQueclinkDevice().getGL500().configureMotionCommand(password, mTrack.isActive(), corrId);
-            }
+            deviceCommand += getQueclinkDevice().getDeviceByType(deviceMo.getType()).configureMotionTrackingCommand(password, mTrack.isActive(), corrId);
         }
-        
-        if (getQueclinkDevice().convertDeviceTypeToQueclinkType(QueclinkConstants.GL505_ID).equals(deviceMo.getType())) {
 
-            if (intervalInSeconds > 0) {
-                int intervalMin = intervalInSeconds / 60; 
-                String intervalVal = Integer.toString(intervalMin);
-
-                // With this command motion report interval and sensor enable/disable options are given
-                deviceCommand += getQueclinkDevice().getGL505().configureMotionCommand(password, mTrack.isActive(), intervalVal, corrId);
-            } else {
-                deviceCommand += getQueclinkDevice().getGL505().configureMotionCommand(password, mTrack.isActive(), corrId);
-            }
-
-        } else if (getQueclinkDevice().convertDeviceTypeToQueclinkType(QueclinkConstants.GL200_ID).equals(deviceMo.getType()) ||
-                getQueclinkDevice().convertDeviceTypeToQueclinkType(QueclinkConstants.GL300_ID).equals(deviceMo.getType())) {
-
-            if (intervalInSeconds > 0) {
-                int interval = intervalInSeconds;
-                deviceCommand += String.format(REPORT_INTERVAL_ON_MOTION_TEMPLATE[0], password, interval, interval, corrId);
-            }
-
-            deviceCommand += String.format(MOTION_TEMPLATE[0], password, mTrack.isActive() ? MOTION_ON : MOTION_OFF, mTrack.isActive() ? 1 : 0, corrId);
-        }
         //update operation
         mTrack.setInterval(intervalInSeconds);
         lastOperation.set(mTrack);
-        
+
         // add restart command
-        deviceCommand += String.format("AT+GTRTO=%s,3,,,,,,0001$", password);
+        //deviceCommand += String.format("AT+GTRTO=%s,3,,,,,,0001$", password);
+        return deviceCommand;
+    }
+    
+    private String setTrackingOptionsOnDevice(GId deviceId, Tracking tracking) {
+        
+        String deviceCommand = new String();
+        
+        ManagedObjectRepresentation deviceMo = getQueclinkDevice().getManagedObjectFromGId(deviceId);
+        String password = (String) deviceMo.get("password");
+        
+        int intervalInSeconds = tracking.getInterval();
+       
+        if (intervalInSeconds > 0) {
+ 
+            MotionTracking mTracking = deviceMo.get(MotionTracking.class);
+            if (!mTracking.isActive()) {
+                deviceCommand += getQueclinkDevice().getDeviceByType(deviceMo.getType()).configureMotionTrackingCommand(password, mTracking.isActive(), intervalInSeconds, corrId);
+                
+                //update operation
+                mTracking.setInterval(intervalInSeconds);
+                lastOperation.set(mTracking);
+            }
+            
+            deviceCommand += getQueclinkDevice().getDeviceByType(deviceMo.getType()).configureTrackingCommand(password, intervalInSeconds, corrId);
+        }
+     
         return deviceCommand;
     }
 

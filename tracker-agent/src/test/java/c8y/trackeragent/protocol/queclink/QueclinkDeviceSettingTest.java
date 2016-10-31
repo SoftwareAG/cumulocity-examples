@@ -39,22 +39,6 @@ public class QueclinkDeviceSettingTest {
     private Tracking tracking = new Tracking();
     
     /**
-     * Commands to device
-     */
-    public final String[] nonMovementReportInterval = {
-        "AT+GTNMD=gl300,E,,,,300,300,,,,,,,,0002$AT+GTRTO=gl300,3,,,,,,0001$", //specific to gl200, gl300, together with reboot command
-        "AT+GTNMD=gl500,E,,,,5,,,,0002$AT+GTRTO=gl500,3,,,,,,0001$", // specific to gl50x, together with reboot command
-    };
-
-    /**
-     * Acknowledgement from device
-     */
-    public final String[] ackNonMovementReportInterval = {
-            "+ACK:GTNMD,300400,860599001073709,,0002,20161004134115,27EF$", //specific to gl200, gl300, together with reboot command
-            "+ACK:GTNMD,110302,868487003422904,GL500,0002,20161007155444,330D$", // specific to gl50x, together with reboot command
-    };
-    
-    /**
      * Report from device
      */
     public final String queclinkDataStr1 = "+RESP:GTFRI,300400,860599001073709,,0,0,1,0,0.0,215,1.9,24.950449,60.193629,20160919101701,0244,0091,0D9F,ABEE,,95,20160921072832,F510$";
@@ -116,40 +100,6 @@ public class QueclinkDeviceSettingTest {
         }
     }
     
-    @Test
-    public void testNonMovementReportInterval() {
-        
-        tracking.setInterval(300);
-        
-        String translatedOperation;
-               
-        translatedOperation = translateNonMovementReportIntervalOperation("gl300", "gl300");      
-        assertEquals(nonMovementReportInterval[0], translatedOperation);
-        
-        translatedOperation = translateNonMovementReportIntervalOperation("gl505", "gl500");      
-        assertEquals(nonMovementReportInterval[1], translatedOperation);
-        
-    }
-    
-    @Test
-    public void testAckNonMovementReportInterval() {
-        tracking.setInterval(300);
-        
-        // gl300
-        translateNonMovementReportIntervalOperation("gl300", "gl300");
-        ReportContext reportCtx = generateReportContext(ackNonMovementReportInterval[0]);
-        queclinkDeviceSetting.onParsed(reportCtx);
-        verify(trackerAgent).getOrCreateTrackerDevice(reportCtx.getImei());
-        verify(trackerDevice).setTracking(300);
-        
-        // gl505
-        translateNonMovementReportIntervalOperation("gl505", "gl500");
-        reportCtx = generateReportContext(ackNonMovementReportInterval[1]);
-        queclinkDeviceSetting.onParsed(reportCtx);
-        verify(trackerAgent).getOrCreateTrackerDevice(reportCtx.getImei());
-        verify(trackerDevice, times(2)).setTracking(300);
-    }
-    
     public ReportContext generateReportContext(String report) {
         String[] reportArr = report.split(QUECLINK.getFieldSeparator());
         String imei = queclinkDeviceSetting.parse(reportArr);
@@ -160,28 +110,4 @@ public class QueclinkDeviceSettingTest {
         return new ReportContext(connectionDetails, reportArr);
     }
     
-    public String translateNonMovementReportIntervalOperation (String deviceType, String password) {
-        translate_setup();
-        
-        GId device_gid = new GId("0");
-        
-        OperationContext operationCtx;
-        OperationRepresentation operation = new OperationRepresentation();
-
-        operation.set(tracking);
-        operation.setDeviceId(device_gid);
-        
-        connectionDetails = new TestConnectionDetails();
-        operationCtx = new OperationContext(connectionDetails, operation);
-
-        when(managedObject.get("password")).thenReturn(password);
-        when(managedObject.getType()).thenReturn("queclink_" + deviceType);
-        when(queclinkDevice.getManagedObjectFromGId(any(GId.class))).thenReturn(managedObject);
-        
-        String deviceCommand = queclinkDeviceSetting.translate(operationCtx);
-        
-        verify(queclinkDevice).getManagedObjectFromGId(device_gid);
-        
-        return deviceCommand; 
-    }
 }

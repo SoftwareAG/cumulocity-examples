@@ -48,6 +48,8 @@ import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.context.OperationContext;
 import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.device.TrackerDevice;
+import c8y.trackeragent.protocol.queclink.device.BaseQueclinkDevice;
+import c8y.trackeragent.protocol.queclink.device.GL200;
 import c8y.trackeragent.protocol.queclink.device.QueclinkDevice;
 import c8y.trackeragent.protocol.queclink.parser.QueclinkDeviceMotionState;
 import c8y.trackeragent.protocol.queclink.parser.QueclinkDeviceSetting;
@@ -57,8 +59,8 @@ public class GL200DeviceMotionStateTest {
 
     public static final String IMEI = "135790246811220";
 
-    public static final String SETNOTRACKINGSTR = "AT+GTCFG=gl200,,,,,,,,,,47,0,,,,,,,,,,0002$AT+GTRTO=gl200,3,,,,,,0001$";
-    public static final String SETTRACKINGSTR = "AT+GTCFG=gl200,,,,,,,,,,303,1,,,,,,,,,,0003$AT+GTRTO=gl200,3,,,,,,0001$";
+    public static final String SETNOTRACKINGSTR = "AT+GTCFG=gl200,,,,,,,,,,47,0,,,,,,,,,,0002$";
+    public static final String SETTRACKINGSTR = "AT+GTCFG=gl200,,,,,,,,,,303,1,,,,,,,,,,0003$";
 
     public static final String ACKMOTIONSTR = "+ACK:GTCFG,02010B,135790246811220,,0002,20100310172830,11F0$";
     public static final String[] ACKMOTION = ACKMOTIONSTR.split(QUECLINK.getFieldSeparator());
@@ -78,6 +80,7 @@ public class GL200DeviceMotionStateTest {
     private QueclinkDevice queclinkDevice;
     private ManagedObjectRepresentation managedObject;
     private Tracking track = new Tracking();
+    private BaseQueclinkDevice gl200 = new GL200();
 
     @Before
     public void setup() throws SDKException {
@@ -95,7 +98,7 @@ public class GL200DeviceMotionStateTest {
         queclinkDevice = mock(QueclinkDevice.class);
         
         when(gl200mot.getQueclinkDevice()).thenReturn(queclinkDevice);
-        when(queclinkDevice.convertDeviceTypeToQueclinkType(anyString())).thenCallRealMethod();
+        when(queclinkDevice.getDeviceByType(anyString())).thenReturn(gl200);
     
         // prepare managed object
         managedObject = new ManagedObjectRepresentation();
@@ -103,7 +106,7 @@ public class GL200DeviceMotionStateTest {
         managedObject.setType("queclink_" + "gl200");
         when(queclinkDevice.getManagedObjectFromGId(any(GId.class))).thenReturn(managedObject);
         managedObject.set(track);
-        
+
     }
 
     @Test
