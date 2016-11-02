@@ -71,15 +71,6 @@ public class QueclinkDeviceMotionState extends QueclinkParser implements Transla
     public static final String BEING_TOWED = "16";
 
     /**
-     * Change the event mask to include motion tracking and enable/disable sensor.
-     */
-    public static final String[] MOTION_TEMPLATE = {
-            "AT+GTCFG=%s,,,,,,,,,,%d,%d,,,,,,,,,,%04x$", // specific to gl200, gl300, gv500
-            "AT+GTGBC=%s,,,,,,,,,,,,,,,%d,,,,,,,%04x$", // specific to gl500
-            "AT+GTGBC=%s,,,,,,,,,,,,,,,%d,,,,,,,,%04x$" // specific to gl50x
-    };
-
-    /**
      * Events to set: Power on/off, external power on/off, battery low are
      * always on. Device motion is added depending on configuration from
      * platform.
@@ -93,21 +84,6 @@ public class QueclinkDeviceMotionState extends QueclinkParser implements Transla
     };
     
     public static final String REPORT_INTERVAL_NO_MOTION_ACK = "+ACK:GTNMD";
-
-    /**
-     * Set report interval on motion state
-     * AT+GTFRI: Template parameters: password, send interval (in sec.), serial number 
-     * AT+GTGBC: With this command motion report interval and sensor enable/disable options are given.
-     *          Template parameters: password, send interval (in minutes), sensor enable/disable, serial number
-     */
-    public static final String[] REPORT_INTERVAL_ON_MOTION_TEMPLATE = {
-            "AT+GTFRI=%s,1,,,,,,%d,%d,,,,,,,,,,,,%04x$", // specific to gl200, gl300
-            "AT+GTGBC=%s,,,,,,,,,,,,,%s,,%d,,,,,,,%04x$", // specific to gl500
-            "AT+GTGBC=%s,,,,,,,,,,,,,%s,,%d,,,,,,,,%04x$" // specific to gl50x 
-    };
-
-
-    public static final String REPORT_INTERVAL_ON_MOTION_ACK = "+ACK:GTFRI";
 
     private final TrackerAgent trackerAgent;
     private short corrId = 1;
@@ -123,7 +99,7 @@ public class QueclinkDeviceMotionState extends QueclinkParser implements Transla
     public boolean onParsed(ReportContext reportCtx) throws SDKException {
         String reportType = reportCtx.getReport()[0];
         if (MOTION_ACK[0].equals(reportType) || MOTION_ACK[1].equals(reportType)) {
-            return onParsedAck(reportCtx.getReport(), reportCtx.getImei());
+            return onParsedMTrackingAck(reportCtx.getReport(), reportCtx.getImei());
         } else if (REPORT_INTERVAL_NO_MOTION_ACK.equals(reportType)) {
            return onParsedTrackingAck(reportCtx, reportCtx.getImei());
         }  else if (MOTION_REPORT[0].equals(reportType) || MOTION_REPORT[1].equals(reportType)) {
@@ -162,7 +138,7 @@ public class QueclinkDeviceMotionState extends QueclinkParser implements Transla
         return true;
     }
 
-    private boolean onParsedAck(String[] report, String imei) throws SDKException {
+    private boolean onParsedMTrackingAck(String[] report, String imei) throws SDKException {
         short returnedCorr = Short.parseShort(report[4], 16);
         OperationRepresentation ackOp;
         MotionTracking ackMTrack;
@@ -192,14 +168,12 @@ public class QueclinkDeviceMotionState extends QueclinkParser implements Transla
     private boolean onParsedTrackingAck(ReportContext reportCtx, String imei) {
         short returnedCommandSerialNum = Short.parseShort(reportCtx.getEntry(4), 16);
         Tracking ackTracking;
-        MotionTracking ackMTracking;
 
         synchronized(this) {
             if (returnedCommandSerialNum != corrId) {
                 return false;
             }
             ackTracking = lastOperation.get(Tracking.class);
-            ackMTracking = lastOperation.get(MotionTracking.class);
         }
 
         try {

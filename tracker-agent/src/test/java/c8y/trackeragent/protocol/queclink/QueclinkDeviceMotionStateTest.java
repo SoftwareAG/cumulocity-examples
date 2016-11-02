@@ -77,8 +77,8 @@ public class QueclinkDeviceMotionStateTest {
     public final String[] nonMovementReportInterval = {
         "AT+GTNMD=gl300,E,,,,300,300,,,,,,,,0002$", //specific to gl200, gl300
         "AT+GTNMD=gl500,E,,,,5,,,,0002$", // specific to gl50x
-        "AT+GTFRI=gl300,1,,,,,,300,300,,,,,,,,,,,,0002$AT+GTCFG=gl300,,,,,,,,,,47,0,,,,,,,,,,0002$AT+GTNMD=gl300,E,,,,300,300,,,,,,,,0002$",
-        "AT+GTGBC=gl500,,,,,,,,,,,,,5,,0,,,,,,,,0002$AT+GTNMD=gl500,E,,,,5,,,,0002$"
+        "AT+GTFRI=gl300,1,,,,,,300,300,,,,,,,,,,,,0002$AT+GTCFG=gl300,,,,,,,,,,47,0,,,,,,,,,,0002$AT+GTNMD=gl300,E,,,,300,300,,,,,,,,0002$", //specific to gl200, gl300 - case of motion sensor disabled
+        "AT+GTGBC=gl500,,,,,,,,,,,,,5,,0,,,,,,,,0002$AT+GTNMD=gl500,E,,,,5,,,,0002$" // specific to gl50x, case of motion sensor disabled
     };
     
     /**
