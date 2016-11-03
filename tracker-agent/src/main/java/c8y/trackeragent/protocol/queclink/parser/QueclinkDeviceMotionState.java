@@ -250,8 +250,6 @@ public class QueclinkDeviceMotionState extends QueclinkParser implements Transla
         mTrack.setInterval(intervalInSeconds);
         lastOperation.set(mTrack);
 
-        // add restart command
-        //deviceCommand += String.format("AT+GTRTO=%s,3,,,,,,0001$", password);
         return deviceCommand;
     }
     
