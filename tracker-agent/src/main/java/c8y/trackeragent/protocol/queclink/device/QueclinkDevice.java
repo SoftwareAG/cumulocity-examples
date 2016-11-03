@@ -1,5 +1,8 @@
 package c8y.trackeragent.protocol.queclink.device;
 
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,10 +16,41 @@ import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.protocol.queclink.QueclinkConstants;
 
 public class QueclinkDevice {
-
+    
+    protected final String model = "Queclink";
+    private GL200 gl200 = new GL200();
+    private GL300 gl300 = new GL300();
+    private GL500 gl500 = new GL500();
+    private GL505 gl505 = new GL505();
+    
+    public GL200 getGL200() {
+        return gl200;
+    }
+    public GL300 getGL300() {
+        return gl300;
+    }
+    public GL500 getGL500() {
+        return gl500;
+    }
+    public GL505 getGL505() {
+        return gl505;
+    }
+    
+    public BaseQueclinkDevice getDeviceByType(String type) {
+        if (type.equals("queclink_gl200")) {
+            return getGL200();
+        } else if (type.equals("queclink_gl300")) {
+            return getGL300();
+        } else if (type.equals("queclink_gl500")) {
+            return getGL500();
+        } else if (type.equals("queclink_gl505")) {
+            return getGL505();
+        } 
+        return null;
+    }
     private Logger logger = LoggerFactory.getLogger(QueclinkDevice.class);
             
-    protected final String model = "Queclink";
+    
 
     public String convertDeviceTypeToQueclinkType(String deviceType) {
        return "queclink_" + QueclinkConstants.queclinkProperties.get(deviceType)[0];
@@ -93,6 +127,12 @@ public class QueclinkDevice {
         return mo;    
     }
 
+    public DateTime getReportDateTime(String[] report) {
+        DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyyMMddHHmmss");
+        DateTime dateTime = formatter.parseDateTime(report[report.length - 2]);
+        return dateTime;
+    }
+    
     private void setMoRepresentationType(ManagedObjectRepresentation representation, String type) {
         representation.setType(configureType(type));
     }
@@ -133,6 +173,5 @@ public class QueclinkDevice {
     
     private String getRevision(String protocolVersion) {
         return protocolVersion.substring(2, 4) + "." + protocolVersion.substring(4, 6);
-    }
-    
+    }   
 }

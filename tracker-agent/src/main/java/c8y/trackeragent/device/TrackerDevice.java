@@ -261,7 +261,7 @@ public class TrackerDevice {
         logger.debug("Motion tracking for {} set to {}", imei, active);
 
         ManagedObjectRepresentation device = new ManagedObjectRepresentation();
-        MotionTracking motion = new MotionTracking();
+        MotionTracking motion = inventory.get(gid).get(MotionTracking.class);
         motion.setActive(active);
         device.set(motion);
         device.setId(gid);
@@ -272,7 +272,7 @@ public class TrackerDevice {
         logger.debug("Motion tracking for {} set to {}", imei, active);
 
         ManagedObjectRepresentation device = new ManagedObjectRepresentation();
-        MotionTracking motion = new MotionTracking();
+        MotionTracking motion = inventory.get(gid).get(MotionTracking.class);
         motion.setActive(active);
         motion.setInterval(interval);
         device.set(motion);

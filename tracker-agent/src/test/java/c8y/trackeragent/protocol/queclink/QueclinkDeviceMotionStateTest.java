@@ -18,10 +18,14 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.times;
 
 import c8y.MotionTracking;
+import c8y.Tracking;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.context.OperationContext;
 import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.device.TrackerDevice;
+import c8y.trackeragent.protocol.queclink.device.BaseQueclinkDevice;
+import c8y.trackeragent.protocol.queclink.device.GL300;
+import c8y.trackeragent.protocol.queclink.device.GL505;
 import c8y.trackeragent.protocol.queclink.device.QueclinkDevice;
 import c8y.trackeragent.protocol.queclink.parser.QueclinkDeviceMotionState;
 import c8y.trackeragent.server.TestConnectionDetails;
@@ -36,26 +40,28 @@ public class QueclinkDeviceMotionStateTest {
     ManagedObjectRepresentation managedObject;
     
     private MotionTracking motionTracking = new MotionTracking();
-    
+    private Tracking tracking = new Tracking();
+    private BaseQueclinkDevice gl505 = new GL505();
+    private BaseQueclinkDevice gl300 = new GL300();
     private QueclinkDeviceMotionState queclinkDeviceMotionState = new QueclinkDeviceMotionState(trackerAgent);
     
     public static final String[] MOTION_SETTING = {
             // report interval on motion, set motion active, reboot
-            "AT+GTFRI=gl300,1,,,,,,,300,,,,,,,,,,,,0002$AT+GTCFG=gl300,,,,,,,,,,303,1,,,,,,,,,,0002$AT+GTRTO=gl300,3,,,,,,0001$", // specific to gl200, gl300, gv500
+            "AT+GTFRI=gl300,1,,,,,,300,300,,,,,,,,,,,,0002$AT+GTCFG=gl300,,,,,,,,,,303,1,,,,,,,,,,0002$", // specific to gl200, gl300, gv500
             // only enable motion sensor, reboot
-            "AT+GTCFG=gl300,,,,,,,,,,303,1,,,,,,,,,,0002$AT+GTRTO=gl300,3,,,,,,0001$", // specific to gl200, gl300, gv500
+            "AT+GTCFG=gl300,,,,,,,,,,303,1,,,,,,,,,,0002$", // specific to gl200, gl300, gv500
             // only disable motion sensor, reboot
-            "AT+GTCFG=gl300,,,,,,,,,,47,0,,,,,,,,,,0002$AT+GTRTO=gl300,3,,,,,,0001$", // specific to gl200, gl300, gv500
+            "AT+GTCFG=gl300,,,,,,,,,,47,0,,,,,,,,,,0002$", // specific to gl200, gl300, gv500
             // report interval on motion and set motion active, reboot
-            "AT+GTGBC=gl500,,,,,,,,,,,,,5,,1,,,,,,,,0002$AT+GTRTO=gl500,3,,,,,,0001$", // specific to gl50x
+            "AT+GTGBC=gl500,,,,,,,,,,,,,5,,1,,,,,,,,0002$", // specific to gl50x
             // only enable motion sensor, reboot
-            "AT+GTGBC=gl500,,,,,,,,,,,,,,,1,,,,,,,,0002$AT+GTRTO=gl500,3,,,,,,0001$", // specific to gl50x
+            "AT+GTGBC=gl500,,,,,,,,,,,,,,,1,,,,,,,,0002$", // specific to gl50x
             // only disable motion sensor, reboot
-            "AT+GTGBC=gl500,,,,,,,,,,,,,,,0,,,,,,,,0002$AT+GTRTO=gl500,3,,,,,,0001$", // specific to gl50x
+            "AT+GTGBC=gl500,,,,,,,,,,,,,,,0,,,,,,,,0002$", // specific to gl50x
             // report interval on motion, set motion active, reboot
-            "AT+GTFRI=gl300,1,,,,,,,300,,,,,,,,,,,,0002$AT+GTCFG=gl300,,,,,,,,,,47,0,,,,,,,,,,0002$AT+GTRTO=gl300,3,,,,,,0001$", // specific to gl200, gl300, gv500
+            "AT+GTFRI=gl300,1,,,,,,300,300,,,,,,,,,,,,0002$AT+GTCFG=gl300,,,,,,,,,,47,0,,,,,,,,,,0002$", // specific to gl200, gl300, gv500
             // report interval on motion and set motion active, reboot
-            "AT+GTGBC=gl500,,,,,,,,,,,,,5,,0,,,,,,,,0002$AT+GTRTO=gl500,3,,,,,,0001$" // specific to gl50x           
+            "AT+GTGBC=gl500,,,,,,,,,,,,,5,,0,,,,,,,,0002$" // specific to gl50x           
     };
     
     public static final String[] ACK_MOTION_SETTING = {
@@ -63,6 +69,24 @@ public class QueclinkDeviceMotionStateTest {
             "+ACK:GTCFG,300400,860599001073709,,0002,20161004134929,27FB$", // specific to gl200, gl300, gv500
             // report interval on motion and set motion active, reboot
             "+ACK:GTGBC,110302,868487003422904,GL500,0002,20161007154349,3304$" // specific to gl50x
+    };
+    
+    /**
+     * Commands to device
+     */
+    public final String[] nonMovementReportInterval = {
+        "AT+GTNMD=gl300,E,,,,300,300,,,,,,,,0002$", //specific to gl200, gl300
+        "AT+GTNMD=gl500,E,,,,5,,,,0002$", // specific to gl50x
+        "AT+GTFRI=gl300,1,,,,,,300,300,,,,,,,,,,,,0002$AT+GTCFG=gl300,,,,,,,,,,47,0,,,,,,,,,,0002$AT+GTNMD=gl300,E,,,,300,300,,,,,,,,0002$", //specific to gl200, gl300 - case of motion sensor disabled
+        "AT+GTGBC=gl500,,,,,,,,,,,,,5,,0,,,,,,,,0002$AT+GTNMD=gl500,E,,,,5,,,,0002$" // specific to gl50x, case of motion sensor disabled
+    };
+    
+    /**
+     * Acknowledgement from device
+     */
+    public final String[] ackNonMovementReportInterval = {
+            "+ACK:GTNMD,300400,860599001073709,,0002,20161004134115,27EF$", //specific to gl200, gl300, together with reboot command
+            "+ACK:GTNMD,110302,868487003422904,GL500,0002,20161007155444,330D$", // specific to gl50x, together with reboot command
     };
     
     @Before
@@ -75,7 +99,8 @@ public class QueclinkDeviceMotionStateTest {
         queclinkDevice = mock(QueclinkDevice.class);
         
         when(queclinkDeviceMotionState.getQueclinkDevice()).thenReturn(queclinkDevice);
-        when(queclinkDevice.convertDeviceTypeToQueclinkType(anyString())).thenCallRealMethod();
+        when(queclinkDevice.getDeviceByType("queclink_gl505")).thenReturn(gl505);
+        when(queclinkDevice.getDeviceByType("queclink_gl300")).thenReturn(gl300);
     }
     
     public void setMotionTrackingOptions(boolean active, int interval) {
@@ -101,7 +126,8 @@ public class QueclinkDeviceMotionStateTest {
         assertEquals(MOTION_SETTING[2], translateReportIntervalOperation("gl300", "gl300"));
         assertEquals(MOTION_SETTING[5], translateReportIntervalOperation("gl505", "gl500"));
         
-        setMotionTrackingOptions(false, 300); //disable motion sensor, set report interval
+        setMotionTrackingOptions(false, 200); //disable motion sensor, set report interval
+        tracking.setInterval(300);
         
         assertEquals(MOTION_SETTING[6], translateReportIntervalOperation("gl300", "gl300"));
         assertEquals(MOTION_SETTING[7], translateReportIntervalOperation("gl505", "gl500"));
@@ -121,13 +147,33 @@ public class QueclinkDeviceMotionStateTest {
         verify(trackerAgent).getOrCreateTrackerDevice(reportCtx.getImei());
         verify(trackerDevice).setMotionTracking(true, 300);
         
+        setMotionTrackingOptions(false, 200);
+        tracking.setInterval(300);
+        translateReportIntervalOperation("gl300", "gl300");
+        
+        reportCtx = generateReportContext(ACK_MOTION_SETTING[0]);
+        queclinkDeviceMotionState.onParsed(reportCtx);
+        
+        verify(trackerAgent, times(2)).getOrCreateTrackerDevice(reportCtx.getImei());
+        verify(trackerDevice).setMotionTracking(false, 300);
+        
         // gl500
+        setMotionTrackingOptions(true, 300);
         translateReportIntervalOperation("gl505", "gl500");
         reportCtx = generateReportContext(ACK_MOTION_SETTING[1]);
         queclinkDeviceMotionState.onParsed(reportCtx);
         
         verify(trackerAgent).getOrCreateTrackerDevice(reportCtx.getImei());
         verify(trackerDevice, times(2)).setMotionTracking(true, 300);
+        
+        setMotionTrackingOptions(false, 200);
+        tracking.setInterval(300);
+        translateReportIntervalOperation("gl505", "gl500");
+        reportCtx = generateReportContext(ACK_MOTION_SETTING[1]);
+        queclinkDeviceMotionState.onParsed(reportCtx);
+        
+        verify(trackerAgent, times(2)).getOrCreateTrackerDevice(reportCtx.getImei());
+        verify(trackerDevice, times(2)).setMotionTracking(false, 300);
         
     }
     
@@ -157,6 +203,7 @@ public class QueclinkDeviceMotionStateTest {
         managedObject = new ManagedObjectRepresentation();
         managedObject.setProperty("password", password);
         managedObject.setType("queclink_" + deviceType);
+        managedObject.set(tracking);
         when(queclinkDevice.getManagedObjectFromGId(any(GId.class))).thenReturn(managedObject);
         
         String deviceCommand = queclinkDeviceMotionState.translate(operationCtx);
@@ -164,5 +211,75 @@ public class QueclinkDeviceMotionStateTest {
         verify(queclinkDevice).getManagedObjectFromGId(device_gid);
         
         return deviceCommand; 
+    }
+    
+    
+    @Test
+    public void testNonMovementReportInterval() {
+        
+        tracking.setInterval(300);
+        
+        String translatedOperation;
+               
+        motionTracking.setActive(true);
+        translatedOperation = translateNonMovementReportIntervalOperation("gl300", "gl300");      
+        assertEquals(nonMovementReportInterval[0], translatedOperation);
+        
+        translatedOperation = translateNonMovementReportIntervalOperation("gl505", "gl500");      
+        assertEquals(nonMovementReportInterval[1], translatedOperation);
+        
+        motionTracking.setActive(false);
+        translatedOperation = translateNonMovementReportIntervalOperation("gl300", "gl300");      
+        assertEquals(nonMovementReportInterval[2], translatedOperation);
+        
+        translatedOperation = translateNonMovementReportIntervalOperation("gl505", "gl500");      
+        assertEquals(nonMovementReportInterval[3], translatedOperation);
+        
+    }
+    
+    public String translateNonMovementReportIntervalOperation (String deviceType, String password) {
+        translate_setup();
+        
+        GId device_gid = new GId("0");
+        
+        OperationContext operationCtx;
+        OperationRepresentation operation = new OperationRepresentation();
+
+        operation.set(tracking);
+        operation.setDeviceId(device_gid);
+        
+        connectionDetails = new TestConnectionDetails();
+        operationCtx = new OperationContext(connectionDetails, operation);
+        
+        managedObject = new ManagedObjectRepresentation();
+        managedObject.setProperty("password", password);
+        managedObject.setType("queclink_" + deviceType);
+        managedObject.set(motionTracking);
+        when(queclinkDevice.getManagedObjectFromGId(any(GId.class))).thenReturn(managedObject);
+        
+        String deviceCommand = queclinkDeviceMotionState.translate(operationCtx);
+        
+        verify(queclinkDevice).getManagedObjectFromGId(device_gid);
+        
+        return deviceCommand; 
+    }
+    
+    @Test
+    public void testAckNonMovementReportInterval() {
+        tracking.setInterval(300);
+        
+        // gl300
+        translateNonMovementReportIntervalOperation("gl300", "gl300");
+        ReportContext reportCtx = generateReportContext(ackNonMovementReportInterval[0]);
+        queclinkDeviceMotionState.onParsed(reportCtx);
+        verify(trackerAgent).getOrCreateTrackerDevice(reportCtx.getImei());
+        verify(trackerDevice).setTracking(300);
+        
+        // gl505
+        translateNonMovementReportIntervalOperation("gl505", "gl500");
+        reportCtx = generateReportContext(ackNonMovementReportInterval[1]);
+        queclinkDeviceMotionState.onParsed(reportCtx);
+        verify(trackerAgent).getOrCreateTrackerDevice(reportCtx.getImei());
+        verify(trackerDevice, times(2)).setTracking(300);
     }
 }
