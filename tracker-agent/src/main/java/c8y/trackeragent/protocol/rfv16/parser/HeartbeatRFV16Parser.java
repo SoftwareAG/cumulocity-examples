@@ -52,7 +52,7 @@ public class HeartbeatRFV16Parser extends RFV16Parser implements Parser {
         if (!isHeartbeat(reportCtx)) {
             return false;
         }        
-        TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(reportCtx.getImei());
+        TrackerDevice device = getTrackerDevice(reportCtx.getImei());
         ping(reportCtx, device);
         String status = reportCtx.getEntry(10);
         if (Strings.isNullOrEmpty(status)) {

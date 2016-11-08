@@ -46,7 +46,7 @@ public class DeviceSituationRFV16Parser extends RFV16Parser implements Parser {
             return false;
         }
         logger.info("Received response on CK command: {}", reportCtx);
-        TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(reportCtx.getImei());
+        TrackerDevice device = getTrackerDevice(reportCtx.getImei());
 
         BigDecimal batteryLevel = getBatteryPercentageLevel(reportCtx);
         if (batteryLevel != null) {

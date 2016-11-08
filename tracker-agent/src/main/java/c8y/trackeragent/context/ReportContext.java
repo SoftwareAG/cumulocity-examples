@@ -10,11 +10,11 @@ import org.slf4j.LoggerFactory;
 import c8y.trackeragent.server.ConnectionDetails;
 
 public class ReportContext extends ConnectionContext {
-    
+
     private static Logger logger = LoggerFactory.getLogger(ReportContext.class);
-    
+
     private final String[] report;
-    
+
     public ReportContext(ConnectionDetails connectionDetails, String[] report) {
         super(connectionDetails);
         this.report = report;
@@ -23,7 +23,7 @@ public class ReportContext extends ConnectionContext {
     public String[] getReport() {
         return report;
     }
-    
+
     public String getEntry(int index) {
         if (index < report.length) {
             return report[index];
@@ -32,25 +32,25 @@ public class ReportContext extends ConnectionContext {
             return null;
         }
     }
-    
+
     public BigDecimal getEntryAsNumber(int index) {
         String entry = getEntry(index);
-        if (StringUtils.isBlank(entry)) { 
-            return null; 
+        if (StringUtils.isBlank(entry)) {
+            return null;
         }
         try {
             return new BigDecimal(entry.trim());
         } catch (Exception e) {
             logger.info("Cannot parse to BigDecimal value: " + entry);
         }
-        return null;   
+        return null;
     }
-    
+
     public Integer getEntryAsInt(int index) {
         String entry = getEntry(index);
         return StringUtils.isBlank(entry) ? null : Integer.parseInt(entry.trim());
     }
-    
+
     public Double getEntryAsDouble(int index) {
         String entry = getEntry(index);
         if (StringUtils.isEmpty(entry)) {
@@ -63,15 +63,18 @@ public class ReportContext extends ConnectionContext {
         }
         return null;
     }
-    
+
     public int getNumberOfEntries() {
         return report.length;
+    }
+
+    public String getReportMessage() {
+        return StringUtils.join(report, getTrackingProtocol().getFieldSeparator());
     }
 
     @Override
     public String toString() {
         return Arrays.toString(report);
     }
-
 
 }
