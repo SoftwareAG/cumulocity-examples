@@ -17,6 +17,9 @@ import c8y.Position;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.device.TrackerDevice;
+import c8y.trackeragent.utils.LocationEventBuilder;
+
+import static c8y.trackeragent.utils.LocationEventBuilder.aLocationEvent;
 
 /**
  * Example crash report of Queclink device
@@ -53,42 +56,29 @@ public class QueclinkCrashReport extends QueclinkParser {
         
         int gpsReportStart = 5;
         int gpsReportEnd = 11;
-        // create location update event
+        
         Position pos = new Position();
         DateTime dateTime = getQueclinkDevice().getReportDateTime(reportCtx.getReport());
-        //DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyyMMddHHmmss");
-        //DateTime dateTime = formatter.parseDateTime(reportCtx.getEntry(reportCtx.getNumberOfEntries() - 2));
-
+        
         if (reportCtx.getEntry(gpsReportStart + 3).length() > 0 
                 && reportCtx.getEntry(gpsReportStart + 4).length() > 0
                 && reportCtx.getEntry(gpsReportStart + 5).length() > 0) {
+            
             pos.setAlt(new BigDecimal(reportCtx.getEntry(gpsReportStart + 3)));
             pos.setLng(new BigDecimal(reportCtx.getEntry(gpsReportStart + 4)));
             pos.setLat(new BigDecimal(reportCtx.getEntry(gpsReportStart + 5)));
 
-            EventRepresentation locationEvent = buildLocationEvent(device, pos, dateTime);
+            LocationEventBuilder locationEventBuilder = aLocationEvent().withPosition(pos).withSourceId(device.getGId()).withDateTime(dateTime);
+            
+            EventRepresentation locationEvent = locationEventBuilder.build();
+            locationEvent.setText("Crash detected");
+            
             device.setPosition(locationEvent);
             device.crashDetectedEvent(pos, dateTime);
+            
         } else {
             device.crashDetectedEvent(dateTime);
         }
         return true;
-    }
-    
-    public EventRepresentation buildLocationEvent(TrackerDevice device, Position position, DateTime dateTime) {
-        EventRepresentation locationUpdate = new EventRepresentation();
-        locationUpdate.setType(TrackerDevice.LU_EVENT_TYPE);
-        locationUpdate.setText("Crash detected");
-        locationUpdate.setSource(asSource(device.getGId()));
-        locationUpdate.setDateTime(dateTime);
-        locationUpdate.set(position);
-
-        return locationUpdate;
-    }
-    
-    public ManagedObjectRepresentation asSource(GId gId) {
-        ManagedObjectRepresentation source = new ManagedObjectRepresentation();
-        source.setId(gId);
-        return source;
     }
 }
