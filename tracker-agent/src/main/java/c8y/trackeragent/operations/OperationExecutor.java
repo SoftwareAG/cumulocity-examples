@@ -35,14 +35,16 @@ public class OperationExecutor {
     private final LoggingService loggingService;
     private final IdentityRepository identityRepository;
     private final ConnectionsContainer connectionsContainer;
+    private final OperationSmsDelivery operationSmsDelivery;
 
     @Autowired
     public OperationExecutor(DeviceControlApi deviceControlApi, LoggingService loggingService, IdentityRepository identityRepository,
-            ConnectionsContainer connectionsContainer) {
+            ConnectionsContainer connectionsContainer, OperationSmsDelivery operationSmsDelivery) {
         this.deviceControlApi = deviceControlApi;
         this.loggingService = loggingService;
         this.identityRepository = identityRepository;
         this.connectionsContainer = connectionsContainer;
+        this.operationSmsDelivery = operationSmsDelivery;
     }
 
     public void execute(OperationRepresentation operation, TrackerDevice device) {
@@ -53,13 +55,23 @@ public class OperationExecutor {
             handleLogfileRequestOperation(operation, device, logfileRequest);
             return;
         }
+        boolean isSmsMode = operationSmsDelivery.isSmsMode(operation, device);
         ActiveConnection connection = connectionsContainer.get(device.getImei());
-        if (connection == null) {
-            markOperationFailed(operation.getId(), "Tracker device is currently not connected, cannot send operation.");
-            return;
+        
+        OperationRepresentation result;
+        
+        if (isSmsMode) {
+            result = executeWithSMS(operation, connection, device);
+        } else {
+            if (connection == null) {
+                markOperationFailed(operation.getId(), "Tracker device is currently not connected, cannot send operation.");
+                return;
+            }
+            // Device is currently connected, execute on device
+            result = execute(operation, connection);
         }
-        // Device is currently connected, execute on device
-        OperationRepresentation result = execute(operation, connection);
+        
+
         if (OperationStatus.FAILED.toString().equals(result.getStatus())) {
             connectionsContainer.remove(device.getImei());
         }
@@ -86,6 +98,23 @@ public class OperationExecutor {
         return markOperationSuccess(operation.getId());
     }
     
+    private OperationRepresentation executeWithSMS(OperationRepresentation operation, ActiveConnection connection, TrackerDevice device) {
+        
+        if (connection == null) {
+          //if connection null, need to know the tracking protocol
+          // fill connection information
+        }
+        
+        OperationContext operationContext = new OperationContext(connection.getConnectionDetails(), operation);
+        markOperationExecuting(operation.getId());
+        try {
+            String translation = connection.getConnectedTracker().translateOperation(operationContext);
+            operationSmsDelivery.deliverSms(translation, operation.getDeviceId());
+        } catch (Exception ex) {
+            return markOperationFailed(operation.getId(), ex.getMessage());
+        }
+        return markOperationSuccess(operation.getId());
+    }
 
     public void markOldExecutingOperationsFailed() throws SDKException {
         logger.debug("Cancel hanging operations (mark failed)");

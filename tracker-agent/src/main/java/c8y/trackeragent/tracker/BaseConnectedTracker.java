@@ -190,7 +190,13 @@ public abstract class BaseConnectedTracker<F extends Fragment> implements Connec
             operationCtx.writeOut(translation);
         }
     }
-
+    
+    @Override
+    public String translateOperation(OperationContext operationCtx) throws IOException {
+        String translation = translate(operationCtx);
+        return translation;
+    }
+    
     private String translate(OperationContext operation) {
         for (Object fragment : fragments) {
             if (fragment instanceof Translator) {
