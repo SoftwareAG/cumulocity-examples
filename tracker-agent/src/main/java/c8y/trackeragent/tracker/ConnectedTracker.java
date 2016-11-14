@@ -11,5 +11,7 @@ public interface ConnectedTracker {
     void executeReports(ConnectionDetails connectionDetails, byte[] reports);
     
     TrackingProtocol getTrackingProtocol();
+
+    String translateOperation(OperationContext operationCtx) throws Exception;
     
 }

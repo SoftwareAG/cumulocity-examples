@@ -169,6 +169,13 @@ public abstract class TrackerServerTestSupport {
         public TrackingProtocol getTrackingProtocol() {
             return TrackingProtocol.COBAN;
         }
+
+        @Override
+        public String translateOperation(OperationContext operationCtx) throws Exception {
+            // TODO Auto-generated method stub
+            return null;
+        }
+        
     }
 
     
