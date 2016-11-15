@@ -133,6 +133,10 @@ public class OperationExecutor {
         return deviceControlApi.getOperationsByFilter(filter).get().allPages();
     }
     
+    public void getTenantOption() {
+        
+    }
+    
     private OperationRepresentation markOperationFailed(GId operationId, String failureReason) {
         logger.warn("[OperationId : {}] " + failureReason, operationId);
         return deviceControlApi.update(asFailedOperation(operationId, failureReason));
