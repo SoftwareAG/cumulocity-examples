@@ -17,6 +17,9 @@ import com.cumulocity.sms.gateway.model.outgoing.SendMessageRequest;
 import c8y.CommunicationMode;
 import c8y.Mobile;
 import c8y.trackeragent.device.TrackerDevice;
+import c8y.trackeragent.protocol.TrackingProtocol;
+import c8y.trackeragent.tracker.BaseTracker;
+import c8y.trackeragent.tracker.ConnectedTracker;
 
 import static com.cumulocity.sms.gateway.model.Address.phoneNumber;
 
@@ -25,11 +28,13 @@ public class OperationSmsDelivery {
 
     private final InventoryApi inventoryApi;
     private final OutgoingMessagingClient outgoingMessagingClient;
-
+    private final BaseTracker baseTracker;
+    
     @Autowired
-    public OperationSmsDelivery (InventoryApi inventoryApi, OutgoingMessagingClient outgoingMessagingClient) {
+    public OperationSmsDelivery (InventoryApi inventoryApi, OutgoingMessagingClient outgoingMessagingClient, BaseTracker baseTracker) {
         this.inventoryApi = inventoryApi;
         this.outgoingMessagingClient = outgoingMessagingClient;
+        this.baseTracker = baseTracker;
     }
     
     /**
@@ -58,26 +63,39 @@ public class OperationSmsDelivery {
         return false;
     }
 
-    public String getProvider(String tenant) {
-      //todo get provider from file
-        return "telia";
+    public String getProvider(GId deviceId) {
+        
+        ManagedObjectRepresentation deviceMo = inventoryApi.get(deviceId);
+        CommunicationMode communicationMode = deviceMo.get(CommunicationMode.class);
+        return communicationMode.getProvider();
+        
     }
     
+    public ConnectedTracker getTrackerForTrackingProtocol (TrackingProtocol trackingProtocol) {
+        return baseTracker.getTrackerForTrackingProtocol(trackingProtocol);
+    }
+
     public void deliverSms (String translation, GId deviceId) throws IllegalArgumentException {
 
         ManagedObjectRepresentation deviceMo = inventoryApi.get(deviceId);
         Mobile mobile = deviceMo.get(Mobile.class);
         String receiver = mobile.getMsisdn();
+        String provider = getProvider(deviceId);
+        
         if (receiver == null || receiver.length() == 0) {
             throw new IllegalArgumentException("MSISDN of target device cannot be null");
         }
+        if (provider == null) {
+            throw new IllegalArgumentException("Sms gateway provider of target device cannot be null");
+        }
+        
         Address address = phoneNumber(receiver);
-        String sender = "";
+
         SendMessageRequest request = SendMessageRequest.builder().withReceiver(address).withSender(address).withMessage(translation).build();
 
         MultiValueMap<String, String> additionalHeaders = new LinkedMultiValueMap<String, String>();
         
-        additionalHeaders.add("provider", getProvider(""));
+        additionalHeaders.add("provider", provider.toLowerCase());
         outgoingMessagingClient.send(address, additionalHeaders, new OutgoingMessageRequest(request));
     }
 }

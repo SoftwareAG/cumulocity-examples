@@ -34,7 +34,7 @@ public class ConnectionContext {
         return connectionDetails.getImei();
     }
 
-    protected TrackingProtocol getTrackingProtocol() {
+    public TrackingProtocol getTrackingProtocol() {
         return connectionDetails.getTrackingProtocol();
     }
 
