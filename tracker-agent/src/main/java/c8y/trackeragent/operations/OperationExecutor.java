@@ -23,8 +23,11 @@ import com.cumulocity.sdk.client.devicecontrol.OperationFilter;
 import c8y.LogfileRequest;
 import c8y.trackeragent.context.OperationContext;
 import c8y.trackeragent.device.TrackerDevice;
+import c8y.trackeragent.protocol.TrackingProtocol;
 import c8y.trackeragent.server.ActiveConnection;
+import c8y.trackeragent.server.ConnectionDetails;
 import c8y.trackeragent.server.ConnectionsContainer;
+import c8y.trackeragent.tracker.ConnectedTracker;
 
 @Component
 public class OperationExecutor {
@@ -100,15 +103,25 @@ public class OperationExecutor {
     
     private OperationRepresentation executeWithSMS(OperationRepresentation operation, ActiveConnection connection, TrackerDevice device) {
         
+        OperationContext operationContext;
+        ConnectedTracker baseTracker;
         if (connection == null) {
-          //if connection null, need to know the tracking protocol
-          // fill connection information
+            // if connection is null, set the tracking protocol            
+            final TrackingProtocol trackingProtocol = device.getTrackingProtocolInfo();
+            baseTracker = operationSmsDelivery.getTrackerForTrackingProtocol(trackingProtocol);
+            
+            ConnectionDetails connectionDetails = new ConnectionDetails(trackingProtocol, null, null);
+            connectionDetails.setImei(device.getImei());
+            operationContext = new OperationContext(connectionDetails, operation);
+            
+        } else {
+            baseTracker = connection.getConnectedTracker();
+            operationContext = new OperationContext(connection.getConnectionDetails(), operation);
         }
         
-        OperationContext operationContext = new OperationContext(connection.getConnectionDetails(), operation);
         markOperationExecuting(operation.getId());
         try {
-            String translation = connection.getConnectedTracker().translateOperation(operationContext);
+            String translation = baseTracker.translateOperation(operationContext);
             operationSmsDelivery.deliverSms(translation, operation.getDeviceId());
         } catch (Exception ex) {
             return markOperationFailed(operation.getId(), ex.getMessage());

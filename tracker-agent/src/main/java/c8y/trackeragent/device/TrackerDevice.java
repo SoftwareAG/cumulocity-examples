@@ -73,6 +73,7 @@ import c8y.SupportedOperations;
 import c8y.Tracking;
 import c8y.trackeragent.UpdateIntervalProvider;
 import c8y.trackeragent.configuration.TrackerConfiguration;
+import c8y.trackeragent.protocol.TrackingProtocol;
 import c8y.trackeragent.protocol.coban.device.CobanDevice;
 import c8y.trackeragent.protocol.coban.device.CobanDeviceFactory;
 
@@ -160,6 +161,8 @@ public class TrackerDevice {
     private String self;
 
     private UpdateIntervalProvider updateIntervalProvider;
+    
+    private TrackingProtocol trackingProtocol;
 
     public TrackerDevice(
             // @formatter:off
@@ -732,6 +735,14 @@ public class TrackerDevice {
 
     public void setUpdateIntervalProvider(UpdateIntervalProvider updateIntervalProvider) {
         this.updateIntervalProvider = updateIntervalProvider;
+    }
+    
+    public TrackingProtocol getTrackingProtocolInfo () {
+        return trackingProtocol;
+    }
+    
+    public void setTrackingProtocolInfo  (TrackingProtocol trackingProtocol) {
+        this.trackingProtocol = trackingProtocol;
     }
 
 }

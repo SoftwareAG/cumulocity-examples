@@ -68,12 +68,6 @@ public class ConnectedTrackerTest {
                     public TrackingProtocol getTrackingProtocol() {
                         return TestConnectionDetails.DEFAULT_PROTOCOL;
                     }
-                    
-                    @Override
-                    public String translateOperation(OperationContext operationCtx) {
-                        // TODO Auto-generated method stub
-                        return null;
-                    }
             
         };
         // @formatter:on
