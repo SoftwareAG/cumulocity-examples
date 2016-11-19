@@ -82,7 +82,8 @@ public class GV500LocationReportTest {
         verify(trackerAgent).getOrCreateTrackerDevice(IMEI);
 
         verify(device).setPosition(POS);
-        verify(device).setMobile(generateMobileInfo(MOBILEINFOSTR));
+        Mobile mobile = generateMobileInfo(MOBILEINFOSTR);
+        verify(device).setMobileInfo(mobile.getMcc(), mobile.getMnc(), mobile.getLac(), mobile.getCellId());
     }
 
     @Test
@@ -95,7 +96,8 @@ public class GV500LocationReportTest {
         verify(trackerAgent).getOrCreateTrackerDevice(IMEI2);
 
         verify(device, never()).setPosition(POS);
-        verify(device).setMobile(generateMobileInfo(MOBILEINFOSTR));
+        Mobile mobile = generateMobileInfo(MOBILEINFOSTR);
+        verify(device).setMobileInfo(mobile.getMcc(), mobile.getMnc(), mobile.getLac(), mobile.getCellId());
     }
     
     private Mobile generateMobileInfo(String mobileInfo) {

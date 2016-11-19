@@ -2,8 +2,6 @@ package c8y.trackeragent.operations;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
@@ -16,8 +14,12 @@ import com.cumulocity.sms.gateway.model.outgoing.SendMessageRequest;
 
 import c8y.CommunicationMode;
 import c8y.Mobile;
+import c8y.trackeragent.configuration.TrackerConfiguration;
 import c8y.trackeragent.device.TrackerDevice;
+import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.protocol.TrackingProtocol;
+import c8y.trackeragent.sms.OptionsAuthorizationSupplier;
+import c8y.trackeragent.sms.SmsConfiguration;
 import c8y.trackeragent.tracker.BaseTracker;
 import c8y.trackeragent.tracker.ConnectedTracker;
 
@@ -29,12 +31,23 @@ public class OperationSmsDelivery {
     private final InventoryApi inventoryApi;
     private final OutgoingMessagingClient outgoingMessagingClient;
     private final BaseTracker baseTracker;
-    
+    private final TrackerConfiguration config;
+    private final DeviceCredentialsRepository deviceCredentials;
+    private final OptionsAuthorizationSupplier optionsAuthSupplier;
     @Autowired
-    public OperationSmsDelivery (InventoryApi inventoryApi, OutgoingMessagingClient outgoingMessagingClient, BaseTracker baseTracker) {
+    public OperationSmsDelivery (InventoryApi inventoryApi, 
+            OutgoingMessagingClient outgoingMessagingClient, 
+            BaseTracker baseTracker, 
+            SmsConfiguration smsConfiguration,
+            TrackerConfiguration config,
+            DeviceCredentialsRepository deviceCredentials,
+            OptionsAuthorizationSupplier optionsAuthSupplier) {
         this.inventoryApi = inventoryApi;
         this.outgoingMessagingClient = outgoingMessagingClient;
         this.baseTracker = baseTracker;
+        this.config = config;
+        this.deviceCredentials = deviceCredentials;
+        this.optionsAuthSupplier = optionsAuthSupplier;
     }
     
     /**
@@ -62,40 +75,32 @@ public class OperationSmsDelivery {
         
         return false;
     }
-
-    public String getProvider(GId deviceId) {
-        
-        ManagedObjectRepresentation deviceMo = inventoryApi.get(deviceId);
-        CommunicationMode communicationMode = deviceMo.get(CommunicationMode.class);
-        return communicationMode.getProvider();
-        
-    }
     
     public ConnectedTracker getTrackerForTrackingProtocol (TrackingProtocol trackingProtocol) {
         return baseTracker.getTrackerForTrackingProtocol(trackingProtocol);
     }
 
-    public void deliverSms (String translation, GId deviceId) throws IllegalArgumentException {
+    public void deliverSms (String translation, GId deviceId, String imei) throws IllegalArgumentException {
 
         ManagedObjectRepresentation deviceMo = inventoryApi.get(deviceId);
         Mobile mobile = deviceMo.get(Mobile.class);
         String receiver = mobile.getMsisdn();
-        String provider = getProvider(deviceId);
         
         if (receiver == null || receiver.length() == 0) {
             throw new IllegalArgumentException("MSISDN of target device cannot be null");
         }
-        if (provider == null) {
-            throw new IllegalArgumentException("Sms gateway provider of target device cannot be null");
-        }
+
         
         Address address = phoneNumber(receiver);
-
         SendMessageRequest request = SendMessageRequest.builder().withReceiver(address).withSender(address).withMessage(translation).build();
-
-        MultiValueMap<String, String> additionalHeaders = new LinkedMultiValueMap<String, String>();
         
-        additionalHeaders.add("provider", provider.toLowerCase());
-        outgoingMessagingClient.send(address, additionalHeaders, new OutgoingMessageRequest(request));
+        setOptionsReaderAuthForTenant(imei);
+        outgoingMessagingClient.send(address, new OutgoingMessageRequest(request));
+
+    }
+
+    private void setOptionsReaderAuthForTenant(String imei) {
+        String tenant = deviceCredentials.getDeviceCredentials(imei).getTenant();
+        optionsAuthSupplier.optionsAuthForTenant(config, tenant);   
     }
 }

@@ -122,7 +122,7 @@ public class OperationExecutor {
         markOperationExecuting(operation.getId());
         try {
             String translation = baseTracker.translateOperation(operationContext);
-            operationSmsDelivery.deliverSms(translation, operation.getDeviceId());
+            operationSmsDelivery.deliverSms(translation, operation.getDeviceId(), device.getImei());
         } catch (Exception ex) {
             return markOperationFailed(operation.getId(), ex.getMessage());
         }
@@ -144,10 +144,6 @@ public class OperationExecutor {
         GId agentId = identityRepository.find(TrackerDevice.getAgentExternalId());
         OperationFilter filter = new OperationFilter().byStatus(status).byAgent(agentId.getValue());
         return deviceControlApi.getOperationsByFilter(filter).get().allPages();
-    }
-    
-    public void getTenantOption() {
-        
     }
     
     private OperationRepresentation markOperationFailed(GId operationId, String failureReason) {

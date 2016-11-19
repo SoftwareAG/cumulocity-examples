@@ -16,6 +16,8 @@ public class TrackerConfiguration {
     private String bootstrapUser;
     private String bootstrapPassword;
     private String bootstrapTenant;
+    private String optionsReaderUser;
+    private String optionsReaderPassword;
     private int clientTimeout;
     private List<Long> bootstrapPollIntervals;
     private Integer cobanLocationReportTimeInterval;
@@ -82,6 +84,24 @@ public class TrackerConfiguration {
         return bootstrapTenant;
     }
     
+    public String getOptionsReaderUser() {
+        return optionsReaderUser;
+    }
+
+    public TrackerConfiguration setOptionsReaderUser(String optionsReaderUser) {
+        this.optionsReaderUser = optionsReaderUser;
+        return this;
+    }
+
+    public String getOptionsReaderPassword() {
+        return optionsReaderPassword;
+    }
+
+    public TrackerConfiguration setOptionsReaderPassword(String optionsReaderPassword) {
+        this.optionsReaderPassword = optionsReaderPassword;
+        return this;
+    }
+
     public int getClientTimeout() {
         return clientTimeout;
     }
@@ -174,6 +194,8 @@ public class TrackerConfiguration {
         builder.append(bootstrapUser);
         builder.append(", bootstrapTenant=");
         builder.append(bootstrapTenant);
+        builder.append(", optionsReaderUser=");
+        builder.append(optionsReaderUser);
         builder.append(", clientTimeout=");
         builder.append(clientTimeout);
         builder.append(", bootstrapPollIntervals=");

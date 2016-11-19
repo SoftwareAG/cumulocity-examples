@@ -191,14 +191,15 @@ public class QueclinkLocationReport extends QueclinkParser {
 	}
 	
 	private void createMobileInfo(TrackerDevice device, ReportContext reportCtx, int mobileInfoIndex) {
-	    Mobile mobile = new Mobile();
-	    mobile.setMcc(reportCtx.getEntry(mobileInfoIndex));
-	    mobile.setMnc(reportCtx.getEntry(mobileInfoIndex + 1));
-	    int lacDecimal = Integer.parseInt(reportCtx.getEntry(mobileInfoIndex + 2), 16);
-	    mobile.setLac(String.valueOf(lacDecimal));
-	    int cellDecimal = Integer.parseInt(reportCtx.getEntry(mobileInfoIndex + 3), 16);
-        mobile.setCellId(String.valueOf(cellDecimal));
 	    
-        device.setMobile(mobile);
+	    int lacDecimal = Integer.parseInt(reportCtx.getEntry(mobileInfoIndex + 2), 16);
+	    int cellDecimal = Integer.parseInt(reportCtx.getEntry(mobileInfoIndex + 3), 16);
+            
+        String mcc = reportCtx.getEntry(mobileInfoIndex);
+        String mnc = reportCtx.getEntry(mobileInfoIndex + 1);
+        String lac = String.valueOf(lacDecimal);
+        String cellId = String.valueOf(cellDecimal);
+	    
+        device.setMobileInfo(mcc, mnc, lac, cellId);
 	}
 }
