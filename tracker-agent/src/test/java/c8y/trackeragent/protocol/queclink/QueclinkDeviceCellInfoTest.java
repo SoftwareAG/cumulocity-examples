@@ -119,7 +119,7 @@ public class QueclinkDeviceCellInfoTest {
 
             // generate mobile structure for testing
             Mobile mobile = generateMobileInfo(testMobileInfoStr[i]);
-            verify(device).setMobile(mobile);
+            verify(device).setMobileInfo(mobile.getMcc(), mobile.getMnc(), mobile.getLac(), mobile.getCellId());
         }
     }
     

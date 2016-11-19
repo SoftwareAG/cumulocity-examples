@@ -95,10 +95,12 @@ public class GL200LocationReportTest {
 		verify(trackerAgent).getOrCreateTrackerDevice(IMEI);
 		
 		verify(device).setPosition(POS1);
-		verify(device).setMobile(generateMobileInfo(MOBILINFOSTR1));
+		Mobile mobile = generateMobileInfo(MOBILINFOSTR1);
+		verify(device).setMobileInfo(mobile.getMcc(), mobile.getMnc(), mobile.getLac(), mobile.getCellId());
 		
-		verify(device).setPosition(POS2);	
-		verify(device).setMobile(generateMobileInfo(MOBILINFOSTR2));
+		verify(device).setPosition(POS2);
+		mobile = generateMobileInfo(MOBILINFOSTR2);
+		verify(device).setMobileInfo(mobile.getMcc(), mobile.getMnc(), mobile.getLac(), mobile.getCellId());
 		
 		verify(measurementService).createPercentageBatteryLevelMeasurement(new BigDecimal(10), device, dateTime);
 	}
@@ -113,7 +115,8 @@ public class GL200LocationReportTest {
 	    verify(trackerAgent).getOrCreateTrackerDevice(IMEI);
 	    
 	    verify(device).setPosition(POS1);
-	    verify(device).setMobile(generateMobileInfo(MOBILINFOSTR1));
+	    Mobile mobile = generateMobileInfo(MOBILINFOSTR1);
+	    verify(device).setMobileInfo(mobile.getMcc(), mobile.getMnc(), mobile.getLac(), mobile.getCellId());
 	    
 	    verify(measurementService).createPercentageBatteryLevelMeasurement(new BigDecimal("2000.0"), device, dateTime);
 	}	
