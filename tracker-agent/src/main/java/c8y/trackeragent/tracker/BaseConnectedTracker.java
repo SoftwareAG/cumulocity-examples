@@ -72,6 +72,7 @@ public abstract class BaseConnectedTracker<F extends Fragment> implements Connec
         this.bootstrapProcessor = bootstrapProcessor;
         this.credentialsRepository = credentialsRepository;
         this.contextService = contextService;
+        
     }
 
     public BaseConnectedTracker(ReportSplitter reportSplitter) {
@@ -143,7 +144,7 @@ public abstract class BaseConnectedTracker<F extends Fragment> implements Connec
         String tenant = getTenant(imei);
         checkAgentCredentials(tenant);
         try {
-            contextService.enterContext(tenant, imei);
+            contextService.enterContext(tenant, imei, reportContext.getTrackingProtocol());
             reportContext.setImei(imei);
             parser.onParsed(reportContext);
         } catch (Exception e) {
@@ -183,14 +184,19 @@ public abstract class BaseConnectedTracker<F extends Fragment> implements Connec
 
     @Override
     public void executeOperation(OperationContext operationCtx) throws IOException {
+        String translation = translateOperation(operationCtx);
+        operationCtx.writeOut(translation);
+    }
+    
+    @Override
+    public String translateOperation(OperationContext operationCtx) throws IOException {
         String translation = translate(operationCtx);
         if (translation == null) {
             throw new RuntimeException("Command currently not supported!");
-        } else {
-            operationCtx.writeOut(translation);
         }
+        return translation;
     }
-
+    
     private String translate(OperationContext operation) {
         for (Object fragment : fragments) {
             if (fragment instanceof Translator) {

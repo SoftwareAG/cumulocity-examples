@@ -119,14 +119,14 @@ public class QueclinkDeviceCellInfo extends QueclinkParser {
                 report[mainCellStartIndex+4]);
         
         // record main cell info to mobile
-        Mobile mobile = new Mobile();
-        mobile.setMcc(report[mainCellStartIndex]);
-        mobile.setMnc(report[mainCellStartIndex + 1]);
         int lacDecimal = Integer.parseInt(report[mainCellStartIndex + 2], 16);
-        mobile.setLac(String.valueOf(lacDecimal));
         int cellDecimal = Integer.parseInt(report[mainCellStartIndex + 3], 16);
-        mobile.setCellId(String.valueOf(cellDecimal));
-        trackerDevice.setMobile(mobile);
+        
+        String mcc = report[mainCellStartIndex];
+        String mnc = report[mainCellStartIndex + 1];
+        String lac = String.valueOf(lacDecimal);
+        String cellId = String.valueOf(cellDecimal);
+        trackerDevice.setMobileInfo(mcc, mnc, lac, cellId);
         
         // record main cell's signal strength as measurement
         // convert signal strength to percentage

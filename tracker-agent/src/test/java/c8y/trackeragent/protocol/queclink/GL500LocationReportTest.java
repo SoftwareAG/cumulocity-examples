@@ -76,7 +76,8 @@ public class GL500LocationReportTest {
         verify(trackerAgent).getOrCreateTrackerDevice(IMEI);
 
         verify(device).setPosition(POS);
-        verify(device).setMobile(generateMobileInfo(MOBILEINFOSTR));
+        Mobile mobile = generateMobileInfo(MOBILEINFOSTR);
+        verify(device).setMobileInfo(mobile.getMcc(), mobile.getMnc(), mobile.getLac(), mobile.getCellId());
     }
     
     private Mobile generateMobileInfo(String mobileInfo) {

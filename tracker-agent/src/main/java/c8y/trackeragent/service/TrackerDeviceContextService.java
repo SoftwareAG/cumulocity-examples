@@ -12,6 +12,7 @@ import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.device.TrackerDeviceProvider;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
+import c8y.trackeragent.protocol.TrackingProtocol;
 
 @Component
 public class TrackerDeviceContextService {
@@ -28,17 +29,27 @@ public class TrackerDeviceContextService {
 		this.credentialsRepository = credentialsRepository;
 		this.trackerDeviceFactory = trackerDeviceFactory;
 	}
-	
+    
 	public void enterContext(String tenant) {
 		enterContext(credentialsRepository.getAgentCredentials(tenant));
 	}
-	
-	public void enterContext(String tenant, String imei) {
+
+    public void enterContext(String tenant, String imei) {
 		DeviceCredentials cred = credentialsRepository.getAgentCredentials(tenant);
 		TrackerDevice device = trackerDeviceFactory.getOrCreate(tenant, imei);
 		DeviceCredentials credWithDevice =  DeviceCredentials.forAgent(cred.getTenant(), cred.getUsername(), cred.getPassword(), device.getGId());
 		enterContext(credWithDevice);
 	}
+    
+    public void enterContext(String tenant, String imei, TrackingProtocol trackingProtocol) {
+        DeviceCredentials cred = credentialsRepository.getAgentCredentials(tenant);
+        TrackerDevice device = trackerDeviceFactory.getOrCreate(tenant, imei);
+        if (trackingProtocol != null) {
+            device.setTrackingProtocolInfo(trackingProtocol);
+        }
+        DeviceCredentials credWithDevice =  DeviceCredentials.forAgent(cred.getTenant(), cred.getUsername(), cred.getPassword(), device.getGId());
+        enterContext(credWithDevice);
+    }
 	
 	private void enterContext(DeviceCredentials credentials) {
 		contextService.enterContext(new DeviceContext(credentials));
