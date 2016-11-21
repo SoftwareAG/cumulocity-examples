@@ -11,6 +11,8 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import org.joda.time.DateTime;
+
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.model.measurement.MeasurementValue;
 import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
@@ -27,6 +29,7 @@ public class LocationEventBuilder {
 
     private Collection<AlarmRepresentation> alarms;
     private Date time = new Date();
+    private DateTime dateTime;
     private GId sourceId;
     private SpeedMeasurement speedMeasurement;
     private Position position = new Position();
@@ -43,6 +46,13 @@ public class LocationEventBuilder {
     public LocationEventBuilder withTime(Date time) {
         if (time != null) {
             this.time = time;
+        }
+        return this;
+    }
+    
+    public LocationEventBuilder withDateTime(DateTime dateTime) {
+        if (dateTime != null) {
+            this.dateTime = dateTime;
         }
         return this;
     }
@@ -90,7 +100,11 @@ public class LocationEventBuilder {
         result.setType(TrackerDevice.LU_EVENT_TYPE);
         result.setText(aText());
         result.setSource(asSource(sourceId));
-        result.setTime(time);
+        if (dateTime != null) {
+            result.setDateTime(dateTime);
+        } else {
+            result.setTime(time);
+        }
         result.set(position);
         if (speedMeasurement != null) {
             result.set(speedMeasurement);
