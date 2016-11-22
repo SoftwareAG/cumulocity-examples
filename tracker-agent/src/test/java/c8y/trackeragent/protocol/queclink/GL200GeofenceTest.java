@@ -22,8 +22,10 @@ package c8y.trackeragent.protocol.queclink;
 
 import static c8y.trackeragent.protocol.TrackingProtocol.QUECLINK;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -34,6 +36,8 @@ import java.math.BigDecimal;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.cumulocity.model.idtype.GId;
+import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 
@@ -43,6 +47,7 @@ import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.context.OperationContext;
 import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.device.TrackerDevice;
+import c8y.trackeragent.protocol.queclink.device.QueclinkDevice;
 import c8y.trackeragent.protocol.queclink.parser.QueclinkGeofence;
 import c8y.trackeragent.server.TestConnectionDetails;
 import c8y.trackeragent.service.MeasurementService;
@@ -61,11 +66,13 @@ public class GL200GeofenceTest {
     private TrackerAgent trackerAgent = mock(TrackerAgent.class);
     private TrackerDevice device = mock(TrackerDevice.class);
     private MeasurementService measurementService = mock(MeasurementService.class);
-
+    private QueclinkDevice queclinkDevice = mock(QueclinkDevice.class);
+    
     private OperationContext operationCtx;
     private Geofence fence;
     private TestConnectionDetails connectionDetails = new TestConnectionDetails();
-
+    private ManagedObjectRepresentation managedObject;
+    
     @Before
     public void setup() throws SDKException {
         OperationRepresentation operation = new OperationRepresentation();
@@ -82,15 +89,25 @@ public class GL200GeofenceTest {
 
         when(trackerAgent.getOrCreateTrackerDevice(anyString())).thenReturn(device);
     }
+    
+    public void setupTranslate() {
+        gl200gf = spy(new QueclinkGeofence(trackerAgent, measurementService));
+        managedObject = new ManagedObjectRepresentation();
+        managedObject.setType("queclink_gl200");
+        when(gl200gf.getQueclinkDevice()).thenReturn(queclinkDevice);
+        when(queclinkDevice.getManagedObjectFromGId(any(GId.class))).thenReturn(managedObject);
+    }
 
     @Test
     public void setGeofence() {
+        setupTranslate();
         String asciiOperation = gl200gf.translate(operationCtx);
         assertEquals(SETFENCESTR, asciiOperation);
     }
 
     @Test
     public void acknowledgeGeofence() throws SDKException {
+        setupTranslate();
         gl200gf.translate(operationCtx);
         connectionDetails.setImei(gl200gf.parse(ACKFENCE));
         gl200gf.onParsed(new ReportContext(connectionDetails, ACKFENCE));
@@ -102,6 +119,7 @@ public class GL200GeofenceTest {
 
     @Test
     public void acknowledgeGeofenceWrongReply() throws SDKException {
+        setupTranslate();
         gl200gf.translate(operationCtx);
 
         String[] wrongCorrelation = ACKFENCE;
