@@ -50,4 +50,9 @@ public class GL200 extends BaseQueclinkDevice {
                 intervalInSeconds, serialNumber);
     }
 
+    @Override
+    public String getDefaultPassword() {
+        return "gl200";
+    }
+
 }

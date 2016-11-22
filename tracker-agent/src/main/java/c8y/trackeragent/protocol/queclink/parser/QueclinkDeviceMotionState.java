@@ -217,8 +217,11 @@ public class QueclinkDeviceMotionState extends QueclinkParser implements Transla
     private String setMotionTrackingOptionsOnDevice(GId deviceId, MotionTracking mTrack) {
         
         ManagedObjectRepresentation deviceMo = getQueclinkDevice().getManagedObjectFromGId(deviceId);
-        String password = (String) deviceMo.get("password");
-
+        String deviceType = deviceMo.getType();
+        String password = new String();
+        if(getQueclinkDevice().getDeviceByType(deviceType) != null) {
+            password = getQueclinkDevice().getDeviceByType(deviceType).getDefaultPassword();
+        }
         String deviceCommand = new String(); 
 
         // if active field is false.
@@ -232,7 +235,7 @@ public class QueclinkDeviceMotionState extends QueclinkParser implements Transla
         } else {
             //set the value from c8y_Tracking
             Tracking track = deviceMo.get(Tracking.class);
-            if (track.getInterval() > 0) {
+            if (track != null && track.getInterval() > 0) {
                 intervalInSeconds = track.getInterval();
             }  
         }
@@ -258,7 +261,11 @@ public class QueclinkDeviceMotionState extends QueclinkParser implements Transla
         String deviceCommand = new String();
         
         ManagedObjectRepresentation deviceMo = getQueclinkDevice().getManagedObjectFromGId(deviceId);
-        String password = (String) deviceMo.get("password");
+        String deviceType = deviceMo.getType();
+        String password = new String();
+        if(getQueclinkDevice().getDeviceByType(deviceType) != null) {
+            password = getQueclinkDevice().getDeviceByType(deviceType).getDefaultPassword();
+        } 
         
         int intervalInSeconds = tracking.getInterval();
        
