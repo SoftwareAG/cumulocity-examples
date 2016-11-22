@@ -23,8 +23,12 @@ import com.cumulocity.sdk.client.devicecontrol.OperationFilter;
 import c8y.LogfileRequest;
 import c8y.trackeragent.context.OperationContext;
 import c8y.trackeragent.device.TrackerDevice;
+import c8y.trackeragent.protocol.TrackingProtocol;
 import c8y.trackeragent.server.ActiveConnection;
+import c8y.trackeragent.server.ConnectionDetails;
 import c8y.trackeragent.server.ConnectionsContainer;
+import c8y.trackeragent.tracker.BaseTracker;
+import c8y.trackeragent.tracker.ConnectedTracker;
 
 @Component
 public class OperationExecutor {
@@ -35,14 +39,18 @@ public class OperationExecutor {
     private final LoggingService loggingService;
     private final IdentityRepository identityRepository;
     private final ConnectionsContainer connectionsContainer;
+    private final OperationSmsDelivery operationSmsDelivery;
+    private final BaseTracker baseTracker;
 
     @Autowired
     public OperationExecutor(DeviceControlApi deviceControlApi, LoggingService loggingService, IdentityRepository identityRepository,
-            ConnectionsContainer connectionsContainer) {
+            ConnectionsContainer connectionsContainer, OperationSmsDelivery operationSmsDelivery, BaseTracker baseTracker) {
         this.deviceControlApi = deviceControlApi;
         this.loggingService = loggingService;
         this.identityRepository = identityRepository;
         this.connectionsContainer = connectionsContainer;
+        this.operationSmsDelivery = operationSmsDelivery;
+        this.baseTracker = baseTracker;
     }
 
     public void execute(OperationRepresentation operation, TrackerDevice device) {
@@ -53,14 +61,23 @@ public class OperationExecutor {
             handleLogfileRequestOperation(operation, device, logfileRequest);
             return;
         }
+        boolean isSmsMode = operationSmsDelivery.isSmsMode(operation);
         ActiveConnection connection = connectionsContainer.get(device.getImei());
-        if (connection == null) {
-            markOperationFailed(operation.getId(), "Tracker device is currently not connected, cannot send operation.");
-            return;
+        
+        OperationRepresentation result;
+        
+        if (isSmsMode) {
+            result = executeWithSMS(operation, connection, device);
+        } else {
+            if (connection == null) {
+                markOperationFailed(operation.getId(), "Tracker device is currently not connected, cannot send operation.");
+                return;
+            }
+            // Device is currently connected, execute on device
+            result = execute(operation, connection);
         }
-        // Device is currently connected, execute on device
-        OperationRepresentation result = execute(operation, connection);
-        if (OperationStatus.FAILED.toString().equals(result.getStatus())) {
+        
+        if (result != null && OperationStatus.FAILED.toString().equals(result.getStatus())) {
             connectionsContainer.remove(device.getImei());
         }
     }
@@ -86,6 +103,32 @@ public class OperationExecutor {
         return markOperationSuccess(operation.getId());
     }
     
+    private OperationRepresentation executeWithSMS(OperationRepresentation operation, ActiveConnection connection, TrackerDevice device) {
+        
+        OperationContext operationContext;
+        ConnectedTracker tracker;
+        if (connection == null) {
+            // if connection is null, set the tracking protocol            
+            final TrackingProtocol trackingProtocol = device.getTrackingProtocolInfo();
+            tracker = baseTracker.getTrackerForTrackingProtocol(trackingProtocol);
+            ConnectionDetails connectionDetails = new ConnectionDetails(trackingProtocol, null, null);
+            connectionDetails.setImei(device.getImei());
+            operationContext = new OperationContext(connectionDetails, operation);
+            
+        } else {
+            tracker = connection.getConnectedTracker();
+            operationContext = new OperationContext(connection.getConnectionDetails(), operation);
+        }
+        
+        markOperationExecuting(operation.getId());
+        try {
+            String translation = tracker.translateOperation(operationContext);
+            operationSmsDelivery.deliverSms(translation, operation.getDeviceId(), device.getImei());
+        } catch (Exception ex) {
+            return markOperationFailed(operation.getId(), ex.getMessage());
+        }
+        return markOperationSuccess(operation.getId());
+    }
 
     public void markOldExecutingOperationsFailed() throws SDKException {
         logger.debug("Cancel hanging operations (mark failed)");

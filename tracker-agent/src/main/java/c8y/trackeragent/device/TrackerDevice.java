@@ -73,6 +73,7 @@ import c8y.SupportedOperations;
 import c8y.Tracking;
 import c8y.trackeragent.UpdateIntervalProvider;
 import c8y.trackeragent.configuration.TrackerConfiguration;
+import c8y.trackeragent.protocol.TrackingProtocol;
 import c8y.trackeragent.protocol.coban.device.CobanDevice;
 import c8y.trackeragent.protocol.coban.device.CobanDeviceFactory;
 
@@ -160,6 +161,8 @@ public class TrackerDevice {
     private String self;
 
     private UpdateIntervalProvider updateIntervalProvider;
+    
+    private TrackingProtocol trackingProtocol;
 
     public TrackerDevice(
             // @formatter:off
@@ -261,7 +264,7 @@ public class TrackerDevice {
         logger.debug("Motion tracking for {} set to {}", imei, active);
 
         ManagedObjectRepresentation device = new ManagedObjectRepresentation();
-        MotionTracking motion = new MotionTracking();
+        MotionTracking motion = inventory.get(gid).get(MotionTracking.class);
         motion.setActive(active);
         device.set(motion);
         device.setId(gid);
@@ -272,7 +275,7 @@ public class TrackerDevice {
         logger.debug("Motion tracking for {} set to {}", imei, active);
 
         ManagedObjectRepresentation device = new ManagedObjectRepresentation();
-        MotionTracking motion = new MotionTracking();
+        MotionTracking motion = inventory.get(gid).get(MotionTracking.class);
         motion.setActive(active);
         motion.setInterval(interval);
         device.set(motion);
@@ -354,15 +357,20 @@ public class TrackerDevice {
 
     public void setCellId(String cellId) throws SDKException {
         ManagedObjectRepresentation device = new ManagedObjectRepresentation();
+        mobile = inventory.get(gid).get(Mobile.class);
         mobile.setCellId(cellId);
         device.set(mobile);
         device.setId(gid);
         inventory.update(device);
     }
-
-    public void setMobile(Mobile mobile) throws SDKException {
+    
+    public void setMobileInfo(String mcc, String mnc, String lac, String cellId) throws SDKException {
         ManagedObjectRepresentation device = new ManagedObjectRepresentation();
-        mobile.setImei(imei);
+        mobile = inventory.get(gid).get(Mobile.class);
+        mobile.setMcc(mcc);
+        mobile.setMnc(mnc);
+        mobile.setLac(lac);
+        mobile.setCellId(cellId);
         device.set(mobile);
         device.setId(gid);
         inventory.update(device);
@@ -511,10 +519,6 @@ public class TrackerDevice {
         device.set(new Configuration());
         device.set(new Restart());
 
-        mobile = new Mobile();
-        mobile.setImei(imei);
-        device.set(mobile);
-
         ID extId = imeiAsId(imei);
 
         device.setType(TYPE);
@@ -523,6 +527,8 @@ public class TrackerDevice {
         createOrUpdate(device, extId);
         gid = device.getId();
         self = device.getSelf();
+        
+        createOrRetrieveMobile();
     }
 
     public void registerVIN(String vin) {
@@ -629,6 +635,22 @@ public class TrackerDevice {
         }
         copyProps(returnedMo, mo);
     }
+    
+    private void createOrRetrieveMobile() {
+        ManagedObjectRepresentation mo = aDevice();
+        if (inventory.get(gid) != null) {
+            mobile = inventory.get(gid).get(Mobile.class);
+            if (mobile == null) {
+                mobile = new Mobile();
+                mobile.setImei(imei);
+            }
+        } else {
+            mobile = new Mobile();
+            mobile.setImei(imei);
+        }
+        mo.set(mobile);
+        inventory.update(mo);
+    }
 
     private ManagedObjectRepresentation assureTrackerAgentExisting() {
         ID extId = getAgentExternalId();
@@ -732,6 +754,14 @@ public class TrackerDevice {
 
     public void setUpdateIntervalProvider(UpdateIntervalProvider updateIntervalProvider) {
         this.updateIntervalProvider = updateIntervalProvider;
+    }
+    
+    public TrackingProtocol getTrackingProtocolInfo () {
+        return trackingProtocol;
+    }
+    
+    public void setTrackingProtocolInfo  (TrackingProtocol trackingProtocol) {
+        this.trackingProtocol = trackingProtocol;
     }
 
 }

@@ -32,10 +32,12 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 import com.cumulocity.agent.server.ServerBuilder;
 import com.cumulocity.agent.server.feature.ContextFeature;
 import com.cumulocity.agent.server.feature.RepositoryFeature;
+import com.cumulocity.agent.server.feature.SmsGatewayFeature;
 import com.cumulocity.agent.server.logging.LoggingService;
 import com.cumulocity.agent.server.repository.BinariesRepository;
 import com.cumulocity.agent.server.repository.DeviceControlRepository;
@@ -49,6 +51,7 @@ import c8y.trackeragent.server.Servers;
 @Configuration
 @EnableAutoConfiguration
 @ComponentScan("c8y.trackeragent")
+@Import({SmsGatewayFeature.class})
 public class Main {
     
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
