@@ -40,5 +40,10 @@ public class GL505 extends BaseQueclinkDevice {
                 password, BITMASK_MODENOMOTION, 
                 intervalInMins, serialNumber);
     }
+
+    @Override
+    public String getDefaultPassword() {
+        return "gl500";
+    }
     
 }

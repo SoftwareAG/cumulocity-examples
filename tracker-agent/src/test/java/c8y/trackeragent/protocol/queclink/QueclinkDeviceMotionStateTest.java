@@ -201,7 +201,6 @@ public class QueclinkDeviceMotionStateTest {
         
         // prepare managed object
         managedObject = new ManagedObjectRepresentation();
-        managedObject.setProperty("password", password);
         managedObject.setType("queclink_" + deviceType);
         managedObject.set(tracking);
         when(queclinkDevice.getManagedObjectFromGId(any(GId.class))).thenReturn(managedObject);
@@ -252,7 +251,6 @@ public class QueclinkDeviceMotionStateTest {
         operationCtx = new OperationContext(connectionDetails, operation);
         
         managedObject = new ManagedObjectRepresentation();
-        managedObject.setProperty("password", password);
         managedObject.setType("queclink_" + deviceType);
         managedObject.set(motionTracking);
         when(queclinkDevice.getManagedObjectFromGId(any(GId.class))).thenReturn(managedObject);

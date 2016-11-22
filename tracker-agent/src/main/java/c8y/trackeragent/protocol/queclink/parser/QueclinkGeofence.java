@@ -140,6 +140,11 @@ public class QueclinkGeofence extends QueclinkLocationReport implements Translat
     public String translate(OperationContext operationCtx) {
         OperationRepresentation operation = operationCtx.getOperation();
         Geofence geofence = operation.get(Geofence.class);
+        
+        String deviceType = getQueclinkDevice().getManagedObjectFromGId(operation.getDeviceId()).getType();
+        if(getQueclinkDevice().getDeviceByType(deviceType) != null) {
+            password = getQueclinkDevice().getDeviceByType(deviceType).getDefaultPassword();
+        }
 
         if (geofence == null) {
             return null;

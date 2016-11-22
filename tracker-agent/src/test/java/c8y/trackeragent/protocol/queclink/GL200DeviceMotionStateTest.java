@@ -102,7 +102,6 @@ public class GL200DeviceMotionStateTest {
     
         // prepare managed object
         managedObject = new ManagedObjectRepresentation();
-        managedObject.setProperty("password", "gl200");
         managedObject.setType("queclink_" + "gl200");
         when(queclinkDevice.getManagedObjectFromGId(any(GId.class))).thenReturn(managedObject);
         managedObject.set(track);

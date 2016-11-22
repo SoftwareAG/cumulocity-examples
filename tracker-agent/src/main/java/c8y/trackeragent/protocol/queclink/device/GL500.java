@@ -2,7 +2,7 @@ package c8y.trackeragent.protocol.queclink.device;
 
 public class GL500 extends BaseQueclinkDevice {
     
-    public static final String motionTemplate = "AT+GTGBC=%s,,,,,,,,,,,,,,,%d,,,,,,,%04x$";
+    public static final String motionTemplate = "AT+GTGBC=%s,,,,,,,,,,,,,,,%d,,,,,,,,%04x$";
     public static final String motionTemplateWithReportInterval = "AT+GTGBC=%s,,,,,,,,,,,,,%d,,%d,,,,,,,,%04x$";
     public static final String nonMovementIntervalTemplate = "AT+GTNMD=%s,%s,,,,%d,,,,%04x$";
     
@@ -37,5 +37,10 @@ public class GL500 extends BaseQueclinkDevice {
         return String.format(nonMovementIntervalTemplate, 
                 password, BITMASK_MODENOMOTION, 
                 intervalInMins, serialNumber);
+    }
+
+    @Override
+    public String getDefaultPassword() {
+        return "gl500";
     }
 }
