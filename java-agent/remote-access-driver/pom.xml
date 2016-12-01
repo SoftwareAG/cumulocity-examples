@@ -17,9 +17,14 @@
         	    <groupId>c8y.example</groupId>
 	            <artifactId>jv-driver</artifactId>
         	</dependency>
+			<dependency>
+			    <groupId>javax.websocket</groupId>
+			    <artifactId>javax.websocket-api</artifactId>
+			    <version>1.1</version>
+			</dependency>
 	        <dependency>
-			<groupId>com.pi4j</groupId>
-			<artifactId>pi4j-example</artifactId>
+				<groupId>com.pi4j</groupId>
+				<artifactId>pi4j-example</artifactId>
 			<version>1.0</version>
 		</dependency>
 	</dependencies>

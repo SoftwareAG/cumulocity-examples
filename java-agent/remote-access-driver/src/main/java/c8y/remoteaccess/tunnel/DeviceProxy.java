@@ -20,8 +20,6 @@ public class DeviceProxy {
     
     public static void main(String[] args) throws Exception {
 
-        //!TODO: Add realtime feature
-        // http://cumulocity.com/guides/java/developing/
         logger.info("DeviceProxy starting");
 
         String vncHost = DEFAULT_VNC_HOST;

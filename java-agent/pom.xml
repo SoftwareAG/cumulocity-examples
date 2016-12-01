@@ -31,6 +31,7 @@
         <module>packages</module>
         <module>win-driver</module>
         <module>generic-linux-driver</module>
+        <module>remote-access-driver</module>
 	</modules>
 
 	<dependencies>
