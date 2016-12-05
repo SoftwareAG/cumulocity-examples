@@ -35,8 +35,8 @@ public class ConfigUtils {
     private static final String DEFAULT_LOCAL_PORT_2 = "9091";
     private static final String BOOTSTRAP_USER_PROP = "C8Y.devicebootstrap.user";
     private static final String BOOTSTRAP_PASSWORD_PROP = "C8Y.devicebootstrap.password";
-    private static final String OPTIONSREADER_USER_PROP = "C8Y.optionsreader.user";
-    private static final String OPTIONSREADER_PASSWORD_PROP = "C8Y.optionsreader.password";
+    private static final String SMS_GATEWAY_USERNAME_PROP = "C8Y.smsgateway.user";
+    private static final String SMS_GATEWAY_PASSWORD_PROP = "C8Y.smsgateway.password";
     private static final String CLIENT_TIMEOUT_PROP = "client.timeout";
     private static final String COBAN_LOCATION_REPORT_INTERVAL_PROP = "coban.locationReport.timeInterval";
     private static final String RFV16_LOCATION_REPORT_INTERVAL_PROP = "rfv16.locationReport.timeInterval";
@@ -93,8 +93,8 @@ public class ConfigUtils {
             .setBootstrapUser(getProperty(props, BOOTSTRAP_USER_PROP))
             .setBootstrapPassword(getProperty(props, BOOTSTRAP_PASSWORD_PROP))
             .setBootstrapTenant("management")
-            .setOptionsReaderUser(getProperty(props, OPTIONSREADER_USER_PROP))
-            .setOptionsReaderPassword(getProperty(props, OPTIONSREADER_PASSWORD_PROP))
+            .setSmsGatewayUser(getProperty(props, SMS_GATEWAY_USERNAME_PROP))
+            .setSmsGatewayPassword(getProperty(props, SMS_GATEWAY_PASSWORD_PROP))
             .setCobanLocationReportTimeInterval(getIntegerProperty(props, COBAN_LOCATION_REPORT_INTERVAL_PROP, CobanConstants.DEFAULT_LOCATION_REPORT_INTERVAL))
             .setRfv16LocationReportTimeInterval(getIntegerProperty(props, RFV16_LOCATION_REPORT_INTERVAL_PROP, RFV16Constants.DEFAULT_LOCATION_REPORT_INTERVAL))
             .setClientTimeout(clientTimeout)
