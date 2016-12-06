@@ -107,6 +107,8 @@ public class TrackerDevice {
     public static final String GEOFENCE_EXIT = "c8y_GeofenceExit";
 
     public static final String POWER_ALARM_TYPE = "c8y_PowerAlarm";
+    
+    public static final String CRASH_DETECTED_EVENT_TYPE = "c8y_CrashDetected";
 
     private Mobile mobile;
 
@@ -119,6 +121,8 @@ public class TrackerDevice {
     private EventRepresentation geofenceExit = new EventRepresentation();
 
     private EventRepresentation chargerConnected = new EventRepresentation();
+    
+    private EventRepresentation crashDetected = new EventRepresentation();
 
     private AlarmRepresentation fenceAlarm = new AlarmRepresentation();
 
@@ -327,7 +331,23 @@ public class TrackerDevice {
         events.create(chargerConnected);
         logger.debug("Charger connected to {}", imei);
     }
+    
+    public void crashDetectedEvent(Position position, DateTime dateTime) {
+        String eventText = "Crash detected: " +  position.getLng() + ", " + position.getLat();
+        crashDetected.setText(eventText);
+        crashDetected.setDateTime(dateTime);
+        events.create(crashDetected);
+        logger.info(eventText);
+    }
 
+    public void crashDetectedEvent(DateTime dateTime) {
+        String eventText = "Crash detected";
+        crashDetected.setText(eventText);
+        crashDetected.setDateTime(dateTime);
+        events.create(crashDetected);
+        logger.info(eventText);
+    }
+    
     public void powerAlarm(boolean powerLost, boolean external) throws SDKException {
         logger.debug("{} {}", imei, powerLost ? "lost power" : "has power again");
         String msg = external ? "Asset " : "Tracker ";
@@ -472,6 +492,9 @@ public class TrackerDevice {
         chargerConnected.setType(CHARGER_CONNECTED);
         chargerConnected.setText("Charger connected");
 
+        crashDetected.setSource(source);
+        crashDetected.setType(CRASH_DETECTED_EVENT_TYPE);
+        
         powerAlarm.setType(POWER_ALARM_TYPE);
         powerAlarm.setSeverity(CumulocitySeverities.MAJOR.toString());
         powerAlarm.setText("Asset lost power.");
