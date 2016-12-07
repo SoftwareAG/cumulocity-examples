@@ -54,14 +54,14 @@ public class OperationSmsDelivery {
      */
     public boolean isSmsMode (OperationRepresentation operation) {
         
-        if (operation.get("deliveryType") != null && ((String) operation.get("deliveryType")).toLowerCase().equals("sms")) {
+        if ("sms".equalsIgnoreCase(String.valueOf(operation.get("deliveryType")))) {
             return true;
         } 
 
         ManagedObjectRepresentation deviceMo = inventoryApi.get(operation.getDeviceId());
         CommunicationMode communicationMode = deviceMo.get(CommunicationMode.class);
 
-        if (communicationMode != null && communicationMode.getMode() != null && communicationMode.getMode().toLowerCase().equals("sms")) {
+        if (communicationMode != null && "sms".equalsIgnoreCase(communicationMode.getMode())) {
             return true;
         }
         
