@@ -10,26 +10,24 @@ import com.google.common.io.BaseEncoding;
 
 @Component
 public class OptionsAuthorizationSupplier {
-    
+
     private final ThreadLocal<String> threadLocal = new ThreadLocal<String>();
-    
+
     public void optionsAuthForTenant(TrackerConfiguration configuration, String tenant) {
-        String optionsReaderUser = configuration.getOptionsReaderUser();
-        String password = configuration.getOptionsReaderPassword();
-        
-        String authString = "Basic ";
-        String authentication = checkTenant(tenant) + optionsReaderUser + ":" + password;
-        authString += new String(BaseEncoding.base64().encode(authentication.getBytes()));
-        
-        threadLocal.set(authString);
+        String auth = formatAuth(tenant, configuration.getSmsGatewayUser(), configuration.getSmsGatewayPassword());
+        auth = "Basic " + new String(BaseEncoding.base64().encode(auth.getBytes()));
+        threadLocal.set(auth);
+    }
+
+    private static String formatAuth(String tenant, String username, String password) {
+        if (isNullOrEmpty(tenant)) {
+            return String.format("%s:%s", username, password);
+        } else {
+            return String.format("%s/%s:%s", tenant, username, password);
+        }
     }
 
     public String getAuth() {
         return threadLocal.get();
     }
-    
-    private String checkTenant(String tenant) {
-        return isNullOrEmpty(tenant) ? "" : tenant + "/";
-    }
-
 }

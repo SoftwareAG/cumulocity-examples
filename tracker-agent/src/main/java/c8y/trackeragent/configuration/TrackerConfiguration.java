@@ -16,8 +16,8 @@ public class TrackerConfiguration {
     private String bootstrapUser;
     private String bootstrapPassword;
     private String bootstrapTenant;
-    private String optionsReaderUser;
-    private String optionsReaderPassword;
+    private String smsGatewayUser;
+    private String smsGatewayPassword;
     private int clientTimeout;
     private List<Long> bootstrapPollIntervals;
     private Integer cobanLocationReportTimeInterval;
@@ -84,21 +84,21 @@ public class TrackerConfiguration {
         return bootstrapTenant;
     }
     
-    public String getOptionsReaderUser() {
-        return optionsReaderUser;
+    public String getSmsGatewayUser() {
+        return smsGatewayUser;
     }
 
-    public TrackerConfiguration setOptionsReaderUser(String optionsReaderUser) {
-        this.optionsReaderUser = optionsReaderUser;
+    public TrackerConfiguration setSmsGatewayUser(String smsGatewayUser) {
+        this.smsGatewayUser = smsGatewayUser;
         return this;
     }
 
-    public String getOptionsReaderPassword() {
-        return optionsReaderPassword;
+    public String getSmsGatewayPassword() {
+        return smsGatewayPassword;
     }
 
-    public TrackerConfiguration setOptionsReaderPassword(String optionsReaderPassword) {
-        this.optionsReaderPassword = optionsReaderPassword;
+    public TrackerConfiguration setSmsGatewayPassword(String smsGatewayPassword) {
+        this.smsGatewayPassword = smsGatewayPassword;
         return this;
     }
 
@@ -195,7 +195,7 @@ public class TrackerConfiguration {
         builder.append(", bootstrapTenant=");
         builder.append(bootstrapTenant);
         builder.append(", optionsReaderUser=");
-        builder.append(optionsReaderUser);
+        builder.append(smsGatewayUser);
         builder.append(", clientTimeout=");
         builder.append(clientTimeout);
         builder.append(", bootstrapPollIntervals=");
