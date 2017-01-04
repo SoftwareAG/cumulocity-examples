@@ -109,15 +109,7 @@ public class TrackerServer implements Runnable {
                 // Process any pending changes
                 synchronized (this.pendingChanges) {
                     for (ChangeRequest change : this.pendingChanges) {
-                        logger.trace("Process pending change: {}", change);
-                        SelectionKey key = change.getSocket().keyFor(this.selector);
-                        if (key == null) {
-                            logger.info(
-                                    "The channel is not currently registered with the selector. Connection was probably closed. Ignore change: {}.",
-                                    change);
-                        } else {
-                            key.interestOps(change.getOps());
-                        }
+                        processPendingChange(change);
                     }
                     logger.trace("Finished pending changes loop");
                     this.pendingChanges.clear();
@@ -149,6 +141,25 @@ public class TrackerServer implements Runnable {
             } catch (Exception e) {
                 logger.error("Error in main server loop", e);
             }
+        }
+    }
+
+    private void processPendingChange(ChangeRequest change) {
+        try {
+            logger.trace("Process pending change: {}", change);
+            SelectionKey key = change.getSocket().keyFor(this.selector);
+            if (key == null) {
+                logger.info("The channel is not currently registered with the selector. Connection was probably closed. Ignore change: {}.",
+                        change);
+                return;
+            }
+            if (!key.isValid()) {
+                logger.info("The channel is not valid. Ignore change: {}.", change);
+                return;
+            }
+            key.interestOps(change.getOps());
+        } catch (Exception ex) {
+            logger.error("Exception thrown; ignore change: " + change, ex);
         }
     }
 
