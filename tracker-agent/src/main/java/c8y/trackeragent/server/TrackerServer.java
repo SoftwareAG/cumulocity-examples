@@ -217,27 +217,34 @@ public class TrackerServer implements Runnable {
 
     private void write(SelectionKey key) throws IOException {
         SocketChannel socketChannel = (SocketChannel) key.channel();
-
         synchronized (this.pendingData) {
-            List<ByteBuffer> queue = this.pendingData.get(socketChannel);
-
-            // Write until there's not more data ...
-            while (!queue.isEmpty()) {
-                ByteBuffer buf = (ByteBuffer) queue.get(0);
-                socketChannel.write(buf);
-                if (buf.remaining() > 0) {
-                    // ... or the socket's buffer fills up
-                    break;
+            try {
+                List<ByteBuffer> queue = this.pendingData.get(socketChannel);
+                write(socketChannel, queue);
+                if (queue.isEmpty()) {
+                    // We wrote away all data, so we're no longer interested
+                    // in writing on this socket. Switch back to waiting for
+                    // data.
+                    key.interestOps(SelectionKey.OP_READ);
                 }
-                queue.remove(0);
-            }
-
-            if (queue.isEmpty()) {
-                // We wrote away all data, so we're no longer interested
-                // in writing on this socket. Switch back to waiting for
-                // data.
+            } catch (Exception ex) {
+                logger.error("Cannot read to channel " + socketChannel + "; delete content from pendingData", ex);
+                this.pendingData.remove(socketChannel);
                 key.interestOps(SelectionKey.OP_READ);
             }
+        }
+    }
+
+    private void write(SocketChannel socketChannel, List<ByteBuffer> queue) throws IOException {
+        // Write until there's not more data ...
+        while (!queue.isEmpty()) {
+            ByteBuffer buf = (ByteBuffer) queue.get(0);
+            socketChannel.write(buf);
+            if (buf.remaining() > 0) {
+                // ... or the socket's buffer fills up
+                break;
+            }
+            queue.remove(0);
         }
     }
 
