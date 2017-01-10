@@ -109,15 +109,7 @@ public class TrackerServer implements Runnable {
                 // Process any pending changes
                 synchronized (this.pendingChanges) {
                     for (ChangeRequest change : this.pendingChanges) {
-                        logger.trace("Process pending change: {}", change);
-                        SelectionKey key = change.getSocket().keyFor(this.selector);
-                        if (key == null) {
-                            logger.info(
-                                    "The channel is not currently registered with the selector. Connection was probably closed. Ignore change: {}.",
-                                    change);
-                        } else {
-                            key.interestOps(change.getOps());
-                        }
+                        processPendingChange(change);
                     }
                     logger.trace("Finished pending changes loop");
                     this.pendingChanges.clear();
@@ -149,6 +141,25 @@ public class TrackerServer implements Runnable {
             } catch (Exception e) {
                 logger.error("Error in main server loop", e);
             }
+        }
+    }
+
+    private void processPendingChange(ChangeRequest change) {
+        try {
+            logger.trace("Process pending change: {}", change);
+            SelectionKey key = change.getSocket().keyFor(this.selector);
+            if (key == null) {
+                logger.info("The channel is not currently registered with the selector. Connection was probably closed. Ignore change: {}.",
+                        change);
+                return;
+            }
+            if (!key.isValid()) {
+                logger.info("The channel is not valid. Ignore change: {}.", change);
+                return;
+            }
+            key.interestOps(change.getOps());
+        } catch (Exception ex) {
+            logger.error("Exception thrown; ignore change: " + change, ex);
         }
     }
 
@@ -206,27 +217,34 @@ public class TrackerServer implements Runnable {
 
     private void write(SelectionKey key) throws IOException {
         SocketChannel socketChannel = (SocketChannel) key.channel();
-
         synchronized (this.pendingData) {
-            List<ByteBuffer> queue = this.pendingData.get(socketChannel);
-
-            // Write until there's not more data ...
-            while (!queue.isEmpty()) {
-                ByteBuffer buf = (ByteBuffer) queue.get(0);
-                socketChannel.write(buf);
-                if (buf.remaining() > 0) {
-                    // ... or the socket's buffer fills up
-                    break;
+            try {
+                List<ByteBuffer> queue = this.pendingData.get(socketChannel);
+                write(socketChannel, queue);
+                if (queue.isEmpty()) {
+                    // We wrote away all data, so we're no longer interested
+                    // in writing on this socket. Switch back to waiting for
+                    // data.
+                    key.interestOps(SelectionKey.OP_READ);
                 }
-                queue.remove(0);
-            }
-
-            if (queue.isEmpty()) {
-                // We wrote away all data, so we're no longer interested
-                // in writing on this socket. Switch back to waiting for
-                // data.
+            } catch (Exception ex) {
+                logger.error("Cannot read to channel " + socketChannel + "; delete content from pendingData", ex);
+                this.pendingData.remove(socketChannel);
                 key.interestOps(SelectionKey.OP_READ);
             }
+        }
+    }
+
+    private void write(SocketChannel socketChannel, List<ByteBuffer> queue) throws IOException {
+        // Write until there's not more data ...
+        while (!queue.isEmpty()) {
+            ByteBuffer buf = (ByteBuffer) queue.get(0);
+            socketChannel.write(buf);
+            if (buf.remaining() > 0) {
+                // ... or the socket's buffer fills up
+                break;
+            }
+            queue.remove(0);
         }
     }
 
