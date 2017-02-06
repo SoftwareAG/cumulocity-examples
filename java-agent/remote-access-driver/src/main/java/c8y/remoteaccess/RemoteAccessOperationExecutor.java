@@ -37,9 +37,8 @@ public class RemoteAccessOperationExecutor implements OperationExecutor {
         if (!cleanup) {
             String hostname = connect.getHostname();
             Integer port = connect.getPort();
-            String protocol = connect.getProtocol();
             String connectionKey = connect.getConnectionKey();
-            logger.info("Starting connect operation to {}:{} with protocol {}", hostname, port, protocol);
+            logger.info("Starting connect operation to {}:{} with connection key {}", hostname, port, connectionKey);
         }
     }
 }
