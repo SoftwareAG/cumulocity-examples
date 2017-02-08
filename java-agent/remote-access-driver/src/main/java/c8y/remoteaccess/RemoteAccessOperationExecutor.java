@@ -3,11 +3,13 @@ package c8y.remoteaccess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.Platform;
 
 import c8y.RemoteAccessConnect;
 import c8y.lx.driver.OperationExecutor;
+import c8y.remoteaccess.tunnel.DeviceProxy;
 
 public class RemoteAccessOperationExecutor implements OperationExecutor {
 
@@ -28,7 +30,7 @@ public class RemoteAccessOperationExecutor implements OperationExecutor {
 
     @Override
     public void execute(OperationRepresentation operation, boolean cleanup) throws Exception {
-        logger.info("Received operation {}", operation);
+        logger.debug("Received operation {}", operation);
         RemoteAccessConnect connect = operation.get(RemoteAccessConnect.class);
         if (connect == null) {
             throw new IllegalArgumentException("Fragement c8y_RemoteAccessConnect not present");
@@ -38,7 +40,12 @@ public class RemoteAccessOperationExecutor implements OperationExecutor {
             String hostname = connect.getHostname();
             Integer port = connect.getPort();
             String connectionKey = connect.getConnectionKey();
-            logger.info("Starting connect operation to {}:{} with connection key {}", hostname, port, connectionKey);
+            
+            logger.debug("Starting connect operation to {}:{} with connection key {}", hostname, port, connectionKey);
+            DeviceProxy proxy = new DeviceProxy(hostname, port, connectionKey, platform);
+            proxy.start();
+
+            operation.setStatus(OperationStatus.SUCCESSFUL.toString());
         }
     }
 }

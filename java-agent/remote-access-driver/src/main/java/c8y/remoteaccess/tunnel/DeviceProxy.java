@@ -1,77 +1,116 @@
 package c8y.remoteaccess.tunnel;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.Arrays;
 
+import javax.websocket.ClientEndpointConfig;
 import javax.websocket.ContainerProvider;
-import javax.websocket.WebSocketContainer;
+import javax.websocket.DeploymentException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cumulocity.sdk.client.Platform;
+import com.cumulocity.sdk.client.PlatformParameters;
+
+import c8y.remoteaccess.tunnel.TunnelingThread;
+import c8y.remoteaccess.tunnel.VncSocketClient;
+import c8y.remoteaccess.tunnel.AuthHeaderConfigurator;
+
 public class DeviceProxy {
+
+    private static final String WEBSOCKET_DEVICE_ENDPOINT = "/service/remoteaccess/device/";
 
     private static final Logger logger = LoggerFactory.getLogger(DeviceProxy.class);
 
-    public static final String DEFAULT_VNC_HOST = "localhost";
+    private String vncHost;
 
-    public static final int DEFAULT_VNC_PORT = 5901;
+    private int vncPort;
 
-    public static final String DEFAULT_WEBSOCKET_URL = "ws://localhost:8080/vnc/device";
-    
-    public static void main(String[] args) throws Exception {
+    private String websocketHost;
 
-        logger.info("DeviceProxy starting");
+    private int websocketPort;
 
-        String vncHost = DEFAULT_VNC_HOST;
-        int vncPort = DEFAULT_VNC_PORT;
-        String websocketUrl = DEFAULT_WEBSOCKET_URL;
+    private String connectionKey;
 
-        if (args.length == 0) {
-            System.out.println("Usage: DeviceProxy <ConnectionKey> [VNC hostanme] [VNC port] [Websocket URL]");
-            return;
+    private boolean encrypted;
+
+    private TunnelingThread thread;
+
+    private VncSocketClient vncsocket;
+
+    private String username;
+
+    private String password;
+
+    public DeviceProxy(String hostname, int port, String connectionKey, Platform platform) throws MalformedURLException {
+
+        if (!(platform instanceof PlatformParameters)) {
+            throw new IllegalArgumentException("Unable to determine host by platform: " + platform);
         }
 
-        String connectionKey = args[0];
+        PlatformParameters parameters = (PlatformParameters) platform;
+        URL url = new URL(parameters.getHost());
 
-        if (args.length > 1) {
-            vncHost = args[1];
+        this.encrypted = url.getProtocol().equals("https");
+        this.websocketHost = url.getHost();
+        this.websocketPort = url.getPort();
 
-            if (args.length > 2) {
-                vncPort = Integer.parseInt(args[2]);
+        this.username = parameters.getPrincipal();
+        this.password = parameters.getPassword();
 
-                if (args.length > 3) {
-                    websocketUrl = args[3];
-                }
-            }
-        }
+        this.vncHost = hostname;
+        this.vncPort = port;
+        this.connectionKey = connectionKey;
+    }
+
+    private URI getWebsocketEndpoint() throws URISyntaxException {
+        String protocol = (encrypted ? "wss://" : "ws://");
+        String hostname = websocketHost + ((websocketPort > 0) ? (":" + websocketPort) : "");
+        return new URI(protocol + hostname + WEBSOCKET_DEVICE_ENDPOINT + connectionKey);
+    }
+
+    public void start() throws URISyntaxException, DeploymentException, IOException {
+
+        logger.debug("DeviceProxy starting");
+
+        URI endpoint = getWebsocketEndpoint();
 
         // Connect to websocket
-        logger.info("Creating websocket connection " + websocketUrl + "/" + connectionKey);
+        logger.debug("Creating websocket connection " + endpoint);
         WebSocketClient websocket = new WebSocketClient();
-        WebSocketContainer container = ContainerProvider.getWebSocketContainer();
-        container.connectToServer(websocket, new URI(websocketUrl + "/" + connectionKey));
+        
+        ClientEndpointConfig endpointConfig = ClientEndpointConfig.Builder.create()
+                .configurator(new AuthHeaderConfigurator(username, password))
+                .preferredSubprotocols(Arrays.asList("binary")).build();
+        ContainerProvider.getWebSocketContainer().connectToServer(websocket, endpointConfig, endpoint);
 
         // Connect to VNC
-        logger.info("Creating VNC connection " + vncHost + ":" + vncPort);
-        VncSocketClient vncsocket = new VncSocketClient(vncHost, vncPort);
+        logger.debug("Creating VNC connection " + vncHost + ":" + vncPort);
+        vncsocket = new VncSocketClient(vncHost, vncPort);
         vncsocket.connect();
 
         // Start tunneling thread
-        logger.info("Starting tunneling thread");
-        TunnelingThread thread = new TunnelingThread(websocket, vncsocket);
+        logger.debug("Starting tunneling thread");
+        thread = new TunnelingThread(websocket, vncsocket);
         thread.start();
 
-        logger.info("Tunneling operational");
-        while (!websocket.isClosed()) {
-            Thread.sleep(100);
+        logger.debug("Tunneling operational");
+    }
+
+    public void stop() throws IOException {
+        if (thread != null) {
+            logger.debug("Stopping tunneling thread");
+            thread.stop();
         }
-
-        logger.info("Stopping tunneling thread");
-        thread.stop();
-
-        logger.info("Closing VNC connection");
-        vncsocket.close();
-
-        logger.info("DeviceProxy finished");
+        if (vncsocket != null) {
+            logger.debug("Closing VNC connection");
+            vncsocket.close();
+        }
+        logger.debug("DeviceProxy finished");
     }
 }

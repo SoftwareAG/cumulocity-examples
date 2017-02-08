@@ -1,14 +1,20 @@
 package c8y.remoteaccess;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.Platform;
 
 import c8y.lx.driver.Driver;
 import c8y.lx.driver.OperationExecutor;
+import c8y.lx.driver.OpsUtil;
 
 public class RemoteAccessDriver implements Driver {
 
-    private Platform platform;
+    private static final Logger logger = LoggerFactory.getLogger(RemoteAccessDriver.class);
+
+    private RemoteAccessOperationExecutor connectOperationExecutor;
 
     @Override
     public void initialize() throws Exception {
@@ -18,18 +24,22 @@ public class RemoteAccessDriver implements Driver {
     @Override
     public void initialize(Platform platform) throws Exception {
         // here you get the platform for access to the API
-        this.platform = platform;
+        logger.debug("Initializing with platform " + platform);
+        connectOperationExecutor = new RemoteAccessOperationExecutor(platform);
     }
 
     @Override
     public OperationExecutor[] getSupportedOperations() {
         // here you return an array of all the OperationExecutors this driver supports
-        return new OperationExecutor[] { new RemoteAccessOperationExecutor(platform) };
+        logger.debug("Returning supported operations");
+        return new OperationExecutor[] { connectOperationExecutor };
     }
 
     @Override
     public void initializeInventory(ManagedObjectRepresentation mo) {
         // this is used if you would like to persist some data to the managedObject of the device (before MO update)
+        logger.debug("Initializing inventory");
+        OpsUtil.addSupportedOperation(mo, connectOperationExecutor.supportedOperationType());
     }
 
     @Override

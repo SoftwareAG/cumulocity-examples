@@ -3,19 +3,18 @@ package c8y.remoteaccess.tunnel;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import javax.websocket.ClientEndpoint;
+import javax.websocket.CloseReason;
 import javax.websocket.Endpoint;
 import javax.websocket.EndpointConfig;
+import javax.websocket.MessageHandler;
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
-import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@ClientEndpoint
 public class WebSocketClient extends Endpoint {
 
     private static final Logger logger = LoggerFactory.getLogger(WebSocketClient.class);
@@ -24,8 +23,8 @@ public class WebSocketClient extends Endpoint {
 
     private VncSocketClient vpnClient;
 
-    public void sendMessage(byte[] data) throws IOException {
-        session.getBasicRemote().sendBinary(ByteBuffer.wrap(data));
+    public WebSocketClient() {
+        super();
     }
 
     public void sendMessage(ByteBuffer data) throws IOException {
@@ -35,25 +34,27 @@ public class WebSocketClient extends Endpoint {
     }
 
     public void close() throws IOException {
+        logger.debug("Closing websocket.");
         if (session != null) {
             session.close();
         }
     }
 
     @OnOpen
-    public void open(Session session) throws IOException {
-        logger.info("Websocket[" + session.getId() + "] was opened.");
+    public void onOpen(Session session, EndpointConfig config) {
+        logger.debug("Websocket was opened.");
         this.session = session;
+        session.addMessageHandler(new MessageHandler.Whole<ByteBuffer>() {
+
+            @Override
+            public void onMessage(ByteBuffer message) {
+                onBinaryMessage(message);
+            }
+        });
     }
 
-    @OnMessage
-    public void onMessage(Session session, String message) {
-        logger.debug("Websocket[" + session.getId() + "] recieved:" + message);
-    }
-
-    @OnMessage
-    public void onBinary(ByteBuffer data, Session session) {
-        logger.debug("Received " + data.remaining() + " bytes from websocket");
+    public void onBinaryMessage(ByteBuffer data) {
+        logger.debug("Received " + data.remaining() + " bytes from websocket, Forwarding to VNC...");
         try {
             vpnClient.sendMessage(data.array());
         } catch (IOException e) {
@@ -68,14 +69,13 @@ public class WebSocketClient extends Endpoint {
     }
 
     @OnError
-    public void error(Session session, Throwable e) {
-        logger.error("Websocket[" + session.getId() + "] encountered an error:");
-        e.printStackTrace();
+    public void onError(Session session, Throwable e) {
+        logger.error("Websocket[" + session.getId() + "] encountered an error:", e);
     }
 
     @OnClose
-    public void close(Session session) {
-        logger.info("Websocket[" + session.getId() + "] was closed.");
+    public void onClose(Session session, CloseReason closeReason) {
+        logger.debug("Websocket[" + session.getId() + "] was closed.");
         this.session = null;
     }
 
@@ -85,10 +85,5 @@ public class WebSocketClient extends Endpoint {
 
     public boolean isClosed() {
         return session == null;
-    }
-
-    @Override
-    public void onOpen(Session session, EndpointConfig config) {
-        // TODO Auto-generated method stub
     }
 }

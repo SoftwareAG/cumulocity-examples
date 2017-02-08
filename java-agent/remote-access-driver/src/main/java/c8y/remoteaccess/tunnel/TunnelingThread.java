@@ -1,6 +1,7 @@
 package c8y.remoteaccess.tunnel;
 
 import java.io.IOException;
+import java.net.SocketException;
 import java.nio.ByteBuffer;
 
 import org.slf4j.Logger;
@@ -25,9 +26,15 @@ public class TunnelingThread implements Runnable {
     public void start() {
         Thread thread = new Thread(this);
         thread.start();
+        close = false;
+    }
+
+    public boolean isActive() {
+        return !close;
     }
 
     public void stop() {
+        logger.debug("Stopping tunneling thread");
         close = true;
     }
 
@@ -39,17 +46,20 @@ public class TunnelingThread implements Runnable {
             try {
                 int bytesRead = vpnsocket.read(data);
                 if (bytesRead > 0) {
-                    logger.debug("Received " + bytesRead + " bytes from VNC server");
+                    logger.debug("Received " + bytesRead + " bytes from VNC server. Forwarding to websocket...");
                     if (websocket == null) {
                         throw new IllegalStateException("Not connect to Websocket");
                     }
-                    logger.debug("Forwarding " + bytesRead + " to websocket");
                     websocket.sendMessage(ByteBuffer.wrap(data, 0, bytesRead));
                 } else if (bytesRead == -1) {
-                    close = true;
+                    logger.debug("Encountered end of stream. Closing connection...");
+                    stop();
                 }
+            } catch (SocketException e) {
+                logger.debug(e.getMessage());
             } catch (IOException e) {
-                close = true;
+                logger.debug("Error:", e);
+                stop();
             }
         }
     }
