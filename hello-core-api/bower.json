@@ -12,11 +12,12 @@
     "demo"
   ],
   "dependencies": {
-    "cumulocity-clients-javascript": "latest",
+    "cumulocity-clients-javascript": "https://bitbucket.org/m2m/cumulocity-clients-javascript.git#STUD-61-smart-app-toolkit-upgrade",
     "bootstrap": "~3.3.5",
-    "angular-route": "1.2.20",
+    "angular-route": "1.5.8",
     "angular-ui-bootstrap-bower": "0.11.0",
-    "d3": "3.5.5"
+    "d3": "3.5.5",
+    "angular-gettext": "2.3.8"
   },
   "license": "MIT",
   "homepage": "http://www.cumulocity.com",

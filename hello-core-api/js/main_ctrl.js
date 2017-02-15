@@ -5,21 +5,22 @@
     '$location',
     '$routeParams',
     'c8yUser',
-     MainCtrl
+    'c8yAuth',
+    MainCtrl
   ]);
 
   function MainCtrl(
-    $location,
-    $routeParams,
-    c8yUser
+      $location,
+      $routeParams,
+      c8yUser,
+      c8yAuth
   ) {
-    c8yUser.current().catch(function () {
-      $location.path('/login');
-    });
 
-    // if (!$routeParams.section) {
-    //   $location.path('/devices');
-    // }
+    c8yAuth.initializing.then(function() {
+      if(c8yUser.current().$$state.status != 1) {
+        $location.path('/login');
+      }
+    });
 
     this.currentSection = $routeParams.section;
     this.sections = {
@@ -33,4 +34,5 @@
       $location.path('/login');
     };
   }
+
 })();
