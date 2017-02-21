@@ -6,7 +6,7 @@
     <parent>
         <groupId>c8y.example</groupId>
         <artifactId>example-packages</artifactId>
-        <version>7.44.0</version>
+        <version>7.45.0</version>
     </parent>
 
     <artifactId>paxrunner-package</artifactId>
