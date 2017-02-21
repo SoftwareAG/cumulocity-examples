@@ -1,5 +1,10 @@
 package c8y.remoteaccess;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+
+import javax.websocket.DeploymentException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +34,7 @@ public class RemoteAccessOperationExecutor implements OperationExecutor {
     }
 
     @Override
-    public void execute(OperationRepresentation operation, boolean cleanup) throws Exception {
+    public void execute(OperationRepresentation operation, boolean cleanup) throws URISyntaxException {
         logger.debug("Received operation {}", operation);
         RemoteAccessConnect connect = operation.get(RemoteAccessConnect.class);
         if (connect == null) {
@@ -37,15 +42,20 @@ public class RemoteAccessOperationExecutor implements OperationExecutor {
         }
 
         if (!cleanup) {
-            String hostname = connect.getHostname();
-            Integer port = connect.getPort();
-            String connectionKey = connect.getConnectionKey();
-            
-            logger.debug("Starting connect operation to {}:{} with connection key {}", hostname, port, connectionKey);
-            DeviceProxy proxy = new DeviceProxy(hostname, port, connectionKey, platform);
-            proxy.start();
+            try {
+                String hostname = connect.getHostname();
+                Integer port = connect.getPort();
+                String connectionKey = connect.getConnectionKey();
 
-            operation.setStatus(OperationStatus.SUCCESSFUL.toString());
+                logger.debug("Starting connect operation to {}:{} with connection key {}", hostname, port, connectionKey);
+                DeviceProxy proxy = new DeviceProxy(hostname, port, connectionKey, platform);
+                proxy.start();
+
+                operation.setStatus(OperationStatus.SUCCESSFUL.toString());
+            } catch (IOException | DeploymentException | RuntimeException e) {
+                operation.setStatus(OperationStatus.FAILED.toString());
+                operation.setFailureReason("Unable to connect");
+            }
         }
     }
 }
