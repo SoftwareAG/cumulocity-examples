@@ -20,24 +20,26 @@
 
 package c8y.trackeragent.operations;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
+import c8y.trackeragent.device.ManagedObjectCache;
+import c8y.trackeragent.device.TrackerDevice;
+import c8y.trackeragent.devicebootstrap.DeviceCredentials;
+import c8y.trackeragent.service.TrackerDeviceContextService;
+import com.cumulocity.model.idtype.GId;
+import com.cumulocity.model.operation.OperationStatus;
+import com.cumulocity.rest.representation.operation.OperationRepresentation;
+import com.cumulocity.sdk.client.SDKException;
+import com.google.common.base.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.FatalBeanException;
 
 import java.util.Collections;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.cumulocity.model.idtype.GId;
-import com.cumulocity.model.operation.OperationStatus;
-import com.cumulocity.rest.representation.operation.OperationRepresentation;
-import com.cumulocity.sdk.client.SDKException;
-
-import c8y.trackeragent.device.ManagedObjectCache;
-import c8y.trackeragent.device.TrackerDevice;
-import c8y.trackeragent.devicebootstrap.DeviceCredentials;
-import c8y.trackeragent.service.TrackerDeviceContextService;
+import static com.google.common.base.Optional.absent;
+import static com.google.common.base.Optional.of;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
  * Polls the platform for pending operations, executes the operations and
@@ -105,9 +107,19 @@ public class OperationDispatcher implements Runnable {
         Iterable<OperationRepresentation> operationsIterable = Collections.emptyList();
         try {
             operationsIterable = operationHelper.getOperationsByStatusAndAgent(status);
-        } catch (SDKException e) {
-            if (hasIncorrectStatus(e) && future != null) {
-                future.cancel(false);
+        } catch (final SDKException e) {
+            if (hasIncorrectStatus(e)) {
+                stopMe();
+            }
+//            when tenant is disabled then thrown exception is BeanInstantiationException with SDKException with 401 status as a cause
+        } catch (final FatalBeanException e) {
+            final Optional<SDKException> sdkException = findCause(SDKException.class, e);
+            if (sdkException.isPresent()) {
+                if (hasIncorrectStatus(sdkException.get())) {
+                    stopMe();
+                }
+            } else {
+                throw e;
             }
         }
         return operationsIterable;
@@ -118,4 +130,19 @@ public class OperationDispatcher implements Runnable {
         return e.getHttpStatus() == 404 || e.getHttpStatus() == 401;
     }
 
+    private void stopMe() {
+        if (future != null) {
+            future.cancel(false);
+        }
+    }
+
+    public static <T extends Throwable> Optional<T> findCause(Class<T> clazz, Throwable ex) {
+        if (ex == null) {
+            return absent();
+        }
+        if (clazz.isInstance(ex)) {
+            return of((T) ex);
+        }
+        return findCause(clazz, ex.getCause());
+    }
 }
