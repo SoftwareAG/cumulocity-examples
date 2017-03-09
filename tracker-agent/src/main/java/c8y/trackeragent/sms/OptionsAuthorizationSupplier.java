@@ -1,34 +1,34 @@
 package c8y.trackeragent.sms;
 
-import c8y.trackeragent.configuration.TrackerConfiguration;
+import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import com.cumulocity.sms.client.SmsMessagingApiImpl;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class OptionsAuthorizationSupplier extends SmsMessagingApiImpl.SmsCredentialsProvider {
 
-    private final ThreadLocal<String> tenantThreadLocal = new ThreadLocal<>();
+    private final ThreadLocal<DeviceCredentials> credentials = new ThreadLocal<>();
 
-    @Autowired
-    private TrackerConfiguration configuration;
+    public void set(DeviceCredentials tenant) {
+        credentials.set(tenant);
+    }
 
-    public void optionsAuthForTenant(String tenant) {
-        tenantThreadLocal.set(tenant);
+    public void clear() {
+        credentials.remove();
     }
 
     @Override
     public String getTenant() {
-        return tenantThreadLocal.get();
+        return credentials.get().getTenant();
     }
 
     @Override
     public String getUsername() {
-        return configuration.getSmsGatewayUser();
+        return credentials.get().getUsername();
     }
 
     @Override
     public String getPassword() {
-        return configuration.getSmsGatewayPassword();
+        return credentials.get().getPassword();
     }
 }

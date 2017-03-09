@@ -32,12 +32,13 @@ public class OperationSmsDeliveryTest {
     
     private OperationSmsDelivery operationSmsDelivery;
     String imei = "12345";
-    String tenant = "tenant";
     String msisdn = "123";
     String translation = "text-to-tracker";
+    String tenant = "tenant";
     GId deviceId;
     ManagedObjectRepresentation managedObject;
-    DeviceCredentials deviceCredentials;
+    DeviceCredentials deviceCredentials = DeviceCredentials.forDevice(imei, tenant);
+    DeviceCredentials agentCredentials = DeviceCredentials.forAgent(tenant, "username", "password");
     ArgumentCaptor<SendMessageRequest> messageRequestCaptor = ArgumentCaptor.forClass(SendMessageRequest.class);
 
     @Before
@@ -53,9 +54,8 @@ public class OperationSmsDeliveryTest {
         when(inventoryApi.get(any(GId.class))).thenReturn(managedObject);
         
         deviceId = new GId("1");
-        deviceCredentials = DeviceCredentials.forDevice(imei, tenant);
         when(deviceCredentialsRepo.getDeviceCredentials(imei)).thenReturn(deviceCredentials);
-        
+        when(deviceCredentialsRepo.getAgentCredentials(tenant)).thenReturn(agentCredentials);
     
     }
     
@@ -81,7 +81,7 @@ public class OperationSmsDeliveryTest {
         verify(outgoingMessagingClient).sendMessage(messageRequestCaptor.capture());
         assertEquals(request.toString(), messageRequestCaptor.getValue().toString());
 
-        verify(optionsAuthSupplier).optionsAuthForTenant(tenant);
+        verify(optionsAuthSupplier).set(agentCredentials);
     }
     
     @Test
