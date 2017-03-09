@@ -10,6 +10,6 @@ import org.springframework.context.annotation.Configuration;
 public class SmsConfiguration {
     @Bean
     public SmsMessagingApi smsMessagingApi(TrackerConfiguration configuration, OptionsAuthorizationSupplier optionsAuth) {
-        return new SmsMessagingApiImpl(configuration.getPlatformHost(), optionsAuth);
+        return new SmsMessagingApiImpl(configuration.getPlatformHost(), "service/messaging/smsmessaging/v1", optionsAuth);
     }
 }

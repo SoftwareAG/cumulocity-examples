@@ -6,16 +6,16 @@ import c8y.trackeragent.configuration.TrackerConfiguration;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.sms.OptionsAuthorizationSupplier;
 import com.cumulocity.model.idtype.GId;
+import com.cumulocity.model.sms.Address;
+import com.cumulocity.model.sms.SendMessageRequest;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.inventory.InventoryApi;
 import com.cumulocity.sms.client.SmsMessagingApi;
-import com.cumulocity.sms.client.model.Address;
-import com.cumulocity.sms.client.model.SendMessageRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static com.cumulocity.sms.client.model.Address.phoneNumber;
+import static com.cumulocity.model.sms.Address.phoneNumber;
 
 
 @Component
