@@ -1,31 +1,23 @@
 package c8y.trackeragent_it.config;
 
-import java.io.IOException;
-
-import javax.annotation.PostConstruct;
-
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.FilterType;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.web.client.RestTemplate;
-
+import c8y.trackeragent.Main;
+import c8y.trackeragent.devicebootstrap.TenantBinder;
+import c8y.trackeragent.server.Servers;
 import com.cumulocity.agent.server.feature.ContextFeature;
 import com.cumulocity.agent.server.feature.RepositoryFeature;
 import com.cumulocity.agent.server.logging.LoggingService;
 import com.cumulocity.agent.server.repository.BinariesRepository;
 import com.cumulocity.agent.server.repository.DeviceControlRepository;
-import com.cumulocity.sms.gateway.client.OutgoingMessagingClient;
+import com.cumulocity.sms.client.SmsMessagingApi;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.context.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
-import c8y.trackeragent.Main;
-import c8y.trackeragent.devicebootstrap.TenantBinder;
-import c8y.trackeragent.server.Servers;
+import javax.annotation.PostConstruct;
+import java.io.IOException;
 
 @Configuration
 @EnableAutoConfiguration
@@ -50,8 +42,8 @@ public class ServerConfiguration {
     }
     
     @Bean
-    public OutgoingMessagingClient outgoingMessagingClient() {
-        return Mockito.mock(OutgoingMessagingClient.class);
+    public SmsMessagingApi outgoingMessagingClient() {
+        return Mockito.mock(SmsMessagingApi.class);
     }
     
     @Bean
