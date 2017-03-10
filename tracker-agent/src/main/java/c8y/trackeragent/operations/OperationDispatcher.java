@@ -20,24 +20,23 @@
 
 package c8y.trackeragent.operations;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
+import c8y.trackeragent.device.ManagedObjectCache;
+import c8y.trackeragent.device.TrackerDevice;
+import c8y.trackeragent.devicebootstrap.DeviceCredentials;
+import c8y.trackeragent.service.TrackerDeviceContextService;
+import com.cumulocity.model.idtype.GId;
+import com.cumulocity.model.operation.OperationStatus;
+import com.cumulocity.rest.representation.operation.OperationRepresentation;
+import com.cumulocity.sdk.client.SDKException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.cumulocity.model.idtype.GId;
-import com.cumulocity.model.operation.OperationStatus;
-import com.cumulocity.rest.representation.operation.OperationRepresentation;
-import com.cumulocity.sdk.client.SDKException;
-
-import c8y.trackeragent.device.ManagedObjectCache;
-import c8y.trackeragent.device.TrackerDevice;
-import c8y.trackeragent.devicebootstrap.DeviceCredentials;
-import c8y.trackeragent.service.TrackerDeviceContextService;
+import static c8y.trackeragent.utils.SDKExceptionHandler.handleSDKException;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
  * Polls the platform for pending operations, executes the operations and
@@ -105,17 +104,19 @@ public class OperationDispatcher implements Runnable {
         Iterable<OperationRepresentation> operationsIterable = Collections.emptyList();
         try {
             operationsIterable = operationHelper.getOperationsByStatusAndAgent(status);
-        } catch (SDKException e) {
-            if (hasIncorrectStatus(e) && future != null) {
-                future.cancel(false);
+//            when tenant is disabled then thrown exception is BeanInstantiationException with SDKException with 401 status as a cause
+        } catch (final Exception e) {
+//            404 - someone deleted device, 401 tenant is disabled
+            switch (handleSDKException(e, 401, 404)) {
+                case OTHER_EXCEPTION:
+                    throw e;
+                case STATUS_MATCHES:
+                    if (future != null) {
+                        future.cancel(false);
+                    }
             }
         }
         return operationsIterable;
-    }
-
-    private boolean hasIncorrectStatus(SDKException e) {
-        // 404 - someone deleted device, 401 tenant is disabled
-        return e.getHttpStatus() == 404 || e.getHttpStatus() == 401;
     }
 
 }
