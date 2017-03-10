@@ -1,33 +1,34 @@
 package c8y.trackeragent.sms;
 
-import c8y.trackeragent.configuration.TrackerConfiguration;
-
-import static com.google.common.base.Strings.isNullOrEmpty;
-
+import c8y.trackeragent.devicebootstrap.DeviceCredentials;
+import com.cumulocity.sms.client.SmsMessagingApiImpl;
 import org.springframework.stereotype.Component;
 
-import com.google.common.io.BaseEncoding;
-
 @Component
-public class OptionsAuthorizationSupplier {
+public class OptionsAuthorizationSupplier extends SmsMessagingApiImpl.SmsCredentialsProvider {
 
-    private final ThreadLocal<String> threadLocal = new ThreadLocal<String>();
+    private final ThreadLocal<DeviceCredentials> credentials = new ThreadLocal<>();
 
-    public void optionsAuthForTenant(TrackerConfiguration configuration, String tenant) {
-        String auth = formatAuth(tenant, configuration.getSmsGatewayUser(), configuration.getSmsGatewayPassword());
-        auth = "Basic " + new String(BaseEncoding.base64().encode(auth.getBytes()));
-        threadLocal.set(auth);
+    public void set(DeviceCredentials tenant) {
+        credentials.set(tenant);
     }
 
-    private static String formatAuth(String tenant, String username, String password) {
-        if (isNullOrEmpty(tenant)) {
-            return String.format("%s:%s", username, password);
-        } else {
-            return String.format("%s/%s:%s", tenant, username, password);
-        }
+    public void clear() {
+        credentials.remove();
     }
 
-    public String getAuth() {
-        return threadLocal.get();
+    @Override
+    public String getTenant() {
+        return credentials.get().getTenant();
+    }
+
+    @Override
+    public String getUsername() {
+        return credentials.get().getUsername();
+    }
+
+    @Override
+    public String getPassword() {
+        return credentials.get().getPassword();
     }
 }

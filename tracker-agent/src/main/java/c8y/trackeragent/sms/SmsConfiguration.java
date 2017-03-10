@@ -1,23 +1,15 @@
 package c8y.trackeragent.sms;
 
-import javax.annotation.PostConstruct;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import c8y.trackeragent.configuration.TrackerConfiguration;
+import com.cumulocity.sms.client.SmsMessagingApi;
+import com.cumulocity.sms.client.SmsMessagingApiImpl;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.client.RestTemplate;
 
 @Configuration
 public class SmsConfiguration {
-
-    @Autowired
-    RestTemplate template;
-    @Autowired
-    OptionsAuthorizationSupplier optionsAuth;
-    
-    @PostConstruct
-    public void initialize() {
-        OptionsAuthorizationInterceptor optionsAuthorizationInterceptor = new OptionsAuthorizationInterceptor(optionsAuth);
-        template.getInterceptors().add(optionsAuthorizationInterceptor);
+    @Bean
+    public SmsMessagingApi smsMessagingApi(TrackerConfiguration configuration, OptionsAuthorizationSupplier optionsAuth) {
+        return new SmsMessagingApiImpl(configuration.getPlatformHost(), "service/messaging/smsmessaging/v1", optionsAuth);
     }
-    
 }
