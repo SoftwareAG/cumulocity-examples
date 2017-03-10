@@ -94,6 +94,10 @@ public class TrackerDevice {
     public static final String POWER_ALARM_TYPE = "c8y_PowerAlarm";
     
     public static final String CRASH_DETECTED_EVENT_TYPE = "c8y_CrashDetected";
+    
+    public static final String IGNITION_ON_EVENT_TYPE = "c8y_IgnitionOnEvent";
+    
+    public static final String IGNITION_OFF_EVENT_TYPE = "c8y_IgnitionOffEvent";
 
     private Mobile mobile;
 
@@ -108,6 +112,10 @@ public class TrackerDevice {
     private EventRepresentation chargerConnected = new EventRepresentation();
     
     private EventRepresentation crashDetected = new EventRepresentation();
+    
+    private EventRepresentation ignitionOnEvent = new EventRepresentation();
+    
+    private EventRepresentation ignitionOffEvent = new EventRepresentation();
 
     private AlarmRepresentation fenceAlarm = new AlarmRepresentation();
 
@@ -772,6 +780,22 @@ public class TrackerDevice {
     
     public void setTrackingProtocolInfo  (TrackingProtocol trackingProtocol) {
         this.trackingProtocol = trackingProtocol;
+    }
+    
+    public void ignitionOnEvent(DateTime dateTime) {
+        String eventText = "Ignition on";
+        ignitionOnEvent.setText(eventText);
+        ignitionOnEvent.setDateTime(dateTime);
+        events.create(ignitionOnEvent);
+        logger.info(eventText);   
+    }
+
+    public void ignitionOffEvent(DateTime dateTime) {
+        String eventText = "Ignition off";
+        ignitionOffEvent.setText(eventText);
+        ignitionOffEvent.setDateTime(dateTime);
+        events.create(ignitionOffEvent);
+        logger.info(eventText);   
     }
 
 }

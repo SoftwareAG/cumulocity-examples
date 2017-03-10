@@ -28,12 +28,14 @@ import c8y.trackeragent.protocol.queclink.device.GL300;
 import c8y.trackeragent.protocol.queclink.device.GL505;
 import c8y.trackeragent.protocol.queclink.device.QueclinkDevice;
 import c8y.trackeragent.protocol.queclink.parser.QueclinkDeviceMotionState;
+import c8y.trackeragent.protocol.queclink.parser.QueclinkIgnition;
 import c8y.trackeragent.server.TestConnectionDetails;
 
 public class QueclinkDeviceMotionStateTest {
 
     private TrackerAgent trackerAgent = mock(TrackerAgent.class);
     private TrackerDevice trackerDevice = mock(TrackerDevice.class);
+    private QueclinkIgnition ignition = mock(QueclinkIgnition.class);
     private QueclinkDevice queclinkDevice;
     private TestConnectionDetails connectionDetails;
     private OperationRepresentation operation = new OperationRepresentation();
@@ -43,7 +45,7 @@ public class QueclinkDeviceMotionStateTest {
     private Tracking tracking = new Tracking();
     private BaseQueclinkDevice gl505 = new GL505();
     private BaseQueclinkDevice gl300 = new GL300();
-    private QueclinkDeviceMotionState queclinkDeviceMotionState = new QueclinkDeviceMotionState(trackerAgent);
+    private QueclinkDeviceMotionState queclinkDeviceMotionState = new QueclinkDeviceMotionState(trackerAgent, ignition);
     
     public static final String[] MOTION_SETTING = {
             // report interval on motion, set motion active, reboot
@@ -95,7 +97,7 @@ public class QueclinkDeviceMotionStateTest {
     }
     
     public void translate_setup() {
-        queclinkDeviceMotionState = spy(new QueclinkDeviceMotionState(trackerAgent));
+        queclinkDeviceMotionState = spy(new QueclinkDeviceMotionState(trackerAgent, ignition));
         queclinkDevice = mock(QueclinkDevice.class);
         
         when(queclinkDeviceMotionState.getQueclinkDevice()).thenReturn(queclinkDevice);

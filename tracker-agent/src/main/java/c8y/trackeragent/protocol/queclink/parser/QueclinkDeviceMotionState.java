@@ -88,11 +88,14 @@ public class QueclinkDeviceMotionState extends QueclinkParser implements Transla
     private final TrackerAgent trackerAgent;
     private short corrId = 1;
     private OperationRepresentation lastOperation;
+    
+    private final QueclinkIgnition queclinkIgnition;
 
 
     @Autowired
-    public QueclinkDeviceMotionState(TrackerAgent trackerAgent) {
+    public QueclinkDeviceMotionState(TrackerAgent trackerAgent, QueclinkIgnition queclinkIgnition) {
         this.trackerAgent = trackerAgent;
+        this.queclinkIgnition = queclinkIgnition;
     }
 
     @Override
@@ -110,7 +113,24 @@ public class QueclinkDeviceMotionState extends QueclinkParser implements Transla
     }
 
     private boolean onParsedMotion(String[] report, String imei) throws SDKException {
+        parseMotionStateAndCreateEvent(report, imei);
+        parseIgnitionAndCreateEvent(report, imei);
+        parseTowAndCreateEvent(report, imei);
+        
+        return true;
+    }
+    
+    private void parseTowAndCreateEvent(String[] report, String imei) {
+        // TODO Auto-generated method stub
+        
+    }
 
+    private void parseIgnitionAndCreateEvent(String[] report, String imei) {
+        queclinkIgnition.getIgnitionFromMotionReport();
+        
+    }
+
+    private void parseMotionStateAndCreateEvent(String[] report, String imei) {
         String deviceType = report[1].substring(0, 2);
         boolean motion; 
         if (report[0].equals(MOTION_REPORT[1])) {
@@ -135,7 +155,6 @@ public class QueclinkDeviceMotionState extends QueclinkParser implements Transla
         TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(imei);
         DateTime dateTime = getQueclinkDevice().getReportDateTime(report);
         device.motionEvent(motion, dateTime);
-        return true;
     }
 
     private boolean onParsedMTrackingAck(String[] report, String imei) throws SDKException {

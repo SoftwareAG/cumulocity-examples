@@ -11,6 +11,7 @@ import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 
 import c8y.Hardware;
 import c8y.trackeragent.TrackerAgent;
+import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.device.ManagedObjectCache;
 import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.protocol.queclink.QueclinkConstants;
@@ -114,6 +115,10 @@ public class QueclinkDevice {
         return mo;    
     }
 
+    public DateTime getReportDateTime(ReportContext reportCtx) {
+        return getReportDateTime(reportCtx.getReport());
+    }
+    
     public DateTime getReportDateTime(String[] report) {
         DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyyMMddHHmmss");
         DateTime dateTime = formatter.parseDateTime(report[report.length - 2]);

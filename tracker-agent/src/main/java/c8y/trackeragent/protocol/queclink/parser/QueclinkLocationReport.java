@@ -84,17 +84,29 @@ public class QueclinkLocationReport extends QueclinkParser {
 	
     protected final TrackerAgent trackerAgent;
     protected final MeasurementService measurementService;
+    private QueclinkTow queclinkTow;
 
-    @Autowired
     public QueclinkLocationReport(TrackerAgent trackerAgent, MeasurementService measurementService) {
         this.trackerAgent = trackerAgent;
         this.measurementService = measurementService;
+    }
+    
+    @Autowired
+    public QueclinkLocationReport(TrackerAgent trackerAgent, MeasurementService measurementService, QueclinkTow queclinkTow) {
+        this.trackerAgent = trackerAgent;
+        this.measurementService = measurementService;
+        this.queclinkTow = queclinkTow;
     }
 
     @Override
     public boolean onParsed(ReportContext reportCtx) throws SDKException {
         String[] reportType = reportCtx.getReport()[0].split(":");
         if (ONLINE_REP.equals(reportType[0]) || BUFFER_REP.equals(reportType[0])) {
+            
+            if (reportType[1].equals("GTTOW")) {
+                queclinkTow.createEventFromTowReport();
+            }
+            
             for (String availableReps : LOCATION_REPORTS) {
                 if (availableReps.equals(reportType[1])) {
                     return processLocationReportOnParsed(reportCtx);
