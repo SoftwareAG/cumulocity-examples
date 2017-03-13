@@ -27,6 +27,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
 
 import java.math.BigDecimal;
 
@@ -41,8 +42,8 @@ import c8y.Position;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.device.TrackerDevice;
+import c8y.trackeragent.protocol.queclink.parser.QueclinkIgnition;
 import c8y.trackeragent.protocol.queclink.parser.QueclinkLocationReport;
-import c8y.trackeragent.protocol.queclink.parser.QueclinkTow;
 import c8y.trackeragent.server.TestConnectionDetails;
 import c8y.trackeragent.service.MeasurementService;
 
@@ -60,9 +61,9 @@ public class GV500LocationReportTest {
 
     private TrackerAgent trackerAgent = mock(TrackerAgent.class);
     private TrackerDevice device = mock(TrackerDevice.class);
-    private QueclinkTow queclinkTow = mock(QueclinkTow.class);
+    private QueclinkIgnition queclinkIgnition = mock(QueclinkIgnition.class);
     private MeasurementService measurementService = Mockito.mock(MeasurementService.class);
-    private QueclinkLocationReport locationReport = new QueclinkLocationReport(trackerAgent, measurementService, queclinkTow);
+    private QueclinkLocationReport locationReport = new QueclinkLocationReport(trackerAgent, measurementService, queclinkIgnition);
     private TestConnectionDetails connectionDetails = new TestConnectionDetails();
 
     @Before
@@ -81,7 +82,7 @@ public class GV500LocationReportTest {
         locationReport.onParsed(new ReportContext(connectionDetails, GV500REP));
 
         assertEquals(IMEI, imei);
-        verify(trackerAgent).getOrCreateTrackerDevice(IMEI);
+        verify(trackerAgent, times(2)).getOrCreateTrackerDevice(IMEI);
 
         verify(device).setPosition(POS);
         Mobile mobile = generateMobileInfo(MOBILEINFOSTR);

@@ -84,7 +84,7 @@ public class QueclinkLocationReport extends QueclinkParser {
 	
     protected final TrackerAgent trackerAgent;
     protected final MeasurementService measurementService;
-    private QueclinkTow queclinkTow;
+    private QueclinkIgnition queclinkIgnition;
 
     public QueclinkLocationReport(TrackerAgent trackerAgent, MeasurementService measurementService) {
         this.trackerAgent = trackerAgent;
@@ -92,10 +92,10 @@ public class QueclinkLocationReport extends QueclinkParser {
     }
     
     @Autowired
-    public QueclinkLocationReport(TrackerAgent trackerAgent, MeasurementService measurementService, QueclinkTow queclinkTow) {
+    public QueclinkLocationReport(TrackerAgent trackerAgent, MeasurementService measurementService, QueclinkIgnition queclinkIgnition) {
         this.trackerAgent = trackerAgent;
         this.measurementService = measurementService;
-        this.queclinkTow = queclinkTow;
+        this.queclinkIgnition = queclinkIgnition;
     }
 
     @Override
@@ -104,7 +104,11 @@ public class QueclinkLocationReport extends QueclinkParser {
         if (ONLINE_REP.equals(reportType[0]) || BUFFER_REP.equals(reportType[0])) {
             
             if (reportType[1].equals("GTTOW")) {
-                queclinkTow.createEventFromTowReport();
+                createTowEvent(reportCtx);
+            }
+            
+            if (reportType[1].equals("GTIGL")) {
+                createIgnitionEvent(reportCtx);
             }
             
             for (String availableReps : LOCATION_REPORTS) {
@@ -116,6 +120,17 @@ public class QueclinkLocationReport extends QueclinkParser {
         return false;
     }
     
+    private void createIgnitionEvent(ReportContext reportCtx) {
+        queclinkIgnition.createEventFromReport(reportCtx);
+        
+    }
+
+    private void createTowEvent(ReportContext reportCtx) {
+        TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(reportCtx.getImei());
+        DateTime reportTime = queclinkReport.getReportDateTime(reportCtx);
+        device.towEvent(reportTime);
+    }
+
     private boolean processLocationReportOnParsed(ReportContext reportCtx) throws SDKException {
         String deviceType = reportCtx.getEntry(1).substring(0, 2);
         
@@ -171,6 +186,9 @@ public class QueclinkLocationReport extends QueclinkParser {
     
 	private void processLocationReportOnParsed(TrackerDevice device, ReportContext report,
 			int reportStart) throws SDKException {
+	    
+	    createSpeedMeasurement(device, report, reportStart + 1);
+	    
 		if (report.getEntry(reportStart + 3).length() > 0
 				&& report.getEntry(reportStart + 4).length() > 0
 				&& report.getEntry(reportStart + 5).length() > 0) {
@@ -185,8 +203,16 @@ public class QueclinkLocationReport extends QueclinkParser {
 		    createMobileInfo(device, report, reportStart + 7);
 		}
 	}
-	
-	private void createBatteryMeasurement(TrackerDevice device, ReportContext reportCtx, int batteryInfoIndex) throws NumberFormatException {
+
+    private void createSpeedMeasurement(TrackerDevice device, ReportContext reportCtx, int speedIndex) {
+        BigDecimal speedValue = reportCtx.getEntryAsNumber(speedIndex);
+        if (speedValue != null) {
+            DateTime reportDate = queclinkReport.getReportDateTime(reportCtx);
+            measurementService.createSpeedMeasurement(speedValue, device, reportDate);
+        }
+    }
+
+    private void createBatteryMeasurement(TrackerDevice device, ReportContext reportCtx, int batteryInfoIndex) throws NumberFormatException {
 	    
 	    String[] report = reportCtx.getReport();
 	    if (batteryInfoIndex > 0 && batteryInfoIndex < report.length) {

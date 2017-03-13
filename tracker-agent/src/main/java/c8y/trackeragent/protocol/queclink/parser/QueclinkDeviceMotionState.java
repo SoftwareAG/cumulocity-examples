@@ -106,28 +106,38 @@ public class QueclinkDeviceMotionState extends QueclinkParser implements Transla
         } else if (REPORT_INTERVAL_NO_MOTION_ACK.equals(reportType)) {
            return onParsedTrackingAck(reportCtx, reportCtx.getImei());
         }  else if (MOTION_REPORT[0].equals(reportType) || MOTION_REPORT[1].equals(reportType)) {
-            return onParsedMotion(reportCtx.getReport(), reportCtx.getImei());
+            return onParsedMotion(reportCtx, reportCtx.getImei());
         } else {
             return false;
         }
     }
 
-    private boolean onParsedMotion(String[] report, String imei) throws SDKException {
-        parseMotionStateAndCreateEvent(report, imei);
-        parseIgnitionAndCreateEvent(report, imei);
-        parseTowAndCreateEvent(report, imei);
+    private boolean onParsedMotion(ReportContext reportCtx, String imei) throws SDKException {
+        
+        parseMotionStateAndCreateEvent(reportCtx.getReport(), imei);
+        
+        if (reportCtx.getEntry(0).equals(MOTION_REPORT[0])) {
+            parseIgnitionAndCreateEvent(reportCtx, imei);
+            parseTowAndCreateEvent(reportCtx, imei);
+        }
         
         return true;
     }
     
-    private void parseTowAndCreateEvent(String[] report, String imei) {
-        // TODO Auto-generated method stub
-        
+    private void parseTowAndCreateEvent(ReportContext reportCtx, String imei) {
+        if (reportCtx.getEntry(4).equals(BEING_TOWED)) {
+            TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(imei);
+            DateTime reportTime = queclinkReport.getReportDateTime(reportCtx);
+            device.towEvent(reportTime);
+        }
     }
 
-    private void parseIgnitionAndCreateEvent(String[] report, String imei) {
-        queclinkIgnition.getIgnitionFromMotionReport();
-        
+    private void parseIgnitionAndCreateEvent(ReportContext reportCtx, String imei) {
+        if (reportCtx.getEntry(4).equals(MOTION_DETECTED_IGNITION_ON)) {
+            queclinkIgnition.createIgnitionOnEvent(reportCtx, imei);
+        } else if (reportCtx.getEntry(4).equals(MOTION_DETECTED_IGNITION_OFF)) {
+            queclinkIgnition.createIgnitionOffEvent(reportCtx, imei);
+        }        
     }
 
     private void parseMotionStateAndCreateEvent(String[] report, String imei) {
@@ -153,7 +163,7 @@ public class QueclinkDeviceMotionState extends QueclinkParser implements Transla
 
 
         TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(imei);
-        DateTime dateTime = getQueclinkDevice().getReportDateTime(report);
+        DateTime dateTime = queclinkReport.getReportDateTime(report);
         device.motionEvent(motion, dateTime);
     }
 

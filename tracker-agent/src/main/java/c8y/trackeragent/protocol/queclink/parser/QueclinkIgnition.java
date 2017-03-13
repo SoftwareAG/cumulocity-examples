@@ -16,6 +16,8 @@ public class QueclinkIgnition extends QueclinkParser {
     public static final String IGNITION_ON = "+RESP:GTIDN";
     public static final String IGNITION_OFF = "+RESP:GTIDF";
     
+    public static final String IGNITION_LOCATIONR = "+RESP:GTIGL";
+    
     private final TrackerAgent trackerAgent;
     
     @Autowired
@@ -36,23 +38,29 @@ public class QueclinkIgnition extends QueclinkParser {
         return false;
     }
     
-    private void createIgnitionOffEvent(ReportContext reportCtx, String imei) {
+    public void createIgnitionOffEvent(ReportContext reportCtx, String imei) {
         TrackerDevice trackerDevice = trackerAgent.getOrCreateTrackerDevice(imei);
-        DateTime dateTime = getQueclinkDevice().getReportDateTime(reportCtx.getReport());
-        trackerDevice.ignitionOffEvent(dateTime);
-        
+        DateTime dateTime = queclinkReport.getReportDateTime(reportCtx);
+        trackerDevice.ignitionOffEvent(dateTime); 
     }
     
-
-    private void createIgnitionOnEvent(ReportContext reportCtx, String imei) {
+    public void createIgnitionOnEvent(ReportContext reportCtx, String imei) {
         TrackerDevice trackerDevice = trackerAgent.getOrCreateTrackerDevice(imei);
-        DateTime dateTime = getQueclinkDevice().getReportDateTime(reportCtx.getReport());
+        DateTime dateTime = queclinkReport.getReportDateTime(reportCtx);
         trackerDevice.ignitionOnEvent(dateTime);
         
     }
 
-    public void getIgnitionFromMotionReport() {
-        // TODO Auto-generated method stub
+    public void createEventFromReport(ReportContext reportCtx) {
+        
+        if (reportCtx.getEntry(0).equals(IGNITION_LOCATIONR)) {
+            String reportType = reportCtx.getEntry(5);
+            if (reportType.equals("00")) {
+                createIgnitionOnEvent(reportCtx, reportCtx.getImei());
+            } else if (reportType.equals("01")) {
+                createIgnitionOffEvent(reportCtx, reportCtx.getImei());
+            }
+        }
         
     }
     

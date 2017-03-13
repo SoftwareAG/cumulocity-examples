@@ -15,6 +15,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
 import static org.mockito.Mockito.times;
 
 import c8y.MotionTracking;
@@ -35,9 +40,8 @@ public class QueclinkDeviceMotionStateTest {
 
     private TrackerAgent trackerAgent = mock(TrackerAgent.class);
     private TrackerDevice trackerDevice = mock(TrackerDevice.class);
-    private QueclinkIgnition ignition = mock(QueclinkIgnition.class);
     private QueclinkDevice queclinkDevice;
-    private TestConnectionDetails connectionDetails;
+    private TestConnectionDetails connectionDetails = new TestConnectionDetails();
     private OperationRepresentation operation = new OperationRepresentation();
     ManagedObjectRepresentation managedObject;
     
@@ -45,6 +49,8 @@ public class QueclinkDeviceMotionStateTest {
     private Tracking tracking = new Tracking();
     private BaseQueclinkDevice gl505 = new GL505();
     private BaseQueclinkDevice gl300 = new GL300();
+    
+    private QueclinkIgnition ignition = new QueclinkIgnition(trackerAgent);
     private QueclinkDeviceMotionState queclinkDeviceMotionState = new QueclinkDeviceMotionState(trackerAgent, ignition);
     
     public static final String[] MOTION_SETTING = {
@@ -281,5 +287,35 @@ public class QueclinkDeviceMotionStateTest {
         queclinkDeviceMotionState.onParsed(reportCtx);
         verify(trackerAgent).getOrCreateTrackerDevice(reportCtx.getImei());
         verify(trackerDevice, times(2)).setTracking(300);
+    }
+    
+    @Test
+    public void shouldCreateTowEvent() {
+        String[] towReports = {
+                "+RESP:GTSTT,3C0101,135790246811220,,16,0,4.3,92,70.0,121.354335,31.222073,20090214013254,0460,0000,18d8,6141,00,20090214093254,11F0$", //gv75 report
+                "+RESP:GTSTT,1A0500,135790246811220,,16,0,4.3,92,70.0,121.354335,31.222073,20090214013254,0460,0000,18d8,6141,00,20100214093254,11F0$" //gl300 report
+        };
+        
+        for (String towReport : towReports) {
+            queclinkDeviceMotionState.onParsed(new ReportContext(connectionDetails, 
+                    towReport.split(QUECLINK.getFieldSeparator())));
+        }
+        
+        DateTime expectedTime = convertEntryToDateTime("20090214093254");
+        verify(trackerDevice).towEvent(expectedTime);
+    }
+    
+    public void shouldNotCreateTowEvent() {
+        
+    }
+    
+    public void shouldCreateIgnitionEvent() {
+        
+    }
+    
+    private DateTime convertEntryToDateTime(String reportDate) {
+        DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyyMMddHHmmss");
+        DateTime dateTime = formatter.parseDateTime(reportDate);
+        return dateTime;
     }
 }

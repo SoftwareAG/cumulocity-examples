@@ -98,6 +98,8 @@ public class TrackerDevice {
     public static final String IGNITION_ON_EVENT_TYPE = "c8y_IgnitionOnEvent";
     
     public static final String IGNITION_OFF_EVENT_TYPE = "c8y_IgnitionOffEvent";
+    
+    public static final String TOW_EVENT_TYPE = "c8y_TowEvent";
 
     private Mobile mobile;
 
@@ -116,6 +118,8 @@ public class TrackerDevice {
     private EventRepresentation ignitionOnEvent = new EventRepresentation();
     
     private EventRepresentation ignitionOffEvent = new EventRepresentation();
+    
+    private EventRepresentation towEvent = new EventRepresentation();
 
     private AlarmRepresentation fenceAlarm = new AlarmRepresentation();
 
@@ -795,6 +799,14 @@ public class TrackerDevice {
         ignitionOffEvent.setText(eventText);
         ignitionOffEvent.setDateTime(dateTime);
         events.create(ignitionOffEvent);
+        logger.info(eventText);   
+    }
+    
+    public void towEvent(DateTime dateTime) {
+        String eventText = "Tow detected";
+        towEvent.setText(eventText);
+        towEvent.setDateTime(dateTime);
+        events.create(towEvent);
         logger.info(eventText);   
     }
 

@@ -114,16 +114,6 @@ public class QueclinkDevice {
          ManagedObjectRepresentation mo = trackerDevice.getManagedObject();
         return mo;    
     }
-
-    public DateTime getReportDateTime(ReportContext reportCtx) {
-        return getReportDateTime(reportCtx.getReport());
-    }
-    
-    public DateTime getReportDateTime(String[] report) {
-        DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyyMMddHHmmss");
-        DateTime dateTime = formatter.parseDateTime(report[report.length - 2]);
-        return dateTime;
-    }
     
     private void setMoRepresentationType(ManagedObjectRepresentation representation, String type) {
         representation.setType(configureType(type));
