@@ -1,43 +1,43 @@
 package c8y.trackeragent.operations;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import com.cumulocity.model.idtype.GId;
-import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
-import com.cumulocity.rest.representation.operation.OperationRepresentation;
-import com.cumulocity.sdk.client.inventory.InventoryApi;
-import com.cumulocity.sms.gateway.client.OutgoingMessagingClient;
-import com.cumulocity.sms.gateway.model.Address;
-import com.cumulocity.sms.gateway.model.outgoing.OutgoingMessageRequest;
-import com.cumulocity.sms.gateway.model.outgoing.SendMessageRequest;
-
 import c8y.CommunicationMode;
 import c8y.Mobile;
 import c8y.trackeragent.configuration.TrackerConfiguration;
+import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.sms.OptionsAuthorizationSupplier;
+import com.cumulocity.model.idtype.GId;
+import com.cumulocity.model.sms.Address;
+import com.cumulocity.model.sms.SendMessageRequest;
+import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
+import com.cumulocity.rest.representation.operation.OperationRepresentation;
+import com.cumulocity.sdk.client.inventory.InventoryApi;
+import com.cumulocity.sms.client.SmsMessagingApi;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-import static com.cumulocity.sms.gateway.model.Address.phoneNumber;
+import static com.cumulocity.model.sms.Address.phoneNumber;
 
+@Slf4j
 @Component
 public class OperationSmsDelivery {
 
     private final InventoryApi inventoryApi;
-    private final OutgoingMessagingClient outgoingMessagingClient;
-    private final TrackerConfiguration config;
+    private final SmsMessagingApi outgoingMessagingClient;
+
     private final DeviceCredentialsRepository deviceCredentials;
     private final OptionsAuthorizationSupplier optionsAuthSupplier;
 
     @Autowired
-    public OperationSmsDelivery (InventoryApi inventoryApi, 
-            OutgoingMessagingClient outgoingMessagingClient,
+    public OperationSmsDelivery (
+            InventoryApi inventoryApi,
+            SmsMessagingApi outgoingMessagingClient,
             TrackerConfiguration config,
             DeviceCredentialsRepository deviceCredentials,
             OptionsAuthorizationSupplier optionsAuthSupplier) {
         this.inventoryApi = inventoryApi;
         this.outgoingMessagingClient = outgoingMessagingClient;
-        this.config = config;
         this.deviceCredentials = deviceCredentials;
         this.optionsAuthSupplier = optionsAuthSupplier;
     }
@@ -69,6 +69,7 @@ public class OperationSmsDelivery {
     }
 
     public void deliverSms (String translation, GId deviceId, String imei) throws IllegalArgumentException {
+        log.debug("sending sms {} {} {}", translation, deviceId, imei);
 
         ManagedObjectRepresentation deviceMo = inventoryApi.get(deviceId);
         Mobile mobile = deviceMo.get(Mobile.class);
@@ -78,18 +79,16 @@ public class OperationSmsDelivery {
             throw new IllegalArgumentException("MSISDN of target device cannot be null");
         }
 
-        
-        Address address = phoneNumber(receiver);
-        SendMessageRequest request = SendMessageRequest.builder().withReceiver(address).withSender(address).withMessage(translation).build();
-        
-        setOptionsReaderAuthForTenant(imei);
-        OutgoingMessageRequest outgoingMessageRequest = new OutgoingMessageRequest(request);
-        outgoingMessagingClient.send(address, outgoingMessageRequest);
+        final Address address = phoneNumber(receiver);
+        final SendMessageRequest request = SendMessageRequest.builder().withReceiver(address).withSender(address).withMessage(translation).build();
 
-    }
-
-    private void setOptionsReaderAuthForTenant(String imei) {
-        String tenant = deviceCredentials.getDeviceCredentials(imei).getTenant();
-        optionsAuthSupplier.optionsAuthForTenant(config, tenant);   
+        try {
+            final DeviceCredentials device = this.deviceCredentials.getDeviceCredentials(imei);
+            final DeviceCredentials agent = this.deviceCredentials.getAgentCredentials(device.getTenant());
+            optionsAuthSupplier.set(agent);
+            outgoingMessagingClient.sendMessage(request);
+        } finally {
+            optionsAuthSupplier.clear();
+        }
     }
 }
