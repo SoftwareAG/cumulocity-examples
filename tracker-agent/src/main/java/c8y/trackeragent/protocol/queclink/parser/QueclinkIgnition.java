@@ -13,8 +13,8 @@ import c8y.trackeragent.device.TrackerDevice;
 @Component
 public class QueclinkIgnition extends QueclinkParser {
     
-    public static final String IGNITION_ON = "+RESP:GTIDN";
-    public static final String IGNITION_OFF = "+RESP:GTIDF";
+    public static final String IGNITION_ON = "+RESP:GTIGN";
+    public static final String IGNITION_OFF = "+RESP:GTIGF";
     
     public static final String IGNITION_LOCATIONR = "+RESP:GTIGL";
     
