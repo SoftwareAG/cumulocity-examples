@@ -89,7 +89,6 @@ public class TrackerDevice {
 
     public static final String GEOFENCE_ENTER = "c8y_GeofenceEnter";
 
-    public static final String GEOFENCE_EXIT = "c8y_GeofenceExit";
 
     public static final String POWER_ALARM_TYPE = "c8y_PowerAlarm";
     
@@ -488,6 +487,18 @@ public class TrackerDevice {
         chargerConnected.setSource(source);
         chargerConnected.setType(CHARGER_CONNECTED);
         chargerConnected.setText("Charger connected");
+        
+        towEvent.setSource(source);
+        towEvent.setType(TOW_EVENT_TYPE);
+        towEvent.setText("Tow detected");
+        
+        ignitionOnEvent.setSource(source);
+        ignitionOnEvent.setType(IGNITION_ON_EVENT_TYPE);
+        ignitionOnEvent.setText("Ignition On");
+        
+        ignitionOffEvent.setSource(source);
+        ignitionOffEvent.setType(IGNITION_OFF_EVENT_TYPE);
+        ignitionOffEvent.setText("Ignition Off");
 
         crashDetected.setSource(source);
         crashDetected.setType(CRASH_DETECTED_EVENT_TYPE);
@@ -787,27 +798,18 @@ public class TrackerDevice {
     }
     
     public void ignitionOnEvent(DateTime dateTime) {
-        String eventText = "Ignition on";
-        ignitionOnEvent.setText(eventText);
         ignitionOnEvent.setDateTime(dateTime);
-        events.create(ignitionOnEvent);
-        logger.info(eventText);   
+        events.create(ignitionOnEvent);   
     }
 
     public void ignitionOffEvent(DateTime dateTime) {
-        String eventText = "Ignition off";
-        ignitionOffEvent.setText(eventText);
         ignitionOffEvent.setDateTime(dateTime);
-        events.create(ignitionOffEvent);
-        logger.info(eventText);   
+        events.create(ignitionOffEvent);  
     }
     
     public void towEvent(DateTime dateTime) {
-        String eventText = "Tow detected";
-        towEvent.setText(eventText);
         towEvent.setDateTime(dateTime);
-        events.create(towEvent);
-        logger.info(eventText);   
+        events.create(towEvent);  
     }
 
 }
