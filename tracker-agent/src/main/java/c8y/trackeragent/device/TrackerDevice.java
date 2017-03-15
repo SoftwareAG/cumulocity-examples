@@ -89,6 +89,7 @@ public class TrackerDevice {
 
     public static final String GEOFENCE_ENTER = "c8y_GeofenceEnter";
 
+    public static final String GEOFENCE_EXIT = "c8y_GeofenceExit";
 
     public static final String POWER_ALARM_TYPE = "c8y_PowerAlarm";
     
