@@ -61,8 +61,7 @@ public class QueclinkLocationReport extends QueclinkParser {
     public static final String ONLINE_REP = "+RESP";
 
     /**
-     * Reports that have been buffered due to GPRS unavailability. TODO Time
-     * handling for such reports is incorrect.
+     * Reports that have been buffered due to GPRS unavailability.
      */
     public static final String BUFFER_REP = "+BUFF";
 
@@ -196,7 +195,9 @@ public class QueclinkLocationReport extends QueclinkParser {
 			pos.setAlt(new BigDecimal(report.getEntry(reportStart + 3)));
 			pos.setLng(new BigDecimal(report.getEntry(reportStart + 4)));
 			pos.setLat(new BigDecimal(report.getEntry(reportStart + 5)));
-			device.setPosition(pos);
+			
+			DateTime reportTime = queclinkReport.getReportDateTime(report);
+			device.setPosition(pos, reportTime);
 		}
 		
 		if (report.getEntry(reportStart + 10).length() > 0) {

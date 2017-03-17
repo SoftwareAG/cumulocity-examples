@@ -42,6 +42,7 @@ import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.protocol.queclink.parser.QueclinkLocationReport;
 import c8y.trackeragent.server.TestConnectionDetails;
 import c8y.trackeragent.service.MeasurementService;
+import c8y.trackeragent.utils.QueclinkReports;
 
 public class GL500LocationReportTest {
     
@@ -75,7 +76,7 @@ public class GL500LocationReportTest {
         assertEquals(IMEI, imei);
         verify(trackerAgent).getOrCreateTrackerDevice(IMEI);
 
-        verify(device).setPosition(POS);
+        verify(device).setPosition(POS, QueclinkReports.convertEntryToDateTime("20130312190551"));
         Mobile mobile = generateMobileInfo(MOBILEINFOSTR);
         verify(device).setMobileInfo(mobile.getMcc(), mobile.getMnc(), mobile.getLac(), mobile.getCellId());
     }

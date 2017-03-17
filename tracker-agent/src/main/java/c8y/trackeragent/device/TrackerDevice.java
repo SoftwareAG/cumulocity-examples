@@ -210,6 +210,12 @@ public class TrackerDevice {
         EventRepresentation event = aLocationUpdateEvent();
         setPosition(event, position);
     }
+    
+    public void setPosition(Position position, DateTime dateTime) throws SDKException {
+        EventRepresentation event = aLocationUpdateEvent();
+        event.setDateTime(dateTime);
+        setPosition(event, position);
+    }
 
     public void setPosition(EventRepresentation event) {
         setPosition(event, event.get(Position.class));
