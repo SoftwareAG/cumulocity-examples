@@ -16,8 +16,7 @@
     "bootstrap": "~3.3.5",
     "angular-route": "1.5.8",
     "angular-ui-bootstrap-bower": "0.11.0",
-    "d3": "3.5.5",
-    "angular-gettext": "2.3.8"
+    "d3": "3.5.5"
   },
   "license": "MIT",
   "homepage": "http://www.cumulocity.com",
