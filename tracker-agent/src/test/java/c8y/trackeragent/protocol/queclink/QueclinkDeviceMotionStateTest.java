@@ -36,6 +36,7 @@ import c8y.trackeragent.protocol.queclink.device.QueclinkDevice;
 import c8y.trackeragent.protocol.queclink.parser.QueclinkDeviceMotionState;
 import c8y.trackeragent.protocol.queclink.parser.QueclinkIgnition;
 import c8y.trackeragent.server.TestConnectionDetails;
+import c8y.trackeragent.utils.QueclinkReports;
 
 public class QueclinkDeviceMotionStateTest {
 
@@ -302,7 +303,7 @@ public class QueclinkDeviceMotionStateTest {
                     towReport.split(QUECLINK.getFieldSeparator())));
         }
         
-        DateTime expectedTime = convertEntryToDateTime("20090214093254");
+        DateTime expectedTime = QueclinkReports.convertEntryToDateTime("20090214093254");
         verify(trackerDevice).towEvent(expectedTime);
     }
     
@@ -343,11 +344,5 @@ public class QueclinkDeviceMotionStateTest {
         verify(ignition).createIgnitionOffEvent(reportCtx, "135790246811220");
         verify(ignition, times(1)).createIgnitionOnEvent(reportCtx, "135790246811220");
         
-    }
-    
-    private DateTime convertEntryToDateTime(String reportDate) {
-        DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyyMMddHHmmss");
-        DateTime dateTime = formatter.parseDateTime(reportDate);
-        return dateTime;
     }
 }

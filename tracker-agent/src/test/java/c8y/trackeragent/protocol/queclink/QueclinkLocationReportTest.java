@@ -21,6 +21,7 @@ import c8y.trackeragent.protocol.queclink.parser.QueclinkIgnition;
 import c8y.trackeragent.protocol.queclink.parser.QueclinkLocationReport;
 import c8y.trackeragent.server.TestConnectionDetails;
 import c8y.trackeragent.service.MeasurementService;
+import c8y.trackeragent.utils.QueclinkReports;
 
 public class QueclinkLocationReportTest {
 
@@ -54,7 +55,7 @@ public class QueclinkLocationReportTest {
         }
         
         BigDecimal expectedSpeed = new BigDecimal("4.3");
-        DateTime expectedTime = convertEntryToDateTime("20090214093254");
+        DateTime expectedTime = QueclinkReports.convertEntryToDateTime("20090214093254");
         verify(measurementService, times(4)).createSpeedMeasurement(eq(expectedSpeed), eq(device), eq(expectedTime));
         
     }
@@ -79,7 +80,7 @@ public class QueclinkLocationReportTest {
         locationReportParser.onParsed(new ReportContext(connectionDetails, 
                 locationReports[0].split(QUECLINK.getFieldSeparator())));
         
-        DateTime expectedTime = convertEntryToDateTime("20090214093254");
+        DateTime expectedTime = QueclinkReports.convertEntryToDateTime("20090214093254");
         verify(device).towEvent(eq(expectedTime));
     }
     
@@ -90,7 +91,7 @@ public class QueclinkLocationReportTest {
         locationReportParser.onParsed(new ReportContext(connectionDetails, 
                 ignitionOnReport.split(QUECLINK.getFieldSeparator())));
         
-        DateTime expectedTime = convertEntryToDateTime("20090214093254");
+        DateTime expectedTime = QueclinkReports.convertEntryToDateTime("20090214093254");
         verify(device).ignitionOnEvent(expectedTime);
         verify(device, times(0)).ignitionOffEvent(expectedTime);
         
@@ -103,11 +104,4 @@ public class QueclinkLocationReportTest {
         verify(device, times(1)).ignitionOnEvent(expectedTime);
         
     }
-    
-    private DateTime convertEntryToDateTime(String reportDate) {
-        DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyyMMddHHmmss");
-        DateTime dateTime = formatter.parseDateTime(reportDate);
-        return dateTime;
-    }
-
 }
