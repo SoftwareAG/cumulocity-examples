@@ -1,8 +1,5 @@
 package c8y.trackeragent.protocol.queclink.device;
 
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -112,12 +109,6 @@ public class QueclinkDevice {
          TrackerDevice trackerDevice = ManagedObjectCache.instance().get(id);
          ManagedObjectRepresentation mo = trackerDevice.getManagedObject();
         return mo;    
-    }
-
-    public DateTime getReportDateTime(String[] report) {
-        DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyyMMddHHmmss");
-        DateTime dateTime = formatter.parseDateTime(report[report.length - 2]);
-        return dateTime;
     }
     
     private void setMoRepresentationType(ManagedObjectRepresentation representation, String type) {

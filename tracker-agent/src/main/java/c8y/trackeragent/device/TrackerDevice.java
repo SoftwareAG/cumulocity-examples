@@ -94,6 +94,12 @@ public class TrackerDevice {
     public static final String POWER_ALARM_TYPE = "c8y_PowerAlarm";
     
     public static final String CRASH_DETECTED_EVENT_TYPE = "c8y_CrashDetected";
+    
+    public static final String IGNITION_ON_EVENT_TYPE = "c8y_IgnitionOnEvent";
+    
+    public static final String IGNITION_OFF_EVENT_TYPE = "c8y_IgnitionOffEvent";
+    
+    public static final String TOW_EVENT_TYPE = "c8y_TowEvent";
 
     private Mobile mobile;
 
@@ -108,6 +114,12 @@ public class TrackerDevice {
     private EventRepresentation chargerConnected = new EventRepresentation();
     
     private EventRepresentation crashDetected = new EventRepresentation();
+    
+    private EventRepresentation ignitionOnEvent = new EventRepresentation();
+    
+    private EventRepresentation ignitionOffEvent = new EventRepresentation();
+    
+    private EventRepresentation towEvent = new EventRepresentation();
 
     private AlarmRepresentation fenceAlarm = new AlarmRepresentation();
 
@@ -196,6 +208,12 @@ public class TrackerDevice {
 
     public void setPosition(Position position) throws SDKException {
         EventRepresentation event = aLocationUpdateEvent();
+        setPosition(event, position);
+    }
+    
+    public void setPosition(Position position, DateTime dateTime) throws SDKException {
+        EventRepresentation event = aLocationUpdateEvent();
+        event.setDateTime(dateTime);
         setPosition(event, position);
     }
 
@@ -476,6 +494,18 @@ public class TrackerDevice {
         chargerConnected.setSource(source);
         chargerConnected.setType(CHARGER_CONNECTED);
         chargerConnected.setText("Charger connected");
+        
+        towEvent.setSource(source);
+        towEvent.setType(TOW_EVENT_TYPE);
+        towEvent.setText("Tow detected");
+        
+        ignitionOnEvent.setSource(source);
+        ignitionOnEvent.setType(IGNITION_ON_EVENT_TYPE);
+        ignitionOnEvent.setText("Ignition On");
+        
+        ignitionOffEvent.setSource(source);
+        ignitionOffEvent.setType(IGNITION_OFF_EVENT_TYPE);
+        ignitionOffEvent.setText("Ignition Off");
 
         crashDetected.setSource(source);
         crashDetected.setType(CRASH_DETECTED_EVENT_TYPE);
@@ -772,6 +802,21 @@ public class TrackerDevice {
     
     public void setTrackingProtocolInfo  (TrackingProtocol trackingProtocol) {
         this.trackingProtocol = trackingProtocol;
+    }
+    
+    public void ignitionOnEvent(DateTime dateTime) {
+        ignitionOnEvent.setDateTime(dateTime);
+        events.create(ignitionOnEvent);   
+    }
+
+    public void ignitionOffEvent(DateTime dateTime) {
+        ignitionOffEvent.setDateTime(dateTime);
+        events.create(ignitionOffEvent);  
+    }
+    
+    public void towEvent(DateTime dateTime) {
+        towEvent.setDateTime(dateTime);
+        events.create(towEvent);  
     }
 
 }

@@ -58,7 +58,7 @@ public class QueclinkCrashReport extends QueclinkParser {
         int gpsReportEnd = 11;
         
         Position pos = new Position();
-        DateTime dateTime = getQueclinkDevice().getReportDateTime(reportCtx.getReport());
+        DateTime dateTime = queclinkReport.getReportDateTime(reportCtx.getReport());
         
         if (reportCtx.getEntry(gpsReportStart + 3).length() > 0 
                 && reportCtx.getEntry(gpsReportStart + 4).length() > 0
