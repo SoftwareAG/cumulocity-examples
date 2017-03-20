@@ -22,10 +22,7 @@ package c8y.trackeragent.protocol.queclink.parser;
 
 import java.math.BigDecimal;
 
-import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +30,6 @@ import org.springframework.stereotype.Component;
 
 import com.cumulocity.sdk.client.SDKException;
 
-import c8y.Mobile;
 import c8y.Position;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.context.ReportContext;
@@ -177,8 +173,7 @@ public class QueclinkLocationReport extends QueclinkParser {
 
         BigDecimal mileage = reportCtx.getEntryAsNumber(mileageIndex);
         if (mileage != null) {
-            DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyyMMddHHmmss");
-            DateTime dateTime = formatter.parseDateTime(reportCtx.getEntry(reportCtx.getNumberOfEntries() - 2));
+            DateTime dateTime = queclinkReport.getReportDateTime(reportCtx);
             measurementService.createMileageMeasurement(mileage, device, dateTime);
         }
     }
@@ -221,9 +216,7 @@ public class QueclinkLocationReport extends QueclinkParser {
     	    if (batteryLevel != null) {
     	        logger.info("Battery percentage: {}", reportCtx.getEntry(batteryInfoIndex));
     	        
-    	        DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyyMMddHHmmss");
-    	        DateTime dateTime = formatter.parseDateTime(report[report.length - 2]);
-    	        
+    	        DateTime dateTime = queclinkReport.getReportDateTime(report);
     	        measurementService.createPercentageBatteryLevelMeasurement(batteryLevel, device, dateTime);   	       
     	    }
 	    }

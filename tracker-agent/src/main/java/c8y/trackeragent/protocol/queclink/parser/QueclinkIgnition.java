@@ -48,16 +48,20 @@ public class QueclinkIgnition extends QueclinkParser {
         TrackerDevice trackerDevice = trackerAgent.getOrCreateTrackerDevice(imei);
         DateTime dateTime = queclinkReport.getReportDateTime(reportCtx);
         trackerDevice.ignitionOnEvent(dateTime);
-        
     }
 
     public void createEventFromReport(ReportContext reportCtx) {
-        
+
         if (reportCtx.getEntry(0).equals(IGNITION_LOCATIONR)) {
-            String reportType = reportCtx.getEntry(5);
-            if (reportType.equals("00")) {
+            
+            int reportTypeIndex = 5;
+            String ignitionOnType = "00";
+            String ignitionOffType = "01";
+            
+            String reportType = reportCtx.getEntry(reportTypeIndex);
+            if (reportType.equals(ignitionOnType)) {
                 createIgnitionOnEvent(reportCtx, reportCtx.getImei());
-            } else if (reportType.equals("01")) {
+            } else if (reportType.equals(ignitionOffType)) {
                 createIgnitionOffEvent(reportCtx, reportCtx.getImei());
             }
         }
