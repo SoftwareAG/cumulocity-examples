@@ -44,6 +44,7 @@ import c8y.Position;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.device.TrackerDevice;
+import c8y.trackeragent.protocol.queclink.parser.QueclinkIgnition;
 import c8y.trackeragent.protocol.queclink.parser.QueclinkLocationReport;
 import c8y.trackeragent.server.TestConnectionDetails;
 import c8y.trackeragent.service.MeasurementService;
@@ -67,7 +68,8 @@ public class GL200LocationReportTest {
 	private TrackerAgent trackerAgent = mock(TrackerAgent.class);
 	private TrackerDevice device = mock(TrackerDevice.class);	
 	private MeasurementService measurementService = Mockito.mock(MeasurementService.class);
-	private QueclinkLocationReport locationReport = new QueclinkLocationReport(trackerAgent, measurementService);
+	private QueclinkIgnition queclinkIgnition = mock(QueclinkIgnition.class);
+	private QueclinkLocationReport locationReport = new QueclinkLocationReport(trackerAgent, measurementService, queclinkIgnition);
 	private TestConnectionDetails connectionDetails = new TestConnectionDetails();
 
 	@Before

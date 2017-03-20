@@ -1,8 +1,5 @@
 package c8y.trackeragent.protocol.queclink.device;
 
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,7 +8,6 @@ import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 
 import c8y.Hardware;
 import c8y.trackeragent.TrackerAgent;
-import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.device.ManagedObjectCache;
 import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.protocol.queclink.QueclinkConstants;

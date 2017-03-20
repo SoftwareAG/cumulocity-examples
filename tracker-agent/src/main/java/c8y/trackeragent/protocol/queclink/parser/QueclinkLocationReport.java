@@ -81,7 +81,7 @@ public class QueclinkLocationReport extends QueclinkParser {
     protected final MeasurementService measurementService;
     private QueclinkIgnition queclinkIgnition;
 
-    public QueclinkLocationReport(TrackerAgent trackerAgent, MeasurementService measurementService) {
+    protected QueclinkLocationReport(TrackerAgent trackerAgent, MeasurementService measurementService) {
         this.trackerAgent = trackerAgent;
         this.measurementService = measurementService;
     }
