@@ -15,7 +15,7 @@
     this.filter.pageSize = 10;
     this.service = $scope.service;
     $scope.$watch('section.refresh', function (val) {
-      $scope.refresh = val;
+        $scope.refresh = val;
     });
   }
 
