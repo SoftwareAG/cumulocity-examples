@@ -62,8 +62,8 @@ public class QueclinkPower extends QueclinkParser {
     public static final String POWERON_REPORT = "+RESP:GTPNA";
     public static final String POWEROFF_REPORT = "+RESP:GTPFA";
     
-    public static final String EXTERNALPOWERON_REPORT = "+RESP:GTEPN";
-    public static final String EXTERNALPOWEROFF_REPORT = "+RESP:GTEPF";
+    public static final String[] EXTERNALPOWERON_REPORT = {"+RESP:GTEPN", "+RESP:GTMPN"};
+    public static final String[] EXTERNALPOWEROFF_REPORT = {"+RESP:GTEPF", "+RESP:GTMPF"};
     
     private final TrackerAgent trackerAgent;
 
@@ -79,9 +79,9 @@ public class QueclinkPower extends QueclinkParser {
             return parsePowerOn(reportCtx.getReport(), reportCtx.getImei());
         } else if (POWEROFF_REPORT.equals(reportType)) {
             return parsePowerOff(reportCtx.getReport(), reportCtx.getImei());
-        } else if (EXTERNALPOWERON_REPORT.equals(reportType)) {
+        } else if (EXTERNALPOWERON_REPORT[0].equals(reportType) || EXTERNALPOWERON_REPORT[1].equals(reportType)) {
             return parseExternalPowerOn(reportCtx.getReport(), reportCtx.getImei());
-        } else if (EXTERNALPOWEROFF_REPORT.equals(reportType)) {
+        } else if (EXTERNALPOWEROFF_REPORT[0].equals(reportType) || EXTERNALPOWEROFF_REPORT[1].equals(reportType)) {
             return parseExternalPowerOff(reportCtx.getReport(), reportCtx.getImei());
         } else {
             return false;
