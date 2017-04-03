@@ -20,6 +20,7 @@
 
 package c8y.trackeragent.protocol.queclink.parser;
 
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -106,7 +107,8 @@ public class QueclinkPower extends QueclinkParser {
     
     private boolean powerAlarm(String[] report, String imei, boolean powerLost, boolean external) throws SDKException {
         TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(imei);
-        device.powerAlarm(powerLost, external);
+        DateTime reportDate = queclinkReport.getReportDateTime(report);
+        device.powerAlarm(powerLost, external, reportDate);
         return true;
 	}
 }
