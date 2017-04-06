@@ -94,6 +94,12 @@ public class TrackerDevice {
     public static final String POWER_ALARM_TYPE = "c8y_PowerAlarm";
     
     public static final String CRASH_DETECTED_EVENT_TYPE = "c8y_CrashDetected";
+    
+    public static final String IGNITION_ON_EVENT_TYPE = "c8y_IgnitionOnEvent";
+    
+    public static final String IGNITION_OFF_EVENT_TYPE = "c8y_IgnitionOffEvent";
+    
+    public static final String TOW_EVENT_TYPE = "c8y_TowEvent";
 
     private Mobile mobile;
 
@@ -108,6 +114,12 @@ public class TrackerDevice {
     private EventRepresentation chargerConnected = new EventRepresentation();
     
     private EventRepresentation crashDetected = new EventRepresentation();
+    
+    private EventRepresentation ignitionOnEvent = new EventRepresentation();
+    
+    private EventRepresentation ignitionOffEvent = new EventRepresentation();
+    
+    private EventRepresentation towEvent = new EventRepresentation();
 
     private AlarmRepresentation fenceAlarm = new AlarmRepresentation();
 
@@ -198,6 +210,12 @@ public class TrackerDevice {
         EventRepresentation event = aLocationUpdateEvent();
         setPosition(event, position);
     }
+    
+    public void setPosition(Position position, DateTime dateTime) throws SDKException {
+        EventRepresentation event = aLocationUpdateEvent();
+        event.setDateTime(dateTime);
+        setPosition(event, position);
+    }
 
     public void setPosition(EventRepresentation event) {
         setPosition(event, event.get(Position.class));
@@ -246,7 +264,7 @@ public class TrackerDevice {
 
     public void geofenceAlarm(boolean raise) throws SDKException {
         logger.debug("{} {} the geofence", imei, raise ? "left" : "entered");
-        createOrCancelAlarm(raise, fenceAlarm);
+        createOrCancelAlarm(raise, fenceAlarm, new DateTime());
     }
 
     public void setMotionTracking(boolean active) throws SDKException {
@@ -334,11 +352,20 @@ public class TrackerDevice {
     }
     
     public void powerAlarm(boolean powerLost, boolean external) throws SDKException {
+        setPowerAlarmMessage(powerLost, external);
+        createOrCancelAlarm(powerLost, powerAlarm, new DateTime());
+    }
+    
+    public void powerAlarm(boolean powerLost, boolean external, DateTime dateTime) throws SDKException {
+        setPowerAlarmMessage(powerLost, external);
+        createOrCancelAlarm(powerLost, powerAlarm, dateTime);
+    }
+    
+    private void setPowerAlarmMessage(boolean powerLost, boolean external) {
         logger.debug("{} {}", imei, powerLost ? "lost power" : "has power again");
         String msg = external ? "Asset " : "Tracker ";
         msg += powerLost ? "lost power" : "has power again";
         powerAlarm.setText(msg);
-        createOrCancelAlarm(powerLost, powerAlarm);
     }
 
     public void batteryLevel(int level) throws SDKException {
@@ -396,25 +423,25 @@ public class TrackerDevice {
     }
 
     public AlarmRepresentation createAlarm(AlarmRepresentation newAlarm) throws SDKException {
-        return createOrCancelAlarm(true, newAlarm);
+        return createOrCancelAlarm(true, newAlarm, new DateTime());
     }
 
     public AlarmRepresentation clearAlarm(AlarmRepresentation newAlarm) throws SDKException {
-        return createOrCancelAlarm(false, newAlarm);
+        return createOrCancelAlarm(false, newAlarm, new DateTime());
     }
 
-    private AlarmRepresentation createOrCancelAlarm(boolean status, AlarmRepresentation newAlarm) throws SDKException {
+    private AlarmRepresentation createOrCancelAlarm(boolean status, AlarmRepresentation newAlarm, DateTime dateTime) throws SDKException {
         newAlarm.setSource(asSource());
         String newStatus = status ? CumulocityAlarmStatuses.ACTIVE.toString() : CumulocityAlarmStatuses.CLEARED.toString();
 
         AlarmRepresentation activeAlarm = findActiveAlarm(newAlarm.getType());
 
         if (activeAlarm != null) {
-            activeAlarm.setDateTime(new DateTime());
+            activeAlarm.setDateTime(dateTime);
             activeAlarm.setStatus(newStatus);
             return alarms.update(activeAlarm);
         } else {
-            newAlarm.setDateTime(new DateTime());
+            newAlarm.setDateTime(dateTime);
             newAlarm.setStatus(newStatus);
             return alarms.create(newAlarm);
         }
@@ -476,6 +503,18 @@ public class TrackerDevice {
         chargerConnected.setSource(source);
         chargerConnected.setType(CHARGER_CONNECTED);
         chargerConnected.setText("Charger connected");
+        
+        towEvent.setSource(source);
+        towEvent.setType(TOW_EVENT_TYPE);
+        towEvent.setText("Tow detected");
+        
+        ignitionOnEvent.setSource(source);
+        ignitionOnEvent.setType(IGNITION_ON_EVENT_TYPE);
+        ignitionOnEvent.setText("Ignition On");
+        
+        ignitionOffEvent.setSource(source);
+        ignitionOffEvent.setType(IGNITION_OFF_EVENT_TYPE);
+        ignitionOffEvent.setText("Ignition Off");
 
         crashDetected.setSource(source);
         crashDetected.setType(CRASH_DETECTED_EVENT_TYPE);
@@ -772,6 +811,21 @@ public class TrackerDevice {
     
     public void setTrackingProtocolInfo  (TrackingProtocol trackingProtocol) {
         this.trackingProtocol = trackingProtocol;
+    }
+    
+    public void ignitionOnEvent(DateTime dateTime) {
+        ignitionOnEvent.setDateTime(dateTime);
+        events.create(ignitionOnEvent);   
+    }
+
+    public void ignitionOffEvent(DateTime dateTime) {
+        ignitionOffEvent.setDateTime(dateTime);
+        events.create(ignitionOffEvent);  
+    }
+    
+    public void towEvent(DateTime dateTime) {
+        towEvent.setDateTime(dateTime);
+        events.create(towEvent);  
     }
 
 }

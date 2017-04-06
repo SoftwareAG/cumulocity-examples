@@ -53,6 +53,7 @@ import c8y.trackeragent.protocol.queclink.device.GL200;
 import c8y.trackeragent.protocol.queclink.device.QueclinkDevice;
 import c8y.trackeragent.protocol.queclink.parser.QueclinkDeviceMotionState;
 import c8y.trackeragent.protocol.queclink.parser.QueclinkDeviceSetting;
+import c8y.trackeragent.protocol.queclink.parser.QueclinkIgnition;
 import c8y.trackeragent.server.TestConnectionDetails;
 
 public class GL200DeviceMotionStateTest {
@@ -74,6 +75,7 @@ public class GL200DeviceMotionStateTest {
     private QueclinkDeviceMotionState gl200mot;
     private TrackerAgent trackerAgent = mock(TrackerAgent.class);
     private TrackerDevice device = mock(TrackerDevice.class);
+    private QueclinkIgnition ignition = mock(QueclinkIgnition.class);
     private OperationContext operationCtx;
     private MotionTracking mtrack = new MotionTracking();
     private TestConnectionDetails connectionDetails = new TestConnectionDetails(IMEI);
@@ -88,13 +90,13 @@ public class GL200DeviceMotionStateTest {
         operation.set(mtrack);
         operation.setDeviceId(new GId("0"));
         operationCtx = new OperationContext(connectionDetails, operation);
-        gl200mot = new QueclinkDeviceMotionState(trackerAgent);
+        gl200mot = new QueclinkDeviceMotionState(trackerAgent, ignition);
         when(trackerAgent.getOrCreateTrackerDevice(anyString())).thenReturn(device);
         
     }
     
     public void translate_setup() {
-        gl200mot = spy(new QueclinkDeviceMotionState(trackerAgent));
+        gl200mot = spy(new QueclinkDeviceMotionState(trackerAgent, ignition));
         queclinkDevice = mock(QueclinkDevice.class);
         
         when(gl200mot.getQueclinkDevice()).thenReturn(queclinkDevice);

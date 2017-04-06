@@ -51,6 +51,7 @@ import c8y.trackeragent.protocol.queclink.device.QueclinkDevice;
 import c8y.trackeragent.protocol.queclink.parser.QueclinkGeofence;
 import c8y.trackeragent.server.TestConnectionDetails;
 import c8y.trackeragent.service.MeasurementService;
+import c8y.trackeragent.utils.QueclinkReports;
 
 public class GL200GeofenceTest {
 
@@ -142,7 +143,7 @@ public class GL200GeofenceTest {
         position.setLat(new BigDecimal("31.222073"));
         position.setLng(new BigDecimal("121.354335"));
         position.setAlt(new BigDecimal("70.0"));
-        verify(device).setPosition(position);
+        verify(device).setPosition(position, QueclinkReports.convertEntryToDateTime("20090214093254"));
 
         verify(device).geofenceAlarm(true);
     }

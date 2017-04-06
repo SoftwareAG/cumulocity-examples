@@ -39,9 +39,11 @@ import c8y.Position;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.device.TrackerDevice;
+import c8y.trackeragent.protocol.queclink.parser.QueclinkIgnition;
 import c8y.trackeragent.protocol.queclink.parser.QueclinkLocationReport;
 import c8y.trackeragent.server.TestConnectionDetails;
 import c8y.trackeragent.service.MeasurementService;
+import c8y.trackeragent.utils.QueclinkReports;
 
 public class GL500LocationReportTest {
     
@@ -54,7 +56,8 @@ public class GL500LocationReportTest {
     private TrackerAgent trackerAgent = mock(TrackerAgent.class);
     private TrackerDevice device = mock(TrackerDevice.class);
     private MeasurementService measurementService = mock(MeasurementService.class);
-    private QueclinkLocationReport locationReport = new QueclinkLocationReport(trackerAgent, measurementService);
+    private QueclinkIgnition queclinkIgnition = mock(QueclinkIgnition.class);
+    private QueclinkLocationReport locationReport = new QueclinkLocationReport(trackerAgent, measurementService, queclinkIgnition);
     private TestConnectionDetails connectionDetails = new TestConnectionDetails();
 
     @Before
@@ -75,7 +78,7 @@ public class GL500LocationReportTest {
         assertEquals(IMEI, imei);
         verify(trackerAgent).getOrCreateTrackerDevice(IMEI);
 
-        verify(device).setPosition(POS);
+        verify(device).setPosition(POS, QueclinkReports.convertEntryToDateTime("20130312190551"));
         Mobile mobile = generateMobileInfo(MOBILEINFOSTR);
         verify(device).setMobileInfo(mobile.getMcc(), mobile.getMnc(), mobile.getLac(), mobile.getCellId());
     }

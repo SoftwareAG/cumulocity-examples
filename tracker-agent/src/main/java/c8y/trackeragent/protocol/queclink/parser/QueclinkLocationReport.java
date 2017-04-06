@@ -22,10 +22,7 @@ package c8y.trackeragent.protocol.queclink.parser;
 
 import java.math.BigDecimal;
 
-import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +30,6 @@ import org.springframework.stereotype.Component;
 
 import com.cumulocity.sdk.client.SDKException;
 
-import c8y.Mobile;
 import c8y.Position;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.context.ReportContext;
@@ -61,8 +57,7 @@ public class QueclinkLocationReport extends QueclinkParser {
     public static final String ONLINE_REP = "+RESP";
 
     /**
-     * Reports that have been buffered due to GPRS unavailability. TODO Time
-     * handling for such reports is incorrect.
+     * Reports that have been buffered due to GPRS unavailability.
      */
     public static final String BUFFER_REP = "+BUFF";
 
@@ -84,17 +79,33 @@ public class QueclinkLocationReport extends QueclinkParser {
 	
     protected final TrackerAgent trackerAgent;
     protected final MeasurementService measurementService;
+    private QueclinkIgnition queclinkIgnition;
 
-    @Autowired
-    public QueclinkLocationReport(TrackerAgent trackerAgent, MeasurementService measurementService) {
+    protected QueclinkLocationReport(TrackerAgent trackerAgent, MeasurementService measurementService) {
         this.trackerAgent = trackerAgent;
         this.measurementService = measurementService;
+    }
+    
+    @Autowired
+    public QueclinkLocationReport(TrackerAgent trackerAgent, MeasurementService measurementService, QueclinkIgnition queclinkIgnition) {
+        this.trackerAgent = trackerAgent;
+        this.measurementService = measurementService;
+        this.queclinkIgnition = queclinkIgnition;
     }
 
     @Override
     public boolean onParsed(ReportContext reportCtx) throws SDKException {
         String[] reportType = reportCtx.getReport()[0].split(":");
         if (ONLINE_REP.equals(reportType[0]) || BUFFER_REP.equals(reportType[0])) {
+            
+            if (reportType[1].equals("GTTOW")) {
+                createTowEvent(reportCtx);
+            }
+            
+            if (reportType[1].equals("GTIGL")) {
+                createIgnitionEvent(reportCtx);
+            }
+            
             for (String availableReps : LOCATION_REPORTS) {
                 if (availableReps.equals(reportType[1])) {
                     return processLocationReportOnParsed(reportCtx);
@@ -104,6 +115,17 @@ public class QueclinkLocationReport extends QueclinkParser {
         return false;
     }
     
+    private void createIgnitionEvent(ReportContext reportCtx) {
+        queclinkIgnition.createEventFromReport(reportCtx);
+        
+    }
+
+    private void createTowEvent(ReportContext reportCtx) {
+        TrackerDevice device = trackerAgent.getOrCreateTrackerDevice(reportCtx.getImei());
+        DateTime reportTime = queclinkReport.getReportDateTime(reportCtx);
+        device.towEvent(reportTime);
+    }
+
     private boolean processLocationReportOnParsed(ReportContext reportCtx) throws SDKException {
         String deviceType = reportCtx.getEntry(1).substring(0, 2);
         
@@ -139,6 +161,17 @@ public class QueclinkLocationReport extends QueclinkParser {
             int mileageIndex = reportEnd;
             createMileageMeasurement(device, reportCtx, mileageIndex);
         }
+        
+        if(QueclinkConstants.GV75_ID.equals(deviceType)) {
+            String[] reportType = reportCtx.getReport()[0].split(":");
+            
+            int mileageIndex = reportEnd;
+            if (reportType[1].equals("GTFRI")) {
+                int batteryInfoIndex = reportEnd + 4;
+                createBatteryMeasurement(device, reportCtx, batteryInfoIndex);
+            }
+            createMileageMeasurement(device, reportCtx, mileageIndex);
+        }
 
         for (; reportStart < reportEnd; reportStart += reportLength) {
             processLocationReportOnParsed(device, reportCtx, reportStart);
@@ -151,14 +184,16 @@ public class QueclinkLocationReport extends QueclinkParser {
 
         BigDecimal mileage = reportCtx.getEntryAsNumber(mileageIndex);
         if (mileage != null) {
-            DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyyMMddHHmmss");
-            DateTime dateTime = formatter.parseDateTime(reportCtx.getEntry(reportCtx.getNumberOfEntries() - 2));
+            DateTime dateTime = queclinkReport.getReportDateTime(reportCtx);
             measurementService.createMileageMeasurement(mileage, device, dateTime);
         }
     }
     
 	private void processLocationReportOnParsed(TrackerDevice device, ReportContext report,
 			int reportStart) throws SDKException {
+	    
+	    createSpeedMeasurement(device, report, reportStart + 1);
+	    
 		if (report.getEntry(reportStart + 3).length() > 0
 				&& report.getEntry(reportStart + 4).length() > 0
 				&& report.getEntry(reportStart + 5).length() > 0) {
@@ -166,15 +201,25 @@ public class QueclinkLocationReport extends QueclinkParser {
 			pos.setAlt(new BigDecimal(report.getEntry(reportStart + 3)));
 			pos.setLng(new BigDecimal(report.getEntry(reportStart + 4)));
 			pos.setLat(new BigDecimal(report.getEntry(reportStart + 5)));
-			device.setPosition(pos);
+			
+			DateTime reportTime = queclinkReport.getReportDateTime(report);
+			device.setPosition(pos, reportTime);
 		}
 		
 		if (report.getEntry(reportStart + 10).length() > 0) {
 		    createMobileInfo(device, report, reportStart + 7);
 		}
 	}
-	
-	private void createBatteryMeasurement(TrackerDevice device, ReportContext reportCtx, int batteryInfoIndex) throws NumberFormatException {
+
+    private void createSpeedMeasurement(TrackerDevice device, ReportContext reportCtx, int speedIndex) {
+        BigDecimal speedValue = reportCtx.getEntryAsNumber(speedIndex);
+        if (speedValue != null) {
+            DateTime reportDate = queclinkReport.getReportDateTime(reportCtx);
+            measurementService.createSpeedMeasurement(speedValue, device, reportDate);
+        }
+    }
+
+    private void createBatteryMeasurement(TrackerDevice device, ReportContext reportCtx, int batteryInfoIndex) throws NumberFormatException {
 	    
 	    String[] report = reportCtx.getReport();
 	    if (batteryInfoIndex > 0 && batteryInfoIndex < report.length) {
@@ -182,9 +227,7 @@ public class QueclinkLocationReport extends QueclinkParser {
     	    if (batteryLevel != null) {
     	        logger.info("Battery percentage: {}", reportCtx.getEntry(batteryInfoIndex));
     	        
-    	        DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyyMMddHHmmss");
-    	        DateTime dateTime = formatter.parseDateTime(report[report.length - 2]);
-    	        
+    	        DateTime dateTime = queclinkReport.getReportDateTime(report);
     	        measurementService.createPercentageBatteryLevelMeasurement(batteryLevel, device, dateTime);   	       
     	    }
 	    }
