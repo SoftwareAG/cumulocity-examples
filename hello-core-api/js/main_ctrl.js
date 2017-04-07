@@ -1,25 +1,31 @@
 (function () {
   'use strict';
+  var loggedIn = false;
 
   angular.module('helloCoreApi').controller('MainCtrl', [
     '$location',
     '$routeParams',
-    'c8yUser',
-     MainCtrl
+    '$rootScope',
+    'c8yAuth',
+    MainCtrl
   ]);
 
   function MainCtrl(
-    $location,
-    $routeParams,
-    c8yUser
+      $location,
+      $routeParams,
+      $rootScope,
+      c8yAuth
   ) {
-    c8yUser.current().catch(function () {
-      $location.path('/login');
+
+    $rootScope.$on('authStateChange', function (evt, state) {
+      loggedIn = state.hasAuth;
     });
 
-    // if (!$routeParams.section) {
-    //   $location.path('/devices');
-    // }
+    c8yAuth.initializing.then(function() {
+      if (!loggedIn) {
+        $location.path('/login');
+      }
+    });
 
     this.currentSection = $routeParams.section;
     this.sections = {
