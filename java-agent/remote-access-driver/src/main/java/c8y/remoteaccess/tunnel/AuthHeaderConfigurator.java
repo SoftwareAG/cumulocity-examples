@@ -9,7 +9,7 @@ import javax.websocket.ClientEndpointConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.jersey.core.util.Base64;
+import com.google.common.io.BaseEncoding;
 
 public class AuthHeaderConfigurator extends ClientEndpointConfig.Configurator {
 
@@ -18,7 +18,7 @@ public class AuthHeaderConfigurator extends ClientEndpointConfig.Configurator {
     private String basicAuth;
 
     public AuthHeaderConfigurator(String username, String password) {
-        this.basicAuth = new String(Base64.encode(username + ":" + password));
+        this.basicAuth = new String(BaseEncoding.base64().encode(new String(username + ":" + password).getBytes()));
     }
 
     @Override

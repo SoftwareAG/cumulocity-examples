@@ -21,7 +21,7 @@ public class WebSocketClient extends Endpoint {
 
     private Session session;
 
-    private VncSocketClient vpnClient;
+    private VncSocketClient vncClient;
 
     public WebSocketClient() {
         super();
@@ -30,6 +30,8 @@ public class WebSocketClient extends Endpoint {
     public void sendMessage(ByteBuffer data) throws IOException {
         if (session != null && session.getBasicRemote() != null) {
             session.getBasicRemote().sendBinary(data);
+        } else {
+            logger.debug("Unable to send message. No basic remote!");
         }
     }
 
@@ -56,14 +58,14 @@ public class WebSocketClient extends Endpoint {
     public void onBinaryMessage(ByteBuffer data) {
         logger.debug("Received " + data.remaining() + " bytes from websocket, Forwarding to VNC...");
         try {
-            vpnClient.sendMessage(data.array());
+            vncClient.sendMessage(data.array());
         } catch (IOException e) {
-            logger.error("Unable to forward message to vpn");
+            logger.error("Unable to forward message to VNC");
             try {
-                vpnClient.close();
+                vncClient.close();
                 close();
             } catch (IOException e1) {
-                // Ignore
+                logger.debug("Exception when closing vnc client connection: ", e.getMessage());
             }
         }
     }
@@ -79,8 +81,8 @@ public class WebSocketClient extends Endpoint {
         this.session = null;
     }
 
-    public void setVpnClient(VncSocketClient vpnClient) {
-        this.vpnClient = vpnClient;
+    public void setVncClient(VncSocketClient vncClient) {
+        this.vncClient = vncClient;
     }
 
     public boolean isClosed() {
