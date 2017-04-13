@@ -41,8 +41,18 @@ public class VncSocketClient {
     }
 
     public void close() throws IOException {
-        fromVnc.close();
-        toVnc.close();
-        clientSocket.close();
+        if (fromVnc != null) {
+            fromVnc.close();
+        }
+        if (toVnc != null) {
+            toVnc.close();
+        }
+        if (clientSocket != null) {
+            clientSocket.close();
+        }
+    }
+
+    public boolean isConnected() {
+        return clientSocket.isConnected();
     }
 }

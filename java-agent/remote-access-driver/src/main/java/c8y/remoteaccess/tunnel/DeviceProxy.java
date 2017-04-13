@@ -47,6 +47,8 @@ public class DeviceProxy {
 
     private String password;
 
+    private WebSocketClient websocket;
+
     public DeviceProxy(String hostname, int port, String connectionKey, Platform platform) throws MalformedURLException {
 
         if (!(platform instanceof PlatformParameters)) {
@@ -78,39 +80,54 @@ public class DeviceProxy {
 
         logger.debug("DeviceProxy starting");
 
-        URI endpoint = getWebsocketEndpoint();
+        try {
+            URI endpoint = getWebsocketEndpoint();
 
-        // Connect to websocket
-        logger.debug("Creating websocket connection " + endpoint);
-        WebSocketClient websocket = new WebSocketClient();
-        
-        ClientEndpointConfig endpointConfig = ClientEndpointConfig.Builder.create()
-                .configurator(new AuthHeaderConfigurator(username, password))
-                .preferredSubprotocols(Arrays.asList("binary")).build();
-        ContainerProvider.getWebSocketContainer().connectToServer(websocket, endpointConfig, endpoint);
+            // Connect to websocket
+            logger.debug("Creating websocket connection " + endpoint);
+            websocket = new WebSocketClient();
 
-        // Connect to VNC
-        logger.debug("Creating VNC connection " + vncHost + ":" + vncPort);
-        vncsocket = new VncSocketClient(vncHost, vncPort);
-        vncsocket.connect();
+            ClientEndpointConfig endpointConfig = ClientEndpointConfig.Builder.create()
+                    .configurator(new AuthHeaderConfigurator(username, password)).preferredSubprotocols(Arrays.asList("binary")).build();
+            ContainerProvider.getWebSocketContainer().connectToServer(websocket, endpointConfig, endpoint);
 
-        // Start tunneling thread
-        logger.debug("Starting tunneling thread");
-        thread = new TunnelingThread(websocket, vncsocket);
-        thread.start();
+            // Connect to VNC
+            logger.debug("Creating VNC connection " + vncHost + ":" + vncPort);
+            vncsocket = new VncSocketClient(vncHost, vncPort);
+            vncsocket.connect();
 
-        logger.debug("Tunneling operational");
+            // Start tunneling thread
+            logger.debug("Starting tunneling thread");
+            thread = new TunnelingThread(websocket, vncsocket);
+            thread.start();
+
+            logger.debug("Tunneling operational");
+        } catch (Exception e) {
+            stop();
+            throw e;
+        }
     }
 
     public void stop() throws IOException {
+        logger.info("Stopping tunnel...");
+
         if (thread != null) {
             logger.debug("Stopping tunneling thread");
             thread.stop();
+            thread = null;
         }
+
         if (vncsocket != null) {
             logger.debug("Closing VNC connection");
             vncsocket.close();
+            vncsocket = null;
         }
-        logger.debug("DeviceProxy finished");
+
+        if (websocket != null) {
+            logger.debug("Closing websocket connection");
+            websocket.close();
+            websocket = null;
+        }
+        logger.info("Success");
     }
 }

@@ -52,6 +52,7 @@ public class RemoteAccessOperationExecutor implements OperationExecutor {
                 proxy.start();
 
                 operation.setStatus(OperationStatus.SUCCESSFUL.toString());
+
             } catch (IOException | DeploymentException | RuntimeException e) {
                 operation.setStatus(OperationStatus.FAILED.toString());
                 operation.setFailureReason("Unable to connect");
