@@ -1,6 +1,7 @@
 package c8y.remoteaccess;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 
 import javax.websocket.DeploymentException;
@@ -34,7 +35,7 @@ public class RemoteAccessOperationExecutor implements OperationExecutor {
     }
 
     @Override
-    public void execute(OperationRepresentation operation, boolean cleanup) throws URISyntaxException {
+    public void execute(OperationRepresentation operation, boolean cleanup) throws MalformedURLException {
         logger.debug("Received operation {}", operation);
         RemoteAccessConnect connect = operation.get(RemoteAccessConnect.class);
         if (connect == null) {
@@ -53,9 +54,15 @@ public class RemoteAccessOperationExecutor implements OperationExecutor {
 
                 operation.setStatus(OperationStatus.SUCCESSFUL.toString());
 
-            } catch (IOException | DeploymentException | RuntimeException e) {
+            } catch (RemoteAccessWebsocketException e) {
                 operation.setStatus(OperationStatus.FAILED.toString());
-                operation.setFailureReason("Unable to connect");
+                operation.setFailureReason("Device Agent websocket error: " + e.getMessage());
+            } catch (RemoteAccessVncException e) {
+                operation.setStatus(OperationStatus.FAILED.toString());
+                operation.setFailureReason("Device Agent VNC error: " + e.getMessage());
+            } catch (RemoteAccessException e) {
+                operation.setStatus(OperationStatus.FAILED.toString());
+                operation.setFailureReason("Device Agent generic error: " + e.getMessage());
             }
         }
     }

@@ -13,14 +13,14 @@ public class TunnelingThread implements Runnable {
 
     private WebSocketClient websocket;
 
-    private final VncSocketClient vpnsocket;
+    private final VncSocketClient vncsocket;
 
     private boolean close;
 
-    public TunnelingThread(WebSocketClient websocket, VncSocketClient vpnsocket) {
+    public TunnelingThread(WebSocketClient websocket, VncSocketClient vncsocket) {
         this.websocket = websocket;
-        this.vpnsocket = vpnsocket;
-        websocket.setVpnClient(vpnsocket);
+        this.vncsocket = vncsocket;
+        websocket.setVncClient(vncsocket);
     }
 
     public void start() {
@@ -44,7 +44,7 @@ public class TunnelingThread implements Runnable {
         byte[] data = new byte[10 * 1024];
         while (!close) {
             try {
-                int bytesRead = vpnsocket.read(data);
+                int bytesRead = vncsocket.read(data);
                 if (bytesRead > 0) {
                     logger.debug("Received " + bytesRead + " bytes from VNC server. Forwarding to websocket...");
                     if (websocket == null) {
