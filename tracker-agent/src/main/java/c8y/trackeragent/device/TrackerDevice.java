@@ -264,7 +264,7 @@ public class TrackerDevice {
 
     public void geofenceAlarm(boolean raise) throws SDKException {
         logger.debug("{} {} the geofence", imei, raise ? "left" : "entered");
-        createOrCancelAlarm(raise, fenceAlarm);
+        createOrCancelAlarm(raise, fenceAlarm, new DateTime());
     }
 
     public void setMotionTracking(boolean active) throws SDKException {
@@ -352,11 +352,20 @@ public class TrackerDevice {
     }
     
     public void powerAlarm(boolean powerLost, boolean external) throws SDKException {
+        setPowerAlarmMessage(powerLost, external);
+        createOrCancelAlarm(powerLost, powerAlarm, new DateTime());
+    }
+    
+    public void powerAlarm(boolean powerLost, boolean external, DateTime dateTime) throws SDKException {
+        setPowerAlarmMessage(powerLost, external);
+        createOrCancelAlarm(powerLost, powerAlarm, dateTime);
+    }
+    
+    private void setPowerAlarmMessage(boolean powerLost, boolean external) {
         logger.debug("{} {}", imei, powerLost ? "lost power" : "has power again");
         String msg = external ? "Asset " : "Tracker ";
         msg += powerLost ? "lost power" : "has power again";
         powerAlarm.setText(msg);
-        createOrCancelAlarm(powerLost, powerAlarm);
     }
 
     public void batteryLevel(int level) throws SDKException {
@@ -414,25 +423,25 @@ public class TrackerDevice {
     }
 
     public AlarmRepresentation createAlarm(AlarmRepresentation newAlarm) throws SDKException {
-        return createOrCancelAlarm(true, newAlarm);
+        return createOrCancelAlarm(true, newAlarm, new DateTime());
     }
 
     public AlarmRepresentation clearAlarm(AlarmRepresentation newAlarm) throws SDKException {
-        return createOrCancelAlarm(false, newAlarm);
+        return createOrCancelAlarm(false, newAlarm, new DateTime());
     }
 
-    private AlarmRepresentation createOrCancelAlarm(boolean status, AlarmRepresentation newAlarm) throws SDKException {
+    private AlarmRepresentation createOrCancelAlarm(boolean status, AlarmRepresentation newAlarm, DateTime dateTime) throws SDKException {
         newAlarm.setSource(asSource());
         String newStatus = status ? CumulocityAlarmStatuses.ACTIVE.toString() : CumulocityAlarmStatuses.CLEARED.toString();
 
         AlarmRepresentation activeAlarm = findActiveAlarm(newAlarm.getType());
 
         if (activeAlarm != null) {
-            activeAlarm.setDateTime(new DateTime());
+            activeAlarm.setDateTime(dateTime);
             activeAlarm.setStatus(newStatus);
             return alarms.update(activeAlarm);
         } else {
-            newAlarm.setDateTime(new DateTime());
+            newAlarm.setDateTime(dateTime);
             newAlarm.setStatus(newStatus);
             return alarms.create(newAlarm);
         }

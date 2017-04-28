@@ -28,6 +28,7 @@ public interface QueclinkConstants {
     static final String GV500_ID = "1F";
     static final String GL300_ID = "30";
     static final String GL200_ID = "02";
+    static final String GV75_ID = "3C";
     
     static final HashMap<String, String[]> queclinkProperties = new HashMap<String, String[]>() {/**
          * 
@@ -40,6 +41,7 @@ public interface QueclinkConstants {
         put(GV500_ID, new String[]{"gv500","gv500"}); //protocol, default password
         put(GL300_ID, new String[]{"gl300","gl300"}); //protocol, default password
         put(GL200_ID, new String[]{"gl200","gl200"}); //protocol, default password
+        put(GV75_ID, new String[]{"gv75","gv75"}); //protocol, default password
     }};
     
 }

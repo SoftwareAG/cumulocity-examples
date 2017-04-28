@@ -104,4 +104,48 @@ public class QueclinkLocationReportTest {
         verify(device, times(1)).ignitionOnEvent(expectedTime);
         
     }
+    
+    @Test
+    public void shouldCreateBatteryMeasurementForGV75Report() {
+        String locationReport = "+BUFF:GTFRI,3C0100,359464038005240,,,10,1,1,0.0,0,66.6,7.656308,51.956121,20170312171721,0262,0007,7757,3CA8,00,0.0,01194:39:07,,,100,210100,,,,20170312191725,CF78$";
+        locationReportParser.onParsed(new ReportContext(connectionDetails, 
+                locationReport.split(QUECLINK.getFieldSeparator())));
+        
+        DateTime expectedTime = QueclinkReports.convertEntryToDateTime("20170312191725");
+        BigDecimal expectedBattery = new BigDecimal("100");
+        verify(measurementService).createPercentageBatteryLevelMeasurement(expectedBattery, device, expectedTime);
+    }
+    
+    @Test
+    public void shouldNotCreateBatteryForGV75Report() {
+        String[] locationReports = {
+                "+RESP:GTDIS,3C0101,135790246811220,,,20,1,1,4.3,92,70.0,121.354335,31.222073,20090214013254,0460,0000,18d8,6141,00,2000.0,20090214093254,11F0$",
+                "+RESP:GTTOW,3C0101,135790246811220,,,10,1,1,4.3,92,70.0,121.354335,31.222073,20090214013254,0460,0000,18d8,6141,00,2000.0,20090214093254,11F0$"
+        };
+        
+        for (String locationReport: locationReports) {
+            locationReportParser.onParsed(new ReportContext(connectionDetails, 
+                    locationReport.split(QUECLINK.getFieldSeparator())));
+        }
+        
+        verify(measurementService, times(0)).createPercentageBatteryLevelMeasurement((BigDecimal) any(), (TrackerDevice) any(), (DateTime) any());
+    }
+    
+    @Test
+    public void shouldCreateMileageForGV75Report() {
+        String[] locationReports = {
+                "+RESP:GTDIS,3C0101,135790246811220,,,20,1,1,4.3,92,70.0,121.354335,31.222073,20090214013254,0460,0000,18d8,6141,00,2000.0,20090214093254,11F0$",
+                "+RESP:GTTOW,3C0101,135790246811220,,,10,1,1,4.3,92,70.0,121.354335,31.222073,20090214013254,0460,0000,18d8,6141,00,2000.0,20090214093254,11F0$",
+                "+BUFF:GTFRI,3C0100,359464038005240,,,10,1,1,0.0,0,66.6,7.656308,51.956121,20170312171721,0262,0007,7757,3CA8,00,2000.0,01194:39:07,,,100,210100,,,,20090214093254,CF78$"
+        };
+        
+        for (String locationReport: locationReports) {
+            locationReportParser.onParsed(new ReportContext(connectionDetails, 
+                    locationReport.split(QUECLINK.getFieldSeparator())));
+        }
+        
+        DateTime expectedTime = QueclinkReports.convertEntryToDateTime("20090214093254");
+        BigDecimal expectedMileage = new BigDecimal("2000.0");
+        verify(measurementService, times(3)).createMileageMeasurement(expectedMileage, device, expectedTime);
+    }
 }

@@ -161,6 +161,17 @@ public class QueclinkLocationReport extends QueclinkParser {
             int mileageIndex = reportEnd;
             createMileageMeasurement(device, reportCtx, mileageIndex);
         }
+        
+        if(QueclinkConstants.GV75_ID.equals(deviceType)) {
+            String[] reportType = reportCtx.getReport()[0].split(":");
+            
+            int mileageIndex = reportEnd;
+            if (reportType[1].equals("GTFRI")) {
+                int batteryInfoIndex = reportEnd + 4;
+                createBatteryMeasurement(device, reportCtx, batteryInfoIndex);
+            }
+            createMileageMeasurement(device, reportCtx, mileageIndex);
+        }
 
         for (; reportStart < reportEnd; reportStart += reportLength) {
             processLocationReportOnParsed(device, reportCtx, reportStart);
