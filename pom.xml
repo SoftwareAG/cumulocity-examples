@@ -6,7 +6,7 @@
 
 	<groupId>c8y.example</groupId>
 	<artifactId>c8y-examples</artifactId>
-	<version>8.3.0</version>
+	<version>8.7.0</version>
 	<name>Cumulocity :: Examples</name>
 	<packaging>pom</packaging>
 	
@@ -15,7 +15,7 @@
 			<id>develop</id>
 			<properties>
 				<!-- current SNAPSHOT version of c8y-client -->
-				<c8y.version>8.3.0</c8y.version>				
+				<c8y.version>8.7.0</c8y.version>				
 			</properties>
 			<distributionManagement>
 				<snapshotRepository>
@@ -31,7 +31,7 @@
 			<id>production</id>
 			<properties>
 				<!-- current RELEASE version of c8y-client -->
-				<c8y.version>8.3.0</c8y.version>				
+				<c8y.version>8.7.0</c8y.version>				
 			</properties>
 			<distributionManagement>
 				<!-- TODO remove snapshotRepository after release -->
@@ -54,10 +54,6 @@
 
 		<slf4j.version>1.7.0</slf4j.version>
 		<spring.version>3.2.6.RELEASE</spring.version>
-
-		<tycho.version>0.19.0</tycho.version>
-
-		<nexus.port>443</nexus.port>
 	</properties>
 
 	<modules>
@@ -148,54 +144,6 @@
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>rpm-maven-plugin</artifactId>
 					<version>2.1-alpha-3</version>
-				</plugin>
-				<plugin>
-					<groupId>org.eclipse.tycho</groupId>
-					<artifactId>tycho-maven-plugin</artifactId>
-					<version>${tycho.version}</version>
-					<extensions>true</extensions>
-				</plugin>
-				<plugin>
-					<groupId>org.eclipse.tycho</groupId>
-					<artifactId>target-platform-configuration</artifactId>
-					<version>${tycho.version}</version>
-					<configuration>
-						<resolver>p2</resolver>
-						<pomDependencies>consider</pomDependencies>
-						<includeAllDependencies>true</includeAllDependencies>
-						<environments>
-							<environment>
-								<os>win32</os>
-								<ws>gtk</ws>
-								<arch>x86</arch>
-							</environment>
-							<environment>
-								<os>win32</os>
-								<ws>gtk</ws>
-								<arch>x86_64</arch>
-							</environment>
-							<environment>
-								<os>macosx</os>
-								<ws>gtk</ws>
-								<arch>x86</arch>
-							</environment>
-							<environment>
-								<os>macosx</os>
-								<ws>gtk</ws>
-								<arch>x86_64</arch>
-							</environment>
-							<environment>
-								<os>linux</os>
-								<ws>gtk</ws>
-								<arch>x86</arch>
-							</environment>
-							<environment>
-								<os>linux</os>
-								<ws>gtk</ws>
-								<arch>x86_64</arch>
-							</environment>
-						</environments>
-					</configuration>
 				</plugin>
 			</plugins>
 		</pluginManagement>
