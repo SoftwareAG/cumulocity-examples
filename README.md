@@ -19,21 +19,22 @@ Building with Maven
       <activeProfiles>
         <activeProfile>cumulocity</activeProfile>
       </activeProfiles>
-
+    
       <profiles>
         <profile>
           <id>cumulocity</id>
           <repositories>
-	    	<repository>
-              <id>cumulocity-m2-repo</id>
-              <url>http://download.cumulocity.com/maven/repository</url>
-            </repository>
             <repository>
-              <id>cumulocity-sdk-repo</id>
-              <layout>p2</layout>
-              <url>http://resources.cumulocity.com/p2/repository</url>
+              <id>cumulocity-maven-repo</id>
+              <url>http://resources.cumulocity.com/maven/repository</url>
             </repository>
           </repositories>
+          <pluginRepositories>
+            <pluginRepository>
+              <id>cumulocity-plugins-repo</id>
+              <url>http://resources.cumulocity.com/maven/repository</url>
+            </pluginRepository>
+          </pluginRepositories>
         </profile>
       </profiles>
     </settings>
