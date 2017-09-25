@@ -80,7 +80,8 @@ public class TrackerServerEventHandler implements ActiveConnectionProvider {
         ConnectedTracker connectedTracker = connectedTrackerFactory.create(readEvent);
         TrackingProtocol trackingProtocol = connectedTracker.getTrackingProtocol();
         OutWriter outWriter = new OutWriterImpl(readEvent.getServer(), readEvent.getChannel());
-        ConnectionDetails connectionDetails = new ConnectionDetails(trackingProtocol, outWriter, readEvent.getChannel());
+        ConnectionDetails connectionDetails = new ConnectionDetails(trackingProtocol, outWriter,
+                readEvent.getChannel(), connectionsContainer);
         return new ActiveConnection(connectionDetails, connectedTracker);
     }
 

@@ -20,77 +20,105 @@
 
 package c8y.trackeragent.server;
 
-import java.nio.channels.SocketChannel;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+
+import java.io.IOException;
+import java.nio.channels.SocketChannel;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Component
+@Slf4j
 public class ConnectionsContainer {
 
     private static final Logger logger = LoggerFactory.getLogger(ConnectionsContainer.class);
 
-    private final Map<SocketChannel, ActiveConnection> connectionsIndex = new ConcurrentHashMap<SocketChannel, ActiveConnection>();
-    private final List<ActiveConnection> connections = new ArrayList<ActiveConnection>();
+    private final Map<String, ActiveConnection> connectionsPerImei = new ConcurrentHashMap<>();
+
+    private final Map<SocketChannel, ActiveConnection> connections = new ConcurrentHashMap<>();
 
     public ActiveConnection get(SocketChannel channel) {
-        return connectionsIndex.get(channel);
+        return connections.get(channel);
     }
 
-    public ActiveConnection get(String imei) {
-        for (ActiveConnection connection : connections) {
-            if (imei.equals(connection.getConnectionDetails().getImei())) {
-                return connection;
+    public void register(String imei, SocketChannel channel) {
+        ActiveConnection oldConnectionForImei = connectionsPerImei.get(imei);
+        removeAndCloseLegacyConnection(imei, channel, oldConnectionForImei);
+        registerNewConnectionPerImei(imei, channel);
+    }
+
+    private void registerNewConnectionPerImei(String imei, SocketChannel channel) {
+        for (ActiveConnection connection : connections.values()) {
+            if (connection.getConnectionDetails().getImei() != null
+                    && connection.getConnectionDetails().equals(imei)
+                    && connection.getConnectionDetails().getChannel().equals(channel)) {
+                connectionsPerImei.put(imei, connection);
+                log.info("New connection for imei {} registered.", imei);
             }
         }
-        return null;
+    }
+
+    private void removeAndCloseLegacyConnection(String imei, SocketChannel channel, ActiveConnection oldConnectionForImei) {
+        if (oldConnectionForImei != null
+                && !oldConnectionForImei.getConnectionDetails().getChannel().equals(channel)) {
+            connectionsPerImei.remove(imei);
+            connections.remove(oldConnectionForImei.getConnectionDetails().getChannel());
+            try {
+                oldConnectionForImei.getConnectionDetails().getChannel().close();
+                log.info("Removed and closed legacy connection for imei: {}.", imei);
+            } catch (IOException e) {
+                log.error("Failed to close device connection", e);
+            }
+        }
+        if (oldConnectionForImei == null) {
+            Iterator<ActiveConnection> iterator = connections.values().iterator();
+            while (iterator.hasNext()) {
+                ActiveConnection activeConnection = iterator.next();
+                if (activeConnection.getConnectionDetails().getImei() != null
+                        && activeConnection.getConnectionDetails().equals(imei)
+                        && !activeConnection.getConnectionDetails().getChannel().equals(channel)) {
+                    connections.remove(oldConnectionForImei.getConnectionDetails().getChannel());
+                    try {
+                        oldConnectionForImei.getConnectionDetails().getChannel().close();
+                        log.info("Removed and closed legacy connection for imei: {}.", imei);
+                    } catch (IOException e) {
+                        log.error("Failed to close device connection", e);
+                    }
+                }
+            }
+        }
     }
 
     public void add(ActiveConnection connection) {
-        synchronized (connections) {
-            logger.info("Store connection: {}", connection);
-            connectionsIndex.put(connection.getConnectionDetails().getChannel(), connection);
-            connections.add(connection);
-        }
+        logger.info("Store connection: {}", connection);
+        connections.put(connection.getConnectionDetails().getChannel(), connection);
+        logger.info("Number of connections: ", connections.size());
     }
 
-    protected List<ActiveConnection> getAll() {
-        return connections;
+    public ActiveConnection get(String imei) {
+        return connectionsPerImei.get(imei);
     }
 
-    public void remove(String imei) {
-        ActiveConnection activeConnection = get(imei);
-        if (activeConnection == null) {
-            logger.warn("Connection for imei: {} have been already removed.", imei);
-        } else {
-            remove(activeConnection);
-        }
-    }
-
-    public void remove(SocketChannel channel) {
-        ActiveConnection activeConnection = get(channel);
-        if (activeConnection == null) {
-            logger.warn("Connection for channel: {} have been already removed.", channel);
-        } else {
-            remove(activeConnection);
-        }
-    }
-
-    private void remove(ActiveConnection activeConnection) {
-        logger.info("Remove connection: {}", activeConnection);
-        synchronized (connections) {
-            connections.remove(activeConnection);
-            connectionsIndex.remove(activeConnection.getConnectionDetails().getChannel());
-        }
+    protected Collection<ActiveConnection> getAll() {
+        return connections.values();
     }
 
     public ActiveConnection next() {
-        for (ActiveConnection connection : connections) {
+        Iterator<ActiveConnection> it = connections.values().iterator();
+        while (it.hasNext()) {
+            ActiveConnection connection = it.next();
+            if (!connection.getConnectionDetails().getChannel().isOpen()) {
+                logger.info("Found closed connection in container: {}, removing it", connection);
+                it.remove();
+                remove(connection.getConnectionDetails().getImei());
+                continue;
+            }
             if (connection.isProcessing()) {
                 continue;
             }
@@ -103,4 +131,21 @@ public class ConnectionsContainer {
         return null;
     }
 
+    public void remove(String imei) {
+        if (StringUtils.isEmpty(imei)) {
+            return;
+        }
+        connectionsPerImei.remove(imei);
+    }
+
+    public void remove(SocketChannel channel) {
+        ActiveConnection activeConnection = connections.get(channel);
+        if (activeConnection == null) {
+            logger.warn("Connection for channel: {} has been already removed.", channel);
+        } else {
+            logger.info("Remove connection: {}", activeConnection);
+            connections.remove(channel);
+            remove(activeConnection.getConnectionDetails().getImei());
+        }
+    }
 }
