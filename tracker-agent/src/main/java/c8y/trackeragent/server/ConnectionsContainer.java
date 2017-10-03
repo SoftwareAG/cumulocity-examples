@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import java.io.IOException;
 import java.nio.channels.SocketChannel;
 import java.util.Collection;
 import java.util.Iterator;
@@ -48,49 +47,33 @@ public class ConnectionsContainer {
     }
 
     public void register(String imei, SocketChannel channel) {
-        ActiveConnection oldConnectionForImei = connectionsPerImei.get(imei);
-        removeAndCloseLegacyConnection(imei, channel, oldConnectionForImei);
+        removeAndCloseLegacyConnection(imei, channel);
         registerNewConnectionPerImei(imei, channel);
     }
 
     private void registerNewConnectionPerImei(String imei, SocketChannel channel) {
         for (ActiveConnection connection : connections.values()) {
-            if (connection.getConnectionDetails().getImei() != null
-                    && connection.getConnectionDetails().equals(imei)
-                    && connection.getConnectionDetails().getChannel().equals(channel)) {
+            if (connection.hasImei(imei) && connection.hasChannel(channel)) {
                 connectionsPerImei.put(imei, connection);
                 log.info("New connection for imei {} registered.", imei);
             }
         }
     }
 
-    private void removeAndCloseLegacyConnection(String imei, SocketChannel channel, ActiveConnection oldConnectionForImei) {
+    private void removeAndCloseLegacyConnection(String imei, SocketChannel channel) {
+        ActiveConnection oldConnectionForImei = connectionsPerImei.get(imei);
         if (oldConnectionForImei != null
-                && !oldConnectionForImei.getConnectionDetails().getChannel().equals(channel)) {
+                && !oldConnectionForImei.hasChannel(channel)) {
             connectionsPerImei.remove(imei);
             connections.remove(oldConnectionForImei.getConnectionDetails().getChannel());
-            try {
-                oldConnectionForImei.getConnectionDetails().getChannel().close();
-                log.info("Removed and closed legacy connection for imei: {}.", imei);
-            } catch (IOException e) {
-                log.error("Failed to close device connection", e);
-            }
+            oldConnectionForImei.close();
         }
-        if (oldConnectionForImei == null) {
-            Iterator<ActiveConnection> iterator = connections.values().iterator();
-            while (iterator.hasNext()) {
-                ActiveConnection activeConnection = iterator.next();
-                if (activeConnection.getConnectionDetails().getImei() != null
-                        && activeConnection.getConnectionDetails().equals(imei)
-                        && !activeConnection.getConnectionDetails().getChannel().equals(channel)) {
-                    connections.remove(oldConnectionForImei.getConnectionDetails().getChannel());
-                    try {
-                        oldConnectionForImei.getConnectionDetails().getChannel().close();
-                        log.info("Removed and closed legacy connection for imei: {}.", imei);
-                    } catch (IOException e) {
-                        log.error("Failed to close device connection", e);
-                    }
-                }
+        Iterator<ActiveConnection> iterator = connections.values().iterator();
+        while (iterator.hasNext()) {
+            ActiveConnection activeConnection = iterator.next();
+            if (activeConnection.hasImei(imei) && !activeConnection.hasChannel(channel)) {
+                iterator.remove();
+                activeConnection.close();
             }
         }
     }
