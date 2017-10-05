@@ -67,6 +67,7 @@ public class ConnectionsContainer {
             connectionsPerImei.remove(imei);
             connections.remove(oldConnectionForImei.getConnectionDetails().getChannel());
             oldConnectionForImei.close();
+            log.info("Removed and close legacy connection for imei {}.", imei);
         }
         Iterator<ActiveConnection> iterator = connections.values().iterator();
         while (iterator.hasNext()) {
@@ -81,7 +82,7 @@ public class ConnectionsContainer {
     public void add(ActiveConnection connection) {
         logger.info("Store connection: {}", connection);
         connections.put(connection.getConnectionDetails().getChannel(), connection);
-        logger.info("Number of connections: ", connections.size());
+        logger.info("Number of connections: {}", connections.size());
     }
 
     public ActiveConnection get(String imei) {
