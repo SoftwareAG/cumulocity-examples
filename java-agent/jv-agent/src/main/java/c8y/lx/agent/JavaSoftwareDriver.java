@@ -27,16 +27,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Map.Entry;
+import java.util.HashMap;
 
+import c8y.SoftwareList;
+import c8y.SoftwareListEntry;
+import com.cumulocity.sdk.client.inventory.BinariesApi;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import c8y.Software;
 import c8y.lx.driver.Driver;
 import c8y.lx.driver.OperationExecutor;
 import c8y.lx.driver.OpsUtil;
@@ -59,7 +58,10 @@ public class JavaSoftwareDriver implements Driver, OperationExecutor {
 	private static final String SOFTWARE_PATH = "./lib/";
 	private static Logger logger = LoggerFactory.getLogger(JavaSoftwareDriver.class);
 
-	private Software software = new Software();
+	private SoftwareList software = new SoftwareList();
+	private HashMap<String, SoftwareListEntry> sftMap = new HashMap<String, SoftwareListEntry>();
+
+	private BinariesApi binaries;
 
 	private GId deviceId;
 	
@@ -69,8 +71,13 @@ public class JavaSoftwareDriver implements Driver, OperationExecutor {
             @Override
             public boolean accept(File dir, String file) {
                 if (file.matches(".*[.]jar$")) {
-                    String[] nameVer = file.split("-[0-9]+[.]");
-                    software.put(nameVer[0], file);
+                	file=file.substring(0,file.length()-4  	);
+                	SoftwareListEntry s = new SoftwareListEntry();
+                    s.setName(file.split("-[0-9]+[.]")[0]);
+                    s.setVersion(file.split(s.getName()+"-")[1]);
+                    s.setUrl(" ");
+                    software.add(s);
+                    sftMap.put(s.getName(),s);
                 }
                 return false;
             }
@@ -81,6 +88,7 @@ public class JavaSoftwareDriver implements Driver, OperationExecutor {
 	@Override
 	public void initialize(Platform platform) throws Exception {
 	    // Nothing to do here.
+        binaries = platform.getBinariesApi();
 	}
 
 	@Override
@@ -106,7 +114,7 @@ public class JavaSoftwareDriver implements Driver, OperationExecutor {
 
 	@Override
 	public String supportedOperationType() {
-		return "c8y_Software";
+		return "c8y_SoftwareList";
 	}
 
 	@Override
@@ -126,56 +134,82 @@ public class JavaSoftwareDriver implements Driver, OperationExecutor {
 
 	private void finishExecuting(OperationRepresentation operation) {
 		logger.info("Checking installed software base after update");
-		Software shouldBeInstalled = operation.get(Software.class);
+		SoftwareList shouldBeInstalled = operation.get(SoftwareList.class);
+
+        HashMap<String, SoftwareListEntry> shouldBeInstalledMap = new HashMap<String, SoftwareListEntry>();
 
 		OperationStatus status = OperationStatus.SUCCESSFUL;
+		String notInstalled = null;
+        String notDeleted = null;
 
-		for (Entry<String, String> shouldBeInstalledEntry : shouldBeInstalled.entrySet()) {
-			try {
-				URL url = new URL(shouldBeInstalledEntry.getValue());
-				String shouldBeInstalledFileName = Paths.get(url.getPath()).getFileName().toString();
-				String installed = software.get(shouldBeInstalledEntry.getKey());
-				
-				if(installed==null||!installed.equals(shouldBeInstalledFileName)){	
-					status = OperationStatus.FAILED;
-					logger.warn("Installation of {} failed. URL: {} .", shouldBeInstalledEntry.getKey(), shouldBeInstalledEntry.getValue());
-				}
-			} catch (MalformedURLException e) {
-				String installed = software.get(shouldBeInstalledEntry.getClass());
-				if(installed!=null) {
-					status = OperationStatus.FAILED;
-					logger.warn("{} was not removed.", shouldBeInstalledEntry.getKey(), shouldBeInstalledEntry.getValue());
-				}
-			}
-		}
+		for (SoftwareListEntry shouldBeInstalledEntry : shouldBeInstalled) {
+            shouldBeInstalledMap.put(shouldBeInstalledEntry.getName(),shouldBeInstalledEntry);
+		    SoftwareListEntry installedEntry = sftMap.get(shouldBeInstalledEntry.getName());
+            if (installedEntry==null || !shouldBeInstalledEntry.getVersion().equals(installedEntry.getVersion())) {
+                if (notInstalled==null)
+                    notInstalled="";
+                status = OperationStatus.FAILED;
+                notInstalled += " " + shouldBeInstalledEntry.getName() + '-' + shouldBeInstalledEntry.getVersion() + ".jar";
+            }
+        }
+
+        for (SoftwareListEntry installedSoftwareEntry : software){
+		    if (shouldBeInstalledMap.get(installedSoftwareEntry.getName())==null) {
+                if (notDeleted == null)
+                    notDeleted = "";
+                status = OperationStatus.FAILED;
+                notDeleted += " " + installedSoftwareEntry.getName() + '-' + installedSoftwareEntry.getVersion() + ".jar";
+            }
+        }
 
 		operation.setStatus(status.toString());
+		if(status!=OperationStatus.SUCCESSFUL)
+		    operation.setFailureReason( (notDeleted!=null?"Not deleted:"+notDeleted:"") +
+                                        (notInstalled!=null?"Not installed:"+notInstalled:"") );
 	}
 
 	private void executePending(OperationRepresentation operation)
 			throws IOException {
-		Software toBeInstalled = (Software) operation.get(Software.class)
-				.clone();
-		Software toBeRemoved = new Software();
-		Software toBeReplaced = new Software();
+        SoftwareList softwareUpdateOperation = (SoftwareList) operation.get(SoftwareList.class)
+                .clone();
+        SoftwareList toBeRemoved = new SoftwareList();
+        SoftwareList toBeDownloaded = new SoftwareList();
 
-		for (Entry<String, String> currentPkg : software.entrySet()) {
-			String software = currentPkg.getKey();
-			String version = currentPkg.getValue();
-			String newVersion = toBeInstalled.get(software);
+        HashMap<String, SoftwareListEntry> sftUpdOpMap = new HashMap<String, SoftwareListEntry>();
 
-			if (newVersion == null) {
-				toBeRemoved.put(software, version);
-			} else if (equals(newVersion, version)) {
-				toBeInstalled.remove(version);
-			}
-		}
+        for (SoftwareListEntry newSoft : softwareUpdateOperation) {
+            sftUpdOpMap.put(newSoft.getName(), newSoft);
+            SoftwareListEntry installedSoft = sftMap.get(newSoft.getName());
 
-		download(toBeInstalled, toBeReplaced);
-		rename(toBeInstalled);
-		remove(toBeRemoved);
-		remove(toBeReplaced);
-		System.exit(0); // Delete files and restart process through watcher
+            if (newSoft.getUrl().matches("^https?:\\/\\/.+\\/inventory\\/binaries\\/[0-9]+$")) {
+                if (installedSoft == null)
+                    toBeDownloaded.add(newSoft);
+                else if (!installedSoft.getVersion().equals(newSoft.getVersion())) {
+                    toBeDownloaded.add(newSoft);
+                    toBeRemoved.add(installedSoft);
+                } else
+                    logger.warn("Package {} already installed. Skipping...", newSoft.getName() + "-" + newSoft.getVersion());
+            } else {
+                if (installedSoft == null || !installedSoft.getVersion().equals(newSoft.getVersion()))
+                    logger.warn("Unknown software url for package {}-{}:{]", newSoft.getName(), newSoft.getVersion(), newSoft.getUrl());
+            }
+        }
+
+        for (SoftwareListEntry entr : software) {
+            SoftwareListEntry opEntry = sftUpdOpMap.get(entr.getName());
+            if (opEntry == null)
+                toBeRemoved.add(entr);
+        }
+
+        if (!toBeDownloaded.isEmpty() && !toBeRemoved.isEmpty()) {
+            download(toBeDownloaded, toBeRemoved);
+            rename(toBeDownloaded);
+            remove(toBeRemoved);
+            System.exit(0); // Delete files and restart process through watcher
+        } else {
+            operation.setStatus(OperationStatus.FAILED.toString());
+            operation.setFailureReason("Nothing to install/upgrade.");
+        }
 
 	}
 
@@ -187,55 +221,49 @@ public class JavaSoftwareDriver implements Driver, OperationExecutor {
 		}
 	}
 
-	private void download(Software toBeInstalled, Software toBeReplaced) {
-		ArrayList<String> downloadFails = new ArrayList<String>();
-		for (Entry<String, String> toBeInstalledEntry : toBeInstalled.entrySet()) {
-			logger.debug("Downloading " + toBeInstalledEntry);
-			
-			URL url=null;
-			try {
-				url = new URL(toBeInstalledEntry.getValue());
-			} catch (MalformedURLException x) {
-				//if malformed url log it, remove it from the list of packages to be installed and continue with next entry
-				logger.warn("Malformed URL: " + toBeInstalledEntry.getValue());
-				downloadFails.add(toBeInstalledEntry.getKey());
-				continue;
-			}
-			String fileName = Paths.get(url.getPath()).getFileName().toString();
+	private void download(SoftwareList toBeDownloaded, SoftwareList toBeRemoved) {
+    	for (SoftwareListEntry toBeDownloadedEntry : toBeDownloaded) {
+			logger.debug("Downloading " + toBeDownloadedEntry);
+
+			String fileName= toBeDownloadedEntry.getName()+"-"+toBeDownloadedEntry.getVersion()+".jar";
+			InputStream is = binaries.downloadFile(new GId(toBeDownloadedEntry.getUrl().split("inventory\\/binaries\\/")[1]));
 			String filePath = SOFTWARE_PATH + fileName + DOWNLOADING;
-				
-			try (InputStream os = url.openStream();
-					ReadableByteChannel rbc = Channels.newChannel(os);
-					FileOutputStream fos = new FileOutputStream(filePath);) {
-				fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
-					
-				// If everything went well, replace other versions of the software if they exist.
-				String toBeReplacedValue = software.get(toBeInstalledEntry.getKey()); 
-				if(toBeReplacedValue!=null)
-					toBeReplaced.put(toBeInstalledEntry.getKey(), toBeReplacedValue);
-			} catch (IOException iox) {
-				logger.warn("Failed downloading " + toBeInstalledEntry.getValue());
-				downloadFails.add(toBeInstalledEntry.getKey());
+			File targetFile = new File(SOFTWARE_PATH + fileName + DOWNLOADING);
+			FileOutputStream outputStream = null;
+			try {
+				outputStream  = new FileOutputStream(targetFile);
+				byte[] buffer = new byte[8 * 1024];
+				int bytesRead;
+				while ((bytesRead = is.read(buffer)) != -1) {
+					outputStream.write(buffer, 0, bytesRead);
+				}
+			} catch (Exception e) {
+				logger.warn("Error downloading {}:{}",toBeDownloadedEntry.getName()+"-"+toBeDownloadedEntry.getVersion(), toBeDownloadedEntry.getUrl(),e);
+				toBeRemoved.remove(toBeDownloadedEntry);
+				toBeDownloaded.remove(toBeDownloadedEntry);
+				targetFile.deleteOnExit();
+			} finally {
+				IOUtils.closeQuietly(is);
+				IOUtils.closeQuietly(outputStream);
 			}
 		}
-		for(String failed:downloadFails)
-			toBeInstalled.remove(failed);
 	}
 
-	private void rename(Software toBeInstalled) throws MalformedURLException{
-		for (String pkg : toBeInstalled.values()) {
-			URL url = new URL(pkg);
-			String fileName = Paths.get(url.getPath()).getFileName().toString();
+	private void rename(SoftwareList toBeRenamed) throws MalformedURLException{
+		for (SoftwareListEntry pkg : toBeRenamed) {
+			String fileName = pkg.getName()+"-"+pkg.getVersion()+".jar";
 			File downloaded = new File(SOFTWARE_PATH + fileName + DOWNLOADING);
 			File target = new File(SOFTWARE_PATH + fileName);
-			downloaded.renameTo(target);
+			if (!downloaded.renameTo(target))
+			    logger.warn("Renaming failed {}:{}",pkg.getName()+"-"+pkg.getVersion(), pkg.getUrl());
 		}
 	}
 
-	private void remove(Software toBeRemoved) {
-		for (String pkg : toBeRemoved.values()) {
-			logger.debug("Removing " + pkg);
-			new File(SOFTWARE_PATH + pkg).deleteOnExit();
+	private void remove(SoftwareList toBeRemoved) {
+		for (SoftwareListEntry pkg : toBeRemoved) {
+		    String fileName = pkg.getName()+"-"+pkg.getVersion()+".jar";
+			logger.debug("Removing " + fileName);
+			new File(SOFTWARE_PATH + fileName).deleteOnExit();
 		}
 	}
 }
