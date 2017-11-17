@@ -12,6 +12,18 @@
     <name>Cumulocity :: Examples :: PiFace Driver</name>
 	<description>PiFace driver for the Cumulocity Raspberry Pi Agent</description>
 	
+	<repositories>
+		<repository>
+			<id>oss-snapshots-repo</id>
+			<name>Sonatype OSS Maven Repository</name>
+			<url>https://oss.sonatype.org/content/groups/public</url>
+			<snapshots>
+				<enabled>true</enabled>
+				<updatePolicy>always</updatePolicy>
+			</snapshots>
+		</repository>
+	</repositories>
+
 	<dependencies>
         <dependency>
             <groupId>c8y.example</groupId>
@@ -20,7 +32,7 @@
         <dependency>
 			<groupId>com.pi4j</groupId>
 			<artifactId>pi4j-example</artifactId>
-			<version>1.0</version>
+			<version>1.2-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 
