@@ -26,7 +26,6 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.HashMap;
 
 import c8y.SoftwareList;
@@ -76,8 +75,10 @@ public class JavaSoftwareDriver implements Driver, OperationExecutor {
                     s.setName(file.split("-[0-9]+[.]")[0]);
                     s.setVersion(file.split(s.getName()+"-")[1]);
                     s.setUrl(" ");
-                    software.add(s);
-                    sftMap.put(s.getName(),s);
+                    if(!sftMap.containsKey(s.getName())) {
+						software.add(s);
+						sftMap.put(s.getName(), s);
+					}
                 }
                 return false;
             }
@@ -191,7 +192,7 @@ public class JavaSoftwareDriver implements Driver, OperationExecutor {
                     logger.warn("Package {} already installed. Skipping...", newSoft.getName() + "-" + newSoft.getVersion());
             } else {
                 if (installedSoft == null || !installedSoft.getVersion().equals(newSoft.getVersion()))
-                    logger.warn("Unknown software url for package {}-{}:{]", newSoft.getName(), newSoft.getVersion(), newSoft.getUrl());
+                    logger.warn("Unknown software url for package {}-{}:{}", newSoft.getName(), newSoft.getVersion(), newSoft.getUrl());
             }
         }
 
@@ -211,14 +212,6 @@ public class JavaSoftwareDriver implements Driver, OperationExecutor {
             operation.setFailureReason("Nothing to install/upgrade.");
         }
 
-	}
-
-	private boolean equals(String newVersion, String version) {
-		try {
-			return new URL(newVersion).getFile().equals(version);
-		} catch (MalformedURLException e) {
-			return false;
-		}
 	}
 
 	private void download(SoftwareList toBeDownloaded, SoftwareList toBeRemoved) {
