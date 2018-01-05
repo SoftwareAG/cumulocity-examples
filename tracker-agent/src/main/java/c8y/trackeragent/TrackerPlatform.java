@@ -16,6 +16,7 @@ import com.cumulocity.sdk.client.inventory.BinariesApi;
 import com.cumulocity.sdk.client.inventory.InventoryApi;
 import com.cumulocity.sdk.client.measurement.MeasurementApi;
 import com.cumulocity.sdk.client.user.UserApi;
+import com.cumulocity.sdk.client.RestOperations;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
@@ -151,6 +152,14 @@ public class TrackerPlatform implements Platform {
             }
 
         }.get();
+    }
+
+    public void close() {
+        orig.close();
+    }
+
+    public RestOperations rest() {
+        return orig.rest();
     }
 
     public String getTenantId() {
