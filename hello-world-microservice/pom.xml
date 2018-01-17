@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.cumulocity</groupId>
+    <artifactId>hello-world-microservice</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.7</maven.compiler.source>
+        <maven.compiler.target>1.7</maven.compiler.target>
+        <spring-boot-dependencies.version>1.5.7.RELEASE</spring-boot-dependencies.version>
+        <package.directory>hello-world</package.directory>
+        <package.name>hello-world</package.name>
+        <main.class>com.cumulocity.helloworld.HelloWorldMain</main.class>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.nsn.cumulocity.clients-java</groupId>
+            <artifactId>microservice-autoconfigure</artifactId>
+            <version>8.20.0-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring-boot-dependencies.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <mainClass>${main.class}</mainClass>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.nsn.cumulocity.clients-java</groupId>
+                <artifactId>microservice-package-maven-plugin</artifactId>
+                <version>8.20.0-SNAPSHOT</version>
+                <executions>
+                    <execution>
+                        <id>package</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>package</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>push</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>push</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>microservice-package</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>microservice-package</goal>
+                        </goals>
+                        <configuration>
+                            <manifestFile>${basedir}/src/main/microservice/cumulocity.json</manifestFile>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>microservice-deploy</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>microservice-deploy</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
