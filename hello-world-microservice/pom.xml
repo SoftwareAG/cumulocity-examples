@@ -16,7 +16,7 @@
         <spring-boot-dependencies.version>1.5.7.RELEASE</spring-boot-dependencies.version>
         <package.directory>hello-world</package.directory>
         <package.name>hello-world</package.name>
-        <main.class>com.cumulocity.helloworld.HelloWorldMain</main.class>
+        <main.class>c8y.example.helloworld.HelloWorldMain</main.class>
     </properties>
 
     <dependencies>

@@ -1,4 +1,4 @@
-package com.cumulocity.helloworld;
+package c8y.example.helloworld;
 
 import com.cumulocity.microservice.autoconfigure.MicroserviceApplication;
 import org.springframework.boot.SpringApplication;
