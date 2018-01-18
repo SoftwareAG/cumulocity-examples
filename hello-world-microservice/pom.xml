@@ -6,7 +6,8 @@
 
     <groupId>com.cumulocity</groupId>
     <artifactId>hello-world-microservice</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <name>Cumulocity :: Examples :: Hello World Microservice</name>
+    <version>8.21.0-SNAPSHOT</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -22,7 +23,7 @@
         <dependency>
             <groupId>com.nsn.cumulocity.clients-java</groupId>
             <artifactId>microservice-autoconfigure</artifactId>
-            <version>8.20.0-SNAPSHOT</version>
+            <version>8.21.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
@@ -47,7 +48,7 @@
             <plugin>
                 <groupId>com.nsn.cumulocity.clients-java</groupId>
                 <artifactId>microservice-package-maven-plugin</artifactId>
-                <version>8.20.0-SNAPSHOT</version>
+                <version>8.21.0-SNAPSHOT</version>
                 <executions>
                     <execution>
                         <id>package</id>
@@ -73,16 +74,8 @@
                             <manifestFile>${basedir}/src/main/microservice/cumulocity.json</manifestFile>
                         </configuration>
                     </execution>
-                    <execution>
-                        <id>microservice-deploy</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>microservice-deploy</goal>
-                        </goals>
-                    </execution>
                 </executions>
             </plugin>
         </plugins>
     </build>
-
 </project>
