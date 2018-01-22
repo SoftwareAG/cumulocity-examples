@@ -29,7 +29,6 @@
 
     <build>
         <plugins>
-
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
@@ -58,21 +57,11 @@
                         </goals>
                     </execution>
                     <execution>
-                        <id>push</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>push</goal>
-                        </goals>
-                    </execution>
-                    <execution>
                         <id>microservice-package</id>
                         <phase>package</phase>
                         <goals>
                             <goal>microservice-package</goal>
                         </goals>
-                        <configuration>
-                            <manifestFile>${basedir}/src/main/microservice/cumulocity.json</manifestFile>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
