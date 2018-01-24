@@ -151,7 +151,9 @@ public class QueclinkLocationReport extends QueclinkParser {
             reportStart = 9;
             reportLength = 11;
             reportEnd = reportStart + reportLength; // Only one report.
+            int temperatureInfoIndex = 7;
             int batteryInfoIndex = 8;
+            createTemperatureMeasurement(device, reportCtx, temperatureInfoIndex);
             createBatteryMeasurement(device, reportCtx, batteryInfoIndex);
         }
 
@@ -180,7 +182,15 @@ public class QueclinkLocationReport extends QueclinkParser {
         return true;
     }
 
-    private void createMileageMeasurement(TrackerDevice device, ReportContext reportCtx, int mileageIndex) throws NumberFormatException {
+    private void createTemperatureMeasurement(TrackerDevice device, ReportContext reportCtx, int temperatureInfoIndex) {
+		BigDecimal temperature = reportCtx.getEntryAsNumber(temperatureInfoIndex);
+		if (temperature != null) {
+			DateTime dateTime = queclinkReport.getReportDateTime(reportCtx);
+            measurementService.createTemperatureMeasurement(temperature, device, dateTime);
+		}
+	}
+
+	private void createMileageMeasurement(TrackerDevice device, ReportContext reportCtx, int mileageIndex) throws NumberFormatException {
 
         BigDecimal mileage = reportCtx.getEntryAsNumber(mileageIndex);
         if (mileage != null) {

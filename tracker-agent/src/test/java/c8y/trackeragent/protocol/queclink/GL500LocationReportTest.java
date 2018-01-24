@@ -26,11 +26,16 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.any;
 
 import java.math.BigDecimal;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 import com.cumulocity.sdk.client.SDKException;
 
@@ -81,6 +86,9 @@ public class GL500LocationReportTest {
         verify(device).setPosition(POS, QueclinkReports.convertEntryToDateTime("20130312190551"));
         Mobile mobile = generateMobileInfo(MOBILEINFOSTR);
         verify(device).setMobileInfo(mobile.getMcc(), mobile.getMnc(), mobile.getLac(), mobile.getCellId());
+        DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyyMMddHHmmss");
+        DateTime dateTime = formatter.parseDateTime("20130312190551");
+        verify(measurementService).createTemperatureMeasurement(new BigDecimal("25.0"), device, dateTime);
     }
     
     private Mobile generateMobileInfo(String mobileInfo) {
