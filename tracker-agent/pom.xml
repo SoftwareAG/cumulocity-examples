@@ -158,7 +158,7 @@
 	            <plugin>
 	                <groupId>com.nsn.cumulocity.clients-java</groupId>
 	                <artifactId>agent-framework-package</artifactId>
-	                <version>${c8y.version}</version>
+	                <version>${c8y.agent-framework.version}</version>
 	                <executions>
 	                    <execution>
 	                        <phase>package</phase>
