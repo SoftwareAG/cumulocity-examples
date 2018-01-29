@@ -18,6 +18,7 @@
         <package.name>tracker-agent-server</package.name>
         <package.directory>tracker-agent</package.directory>
         <agent.main.class>c8y.trackeragent.Main</agent.main.class>
+        <c8y.agent-framework.version>8.18.3</c8y.agent-framework.version>
     </properties>
     <dependencies>
         <dependency>
@@ -62,27 +63,27 @@
         <dependency>
 			<groupId>com.nsn.cumulocity.clients-java</groupId>
 			<artifactId>agent-framework-core</artifactId>
-			<version>${c8y.version}</version>
+			<version>${c8y.agent-framework.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.nsn.cumulocity.clients-java</groupId>
 			<artifactId>agent-framework-repositories</artifactId>
-			<version>${c8y.version}</version>
+			<version>${c8y.agent-framework.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.nsn.cumulocity.clients-java</groupId>
 			<artifactId>agent-framework-device-control</artifactId>
-			<version>${c8y.version}</version>
+			<version>${c8y.agent-framework.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.nsn.cumulocity.clients-java</groupId>
 			<artifactId>agent-framework-device-context</artifactId>
-			<version>${c8y.version}</version>
+			<version>${c8y.agent-framework.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.nsn.cumulocity.clients-java</groupId>
 			<artifactId>agent-framework-mvc</artifactId>
-			<version>${c8y.version}</version>
+			<version>${c8y.agent-framework.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>javax.validation</groupId>
