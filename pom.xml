@@ -59,6 +59,7 @@
 	<modules>
 		<module>java-agent</module>
 		<module>tracker-agent</module>
+		<module>hello-world-microservice</module>
 	</modules>
 
 	<licenses>
