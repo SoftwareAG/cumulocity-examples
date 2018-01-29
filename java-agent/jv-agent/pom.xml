@@ -5,7 +5,7 @@
     <parent>
 		<groupId>c8y.example</groupId>
 		<artifactId>c8y-jv</artifactId>
-        <version>8.18.0</version>
+        <version>8.19.0</version>
 	</parent>
 
 	<artifactId>jv-agent</artifactId>
@@ -20,7 +20,7 @@
         <dependency>
             <groupId>c8y.example</groupId>
             <artifactId>remote-access-driver</artifactId>
-            <version>8.18.0</version>
+            <version>8.19.0</version>
         </dependency>
 		<dependency>
 			<groupId>com.google.code</groupId>
