@@ -1,4 +1,3 @@
-// spec.js
 describe('Cumulocity demo test project', function () {
 
   // ADJUST THIS
@@ -9,7 +8,7 @@ describe('Cumulocity demo test project', function () {
   const baseURL = 'https://tenant.installation.tld';
 
   const EC = protractor.ExpectedConditions;
-
+  const DEFAULT_TIMEOUT = 20000;
 
   const userInput = '$(\'[ng-model="ctrl.user.name"]\')',
     logoutBtn = element(by.css('[ng-click*="logout()"]')),
@@ -18,7 +17,7 @@ describe('Cumulocity demo test project', function () {
     pageTitle = element(by.css('c8y-ui-title'));
 
   const waitForAngular = (elem) => {
-    browser.wait(() => browser.executeScript(`return ${elem}.length`), 20000);
+    browser.wait(() => browser.executeScript(`return ${elem}.length`), DEFAULT_TIMEOUT);
   };
 
   const closeAlerts = () => {
@@ -38,9 +37,9 @@ describe('Cumulocity demo test project', function () {
 
   const logout = () => {
     closeAlerts();
-    browser.wait(EC.elementToBeClickable(userDropDown), 10000);
+    browser.wait(EC.elementToBeClickable(userDropDown), DEFAULT_TIMEOUT);
     userDropDown.click();
-    browser.wait(EC.elementToBeClickable(logoutBtn));
+    browser.wait(EC.elementToBeClickable(logoutBtn), DEFAULT_TIMEOUT);
     logoutBtn.click();
     waitForAngular(userInput);
   };
