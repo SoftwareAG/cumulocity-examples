@@ -8,5 +8,23 @@
   "requiredRoles": [
   ],
   "roles":[
-  ]
+  ],
+  "livenessProbe":{
+    "httpGet":{
+      "path": "/health",
+      "port": 80
+
+    },
+    "initialDelaySeconds": 200,
+    "periodSeconds": 10
+  },
+  "readinessProbe":{
+    "httpGet":{
+      "path": "/health",
+      "port": 80
+
+    },
+    "initialDelaySeconds": 220,
+    "periodSeconds": 10
+  }
 }
