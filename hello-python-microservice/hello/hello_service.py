@@ -6,18 +6,18 @@ from random import randint
 from urllib.request import Request
 from urllib.request import urlopen
 
-# values provided into environment by cumulocity platform during deployment
-C8Y_TENANT = os.getenv('C8Y_TENANT')
-C8Y_USERNAME = os.getenv('C8Y_USERNAME')
-C8Y_PASSWORD = os.getenv('C8Y_PASSWORD')
+# value provided into environment by cumulocity platform during deployment
 C8Y_BASEURL = os.getenv('C8Y_BASEURL')
 
 DEVICE_NAME = "hello-device"
 DEVICE_TYPE = "hello-type"
 
 
-text_credentials = C8Y_TENANT + '/' + C8Y_USERNAME + ':' + C8Y_PASSWORD
-credentials = 'Basic ' + (base64.b64encode(text_credentials.encode())).decode()
+# tenant_user should have form "tenant/user"
+# result is Base64 encoded "tenant/user:password"
+def base64_credentials(tenant_user, password):
+    str_credentials = tenant_user + ":" + password
+    return 'Basic ' + base64.b64encode(str_credentials.encode()).decode()
 
 
 def generate_sample_device():
@@ -29,7 +29,7 @@ def generate_sample_device():
     return managed_object_data
 
 
-def create_managed_object(data):
+def create_managed_object(data, credentials):
     req = Request(C8Y_BASEURL + '/inventory/managedObjects')
     req.add_header('Authorization', credentials)
     req.add_header('Content-Type', 'application/json')
@@ -39,7 +39,7 @@ def create_managed_object(data):
     return json.loads(response.read().decode())
 
 
-def get_devices_by_type(device_type):
+def get_devices_by_type(device_type, credentials):
     req = Request(C8Y_BASEURL + '/inventory/managedObjects?type=' + str(device_type))
     req.add_header('Authorization', credentials)
     req.add_header('Content-Type', 'application/json')
@@ -47,11 +47,11 @@ def get_devices_by_type(device_type):
     return json.loads(response.read().decode())
 
 
-def get_sample_devices():
-    return get_devices_by_type(DEVICE_TYPE)
+def get_sample_devices(credentials):
+    return get_devices_by_type(DEVICE_TYPE, credentials)
 
 
-def create_measurement(data):
+def create_measurement(data, credentials):
     req = Request(C8Y_BASEURL + '/measurement/measurements')
     req.add_header('Content-Type', 'application/json')
     req.add_header('Authorization', credentials)
