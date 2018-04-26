@@ -52,7 +52,7 @@ public class RouteService {
                 final ManagedObjectRepresentation source = findOrCreateSource(subscriptions.getTenant());
 
                 try {
-                    final DateTime lastTimeRunning = getLastTimeChanged(source);
+                    final DateTime lastTimeRunning = getLastTimeRunning(source);
 
                     measurements.findAll(lastTimeRunning, now).forEach(o -> {
                         try {
@@ -69,7 +69,7 @@ public class RouteService {
                         }
                     });
                 } finally {
-                    saveLastTimeChanged(source, now);
+                    saveLastTimeRunning(source, now);
                 }
             } catch (final Exception ex) {
                 log.error(ex.getMessage(), ex);
@@ -184,7 +184,7 @@ public class RouteService {
         );
     }
 
-    private DateTime getLastTimeChanged(ManagedObjectRepresentation source) {
+    private DateTime getLastTimeRunning(ManagedObjectRepresentation source) {
         final Object lastTimeRunning = source.get("lastTimeRunning");
         if (lastTimeRunning == null) {
             return DateTime.now();
@@ -193,7 +193,7 @@ public class RouteService {
         }
     }
 
-    private void saveLastTimeChanged(ManagedObjectRepresentation source, DateTime now) {
+    private void saveLastTimeRunning(ManagedObjectRepresentation source, DateTime now) {
         source.setLastUpdatedDateTime(null);
         source.setProperty("lastTimeRunning", ISODateTimeFormat.dateTime().print(now));
         inventory.update(source);
