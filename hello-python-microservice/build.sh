@@ -7,3 +7,5 @@ if ! command -v microservice ; then
 fi
 
 microservice pack -n hello-microservice
+
+rm image.tar

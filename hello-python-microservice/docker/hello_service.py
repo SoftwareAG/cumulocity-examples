@@ -6,17 +6,19 @@ from random import randint
 from urllib.request import Request
 from urllib.request import urlopen
 
-# value provided into environment by cumulocity platform during deployment
+# values provided into environment by cumulocity platform during deployment
 C8Y_BASEURL = os.getenv('C8Y_BASEURL')
+C8Y_BOOTSTRAP_USER = os.getenv('C8Y_BOOTSTRAP_USER')
+C8Y_BOOTSTRAP_TENANT = os.getenv('C8Y_BOOTSTRAP_TENANT')
+C8Y_BOOTSTRAP_PASSWORD = os.getenv('C8Y_BOOTSTRAP_PASSWORD')
 
 DEVICE_NAME = "hello-device"
 DEVICE_TYPE = "hello-type"
 
 
-# tenant_user should have form "tenant/user"
 # result is Base64 encoded "tenant/user:password"
-def base64_credentials(tenant_user, password):
-    str_credentials = tenant_user + ":" + password
+def base64_credentials(tenant, user, password):
+    str_credentials = tenant + "/" + user + ":" + password
     return 'Basic ' + base64.b64encode(str_credentials.encode()).decode()
 
 
@@ -73,4 +75,14 @@ def random_measurement_for(device_id):
         }
     }
     return measurement_data
+
+
+# subscriber has form of dictionary with 3 keys {tenant, user, password}
+def get_subscriber_for(tenant_id):
+    req = Request(C8Y_BASEURL + '/application/currentApplication/subscriptions')
+    req.add_header('Accept', 'application/vnd.com.nsn.cumulocity.applicationUserCollection+json')
+    req.add_header('Authorization', base64_credentials(C8Y_BOOTSTRAP_TENANT, C8Y_BOOTSTRAP_USER, C8Y_BOOTSTRAP_PASSWORD))
+    response = urlopen(req)
+    subscribers = json.loads(response.read().decode())["users"]
+    return [s for s in subscribers if s["tenant"] == tenant_id][0]
 

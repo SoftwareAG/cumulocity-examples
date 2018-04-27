@@ -7,7 +7,8 @@ app = Flask(__name__)
 
 @app.route('/')
 def hello_measurement():
-    auth = base64_credentials(request.authorization["username"], request.authorization["password"])
+    # get credentials of service user for particular tenant
+    auth = get_authorization()
 
     # get device by type or create if none exists
     response = get_sample_devices(auth)
@@ -27,6 +28,21 @@ def hello_measurement():
 @app.route('/health')
 def health():
     return '{"status":"UP"}'
+
+
+@app.route('/subscriber')
+def get_subscriber():
+    tenant_id = request.authorization["username"].split('/')[0]
+    subscriber = get_subscriber_for(tenant_id)
+    return jsonify(subscriber)
+
+
+def get_authorization():
+    # username has form tenant/user
+    tenant_id = request.authorization["username"].split('/')[0]
+    subscriber = get_subscriber_for(tenant_id)
+    auth = base64_credentials(subscriber["tenant"], subscriber["name"], subscriber["password"])
+    return auth
 
 
 if __name__ == '__main__':
