@@ -21,7 +21,7 @@ public class WebSocketClient extends Endpoint {
 
     private Session session;
 
-    private VncSocketClient vncClient;
+    private DeviceSocketClient vncClient;
 
     public WebSocketClient() {
         super();
@@ -81,7 +81,7 @@ public class WebSocketClient extends Endpoint {
         this.session = null;
     }
 
-    public void setVncClient(VncSocketClient vncClient) {
+    public void setVncClient(DeviceSocketClient vncClient) {
         this.vncClient = vncClient;
     }
 

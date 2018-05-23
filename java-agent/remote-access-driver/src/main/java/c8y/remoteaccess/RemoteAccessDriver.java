@@ -17,11 +17,11 @@ public class RemoteAccessDriver implements Driver {
     private RemoteAccessOperationExecutor connectOperationExecutor;
 
     @Override
-    public void initialize() throws Exception {
+    public void initialize() {
     }
 
     @Override
-    public void initialize(Platform platform) throws Exception {
+    public void initialize(Platform platform) {
         logger.debug("Initializing with platform " + platform);
         connectOperationExecutor = new RemoteAccessOperationExecutor(platform);
     }

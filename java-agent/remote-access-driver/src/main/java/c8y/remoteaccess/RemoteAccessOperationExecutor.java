@@ -1,21 +1,15 @@
 package c8y.remoteaccess;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-
-import javax.websocket.DeploymentException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.cumulocity.model.operation.OperationStatus;
-import com.cumulocity.rest.representation.operation.OperationRepresentation;
-import com.cumulocity.sdk.client.Platform;
-
 import c8y.RemoteAccessConnect;
 import c8y.lx.driver.OperationExecutor;
 import c8y.remoteaccess.tunnel.DeviceProxy;
+import com.cumulocity.model.operation.OperationStatus;
+import com.cumulocity.rest.representation.operation.OperationRepresentation;
+import com.cumulocity.sdk.client.Platform;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.net.MalformedURLException;
 
 public class RemoteAccessOperationExecutor implements OperationExecutor {
 
@@ -39,7 +33,7 @@ public class RemoteAccessOperationExecutor implements OperationExecutor {
         logger.debug("Received operation {}", operation);
         RemoteAccessConnect connect = operation.get(RemoteAccessConnect.class);
         if (connect == null) {
-            throw new IllegalArgumentException("Fragement c8y_RemoteAccessConnect not present");
+            throw new IllegalArgumentException("Fragment c8y_RemoteAccessConnect not present");
         }
 
         if (!cleanup) {
@@ -57,7 +51,7 @@ public class RemoteAccessOperationExecutor implements OperationExecutor {
             } catch (RemoteAccessWebsocketException e) {
                 operation.setStatus(OperationStatus.FAILED.toString());
                 operation.setFailureReason("Device Agent websocket error: " + e.getMessage());
-            } catch (RemoteAccessVncException e) {
+            } catch (RemoteAccessProtocolException e) {
                 operation.setStatus(OperationStatus.FAILED.toString());
                 operation.setFailureReason("Device Agent VNC error: " + e.getMessage());
             } catch (RemoteAccessException e) {
