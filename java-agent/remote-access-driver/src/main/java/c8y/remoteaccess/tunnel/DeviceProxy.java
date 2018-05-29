@@ -23,9 +23,9 @@ public class DeviceProxy {
 
     private static final Logger logger = LoggerFactory.getLogger(DeviceProxy.class);
 
-    private String vncHost;
+    private String deviceHost;
 
-    private int vncPort;
+    private int devicePort;
 
     private String websocketHost;
 
@@ -37,7 +37,7 @@ public class DeviceProxy {
 
     private TunnelingThread thread;
 
-    private DeviceSocketClient vncsocket;
+    private DeviceSocketClient deviceSocket;
 
     private String username;
 
@@ -61,8 +61,8 @@ public class DeviceProxy {
         this.username = parameters.getPrincipal();
         this.password = parameters.getPassword();
 
-        this.vncHost = hostname;
-        this.vncPort = port;
+        this.deviceHost = hostname;
+        this.devicePort = port;
         this.connectionKey = connectionKey;
     }
 
@@ -95,9 +95,9 @@ public class DeviceProxy {
 
             try {
                 // Connect to Device
-                logger.debug("Creating device connection " + vncHost + ":" + vncPort);
-                vncsocket = new DeviceSocketClient(vncHost, vncPort);
-                vncsocket.connect();
+                logger.debug("Creating device connection " + deviceHost + ":" + devicePort);
+                deviceSocket = new DeviceSocketClient(deviceHost, devicePort);
+                deviceSocket.connect();
             } catch (IOException e) {
                 logger.error("Device connect error:", e.getMessage());
                 throw new RemoteAccessProtocolException(e.getMessage());
@@ -105,7 +105,7 @@ public class DeviceProxy {
 
             // Start tunneling thread
             logger.debug("Starting tunneling thread");
-            thread = new TunnelingThread(websocket, vncsocket);
+            thread = new TunnelingThread(websocket, deviceSocket);
             thread.start();
 
             logger.debug("Tunneling operational");
@@ -126,10 +126,10 @@ public class DeviceProxy {
                 thread = null;
             }
 
-            if (vncsocket != null) {
-                logger.debug("Closing VNC connection");
-                vncsocket.close();
-                vncsocket = null;
+            if (deviceSocket != null) {
+                logger.debug("Closing device connection");
+                deviceSocket.close();
+                deviceSocket = null;
             }
 
             if (websocket != null) {

@@ -21,7 +21,7 @@ public class WebSocketClient extends Endpoint {
 
     private Session session;
 
-    private DeviceSocketClient vncClient;
+    private DeviceSocketClient deviceClient;
 
     public WebSocketClient() {
         super();
@@ -56,16 +56,16 @@ public class WebSocketClient extends Endpoint {
     }
 
     public void onBinaryMessage(ByteBuffer data) {
-        logger.debug("Received " + data.remaining() + " bytes from websocket, Forwarding to VNC...");
+        logger.debug("Received " + data.remaining() + " bytes from websocket, Forwarding to device...");
         try {
-            vncClient.sendMessage(data.array());
+            deviceClient.sendMessage(data.array());
         } catch (IOException e) {
-            logger.error("Unable to forward message to VNC");
+            logger.error("Unable to forward message to device");
             try {
-                vncClient.close();
+                deviceClient.close();
                 close();
             } catch (IOException e1) {
-                logger.debug("Exception when closing vnc client connection: ", e.getMessage());
+                logger.debug("Exception when closing device client connection: ", e.getMessage());
             }
         }
     }
@@ -81,8 +81,8 @@ public class WebSocketClient extends Endpoint {
         this.session = null;
     }
 
-    public void setVncClient(DeviceSocketClient vncClient) {
-        this.vncClient = vncClient;
+    public void setDeviceClient(DeviceSocketClient deviceClient) {
+        this.deviceClient = deviceClient;
     }
 
     public boolean isClosed() {

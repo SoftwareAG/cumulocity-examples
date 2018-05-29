@@ -53,7 +53,7 @@ public class RemoteAccessOperationExecutor implements OperationExecutor {
                 operation.setFailureReason("Device Agent websocket error: " + e.getMessage());
             } catch (RemoteAccessProtocolException e) {
                 operation.setStatus(OperationStatus.FAILED.toString());
-                operation.setFailureReason("Device Agent VNC error: " + e.getMessage());
+                operation.setFailureReason("Device Agent protocol error: " + e.getMessage());
             } catch (RemoteAccessException e) {
                 operation.setStatus(OperationStatus.FAILED.toString());
                 operation.setFailureReason("Device Agent generic error: " + e.getMessage());

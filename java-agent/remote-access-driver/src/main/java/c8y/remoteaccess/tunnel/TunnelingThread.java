@@ -20,7 +20,7 @@ public class TunnelingThread implements Runnable {
     public TunnelingThread(WebSocketClient websocket, DeviceSocketClient deviceSocketClient) {
         this.websocket = websocket;
         this.deviceSocket = deviceSocketClient;
-        websocket.setVncClient(deviceSocketClient);
+        websocket.setDeviceClient(deviceSocketClient);
     }
 
     public void start() {
