@@ -13,24 +13,20 @@ public class TunnelingThread implements Runnable {
 
     private WebSocketClient websocket;
 
-    private final VncSocketClient vncsocket;
+    private final DeviceSocketClient deviceSocket;
 
     private boolean close;
 
-    public TunnelingThread(WebSocketClient websocket, VncSocketClient vncsocket) {
+    public TunnelingThread(WebSocketClient websocket, DeviceSocketClient deviceSocketClient) {
         this.websocket = websocket;
-        this.vncsocket = vncsocket;
-        websocket.setVncClient(vncsocket);
+        this.deviceSocket = deviceSocketClient;
+        websocket.setDeviceClient(deviceSocketClient);
     }
 
     public void start() {
         Thread thread = new Thread(this);
         thread.start();
         close = false;
-    }
-
-    public boolean isActive() {
-        return !close;
     }
 
     public void stop() {
@@ -44,9 +40,9 @@ public class TunnelingThread implements Runnable {
         byte[] data = new byte[10 * 1024];
         while (!close) {
             try {
-                int bytesRead = vncsocket.read(data);
+                int bytesRead = deviceSocket.read(data);
                 if (bytesRead > 0) {
-                    logger.debug("Received " + bytesRead + " bytes from VNC server. Forwarding to websocket...");
+                    logger.debug("Received " + bytesRead + " bytes from device server. Forwarding to websocket...");
                     if (websocket == null) {
                         throw new IllegalStateException("Not connect to Websocket");
                     }
