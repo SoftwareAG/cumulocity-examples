@@ -29,6 +29,7 @@ import c8y.tinkerforge.bricklet.BrickletFactory;
 import com.tinkerforge.AlreadyConnectedException;
 import com.tinkerforge.IPConnection;
 import com.tinkerforge.IPConnection.ConnectedListener;
+import com.tinkerforge.NetworkException;
 import com.tinkerforge.NotConnectedException;
 
 /**
@@ -43,7 +44,7 @@ public class BrickConnector implements ConnectedListener {
 	private DiscoveryFinishedListener finished;
 
 	public BrickConnector(DiscoveryFinishedListener finished)
-			throws UnknownHostException, AlreadyConnectedException, IOException {
+			throws UnknownHostException, AlreadyConnectedException, IOException, NetworkException {
 		this.finished = finished;
 		
 		ipcon = new IPConnection();

@@ -31,27 +31,7 @@ import c8y.tinkerforge.bricklet.HumidityBricklet;
 import c8y.tinkerforge.bricklet.LightBricklet;
 import c8y.tinkerforge.bricklet.TemperatureBricklet;
 
-import com.tinkerforge.BrickMaster;
-import com.tinkerforge.BrickletAmbientLight;
-import com.tinkerforge.BrickletBarometer;
-import com.tinkerforge.BrickletCurrent12;
-import com.tinkerforge.BrickletCurrent25;
-import com.tinkerforge.BrickletDistanceIR;
-import com.tinkerforge.BrickletDistanceUS;
-import com.tinkerforge.BrickletDualRelay;
-import com.tinkerforge.BrickletGPS;
-import com.tinkerforge.BrickletHumidity;
-import com.tinkerforge.BrickletIO16;
-import com.tinkerforge.BrickletLCD20x4;
-import com.tinkerforge.BrickletMoisture;
-import com.tinkerforge.BrickletMotionDetector;
-import com.tinkerforge.BrickletPTC;
-import com.tinkerforge.BrickletRemoteSwitch;
-import com.tinkerforge.BrickletRotaryPoti;
-import com.tinkerforge.BrickletSegmentDisplay4x7;
-import com.tinkerforge.BrickletTemperature;
-import com.tinkerforge.BrickletVoltageCurrent;
-import com.tinkerforge.IPConnection;
+import com.tinkerforge.*;
 
 /**
  * Instantiates the correct driver for a discovered bricklet. 
@@ -147,7 +127,10 @@ public class BrickletFactory {
 			return new VoltageCurrentBricklet(uid, new BrickletVoltageCurrent(uid, ipcon));
 		case BrickletRotaryPoti.DEVICE_IDENTIFIER:
 			return new RotaryPotiBricklet(uid, new BrickletRotaryPoti(uid, ipcon));
-			
+		case BrickletAmbientLightV2.DEVICE_IDENTIFIER:
+			return new LightBrickletV2(uid, new BrickletAmbientLightV2(uid, ipcon));
+		case BrickletHumidityV2.DEVICE_IDENTIFIER:
+			return new 	HumidityBrickletV2(uid, new BrickletHumidityV2(uid, ipcon));
 		default:
 			throw new IllegalArgumentException("Unknown device identifier: "
 					+ deviceIdentifier);

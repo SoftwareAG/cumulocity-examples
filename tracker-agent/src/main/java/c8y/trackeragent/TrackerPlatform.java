@@ -15,7 +15,9 @@ import com.cumulocity.sdk.client.identity.IdentityApi;
 import com.cumulocity.sdk.client.inventory.BinariesApi;
 import com.cumulocity.sdk.client.inventory.InventoryApi;
 import com.cumulocity.sdk.client.measurement.MeasurementApi;
+import com.cumulocity.sdk.client.option.TenantOptionApi;
 import com.cumulocity.sdk.client.user.UserApi;
+import com.cumulocity.sdk.client.RestOperations;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
@@ -151,6 +153,26 @@ public class TrackerPlatform implements Platform {
             }
 
         }.get();
+    }
+
+    @Override
+    public TenantOptionApi getTenantOptionApi() throws SDKException {
+        return new CachedApiGetter<TenantOptionApi>(TenantOptionApi.class) {
+
+            @Override
+            public TenantOptionApi call() throws Exception {
+                return orig.getTenantOptionApi();
+            }
+
+        }.get();
+    }
+
+    public void close() {
+        orig.close();
+    }
+
+    public RestOperations rest() {
+        return orig.rest();
     }
 
     public String getTenantId() {

@@ -18,6 +18,7 @@ import c8y.DistanceMeasurement;
 import c8y.GpsQuality;
 import c8y.SignalStrength;
 import c8y.SpeedMeasurement;
+import c8y.TemperatureMeasurement;
 import c8y.trackeragent.device.TrackerDevice;
 
 @Component
@@ -233,5 +234,34 @@ public class MeasurementService {
         gpsQuality.setQualityValue(quality);
         representation.set(gpsQuality);
         return representation;
+    }
+
+	public TemperatureMeasurement createTemperatureMeasurement(BigDecimal temperature, TrackerDevice device, DateTime dateTime) {
+		TemperatureMeasurement temperatureFragment = createTemperatureFragment(temperature);
+        if (temperatureFragment == null) {
+            return null;
+        }
+        MeasurementRepresentation measurement = asMeasurement(device, temperatureFragment, dateTime);
+        logger.debug("Create temperature measurement: ", measurement.getAttrs());
+        device.createMeasurement(measurement);
+        return temperatureFragment;
+	}
+	
+	public static TemperatureMeasurement createTemperatureFragment(BigDecimal temperatureValue) {
+        if (temperatureValue == null) {
+            return null;
+        }
+        TemperatureMeasurement temperatureFragment = new TemperatureMeasurement();
+        temperatureFragment.setTemperature(temperatureValue);
+        return temperatureFragment;
+    }
+	
+	private MeasurementRepresentation asMeasurement(TrackerDevice device, TemperatureMeasurement temperatureFragment, DateTime date) {
+        MeasurementRepresentation measurement = new MeasurementRepresentation();
+        measurement.set(temperatureFragment);
+        measurement.setType("c8y_Temperature");
+        measurement.setSource(asSource(device));
+        measurement.setDateTime(date);
+        return measurement;
     }
 }
