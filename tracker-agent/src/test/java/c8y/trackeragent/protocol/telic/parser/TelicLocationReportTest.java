@@ -89,7 +89,7 @@ public class TelicLocationReportTest {
         telic.onParsed(new ReportContext(connectionDetails, report));
 
         verifyReport();
-        assertThat(positionCaptor.getValue()).isEqualTo(Positions.SAMPLE_5);
+        assertThat(positionCaptor.getValue()).isEqualTo(Positions.SAMPLE_1);
         assertThat(positionCaptor.getValue().getAccuracy()).isNull();
     }
 

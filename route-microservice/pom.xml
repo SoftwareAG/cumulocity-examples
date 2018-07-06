@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>c8y.agents</groupId>
+    <artifactId>route-microservice</artifactId>
+    <version>9.5.0-SNAPSHOT</version>
+
+    <name>Cumulocity :: Microservice :: Route</name>
+    <description>Route Microservice</description>
+    <packaging>pom</packaging>
+
+    <properties>
+        <package.name>route-microservice</package.name>
+
+        <c8y.microservice.version>9.5.0-SNAPSHOT</c8y.microservice.version>
+    </properties>
+
+    <modules>
+        <module>server</module>
+    </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.nsn.cumulocity.clients-java</groupId>
+                <artifactId>microservice-dependencies</artifactId>
+                <version>${c8y.microservice.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>com.nsn.cumulocity.clients-java</groupId>
+                    <artifactId>microservice-package-maven-plugin</artifactId>
+                    <version>${c8y.microservice.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+</project>

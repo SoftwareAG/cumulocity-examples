@@ -5,7 +5,7 @@
     <parent>
 		<groupId>c8y.example</groupId>
 		<artifactId>c8y-examples</artifactId>
-		<version>8.12.0-SNAPSHOT</version>
+		<version>9.10.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>c8y-jv</artifactId>
@@ -16,7 +16,7 @@
         <commons.io.version>2.4</commons.io.version>
         <jssc.version>2.6.0</jssc.version>
         <logback.version>1.0.13</logback.version>
-        <tinkerforge.version>2.1.2</tinkerforge.version>
+        <tinkerforge.version>2.1.17</tinkerforge.version>
     </properties>
 
 	<modules>

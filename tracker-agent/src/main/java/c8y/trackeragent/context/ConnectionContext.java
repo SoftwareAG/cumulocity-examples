@@ -1,11 +1,12 @@
 package c8y.trackeragent.context;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import c8y.trackeragent.protocol.TrackingProtocol;
 import c8y.trackeragent.server.ConnectionDetails;
 import c8y.trackeragent.utils.message.TrackerMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.nio.channels.SocketChannel;
 
 public class ConnectionContext {
 
@@ -40,6 +41,10 @@ public class ConnectionContext {
 
     public void setImei(String imei) {
         connectionDetails.setImei(imei);
+    }
+
+    public SocketChannel getConnection() {
+        return connectionDetails.getChannel();
     }
 
     public DeviceContext getDeviceContext() {

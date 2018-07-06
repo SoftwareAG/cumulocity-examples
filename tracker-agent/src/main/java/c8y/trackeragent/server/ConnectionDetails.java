@@ -14,6 +14,13 @@ public class ConnectionDetails {
     private final SocketChannel channel;
     private volatile String imei;
     private final Map<String, Object> params = new ConcurrentHashMap<String, Object>();
+    private ConnectionsContainer connectionsContainer;
+
+    public ConnectionDetails(TrackingProtocol trackingProtocol, OutWriter outWriter, SocketChannel channel,
+                             ConnectionsContainer connectionsContainer) {
+        this(trackingProtocol, outWriter, channel);
+        this.connectionsContainer = connectionsContainer;
+    }
 
     public ConnectionDetails(TrackingProtocol trackingProtocol, OutWriter outWriter, SocketChannel channel) {
         this.trackingProtocol = trackingProtocol;
@@ -34,6 +41,9 @@ public class ConnectionDetails {
             this.imei = imei;
         } else if (!this.imei.equals(imei)) {
             throw new RuntimeException("Imei " + this.imei + " already bound to the connection! Cant rebind to " + imei + "!");
+        }
+        if (connectionsContainer != null) {
+            connectionsContainer.register(imei, channel);
         }
     }
 
