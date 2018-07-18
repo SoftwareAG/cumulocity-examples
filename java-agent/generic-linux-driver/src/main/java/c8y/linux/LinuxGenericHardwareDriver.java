@@ -25,7 +25,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.nio.charset.StandardCharsets;
+import java.util.Enumeration;
 
+import org.apache.commons.codec.binary.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,6 +46,8 @@ import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.Platform;
 
+import javax.xml.bind.DatatypeConverter;
+
 public class LinuxGenericHardwareDriver implements Driver, OperationExecutor, HardwareProvider{
 	public static final String GETINTERFACES = "ifconfig";
 	public static final String PATTERN = "\\s+";
@@ -53,7 +60,9 @@ public class LinuxGenericHardwareDriver implements Driver, OperationExecutor, Ha
 	
     @Override
     public void initialize() throws Exception {
-        initializeFromProcess(GETINTERFACES);
+        if(!initializeFromProcess(GETINTERFACES)) {
+        	initializeUsingNetworkInterface();
+		}
     }
 
 	@Override
@@ -61,15 +70,14 @@ public class LinuxGenericHardwareDriver implements Driver, OperationExecutor, Ha
 	    // Nothing to do here.
 	}
 
-	private void initializeFromProcess(String process) throws Exception {
+	private boolean initializeFromProcess(String process) throws Exception {
 		Process p = Runtime.getRuntime().exec(process);
-		try (InputStream is = p.getInputStream();
-				InputStreamReader ir = new InputStreamReader(is)) {
-			initializeFromReader(ir);
+		try (InputStream is = p.getInputStream(); InputStreamReader ir = new InputStreamReader(is)) {
+			return initializeFromReader(ir);
 		}
 	}
 
-	void initializeFromReader(Reader r) throws IOException {
+	boolean initializeFromReader(Reader r) throws IOException {
 		/*
 		 * Eclipse prints a warning here, however the construct with return
 		 * should be legal according to http: //
@@ -78,18 +86,28 @@ public class LinuxGenericHardwareDriver implements Driver, OperationExecutor, Ha
 		 */
 		try (@SuppressWarnings("resource")
 		BufferedReader reader = new BufferedReader(r)) {
-			String line = null;
-
+			String line;
 			while ((line = reader.readLine()) != null) {
 				String[] fields = line.trim().split(PATTERN);
 
 				for (int i = 0; i < fields.length; i++) {
 					if ("HWaddr".equals(fields[i]) && i + 1 < fields.length) {
 						hardware.setSerialNumber(fields[i + 1].replace(":", ""));
-						return;
+						return true;
 					}
 				}
 			}
+		}
+		return false;
+	}
+
+	private void initializeUsingNetworkInterface() throws SocketException {
+		Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+		if (interfaces.hasMoreElements()) {
+			NetworkInterface networkInterface = interfaces.nextElement();
+			byte[] mac = networkInterface.getHardwareAddress();
+			String address = DatatypeConverter.printHexBinary(mac);
+			hardware.setSerialNumber(address);
 		}
 	}
 
