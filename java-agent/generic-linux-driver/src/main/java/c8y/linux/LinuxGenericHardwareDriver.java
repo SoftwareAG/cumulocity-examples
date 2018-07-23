@@ -27,10 +27,8 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.NetworkInterface;
 import java.net.SocketException;
-import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 
-import org.apache.commons.codec.binary.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +47,7 @@ import com.cumulocity.sdk.client.Platform;
 import javax.xml.bind.DatatypeConverter;
 
 public class LinuxGenericHardwareDriver implements Driver, OperationExecutor, HardwareProvider{
-	public static final String GETINTERFACES = "ifconfig";
+	public static final String GET_INTERFACES = "ifconfig";
 	public static final String PATTERN = "\\s+";
 
 	private static Logger logger = LoggerFactory
@@ -60,7 +58,7 @@ public class LinuxGenericHardwareDriver implements Driver, OperationExecutor, Ha
 	
     @Override
     public void initialize() throws Exception {
-        if(!initializeFromProcess(GETINTERFACES)) {
+        if(!initializeFromProcess(GET_INTERFACES)) {
         	initializeUsingNetworkInterface();
 		}
     }
