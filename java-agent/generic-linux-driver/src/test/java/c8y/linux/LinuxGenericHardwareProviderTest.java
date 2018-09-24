@@ -57,6 +57,6 @@ public class LinuxGenericHardwareProviderTest {
 		driver.initialize();
 		//then
 		Hardware hardware = driver.getHardware();
-		assertThat(hardware.getSerialNumber(), not(isEmptyOrNullString()));;
+		assertThat(hardware.getSerialNumber(), not(isEmptyOrNullString()));
 	}
 }
