@@ -1,0 +1,55 @@
+/*
+ * Copyright (C) 2013 Cumulocity GmbH
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of 
+ * this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation the rights to use,
+ * copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+ * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+ * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+
+package c8y.tinkerforge.bricklet;
+
+import java.math.BigDecimal;
+
+import com.tinkerforge.BrickletRotaryEncoderV2;
+import com.tinkerforge.Device;
+
+import c8y.CurrentMeasurement;
+import c8y.CurrentSensor;
+
+public class RotaryEncoderBrickletV2 extends BaseSensorBricklet {
+
+	private CurrentMeasurement current = new CurrentMeasurement();
+
+	public RotaryEncoderBrickletV2(String id, Device device) {
+		super(id, device, "Rotary Encoder V2", new CurrentSensor());
+	}
+	
+    @Override
+    public void initialize() throws Exception {
+        // Nothing to do here.
+    }
+
+	@Override
+	public void run() {
+		try {
+			BrickletRotaryEncoderV2 encoder = (BrickletRotaryEncoderV2) getDevice();
+			current.setCurrentValue(new BigDecimal(encoder.getCount(false)));
+			super.sendMeasurement(current);
+		} catch (Exception x) {
+			logger.warn("Cannot read position from bricklet", x);
+		}
+	}
+}

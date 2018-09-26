@@ -133,6 +133,10 @@ public class BrickletFactory {
 			return new 	HumidityBrickletV2(uid, new BrickletHumidityV2(uid, ipcon));
 		case BrickletLoadCell.DEVICE_IDENTIFIER:
 			return new LoadCellBricklet(uid, new BrickletLoadCell(uid, ipcon));
+		case BrickletRotaryEncoder.DEVICE_IDENTIFIER:
+			return new RotaryEncoderBricklet(uid, new BrickletRotaryEncoder(uid, ipcon));
+		case BrickletRotaryEncoderV2.DEVICE_IDENTIFIER:
+			return new RotaryEncoderBrickletV2(uid, new BrickletRotaryEncoderV2(uid, ipcon));
 		default:
 			throw new IllegalArgumentException("Unknown device identifier: "
 					+ deviceIdentifier);
