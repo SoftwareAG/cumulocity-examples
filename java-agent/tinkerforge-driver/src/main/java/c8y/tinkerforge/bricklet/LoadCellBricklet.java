@@ -5,18 +5,18 @@ import java.math.BigDecimal;
 import com.tinkerforge.BrickletLoadCell;
 import com.tinkerforge.Device;
 
-import c8y.CurrentMeasurement;
-import c8y.CurrentSensor;
+import c8y.WeightMeasurement;
+import c8y.WeightSensor;
 
 public class LoadCellBricklet extends BaseSensorBricklet  {
 
 	private static final String TYPE = "Load";
 	
-	private CurrentMeasurement current = new CurrentMeasurement();
+	private WeightMeasurement weight = new WeightMeasurement();
 	
 	
 	public LoadCellBricklet(String id, Device device) {
-		super(id, device, TYPE, new CurrentSensor());
+		super(id, device, TYPE, new WeightSensor());
 	}
 
 	@Override
@@ -28,8 +28,8 @@ public class LoadCellBricklet extends BaseSensorBricklet  {
 	public void run() {
 		try {
 			BrickletLoadCell loadCell = (BrickletLoadCell) getDevice();
-			current.setCurrentValue(new BigDecimal(loadCell.getWeight()));
-			super.sendMeasurement(current);
+			weight.setWeightValue(new BigDecimal(loadCell.getWeight()));
+			super.sendMeasurement(weight);
 		} catch (Exception x) {
 			logger.warn("Cannot read weight from bricklet", x);
 		}
