@@ -29,6 +29,7 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
 
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,15 +65,25 @@ public class LinuxGenericHardwareDriver implements Driver, OperationExecutor, Ha
     }
 
 	@Override
-	public void initialize(Platform platform) throws Exception {
+	public void initialize(Platform platform) {
 	    // Nothing to do here.
 	}
 
-	private boolean initializeFromProcess(String process) throws Exception {
-		Process p = Runtime.getRuntime().exec(process);
-		try (InputStream is = p.getInputStream(); InputStreamReader ir = new InputStreamReader(is)) {
+	private boolean initializeFromProcess(String process) {
+		InputStream is = null;
+		InputStreamReader ir = null;
+    	try {
+			Process p = Runtime.getRuntime().exec(process);
+			is = p.getInputStream();
+			ir = new InputStreamReader(is);
 			return initializeFromReader(ir);
+		} catch (Exception e) {
+    		logger.warn(e.getMessage());
+		} finally {
+    		IOUtils.closeQuietly(is);
+			IOUtils.closeQuietly(ir);
 		}
+		return false;
 	}
 
 	boolean initializeFromReader(Reader r) throws IOException {
