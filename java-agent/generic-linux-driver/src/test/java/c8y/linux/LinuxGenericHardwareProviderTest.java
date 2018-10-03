@@ -20,31 +20,43 @@
 
 package c8y.linux;
 
-import static org.junit.Assert.assertEquals;
+import c8y.Hardware;
+import c8y.lx.driver.HardwareProvider;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 
-import org.junit.Test;
-
-import c8y.Hardware;
-import c8y.lx.driver.HardwareProvider;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.Matchers.isEmptyOrNullString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 public class LinuxGenericHardwareProviderTest {
-	public static final String REFERENCE_HWFILE = "/hardware.txt";
 
-	@Test
-	public void hardwareReadingSuccessful() throws IOException {
-		try (InputStream is = getClass().getResourceAsStream(REFERENCE_HWFILE);
-				Reader reader = new InputStreamReader(is)) {
-			driver.initializeFromReader(reader);
-		}
-
-		assertEquals(referenceHw, driver.getHardware());
-	}
+	private static final String REFERENCE_HWFILE = "/hardware.txt";
 
 	private Hardware referenceHw = new Hardware("Linux MAC", "00B3380001CE", HardwareProvider.UNKNOWN);
 	private LinuxGenericHardwareDriver driver = new LinuxGenericHardwareDriver();
+
+	@Test
+	public void hardwareReadingSuccessful() throws IOException {
+		try (InputStream is = getClass().getResourceAsStream(REFERENCE_HWFILE); Reader reader = new InputStreamReader(is)) {
+			driver.initializeFromReader(reader);
+		}
+		assertEquals(referenceHw, driver.getHardware());
+	}
+
+	@Test
+	public void shouldReturnMacAddress() throws Exception {
+		//given
+		LinuxGenericHardwareDriver driver = this.driver;
+		//when
+		driver.initialize();
+		//then
+		Hardware hardware = driver.getHardware();
+		assertThat(hardware.getSerialNumber(), not(isEmptyOrNullString()));
+	}
 }
