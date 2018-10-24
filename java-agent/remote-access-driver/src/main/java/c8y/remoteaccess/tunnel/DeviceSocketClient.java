@@ -1,11 +1,12 @@
 package c8y.remoteaccess.tunnel;
 
+import java.io.Closeable;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
-public class DeviceSocketClient {
+public class DeviceSocketClient implements Closeable {
 
     private final String host;
 
@@ -24,7 +25,7 @@ public class DeviceSocketClient {
 
     public void sendMessage(byte[] data) throws IOException {
         if (toHostOutputStream == null) {
-            throw new IllegalStateException("Not connected to host!");
+            throw new IllegalStateException("Not connected to the host!");
         }
         toHostOutputStream.write(data);
     }
@@ -39,6 +40,7 @@ public class DeviceSocketClient {
         return fromHostInputStream.read(buffer);
     }
 
+    @Override
     public void close() throws IOException {
         if (fromHostInputStream != null) {
             fromHostInputStream.close();

@@ -22,7 +22,7 @@ public class RemoteAccessDriver implements Driver {
 
     @Override
     public void initialize(Platform platform) {
-        logger.debug("Initializing with platform " + platform);
+        logger.debug("Initializing with platform {}", platform);
         connectOperationExecutor = new RemoteAccessOperationExecutor(platform);
     }
 
