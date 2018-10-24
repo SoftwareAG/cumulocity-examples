@@ -55,9 +55,6 @@ public class WebSocketClient extends Endpoint implements Closeable {
     public void onBinaryMessage(ByteBuffer data) {
         logger.debug("Received {} bytes from websocket, Forwarding to device...", data.remaining());
         try {
-            logger.info("DeviceClient: {}", deviceClient != null);
-            logger.info("ByteBuffer: {}", data != null);
-            logger.info("ByteBuffer array: {}", data.array() != null);
             deviceClient.sendMessage(data.array());
         } catch (Exception e) {
             logger.error("Unable to forward message to device");
