@@ -80,27 +80,27 @@ public class DeviceProxy {
             URI endpoint = getWebsocketEndpoint();
 
             try {
+                // Connect to Device
+                logger.debug("Creating device connection " + deviceHost + ":" + devicePort);
+                deviceSocket = new DeviceSocketClient(deviceHost, devicePort);
+                deviceSocket.connect();
+            } catch (IOException e) {
+                logger.error("Device connect error: {}", e.getMessage());
+                throw new RemoteAccessProtocolException(e.getMessage());
+            }
+
+            try {
                 // Connect to websocket
-                logger.debug("Creating websocket connection " + endpoint);
-                websocket = new WebSocketClient();
+                logger.debug("Creating websocket connection {}", endpoint);
+                websocket = new WebSocketClient(deviceSocket);
 
                 ClientEndpointConfig endpointConfig = ClientEndpointConfig.Builder.create()
                         .configurator(new AuthHeaderConfigurator(username, password)).preferredSubprotocols(Collections.singletonList("binary"))
                         .build();
                 ContainerProvider.getWebSocketContainer().connectToServer(websocket, endpointConfig, endpoint);
             } catch (IOException | DeploymentException e) {
-                logger.error("Websocket connect error:", e.getMessage());
+                logger.error("Websocket connect error: {}", e.getMessage());
                 throw new RemoteAccessWebsocketException(e.getMessage());
-            }
-
-            try {
-                // Connect to Device
-                logger.debug("Creating device connection " + deviceHost + ":" + devicePort);
-                deviceSocket = new DeviceSocketClient(deviceHost, devicePort);
-                deviceSocket.connect();
-            } catch (IOException e) {
-                logger.error("Device connect error:", e.getMessage());
-                throw new RemoteAccessProtocolException(e.getMessage());
             }
 
             // Start tunneling thread
