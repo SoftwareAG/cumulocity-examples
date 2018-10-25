@@ -1,30 +1,29 @@
 package c8y.remoteaccess.tunnel;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
+import c8y.remoteaccess.util.CumulocityIOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.websocket.CloseReason;
 import javax.websocket.Endpoint;
 import javax.websocket.EndpointConfig;
 import javax.websocket.MessageHandler;
-import javax.websocket.OnClose;
-import javax.websocket.OnError;
-import javax.websocket.OnOpen;
 import javax.websocket.Session;
+import java.io.Closeable;
+import java.io.IOException;
+import java.nio.ByteBuffer;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-public class WebSocketClient extends Endpoint {
+public class WebSocketClient extends Endpoint implements Closeable {
 
     private static final Logger logger = LoggerFactory.getLogger(WebSocketClient.class);
 
     private Session session;
 
-    private DeviceSocketClient deviceClient;
+    private final DeviceSocketClient deviceClient;
 
-    public WebSocketClient() {
+    public WebSocketClient(DeviceSocketClient deviceClient) {
         super();
+        this.deviceClient = deviceClient;
     }
 
     public void sendMessage(ByteBuffer data) throws IOException {
@@ -35,14 +34,12 @@ public class WebSocketClient extends Endpoint {
         }
     }
 
-    public void close() throws IOException {
+    @Override
+    public void close() {
         logger.debug("Closing websocket.");
-        if (session != null) {
-            session.close();
-        }
+        CumulocityIOUtils.closeQuietly(session, deviceClient);
     }
 
-    @OnOpen
     public void onOpen(Session session, EndpointConfig config) {
         logger.debug("Websocket was opened.");
         this.session = session;
@@ -56,10 +53,10 @@ public class WebSocketClient extends Endpoint {
     }
 
     public void onBinaryMessage(ByteBuffer data) {
-        logger.debug("Received " + data.remaining() + " bytes from websocket, Forwarding to device...");
+        logger.debug("Received {} bytes from websocket, Forwarding to device...", data.remaining());
         try {
             deviceClient.sendMessage(data.array());
-        } catch (IOException e) {
+        } catch (Exception e) {
             logger.error("Unable to forward message to device");
             try {
                 deviceClient.close();
@@ -70,22 +67,13 @@ public class WebSocketClient extends Endpoint {
         }
     }
 
-    @OnError
     public void onError(Session session, Throwable e) {
-        logger.error("Websocket[" + session.getId() + "] encountered an error:", e);
+        logger.error("Websocket[{}] encountered an error:", session.getId(), e);
     }
 
-    @OnClose
     public void onClose(Session session, CloseReason closeReason) {
-        logger.debug("Websocket[" + session.getId() + "] was closed.");
+        logger.debug("Websocket[{}] was closed.", session.getId());
         this.session = null;
     }
 
-    public void setDeviceClient(DeviceSocketClient deviceClient) {
-        this.deviceClient = deviceClient;
-    }
-
-    public boolean isClosed() {
-        return session == null;
-    }
 }

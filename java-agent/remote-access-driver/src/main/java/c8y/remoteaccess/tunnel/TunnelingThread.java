@@ -1,11 +1,12 @@
 package c8y.remoteaccess.tunnel;
 
-import java.io.IOException;
-import java.net.SocketException;
-import java.nio.ByteBuffer;
-
+import c8y.remoteaccess.util.CumulocityIOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.nio.ByteBuffer;
+
+import static c8y.remoteaccess.util.CumulocityIOUtils.EOF;
 
 public class TunnelingThread implements Runnable {
 
@@ -20,7 +21,6 @@ public class TunnelingThread implements Runnable {
     public TunnelingThread(WebSocketClient websocket, DeviceSocketClient deviceSocketClient) {
         this.websocket = websocket;
         this.deviceSocket = deviceSocketClient;
-        websocket.setDeviceClient(deviceSocketClient);
     }
 
     public void start() {
@@ -32,6 +32,7 @@ public class TunnelingThread implements Runnable {
     public void stop() {
         logger.debug("Stopping tunneling thread");
         close = true;
+        CumulocityIOUtils.closeQuietly(websocket, deviceSocket);
     }
 
     @Override
@@ -42,19 +43,17 @@ public class TunnelingThread implements Runnable {
             try {
                 int bytesRead = deviceSocket.read(data);
                 if (bytesRead > 0) {
-                    logger.debug("Received " + bytesRead + " bytes from device server. Forwarding to websocket...");
+                    logger.debug("Received {} bytes from device server. Forwarding to websocket...", bytesRead);
                     if (websocket == null) {
-                        throw new IllegalStateException("Not connect to Websocket");
+                        throw new IllegalStateException("Not connected to Websocket");
                     }
                     websocket.sendMessage(ByteBuffer.wrap(data, 0, bytesRead));
-                } else if (bytesRead == -1) {
+                } else if (bytesRead == EOF) {
                     logger.debug("Encountered end of stream. Closing connection...");
                     stop();
                 }
-            } catch (SocketException e) {
-                logger.debug(e.getMessage());
-            } catch (IOException e) {
-                logger.debug("Error:", e);
+            } catch (Exception e) {
+                logger.debug("Device data forwarding error: {}", e.getMessage(), e);
                 stop();
             }
         }
