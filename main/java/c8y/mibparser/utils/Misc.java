@@ -11,8 +11,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 
-import static c8y.mibparser.constants.Constants.HOME_DIR;
-import static c8y.mibparser.constants.Constants.TEMP_DIR_NAME;
+import static c8y.mibparser.constants.PlaceHolders.HOME_DIR;
+import static c8y.mibparser.constants.PlaceHolders.TEMP_DIR_NAME;
 
 public class Misc {
 

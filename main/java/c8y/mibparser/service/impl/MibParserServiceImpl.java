@@ -22,8 +22,7 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import static c8y.mibparser.constants.Constants.FIELD_BUS_TYPE;
-import static c8y.mibparser.constants.Constants.MANIFEST_FILENAME;
+import static c8y.mibparser.constants.PlaceHolders.*;
 import static c8y.mibparser.utils.Misc.*;
 
 @Component
@@ -41,7 +40,7 @@ public class MibParserServiceImpl implements MibParserService {
             List<Mib> mibs = extractAndLoadMainMibs(file.getInputStream(), path);
             return getMibJson(extractMibTrapInformation(mibs));
         } catch (MibLoaderException e) {
-            throw new IllegalMibUploadException("MIB dependent files are missing");
+            throw new IllegalMibUploadException(MISSING_MIB_DEPENDENCIES);
         } finally {
             FileUtils.deleteDirectory(parentFile);
             mibLoader.unloadAll();
@@ -60,7 +59,7 @@ public class MibParserServiceImpl implements MibParserService {
             zipInputStream = new ZipInputStream(inputStream);
             while ((zipEntry = zipInputStream.getNextEntry()) != null) {
                 if (zipEntry.isDirectory()) {
-                    throw new IllegalMibUploadException("Directories are not allowed inside zip file");
+                    throw new IllegalMibUploadException(DIR_NOT_ALLOWED);
                 }
                 File mibfile = new File(dirPath + File.separator + zipEntry.getName());
                 FileOutputStream fos = new FileOutputStream(mibfile);
@@ -77,7 +76,7 @@ public class MibParserServiceImpl implements MibParserService {
                 zipInputStream.closeEntry();
             }
             if (StringUtils.isEmpty(mainFiles))
-                throw new IllegalMibUploadException("Zip file does not contain main.txt");
+                throw new IllegalMibUploadException(NO_MANIFEST_FILE_FOUND);
             for (String mainFileName : mainFiles) {
                 mibs.add(loadMib(fileMap.get(mainFileName)));
             }

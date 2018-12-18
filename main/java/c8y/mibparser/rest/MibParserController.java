@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import static c8y.mibparser.constants.Constants.REQUEST_PARAM_NAME;
+import static c8y.mibparser.constants.PlaceHolders.REQUEST_PARAM_NAME;
 
 @RestController
 @RequestMapping(value = "/mibparser")
