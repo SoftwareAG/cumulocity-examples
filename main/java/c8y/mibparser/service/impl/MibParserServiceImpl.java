@@ -11,7 +11,7 @@ import net.percederberg.mibble.snmp.SnmpTrapType;
 import net.percederberg.mibble.value.ObjectIdentifierValue;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
@@ -54,7 +54,6 @@ public class MibParserServiceImpl implements MibParserService {
         List<Mib> mibs = new ArrayList<>();
         try {
             ZipEntry zipEntry;
-            List<String> mainFiles = new ArrayList<>();
             Map<String, File> fileMap = new HashMap<>();
             zipInputStream = new ZipInputStream(inputStream);
             while ((zipEntry = zipInputStream.getNextEntry()) != null) {
@@ -69,14 +68,10 @@ public class MibParserServiceImpl implements MibParserService {
                     fos.write(bytes, 0, length);
                 }
                 fileMap.put(mibfile.getName(), mibfile);
-                if (MANIFEST_FILENAME.equals(mibfile.getName())) {
-                    mainFiles = readMainFile(mibfile);
-                }
                 fos.close();
                 zipInputStream.closeEntry();
             }
-            if (StringUtils.isEmpty(mainFiles))
-                throw new IllegalMibUploadException(NO_MANIFEST_FILE_FOUND);
+            List<String> mainFiles = examineManifestFile(fileMap);
             for (String mainFileName : mainFiles) {
                 mibs.add(loadMib(fileMap.get(mainFileName)));
             }
@@ -143,5 +138,16 @@ public class MibParserServiceImpl implements MibParserService {
             childOids.add(mibVS.getOid().toString());
         }
         return new Register(name, oid, description, parentOid, childOids);
+    }
+
+    private List<String> examineManifestFile(Map<String, File> fileMap)
+            throws IllegalMibUploadException, IOException {
+        List<String> mainFiles = new ArrayList<>();
+        if (fileMap.containsKey(MANIFEST_FILENAME)) {
+            mainFiles = readMainFile(fileMap.get(MANIFEST_FILENAME));
+        }
+        if (CollectionUtils.isEmpty(mainFiles))
+            throw new IllegalMibUploadException(NO_MANIFEST_FILE_FOUND);
+        return mainFiles;
     }
 }
