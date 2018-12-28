@@ -20,7 +20,7 @@
 			<distributionManagement>
 				<snapshotRepository>
 					<id>snapshot</id>
-					<url>http://localhost:8080/nexus/content/repositories/snapshots/</url>
+					<url>${nexus.url}/nexus/content/repositories/snapshots/</url>
 				</snapshotRepository>
 			</distributionManagement>			
 		</profile>
@@ -37,11 +37,11 @@
 				<!-- TODO remove snapshotRepository after release -->
 				<snapshotRepository>
 					<id>snapshot</id>
-					<url>http://localhost:8080/nexus/content/repositories/snapshots/</url>
+					<url>${nexus.url}/nexus/content/repositories/snapshots/</url>
 				</snapshotRepository>
 				<repository>
 					<id>release</id>
-					<url>http://localhost:8080/nexus/content/repositories/releases/</url>
+					<url>${nexus.url}/nexus/content/repositories/releases/</url>
 				</repository>
 			</distributionManagement>			
 		</profile>
