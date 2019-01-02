@@ -6,12 +6,11 @@ import c8y.mibparser.model.DeviceType;
 import c8y.mibparser.model.Register;
 import c8y.mibparser.model.Root;
 import c8y.mibparser.service.MibParserService;
+import lombok.extern.slf4j.Slf4j;
 import net.percederberg.mibble.*;
 import net.percederberg.mibble.snmp.SnmpNotificationType;
-import net.percederberg.mibble.snmp.SnmpTrapType;
-import net.percederberg.mibble.value.ObjectIdentifierValue;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,7 +25,8 @@ import java.util.zip.ZipInputStream;
 import static c8y.mibparser.constants.PlaceHolders.*;
 import static c8y.mibparser.utils.Misc.*;
 
-@Component
+@Slf4j
+@Service
 public class MibParserServiceImpl implements MibParserService {
 
     private MibLoader mibLoader = new MibLoader();
@@ -85,7 +85,7 @@ public class MibParserServiceImpl implements MibParserService {
 
     private Mib loadMib(File file) throws IOException, MibLoaderException, IllegalMibUploadException {
         if (file == null)
-            throw new IllegalMibUploadException("No MIBs found in Zip File");
+            throw new IllegalMibUploadException(NO_MIB_FOUND_IN_ZIP_FILE);
         mibLoader.addDir(file.getParentFile());
         return mibLoader.load(file);
     }
@@ -96,7 +96,7 @@ public class MibParserServiceImpl implements MibParserService {
             registers.addAll(extractMibTrapInformation(mib));
         }
         if (CollectionUtils.isEmpty(registers))
-            throw new NoTrapInfoFoundException("No Traps found in Zip File");
+            throw new NoTrapInfoFoundException(NO_TRAPS_FOUND_IN_ZIP_FILE);
         return new Root(new DeviceType(FIELD_BUS_TYPE), registers);
     }
 
@@ -108,10 +108,7 @@ public class MibParserServiceImpl implements MibParserService {
         for (MibSymbol mibSymbol : mib.getAllSymbols()) {
             if (mibSymbol instanceof MibValueSymbol) {
                 MibValueSymbol mibValueSymbol = (MibValueSymbol) mibSymbol;
-                if (mibValueSymbol.getType() instanceof SnmpTrapType) {
-                    SnmpTrapType snmpTrapType = (SnmpTrapType) ((MibValueSymbol) mibSymbol).getType();
-                    registerList.add(extractMibTrapNode(snmpTrapType, mibValueSymbol));
-                } else if (mibValueSymbol.getType() instanceof SnmpNotificationType) {
+                if (mibValueSymbol.getType() instanceof SnmpNotificationType) {
                     registerList.add(extractMibTrapNode(mibValueSymbol));
                 }
             }
@@ -125,16 +122,6 @@ public class MibParserServiceImpl implements MibParserService {
                 mibValueSymbol.getParent().getOid().toString(),
                 mibValueSymbol.getChildren(),
                 ((SnmpNotificationType) mibValueSymbol.getType()).getDescription().replace("\n", "")
-        );
-    }
-
-    private Register extractMibTrapNode(SnmpTrapType snmpTrapType, MibValueSymbol mibValueSymbol) {
-        return createRegister(
-                mibValueSymbol.getName(),
-                ((ObjectIdentifierValue) snmpTrapType.getEnterprise()).getSymbol().getOid().toString(),
-                ((ObjectIdentifierValue) snmpTrapType.getEnterprise()).getSymbol().getParent().getOid().toString(),
-                ((ObjectIdentifierValue) snmpTrapType.getEnterprise()).getSymbol().getChildren(),
-                ((ObjectIdentifierValue) snmpTrapType.getEnterprise()).getSymbol().getComment().replace("\n", "")
         );
     }
 

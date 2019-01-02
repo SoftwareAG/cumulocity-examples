@@ -12,4 +12,7 @@ public interface PlaceHolders {
     String MISSING_MIB_DEPENDENCIES = "MIB dependent files are missing";
     String DIR_NOT_ALLOWED = "Directories are not allowed inside zip file";
     String NO_MANIFEST_FILE_FOUND = "Zip file does not contain "+MANIFEST_FILENAME;
+    String NO_MIB_FOUND_IN_ZIP_FILE = "No MIBs found in Zip File";
+    String NO_TRAPS_FOUND_IN_ZIP_FILE = "No Traps information found in Zip File";
+
 }

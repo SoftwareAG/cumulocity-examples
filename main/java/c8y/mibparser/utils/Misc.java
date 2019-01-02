@@ -3,6 +3,7 @@ package c8y.mibparser.utils;
 import c8y.mibparser.model.Root;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,6 +15,7 @@ import java.util.List;
 import static c8y.mibparser.constants.PlaceHolders.HOME_DIR;
 import static c8y.mibparser.constants.PlaceHolders.TEMP_DIR_NAME;
 
+@Slf4j
 public class Misc {
 
     private static ObjectMapper objectMapper = new ObjectMapper();

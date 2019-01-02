@@ -2,8 +2,6 @@ package c8y.mibparser;
 
 import c8y.mibparser.customexception.IllegalMibUploadException;
 import c8y.mibparser.service.impl.MibParserServiceImpl;
-import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -13,11 +11,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Matchers.any;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest

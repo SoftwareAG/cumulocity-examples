@@ -12,20 +12,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 import static c8y.mibparser.constants.PlaceHolders.REQUEST_PARAM_NAME;
 
+@Slf4j
 @RestController
 @RequestMapping(value = "/mibparser")
-@Slf4j
 public class MibParserController {
 
     @Autowired
     private MibParserService mibParserService;
-
-    @RequestMapping(value = "/health",
-            method = RequestMethod.GET,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    public String get() {
-        return "{\"status\":\"UP\"";
-    }
 
     @RequestMapping(value = "/uploadzip",
             method = RequestMethod.POST,
