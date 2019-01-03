@@ -1,25 +1,29 @@
 {
-  "apiVersion":"1",
-  "version":"@project.version@",
+  "apiVersion": "1",
+  "version": "@project.version@",
   "provider": {
-    "name":"Cumulocity GmbH"
+    "name": "Cumulocity GmbH"
   },
-  "roles":[
+  "requiredRoles": [
+    "ROLE_TENANT_MANAGEMENT_READ",
+    "ROLE_OPTION_MANAGEMENT_READ",
+    "ROLE_USER_MANAGEMENT_READ"
   ],
-  "livenessProbe":{
-    "httpGet":{
+  "roles": [
+    "ROLE_DEVICE_CONTROL_ADMIN"
+  ],
+  "livenessProbe": {
+    "httpGet": {
       "path": "/health",
       "port": 80
-
     },
     "initialDelaySeconds": 200,
     "periodSeconds": 10
   },
-  "readinessProbe":{
-    "httpGet":{
+  "readinessProbe": {
+    "httpGet": {
       "path": "/health",
       "port": 80
-
     },
     "initialDelaySeconds": 220,
     "periodSeconds": 10

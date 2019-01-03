@@ -13,6 +13,8 @@ public class MicroserviceConfiguration {
     @Bean
     public MicroserviceMetadataRepresentation microserviceRepresentation() {
         return microserviceMetadataRepresentation()
+                .requiredRole("ROLE_TENANT_MANAGEMENT_READ")
+                .requiredRole("ROLE_OPTION_MANAGEMENT_READ")
                 .requiredRole("ROLE_USER_MANAGEMENT_READ")
                 .role(ROLE_DEVICE_CONTROL_ADMIN)
                 .build();
