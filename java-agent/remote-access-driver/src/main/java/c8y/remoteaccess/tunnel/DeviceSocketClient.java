@@ -32,6 +32,8 @@ public class DeviceSocketClient implements Closeable {
 
     public void connect() throws IOException {
         clientSocket = new Socket(host, port);
+        clientSocket.setKeepAlive(true);
+        clientSocket.setSoTimeout(3600000); // 1 hour
         toHostOutputStream = new DataOutputStream(clientSocket.getOutputStream());
         fromHostInputStream = new DataInputStream(clientSocket.getInputStream());
     }
