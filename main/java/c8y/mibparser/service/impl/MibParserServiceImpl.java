@@ -1,10 +1,8 @@
 package c8y.mibparser.service.impl;
 
-import c8y.mibparser.customexception.IllegalMibUploadException;
-import c8y.mibparser.customexception.NoTrapInfoFoundException;
 import c8y.mibparser.model.DeviceType;
 import c8y.mibparser.model.Register;
-import c8y.mibparser.model.Root;
+import c8y.mibparser.model.MibUploadResult;
 import c8y.mibparser.service.MibParserService;
 import lombok.extern.slf4j.Slf4j;
 import net.percederberg.mibble.*;
@@ -15,14 +13,11 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import static c8y.mibparser.constants.PlaceHolders.*;
+import static c8y.mibparser.constants.Constants.*;
 import static c8y.mibparser.utils.Misc.*;
 
 @Slf4j
@@ -32,15 +27,15 @@ public class MibParserServiceImpl implements MibParserService {
     private MibLoader mibLoader = new MibLoader();
 
     @Override
-    public String processMibZipFile(MultipartFile file) throws IOException, IllegalMibUploadException {
-        String path = getDirectoryPath();
+    public MibUploadResult processMibZipFile(MultipartFile multipartFile) throws IOException, IllegalArgumentException {
+        String path = getTempDirectoryPath();
         File parentFile = createTempDirectory(path);
 
         try {
-            List<Mib> mibs = extractAndLoadMainMibs(file.getInputStream(), path);
-            return getMibJson(extractMibTrapInformation(mibs));
+            List<Mib> mibs = extractAndLoadMainMibs(multipartFile.getInputStream(), path);
+            return extractMibTrapInformation(mibs);
         } catch (MibLoaderException e) {
-            throw new IllegalMibUploadException(MISSING_MIB_DEPENDENCIES);
+            throw new IllegalArgumentException(MISSING_MIB_DEPENDENCIES);
         } finally {
             FileUtils.deleteDirectory(parentFile);
             mibLoader.unloadAll();
@@ -48,28 +43,25 @@ public class MibParserServiceImpl implements MibParserService {
         }
     }
 
-    private List<Mib> extractAndLoadMainMibs(InputStream inputStream, String dirPath)
-            throws MibLoaderException, IOException, IllegalMibUploadException {
-        ZipInputStream zipInputStream = null;
+    private List<Mib> extractAndLoadMainMibs(InputStream inputStream, String tmpDirPath)
+            throws MibLoaderException, IOException {
         List<Mib> mibs = new ArrayList<>();
-        try {
-            ZipEntry zipEntry;
+        try (ZipInputStream zipInputStream = new ZipInputStream(inputStream)) {
             Map<String, File> fileMap = new HashMap<>();
-            zipInputStream = new ZipInputStream(inputStream);
-            zipEntry = zipInputStream.getNextEntry();
+            ZipEntry zipEntry = zipInputStream.getNextEntry();
             while (zipEntry != null) {
                 if (zipEntry.isDirectory()) {
-                    throw new IllegalMibUploadException(DIR_NOT_ALLOWED);
+                    throw new IllegalArgumentException(DIR_NOT_ALLOWED);
                 }
-                File mibfile = new File(dirPath + File.separator + zipEntry.getName());
-                FileOutputStream fos = new FileOutputStream(mibfile);
-                byte[] bytes = new byte[(int) zipEntry.getSize()];
-                int length;
-                while ((length = zipInputStream.read(bytes)) > 0) {
-                    fos.write(bytes, 0, length);
+                File mibfile = new File(tmpDirPath + File.separator + zipEntry.getName());
+                try (FileOutputStream fos = new FileOutputStream(mibfile)) {
+                    byte[] bytes = new byte[(int) zipEntry.getSize()];
+                    int length;
+                    while ((length = zipInputStream.read(bytes)) > 0) {
+                        fos.write(bytes, 0, length);
+                    }
+                    fileMap.put(mibfile.getName(), mibfile);
                 }
-                fileMap.put(mibfile.getName(), mibfile);
-                fos.close();
                 zipInputStream.closeEntry();
                 zipEntry = zipInputStream.getNextEntry();
             }
@@ -78,32 +70,33 @@ public class MibParserServiceImpl implements MibParserService {
                 mibs.add(loadMib(fileMap.get(mainFileName)));
             }
             return mibs;
-        } finally {
-            closeInputStream(zipInputStream);
         }
     }
 
-    private Mib loadMib(File file) throws IOException, MibLoaderException, IllegalMibUploadException {
-        if (file == null)
-            throw new IllegalMibUploadException(NO_MIB_FOUND_IN_ZIP_FILE);
+    private Mib loadMib(File file) throws IOException, MibLoaderException {
+        if (file == null) {
+            throw new IllegalArgumentException(NO_MIB_FOUND_IN_ZIP_FILE);
+        }
         mibLoader.addDir(file.getParentFile());
         return mibLoader.load(file);
     }
 
-    private Root extractMibTrapInformation(List<Mib> mibs) throws NoTrapInfoFoundException {
+    private MibUploadResult extractMibTrapInformation(List<Mib> mibs) {
         List<Register> registers = new ArrayList<>();
         for (Mib mib: mibs) {
             registers.addAll(extractMibTrapInformation(mib));
         }
-        if (CollectionUtils.isEmpty(registers))
-            throw new NoTrapInfoFoundException(NO_TRAPS_FOUND_IN_ZIP_FILE);
-        return new Root(new DeviceType(FIELD_BUS_TYPE), registers);
+        if (CollectionUtils.isEmpty(registers)) {
+            throw new IllegalArgumentException(NO_TRAPS_FOUND_IN_ZIP_FILE);
+        }
+        return new MibUploadResult(new DeviceType(FIELD_BUS_TYPE), registers);
     }
 
     private List<Register> extractMibTrapInformation(Mib mib) {
         List<Register> registerList = new ArrayList<>();
-        if (mib == null)
+        if (mib == null) {
             return registerList;
+        }
 
         for (MibSymbol mibSymbol : mib.getAllSymbols()) {
             if (mibSymbol instanceof MibValueSymbol) {
@@ -125,7 +118,8 @@ public class MibParserServiceImpl implements MibParserService {
         );
     }
 
-    private Register createRegister(String name, String oid, String parentOid, MibValueSymbol[] childOid, String description) {
+    private Register createRegister(String name, String oid, String parentOid,
+                                    MibValueSymbol[] childOid, String description) {
         List<String> childOids = new ArrayList<>();
         for (MibValueSymbol mibVS : childOid) {
             childOids.add(mibVS.getOid().toString());
@@ -133,14 +127,16 @@ public class MibParserServiceImpl implements MibParserService {
         return new Register(name, oid, description, parentOid, childOids);
     }
 
-    private List<String> examineManifestFile(Map<String, File> fileMap)
-            throws IllegalMibUploadException, IOException {
-        List<String> mainFiles = new ArrayList<>();
+    private List<String> examineManifestFile(Map<String, File> fileMap) throws IOException {
+        List<String> mainFiles;
         if (fileMap.containsKey(MANIFEST_FILENAME)) {
             mainFiles = readMainFile(fileMap.get(MANIFEST_FILENAME));
+        } else {
+            throw new IllegalArgumentException(NO_MANIFEST_FILE_FOUND);
         }
-        if (CollectionUtils.isEmpty(mainFiles))
-            throw new IllegalMibUploadException(NO_MANIFEST_FILE_FOUND);
+        if (CollectionUtils.isEmpty(mainFiles)) {
+            throw new IllegalArgumentException(NO_MAIN_MIBS_FOUND);
+        }
         return mainFiles;
     }
 }

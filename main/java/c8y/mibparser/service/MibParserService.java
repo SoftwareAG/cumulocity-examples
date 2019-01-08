@@ -1,6 +1,6 @@
 package c8y.mibparser.service;
 
-import c8y.mibparser.customexception.IllegalMibUploadException;
+import c8y.mibparser.model.MibUploadResult;
 import net.percederberg.mibble.MibLoaderException;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -8,5 +8,5 @@ import java.io.IOException;
 
 public interface MibParserService {
 
-    String processMibZipFile(MultipartFile file) throws IOException, MibLoaderException, IllegalMibUploadException;
+    MibUploadResult processMibZipFile(MultipartFile file) throws IOException, MibLoaderException;
 }
