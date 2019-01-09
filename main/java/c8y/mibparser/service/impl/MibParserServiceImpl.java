@@ -24,10 +24,11 @@ import static c8y.mibparser.utils.Misc.*;
 @Service
 public class MibParserServiceImpl implements MibParserService {
 
-    private MibLoader mibLoader = new MibLoader();
+    private MibLoader mibLoader;
 
     @Override
     public MibUploadResult processMibZipFile(MultipartFile multipartFile) throws IOException, IllegalArgumentException {
+        mibLoader = new MibLoader();
         String path = getTempDirectoryPath();
         File parentFile = createTempDirectory(path);
 
