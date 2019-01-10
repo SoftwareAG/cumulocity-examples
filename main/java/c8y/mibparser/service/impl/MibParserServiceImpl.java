@@ -26,16 +26,14 @@ import static c8y.mibparser.utils.Misc.*;
 @Service
 public class MibParserServiceImpl implements MibParserService {
 
-    private MibLoader mibLoader;
-
     @Override
     public MibUploadResult processMibZipFile(MultipartFile multipartFile) throws IOException, IllegalArgumentException {
-        mibLoader = new MibLoader();
+        MibLoader mibLoader = new MibLoader();
         String path = getTempDirectoryPath();
         File parentFile = createTempDirectory(path);
 
         try {
-            List<Mib> mibs = extractAndLoadMainMibs(multipartFile.getInputStream(), path);
+            List<Mib> mibs = extractAndLoadMainMibs(multipartFile.getInputStream(), path, mibLoader);
             return extractMibTrapInformation(mibs);
         } catch (MibLoaderException e) {
             throw new IllegalArgumentException(MISSING_MIB_DEPENDENCIES);
@@ -46,7 +44,7 @@ public class MibParserServiceImpl implements MibParserService {
         }
     }
 
-    private List<Mib> extractAndLoadMainMibs(InputStream inputStream, String tmpDirPath)
+    private List<Mib> extractAndLoadMainMibs(InputStream inputStream, String tmpDirPath, MibLoader mibLoader)
             throws MibLoaderException, IOException {
         List<Mib> mibs = new ArrayList<>();
         try (ZipInputStream zipInputStream = new ZipInputStream(inputStream)) {
@@ -70,13 +68,13 @@ public class MibParserServiceImpl implements MibParserService {
             }
             List<String> mainFiles = examineManifestFile(fileMap);
             for (String mainFileName : mainFiles) {
-                mibs.add(loadMib(fileMap.get(mainFileName)));
+                mibs.add(loadMib(fileMap.get(mainFileName), mibLoader));
             }
             return mibs;
         }
     }
 
-    private Mib loadMib(File file) throws IOException, MibLoaderException {
+    private Mib loadMib(File file, MibLoader mibLoader) throws IOException, MibLoaderException {
         if (file == null) {
             throw new IllegalArgumentException(NO_MIB_FOUND_IN_ZIP_FILE);
         }
