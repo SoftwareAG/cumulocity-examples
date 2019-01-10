@@ -7,6 +7,8 @@ import c8y.mibparser.service.MibParserService;
 import lombok.extern.slf4j.Slf4j;
 import net.percederberg.mibble.*;
 import net.percederberg.mibble.snmp.SnmpNotificationType;
+import net.percederberg.mibble.snmp.SnmpTrapType;
+import net.percederberg.mibble.value.ObjectIdentifierValue;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -102,12 +104,25 @@ public class MibParserServiceImpl implements MibParserService {
         for (MibSymbol mibSymbol : mib.getAllSymbols()) {
             if (mibSymbol instanceof MibValueSymbol) {
                 MibValueSymbol mibValueSymbol = (MibValueSymbol) mibSymbol;
-                if (mibValueSymbol.getType() instanceof SnmpNotificationType) {
+                if (mibValueSymbol.getType() instanceof SnmpTrapType) {
+                    SnmpTrapType snmpTrapType = (SnmpTrapType) ((MibValueSymbol) mibSymbol).getType();
+                    registerList.add(extractMibTrapNode(snmpTrapType, mibValueSymbol));
+                } else if (mibValueSymbol.getType() instanceof SnmpNotificationType) {
                     registerList.add(extractMibTrapNode(mibValueSymbol));
                 }
             }
         }
         return registerList;
+    }
+
+    private Register extractMibTrapNode(SnmpTrapType snmpTrapType, MibValueSymbol mibValueSymbol) {
+        return createRegister(
+                mibValueSymbol.getName(),
+                ((ObjectIdentifierValue) snmpTrapType.getEnterprise()).getSymbol().getOid().toString(),
+                ((ObjectIdentifierValue) snmpTrapType.getEnterprise()).getSymbol().getParent().getOid().toString(),
+                ((ObjectIdentifierValue) snmpTrapType.getEnterprise()).getSymbol().getChildren(),
+                ((ObjectIdentifierValue) snmpTrapType.getEnterprise()).getSymbol().getComment().replace("\n", "")
+        );
     }
 
     private Register extractMibTrapNode(MibValueSymbol mibValueSymbol) {
