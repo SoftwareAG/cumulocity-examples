@@ -12,7 +12,6 @@ import org.springframework.stereotype.Repository;
 import static com.cumulocity.snmp.utils.PlatformRepositoryUtils.handleException;
 import static com.cumulocity.snmp.utils.PlatformRepositoryUtils.handleSuccess;
 
-@Slf4j
 @Repository
 public class DeviceCredentialsRepository {
 

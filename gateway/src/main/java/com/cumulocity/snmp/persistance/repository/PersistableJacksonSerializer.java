@@ -3,14 +3,12 @@ package com.cumulocity.snmp.persistance.repository;
 import com.cumulocity.snmp.model.core.IdProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.mapdb.Serializer;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-@Slf4j
 @RequiredArgsConstructor
 class PersistableJacksonSerializer<T extends IdProvider> extends Serializer<T> {
 

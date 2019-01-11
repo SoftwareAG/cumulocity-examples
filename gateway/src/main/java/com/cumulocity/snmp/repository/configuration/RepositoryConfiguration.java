@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 
-@Slf4j
 @Service
 public class RepositoryConfiguration {
 
