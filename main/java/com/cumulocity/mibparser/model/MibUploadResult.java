@@ -1,4 +1,4 @@
-package c8y.mibparser.model;
+package com.cumulocity.mibparser.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;

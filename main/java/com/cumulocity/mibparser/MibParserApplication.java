@@ -1,4 +1,4 @@
-package c8y.mibparser;
+package com.cumulocity.mibparser;
 
 import com.cumulocity.microservice.autoconfigure.MicroserviceApplication;
 import lombok.extern.slf4j.Slf4j;

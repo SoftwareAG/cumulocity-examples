@@ -1,6 +1,6 @@
-package c8y.mibparser;
+package com.cumulocity.mibparser;
 
-import c8y.mibparser.service.impl.MibParserServiceImpl;
+import com.cumulocity.mibparser.service.impl.MibParserServiceImpl;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;

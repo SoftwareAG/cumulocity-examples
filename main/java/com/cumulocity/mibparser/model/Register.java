@@ -1,4 +1,4 @@
-package c8y.mibparser.model;
+package com.cumulocity.mibparser.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -1,4 +1,4 @@
-package c8y.mibparser.utils;
+package com.cumulocity.mibparser.utils;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -8,8 +8,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 
-import static c8y.mibparser.constants.Constants.TMPDIR;
-import static c8y.mibparser.constants.Constants.TEMP_DIR_NAME;
+import static com.cumulocity.mibparser.constants.Constants.TMPDIR;
+import static com.cumulocity.mibparser.constants.Constants.TEMP_DIR_NAME;
 
 @Slf4j
 public class MibParserUtil {

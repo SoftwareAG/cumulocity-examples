@@ -1,4 +1,4 @@
-package c8y.mibparser.configuration;
+package com.cumulocity.mibparser.configuration;
 
 import lombok.Builder;
 import lombok.Getter;

@@ -1,9 +1,9 @@
-package c8y.mibparser.service.impl;
+package com.cumulocity.mibparser.service.impl;
 
-import c8y.mibparser.model.DeviceType;
-import c8y.mibparser.model.Register;
-import c8y.mibparser.model.MibUploadResult;
-import c8y.mibparser.service.MibParserService;
+import com.cumulocity.mibparser.model.DeviceType;
+import com.cumulocity.mibparser.model.Register;
+import com.cumulocity.mibparser.model.MibUploadResult;
+import com.cumulocity.mibparser.service.MibParserService;
 import lombok.extern.slf4j.Slf4j;
 import net.percederberg.mibble.*;
 import net.percederberg.mibble.snmp.SnmpNotificationType;
@@ -19,8 +19,8 @@ import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import static c8y.mibparser.constants.Constants.*;
-import static c8y.mibparser.utils.MibParserUtil.*;
+import static com.cumulocity.mibparser.constants.Constants.*;
+import static com.cumulocity.mibparser.utils.MibParserUtil.*;
 
 @Slf4j
 @Service
@@ -36,6 +36,7 @@ public class MibParserServiceImpl implements MibParserService {
             List<Mib> mibs = extractAndLoadMainMibs(multipartFile.getInputStream(), path, mibLoader);
             return extractMibTrapInformation(mibs);
         } catch (MibLoaderException e) {
+            log.error(MISSING_MIB_DEPENDENCIES);
             throw new IllegalArgumentException(MISSING_MIB_DEPENDENCIES);
         } finally {
             FileUtils.deleteDirectory(parentFile);
@@ -47,11 +48,13 @@ public class MibParserServiceImpl implements MibParserService {
     private List<Mib> extractAndLoadMainMibs(InputStream inputStream, String tmpDirPath, MibLoader mibLoader)
             throws MibLoaderException, IOException {
         List<Mib> mibs = new ArrayList<>();
+        log.info("Extracting all files from Zip");
         try (ZipInputStream zipInputStream = new ZipInputStream(inputStream)) {
             Map<String, File> fileMap = new HashMap<>();
             ZipEntry zipEntry = zipInputStream.getNextEntry();
             while (zipEntry != null) {
                 if (zipEntry.isDirectory()) {
+                    log.error(DIR_NOT_ALLOWED);
                     throw new IllegalArgumentException(DIR_NOT_ALLOWED);
                 }
                 File mibfile = new File(tmpDirPath + File.separator + zipEntry.getName());
@@ -76,8 +79,10 @@ public class MibParserServiceImpl implements MibParserService {
 
     private Mib loadMib(File file, MibLoader mibLoader) throws IOException, MibLoaderException {
         if (file == null) {
+            log.error(NO_MIB_FOUND_IN_ZIP_FILE);
             throw new IllegalArgumentException(NO_MIB_FOUND_IN_ZIP_FILE);
         }
+        log.debug("Loading main MIB file " + file.getName());
         mibLoader.addDir(file.getParentFile());
         return mibLoader.load(file);
     }
@@ -88,12 +93,15 @@ public class MibParserServiceImpl implements MibParserService {
             registers.addAll(extractMibTrapInformation(mib));
         }
         if (CollectionUtils.isEmpty(registers)) {
+            log.error(NO_TRAPS_FOUND_IN_ZIP_FILE);
             throw new IllegalArgumentException(NO_TRAPS_FOUND_IN_ZIP_FILE);
         }
+        log.info("MIB Zip file processed");
         return new MibUploadResult(new DeviceType(FIELD_BUS_TYPE), registers);
     }
 
     private List<Register> extractMibTrapInformation(Mib mib) {
+        log.debug("Extracting TRAP information");
         List<Register> registerList = new ArrayList<>();
         if (mib == null) {
             return registerList;
@@ -103,9 +111,11 @@ public class MibParserServiceImpl implements MibParserService {
             if (mibSymbol instanceof MibValueSymbol) {
                 MibValueSymbol mibValueSymbol = (MibValueSymbol) mibSymbol;
                 if (mibValueSymbol.getType() instanceof SnmpTrapType) {
+                    log.debug("SMPv1 TRAP info found");
                     SnmpTrapType snmpTrapType = (SnmpTrapType) ((MibValueSymbol) mibSymbol).getType();
                     registerList.add(extractMibTrapNode(snmpTrapType, mibValueSymbol));
                 } else if (mibValueSymbol.getType() instanceof SnmpNotificationType) {
+                    log.debug("SMPv2 TRAP info found");
                     registerList.add(extractMibTrapNode(mibValueSymbol));
                 }
             }
@@ -142,13 +152,16 @@ public class MibParserServiceImpl implements MibParserService {
     }
 
     private List<String> examineManifestFile(Map<String, File> fileMap) throws IOException {
+        log.info("Examining all MIB files");
         List<String> mainFiles;
         if (fileMap.containsKey(MANIFEST_FILENAME)) {
             mainFiles = readMainFile(fileMap.get(MANIFEST_FILENAME));
         } else {
+            log.error(NO_MANIFEST_FILE_FOUND);
             throw new IllegalArgumentException(NO_MANIFEST_FILE_FOUND);
         }
         if (CollectionUtils.isEmpty(mainFiles)) {
+            log.error(NO_MAIN_MIBS_FOUND);
             throw new IllegalArgumentException(NO_MAIN_MIBS_FOUND);
         }
         return mainFiles;

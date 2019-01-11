@@ -1,7 +1,6 @@
-package c8y.mibparser.service;
+package com.cumulocity.mibparser.service;
 
-import c8y.mibparser.model.MibUploadResult;
-import net.percederberg.mibble.MibLoaderException;
+import com.cumulocity.mibparser.model.MibUploadResult;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;

@@ -1,4 +1,4 @@
-package c8y.mibparser.constants;
+package com.cumulocity.mibparser.constants;
 
 public class Constants {
 
