@@ -1,7 +1,6 @@
 package com.cumulocity.snmp.utils.gateway;
 
 import com.cumulocity.snmp.configuration.service.GatewayConfigurationProperties;
-import lombok.RequiredArgsConstructor;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.TaskScheduler;

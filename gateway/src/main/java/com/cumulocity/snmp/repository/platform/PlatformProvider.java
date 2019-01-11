@@ -22,7 +22,6 @@ import java.util.concurrent.ExecutionException;
 
 import static com.google.common.cache.CacheBuilder.newBuilder;
 import static java.util.concurrent.TimeUnit.HOURS;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 
 @Component
