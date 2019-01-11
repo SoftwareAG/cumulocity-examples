@@ -20,7 +20,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import static c8y.mibparser.constants.Constants.*;
-import static c8y.mibparser.utils.Misc.*;
+import static c8y.mibparser.utils.MibParserUtil.*;
 
 @Slf4j
 @Service

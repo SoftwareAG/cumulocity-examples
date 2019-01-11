@@ -14,7 +14,7 @@ public class Register {
     private String name;
 
     @NotNull
-    private String Oid;
+    private String oid;
 
     private String description;
 

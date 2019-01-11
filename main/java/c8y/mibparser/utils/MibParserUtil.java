@@ -12,7 +12,7 @@ import static c8y.mibparser.constants.Constants.TMPDIR;
 import static c8y.mibparser.constants.Constants.TEMP_DIR_NAME;
 
 @Slf4j
-public class Misc {
+public class MibParserUtil {
 
     public static File createTempDirectory(String dirPath) {
         File file = new File(dirPath);
