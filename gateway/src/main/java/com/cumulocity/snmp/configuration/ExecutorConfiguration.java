@@ -11,7 +11,7 @@ import java.util.concurrent.Executor;
 
 @Slf4j
 @Configuration
-public class ServiceConfiguration {
+public class ExecutorConfiguration {
     @Bean
     public Executor asyncExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();

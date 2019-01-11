@@ -5,8 +5,8 @@ import com.cumulocity.snmp.annotation.core.PersistableType;
 import com.cumulocity.snmp.annotation.model.ExtensibleRepresentationView;
 import com.cumulocity.snmp.model.core.Alarms;
 import com.cumulocity.snmp.model.core.Credentials;
-import com.cumulocity.snmp.model.core.HasKey;
-import com.cumulocity.snmp.model.core.HasTenant;
+import com.cumulocity.snmp.model.core.IdProvider;
+import com.cumulocity.snmp.model.core.TenantProvider;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
@@ -23,7 +23,7 @@ import java.util.List;
 @EqualsAndHashCode(of = {"tenant", "name", "password", "id", "currentDeviceIds"})
 @PersistableType(value = "Gateway")
 @ExtensibleRepresentationView(fragment = Gateway.c8y_SNMPGateway, type = Gateway.TYPE)
-public class Gateway implements HasKey, HasTenant, Credentials {
+public class Gateway implements IdProvider, TenantProvider, Credentials {
 
     public static final String TYPE = "c8y_SNMP";
     public static final String c8y_SNMPGateway = "c8y_SNMPGateway";

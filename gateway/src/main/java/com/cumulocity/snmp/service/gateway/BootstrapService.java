@@ -179,8 +179,4 @@ public class BootstrapService {
         }
     }
 
-//    @VisibleForTesting
-    /*public void setDeviceCredentialsRepository(DeviceCredentialsRepository deviceCredentialsRepository){
-        deviceCredentialsRepository = deviceCredentialsRepository;
-    }*/
 }

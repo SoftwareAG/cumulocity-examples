@@ -1,6 +1,6 @@
 package com.cumulocity.snmp.persistance.repository;
 
-import com.cumulocity.snmp.model.core.HasKey;
+import com.cumulocity.snmp.model.core.IdProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +12,7 @@ import java.io.IOException;
 
 @Slf4j
 @RequiredArgsConstructor
-class PersistableJacksonSerializer<T extends HasKey> extends Serializer<T> {
+class PersistableJacksonSerializer<T extends IdProvider> extends Serializer<T> {
 
     private final ObjectMapper objectMapper;
     private final PersistableTypeMetadataProvider metadataProvider;

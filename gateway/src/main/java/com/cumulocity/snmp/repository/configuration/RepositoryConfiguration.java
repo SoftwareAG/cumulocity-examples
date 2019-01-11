@@ -2,7 +2,6 @@ package com.cumulocity.snmp.repository.configuration;
 
 import com.cumulocity.snmp.platform.PlatformObjectMapperConfiguration;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;

@@ -1,4 +1,4 @@
-package com.cumulocity.snmp.gateway;
+package com.cumulocity.snmp;
 
 import com.cumulocity.microservice.logging.annotation.EnableMicroserviceLogging;
 import com.cumulocity.snmp.annotation.core.PersistableType;
@@ -25,8 +25,8 @@ import static org.springframework.context.annotation.AdviceMode.ASPECTJ;
         @PropertySource(value = "file:${user.home}/snmp/snmp-agent-gateway.properties", ignoreResourceNotFound = true),
         @PropertySource(value = "file:${snmp.conf.dir:/etc}/snmp/snmp-agent-gateway.properties", ignoreResourceNotFound = true),
         @PropertySource(value = "classpath:META-INF/spring/snmp-agent-gateway.properties", ignoreResourceNotFound = true)})
-public class GatewayEntryPoint {
+public class main {
     public static void main(String... args) {
-        SpringApplication.run(GatewayEntryPoint.class, args);
+        SpringApplication.run(main.class, args);
     }
 }

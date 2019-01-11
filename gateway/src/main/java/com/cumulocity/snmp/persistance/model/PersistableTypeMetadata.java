@@ -1,6 +1,6 @@
 package com.cumulocity.snmp.persistance.model;
 
-import com.cumulocity.snmp.model.core.HasTenant;
+import com.cumulocity.snmp.model.core.TenantProvider;
 import com.cumulocity.snmp.repository.configuration.ContextProvider;
 import com.google.common.base.Function;
 import com.google.common.base.Supplier;
@@ -20,9 +20,9 @@ public class PersistableTypeMetadata {
     private final Class<?> context;
 
     public String getStoreName() {
-        if (HasTenant.class.isAssignableFrom(context)) {
-            return ContextProvider.get(HasTenant.class).transform(new Function<HasTenant, String>() {
-                public String apply(HasTenant context) {
+        if (TenantProvider.class.isAssignableFrom(context)) {
+            return ContextProvider.get(TenantProvider.class).transform(new Function<TenantProvider, String>() {
+                public String apply(TenantProvider context) {
                     return context.getTenant() + "_" + getTypeName();
                 }
             }).or(new Supplier<String>() {

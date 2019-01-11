@@ -2,7 +2,7 @@ package com.cumulocity.snmp.persistance.repository;
 
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.snmp.annotation.gateway.RunWithinContext;
-import com.cumulocity.snmp.model.core.HasKey;
+import com.cumulocity.snmp.model.core.IdProvider;
 import com.cumulocity.snmp.model.gateway.Gateway;
 import com.cumulocity.snmp.repository.core.GatewayRepository;
 import com.cumulocity.snmp.repository.core.Repository;
@@ -10,7 +10,6 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
@@ -25,7 +24,7 @@ import static com.google.common.collect.FluentIterable.from;
 
 @Slf4j
 @RequiredArgsConstructor
-public class PersistableRepository<T extends HasKey> implements Repository<T>, GatewayRepository<T> {
+public class PersistableRepository<T extends IdProvider> implements Repository<T>, GatewayRepository<T> {
 
     private final Class<T> clazz;
 

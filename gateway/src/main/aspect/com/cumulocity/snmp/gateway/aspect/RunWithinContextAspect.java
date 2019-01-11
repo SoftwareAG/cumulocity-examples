@@ -1,6 +1,6 @@
 package com.cumulocity.snmp.gateway.aspect;
 
-import com.cumulocity.snmp.model.core.HasGateway;
+import com.cumulocity.snmp.model.core.GatewayProvider;
 import com.cumulocity.snmp.model.core.Credentials;
 import com.cumulocity.snmp.model.gateway.Gateway;
 import com.cumulocity.snmp.repository.configuration.ContextProvider;
@@ -28,7 +28,7 @@ public class RunWithinContextAspect {
     }
 
     @Around("withAnnotation() && atExecution() && args(credentials,..)")
-    public Object runWithinContext(HasGateway credentials, ProceedingJoinPoint jointPoint) throws Throwable {
+    public Object runWithinContext(GatewayProvider credentials, ProceedingJoinPoint jointPoint) throws Throwable {
         return doInvoke(credentials.getGateway(), jointPoint);
     }
 

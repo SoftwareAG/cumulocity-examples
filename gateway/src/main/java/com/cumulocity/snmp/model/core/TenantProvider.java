@@ -1,5 +1,5 @@
 package com.cumulocity.snmp.model.core;
 
-public interface HasTenant {
+public interface TenantProvider {
     String getTenant();
 }

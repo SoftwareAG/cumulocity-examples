@@ -20,7 +20,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <snmp4j.version>3.0.5</snmp4j.version>
         <java.version>1.7</java.version>
-        <start-class>com.cumulocity.snmp.gateway.GatewayEntryPoint</start-class>
+        <start-class>com.cumulocity.snmp.main</start-class>
 
         <c8y.clients.version>9.12.0</c8y.clients.version>
 
@@ -63,6 +63,12 @@
             <groupId>com.nsn.cumulocity.model</groupId>
             <artifactId>device-capability-model</artifactId>
             <version>${c8y.clients.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.nsn.cumulocity.dependencies.osgi</groupId>
+            <artifactId>svenson</artifactId>
+            <version>${svenson.version}-${c8y.dependencies.version}</version>
         </dependency>
 
         <!--Spring-->
