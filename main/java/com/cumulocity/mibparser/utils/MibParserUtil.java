@@ -1,7 +1,5 @@
 package com.cumulocity.mibparser.utils;
 
-import lombok.extern.slf4j.Slf4j;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -11,7 +9,6 @@ import java.util.List;
 import static com.cumulocity.mibparser.constants.Constants.TMPDIR;
 import static com.cumulocity.mibparser.constants.Constants.TEMP_DIR_NAME;
 
-@Slf4j
 public class MibParserUtil {
 
     public static File createTempDirectory(String dirPath) {
