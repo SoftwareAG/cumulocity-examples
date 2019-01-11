@@ -1,21 +1,18 @@
 package c8y.trackeragent_it.service;
 
-import static com.cumulocity.model.authentication.CumulocityCredentials.Builder.cumulocityCredentials;
-
-import java.io.UnsupportedEncodingException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.cumulocity.model.authentication.CumulocityCredentials;
+import c8y.trackeragent.utils.message.TrackerMessage;
+import c8y.trackeragent_it.TestSettings;
+import com.cumulocity.model.authentication.CumulocityBasicCredentials;
 import com.cumulocity.rest.representation.devicebootstrap.NewDeviceRequestRepresentation;
 import com.cumulocity.sdk.client.Platform;
 import com.cumulocity.sdk.client.PlatformImpl;
 import com.cumulocity.sdk.client.inventory.InventoryApi;
 import com.cumulocity.sdk.client.inventory.InventoryFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import c8y.trackeragent.utils.message.TrackerMessage;
-import c8y.trackeragent_it.TestSettings;
+import java.io.UnsupportedEncodingException;
+
 
 public class Bootstraper {
 
@@ -31,8 +28,8 @@ public class Bootstraper {
     public Bootstraper(TestSettings testSettings, SocketWritter socketWriter, NewDeviceRequestService newDeviceRequestService) {
         this.testSettings = testSettings;
         this.newDeviceRequestService = newDeviceRequestService;
-        this.bootstrapPlatform = createBootstrapPlatform();
-        this.trackerPlatform = createTrackerPlatform();
+        this.bootstrapPlatform = createPlatform(testSettings.getBootstrapUser(), testSettings.getBootstrapPassword());
+        this.trackerPlatform = createPlatform(testSettings.getC8yUser(), testSettings.getC8yPassword());
         this.socketWriter = socketWriter;
         this.inventoryApi = this.trackerPlatform.getInventoryApi();
     }
@@ -68,7 +65,7 @@ public class Bootstraper {
         socketWriter.write(deviceMessage);
         Thread.sleep(1000);
         // Device credentials got
-        
+
         socketWriter.closeExistingConnection();
     }
 
@@ -124,15 +121,12 @@ public class Bootstraper {
         }
     }
 
-    private PlatformImpl createBootstrapPlatform() {
-        CumulocityCredentials credentials = cumulocityCredentials(testSettings.getBootstrapUser(), testSettings.getBootstrapPassword())
-                .withTenantId(testSettings.getC8yTenant()).build();
-        return new PlatformImpl(testSettings.getC8yHost(), credentials);
-    }
-
-    private PlatformImpl createTrackerPlatform() {
-        CumulocityCredentials credentials = cumulocityCredentials(testSettings.getC8yUser(), testSettings.getC8yPassword())
-                .withTenantId(testSettings.getC8yTenant()).build();
+    private PlatformImpl createPlatform(String userName, String password) {
+        CumulocityBasicCredentials credentials = CumulocityBasicCredentials.builder()
+                .tenantId(testSettings.getC8yTenant())
+                .username(userName)
+                .password(password)
+                .build();
         return new PlatformImpl(testSettings.getC8yHost(), credentials);
     }
 }

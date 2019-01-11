@@ -1,15 +1,12 @@
 package c8y.migration;
 
-import static com.cumulocity.model.authentication.CumulocityCredentials.Builder.cumulocityCredentials;
-
-import javax.annotation.PostConstruct;
-
+import com.cumulocity.model.authentication.CumulocityBasicCredentials;
+import com.cumulocity.sdk.client.PlatformImpl;
+import com.cumulocity.sdk.client.devicecontrol.DeviceCredentialsApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.cumulocity.model.authentication.CumulocityCredentials;
-import com.cumulocity.sdk.client.PlatformImpl;
-import com.cumulocity.sdk.client.devicecontrol.DeviceCredentialsApi;
+import javax.annotation.PostConstruct;
 
 @Component
 public class BootstrapPlatform {
@@ -24,8 +21,11 @@ public class BootstrapPlatform {
 
 	@PostConstruct
 	public void init() {
-		CumulocityCredentials credentials = cumulocityCredentials(settings.getBootstrapUser(),
-				settings.getBootstrapPassword()).withTenantId(settings.getBootstrapTenant()).build();
+		CumulocityBasicCredentials credentials = CumulocityBasicCredentials.builder()
+		.tenantId(settings.getBootstrapTenant())
+		.username(settings.getBootstrapUser())
+		.password(settings.getBootstrapPassword())
+		.build();
 		PlatformImpl platform = new PlatformImpl(settings.getC8yHost(), credentials);
 		deviceCredentialsApi = platform.getDeviceCredentialsApi();
 	}

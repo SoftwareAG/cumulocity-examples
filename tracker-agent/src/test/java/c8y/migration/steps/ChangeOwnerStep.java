@@ -1,33 +1,26 @@
 package c8y.migration.steps;
 
-import static c8y.trackeragent.device.TrackerDevice.getAgentExternalId;
-import static c8y.trackeragent.device.TrackerDevice.imeiAsId;
-import static com.cumulocity.model.authentication.CumulocityCredentials.Builder.cumulocityCredentials;
-
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.annotation.Order;
-import org.springframework.stereotype.Component;
-
+import c8y.migration.Settings;
+import c8y.migration.model.*;
 import com.cumulocity.agent.server.repository.InventoryRepository;
 import com.cumulocity.model.ID;
-import com.cumulocity.model.authentication.CumulocityCredentials;
+import com.cumulocity.model.authentication.CumulocityBasicCredentials;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.devicebootstrap.DeviceCredentialsRepresentation;
 import com.cumulocity.rest.representation.identity.ExternalIDRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.Platform;
 import com.cumulocity.sdk.client.PlatformImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
 
-import c8y.migration.Settings;
-import c8y.migration.model.DeviceMigrationRequest;
-import c8y.migration.model.DeviceMigrationResponse;
-import c8y.migration.model.MigrationException;
-import c8y.migration.model.TenantMigrationRequest;
-import c8y.migration.model.TenantMigrationResponse;
+import java.util.List;
+
+import static c8y.trackeragent.device.TrackerDevice.getAgentExternalId;
+import static c8y.trackeragent.device.TrackerDevice.imeiAsId;
 
 @Component
 @Order(value = 20)
@@ -89,10 +82,13 @@ public class ChangeOwnerStep extends MigrationStep {
 		return result;
 	}
 
-	private Platform platform(String tenant, DeviceCredentialsRepresentation credentialsRep) {
-		CumulocityCredentials credentials = cumulocityCredentials(credentialsRep.getUsername(), credentialsRep.getPassword())
-				.withTenantId(tenant).build();
-		return new PlatformImpl(settings.getC8yHost(), credentials);
-	}
+    private Platform platform(String tenant, DeviceCredentialsRepresentation credentialsRep) {
+        CumulocityBasicCredentials credentials = CumulocityBasicCredentials.builder()
+                .tenantId(tenant)
+                .username(credentialsRep.getUsername())
+                .password(credentialsRep.getPassword())
+                .build();
+        return new PlatformImpl(settings.getC8yHost(), credentials);
+    }
 
 }

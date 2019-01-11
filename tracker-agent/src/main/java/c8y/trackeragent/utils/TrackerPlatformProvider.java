@@ -1,29 +1,25 @@
 package c8y.trackeragent.utils;
 
-import static com.cumulocity.model.authentication.CumulocityCredentials.Builder.cumulocityCredentials;
-
-import java.util.concurrent.Callable;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import com.cumulocity.model.authentication.CumulocityCredentials;
-import com.cumulocity.sdk.client.ClientConfiguration;
-import com.cumulocity.sdk.client.PlatformImpl;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-
 import c8y.trackeragent.TrackerPlatform;
 import c8y.trackeragent.configuration.TrackerConfiguration;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.exception.SDKExceptions;
+import com.cumulocity.model.authentication.CumulocityBasicCredentials;
+import com.cumulocity.sdk.client.ClientConfiguration;
+import com.cumulocity.sdk.client.PlatformImpl;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.concurrent.Callable;
 
 @Component
 public class TrackerPlatformProvider {
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(TrackerPlatformProvider.class);
 
     private final DeviceCredentialsRepository deviceCredentialsRepository;
@@ -36,7 +32,7 @@ public class TrackerPlatformProvider {
         this.deviceCredentialsRepository = deviceCredentialsRepository;
         this.cache = CacheBuilder.newBuilder().build();
     }
-    
+
     public void initTenantPlatform(final String tenantId) {
     	getTenantPlatform(tenantId);
     }
@@ -44,7 +40,7 @@ public class TrackerPlatformProvider {
     public TrackerPlatform getTenantPlatform(final String tenantId) {
     	return getPlatform(PlatformKey.forTenant(tenantId));
     }
-    
+
     public TrackerPlatform getBootstrapPlatform() {
         return getPlatform(PlatformKey.forBootstrap());
     }
@@ -73,20 +69,28 @@ public class TrackerPlatformProvider {
     }
 
     private TrackerPlatform createBootstrapPlatform() {
-        CumulocityCredentials credentials = cumulocityCredentials(config.getBootstrapUser(), config.getBootstrapPassword()).withTenantId(config.getBootstrapTenant()).build();
+        CumulocityBasicCredentials credentials = CumulocityBasicCredentials.builder()
+                .tenantId(config.getBootstrapTenant())
+                .username(config.getBootstrapUser())
+                .password(config.getBootstrapPassword())
+                .build();
         PlatformImpl paltform = c8yPlatform(credentials);
         return new TrackerPlatform(paltform);
     }
-    
+
     private TrackerPlatform createTenantPlatform(String tenant) {
-    	DeviceCredentials agentCredentials = deviceCredentialsRepository.getAgentCredentials(tenant);
-    	CumulocityCredentials credentials = cumulocityCredentials(agentCredentials.getUsername(), agentCredentials.getPassword()).withTenantId(tenant).build();
-    	PlatformImpl platform = c8yPlatform(credentials);
-    	TrackerPlatform trackerPlatform = new TrackerPlatform(platform);
-    	return trackerPlatform;
+        DeviceCredentials agentCredentials = deviceCredentialsRepository.getAgentCredentials(tenant);
+        CumulocityBasicCredentials credentials = CumulocityBasicCredentials.builder()
+                .tenantId(tenant)
+                .username(agentCredentials.getUsername())
+                .password(agentCredentials.getPassword())
+                .build();
+        PlatformImpl platform = c8yPlatform(credentials);
+        TrackerPlatform trackerPlatform = new TrackerPlatform(platform);
+        return trackerPlatform;
     }
 
-    private PlatformImpl c8yPlatform(CumulocityCredentials credentials) {
+    private PlatformImpl c8yPlatform(CumulocityBasicCredentials credentials) {
         PlatformImpl platform = new PlatformImpl(config.getPlatformHost(), credentials, new ClientConfiguration(null, false));
         platform.setForceInitialHost(config.getForceInitialHost());
         return platform;
@@ -95,11 +99,11 @@ public class TrackerPlatformProvider {
     private static class PlatformKey {
 
         private final String tenant;
-        
+
         public static PlatformKey forBootstrap() {
         	return new PlatformKey(null);
         }
-        
+
         public static PlatformKey forTenant(String tenant) {
         	return new PlatformKey(tenant);
         }
@@ -140,7 +144,7 @@ public class TrackerPlatformProvider {
                 return false;
             return true;
         }
-        
+
         @Override
         public String toString() {
             return isBootstrap() ? "bootstrap" : "tenant: " + tenant;

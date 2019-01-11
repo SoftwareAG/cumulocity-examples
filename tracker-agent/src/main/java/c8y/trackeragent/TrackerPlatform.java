@@ -1,10 +1,8 @@
 package c8y.trackeragent;
 
 import c8y.trackeragent.exception.SDKExceptions;
-import com.cumulocity.sdk.client.Platform;
-import com.cumulocity.sdk.client.PlatformImpl;
-import com.cumulocity.sdk.client.PlatformParameters;
-import com.cumulocity.sdk.client.SDKException;
+import com.cumulocity.model.authentication.CumulocityBasicCredentials;
+import com.cumulocity.sdk.client.*;
 import com.cumulocity.sdk.client.alarm.AlarmApi;
 import com.cumulocity.sdk.client.audit.AuditRecordApi;
 import com.cumulocity.sdk.client.cep.CepApi;
@@ -17,7 +15,6 @@ import com.cumulocity.sdk.client.inventory.InventoryApi;
 import com.cumulocity.sdk.client.measurement.MeasurementApi;
 import com.cumulocity.sdk.client.option.TenantOptionApi;
 import com.cumulocity.sdk.client.user.UserApi;
-import com.cumulocity.sdk.client.RestOperations;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
@@ -188,7 +185,8 @@ public class TrackerPlatform implements Platform {
     }
 
     public String getPassword() {
-        return getPlatformParameters().getPassword();
+        CumulocityBasicCredentials cumulocityBasicCredentials = (CumulocityBasicCredentials)getPlatformParameters().getCumulocityCredentials();
+        return cumulocityBasicCredentials.getPassword();
     }
 
     public PlatformParameters getPlatformParameters() {

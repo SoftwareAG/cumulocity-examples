@@ -3,6 +3,7 @@ package c8y.remoteaccess.tunnel;
 import c8y.remoteaccess.RemoteAccessException;
 import c8y.remoteaccess.RemoteAccessProtocolException;
 import c8y.remoteaccess.RemoteAccessWebsocketException;
+import com.cumulocity.model.authentication.CumulocityBasicCredentials;
 import com.cumulocity.sdk.client.Platform;
 import com.cumulocity.sdk.client.PlatformParameters;
 import org.slf4j.Logger;
@@ -58,8 +59,9 @@ public class DeviceProxy {
         this.websocketHost = url.getHost();
         this.websocketPort = url.getPort();
 
-        this.username = parameters.getPrincipal();
-        this.password = parameters.getPassword();
+        CumulocityBasicCredentials cumulocityBasicCredentials = (CumulocityBasicCredentials) parameters.getCumulocityCredentials();
+        this.username = cumulocityBasicCredentials.getUsername();
+        this.password = cumulocityBasicCredentials.getPassword();
 
         this.deviceHost = hostname;
         this.devicePort = port;

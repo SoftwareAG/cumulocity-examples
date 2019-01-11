@@ -1,32 +1,5 @@
 package c8y.trackeragent_it;
 
-import static com.cumulocity.model.authentication.CumulocityCredentials.Builder.cumulocityCredentials;
-
-import java.io.IOException;
-import java.util.Date;
-import java.util.List;
-
-import org.joda.time.DateTime;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
-import com.cumulocity.agent.server.context.DeviceContextService;
-import com.cumulocity.agent.server.repository.InventoryRepository;
-import com.cumulocity.model.ID;
-import com.cumulocity.model.authentication.CumulocityCredentials;
-import com.cumulocity.model.event.CumulocityAlarmStatuses;
-import com.cumulocity.model.idtype.GId;
-import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
-import com.cumulocity.rest.representation.event.EventRepresentation;
-import com.cumulocity.rest.representation.identity.ExternalIDRepresentation;
-import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
-import com.cumulocity.sdk.client.PlatformImpl;
-import com.cumulocity.sdk.client.alarm.AlarmFilter;
-import com.cumulocity.sdk.client.event.EventFilter;
 
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerPlatform;
@@ -42,6 +15,28 @@ import c8y.trackeragent_it.config.TestConfiguration;
 import c8y.trackeragent_it.service.Bootstraper;
 import c8y.trackeragent_it.service.NewDeviceRequestService;
 import c8y.trackeragent_it.service.SocketWritter;
+import com.cumulocity.agent.server.context.DeviceContextService;
+import com.cumulocity.agent.server.repository.InventoryRepository;
+import com.cumulocity.model.ID;
+import com.cumulocity.model.authentication.CumulocityBasicCredentials;
+import com.cumulocity.model.event.CumulocityAlarmStatuses;
+import com.cumulocity.model.idtype.GId;
+import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
+import com.cumulocity.rest.representation.event.EventRepresentation;
+import com.cumulocity.rest.representation.identity.ExternalIDRepresentation;
+import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
+import com.cumulocity.sdk.client.PlatformImpl;
+import com.cumulocity.sdk.client.alarm.AlarmFilter;
+import com.cumulocity.sdk.client.event.EventFilter;
+import org.joda.time.DateTime;
+import org.junit.Before;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import java.util.Date;
+import java.util.List;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = { ServerConfiguration.class, TestConfiguration.class })
@@ -49,7 +44,7 @@ public abstract class TrackerITSupport {
 
     @Autowired
     protected TrackerConfiguration trackerAgentConfig;
-    
+
     @Autowired
     protected TestSettings testSettings;
 
@@ -68,9 +63,9 @@ public abstract class TrackerITSupport {
 
     @Autowired
     protected DeviceCredentialsRepository deviceCredentialsRepository;
-    
+
     protected TrackerPlatform trackerPlatform;
-    
+
     protected Bootstraper bootstraper;
     protected SocketWritter socketWriter;
 
@@ -91,7 +86,7 @@ public abstract class TrackerITSupport {
     protected String writeInNewConnection(TrackerMessage... deviceMessages) throws Exception {
         return socketWriter.writeInNewConnection(deviceMessages);
     }
-    
+
     protected ManagedObjectRepresentation getDeviceMO(String imei) {
         GId gid = getGId(imei);
         return trackerPlatform.getInventoryApi().get(gid);
@@ -114,7 +109,7 @@ public abstract class TrackerITSupport {
         List<AlarmRepresentation> alarms = trackerPlatform.getAlarmApi().getAlarmsByFilter(filter).get().getAlarms();
         return alarms.isEmpty() ? null : alarms.get(0);
     }
-    
+
     protected EventRepresentation findLastEvent(String imei, String type) {
         GId gId = getGId(imei);
         Date fromDate = new Date(0);
@@ -123,14 +118,17 @@ public abstract class TrackerITSupport {
         List<EventRepresentation> events = trackerPlatform.getEventApi().getEventsByFilter(filter).get().getEvents();
         return events.isEmpty() ? null : events.get(0);
     }
-    
+
     public static TrackerPlatform trackerPlatform(TestSettings testSettings) {
         return new TrackerPlatform(platform(testSettings));
     }
-    
+
     public static PlatformImpl platform(TestSettings testSettings) {
-        CumulocityCredentials credentials = cumulocityCredentials(testSettings.getC8yUser(), testSettings.getC8yPassword())
-                .withTenantId(testSettings.getC8yTenant()).build();
+        CumulocityBasicCredentials credentials = CumulocityBasicCredentials.builder()
+                .tenantId(testSettings.getC8yTenant())
+                .username(testSettings.getC8yUser())
+                .password(testSettings.getC8yPassword())
+                .build();
         return new PlatformImpl(testSettings.getC8yHost(), credentials);
     }
 
