@@ -8,5 +8,5 @@ import java.io.IOException;
 
 public interface MibParserService {
 
-    MibUploadResult processMibZipFile(MultipartFile file) throws IOException, MibLoaderException;
+    MibUploadResult processMibZipFile(MultipartFile file) throws IOException;
 }
