@@ -25,8 +25,8 @@ import static org.springframework.context.annotation.AdviceMode.ASPECTJ;
         @PropertySource(value = "file:${user.home}/snmp/snmp-agent-gateway.properties", ignoreResourceNotFound = true),
         @PropertySource(value = "file:${snmp.conf.dir:/etc}/snmp/snmp-agent-gateway.properties", ignoreResourceNotFound = true),
         @PropertySource(value = "classpath:META-INF/spring/snmp-agent-gateway.properties", ignoreResourceNotFound = true)})
-public class main {
+public class Main {
     public static void main(String... args) {
-        SpringApplication.run(main.class, args);
+        SpringApplication.run(Main.class, args);
     }
 }

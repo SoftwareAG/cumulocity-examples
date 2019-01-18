@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
@@ -20,7 +20,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <snmp4j.version>3.0.5</snmp4j.version>
         <java.version>1.7</java.version>
-        <start-class>com.cumulocity.snmp.main</start-class>
+        <start-class>com.cumulocity.snmp.Main</start-class>
         <c8y.clients.version>9.12.0</c8y.clients.version>
         <jackson.joda.version>2.4.0</jackson.joda.version>
         <jackson.guava.version>2.8.4</jackson.guava.version>

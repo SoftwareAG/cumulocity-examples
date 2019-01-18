@@ -8,8 +8,6 @@ import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.Platform;
 import com.cumulocity.sdk.client.PlatformImpl;
 import com.cumulocity.sdk.client.devicecontrol.DeviceCredentialsApi;
-import com.cumulocity.sdk.client.identity.IdentityApi;
-import com.cumulocity.sdk.client.identity.IdentityApiImpl;
 import com.cumulocity.sdk.client.inventory.InventoryApi;
 import com.cumulocity.sdk.client.inventory.InventoryApiImpl;
 import com.cumulocity.snmp.configuration.service.GatewayConfigurationProperties;
@@ -17,7 +15,6 @@ import com.cumulocity.snmp.factory.gateway.GatewayFactory;
 import com.cumulocity.snmp.factory.platform.IdentityFactory;
 import com.cumulocity.snmp.factory.platform.ManagedObjectFactory;
 import com.cumulocity.snmp.factory.platform.ManagedObjectMapper;
-import com.cumulocity.snmp.model.core.Alarms;
 import com.cumulocity.snmp.model.gateway.Gateway;
 import com.cumulocity.snmp.model.gateway.GatewayAddedEvent;
 import com.cumulocity.snmp.repository.DeviceCredentialsRepository;
@@ -26,19 +23,13 @@ import com.cumulocity.snmp.repository.ManagedObjectRepository;
 import com.cumulocity.snmp.repository.core.Repository;
 import com.cumulocity.snmp.utils.gateway.Scheduler;
 import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.event.EventListener;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -117,26 +108,32 @@ public class BootstrapServiceTest {
 
 
     @Test
-    public void shouldTestSyncGatewaysWithGatewayConfig()throws InvocationTargetException, IllegalAccessException {
+    public void shouldTestSyncGatewaysWithGatewayConfig() throws InvocationTargetException, IllegalAccessException {
 
+        //Given
         when(properties.getIdentifier()).thenReturn("snmp-agent");
         deviceCredentialsRepository.setBootstrapPlatform(bootstrapPlatform);
         doReturn(deviceCredentialsApi).when(bootstrapPlatform).getDeviceCredentialsApi();
         when(deviceCredentialsApi.pollCredentials("snmp-agent")).thenReturn(deviceCredentialsRepresentation);
-        when(identityRepository.get(any(DeviceCredentialsRepresentation.class),any(ID.class))).thenReturn(existingExternalIdOptional);
+        when(identityRepository.get(any(DeviceCredentialsRepresentation.class), any(ID.class))).thenReturn(existingExternalIdOptional);
         when(managedObjectFactory.create(anyString())).thenReturn(managedObjectRepresentation);
         inventoryApi = mock(InventoryApiImpl.class);
         inventoryRepository.setInventory(inventoryApi);
         when(inventoryApi.create(any(ManagedObjectRepresentation.class))).thenReturn(managedObjectRepresentation);
-        when(gatewayFactory.create(deviceCredentialsRepresentation,managedObjectRepresentation)).thenReturn(gatewayOptional);
+        when(gatewayFactory.create(deviceCredentialsRepresentation, managedObjectRepresentation)).thenReturn(gatewayOptional);
         when(gatewayOptional.isPresent()).thenReturn(true);
         when(gatewayOptional.get()).thenReturn(getGatewayInstance());
-        when(identityFactory.create(properties.getIdentifier(),managedObjectRepresentation)).thenReturn(existingExternalId);
+        when(identityFactory.create(properties.getIdentifier(), managedObjectRepresentation)).thenReturn(existingExternalId);
+
+        //When
         bootstrapService.syncGateways();
+
+        //Then
+        verify(eventPublisher).publishEvent(any(GatewayAddedEvent.class));
 
     }
 
-    private Gateway getGatewayInstance(){
+    private Gateway getGatewayInstance() {
         return Gateway.gateway()
                 .tenant("tenant")
                 .name("username")

@@ -10,7 +10,6 @@ import com.cumulocity.snmp.model.gateway.Gateway;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
-import lombok.experimental.UtilityClass;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -41,7 +40,7 @@ public class GatewayFactory {
                         .withName(username)
                         .withPassword(password)
                         .withAlarms(alarms)
-                        .withCurrentDeviceIds(from(getChildDevices(managedObject)).transform(Method.toManagedObjectToId()).toList());
+                        .withCurrentDeviceIds(from(getChildDevices(managedObject)).transform(managedObjectToId()).toList());
             }
         });
     }
@@ -53,20 +52,17 @@ public class GatewayFactory {
         return managedObject.getChildDevices();
     }
 
-    @UtilityClass
-    public static class Method {
-        public static Function<ManagedObjectReferenceRepresentation, GId> toManagedObjectToId() {
-            return new Function<ManagedObjectReferenceRepresentation, GId>() {
-                @Override
-                public GId apply(final ManagedObjectReferenceRepresentation representation) {
-                    return representation.getManagedObject().getId();
-                }
-            };
-        }
+    private Function<ManagedObjectReferenceRepresentation, GId> managedObjectToId() {
+        return new Function<ManagedObjectReferenceRepresentation, GId>() {
+            @Override
+            public GId apply(final ManagedObjectReferenceRepresentation representation) {
+                return representation.getManagedObject().getId();
+            }
+        };
     }
 
     @VisibleForTesting
-    public void setManagedObjectMapper(ManagedObjectMapper managedObjectMapper){
+    public void setManagedObjectMapper(ManagedObjectMapper managedObjectMapper) {
         this.managedObjectMapper = managedObjectMapper;
     }
 }
