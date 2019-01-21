@@ -1,6 +1,5 @@
 package com.cumulocity.snmp;
 
-import com.cumulocity.microservice.logging.annotation.EnableMicroserviceLogging;
 import com.cumulocity.snmp.annotation.core.PersistableType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
@@ -19,10 +18,9 @@ import static org.springframework.context.annotation.AdviceMode.ASPECTJ;
 @SpringBootApplication
 @EnableScheduling
 @EnableAsync(mode = ASPECTJ)
-@EnableMicroserviceLogging
 @EnableConfigurationProperties
 @PropertySources(value = {
-        @PropertySource(value = "file:${user.home}/snmp/snmp-agent-gateway.properties", ignoreResourceNotFound = true),
+        @PropertySource(value = "file:${user.home}/.snmp/snmp-agent-gateway.properties", ignoreResourceNotFound = true),
         @PropertySource(value = "file:${snmp.conf.dir:/etc}/snmp/snmp-agent-gateway.properties", ignoreResourceNotFound = true),
         @PropertySource(value = "classpath:META-INF/spring/snmp-agent-gateway.properties", ignoreResourceNotFound = true)})
 public class Main {

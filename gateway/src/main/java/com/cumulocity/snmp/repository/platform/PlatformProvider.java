@@ -28,19 +28,7 @@ import static java.util.concurrent.TimeUnit.HOURS;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PlatformProvider {
 
-    @lombok.Value
-    @Builder
-    private static class Key {
-        @NonNull
-        private final String tenant;
-        @NonNull
-        private final String user;
-        @NonNull
-        private final String password;
-    }
-
     private final PlatformProperties platformProperties;
-
     private final LoadingCache<Key, PlatformImpl> platforms = newBuilder().expireAfterAccess(1, HOURS)
             .removalListener(new RemovalListener<Key, PlatformImpl>() {
                 @Override
@@ -87,5 +75,16 @@ public class PlatformProvider {
     @Nonnull
     private Platform getPlatform(final String user, final String password, final String tenant) throws ExecutionException {
         return platforms.get(Key.builder().user(user).password(password).tenant(tenant).build());
+    }
+
+    @lombok.Value
+    @Builder
+    private static class Key {
+        @NonNull
+        private final String tenant;
+        @NonNull
+        private final String user;
+        @NonNull
+        private final String password;
     }
 }

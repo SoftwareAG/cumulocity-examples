@@ -12,70 +12,19 @@
     <groupId>snmp-agent-gateway</groupId>
     <artifactId>snmp-agent-gateway</artifactId>
     <packaging>jar</packaging>
-
     <name>snmp-agent-gateway</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <snmp4j.version>3.0.5</snmp4j.version>
-        <java.version>1.7</java.version>
-        <start-class>com.cumulocity.snmp.Main</start-class>
-        <c8y.clients.version>9.12.0</c8y.clients.version>
-        <jackson.joda.version>2.4.0</jackson.joda.version>
-        <jackson.guava.version>2.8.4</jackson.guava.version>
-        <jsr.version>3.0.2</jsr.version>
-        <spring.aspect.version>4.3.2.RELEASE</spring.aspect.version>
-        <aspectjrt.version>1.8.7</aspectjrt.version>
-        <aspectj.weaver.version>1.8.7</aspectj.weaver.version>
-
+        <snmp4j.version>2.7.0</snmp4j.version>
+        <java.version>1.8</java.version>
+        <jackson-datatype-joda>2.4.0</jackson-datatype-joda>
+        <jackson-datatype-guava>2.8.4</jackson-datatype-guava>
+        <c8y.microservice.version>${c8y.microservice-new.version}</c8y.microservice.version>
     </properties>
 
     <dependencies>
-        <!--SNMP4J-->
-        <dependency>
-            <groupId>org.snmp4j</groupId>
-            <artifactId>snmp4j</artifactId>
-            <version>${snmp4j.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <!--Cumulocity-->
-        <dependency>
-            <groupId>com.nsn.cumulocity.clients-java</groupId>
-            <artifactId>microservice-autoconfigure</artifactId>
-            <version>${c8y.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.nsn.cumulocity.clients-java</groupId>
-            <artifactId>microservice-logging</artifactId>
-            <version>${c8y.microservice.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.nsn.cumulocity.model</groupId>
-            <artifactId>core-model</artifactId>
-            <version>${c8y.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.nsn.cumulocity.model</groupId>
-            <artifactId>device-capability-model</artifactId>
-            <version>${c8y.clients.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.nsn.cumulocity.dependencies.osgi</groupId>
-            <artifactId>svenson</artifactId>
-            <version>${svenson.version}-${c8y.dependencies.version}</version>
-        </dependency>
-
         <!--Spring-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -88,6 +37,63 @@
             <scope>test</scope>
         </dependency>
 
+        <!--SNMP4J-->
+        <dependency>
+            <groupId>org.snmp4j</groupId>
+            <artifactId>snmp4j</artifactId>
+            <version>${snmp4j.version}</version>
+        </dependency>
+
+        <!--Cumulocity-->
+        <dependency>
+            <groupId>com.nsn.cumulocity.clients-java</groupId>
+            <artifactId>microservice-autoconfigure</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.nsn.cumulocity.model</groupId>
+            <artifactId>core-model</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.nsn.cumulocity.model</groupId>
+            <artifactId>device-capability-model</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.nsn.cumulocity.model</groupId>
+            <artifactId>rest-representation</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.ws.rs</groupId>
+                    <artifactId>javax.ws.rs-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>com.nsn.cumulocity.shared-components</groupId>
+            <artifactId>common-notification</artifactId>
+
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.ws.rs</groupId>
+                    <artifactId>javax.ws.rs-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>com.nsn.cumulocity.shared-components</groupId>
+            <artifactId>common-rest</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.nsn.cumulocity.dependencies.osgi</groupId>
+            <artifactId>svenson</artifactId>
+            <version>${svenson.version}-${c8y.dependencies.version}</version>
+        </dependency>
+
         <!--Utils-->
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -97,7 +103,6 @@
         <dependency>
             <groupId>org.mapdb</groupId>
             <artifactId>mapdb</artifactId>
-            <version>${mapdb.version}</version>
         </dependency>
 
         <dependency>
@@ -109,37 +114,31 @@
         <dependency>
             <groupId>com.google.code.findbugs</groupId>
             <artifactId>jsr305</artifactId>
-            <version>${jsr.version}</version>
+            <version>3.0.2</version>
             <scope>provided</scope>
         </dependency>
+
         <dependency>
             <groupId>com.nsn.cumulocity.clients-java</groupId>
             <artifactId>java-client</artifactId>
-            <version>${c8y.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.nsn.cumulocity.model</groupId>
-            <artifactId>core-model</artifactId>
-            <version>${c8y.version}</version>
         </dependency>
 
         <!-- jackson -->
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-joda</artifactId>
-            <version>${jackson.joda.version}</version>
+            <version>${jackson-datatype-joda}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-guava</artifactId>
-            <version>${jackson.guava.version}</version>
+            <version>${jackson-datatype-guava}</version>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/org.springframework/spring-aspects -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-aspects</artifactId>
-            <version>${spring.aspect.version}</version>
+            <version>4.3.2.RELEASE</version>
         </dependency>
 
         <dependency>
@@ -150,15 +149,32 @@
         <dependency>
             <groupId>org.aspectj</groupId>
             <artifactId>aspectjrt</artifactId>
-            <version>${aspectjrt.version}</version>
+            <version>1.8.7</version>
         </dependency>
 
         <dependency>
             <groupId>org.aspectj</groupId>
             <artifactId>aspectjweaver</artifactId>
-            <version>${aspectj.weaver.version}</version>
+            <version>1.8.7</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.cometd.java</groupId>
+            <artifactId>cometd-java-common</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.cometd.java</groupId>
+            <artifactId>bayeux-api</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.cometd.java</groupId>
+            <artifactId>cometd-java-client</artifactId>
+            <version>3.0.0</version>
+        </dependency>
     </dependencies>
 
     <dependencyManagement>
@@ -167,7 +183,7 @@
             <dependency>
                 <groupId>com.nsn.cumulocity.clients-java</groupId>
                 <artifactId>microservice-dependencies</artifactId>
-                <version>${c8y.version}</version>
+                <version>${project.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -175,7 +191,6 @@
     </dependencyManagement>
 
     <build>
-
         <pluginManagement>
             <plugins>
                 <plugin>
@@ -215,21 +230,6 @@
             </plugin>
 
             <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>repackage</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <mainClass>${start-class}</mainClass>
-                </configuration>
-            </plugin>
-
-            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>aspectj-maven-plugin</artifactId>
                 <version>1.9</version>
@@ -261,6 +261,24 @@
                         <goals>
                             <goal>compile</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!--Generate RPM-->
+            <plugin>
+                <groupId>com.nsn.cumulocity.clients-java</groupId>
+                <artifactId>microservice-package-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>3rd-license-generate</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>package</goal>
+                        </goals>
+                        <configuration>
+                            <rpmSkip>false</rpmSkip>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

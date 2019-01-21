@@ -5,7 +5,6 @@ import com.cumulocity.sdk.client.Platform;
 import com.cumulocity.sdk.client.devicecontrol.DeviceCredentialsApi;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 

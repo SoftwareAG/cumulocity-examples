@@ -65,7 +65,7 @@ public class Gateway implements IdProvider, TenantProvider, Credentials {
 
     @JsonIgnore
     public int increaseNumberOfRetries() {
-        return ++ numberOfRetries;
+        return ++numberOfRetries;
     }
 }
 

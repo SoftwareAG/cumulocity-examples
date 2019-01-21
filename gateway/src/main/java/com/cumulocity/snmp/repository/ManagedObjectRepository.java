@@ -9,7 +9,6 @@ import com.cumulocity.snmp.model.gateway.Gateway;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -17,7 +16,7 @@ import static com.cumulocity.snmp.utils.PlatformRepositoryUtils.handleException;
 import static com.cumulocity.snmp.utils.PlatformRepositoryUtils.handleSuccess;
 
 @Repository
-public class ManagedObjectRepository{
+public class ManagedObjectRepository {
 
     @Autowired
     InventoryApi inventory;
@@ -59,7 +58,7 @@ public class ManagedObjectRepository{
     }
 
     @VisibleForTesting
-    public void setInventory(InventoryApi inventory){
+    public void setInventory(InventoryApi inventory) {
         this.inventory = inventory;
     }
 }

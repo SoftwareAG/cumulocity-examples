@@ -39,7 +39,7 @@ public class PlatformObjectMapperConfiguration {
 
             addDeserializer(GId.class, new JsonDeserializer<GId>() {
                 @Override
-                public GId deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException, JsonProcessingException {
+                public GId deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
                     return GId.asGId(jsonParser.getValueAsString());
                 }
             });

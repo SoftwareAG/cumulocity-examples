@@ -11,10 +11,6 @@ import static com.google.common.collect.FluentIterable.from;
 import static com.google.common.collect.Lists.reverse;
 
 public class ContextProvider {
-    public interface Callable<T> {
-        T call() throws Throwable;
-    }
-
     private static ThreadLocal<LinkedList<Object>> context = new ThreadLocal<LinkedList<Object>>() {
         @Override
         protected LinkedList<Object> initialValue() {
@@ -60,5 +56,9 @@ public class ContextProvider {
                 return (T) o;
             }
         });
+    }
+
+    public interface Callable<T> {
+        T call() throws Throwable;
     }
 }

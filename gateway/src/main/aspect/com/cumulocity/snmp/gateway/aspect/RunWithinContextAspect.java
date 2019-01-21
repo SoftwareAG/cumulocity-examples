@@ -1,11 +1,11 @@
 package com.cumulocity.snmp.gateway.aspect;
 
-import com.cumulocity.snmp.model.core.GatewayProvider;
+import com.cumulocity.rest.representation.devicebootstrap.DeviceCredentialsRepresentation;
 import com.cumulocity.snmp.model.core.Credentials;
+import com.cumulocity.snmp.model.core.GatewayProvider;
 import com.cumulocity.snmp.model.gateway.Gateway;
 import com.cumulocity.snmp.repository.configuration.ContextProvider;
 import com.cumulocity.snmp.repository.configuration.ContextProvider.Callable;
-import com.cumulocity.rest.representation.devicebootstrap.DeviceCredentialsRepresentation;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;

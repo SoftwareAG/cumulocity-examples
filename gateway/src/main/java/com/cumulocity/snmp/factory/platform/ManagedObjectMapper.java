@@ -22,6 +22,14 @@ public class ManagedObjectMapper {
 
     private final ObjectMapper objectMapper;
 
+    private static Optional<Method> findMethod(Class clazz, String methodName, Class... paramType) {
+        try {
+            return fromNullable(clazz.getDeclaredMethod(methodName, paramType));
+        } catch (final NoSuchMethodException ex) {
+            return absent();
+        }
+    }
+
     public <T> Optional<T> convert(Class<T> clazz, AbstractExtensibleRepresentation representation) throws InvocationTargetException, IllegalAccessException {
         final ExtensibleRepresentationView annotation = clazz.getAnnotation(ExtensibleRepresentationView.class);
         if (annotation != null) {
@@ -49,13 +57,5 @@ public class ManagedObjectMapper {
             }
         }
         return absent();
-    }
-
-    private static Optional<Method> findMethod(Class clazz, String methodName, Class... paramType) {
-        try {
-            return fromNullable(clazz.getDeclaredMethod(methodName, paramType));
-        } catch (final NoSuchMethodException ex) {
-            return absent();
-        }
     }
 }

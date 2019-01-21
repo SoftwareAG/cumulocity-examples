@@ -16,8 +16,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring-boot-dependencies.version>1.5.7.RELEASE</spring-boot-dependencies.version>
-        <c8y.version>${version}</c8y.version>
+        <spring-boot-dependencies.version>1.5.17.RELEASE</spring-boot-dependencies.version>
         <mapdb.version>2.0-beta13</mapdb.version>
         <apache.commons>3.4</apache.commons>
     </properties>
@@ -54,12 +53,176 @@
             </dependency>
 
             <dependency>
+                <groupId>org.mapdb</groupId>
+                <artifactId>mapdb</artifactId>
+                <version>${mapdb.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
                 <version>${apache.commons}</version>
             </dependency>
 
+            <dependency>
+                <groupId>com.fasterxml.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>${jackson.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+
+            <dependency>
+                <groupId>com.nsn.cumulocity.clients-java</groupId>
+                <artifactId>microservice-dependencies</artifactId>
+                <version>${c8y.microservice-new.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>com.nsn.cumulocity.clients-java</groupId>
+                <artifactId>microservice-autoconfigure</artifactId>
+                <version>${c8y.microservice-new.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.nsn.cumulocity.clients-java</groupId>
+                <artifactId>java-client</artifactId>
+                <version>${c8y.clients.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>rest-representation</artifactId>
+                        <groupId>com.nsn.cumulocity.model</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.nsn.cumulocity.shared-components</groupId>
+                        <artifactId>common-notification</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.nsn.cumulocity.shared-components</groupId>
+                        <artifactId>common-rest</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.codehaus.jackson</groupId>
+                        <artifactId>jackson-core-asl</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.codehaus.jackson</groupId>
+                        <artifactId>jackson-mapper-asl</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.cometd.java</groupId>
+                        <artifactId>cometd-java-common</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.cometd.java</groupId>
+                        <artifactId>bayeux-api</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <dependency>
+                <groupId>com.nsn.cumulocity.shared-components</groupId>
+                <artifactId>common-rest</artifactId>
+                <version>${c8y.shared-components.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>guava</artifactId>
+                        <groupId>com.nsn.cumulocity.dependencies.osgi</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.codehaus.jackson</groupId>
+                        <artifactId>jackson-core-asl</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.codehaus.jackson</groupId>
+                        <artifactId>jackson-mapper-asl</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>javax.validation</groupId>
+                        <artifactId>com.springsource.javax.validation</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.cometd.java</groupId>
+                        <artifactId>cometd-java-common</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.cometd.java</groupId>
+                        <artifactId>bayeux-api</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <dependency>
+                <groupId>com.nsn.cumulocity.shared-components</groupId>
+                <artifactId>common-notification</artifactId>
+                <version>${c8y.shared-components.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.nsn.cumulocity.model</groupId>
+                <artifactId>core-model</artifactId>
+                <version>${c8y.model.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.nsn.cumulocity.dependencies.osgi</groupId>
+                        <artifactId>guava</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <dependency>
+                <groupId>com.nsn.cumulocity.model</groupId>
+                <artifactId>application-model</artifactId>
+                <version>${c8y.model.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>guava</artifactId>
+                        <groupId>com.nsn.cumulocity.dependencies.osgi</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>javax.validation</groupId>
+                        <artifactId>com.springsource.javax.validation</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <dependency>
+                <groupId>com.nsn.cumulocity.model</groupId>
+                <artifactId>device-capability-model</artifactId>
+                <version>${c8y.model.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>guava</artifactId>
+                        <groupId>com.nsn.cumulocity.dependencies.osgi</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>javax.validation</groupId>
+                        <artifactId>com.springsource.javax.validation</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.cometd.java</groupId>
+                        <artifactId>cometd-java-client</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <dependency>
+                <groupId>com.nsn.cumulocity.model</groupId>
+                <artifactId>rest-representation</artifactId>
+                <version>${c8y.model.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>javax.validation</groupId>
+                        <artifactId>com.springsource.javax.validation</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.nsn.cumulocity.dependencies.osgi</groupId>
+                        <artifactId>guava</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
         </dependencies>
     </dependencyManagement>
-
 </project>

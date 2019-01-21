@@ -8,7 +8,6 @@ import com.cumulocity.sdk.client.identity.IdentityApi;
 import com.cumulocity.snmp.annotation.gateway.RunWithinContext;
 import com.cumulocity.snmp.model.gateway.Gateway;
 import com.google.common.base.Optional;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 

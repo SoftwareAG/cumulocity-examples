@@ -24,10 +24,9 @@ import static com.google.common.collect.FluentIterable.from;
 @Component
 class PersistableTypeMetadataProvider {
 
+    private final List<PersistableTypeMetadata> metadataList = new ArrayList<>();
     @Autowired
     ApplicationContext appContext;
-
-    private final List<PersistableTypeMetadata> metadataList = new ArrayList<>();
 
     @PostConstruct
     private void findAnnotatedClasses() {

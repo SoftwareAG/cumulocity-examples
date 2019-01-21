@@ -10,5 +10,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Retention(RUNTIME)
 public @interface ExtensibleRepresentationView {
     String fragment();
+
     String type();
 }
