@@ -60,7 +60,7 @@ public class QueclinkDeviceCellInfo extends QueclinkParser {
             String deviceType = reportCtx.getEntry(1).substring(0,2);
             int startIndex;
 
-            if(QueclinkConstants.GV500_ID.equals(deviceType)) { // gv500
+            if(QueclinkConstants.GV500_ID1.equals(deviceType) || QueclinkConstants.GV500_ID2.equals(deviceType)) { // gv500
                 startIndex = 5;
             } else { // gl200, gl300, gl500, gl505 
                 startIndex = 4;
