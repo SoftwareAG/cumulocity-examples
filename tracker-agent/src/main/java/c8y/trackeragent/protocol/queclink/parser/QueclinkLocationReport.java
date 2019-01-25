@@ -157,7 +157,8 @@ public class QueclinkLocationReport extends QueclinkParser {
             createBatteryMeasurement(device, reportCtx, batteryInfoIndex);
         }
 
-        if (QueclinkConstants.GV500_ID.equals(deviceType)) {
+        if (QueclinkConstants.GV500_ID1.equals(deviceType) ||
+                QueclinkConstants.GV500_ID2.equals(deviceType)) {
             reportStart = 8;
             reportEnd = reportStart + reportCtx.getEntryAsInt(7) * reportLength;
             int mileageIndex = reportEnd;

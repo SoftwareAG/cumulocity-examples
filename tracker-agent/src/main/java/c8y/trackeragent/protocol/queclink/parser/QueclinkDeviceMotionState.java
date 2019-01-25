@@ -150,7 +150,7 @@ public class QueclinkDeviceMotionState extends QueclinkParser implements Transla
         }  else {
             String motionState = report[4];
 
-            if (QueclinkConstants.GV500_ID.equals(deviceType)) {
+            if(QueclinkConstants.GV500_ID1.equals(deviceType) || QueclinkConstants.GV500_ID2.equals(deviceType)) { // gv500
                 motionState = report[5];
             }
 

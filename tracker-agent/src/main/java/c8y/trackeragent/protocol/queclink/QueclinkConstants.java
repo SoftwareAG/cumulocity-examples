@@ -25,7 +25,8 @@ import java.util.HashMap;
 public interface QueclinkConstants {
     static final String GL500_ID = "11";
     static final String GL505_ID = "40";
-    static final String GV500_ID = "1F";
+    static final String GV500_ID1 = "1F";
+    static final String GV500_ID2 = "36";
     static final String GL300_ID = "30";
     static final String GL200_ID = "02";
     static final String GV75_ID = "3C";
@@ -38,7 +39,8 @@ public interface QueclinkConstants {
     {
         put(GL500_ID, new String[]{"gl500","gl500"}); //protocol, default password
         put(GL505_ID, new String[]{"gl505","gl500"}); //protocol, default password
-        put(GV500_ID, new String[]{"gv500","gv500"}); //protocol, default password
+        put(GV500_ID1, new String[]{"gv500","gv500"}); //protocol, default password
+        put(GV500_ID2, new String[]{"gv500","gv500"}); //protocol, default password
         put(GL300_ID, new String[]{"gl300","gl300"}); //protocol, default password
         put(GL200_ID, new String[]{"gl200","gl200"}); //protocol, default password
         put(GV75_ID, new String[]{"gv75","gv75"}); //protocol, default password
