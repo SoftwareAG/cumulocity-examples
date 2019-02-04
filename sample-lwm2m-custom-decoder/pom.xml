@@ -15,7 +15,6 @@
         <maven.compiler.source>1.7</maven.compiler.source>
         <maven.compiler.target>1.7</maven.compiler.target>
         <spring-boot-dependencies.version>1.5.16.RELEASE</spring-boot-dependencies.version>
-        <spring.version>4.3.19.RELEASE</spring.version>
         <main.class>c8y.example.bytesequencedecoder.ByteSequenceDecoder
         </main.class>
     </properties>
@@ -48,23 +47,10 @@
             <version>${spring-boot-dependencies.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.nsn.cumulocity.shared-components</groupId>
-            <artifactId>common-rest</artifactId>
-            <version>${project.parent.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>javax.ws.rs</groupId>
-                    <artifactId>javax.ws.rs-api</artifactId>
-                </exclusion>
-            </exclusions>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-common</artifactId>
+            <version>2.22.2</version>
         </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-core</artifactId>
-            <version>${spring.version}</version>
-        </dependency>
-
-
     </dependencies>
 
     <build>
