@@ -19,8 +19,8 @@ import java.io.IOException;
 public class ByteSequenceDecoder {
 
 
-    //@Autowired
-    //ByteSequenceDecoderService byteSequenceDecoderService;
+    @Autowired
+    ByteSequenceDecoderService byteSequenceDecoderService;
 
     public static void main(String[] args) {
         SpringApplication.run(ByteSequenceDecoder.class,args);
@@ -31,8 +31,7 @@ public class ByteSequenceDecoder {
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public DecoderResult decodeWithJSONInput(@RequestBody DecoderInputData inputData) throws DecoderServiceException, IOException {
-        return null;
-        //return byteSequenceDecoderService.decode(inputData.getValue(), GId.asGId(inputData.getSourceDeviceId()), inputData.getArgs());
+        return byteSequenceDecoderService.decode(inputData.getValue(), GId.asGId(inputData.getSourceDeviceId()), inputData.getArgs());
     }
 
 }
