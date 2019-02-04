@@ -30,6 +30,15 @@ public class IdentityRepository {
     }
 
     @RunWithinContext
+    public void delete(final Gateway gateway, final ExternalIDRepresentation id) {
+        try {
+            identity.deleteExternalId(id);
+        } catch (final Exception ex) {
+            handleException(ex);
+        }
+    }
+
+    @RunWithinContext
     public Optional<ExternalIDRepresentation> get(final Gateway gateway, final ID identifier) {
         try {
             return handleSuccess(identity.getExternalId(identifier));

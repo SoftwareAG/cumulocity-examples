@@ -1,9 +1,12 @@
 package com.cumulocity.snmp.repository.platform;
 
 import com.cumulocity.sdk.client.Platform;
+import com.cumulocity.sdk.client.alarm.AlarmApi;
 import com.cumulocity.sdk.client.devicecontrol.DeviceControlApi;
+import com.cumulocity.sdk.client.event.EventApi;
 import com.cumulocity.sdk.client.identity.IdentityApi;
 import com.cumulocity.sdk.client.inventory.InventoryApi;
+import com.cumulocity.sdk.client.measurement.MeasurementApi;
 import com.cumulocity.snmp.model.core.Credentials;
 import com.cumulocity.snmp.repository.configuration.ContextProvider;
 import com.google.common.base.Optional;
@@ -39,6 +42,24 @@ public class PlatformConfiguration {
     @Scope(scopeName = SCOPE_PROTOTYPE, proxyMode = TARGET_CLASS)
     public DeviceControlApi deviceControlApi(PlatformProvider platformProvider) throws ExecutionException {
         return platform(platformProvider).getDeviceControlApi();
+    }
+
+    @Bean
+    @Scope(scopeName = SCOPE_PROTOTYPE, proxyMode = TARGET_CLASS)
+    public MeasurementApi measurementApi(PlatformProvider platformProvider) throws ExecutionException {
+        return platform(platformProvider).getMeasurementApi();
+    }
+
+    @Bean
+    @Scope(scopeName = SCOPE_PROTOTYPE, proxyMode = TARGET_CLASS)
+    public AlarmApi alarmApi(PlatformProvider platformProvider) throws ExecutionException{
+        return platform(platformProvider).getAlarmApi();
+    }
+
+    @Bean
+    @Scope(scopeName = SCOPE_PROTOTYPE, proxyMode = TARGET_CLASS)
+    public EventApi eventApi(PlatformProvider platformProvider) throws ExecutionException{
+        return platform(platformProvider).getEventApi();
     }
 
     @Bean

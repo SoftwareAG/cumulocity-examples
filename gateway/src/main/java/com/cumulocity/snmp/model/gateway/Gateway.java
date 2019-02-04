@@ -52,6 +52,15 @@ public class Gateway implements IdProvider, TenantProvider, Credentials {
     @Nullable
     private List<GId> currentDeviceIds;
 
+    @Wither
+    @Nullable
+    @JsonProperty
+    private String url;
+
+    @Nullable
+    @JsonProperty("transmitRate")
+    private Long transmitRateInSeconds;
+
     @Nullable
     @JsonProperty
     private volatile int numberOfRetries = 0;

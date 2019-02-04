@@ -5,6 +5,7 @@ import com.cumulocity.model.authentication.CumulocityCredentialsFactory;
 import com.cumulocity.sdk.client.ClientConfiguration;
 import com.cumulocity.sdk.client.Platform;
 import com.cumulocity.sdk.client.PlatformImpl;
+import com.cumulocity.sdk.client.PlatformParameters;
 import com.cumulocity.snmp.model.core.Credentials;
 import com.cumulocity.snmp.repository.platform.PlatformProperties.DeviceBootstrapConfigurationProperties;
 import com.google.common.cache.CacheLoader;
@@ -70,6 +71,11 @@ public class PlatformProvider {
         final String password = gateway.getPassword();
         final String tenant = gateway.getTenant();
         return getPlatform(username, password, tenant);
+    }
+
+    @Nonnull
+    public PlatformParameters getPlatformProperties(final Credentials gateway) throws ExecutionException {
+        return (PlatformParameters) getPlatform(gateway);
     }
 
     @Nonnull

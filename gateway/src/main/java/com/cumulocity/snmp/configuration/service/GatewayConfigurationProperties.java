@@ -11,4 +11,6 @@ public class GatewayConfigurationProperties {
     private String identifier;
     @Value("${gateway.bootstrapFixedDelay:10000}")
     private Integer bootstrapFixedDelay;
+    @Value("${snmp.trapListener.address}")
+    private String address;
 }
