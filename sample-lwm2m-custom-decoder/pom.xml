@@ -10,6 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>sample-lwm2m-custom-decoder</artifactId>
+    <name>Cumulocity :: Examples :: Custom LWM2M Decoder (Binary Value Decoder)</name>
 
     <properties>
         <maven.compiler.source>1.7</maven.compiler.source>
@@ -50,6 +51,11 @@
             <groupId>org.glassfish.jersey.core</groupId>
             <artifactId>jersey-common</artifactId>
             <version>2.22.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-joda</artifactId>
+            <version>2.9.7</version>
         </dependency>
     </dependencies>
 
