@@ -33,17 +33,27 @@ import java.lang.reflect.InvocationTargetException;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PlatformSubscriber {
-    private final PlatformProvider platformProvider;
-    private final ApplicationEventPublisher eventPublisher;
-    private final Repository<Gateway> gatewayRepository;
-    private final GatewayFactory gatewayFactory;
-    private final ManagedObjectRepository managedObjectRepository;
-    private final Notifications notifications;
+
+    @Autowired
+    private PlatformProvider platformProvider;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
+
+    @Autowired
+    private Repository<Gateway> gatewayRepository;
+
+    @Autowired
+    private GatewayFactory gatewayFactory;
+
+    @Autowired
+    private ManagedObjectRepository managedObjectRepository;
+
+    @Autowired
+    private Notifications notifications;
 
     private final Subscriptions managedObjectSubscribers = new Subscriptions();
-    private final Subscriptions operationSubscribers = new Subscriptions();
 
     @EventListener
     @RunWithinContext
@@ -54,19 +64,6 @@ public class PlatformSubscriber {
 
             unsubscribeGateway(gateway);
             subscribeGatewayInventory(platform, gateway);
-        } catch (final Exception ex) {
-            log.error(ex.getMessage(), ex);
-        }
-    }
-
-    @EventListener
-    @RunWithinContext
-    public synchronized void subscribe(final DeviceAddedEvent deviceAddedEvent) {
-        try {
-            final Gateway gateway = deviceAddedEvent.getGateway();
-            final Device device = deviceAddedEvent.getDevice();
-            final PlatformParameters platform = platformProvider.getPlatformProperties(gateway);
-
         } catch (final Exception ex) {
             log.error(ex.getMessage(), ex);
         }
@@ -112,14 +109,12 @@ public class PlatformSubscriber {
     }
 
     private void unsubscribeGateway(final Gateway gateway) {
-        operationSubscribers.disconnect(gateway.getId());
         if (managedObjectSubscribers.disconnect(gateway.getId())) {
             eventPublisher.publishEvent(new PlatformUnsubscribedEvent(gateway));
         }
     }
 
     private void unsubscribeDevice(final Device device) {
-        operationSubscribers.disconnect(device.getId());
         managedObjectSubscribers.disconnect(device.getId());
     }
 }
