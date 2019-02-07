@@ -41,10 +41,11 @@ public class ByteSequenceDecoderService implements DecoderService {
 
         DecoderResult decoderResult = new DecoderResult();
 
-        List<MeasurementValueDto> measurementValueDtos = new ArrayList<>();
         int byteIndex=0;
 
         for (byte valueByte: decodedBytes) {
+            List<MeasurementValueDto> measurementValueDtos = new ArrayList<>();
+
             log.debug("Creating Measurement for byte {}, value {}", byteIndex,valueByte);
             MeasurementValueDto valueDto = new MeasurementValueDto();
             valueDto.setValue(new BigDecimal(valueByte));
@@ -61,6 +62,7 @@ public class ByteSequenceDecoderService implements DecoderService {
 
             byteIndex++;
         }
+
 
 
         log.debug("Finished decoding byte values");
