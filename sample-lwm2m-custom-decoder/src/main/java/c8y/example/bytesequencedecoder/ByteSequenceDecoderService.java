@@ -48,17 +48,20 @@ public class ByteSequenceDecoderService implements DecoderService {
             log.debug("Creating Measurement for byte {}, value {}", byteIndex,valueByte);
             MeasurementValueDto valueDto = new MeasurementValueDto();
             valueDto.setValue(new BigDecimal(valueByte));
-            valueDto.setSeriesName("Byte "+byteIndex);
+            valueDto.setSeriesName("byte "+byteIndex);
             valueDto.setUnit("unknown");
             measurementValueDtos.add(valueDto);
+
+            MeasurementDto measurementDto = new MeasurementDto();
+            measurementDto.setType("c8y_example_lwm2m_decoder_binaryValues_byteIndex_"+byteIndex);
+            measurementDto.setTime(new DateTime());
+            measurementDto.setValues(measurementValueDtos);
+            measurementDto.setSeries("binaryValueSeries");
+            decoderResult.addMeasurement(measurementDto);
+
+            byteIndex++;
         }
 
-        MeasurementDto measurementDto = new MeasurementDto();
-        measurementDto.setType("c8y_example_lwm2m_decoder_binaryValues");
-        measurementDto.setTime(new DateTime());
-        measurementDto.setValues(measurementValueDtos);
-        measurementDto.setSeries("binaryValueSeries");
-        decoderResult.addMeasurement(measurementDto);
 
         log.debug("Finished decoding byte values");
         return decoderResult;
