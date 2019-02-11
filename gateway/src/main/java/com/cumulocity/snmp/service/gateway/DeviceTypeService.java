@@ -36,7 +36,7 @@ public class DeviceTypeService {
     private final ApplicationEventPublisher eventPublisher;
     private final PlatformProvider platformProvider;
     private final Notifications notifications;
-    private final Subscriptions subscribers;
+    private final Subscriptions subscribers = new Subscriptions();
     private final ObjectMapper objectMapper;
 
     @EventListener
