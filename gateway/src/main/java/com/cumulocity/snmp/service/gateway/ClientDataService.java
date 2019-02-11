@@ -49,7 +49,7 @@ import static com.cumulocity.snmp.utils.gateway.BeanUtils.findBeanByGenericType;
         }
     }
 
-    public void storeDataChange(ClientDataChangedEvent event, Mapping mapping) {
+    private void storeDataChange(ClientDataChangedEvent event, Mapping mapping) {
         final Device device = event.getDevice();
         final Gateway gateway = event.getGateway();
         final Register register = event.getRegister();

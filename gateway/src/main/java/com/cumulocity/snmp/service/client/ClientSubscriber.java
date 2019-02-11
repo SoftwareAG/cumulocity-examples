@@ -38,7 +38,7 @@ public class ClientSubscriber {
     private final Repository<Device> deviceRepository;
     private final ApplicationEventPublisher eventPublisher;
     private final TrapListener trapListener;
-    Map<String,Map<String,PduListener>> mapIPAddressToOid = new HashMap();
+    Map<String, Map<String, PduListener>> mapIPAddressToOid = new HashMap();
 
     @EventListener
     @RunWithinContext
@@ -117,11 +117,11 @@ public class ClientSubscriber {
                 return;
             }
 
-            Map<String,PduListener> mapOidToPduListener = new HashMap();
+            Map<String, PduListener> mapOidToPduListener = new HashMap();
             clearGatewayValidationErrors(gateway);
             trapListener.setGateway(gateway);
             for (final Register register : deviceType.getRegisters()) {
-                mapOidToPduListener.put(register.getOid(),new PduListener() {
+                mapOidToPduListener.put(register.getOid(), new PduListener() {
                     @Override
                     public void onPduRecived(PDU pdu) {
                         eventPublisher.publishEvent(new ClientDataChangedEvent(gateway, device, register, new DateTime(), pdu.getType()));
@@ -131,8 +131,6 @@ public class ClientSubscriber {
 
             mapIPAddressToOid.put(device.getIpAddress(), mapOidToPduListener);
             trapListener.subscribe(mapIPAddressToOid);
-
-
         } catch (final Exception ex) {
             log.error(ex.getMessage(), ex);
             eventPublisher.publishEvent(new GatewayConfigErrorEvent(gateway, new ConfigEventType(ex.getMessage())));
@@ -151,9 +149,7 @@ public class ClientSubscriber {
         eventPublisher.publishEvent(new GatewayConfigSuccessEvent(gateway, URL));
     }
 
-    private void unsubscribe(Device device){
+    private void unsubscribe(Device device) {
         trapListener.unsubscribe(device.getIpAddress());
-
     }
-
 }

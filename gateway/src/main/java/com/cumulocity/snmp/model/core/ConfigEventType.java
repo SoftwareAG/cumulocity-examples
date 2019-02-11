@@ -30,7 +30,7 @@ public class ConfigEventType<T> {
         }
     }
 
-    public String formatMessage(@Nullable T browsePath) {
+    public String formatMessage(@Nullable T path) {
         return getValue();
     }
 

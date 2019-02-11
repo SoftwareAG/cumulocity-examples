@@ -33,19 +33,16 @@ import java.util.Map;
 @Component
 public class TrapListener implements CommandResponder {
 
+    Map<String, Map<String, PduListener>> mapIPAddressToOid = new HashMap<>();
+    Gateway gateway = new Gateway();
+    @Autowired
+    ApplicationEventPublisher eventPublisher;
     @Autowired
     private GatewayConfigurationProperties config;
 
-    Map<String,Map<String,PduListener>> mapIPAddressToOid = new HashMap<>();
-
-    Gateway gateway = new Gateway();
-
-    @Autowired
-    ApplicationEventPublisher eventPublisher;
-
     @PostConstruct
     public void init() {
-      listen(new UdpAddress(config.getAddress()));
+        listen(new UdpAddress(config.getAddress()));
     }
 
     public synchronized void listen(TransportIpAddress snmpListeningAddress) {
@@ -88,34 +85,29 @@ public class TrapListener implements CommandResponder {
             return;
         }
 
-        log.info("Received PDU is : ",pdu);
+        log.info("Received PDU is : ", pdu);
 
         String peerIPAddress = event.getPeerAddress().toString().split("/")[0];
-        if(mapIPAddressToOid.containsKey(peerIPAddress)){
-
-            Map<String,PduListener> oidToPduListener = mapIPAddressToOid.get(peerIPAddress);
-
-            if(oidToPduListener.containsKey(pdu.getVariableBindings().get(3).getOid().toString())){
+        if (mapIPAddressToOid.containsKey(peerIPAddress)) {
+            Map<String, PduListener> oidToPduListener = mapIPAddressToOid.get(peerIPAddress);
+            if (oidToPduListener.containsKey(pdu.getVariableBindings().get(3).getOid().toString())) {
                 oidToPduListener.get(pdu.getVariableBindings().get(3).getOid().toString()).onPduRecived(pdu);
             }
-        } else{
-            eventPublisher.publishEvent(new UnknownTrapRecievedEvent(gateway, new ConfigEventType("TRAP received from unknown device with IP Address : "+peerIPAddress)));
+        } else {
+            eventPublisher.publishEvent(new UnknownTrapRecievedEvent(gateway, new ConfigEventType("TRAP received from unknown device with IP Address : " + peerIPAddress)));
         }
 
     }
 
-    public void subscribe(Map<String,Map<String,PduListener>> mapIPAddressToOid){
-
+    public void subscribe(Map<String, Map<String, PduListener>> mapIPAddressToOid) {
         this.mapIPAddressToOid = mapIPAddressToOid;
     }
 
-    public void setGateway(Gateway gateway){
+    public void setGateway(Gateway gateway) {
         this.gateway = gateway;
     }
 
-    public void unsubscribe(String ipAddress){
-        if(mapIPAddressToOid.containsKey(ipAddress)) {
-            mapIPAddressToOid.remove(ipAddress);
-        }
+    public void unsubscribe(String ipAddress) {
+        mapIPAddressToOid.remove(ipAddress);
     }
 }

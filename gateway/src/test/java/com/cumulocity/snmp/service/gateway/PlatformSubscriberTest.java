@@ -55,11 +55,11 @@ public class PlatformSubscriberTest {
     }
 
     @Test
-    public void shouldTestGatewayAddedEvent(){
+    public void shouldTestGatewayAddedEvent() {
 
         //Given
         Gateway gateway = createGateway();
-        when(notifications.subscribeInventory(eq(platformParameters),eq(gateway.getId()),any(ManagedObjectListener.class))).thenReturn(inventorySubscriber);
+        when(notifications.subscribeInventory(eq(platformParameters), eq(gateway.getId()), any(ManagedObjectListener.class))).thenReturn(inventorySubscriber);
 
         ///When
         platformSubscriber.refreshSubscriptions(new GatewayAddedEvent(gateway));
