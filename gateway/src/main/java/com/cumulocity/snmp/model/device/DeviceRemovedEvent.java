@@ -8,7 +8,7 @@ import lombok.Value;
 
 @Value
 public class DeviceRemovedEvent implements GatewayProvider {
-    public static final String c8y_OPCUADeviceRemoved = "c8y_SNMPDeviceRemoved";
+    public static final String c8y_SNMPDeviceRemoved = "c8y_SNMPDeviceRemoved";
     private final Gateway gateway;
     private final Device device;
 
