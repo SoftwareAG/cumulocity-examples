@@ -25,9 +25,9 @@ public class Notifications {
                     try {
                         listener.onUpdate(notification.getData());
                     } catch (InvocationTargetException e) {
-                        e.printStackTrace();
+                        log.error(e.getMessage(),e);
                     } catch (IllegalAccessException e) {
-                        e.printStackTrace();
+                        log.error(e.getMessage(),e);
                     }
                 } else if ("DELETE".equals(notification.getRealtimeAction())) {
                     listener.onDelete();

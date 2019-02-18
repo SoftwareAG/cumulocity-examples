@@ -8,6 +8,7 @@ import com.cumulocity.snmp.model.gateway.client.ClientDataChangedEvent;
 import com.cumulocity.snmp.model.gateway.device.Device;
 import com.cumulocity.snmp.model.gateway.type.core.Mapping;
 import com.cumulocity.snmp.model.gateway.type.core.Register;
+import com.cumulocity.snmp.model.notification.platform.PlatformRepresentationEvent;
 import com.cumulocity.snmp.repository.core.PlatformRepresentationRepository;
 import com.google.common.base.Optional;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +27,7 @@ import static com.cumulocity.snmp.utils.gateway.BeanUtils.findBeanByGenericType;
 @Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-    public class ClientDataService {
+public class ClientDataService {
 
     private final ApplicationContext applicationContext;
     private final ApplicationEventPublisher eventPublisher;
@@ -60,7 +61,7 @@ import static com.cumulocity.snmp.utils.gateway.BeanUtils.findBeanByGenericType;
         }
 
         final PlatformRepresentationFactory representationFactory = findRepresentationFactory(mapping);
-        final Optional representationOptional = representationFactory.apply(date, event.getGateway(), device, register, mapping, event.getValue());
+        final Optional representationOptional = representationFactory.apply(new PlatformRepresentationEvent(date, event.getGateway(), device, register, mapping, event.getValue()));
         if (representationOptional.isPresent()) {
             final Object representation = representationOptional.get();
             final PlatformRepresentationRepository repository = findRepresentationRepository(representation);

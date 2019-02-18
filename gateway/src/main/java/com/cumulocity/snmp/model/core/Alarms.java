@@ -80,9 +80,6 @@ public class Alarms {
     }
 
     public List<Alarm> getActive() {
-        if (active == null) {
-            active = Lists.newArrayList();
-        }
         return active;
     }
 }

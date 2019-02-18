@@ -1,23 +1,22 @@
 package com.cumulocity.snmp.factory.platform;
 
-import c8y.*;
+import c8y.Hardware;
+import c8y.IsDevice;
+import c8y.Mobile;
+import c8y.SupportedOperations;
 import com.cumulocity.model.Agent;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.snmp.factory.gateway.core.PlatformRepresentationFactory;
-import com.cumulocity.snmp.model.gateway.Gateway;
 import com.cumulocity.snmp.model.gateway.device.Device;
-import com.cumulocity.snmp.model.gateway.type.core.Register;
 import com.cumulocity.snmp.model.gateway.type.mapping.StatusMapping;
+import com.cumulocity.snmp.model.notification.platform.PlatformRepresentationEvent;
 import com.google.common.base.Optional;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import org.joda.time.DateTime;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
-
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -42,8 +41,8 @@ public class ManagedObjectFactory implements PlatformRepresentationFactory<Statu
             });
 
     @Override
-    public Optional<ManagedObjectRepresentation> apply(DateTime time, Gateway gateway, Device device, Register register, StatusMapping var1, Object value) {
-        final ManagedObjectRepresentation result = cache.getUnchecked(device);
+    public Optional<ManagedObjectRepresentation> apply(PlatformRepresentationEvent platformRepresentationEvent) {
+        final ManagedObjectRepresentation result = cache.getUnchecked(platformRepresentationEvent.getDevice());
         return of(result);
     }
 

@@ -32,7 +32,7 @@ public class DeviceFactoryTest {
         managedObject.setProperty(Device.c8y_SNMPDevice, deviceFragment);
 
         //When
-        Optional<Device> deviceOptional = deviceFactory.create(managedObject);
+        Optional<Device> deviceOptional = deviceFactory.convert(managedObject);
 
         //Then
         assertThat(deviceOptional).is(present());
@@ -46,7 +46,7 @@ public class DeviceFactoryTest {
         ManagedObjectRepresentation representation = new ManagedObjectRepresentation();
 
         //When
-        Optional<Device> deviceOptional = deviceFactory.create(representation);
+        Optional<Device> deviceOptional = deviceFactory.convert(representation);
 
         //Then
         assertThat(deviceOptional).isNot(present());

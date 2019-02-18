@@ -9,6 +9,7 @@ import com.cumulocity.snmp.model.gateway.device.Device;
 import com.cumulocity.snmp.model.gateway.type.mapping.AlarmClearedEvent;
 import com.cumulocity.snmp.model.gateway.type.mapping.AlarmCreatedEvent;
 import com.cumulocity.snmp.model.gateway.type.mapping.AlarmMapping;
+import com.cumulocity.snmp.model.notification.platform.PlatformRepresentationEvent;
 import com.cumulocity.snmp.repository.AlarmRepository;
 import com.cumulocity.snmp.repository.core.Repository;
 import com.google.common.base.Optional;
@@ -41,7 +42,7 @@ public class ClientValidationService {
         final Device device = event.getDevice();
 
         final AlarmMapping alarmMapping = AlarmMapping.alarmMapping().type(c8y_ValidationError + "_" + event.getType()).text(event.getMessage()).severity(CRITICAL).build();
-        final Optional<AlarmRepresentation> representation = alarmRepresentationFactory.apply(DateTime.now(), gateway, device, null, alarmMapping, null);
+        final Optional<AlarmRepresentation> representation = alarmRepresentationFactory.apply(new PlatformRepresentationEvent(DateTime.now(), gateway, device, null, alarmMapping, null));
         if (representation.isPresent()) {
             final Optional<AlarmRepresentation> saved = alarmRepository.create(gateway, representation.get());
             if (saved.isPresent()) {
@@ -60,7 +61,7 @@ public class ClientValidationService {
 
         if (!alarms.existsBySourceAndType(gateway.getId(), event.getType())) {
             final AlarmMapping alarmMapping = AlarmMapping.alarmMapping().type(c8y_ValidationError).text(event.getType().getValue()).severity(CRITICAL).build();
-            final Optional<AlarmRepresentation> representation = alarmRepresentationFactory.apply(DateTime.now(), gateway, null, null, alarmMapping, null);
+            final Optional<AlarmRepresentation> representation = alarmRepresentationFactory.apply(new PlatformRepresentationEvent(DateTime.now(), gateway, null, null, alarmMapping, null));
             if (representation.isPresent()) {
                 final Optional<AlarmRepresentation> saved = alarmRepository.create(gateway, representation.get());
                 if (saved.isPresent()) {
@@ -113,7 +114,7 @@ public class ClientValidationService {
 
         if (!alarms.existsBySourceAndType(gateway.getId(), event.getType())) {
             final AlarmMapping alarmMapping = AlarmMapping.alarmMapping().type(c8y_TRAPReceivedFromUnknownDevice).text(event.getType().getValue()).severity(MAJOR).build();
-            final Optional<AlarmRepresentation> representation = alarmRepresentationFactory.apply(DateTime.now(), gateway, null, null, alarmMapping, null);
+            final Optional<AlarmRepresentation> representation = alarmRepresentationFactory.apply(new PlatformRepresentationEvent(DateTime.now(), gateway, null, null, alarmMapping, null));
             if (representation.isPresent()) {
                 final Optional<AlarmRepresentation> saved = alarmRepository.create(gateway, representation.get());
                 if (saved.isPresent()) {

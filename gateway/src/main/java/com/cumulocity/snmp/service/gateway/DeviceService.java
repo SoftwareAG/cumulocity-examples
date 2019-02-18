@@ -78,7 +78,7 @@ public class DeviceService {
     }
 
     private void addDevice(Gateway gateway, ManagedObjectRepresentation deviceManagedObject) {
-        final Optional<Device> device = deviceFactory.create(deviceManagedObject);
+        final Optional<Device> device = deviceFactory.convert(deviceManagedObject);
         if (device.isPresent()) {
             if (!deviceRepository.exists(device.get().getId())) {
                 deviceRepository.save(device.get());

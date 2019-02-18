@@ -60,9 +60,9 @@ public class ClientSubscriberTest {
 
         clientSubscriber.refreshSubscription(event);
 
-        verify(eventPublisher, times(1)).publishEvent(any(GatewayConfigSuccessEvent.class));
-        verify(eventPublisher, times(1)).publishEvent(any(ClientDataChangedEvent.class));
-        verify(trapListener, times(1)).subscribe(any(HashMap.class));
+        verify(eventPublisher).publishEvent(any(GatewayConfigSuccessEvent.class));
+        verify(eventPublisher).publishEvent(any(ClientDataChangedEvent.class));
+        verify(trapListener).subscribe(any(HashMap.class));
     }
 
     @Test
@@ -85,9 +85,9 @@ public class ClientSubscriberTest {
 
         clientSubscriber.refreshSubscription(event);
 
-        verify(eventPublisher, times(1)).publishEvent(any(GatewayConfigSuccessEvent.class));
-        verify(eventPublisher, times(1)).publishEvent(any(ClientDataChangedEvent.class));
-        verify(trapListener, times(1)).subscribe(any(HashMap.class));
+        verify(eventPublisher).publishEvent(any(GatewayConfigSuccessEvent.class));
+        verify(eventPublisher).publishEvent(any(ClientDataChangedEvent.class));
+        verify(trapListener).subscribe(any(HashMap.class));
     }
 
     @Test
@@ -113,8 +113,8 @@ public class ClientSubscriberTest {
 
         clientSubscriber.refreshSubscription(event);
 
-        verify(eventPublisher, times(1)).publishEvent(any(GatewayConfigSuccessEvent.class));
-        verify(eventPublisher, times(1)).publishEvent(any(ClientDataChangedEvent.class));
-        verify(trapListener, times(1)).subscribe(any(HashMap.class));
+        verify(eventPublisher).publishEvent(any(GatewayConfigSuccessEvent.class));
+        verify(eventPublisher).publishEvent(any(ClientDataChangedEvent.class));
+        verify(trapListener).subscribe(any(HashMap.class));
     }
 }

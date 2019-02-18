@@ -34,9 +34,12 @@ import java.util.Map;
 public class TrapListener implements CommandResponder {
 
     Map<String, Map<String, PduListener>> mapIPAddressToOid = new HashMap<>();
+
     Gateway gateway = new Gateway();
+
     @Autowired
-    ApplicationEventPublisher eventPublisher;
+    private ApplicationEventPublisher eventPublisher;
+
     @Autowired
     private GatewayConfigurationProperties config;
 
@@ -50,9 +53,9 @@ public class TrapListener implements CommandResponder {
         try {
             if (snmpListeningAddress instanceof TcpAddress) {
                 transportMapping = new DefaultTcpTransportMapping((TcpAddress) snmpListeningAddress);
-
-            } else
+            } else {
                 transportMapping = new DefaultUdpTransportMapping((UdpAddress) snmpListeningAddress);
+            }
 
             ThreadPool threadPool = ThreadPool.create("DispatcherPool", 10);
             MessageDispatcher messageDispatcher = new MultiThreadedMessageDispatcher(threadPool, new MessageDispatcherImpl());
@@ -72,7 +75,7 @@ public class TrapListener implements CommandResponder {
 
             transportMapping.listen();
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error(e.getMessage(),e);
         }
     }
 
