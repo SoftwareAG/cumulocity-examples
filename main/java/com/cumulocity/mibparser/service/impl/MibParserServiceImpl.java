@@ -1,15 +1,18 @@
 package com.cumulocity.mibparser.service.impl;
 
+import com.cumulocity.mibparser.conversion.RegisterConversionHandler;
 import com.cumulocity.mibparser.model.DeviceType;
 import com.cumulocity.mibparser.model.Register;
 import com.cumulocity.mibparser.model.MibUploadResult;
 import com.cumulocity.mibparser.service.MibParserService;
 import lombok.extern.slf4j.Slf4j;
 import net.percederberg.mibble.*;
-import net.percederberg.mibble.snmp.SnmpNotificationType;
-import net.percederberg.mibble.snmp.SnmpTrapType;
+import net.percederberg.mibble.snmp.*;
+import net.percederberg.mibble.type.IntegerType;
+import net.percederberg.mibble.type.ValueRangeConstraint;
 import net.percederberg.mibble.value.ObjectIdentifierValue;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,6 +28,9 @@ import static com.cumulocity.mibparser.utils.MibParserUtil.*;
 @Slf4j
 @Service
 public class MibParserServiceImpl implements MibParserService {
+
+    @Autowired
+    private RegisterConversionHandler handler;
 
     @Override
     public MibUploadResult processMibZipFile(MultipartFile multipartFile) throws IOException {
@@ -107,48 +113,18 @@ public class MibParserServiceImpl implements MibParserService {
             return registerList;
         }
 
+        MibValueSymbol mibValueSymbol;
+
         for (MibSymbol mibSymbol : mib.getAllSymbols()) {
-            if (mibSymbol instanceof MibValueSymbol) {
-                MibValueSymbol mibValueSymbol = (MibValueSymbol) mibSymbol;
-                if (mibValueSymbol.getType() instanceof SnmpTrapType) {
-                    log.debug("SMPv1 TRAP info found");
-                    SnmpTrapType snmpTrapType = (SnmpTrapType) ((MibValueSymbol) mibSymbol).getType();
-                    registerList.add(extractMibTrapNode(snmpTrapType, mibValueSymbol));
-                } else if (mibValueSymbol.getType() instanceof SnmpNotificationType) {
-                    log.debug("SMPv2 TRAP info found");
-                    registerList.add(extractMibTrapNode(mibValueSymbol));
-                }
+            try {
+                mibValueSymbol = (MibValueSymbol) mibSymbol;
+                SnmpType type = (SnmpType) mibValueSymbol.getType();
+                handler.convertSnmpObjectToRegister(type, mibValueSymbol, registerList);
+            } catch (ClassCastException e) {
+                continue;
             }
         }
         return registerList;
-    }
-
-    private Register extractMibTrapNode(SnmpTrapType snmpTrapType, MibValueSymbol mibValueSymbol) {
-        return createRegister(
-                mibValueSymbol.getName(),
-                ((ObjectIdentifierValue) snmpTrapType.getEnterprise()).getSymbol().getOid().toString(),
-                ((ObjectIdentifierValue) snmpTrapType.getEnterprise()).getSymbol().getParent().getOid().toString(),
-                ((ObjectIdentifierValue) snmpTrapType.getEnterprise()).getSymbol().getChildren(),
-                ((ObjectIdentifierValue) snmpTrapType.getEnterprise()).getSymbol().getComment().replace("\n", "")
-        );
-    }
-
-    private Register extractMibTrapNode(MibValueSymbol mibValueSymbol) {
-        return createRegister(mibValueSymbol.getName(),
-                mibValueSymbol.getOid().toString(),
-                mibValueSymbol.getParent().getOid().toString(),
-                mibValueSymbol.getChildren(),
-                ((SnmpNotificationType) mibValueSymbol.getType()).getDescription().replace("\n", "")
-        );
-    }
-
-    private Register createRegister(String name, String oid, String parentOid,
-                                    MibValueSymbol[] childOid, String description) {
-        List<String> childOids = new ArrayList<>();
-        for (MibValueSymbol mibVS : childOid) {
-            childOids.add(mibVS.getOid().toString());
-        }
-        return new Register(name, oid, description, parentOid, childOids);
     }
 
     private List<String> examineManifestFile(Map<String, File> fileMap) throws IOException {
