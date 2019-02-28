@@ -17,7 +17,6 @@ import static com.cumulocity.mibparser.constants.Constants.REQUEST_PARAM_NAME;
 
 @Slf4j
 @RestController
-@RequestMapping(value = "/mibparser")
 public class MibParserController {
 
     @Autowired
