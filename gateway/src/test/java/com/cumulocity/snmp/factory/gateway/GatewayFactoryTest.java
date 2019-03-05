@@ -5,15 +5,11 @@ import com.cumulocity.rest.representation.devicebootstrap.DeviceCredentialsRepre
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.snmp.factory.platform.ManagedObjectMapper;
 import com.cumulocity.snmp.model.gateway.Gateway;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 

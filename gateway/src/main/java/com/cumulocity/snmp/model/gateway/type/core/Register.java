@@ -3,6 +3,7 @@ package com.cumulocity.snmp.model.gateway.type.core;
 import com.cumulocity.snmp.model.gateway.type.mapping.AlarmMapping;
 import com.cumulocity.snmp.model.gateway.type.mapping.EventMapping;
 import com.cumulocity.snmp.model.gateway.type.mapping.ManagedObjectMapping;
+import com.cumulocity.snmp.model.gateway.type.mapping.MeasurementMapping;
 import lombok.*;
 
 import javax.annotation.Nullable;
@@ -38,6 +39,9 @@ public class Register{
     private EventMapping eventMapping;
 
     @Nullable
+    private MeasurementMapping measurementMapping;
+
+    @Nullable
     private ManagedObjectMapping managedObjectMapping;
 
 
@@ -48,6 +52,9 @@ public class Register{
         }
         if (eventMapping != null) {
             result.add(eventMapping);
+        }
+        if (measurementMapping != null) {
+            result.add(measurementMapping);
         }
         if (managedObjectMapping != null) {
             result.add(managedObjectMapping);

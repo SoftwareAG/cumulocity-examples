@@ -19,8 +19,10 @@ import org.snmp4j.PDU;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +40,9 @@ public class ClientSubscriber {
     private final Repository<Device> deviceRepository;
     private final ApplicationEventPublisher eventPublisher;
     private final TrapListener trapListener;
+    private final TaskScheduler taskScheduler;
     Map<String, Map<String, PduListener>> mapIPAddressToOid = new HashMap();
+    Map<String, List<Register>> mapIpAddressToRegister = new HashMap();
 
     @EventListener
     @RunWithinContext
@@ -88,7 +92,7 @@ public class ClientSubscriber {
         }
     }
 
-    private void updateSubscriptions(Gateway gateway) {
+    private void updateSubscriptions(final Gateway gateway) throws IOException {
         trapListener.setGateway(gateway);
         final List<GId> currentDeviceIds = gateway.getCurrentDeviceIds();
         if (currentDeviceIds != null) {
@@ -98,8 +102,38 @@ public class ClientSubscriber {
                     final Device device = deviceOptional.get();
                     final Optional<DeviceType> deviceTypeOptional = deviceTypeRepository.get(device.getDeviceType());
                     if (deviceTypeOptional.isPresent()) {
+                        mapIpAddressToRegister.put(device.getIpAddress(),deviceTypeOptional.get().getRegisters());
+                        if(gateway.getPollingRateInSeconds()>0){
+                            taskScheduler.scheduleWithFixedDelay(new Runnable() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        pollDevice(gateway, device);
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }, gateway.getPollingRateInSeconds()*1000);
+                        } else{
+                            pollDevice(gateway, device);
+                        }
                         subscribe(gateway, device, deviceTypeOptional.get());
                     }
+                }
+            }
+        }
+    }
+
+    private void pollDevice(final Gateway gateway, final Device device) throws IOException {
+        for(Map.Entry<String, List<Register>> ipAddressToRegoster : mapIpAddressToRegister.entrySet()){
+            for(final Register register : ipAddressToRegoster.getValue()){
+                if(register.getMeasurementMapping()!=null){
+                    trapListener.initiatePolling(register.getOid(),ipAddressToRegoster.getKey(),new PduListener() {
+                        @Override
+                        public void onPduRecived(PDU pdu) {
+                            eventPublisher.publishEvent(new ClientDataChangedEvent(gateway, device, register, new DateTime(), pdu.getType()));
+                        }
+                    });
                 }
             }
         }
@@ -131,6 +165,7 @@ public class ClientSubscriber {
 
             mapIPAddressToOid.put(device.getIpAddress(), mapOidToPduListener);
             trapListener.subscribe(mapIPAddressToOid);
+
         } catch (final Exception ex) {
             log.error(ex.getMessage(), ex);
             eventPublisher.publishEvent(new GatewayConfigErrorEvent(gateway, new ConfigEventType(ex.getMessage())));
