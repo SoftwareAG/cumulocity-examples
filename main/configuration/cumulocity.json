@@ -4,7 +4,7 @@
   "provider": {
     "name": "Cumulocity GmbH"
   },
-  "isolation":"MULTI_TENANT",
+  "isolation": "MULTI_TENANT",
   "requiredRoles": [
     "ROLE_TENANT_MANAGEMENT_READ",
     "ROLE_OPTION_MANAGEMENT_READ",

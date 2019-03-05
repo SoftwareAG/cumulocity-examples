@@ -7,10 +7,6 @@ import com.cumulocity.mibparser.model.MibUploadResult;
 import com.cumulocity.mibparser.service.MibParserService;
 import lombok.extern.slf4j.Slf4j;
 import net.percederberg.mibble.*;
-import net.percederberg.mibble.snmp.*;
-import net.percederberg.mibble.type.IntegerType;
-import net.percederberg.mibble.type.ValueRangeConstraint;
-import net.percederberg.mibble.value.ObjectIdentifierValue;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -95,7 +91,7 @@ public class MibParserServiceImpl implements MibParserService {
 
     private MibUploadResult extractMibTrapInformation(List<Mib> mibs) {
         List<Register> registers = new ArrayList<>();
-        for (Mib mib: mibs) {
+        for (Mib mib : mibs) {
             registers.addAll(extractMibTrapInformation(mib));
         }
         if (CollectionUtils.isEmpty(registers)) {
@@ -118,12 +114,12 @@ public class MibParserServiceImpl implements MibParserService {
         for (MibSymbol mibSymbol : mib.getAllSymbols()) {
             try {
                 mibValueSymbol = (MibValueSymbol) mibSymbol;
-                SnmpType type = (SnmpType) mibValueSymbol.getType();
-                handler.convertSnmpObjectToRegister(type, mibValueSymbol, registerList);
+                registerList.add(handler.convertSnmpObjectToRegister(mibValueSymbol));
             } catch (ClassCastException e) {
                 continue;
             }
         }
+        registerList.remove(null);
         return registerList;
     }
 

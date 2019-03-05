@@ -17,17 +17,18 @@ import java.util.List;
 @Component
 public class RegisterConversionHandler {
 
-    public void convertSnmpObjectToRegister(SnmpType snmpType, MibValueSymbol mibValueSymbol, List<Register> registerList) {
+    public Register convertSnmpObjectToRegister(MibValueSymbol mibValueSymbol) {
         if (mibValueSymbol.getType() instanceof SnmpObjectType) {
             log.debug("OBJECT-TYPE found");
-            registerList.add(convertSnmpObjectTypeToRegister((SnmpObjectType) mibValueSymbol.getType(), mibValueSymbol));
+            return convertSnmpObjectTypeToRegister((SnmpObjectType) mibValueSymbol.getType(), mibValueSymbol);
         } else if (mibValueSymbol.getType() instanceof SnmpTrapType) {
             log.debug("TRAP-TYPE found");
-            registerList.add(convertMibTrapTypeToRegister((SnmpTrapType) mibValueSymbol.getType(), mibValueSymbol));
+            return convertMibTrapTypeToRegister((SnmpTrapType) mibValueSymbol.getType(), mibValueSymbol);
         } else if (mibValueSymbol.getType() instanceof SnmpNotificationType) {
             log.debug("NOTIFICATION-TYPE found");
-            registerList.add(convertMibNotificationTypeToRegister(mibValueSymbol));
+            return convertMibNotificationTypeToRegister(mibValueSymbol);
         }
+        return null;
     }
 
     private Register convertSnmpObjectTypeToRegister(SnmpObjectType snmpObjectType, MibValueSymbol mibValueSymbol) {
