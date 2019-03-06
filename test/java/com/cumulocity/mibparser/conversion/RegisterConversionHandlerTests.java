@@ -1,33 +1,52 @@
 package com.cumulocity.mibparser.conversion;
 
 import com.cumulocity.mibparser.model.Register;
+import net.percederberg.mibble.MibSymbol;
 import net.percederberg.mibble.MibValueSymbol;
 import net.percederberg.mibble.snmp.SnmpNotificationType;
 import net.percederberg.mibble.snmp.SnmpObjectType;
 import net.percederberg.mibble.snmp.SnmpTrapType;
 import net.percederberg.mibble.value.ObjectIdentifierValue;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import java.util.Iterator;
+import java.util.List;
+
+import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class RegisterConversionHandlerTests {
 
+    Iterator<MibSymbol> iterator;
+    List<MibSymbol> mibSymbols;
+    MibSymbol mibSymbol;
     @InjectMocks
     private RegisterConversionHandler handler;
 
-    @Test
-    public void shouldReturnNullObjectForSnmpType() {
-        Register register = handler.convertSnmpObjectToRegister(mock(MibValueSymbol.class));
+    @Before
+    public void setup() {
+        iterator = mock(Iterator.class);
+        mibSymbols = mock(List.class);
+        mibSymbol = mock(MibSymbol.class);
 
-        Assert.assertNull(register);
+        when(mibSymbols.iterator()).thenReturn(iterator);
+        when(iterator.hasNext()).thenReturn(true, false);
+    }
+
+    @Test
+    public void shouldReturnDummyRegisterObjectForSnmpType() {
+        when(iterator.next()).thenReturn(mibSymbol);
+
+        List<Register> register = handler.convertSnmpObjectToRegister(mibSymbols);
+
+        Assert.assertNotNull(register);
     }
 
     @Test
@@ -35,6 +54,7 @@ public class RegisterConversionHandlerTests {
         MibValueSymbol mibValueSymbol = mock(MibValueSymbol.class);
         SnmpObjectType snmpObjectType = mock(SnmpObjectType.class);
         ObjectIdentifierValue objectIdentifierValue = mock(ObjectIdentifierValue.class);
+        when(iterator.next()).thenReturn(mibValueSymbol);
 
         when(mibValueSymbol.getType()).thenReturn(snmpObjectType);
         when(mibValueSymbol.getName()).thenReturn("");
@@ -44,7 +64,7 @@ public class RegisterConversionHandlerTests {
         when(mibValueSymbol.getChildren()).thenReturn(new MibValueSymbol[]{});
         when(snmpObjectType.getDescription()).thenReturn("");
 
-        Register register = handler.convertSnmpObjectToRegister(mibValueSymbol);
+        List<Register> register = handler.convertSnmpObjectToRegister(mibSymbols);
 
         Assert.assertNotNull(register);
     }
@@ -54,6 +74,7 @@ public class RegisterConversionHandlerTests {
         MibValueSymbol mibValueSymbol = mock(MibValueSymbol.class);
         SnmpTrapType snmpTrapType = mock(SnmpTrapType.class);
         ObjectIdentifierValue objectIdentifierValue = mock(ObjectIdentifierValue.class);
+        when(iterator.next()).thenReturn(mibValueSymbol);
 
         when(mibValueSymbol.getType()).thenReturn(snmpTrapType);
         when(mibValueSymbol.getName()).thenReturn("");
@@ -65,7 +86,7 @@ public class RegisterConversionHandlerTests {
         when(mibValueSymbol.getChildren()).thenReturn(new MibValueSymbol[]{});
         when(mibValueSymbol.getComment()).thenReturn("");
 
-        Register register = handler.convertSnmpObjectToRegister(mibValueSymbol);
+        List<Register> register = handler.convertSnmpObjectToRegister(mibSymbols);
 
         Assert.assertNotNull(register);
     }
@@ -75,6 +96,7 @@ public class RegisterConversionHandlerTests {
         MibValueSymbol mibValueSymbol = mock(MibValueSymbol.class);
         SnmpNotificationType snmpNotificationType = mock(SnmpNotificationType.class);
         ObjectIdentifierValue objectIdentifierValue = mock(ObjectIdentifierValue.class);
+        when(iterator.next()).thenReturn(mibValueSymbol);
 
         when(mibValueSymbol.getType()).thenReturn(snmpNotificationType);
         when(mibValueSymbol.getName()).thenReturn("");
@@ -84,7 +106,7 @@ public class RegisterConversionHandlerTests {
         when(mibValueSymbol.getChildren()).thenReturn(new MibValueSymbol[]{});
         when(snmpNotificationType.getDescription()).thenReturn("");
 
-        Register register = handler.convertSnmpObjectToRegister(mibValueSymbol);
+        List<Register> register = handler.convertSnmpObjectToRegister(mibSymbols);
 
         Assert.assertNotNull(register);
     }

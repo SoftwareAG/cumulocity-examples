@@ -36,7 +36,7 @@ public class MibParserServiceImpl implements MibParserService {
 
         try {
             List<Mib> mibs = extractAndLoadMainMibs(multipartFile.getInputStream(), path, mibLoader);
-            return extractMibTrapInformation(mibs);
+            return extractMibInformation(mibs);
         } catch (MibLoaderException e) {
             log.error(MISSING_MIB_DEPENDENCIES);
             throw new IllegalArgumentException(MISSING_MIB_DEPENDENCIES);
@@ -89,38 +89,26 @@ public class MibParserServiceImpl implements MibParserService {
         return mibLoader.load(file);
     }
 
-    private MibUploadResult extractMibTrapInformation(List<Mib> mibs) {
+    private MibUploadResult extractMibInformation(List<Mib> mibs) {
+        log.debug("Extracting MIB information");
         List<Register> registers = new ArrayList<>();
         for (Mib mib : mibs) {
-            registers.addAll(extractMibTrapInformation(mib));
+            registers.addAll(extractMibInformation(mib));
         }
         if (CollectionUtils.isEmpty(registers)) {
-            log.error(NO_TRAPS_FOUND_IN_ZIP_FILE);
-            throw new IllegalArgumentException(NO_TRAPS_FOUND_IN_ZIP_FILE);
+            log.error(NO_MIB_INFO_FOUND_IN_ZIP_FILE);
+            throw new IllegalArgumentException(NO_MIB_INFO_FOUND_IN_ZIP_FILE);
         }
         log.info("MIB Zip file processed");
         return new MibUploadResult(new DeviceType(FIELD_BUS_TYPE), registers);
     }
 
-    private List<Register> extractMibTrapInformation(Mib mib) {
-        log.debug("Extracting TRAP information");
-        List<Register> registerList = new ArrayList<>();
+    private List<Register> extractMibInformation(Mib mib) {
+        log.debug("Processing each MIB component of " + mib.getName());
         if (mib == null) {
-            return registerList;
+            return Collections.EMPTY_LIST;
         }
-
-        MibValueSymbol mibValueSymbol;
-
-        for (MibSymbol mibSymbol : mib.getAllSymbols()) {
-            try {
-                mibValueSymbol = (MibValueSymbol) mibSymbol;
-                registerList.add(handler.convertSnmpObjectToRegister(mibValueSymbol));
-            } catch (ClassCastException e) {
-                continue;
-            }
-        }
-        registerList.remove(null);
-        return registerList;
+        return handler.convertSnmpObjectToRegister(mib.getAllSymbols());
     }
 
     private List<String> examineManifestFile(Map<String, File> fileMap) throws IOException {

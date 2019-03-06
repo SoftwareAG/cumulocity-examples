@@ -2,11 +2,11 @@ package com.cumulocity.mibparser.conversion;
 
 import com.cumulocity.mibparser.model.Register;
 import lombok.extern.slf4j.Slf4j;
+import net.percederberg.mibble.MibSymbol;
 import net.percederberg.mibble.MibValueSymbol;
 import net.percederberg.mibble.snmp.SnmpNotificationType;
 import net.percederberg.mibble.snmp.SnmpObjectType;
 import net.percederberg.mibble.snmp.SnmpTrapType;
-import net.percederberg.mibble.snmp.SnmpType;
 import net.percederberg.mibble.value.ObjectIdentifierValue;
 import org.springframework.stereotype.Component;
 
@@ -17,18 +17,29 @@ import java.util.List;
 @Component
 public class RegisterConversionHandler {
 
-    public Register convertSnmpObjectToRegister(MibValueSymbol mibValueSymbol) {
-        if (mibValueSymbol.getType() instanceof SnmpObjectType) {
-            log.debug("OBJECT-TYPE found");
-            return convertSnmpObjectTypeToRegister((SnmpObjectType) mibValueSymbol.getType(), mibValueSymbol);
-        } else if (mibValueSymbol.getType() instanceof SnmpTrapType) {
-            log.debug("TRAP-TYPE found");
-            return convertMibTrapTypeToRegister((SnmpTrapType) mibValueSymbol.getType(), mibValueSymbol);
-        } else if (mibValueSymbol.getType() instanceof SnmpNotificationType) {
-            log.debug("NOTIFICATION-TYPE found");
-            return convertMibNotificationTypeToRegister(mibValueSymbol);
+    public List<Register> convertSnmpObjectToRegister(List<MibSymbol> mibSymbols) {
+        List<Register> registerList = new ArrayList<>();
+        MibValueSymbol mibValueSymbol;
+
+        for (MibSymbol mibSymbol : mibSymbols) {
+            try {
+                mibValueSymbol = (MibValueSymbol) mibSymbol;
+                if (mibValueSymbol.getType() instanceof SnmpObjectType) {
+                    log.debug("OBJECT-TYPE found");
+                    registerList.add(convertSnmpObjectTypeToRegister((SnmpObjectType) mibValueSymbol.getType(), mibValueSymbol));
+                } else if (mibValueSymbol.getType() instanceof SnmpTrapType) {
+                    log.debug("TRAP-TYPE found");
+                    registerList.add(convertMibTrapTypeToRegister((SnmpTrapType) mibValueSymbol.getType(), mibValueSymbol));
+                } else if (mibValueSymbol.getType() instanceof SnmpNotificationType) {
+                    log.debug("NOTIFICATION-TYPE found");
+                    registerList.add(convertMibNotificationTypeToRegister(mibValueSymbol));
+                }
+            } catch (ClassCastException e) {
+                log.debug("MibSymbol is not of type MibValueSymbol. Do nothing. " +
+                        "Iterating to next MibSymbol object");
+            }
         }
-        return null;
+        return registerList;
     }
 
     private Register convertSnmpObjectTypeToRegister(SnmpObjectType snmpObjectType, MibValueSymbol mibValueSymbol) {

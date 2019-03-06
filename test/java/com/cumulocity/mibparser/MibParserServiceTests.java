@@ -1,11 +1,10 @@
 package com.cumulocity.mibparser;
 
 import com.cumulocity.mibparser.conversion.RegisterConversionHandler;
-import com.cumulocity.mibparser.model.MibUploadResult;
 import com.cumulocity.mibparser.model.Register;
 import com.cumulocity.mibparser.service.impl.MibParserServiceImpl;
-import net.percederberg.mibble.MibValueSymbol;
-import org.junit.Assert;
+import net.percederberg.mibble.Mib;
+import net.percederberg.mibble.MibSymbol;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -16,6 +15,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
+import java.util.*;
 
 import static org.mockito.Mockito.*;
 
@@ -81,17 +81,20 @@ public class MibParserServiceTests {
         mibParserService.processMibZipFile(file);
     }
 
-    @Test
-    public void shouldProcessMibZipFileSuccessfully() throws IOException, IllegalArgumentException {
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldProcessMibZipFileWithNoMibInfoFound() throws IOException, IllegalArgumentException {
         MultipartFile file = new MockMultipartFile("Test_MIB.zip", new FileInputStream(
                 new File(System.getProperties().get("user.dir") + "/src/test/resources/Test_MIB.zip")));
-        MibValueSymbol mibValueSymbol = mock(MibValueSymbol.class);
+        Mib mib = mock(Mib.class);
+        List<MibSymbol> mibSymbols = new ArrayList<>();
+        List<Register> registers = new ArrayList<>();
         Register register = mock(Register.class);
+        registers.add(register);
 
-        when(handler.convertSnmpObjectToRegister(mibValueSymbol)).thenReturn(register);
+        when(mib.getAllSymbols()).thenReturn(mibSymbols);
+        when(handler.convertSnmpObjectToRegister(mib.getAllSymbols())).thenReturn(registers);
 
-        MibUploadResult mibUploadResult = mibParserService.processMibZipFile(file);
+        mibParserService.processMibZipFile(file);
 
-        Assert.assertNotNull(mibUploadResult);
     }
 }

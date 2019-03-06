@@ -14,6 +14,6 @@ public class Constants {
     public static final String NO_MANIFEST_FILE_FOUND = "Zip file does not contain "+MANIFEST_FILENAME;
     public static final String NO_MAIN_MIBS_FOUND = MANIFEST_FILENAME + " is empty in Zip file";
     public static final String NO_MIB_FOUND_IN_ZIP_FILE = "No MIBs found in Zip file";
-    public static final String NO_TRAPS_FOUND_IN_ZIP_FILE = "No Traps information found in Zip file";
+    public static final String NO_MIB_INFO_FOUND_IN_ZIP_FILE = "No MIB information found in Zip file";
 
 }
