@@ -8,6 +8,7 @@ import com.cumulocity.snmp.model.gateway.client.ClientDataChangedEvent;
 import com.cumulocity.snmp.model.gateway.device.Device;
 import com.cumulocity.snmp.model.gateway.type.core.Mapping;
 import com.cumulocity.snmp.model.gateway.type.core.Register;
+import com.cumulocity.snmp.model.gateway.type.mapping.MeasurementMapping;
 import com.cumulocity.snmp.model.notification.platform.PlatformRepresentationEvent;
 import com.cumulocity.snmp.repository.core.PlatformRepresentationRepository;
 import com.google.common.base.Optional;
@@ -46,7 +47,13 @@ public class ClientDataService {
     @RunWithinContext
     public void execute(ClientDataChangedEvent event) {
         for (final Mapping mapping : event.getRegister().mappings()) {
-            storeDataChange(event, mapping);
+            if(event.isPolledData()){
+                if(mapping instanceof MeasurementMapping) {
+                    storeDataChange(event, mapping);
+                }
+            } else{
+                storeDataChange(event, mapping);
+            }
         }
     }
 

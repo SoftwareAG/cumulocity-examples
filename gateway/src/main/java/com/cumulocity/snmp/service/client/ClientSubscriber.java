@@ -39,7 +39,7 @@ public class ClientSubscriber {
     private final Repository<DeviceType> deviceTypeRepository;
     private final Repository<Device> deviceRepository;
     private final ApplicationEventPublisher eventPublisher;
-    private final TrapListener trapListener;
+    private final DeviceInterface deviceInterface;
     private final TaskScheduler taskScheduler;
     Map<String, Map<String, PduListener>> mapIPAddressToOid = new HashMap();
     Map<String, List<Register>> mapIpAddressToRegister = new HashMap();
@@ -93,7 +93,7 @@ public class ClientSubscriber {
     }
 
     private void updateSubscriptions(final Gateway gateway) throws IOException {
-        trapListener.setGateway(gateway);
+        deviceInterface.setGateway(gateway);
         final List<GId> currentDeviceIds = gateway.getCurrentDeviceIds();
         if (currentDeviceIds != null) {
             for (final GId gId : currentDeviceIds) {
@@ -128,10 +128,10 @@ public class ClientSubscriber {
         for(Map.Entry<String, List<Register>> ipAddressToRegoster : mapIpAddressToRegister.entrySet()){
             for(final Register register : ipAddressToRegoster.getValue()){
                 if(register.getMeasurementMapping()!=null){
-                    trapListener.initiatePolling(register.getOid(),ipAddressToRegoster.getKey(),new PduListener() {
+                    deviceInterface.initiatePolling(register.getOid(),ipAddressToRegoster.getKey(),new PduListener() {
                         @Override
                         public void onPduRecived(PDU pdu) {
-                            eventPublisher.publishEvent(new ClientDataChangedEvent(gateway, device, register, new DateTime(), pdu.getType()));
+                            eventPublisher.publishEvent(new ClientDataChangedEvent(gateway, device, register, new DateTime(), pdu.getType(),true));
                         }
                     });
                 }
@@ -153,18 +153,18 @@ public class ClientSubscriber {
 
             Map<String, PduListener> mapOidToPduListener = new HashMap();
             clearGatewayValidationErrors(gateway);
-            trapListener.setGateway(gateway);
+            deviceInterface.setGateway(gateway);
             for (final Register register : deviceType.getRegisters()) {
                 mapOidToPduListener.put(register.getOid(), new PduListener() {
                     @Override
                     public void onPduRecived(PDU pdu) {
-                        eventPublisher.publishEvent(new ClientDataChangedEvent(gateway, device, register, new DateTime(), pdu.getType()));
+                        eventPublisher.publishEvent(new ClientDataChangedEvent(gateway, device, register, new DateTime(), pdu.getType(),false));
                     }
                 });
             }
 
             mapIPAddressToOid.put(device.getIpAddress(), mapOidToPduListener);
-            trapListener.subscribe(mapIPAddressToOid);
+            deviceInterface.subscribe(mapIPAddressToOid);
 
         } catch (final Exception ex) {
             log.error(ex.getMessage(), ex);
@@ -185,6 +185,6 @@ public class ClientSubscriber {
     }
 
     private void unsubscribe(Device device) {
-        trapListener.unsubscribe(device.getIpAddress());
+        deviceInterface.unsubscribe(device.getIpAddress());
     }
 }

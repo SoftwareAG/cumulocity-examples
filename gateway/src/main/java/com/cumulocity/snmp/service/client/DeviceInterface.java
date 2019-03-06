@@ -31,7 +31,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Component
-public class TrapListener implements CommandResponder {
+public class DeviceInterface implements CommandResponder {
 
     Map<String, Map<String, PduListener>> mapIPAddressToOid = new ConcurrentHashMap<>();
 

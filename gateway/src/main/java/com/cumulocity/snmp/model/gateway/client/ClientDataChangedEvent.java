@@ -14,4 +14,5 @@ public class ClientDataChangedEvent implements GatewayProvider {
     private final Register register;
     private final DateTime time;
     private final Object value;
+    private final boolean isPolledData;
 }

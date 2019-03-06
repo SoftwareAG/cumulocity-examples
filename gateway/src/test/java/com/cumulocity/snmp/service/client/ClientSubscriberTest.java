@@ -35,7 +35,7 @@ public class ClientSubscriberTest {
     ApplicationEventPublisher eventPublisher;
 
     @Mock
-    TrapListener trapListener;
+    DeviceInterface deviceInterface;
 
     @InjectMocks
     ClientSubscriber clientSubscriber;
@@ -56,13 +56,13 @@ public class ClientSubscriberTest {
         when(deviceType.getRegisters()).thenReturn(registers);
 
         doNothing().when(eventPublisher).publishEvent(deviceConfigErrorEvent);
-        doNothing().when(trapListener).setGateway(gateway);
+        doNothing().when(deviceInterface).setGateway(gateway);
 
         clientSubscriber.refreshSubscription(event);
 
         verify(eventPublisher).publishEvent(any(GatewayConfigSuccessEvent.class));
         verify(eventPublisher).publishEvent(any(ClientDataChangedEvent.class));
-        verify(trapListener).subscribe(any(HashMap.class));
+        verify(deviceInterface).subscribe(any(HashMap.class));
     }
 
     @Test
@@ -81,13 +81,13 @@ public class ClientSubscriberTest {
         when(deviceType.getRegisters()).thenReturn(registers);
 
         doNothing().when(eventPublisher).publishEvent(deviceConfigErrorEvent);
-        doNothing().when(trapListener).setGateway(gateway);
+        doNothing().when(deviceInterface).setGateway(gateway);
 
         clientSubscriber.refreshSubscription(event);
 
         verify(eventPublisher).publishEvent(any(GatewayConfigSuccessEvent.class));
         verify(eventPublisher).publishEvent(any(ClientDataChangedEvent.class));
-        verify(trapListener).subscribe(any(HashMap.class));
+        verify(deviceInterface).subscribe(any(HashMap.class));
     }
 
     @Test
@@ -109,12 +109,12 @@ public class ClientSubscriberTest {
         when(deviceTypeOptional.get()).thenReturn(deviceType);
 
         doNothing().when(eventPublisher).publishEvent(deviceConfigErrorEvent);
-        doNothing().when(trapListener).setGateway(gateway);
+        doNothing().when(deviceInterface).setGateway(gateway);
 
         clientSubscriber.refreshSubscription(event);
 
         verify(eventPublisher).publishEvent(any(GatewayConfigSuccessEvent.class));
         verify(eventPublisher).publishEvent(any(ClientDataChangedEvent.class));
-        verify(trapListener).subscribe(any(HashMap.class));
+        verify(deviceInterface).subscribe(any(HashMap.class));
     }
 }
