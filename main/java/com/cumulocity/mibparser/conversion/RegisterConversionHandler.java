@@ -17,7 +17,7 @@ import java.util.List;
 @Component
 public class RegisterConversionHandler {
 
-    public List<Register> convertSnmpObjectToRegister(List<MibSymbol> mibSymbols) {
+    public static List<Register> convertSnmpObjectToRegister(List<MibSymbol> mibSymbols) {
         List<Register> registerList = new ArrayList<>();
         MibValueSymbol mibValueSymbol;
 
@@ -42,7 +42,7 @@ public class RegisterConversionHandler {
         return registerList;
     }
 
-    private Register convertSnmpObjectTypeToRegister(SnmpObjectType snmpObjectType, MibValueSymbol mibValueSymbol) {
+    private static Register convertSnmpObjectTypeToRegister(SnmpObjectType snmpObjectType, MibValueSymbol mibValueSymbol) {
         return createRegister(mibValueSymbol.getName(),
                 mibValueSymbol.getOid().toString(),
                 mibValueSymbol.getParent().getOid().toString(),
@@ -51,7 +51,7 @@ public class RegisterConversionHandler {
         );
     }
 
-    private Register convertMibTrapTypeToRegister(SnmpTrapType snmpTrapType, MibValueSymbol mibValueSymbol) {
+    private static Register convertMibTrapTypeToRegister(SnmpTrapType snmpTrapType, MibValueSymbol mibValueSymbol) {
         return createRegister(
                 mibValueSymbol.getName(),
                 ((ObjectIdentifierValue) snmpTrapType.getEnterprise()).getSymbol().getOid().toString(),
@@ -62,7 +62,7 @@ public class RegisterConversionHandler {
         );
     }
 
-    private Register convertMibNotificationTypeToRegister(MibValueSymbol mibValueSymbol) {
+    private static Register convertMibNotificationTypeToRegister(MibValueSymbol mibValueSymbol) {
         return createRegister(mibValueSymbol.getName(),
                 mibValueSymbol.getOid().toString(),
                 mibValueSymbol.getParent().getOid().toString(),
@@ -72,8 +72,8 @@ public class RegisterConversionHandler {
         );
     }
 
-    private Register createRegister(String name, String oid, String parentOid,
-                                    MibValueSymbol[] childOid, String description) {
+    private static Register createRegister(String name, String oid, String parentOid,
+                                           MibValueSymbol[] childOid, String description) {
         List<String> childOids = new ArrayList<>();
         for (MibValueSymbol mibVS : childOid) {
             childOids.add(mibVS.getOid().toString());

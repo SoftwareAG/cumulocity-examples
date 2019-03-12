@@ -8,7 +8,6 @@ import com.cumulocity.mibparser.service.MibParserService;
 import lombok.extern.slf4j.Slf4j;
 import net.percederberg.mibble.*;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,9 +23,6 @@ import static com.cumulocity.mibparser.utils.MibParserUtil.*;
 @Slf4j
 @Service
 public class MibParserServiceImpl implements MibParserService {
-
-    @Autowired
-    private RegisterConversionHandler handler;
 
     @Override
     public MibUploadResult processMibZipFile(MultipartFile multipartFile) throws IOException {
@@ -108,7 +104,7 @@ public class MibParserServiceImpl implements MibParserService {
         if (mib == null) {
             return Collections.EMPTY_LIST;
         }
-        return handler.convertSnmpObjectToRegister(mib.getAllSymbols());
+        return RegisterConversionHandler.convertSnmpObjectToRegister(mib.getAllSymbols());
     }
 
     private List<String> examineManifestFile(Map<String, File> fileMap) throws IOException {
