@@ -4,7 +4,7 @@
     <parent>
         <groupId>c8y.agents</groupId>
         <artifactId>c8y-agents</artifactId>
-        <version>1004.2.2-SNAPSHOT</version>
+        <version>1004.2.0-SNAPSHOT</version>
     </parent>
     <artifactId>snmp-agent</artifactId>
 
