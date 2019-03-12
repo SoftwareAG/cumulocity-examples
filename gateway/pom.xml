@@ -183,8 +183,8 @@
             <dependency>
                 <groupId>com.nsn.cumulocity.clients-java</groupId>
                 <artifactId>microservice-dependencies</artifactId>
-                <version>${project.version}</version>
-                <type>pom</type>
+                <version>${c8y.microservice.version}</version>
+		<type>pom</type>
                 <scope>import</scope>
             </dependency>
         </dependencies>
