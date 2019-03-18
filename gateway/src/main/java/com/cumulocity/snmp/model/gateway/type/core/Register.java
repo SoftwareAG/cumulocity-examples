@@ -5,7 +5,6 @@ import com.cumulocity.snmp.model.gateway.type.mapping.EventMapping;
 import com.cumulocity.snmp.model.gateway.type.mapping.ManagedObjectMapping;
 import com.cumulocity.snmp.model.gateway.type.mapping.MeasurementMapping;
 import lombok.*;
-import org.snmp4j.smi.Integer32;
 import org.snmp4j.smi.Variable;
 
 import javax.annotation.Nullable;
