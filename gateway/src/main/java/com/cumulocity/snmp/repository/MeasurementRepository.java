@@ -2,8 +2,8 @@ package com.cumulocity.snmp.repository;
 
 import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
 import com.cumulocity.snmp.annotation.gateway.RunWithinContext;
-import com.cumulocity.snmp.model.core.MeasurementUnit;
 import com.cumulocity.snmp.model.core.Credentials;
+import com.cumulocity.snmp.model.core.MeasurementUnit;
 import com.cumulocity.snmp.repository.core.PlatformRepresentationRepository;
 import com.cumulocity.snmp.service.gateway.GroupMeasurementService;
 import com.google.common.base.Optional;

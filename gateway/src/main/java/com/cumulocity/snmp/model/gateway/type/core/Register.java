@@ -5,6 +5,8 @@ import com.cumulocity.snmp.model.gateway.type.mapping.EventMapping;
 import com.cumulocity.snmp.model.gateway.type.mapping.ManagedObjectMapping;
 import com.cumulocity.snmp.model.gateway.type.mapping.MeasurementMapping;
 import lombok.*;
+import org.snmp4j.smi.Integer32;
+import org.snmp4j.smi.Variable;
 
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
@@ -24,13 +26,14 @@ public class Register{
 
     @NotNull
     private String oid;
-
     private String description;
 
     @NotNull
     private String parentOid;
 
     private List<String> childOids;
+
+    private String unit;
 
     @Nullable
     private AlarmMapping alarmMapping;
@@ -60,5 +63,22 @@ public class Register{
             result.add(managedObjectMapping);
         }
         return result;
+    }
+
+    public Object convert(Object object) {
+        if (object == null) {
+            return null;
+        }
+        if (object instanceof Variable) {
+            return new Double(((Variable) object).toInt());
+        }
+        if (object instanceof Boolean) {
+            if ((Boolean) object)  {
+                return 1;
+            } else {
+                return 0;
+            }
+        }
+        return object;
     }
 }

@@ -91,32 +91,4 @@ public class ClientSubscriberTest {
         verify(eventPublisher).publishEvent(any(ClientDataChangedEvent.class));
         verify(deviceInterface).subscribe(any(HashMap.class));
     }
-
-    @Test
-    public void shouldRefreshSubscriptionOnDeviceAddedEvent() {
-        DeviceAddedEvent event = mock(DeviceAddedEvent.class);
-        Gateway gateway = mock(Gateway.class);
-        DeviceConfigErrorEvent deviceConfigErrorEvent = mock(DeviceConfigErrorEvent.class);
-        DeviceType deviceType = mock(DeviceType.class);
-        List<Register> registers = new ArrayList<>();
-        Register register = mock(Register.class);
-        registers.add(register);
-        Optional<DeviceType> deviceTypeOptional = mock(Optional.class);
-
-        when(event.getDevice()).thenReturn(mock(Device.class));
-        when(event.getGateway()).thenReturn(gateway);
-        when(deviceType.getRegisters()).thenReturn(registers);
-        when(deviceTypeRepository.get(any(GId.class))).thenReturn(deviceTypeOptional);
-        when(deviceTypeOptional.isPresent()).thenReturn(true);
-        when(deviceTypeOptional.get()).thenReturn(deviceType);
-
-        doNothing().when(eventPublisher).publishEvent(deviceConfigErrorEvent);
-        doNothing().when(deviceInterface).setGateway(gateway);
-
-        clientSubscriber.refreshSubscription(event);
-
-        verify(eventPublisher).publishEvent(any(GatewayConfigSuccessEvent.class));
-        verify(eventPublisher).publishEvent(any(ClientDataChangedEvent.class));
-        verify(deviceInterface).subscribe(any(HashMap.class));
-    }
 }

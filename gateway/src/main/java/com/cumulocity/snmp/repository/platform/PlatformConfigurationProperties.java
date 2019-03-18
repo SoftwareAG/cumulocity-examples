@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class PlatformConfigurationProperties {
 
-    @Value("${platform.url:http://developers.cumulocity.com}")
+    @Value("${C8Y.baseUrl:http://developers.cumulocity.com}")
     private String url;
 
     @Value("${platform.forceInitialHost:true}")

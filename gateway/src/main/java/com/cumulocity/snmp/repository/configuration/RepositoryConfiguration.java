@@ -11,7 +11,7 @@ import java.io.File;
 public class RepositoryConfiguration {
 
     public static File findConfSubdirectory(String subfolderName) {
-        final File home = new File(System.getProperty("user.home"), "snmp");
+        final File home = new File(System.getProperty("user.home"), ".snmp");
         final File etc = new File("/etc/snmp");
         final File confDirectory;
         if (home.exists()) {

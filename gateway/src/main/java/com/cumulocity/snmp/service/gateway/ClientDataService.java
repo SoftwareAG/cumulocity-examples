@@ -47,11 +47,11 @@ public class ClientDataService {
     @RunWithinContext
     public void execute(ClientDataChangedEvent event) {
         for (final Mapping mapping : event.getRegister().mappings()) {
-            if(event.isPolledData()){
-                if(mapping instanceof MeasurementMapping) {
+            if (event.isPolledData()) {
+                if (mapping instanceof MeasurementMapping) {
                     storeDataChange(event, mapping);
                 }
-            } else{
+            } else {
                 storeDataChange(event, mapping);
             }
         }

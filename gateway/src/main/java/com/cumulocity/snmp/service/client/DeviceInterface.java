@@ -61,7 +61,8 @@ public class DeviceInterface implements CommandResponder {
             }
 
             ThreadPool threadPool = ThreadPool.create("DispatcherPool", 10);
-            MessageDispatcher messageDispatcher = new MultiThreadedMessageDispatcher(threadPool, new MessageDispatcherImpl());
+            MessageDispatcher messageDispatcher = new MultiThreadedMessageDispatcher(threadPool,
+                    new MessageDispatcherImpl());
 
             messageDispatcher.addMessageProcessingModel(new MPv1());
             messageDispatcher.addMessageProcessingModel(new MPv2c());
@@ -74,7 +75,7 @@ public class DeviceInterface implements CommandResponder {
             snmp.addCommandResponder(this);
 
             CommunityTarget target = new CommunityTarget();
-            target.setCommunity(new OctetString("public"));
+            target.setCommunity(new OctetString(config.getCommunityTarget()));
 
             transportMapping.listen();
         } catch (IOException e) {
@@ -91,16 +92,19 @@ public class DeviceInterface implements CommandResponder {
             return;
         }
 
-        log.info("Received PDU is : ", pdu);
+        log.debug("Received PDU");
 
         String peerIPAddress = event.getPeerAddress().toString().split("/")[0];
         if (mapIPAddressToOid.containsKey(peerIPAddress)) {
             Map<String, PduListener> oidToPduListener = mapIPAddressToOid.get(peerIPAddress);
-            if (oidToPduListener.containsKey(pdu.getVariableBindings().get(3).getOid().toString())) {
-                oidToPduListener.get(pdu.getVariableBindings().get(3).getOid().toString()).onPduRecived(pdu);
+            for (VariableBinding var : pdu.getVariableBindings()) {
+                if (oidToPduListener.containsKey(var.getOid().toString())) {
+                    oidToPduListener.get(var.getOid().toString()).onPduRecived(pdu);
+                }
             }
         } else {
-            eventPublisher.publishEvent(new UnknownTrapRecievedEvent(gateway, new ConfigEventType("TRAP received from unknown device with IP Address : " + peerIPAddress)));
+            eventPublisher.publishEvent(new UnknownTrapRecievedEvent(gateway, new ConfigEventType(
+                    "TRAP received from unknown device with IP Address : " + peerIPAddress)));
         }
 
     }
@@ -115,23 +119,28 @@ public class DeviceInterface implements CommandResponder {
 
         Snmp snmp = new Snmp(transport);
         CommunityTarget target = new CommunityTarget();
-        target.setCommunity(new OctetString("public"));
-        target.setVersion(SnmpConstants.version3);
+        target.setCommunity(new OctetString(config.getCommunityTarget()));
+        target.setVersion(SnmpConstants.version2c);
+
         //TODO: Port has to be obtained from UI/User if required.
-        target.setAddress(new TcpAddress(ipAddress + "/" + 6690));
+        target.setAddress(new TcpAddress(ipAddress + "/" + 161));
         target.setRetries(2);
         target.setTimeout(5000);
+
         try {
             ResponseEvent responseEvent = snmp.send(pdu, target);
             PDU response = responseEvent.getResponse();
             if (response == null) {
-                log.warn("response null - error:{} peerAddress:{} source:{} request:{}",
+                log.error("Polling response null - error:{} peerAddress:{} source:{} request:{}",
                         responseEvent.getError(),
                         responseEvent.getPeerAddress(),
                         responseEvent.getSource(),
                         responseEvent.getRequest());
             } else {
-                pduListener.onPduRecived(response);
+                // Process polled data only if it is Integer
+                if (response.getVariableBindings().get(0).getVariable().getSyntax() == 2) {
+                    pduListener.onPduRecived(response);
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();

@@ -102,19 +102,20 @@ public class ClientSubscriber {
                     final Device device = deviceOptional.get();
                     final Optional<DeviceType> deviceTypeOptional = deviceTypeRepository.get(device.getDeviceType());
                     if (deviceTypeOptional.isPresent()) {
-                        mapIpAddressToRegister.put(device.getIpAddress(),deviceTypeOptional.get().getRegisters());
-                        if(gateway.getPollingRateInSeconds()>0){
+                        mapIpAddressToRegister.put(device.getIpAddress(), deviceTypeOptional.get().getRegisters());
+                        if (gateway.getPollingRateInSeconds() > 0) {
                             taskScheduler.scheduleWithFixedDelay(new Runnable() {
                                 @Override
                                 public void run() {
                                     try {
                                         pollDevice(gateway, device);
                                     } catch (IOException e) {
+                                        log.error("Exception during SNMP Device Polling ", e);
                                         e.printStackTrace();
                                     }
                                 }
-                            }, gateway.getPollingRateInSeconds()*1000);
-                        } else{
+                            }, gateway.getPollingRateInSeconds() * 1000);
+                        } else {
                             pollDevice(gateway, device);
                         }
                         subscribe(gateway, device, deviceTypeOptional.get());
@@ -125,13 +126,14 @@ public class ClientSubscriber {
     }
 
     private void pollDevice(final Gateway gateway, final Device device) throws IOException {
-        for(Map.Entry<String, List<Register>> ipAddressToRegoster : mapIpAddressToRegister.entrySet()){
-            for(final Register register : ipAddressToRegoster.getValue()){
-                if(register.getMeasurementMapping()!=null){
-                    deviceInterface.initiatePolling(register.getOid(),ipAddressToRegoster.getKey(),new PduListener() {
+        for (Map.Entry<String, List<Register>> ipAddressToRegister : mapIpAddressToRegister.entrySet()) {
+            for (final Register register : ipAddressToRegister.getValue()) {
+                if (register.getMeasurementMapping() != null) {
+                    deviceInterface.initiatePolling(register.getOid(), ipAddressToRegister.getKey(), new PduListener() {
                         @Override
                         public void onPduRecived(PDU pdu) {
-                            eventPublisher.publishEvent(new ClientDataChangedEvent(gateway, device, register, new DateTime(), pdu.getType(),true));
+                            eventPublisher.publishEvent(new ClientDataChangedEvent(gateway, device, register,
+                                    new DateTime(), pdu.getVariableBindings().get(0).getVariable(), true));
                         }
                     });
                 }
@@ -158,7 +160,8 @@ public class ClientSubscriber {
                 mapOidToPduListener.put(register.getOid(), new PduListener() {
                     @Override
                     public void onPduRecived(PDU pdu) {
-                        eventPublisher.publishEvent(new ClientDataChangedEvent(gateway, device, register, new DateTime(), pdu.getType(),false));
+                        eventPublisher.publishEvent(new ClientDataChangedEvent(gateway, device, register,
+                                new DateTime(), pdu.getType(), false));
                     }
                 });
             }

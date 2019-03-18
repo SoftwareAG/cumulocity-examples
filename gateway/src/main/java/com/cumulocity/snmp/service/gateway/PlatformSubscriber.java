@@ -6,7 +6,6 @@ import com.cumulocity.sdk.client.cep.notification.ManagedObjectDeleteAwareNotifi
 import com.cumulocity.sdk.client.notification.Subscriber;
 import com.cumulocity.snmp.annotation.gateway.RunWithinContext;
 import com.cumulocity.snmp.factory.gateway.GatewayFactory;
-import com.cumulocity.snmp.model.device.DeviceAddedEvent;
 import com.cumulocity.snmp.model.device.DeviceRemovedEvent;
 import com.cumulocity.snmp.model.gateway.Gateway;
 import com.cumulocity.snmp.model.gateway.GatewayAddedEvent;
@@ -22,7 +21,6 @@ import com.cumulocity.snmp.repository.ManagedObjectRepository;
 import com.cumulocity.snmp.repository.core.Repository;
 import com.cumulocity.snmp.repository.platform.PlatformProvider;
 import com.google.common.base.Optional;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;

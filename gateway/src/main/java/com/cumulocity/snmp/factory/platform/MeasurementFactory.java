@@ -33,9 +33,10 @@ public class MeasurementFactory implements PlatformRepresentationFactory<Measure
         result.setType(mapping.getType());
 
         final Map<String, Object> series = Maps.newHashMap();
+
         //TODO: The value and the unit is to be defined after getting the polled data.
-        series.put("value", 1);
-        series.put("unit", "dummyUnit");
+        series.put("value", register.convert(value));
+        series.put("unit", register.getUnit());
 
         final Map<String, Object> type = Maps.newHashMap();
         type.put(mapping.getSeries().replace(" ", "_"), series);
