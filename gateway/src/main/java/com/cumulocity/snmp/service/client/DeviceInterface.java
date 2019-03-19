@@ -57,7 +57,9 @@ public class DeviceInterface implements CommandResponder {
             if (snmpListeningAddress instanceof TcpAddress) {
                 transportMapping = new DefaultTcpTransportMapping((TcpAddress) snmpListeningAddress);
             } else {
-                transportMapping = new DefaultUdpTransportMapping((UdpAddress) snmpListeningAddress);
+                log.error("Received request is other than TCP");
+                return;
+//                transportMapping = new DefaultUdpTransportMapping((UdpAddress) snmpListeningAddress);
             }
 
             ThreadPool threadPool = ThreadPool.create("DispatcherPool", 10);
@@ -88,11 +90,11 @@ public class DeviceInterface implements CommandResponder {
         PDU pdu = event.getPDU();
 
         if (pdu == null) {
-            log.error("Received PDU is null");
+            log.error("Received SNMP Data is null");
             return;
         }
 
-        log.debug("Received PDU");
+        log.debug("SNMP Data Received");
 
         String peerIPAddress = event.getPeerAddress().toString().split("/")[0];
         if (mapIPAddressToOid.containsKey(peerIPAddress)) {
@@ -123,7 +125,7 @@ public class DeviceInterface implements CommandResponder {
         target.setVersion(SnmpConstants.version2c);
 
         //TODO: Port has to be obtained from UI/User if required.
-        target.setAddress(new TcpAddress(ipAddress + "/" + 161));
+        target.setAddress(new TcpAddress(ipAddress + "/" + 162));
         target.setRetries(2);
         target.setTimeout(5000);
 
@@ -143,7 +145,7 @@ public class DeviceInterface implements CommandResponder {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Exception while processing SNMP Polling response ", e);
         }
     }
 

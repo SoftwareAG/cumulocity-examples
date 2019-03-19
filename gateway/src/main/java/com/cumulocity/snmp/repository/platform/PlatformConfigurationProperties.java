@@ -9,19 +9,19 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class PlatformConfigurationProperties {
 
-    @Value("${C8Y.baseUrl:http://developers.cumulocity.com}")
+    @Value("${C8Y.baseURL:http://developers.cumulocity.com}")
     private String url;
 
-    @Value("${platform.forceInitialHost:true}")
+    @Value("${C8Y.forceInitialHost:true}")
     private boolean forceInitialHost;
 
-    @Value("${platform.bootstrap.tenant:management}")
+    @Value("${C8Y.bootstrap.tenant:management}")
     private String tenant;
 
-    @Value("${platform.bootstrap.user:devicebootstrap}")
+    @Value("${C8Y.bootstrap.user:devicebootstrap}")
     private String user;
 
-    @Value("${platform.bootstrap.password:Fhdt1bb1f}")
+    @Value("${C8Y.bootstrap.password:Fhdt1bb1f}")
     private String password;
 
     @Bean
@@ -30,9 +30,9 @@ public class PlatformConfigurationProperties {
                 .url(url)
                 .forceInitialHost(forceInitialHost)
                 .bootstrap(DeviceBootstrapConfigurationProperties.builder()
-                        .tenant(tenant)
-                        .user(user)
-                        .password(password)
+                        .tenant(tenant.trim())
+                        .user(user.trim())
+                        .password(password.trim())
                         .build())
                 .build();
     }

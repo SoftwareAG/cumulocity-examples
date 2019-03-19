@@ -111,7 +111,6 @@ public class ClientSubscriber {
                                         pollDevice(gateway, device);
                                     } catch (IOException e) {
                                         log.error("Exception during SNMP Device Polling ", e);
-                                        e.printStackTrace();
                                     }
                                 }
                             }, gateway.getPollingRateInSeconds() * 1000);
