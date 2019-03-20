@@ -16,7 +16,6 @@ import org.snmp4j.security.SecurityProtocols;
 import org.snmp4j.smi.*;
 import org.snmp4j.transport.AbstractTransportMapping;
 import org.snmp4j.transport.DefaultTcpTransportMapping;
-import org.snmp4j.transport.DefaultUdpTransportMapping;
 import org.snmp4j.util.MultiThreadedMessageDispatcher;
 import org.snmp4j.util.ThreadPool;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,7 +100,7 @@ public class DeviceInterface implements CommandResponder {
             Map<String, PduListener> oidToPduListener = mapIPAddressToOid.get(peerIPAddress);
             for (VariableBinding var : pdu.getVariableBindings()) {
                 if (oidToPduListener.containsKey(var.getOid().toString())) {
-                    oidToPduListener.get(var.getOid().toString()).onPduRecived(pdu);
+                    oidToPduListener.get(var.getOid().toString()).onPduReceived(pdu);
                 }
             }
         } else {
@@ -141,7 +140,7 @@ public class DeviceInterface implements CommandResponder {
             } else {
                 // Process polled data only if it is Integer
                 if (response.getVariableBindings().get(0).getVariable().getSyntax() == 2) {
-                    pduListener.onPduRecived(response);
+                    pduListener.onPduReceived(response);
                 }
             }
         } catch (IOException e) {

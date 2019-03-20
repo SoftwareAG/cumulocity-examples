@@ -130,7 +130,7 @@ public class ClientSubscriber {
                 if (register.getMeasurementMapping() != null) {
                     deviceInterface.initiatePolling(register.getOid(), ipAddressToRegister.getKey(), new PduListener() {
                         @Override
-                        public void onPduRecived(PDU pdu) {
+                        public void onPduReceived(PDU pdu) {
                             eventPublisher.publishEvent(new ClientDataChangedEvent(gateway, device, register,
                                     new DateTime(), pdu.getVariableBindings().get(0).getVariable(), true));
                         }
@@ -158,7 +158,7 @@ public class ClientSubscriber {
             for (final Register register : deviceType.getRegisters()) {
                 mapOidToPduListener.put(register.getOid(), new PduListener() {
                     @Override
-                    public void onPduRecived(PDU pdu) {
+                    public void onPduReceived(PDU pdu) {
                         eventPublisher.publishEvent(new ClientDataChangedEvent(gateway, device, register,
                                 new DateTime(), pdu.getType(), false));
                     }
