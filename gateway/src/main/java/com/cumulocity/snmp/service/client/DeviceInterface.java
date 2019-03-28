@@ -1,6 +1,6 @@
 package com.cumulocity.snmp.service.client;
 
-import com.cumulocity.snmp.configuration.service.GatewayConfigurationProperties;
+import com.cumulocity.snmp.configuration.service.SNMPConfigurationProperties;
 import com.cumulocity.snmp.model.core.ConfigEventType;
 import com.cumulocity.snmp.model.gateway.Gateway;
 import com.cumulocity.snmp.model.gateway.UnknownTrapRecievedEvent;
@@ -20,7 +20,6 @@ import org.snmp4j.util.MultiThreadedMessageDispatcher;
 import org.snmp4j.util.ThreadPool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -37,20 +36,23 @@ public class DeviceInterface implements CommandResponder {
     Gateway gateway = new Gateway();
 
     @Autowired
-    TaskScheduler taskScheduler;
-
-    @Autowired
     private ApplicationEventPublisher eventPublisher;
 
     @Autowired
-    private GatewayConfigurationProperties config;
+    private SNMPConfigurationProperties config;
 
     @PostConstruct
     public void init() {
-        listen(new TcpAddress(config.getAddress()));
+        try {
+            log.debug("Initiating SNMP Listner at address {}, and community {} ",
+                    config.getAddress(), config.getCommunityTarget());
+            listen(new TcpAddress(config.getAddress() + "/" + config.getListenerPort()));
+        } catch (IOException e) {
+            log.error("Exception initiating SNMP TRAP listener ", e);
+        }
     }
 
-    public synchronized void listen(TransportIpAddress snmpListeningAddress) {
+    public synchronized void listen(TransportIpAddress snmpListeningAddress) throws IOException {
         AbstractTransportMapping transportMapping;
         try {
             if (snmpListeningAddress instanceof TcpAddress) {
@@ -58,10 +60,9 @@ public class DeviceInterface implements CommandResponder {
             } else {
                 log.error("Received request is other than TCP");
                 return;
-//                transportMapping = new DefaultUdpTransportMapping((UdpAddress) snmpListeningAddress);
             }
 
-            ThreadPool threadPool = ThreadPool.create("DispatcherPool", 10);
+            ThreadPool threadPool = ThreadPool.create("DispatcherPool", config.getThreadPoolSize());
             MessageDispatcher messageDispatcher = new MultiThreadedMessageDispatcher(threadPool,
                     new MessageDispatcherImpl());
 
@@ -79,8 +80,9 @@ public class DeviceInterface implements CommandResponder {
             target.setCommunity(new OctetString(config.getCommunityTarget()));
 
             transportMapping.listen();
+            log.debug("Listening for SNMP TRAPs on " + transportMapping.getListenAddress().toString());
         } catch (IOException e) {
-            log.error(e.getMessage(), e);
+            log.error("Exception in SNMP TRAP listener ", e.getMessage(), e);
         }
     }
 
@@ -90,6 +92,10 @@ public class DeviceInterface implements CommandResponder {
 
         if (pdu == null) {
             log.error("Received SNMP Data is null");
+            return;
+        }
+        if (pdu.getVariableBindings() == null || pdu.getVariableBindings().size() == 0) {
+            log.debug("No OID found in the received TRAP");
             return;
         }
 
@@ -107,7 +113,6 @@ public class DeviceInterface implements CommandResponder {
             eventPublisher.publishEvent(new UnknownTrapRecievedEvent(gateway, new ConfigEventType(
                     "TRAP received from unknown device with IP Address : " + peerIPAddress)));
         }
-
     }
 
     public void initiatePolling(String oId, String ipAddress, PduListener pduListener) throws IOException {
@@ -115,24 +120,27 @@ public class DeviceInterface implements CommandResponder {
         pdu.setType(PDU.GET);
         pdu.add(new VariableBinding(new OID(oId)));
 
-        TransportMapping transport = new DefaultTcpTransportMapping();
-        transport.listen();
-
-        Snmp snmp = new Snmp(transport);
-        CommunityTarget target = new CommunityTarget();
-        target.setCommunity(new OctetString(config.getCommunityTarget()));
-        target.setVersion(SnmpConstants.version2c);
-
-        //TODO: Port has to be obtained from UI/User if required.
-        target.setAddress(new TcpAddress(ipAddress + "/" + 162));
-        target.setRetries(2);
-        target.setTimeout(5000);
+        AbstractTransportMapping transport = null;
+        Snmp snmp = null;
 
         try {
+            transport = new DefaultTcpTransportMapping();
+            transport.listen();
+
+            snmp = new Snmp(transport);
+
+            CommunityTarget target = new CommunityTarget();
+            target.setCommunity(new OctetString(config.getCommunityTarget()));
+            target.setVersion(SnmpConstants.version2c);
+
+            //TODO: Port has to be obtained from UI/User if required.
+            target.setAddress(new TcpAddress(ipAddress + "/" + config.getPollingPort()));
+
             ResponseEvent responseEvent = snmp.send(pdu, target);
             PDU response = responseEvent.getResponse();
             if (response == null) {
-                log.error("Polling response null - error:{} peerAddress:{} source:{} request:{}",
+                log.error("Polling response null for device {} and OID {} - error:{} peerAddress:{} source:{} request:{}",
+                        ipAddress, oId,
                         responseEvent.getError(),
                         responseEvent.getPeerAddress(),
                         responseEvent.getSource(),
@@ -145,6 +153,13 @@ public class DeviceInterface implements CommandResponder {
             }
         } catch (IOException e) {
             log.error("Exception while processing SNMP Polling response ", e);
+        } finally {
+            if (transport != null) {
+                transport.close();
+            }
+            if (snmp != null) {
+                snmp.close();
+            }
         }
     }
 

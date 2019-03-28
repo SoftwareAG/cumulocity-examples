@@ -68,7 +68,8 @@ public class ClientDataService {
         }
 
         final PlatformRepresentationFactory representationFactory = findRepresentationFactory(mapping);
-        final Optional representationOptional = representationFactory.apply(new PlatformRepresentationEvent(date, event.getGateway(), device, register, mapping, event.getValue()));
+        final Optional representationOptional = representationFactory.apply(new PlatformRepresentationEvent(date,
+                event.getGateway(), device, register, mapping, event.getValue()));
         if (representationOptional.isPresent()) {
             final Object representation = representationOptional.get();
             final PlatformRepresentationRepository repository = findRepresentationRepository(representation);
@@ -84,6 +85,7 @@ public class ClientDataService {
     }
 
     private PlatformRepresentationRepository findRepresentationRepository(Object representation) {
-        return findBeanByGenericType(applicationContext, PlatformRepresentationRepository.class, representation.getClass());
+        return findBeanByGenericType(applicationContext, PlatformRepresentationRepository.class,
+                representation.getClass());
     }
 }

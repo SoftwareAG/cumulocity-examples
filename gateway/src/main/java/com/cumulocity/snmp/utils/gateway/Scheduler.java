@@ -21,6 +21,10 @@ public class Scheduler {
         }
     }
 
+    public void scheduleWithFixedDelay(final Runnable task, long delay) {
+        taskScheduler.scheduleWithFixedDelay(task, delay);
+    }
+
     public void scheduleOnce(Runnable task1) {
         if (properties.getBootstrapFixedDelay() != null && properties.getBootstrapFixedDelay() > 0) {
             taskScheduler.schedule(task1, DateTime.now().plusMillis(properties.getBootstrapFixedDelay()).toDate());
