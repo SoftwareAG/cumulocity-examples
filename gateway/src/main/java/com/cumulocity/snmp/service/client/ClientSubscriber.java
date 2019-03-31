@@ -25,6 +25,7 @@ import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.cumulocity.snmp.model.core.ConfigEventType.NO_REGISTERS;
 import static com.cumulocity.snmp.model.core.ConfigEventType.URL;
@@ -50,6 +51,7 @@ public class ClientSubscriber {
     Scheduler scheduler;
 
     Gateway gateway;
+    AtomicInteger counter = new AtomicInteger(1);
 
     Map<String, Map<String, PduListener>> mapIPAddressToOid = new ConcurrentHashMap<>();
     Map<String, List<Register>> mapIpAddressToRegister = new ConcurrentHashMap<>();
@@ -59,17 +61,18 @@ public class ClientSubscriber {
     public void scheduleDevicePolling() {
         scheduler.scheduleWithFixedDelay(new Runnable() {
             public void run() {
-                if (gateway != null && gateway.getPollingRateInSeconds() > 0) {
+                if (gateway != null
+                        && gateway.getPollingRateInSeconds() > 0
+                        && (counter.get() >= gateway.getPollingRateInSeconds())) {
                     try {
                         log.debug("Running scheduled device polling");
                         pollDevices();
-                        Thread.sleep(gateway.getPollingRateInSeconds() * 1000);
+                        counter.getAndSet(0);
                     } catch (IOException e) {
                         log.error("Exception during SNMP Device Polling ", e);
-                    } catch (InterruptedException e) {
-                        log.error("Device Polling Scheduler is Interrupted ");
                     }
                 }
+                counter.incrementAndGet();
             }
         }, 1000);
     }
