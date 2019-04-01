@@ -134,6 +134,16 @@ public class ClientSubscriber {
         unsubscribe(event.getDevice());
     }
 
+    @EventListener
+    @RunWithinContext
+    public synchronized void unsubscribe(final GatewayRemovedEvent event) {
+        log.debug("Gateway deleted");
+        devicePollingData.clear();
+        mapIPAddressToOid.clear();
+        mapIpAddressToRegister.clear();
+        this.gateway = null;
+    }
+
     private void updateSubscriptions() throws IOException {
         log.debug("Updating Device Subscription");
         deviceInterface.setGateway(gateway);
@@ -151,7 +161,7 @@ public class ClientSubscriber {
                 }
             }
             if (gateway.getPollingRateInSeconds() <= 0) {
-                log.debug("No Gateway polling rate found");
+                log.debug("Device polling will be done only once as no gateway polling rate found");
                 pollDevices();
             }
             subscribe();
@@ -159,7 +169,6 @@ public class ClientSubscriber {
     }
 
     private void pollDevices() throws IOException {
-        log.debug("Device Polling Data size :: " + devicePollingData.size());
         for (Device device : devicePollingData.keySet()) {
             pollDevice(gateway, device);
         }

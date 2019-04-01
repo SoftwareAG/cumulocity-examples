@@ -145,11 +145,15 @@ public class DeviceInterface implements CommandResponder {
                         responseEvent.getPeerAddress(),
                         responseEvent.getSource(),
                         responseEvent.getRequest());
-            } else {
+            } else if (response.getErrorStatus() == PDU.noError) {
                 // Process polled data only if it is Integer
                 if (response.getVariableBindings().get(0).getVariable().getSyntax() == 2) {
                     pduListener.onPduReceived(response);
                 }
+            } else {
+                log.error("Error in Device polling response");
+                log.error("Error index {} | Error status {} | Error text {} ",
+                        response.getErrorIndex(), response.getErrorStatus(), response.getErrorStatusText());
             }
         } catch (IOException e) {
             log.error("Exception while processing SNMP Polling response ", e);
