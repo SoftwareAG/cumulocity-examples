@@ -264,7 +264,7 @@
                 </executions>
             </plugin>
 
-            <!--Generate RPM-->
+            <!--
             <plugin>
                 <groupId>com.nsn.cumulocity.clients-java</groupId>
                 <artifactId>microservice-package-maven-plugin</artifactId>
@@ -280,7 +280,7 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
+            </plugin>  -->
         </plugins>
     </build>
 </project>
