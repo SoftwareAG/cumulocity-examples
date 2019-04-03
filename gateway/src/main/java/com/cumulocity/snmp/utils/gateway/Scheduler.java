@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 
+import java.util.concurrent.ScheduledFuture;
+
 @Service
 public class Scheduler {
 
@@ -21,8 +23,8 @@ public class Scheduler {
         }
     }
 
-    public void scheduleWithFixedDelay(final Runnable task, long delay) {
-        taskScheduler.scheduleWithFixedDelay(task, delay);
+    public ScheduledFuture<?> scheduleWithFixedDelay(final Runnable task, long delay) {
+        return taskScheduler.scheduleWithFixedDelay(task, delay);
     }
 
     public void scheduleOnce(Runnable task1) {

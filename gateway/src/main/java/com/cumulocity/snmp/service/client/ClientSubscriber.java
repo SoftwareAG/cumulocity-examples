@@ -21,10 +21,10 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.cumulocity.snmp.model.core.ConfigEventType.NO_REGISTERS;
@@ -50,32 +50,13 @@ public class ClientSubscriber {
     @Autowired
     Scheduler scheduler;
 
-    Gateway gateway;
-    AtomicInteger counter = new AtomicInteger(1);
+    ScheduledFuture<?> future = null;
+    Gateway gateway = null;
+    AtomicInteger currentPollingRateInSeconds = new AtomicInteger(0);
 
     Map<String, Map<String, PduListener>> mapIPAddressToOid = new ConcurrentHashMap<>();
     Map<String, List<Register>> mapIpAddressToRegister = new ConcurrentHashMap<>();
     Map<Device, DeviceType> devicePollingData = new ConcurrentHashMap<>();
-
-    @PostConstruct
-    public void scheduleDevicePolling() {
-        scheduler.scheduleWithFixedDelay(new Runnable() {
-            public void run() {
-                if (gateway != null
-                        && gateway.getPollingRateInSeconds() > 0
-                        && (counter.get() >= gateway.getPollingRateInSeconds())) {
-                    try {
-                        log.debug("Running scheduled device polling");
-                        pollDevices();
-                        counter.getAndSet(0);
-                    } catch (IOException e) {
-                        log.error("Exception during SNMP Device Polling ", e);
-                    }
-                }
-                counter.incrementAndGet();
-            }
-        }, 1000);
-    }
 
     @EventListener
     @RunWithinContext
@@ -110,6 +91,7 @@ public class ClientSubscriber {
     public synchronized void refreshSubscriptions(final GatewayAddedEvent event) {
         this.gateway = event.getGateway();
         try {
+            refreshScheduler();
             updateSubscriptions();
         } catch (final Exception ex) {
             log.error(ex.getMessage(), ex);
@@ -120,8 +102,9 @@ public class ClientSubscriber {
     @EventListener
     @RunWithinContext
     public synchronized void refreshSubscriptions(final GatewayUpdateEvent event) {
+        this.gateway = event.getGateway();
         try {
-            this.gateway = event.getGateway();
+            refreshScheduler();
             updateSubscriptions();
         } catch (final Exception ex) {
             log.error(ex.getMessage(), ex);
@@ -138,6 +121,7 @@ public class ClientSubscriber {
     @RunWithinContext
     public synchronized void unsubscribe(final GatewayRemovedEvent event) {
         log.debug("Gateway deleted");
+        terminateTaskIfRunning();
         devicePollingData.clear();
         mapIPAddressToOid.clear();
         mapIpAddressToRegister.clear();
@@ -161,7 +145,7 @@ public class ClientSubscriber {
                 }
             }
             if (gateway.getPollingRateInSeconds() <= 0) {
-                log.debug("Device polling will be done only once as no gateway polling rate found");
+                log.debug("Device polling will be scheduled once as no polling rate found");
                 pollDevices();
             }
             subscribe();
@@ -241,5 +225,34 @@ public class ClientSubscriber {
         log.debug("Unsubscribed device");
         deviceInterface.unsubscribe(device.getIpAddress());
         devicePollingData.remove(device);
+    }
+
+    private void refreshScheduler() {
+        terminateTaskIfRunning();
+        checkIfIntervalChanged();
+    }
+
+    private void terminateTaskIfRunning() {
+        log.debug("Deleting Task if exists");
+        if (future != null && (!future.isCancelled())) {
+            future.cancel(true);
+        }
+    }
+
+    public void checkIfIntervalChanged() {
+        log.debug("Scheduling Device Polling on user defined interval if polling rate exists");
+        if (gateway != null && (currentPollingRateInSeconds.get() != gateway.getPollingRateInSeconds())) {
+            currentPollingRateInSeconds.set(gateway.getPollingRateInSeconds());
+            future = scheduler.scheduleWithFixedDelay(new Runnable() {
+                public void run() {
+                    try {
+                        log.debug("Running scheduled device polling");
+                        pollDevices();
+                    } catch (IOException e) {
+                        log.error("Exception during SNMP Device Polling ", e);
+                    }
+                }
+            }, 1000 * currentPollingRateInSeconds.get());
+        }
     }
 }
