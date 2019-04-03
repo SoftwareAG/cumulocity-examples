@@ -61,6 +61,7 @@ public class ClientSubscriber {
     @EventListener
     @RunWithinContext
     public synchronized void refreshSubscription(final DeviceTypeAddedEvent event) {
+        log.debug("Initiating DeviceType add");
         final Device device = event.getDevice();
         this.gateway = event.getGateway();
         subscribe(device, event.getDeviceType());
@@ -69,14 +70,16 @@ public class ClientSubscriber {
     @EventListener
     @RunWithinContext
     public synchronized void refreshSubscription(final DeviceTypeUpdatedEvent event) {
-        final Device device = event.getDevice();
+        log.debug("Initiating DeviceType update");
         this.gateway = event.getGateway();
+        final Device device = event.getDevice();
         subscribe(device, event.getDeviceType());
     }
 
     @EventListener
     @RunWithinContext
     public synchronized void refreshSubscription(final DeviceAddedEvent event) {
+        log.debug("Initiating Device add");
         final Gateway gateway = event.getGateway();
         this.gateway = event.getGateway();
         final Optional<DeviceType> deviceTypeOptional = deviceTypeRepository.get(event.getDevice().getDeviceType());
@@ -89,6 +92,7 @@ public class ClientSubscriber {
     @EventListener
     @RunWithinContext
     public synchronized void refreshSubscriptions(final GatewayAddedEvent event) {
+        log.debug("Initiating Gateway add");
         this.gateway = event.getGateway();
         try {
             refreshScheduler();
@@ -102,6 +106,7 @@ public class ClientSubscriber {
     @EventListener
     @RunWithinContext
     public synchronized void refreshSubscriptions(final GatewayUpdateEvent event) {
+        log.debug("Initiating Gateway update");
         this.gateway = event.getGateway();
         try {
             refreshScheduler();
@@ -114,13 +119,14 @@ public class ClientSubscriber {
     @EventListener
     @RunWithinContext
     public synchronized void unsubscribe(final DeviceRemovedEvent event) {
+        log.debug("Initiating Device remove");
         unsubscribe(event.getDevice());
     }
 
     @EventListener
     @RunWithinContext
     public synchronized void unsubscribe(final GatewayRemovedEvent event) {
-        log.debug("Gateway deleted");
+        log.debug("Initiating Gateway delete");
         terminateTaskIfRunning();
         devicePollingData.clear();
         mapIPAddressToOid.clear();
@@ -139,7 +145,7 @@ public class ClientSubscriber {
                     final Device device = deviceOptional.get();
                     final Optional<DeviceType> deviceTypeOptional = deviceTypeRepository.get(device.getDeviceType());
                     if (deviceTypeOptional.isPresent()) {
-                        log.debug("Adding details to devicePollingData ", device.getIpAddress());
+                        log.debug("Adding details to devicePollingData ");
                         devicePollingData.put(device, deviceTypeOptional.get());
                     }
                 }
@@ -159,18 +165,15 @@ public class ClientSubscriber {
     }
 
     private void pollDevice(final Gateway gateway, final Device device) throws IOException {
-        for (Map.Entry<String, List<Register>> ipAddressToRegister : mapIpAddressToRegister.entrySet()) {
-            for (final Register register : ipAddressToRegister.getValue()) {
-                if (register.getMeasurementMapping() != null) {
-                    log.debug("Measurement mapping OID : " + register.getOid());
-                    deviceInterface.initiatePolling(register.getOid(), ipAddressToRegister.getKey(), new PduListener() {
-                        @Override
-                        public void onPduReceived(PDU pdu) {
-                            eventPublisher.publishEvent(new ClientDataChangedEvent(gateway, device, register,
-                                    new DateTime(), pdu.getVariableBindings().get(0).getVariable(), true));
-                        }
-                    });
-                }
+        for (final Register register : mapIpAddressToRegister.get(device.getIpAddress())) {
+            if (register.getMeasurementMapping() != null) {
+                deviceInterface.initiatePolling(register.getOid(), device.getIpAddress(), new PduListener() {
+                    @Override
+                    public void onPduReceived(PDU pdu) {
+                        eventPublisher.publishEvent(new ClientDataChangedEvent(gateway, device, register,
+                                new DateTime(), pdu.getVariableBindings().get(0).getVariable(), true));
+                    }
+                });
             }
         }
     }
@@ -222,26 +225,18 @@ public class ClientSubscriber {
     }
 
     private void unsubscribe(Device device) {
-        log.debug("Unsubscribed device");
+        log.debug("Device unsubscribed");
         deviceInterface.unsubscribe(device.getIpAddress());
+        mapIPAddressToOid.remove(device.getIpAddress());
+        mapIpAddressToRegister.remove(device.getIpAddress());
         devicePollingData.remove(device);
     }
 
     private void refreshScheduler() {
-        terminateTaskIfRunning();
-        checkIfIntervalChanged();
-    }
-
-    private void terminateTaskIfRunning() {
-        log.debug("Deleting Task if exists");
-        if (future != null && (!future.isCancelled())) {
-            future.cancel(true);
-        }
-    }
-
-    public void checkIfIntervalChanged() {
         log.debug("Scheduling Device Polling on user defined interval if polling rate exists");
-        if (gateway != null && (currentPollingRateInSeconds.get() != gateway.getPollingRateInSeconds())) {
+        if (gateway != null && (gateway.getPollingRateInSeconds() > 0)
+                && (currentPollingRateInSeconds.get() != gateway.getPollingRateInSeconds())) {
+            terminateTaskIfRunning();
             currentPollingRateInSeconds.set(gateway.getPollingRateInSeconds());
             future = scheduler.scheduleWithFixedDelay(new Runnable() {
                 public void run() {
@@ -253,6 +248,13 @@ public class ClientSubscriber {
                     }
                 }
             }, 1000 * currentPollingRateInSeconds.get());
+        }
+    }
+
+    private void terminateTaskIfRunning() {
+        log.debug("Deleting Task if exists");
+        if (future != null && (!future.isCancelled())) {
+            future.cancel(true);
         }
     }
 }
