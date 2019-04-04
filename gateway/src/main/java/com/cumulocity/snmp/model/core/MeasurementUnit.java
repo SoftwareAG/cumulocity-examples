@@ -8,15 +8,13 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@Slf4j
 @Data
 @ToString(exclude = "measurementApi")
 @NoArgsConstructor
-@PersistableType(value = "MeasurementUnit", discriminator = "CreateMeasurementCommand", autowire = true, runWithinContext = TenantProvider.class, inMemory = true)
+@PersistableType(value = "MeasurementUnit", discriminator = "CreateMeasurementUnit", autowire = true, runWithinContext = TenantProvider.class, inMemory = true)
 public class MeasurementUnit implements IdProvider {
 
     @Autowired

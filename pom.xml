@@ -4,7 +4,7 @@
     <parent>
         <groupId>c8y.agents</groupId>
         <artifactId>c8y-agents</artifactId>
-        <version>1004.3.0-SNAPSHOT</version>
+        <version>1004.4.0-SNAPSHOT</version>
     </parent>
     <artifactId>snmp-agent</artifactId>
 
@@ -123,7 +123,7 @@
             <dependency>
                 <groupId>com.nsn.cumulocity.shared-components</groupId>
                 <artifactId>common-rest</artifactId>
-                <version>${c8y.shared-components.version}</version>
+                <version>${c8y.core.version}</version>
                 <exclusions>
                     <exclusion>
                         <artifactId>guava</artifactId>
@@ -155,13 +155,13 @@
             <dependency>
                 <groupId>com.nsn.cumulocity.shared-components</groupId>
                 <artifactId>common-notification</artifactId>
-                <version>${c8y.shared-components.version}</version>
+                <version>${c8y.core.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>com.nsn.cumulocity.model</groupId>
                 <artifactId>core-model</artifactId>
-                <version>${c8y.model.version}</version>
+                <version>${c8y.core.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>com.nsn.cumulocity.dependencies.osgi</groupId>
@@ -173,7 +173,7 @@
             <dependency>
                 <groupId>com.nsn.cumulocity.model</groupId>
                 <artifactId>application-model</artifactId>
-                <version>${c8y.model.version}</version>
+                <version>${c8y.core.version}</version>
                 <exclusions>
                     <exclusion>
                         <artifactId>guava</artifactId>
@@ -189,7 +189,7 @@
             <dependency>
                 <groupId>com.nsn.cumulocity.model</groupId>
                 <artifactId>device-capability-model</artifactId>
-                <version>${c8y.model.version}</version>
+                <version>${c8y.core.version}</version>
                 <exclusions>
                     <exclusion>
                         <artifactId>guava</artifactId>
@@ -209,7 +209,7 @@
             <dependency>
                 <groupId>com.nsn.cumulocity.model</groupId>
                 <artifactId>rest-representation</artifactId>
-                <version>${c8y.model.version}</version>
+                <version>${c8y.core.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>javax.validation</groupId>
