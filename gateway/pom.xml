@@ -90,7 +90,7 @@
         <dependency>
             <groupId>com.nsn.cumulocity.dependencies.osgi</groupId>
             <artifactId>svenson</artifactId>
-            <version>${svenson.version}-${c8y.dependencies.version}</version>
+            <version>${svenson.version}-${c8y.core.version}</version>
         </dependency>
 
         <!--Utils-->
