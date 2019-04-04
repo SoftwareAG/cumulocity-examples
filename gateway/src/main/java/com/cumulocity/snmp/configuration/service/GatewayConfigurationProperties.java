@@ -13,10 +13,4 @@ public class GatewayConfigurationProperties {
 
     @Value("${gateway.bootstrapFixedDelay:10000}")
     private Integer bootstrapFixedDelay;
-
-    @Value("${snmp.trapListener.address:localhost/6671}")
-    private String address;
-
-    @Value("${snmp.community.target:public}")
-    private String communityTarget;
 }

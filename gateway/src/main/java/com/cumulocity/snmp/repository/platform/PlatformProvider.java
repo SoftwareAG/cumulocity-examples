@@ -1,7 +1,6 @@
 package com.cumulocity.snmp.repository.platform;
 
-import com.cumulocity.model.authentication.CumulocityCredentials;
-import com.cumulocity.model.authentication.CumulocityCredentialsFactory;
+import com.cumulocity.model.authentication.CumulocityBasicCredentials;
 import com.cumulocity.sdk.client.ClientConfiguration;
 import com.cumulocity.sdk.client.Platform;
 import com.cumulocity.sdk.client.PlatformImpl;
@@ -30,6 +29,7 @@ import static java.util.concurrent.TimeUnit.HOURS;
 public class PlatformProvider {
 
     private final PlatformProperties platformProperties;
+
     private final LoadingCache<Key, PlatformImpl> platforms = newBuilder().expireAfterAccess(1, HOURS)
             .removalListener(new RemovalListener<Key, PlatformImpl>() {
                 @Override
@@ -42,7 +42,7 @@ public class PlatformProvider {
             .build(new CacheLoader<Key, PlatformImpl>() {
                 public PlatformImpl load(final Key key) {
                     final String url = platformProperties.getUrl();
-                    final CumulocityCredentials cred = initCredentials(key.getUser(), key.getPassword(), key.getTenant());
+                    final CumulocityBasicCredentials cred = initCredentials(key.getUser(), key.getPassword(), key.getTenant());
                     final ClientConfiguration conf = new ClientConfiguration(null, false);
                     final PlatformImpl result = new PlatformImpl(url, cred, conf);
 
@@ -51,12 +51,12 @@ public class PlatformProvider {
                 }
 
                 @Nonnull
-                private CumulocityCredentials initCredentials(final String user, String password, String tenant) {
-                    return new CumulocityCredentialsFactory()
-                            .withUsername(user)
-                            .withPassword(password)
-                            .withTenant(tenant)
-                            .getCredentials();
+                private CumulocityBasicCredentials initCredentials(final String user, String password, String tenant) {
+                    return CumulocityBasicCredentials.builder()
+                            .tenantId(tenant)
+                            .username(user)
+                            .password(password)
+                            .build();
                 }
             });
 

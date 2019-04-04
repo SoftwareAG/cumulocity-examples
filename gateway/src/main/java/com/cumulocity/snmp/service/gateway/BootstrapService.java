@@ -178,5 +178,4 @@ public class BootstrapService {
             eventPublisher.publishEvent(new GatewayRemovedEvent(gateway));
         }
     }
-
 }
