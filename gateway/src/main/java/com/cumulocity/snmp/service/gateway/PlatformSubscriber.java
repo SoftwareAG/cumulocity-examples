@@ -1,11 +1,15 @@
 package com.cumulocity.snmp.service.gateway;
 
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
+import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.PlatformParameters;
 import com.cumulocity.sdk.client.cep.notification.ManagedObjectDeleteAwareNotification;
+import com.cumulocity.sdk.client.devicecontrol.notification.OperationNotificationSubscriber;
 import com.cumulocity.sdk.client.notification.Subscriber;
 import com.cumulocity.snmp.annotation.gateway.RunWithinContext;
 import com.cumulocity.snmp.factory.gateway.GatewayFactory;
+import com.cumulocity.snmp.factory.gateway.OperationFactory;
+import com.cumulocity.snmp.model.device.DeviceAddedEvent;
 import com.cumulocity.snmp.model.device.DeviceRemovedEvent;
 import com.cumulocity.snmp.model.gateway.Gateway;
 import com.cumulocity.snmp.model.gateway.GatewayAddedEvent;
@@ -14,10 +18,14 @@ import com.cumulocity.snmp.model.gateway.GatewayUpdateEvent;
 import com.cumulocity.snmp.model.gateway.device.Device;
 import com.cumulocity.snmp.model.notification.Notifications;
 import com.cumulocity.snmp.model.notification.platform.ManagedObjectListener;
+import com.cumulocity.snmp.model.notification.platform.OperationListener;
 import com.cumulocity.snmp.model.notification.platform.Subscriptions;
+import com.cumulocity.snmp.model.operation.Operation;
+import com.cumulocity.snmp.model.operation.OperationEvent;
 import com.cumulocity.snmp.platform.PlatformSubscribedEvent;
 import com.cumulocity.snmp.platform.PlatformUnsubscribedEvent;
 import com.cumulocity.snmp.repository.ManagedObjectRepository;
+import com.cumulocity.snmp.repository.OperationRepository;
 import com.cumulocity.snmp.repository.core.Repository;
 import com.cumulocity.snmp.repository.platform.PlatformProvider;
 import com.google.common.base.Optional;
@@ -51,7 +59,14 @@ public class PlatformSubscriber {
     @Autowired
     private Notifications notifications;
 
+    @Autowired
+    private OperationRepository operationRepository;
+
+    @Autowired
+    private OperationFactory operationFactory;
+
     private final Subscriptions managedObjectSubscribers = new Subscriptions();
+    private final Subscriptions operationSubscribers = new Subscriptions();
 
     @EventListener
     @RunWithinContext
@@ -62,6 +77,21 @@ public class PlatformSubscriber {
 
             unsubscribeGateway(gateway);
             subscribeGatewayInventory(platform, gateway);
+            subscribeGatewayOperations(platform, gateway);
+        } catch (final Exception ex) {
+            log.error(ex.getMessage(), ex);
+        }
+    }
+
+    @EventListener
+    @RunWithinContext
+    public synchronized void subscribe(final DeviceAddedEvent deviceAddedEvent) {
+        try {
+            final Gateway gateway = deviceAddedEvent.getGateway();
+            final Device device = deviceAddedEvent.getDevice();
+            final PlatformParameters platform = platformProvider.getPlatformProperties(gateway);
+
+            subscribeDeviceOperations(platform, gateway, device);
         } catch (final Exception ex) {
             log.error(ex.getMessage(), ex);
         }
@@ -85,6 +115,39 @@ public class PlatformSubscriber {
         } catch (final Exception ex) {
             log.error(ex.getMessage(), ex);
         }
+    }
+
+    private void subscribeGatewayOperations(final PlatformParameters platform, final Gateway gateway) {
+        final OperationNotificationSubscriber operationSubscriber = notifications.subscribeOperations(platform, gateway.getId(), new OperationListener() {
+            public void onCreate(OperationRepresentation operationRepresentation) {
+                final Object opcuaDeviceConfigurationChange = operationRepresentation.get(Operation.SNMP_DEVICE);
+                if (opcuaDeviceConfigurationChange != null) {
+                    operationRepository.successful(gateway, operationRepresentation.getId());
+                } else {
+                    final Optional<Operation> operation = operationFactory.create(operationRepresentation);
+                    if (operation.isPresent()) {
+                        eventPublisher.publishEvent(new OperationEvent(gateway, operation.get()));
+                    } else {
+                        operationRepository.failed(gateway, operationRepresentation.getId(), "Operation not supported.");
+                    }
+                }
+            }
+        });
+        operationSubscribers.add(gateway.getId(), operationSubscriber);
+    }
+
+    private void subscribeDeviceOperations(PlatformParameters platform, final Gateway gateway, final Device device) {
+        final OperationNotificationSubscriber operationsSubscriber = notifications.subscribeOperations(platform, device.getId(), new OperationListener() {
+            public void onCreate(OperationRepresentation operationRepresentation) {
+                final Optional<Operation> operation = operationFactory.create(operationRepresentation);
+                if (operation.isPresent()) {
+                    eventPublisher.publishEvent(new OperationEvent(gateway, operation.get()));
+                } else {
+                    operationRepository.failed(gateway, operationRepresentation.getId(), "Operation not supported.");
+                }
+            }
+        });
+        operationSubscribers.add(device.getId(), operationsSubscriber);
     }
 
     private void subscribeGatewayInventory(final PlatformParameters platform, final Gateway gateway) {

@@ -17,6 +17,7 @@ import org.springframework.stereotype.Repository;
 
 import static com.cumulocity.snmp.utils.PlatformRepositoryUtils.handleException;
 import static com.cumulocity.snmp.utils.PlatformRepositoryUtils.handleSuccess;
+import static com.google.common.base.Optional.fromNullable;
 
 @Repository
 public class ManagedObjectRepository implements PlatformRepresentationRepository<ManagedObjectRepresentation> {
@@ -36,6 +37,16 @@ public class ManagedObjectRepository implements PlatformRepresentationRepository
         try {
             managedObject.setId(id);
             return handleSuccess(inventory.update(managedObject));
+        } catch (final Exception ex) {
+            return handleException(ex);
+        }
+    }
+
+    @NonNull
+    @RunWithinContext
+    public Optional<ManagedObjectRepresentation> save(@NonNull Credentials user, @NonNull ManagedObjectRepresentation managedObject) {
+        try {
+            return fromNullable(inventory.create(managedObject));
         } catch (final Exception ex) {
             return handleException(ex);
         }

@@ -1,12 +1,15 @@
 package com.cumulocity.snmp.model.notification;
 
 import com.cumulocity.model.idtype.GId;
+import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.PlatformParameters;
 import com.cumulocity.sdk.client.cep.notification.InventoryRealtimeDeleteAwareNotificationsSubscriber;
 import com.cumulocity.sdk.client.cep.notification.ManagedObjectDeleteAwareNotification;
+import com.cumulocity.sdk.client.devicecontrol.notification.OperationNotificationSubscriber;
 import com.cumulocity.sdk.client.notification.Subscription;
 import com.cumulocity.sdk.client.notification.SubscriptionListener;
 import com.cumulocity.snmp.model.notification.platform.ManagedObjectListener;
+import com.cumulocity.snmp.model.notification.platform.OperationListener;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -42,7 +45,27 @@ public class Notifications {
         return result;
     }
 
-    protected InventoryRealtimeDeleteAwareNotificationsSubscriber createInventorySubscriber(PlatformParameters platform) {
+    private InventoryRealtimeDeleteAwareNotificationsSubscriber createInventorySubscriber(PlatformParameters platform) {
         return new InventoryRealtimeDeleteAwareNotificationsSubscriber(platform);
+    }
+
+    public OperationNotificationSubscriber subscribeOperations(PlatformParameters platform, GId id, final OperationListener listener) {
+        final OperationNotificationSubscriber result = createOperationsSubscriber(platform);
+        result.subscribe(id, new SubscriptionListener<GId, OperationRepresentation>() {
+            @Override
+            public void onNotification(Subscription<GId> subscription, OperationRepresentation operation) {
+                listener.onCreate(operation);
+            }
+
+            @Override
+            public void onError(Subscription<GId> subscription, Throwable throwable) {
+                listener.onError(throwable);
+            }
+        });
+        return result;
+    }
+
+    private OperationNotificationSubscriber createOperationsSubscriber(PlatformParameters platform) {
+        return new OperationNotificationSubscriber(platform);
     }
 }
