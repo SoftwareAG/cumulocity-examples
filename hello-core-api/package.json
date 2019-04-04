@@ -2,6 +2,9 @@
   "name": "hello-core-api",
   "version": "6.3.0",
   "description": "Cumulocity UI Core API examples",
+  "scripts": {
+    "server": "http-server -P https://demos.cumulocity.com"
+  },
   "keywords": [
     "cumulocity",
     "m2m",
@@ -11,8 +14,6 @@
   "author": "Cumulocity GmbH",
   "license": "MIT",
   "devDependencies": {
-    "grunt": "^0.4.5",
-    "grunt-http-server": "^1.4.0",
-    "http-server": "^0.8.0"
+    "http-server": "0.11.1"
   }
 }
