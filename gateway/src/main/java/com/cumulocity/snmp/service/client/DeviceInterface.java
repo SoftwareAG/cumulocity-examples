@@ -11,8 +11,7 @@ import org.snmp4j.mp.MPv1;
 import org.snmp4j.mp.MPv2c;
 import org.snmp4j.mp.MPv3;
 import org.snmp4j.mp.SnmpConstants;
-import org.snmp4j.security.Priv3DES;
-import org.snmp4j.security.SecurityProtocols;
+import org.snmp4j.security.*;
 import org.snmp4j.smi.*;
 import org.snmp4j.transport.AbstractTransportMapping;
 import org.snmp4j.transport.DefaultTcpTransportMapping;
@@ -115,36 +114,49 @@ public class DeviceInterface implements CommandResponder {
         }
     }
 
-    public void initiatePolling(String oId, String ipAddress, PduListener pduListener) throws IOException {
-        PDU pdu = new PDU();
-        pdu.setType(PDU.GET);
-        pdu.add(new VariableBinding(new OID(oId)));
+    public void subscribe(Map<String, Map<String, PduListener>> mapIPAddressToOid) {
+        this.mapIPAddressToOid = mapIPAddressToOid;
+    }
 
+    public void setGateway(Gateway gateway) {
+        this.gateway = gateway;
+    }
+
+    public void unsubscribe(String ipAddress) {
+        mapIPAddressToOid.remove(ipAddress);
+    }
+
+    public void initiatePolling(String oId, String ipAddress, String pollingPort,
+                                int snmpVersion, PduListener pduListener) throws IOException {
+        if (!isValidSnmpVersion(snmpVersion)) {
+            log.error("Invalid SNMP Version assigned to device");
+            return;
+        }
+        if (!isValidPollingPort(pollingPort)) {
+            log.error("Invalid port for device with IP address "+ ipAddress);
+            return;
+        }
+
+        PDU pdu = new PDU();
         AbstractTransportMapping transport = null;
         Snmp snmp = null;
+        Target target;
 
         try {
             transport = new DefaultTcpTransportMapping();
             transport.listen();
 
             snmp = new Snmp(transport);
-
-            CommunityTarget target = new CommunityTarget();
-            target.setCommunity(new OctetString(config.getCommunityTarget()));
-            target.setVersion(SnmpConstants.version2c);
-
-            //TODO: Port has to be obtained from UI/User if required.
-            target.setAddress(new TcpAddress(ipAddress + "/" + config.getPollingPort()));
+            target = getTarget(ipAddress.trim(), snmpVersion, pollingPort.trim());
+            pdu.setType(PDU.GET);
+            pdu.add(new VariableBinding(new OID(oId)));
 
             ResponseEvent responseEvent = snmp.send(pdu, target);
             PDU response = responseEvent.getResponse();
             if (response == null) {
                 log.error("Polling response null for device {} and OID {} - error:{} peerAddress:{} source:{} request:{}",
-                        ipAddress, oId,
-                        responseEvent.getError(),
-                        responseEvent.getPeerAddress(),
-                        responseEvent.getSource(),
-                        responseEvent.getRequest());
+                        ipAddress, oId, responseEvent.getError(), responseEvent.getPeerAddress(),
+                        responseEvent.getSource(), responseEvent.getRequest());
             } else if (response.getErrorStatus() == PDU.noError) {
                 // Process polled data only if it is Integer
                 if (response.getVariableBindings().get(0).getVariable().getSyntax() == 2) {
@@ -158,24 +170,42 @@ public class DeviceInterface implements CommandResponder {
         } catch (IOException e) {
             log.error("Exception while processing SNMP Polling response ", e);
         } finally {
-            if (transport != null) {
-                transport.close();
-            }
-            if (snmp != null) {
-                snmp.close();
-            }
+            closeTransport(transport);
+            closeSnmp(snmp);
         }
     }
 
-    public void subscribe(Map<String, Map<String, PduListener>> mapIPAddressToOid) {
-        this.mapIPAddressToOid = mapIPAddressToOid;
+    private void closeTransport(AbstractTransportMapping transport) throws IOException {
+        if (transport != null) {
+            transport.close();
+        }
     }
 
-    public void setGateway(Gateway gateway) {
-        this.gateway = gateway;
+    private void closeSnmp(Snmp snmp) throws IOException {
+        if (snmp != null) {
+            snmp.close();
+        }
     }
 
-    public void unsubscribe(String ipAddress) {
-        mapIPAddressToOid.remove(ipAddress);
+    private boolean isValidPollingPort(String pollingPort) {
+        try {
+            Integer.parseInt(pollingPort);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    private boolean isValidSnmpVersion(int snmpVersion) {
+        return snmpVersion == SnmpConstants.version1
+                || snmpVersion == SnmpConstants.version2c;
+    }
+
+    private Target getTarget(String ipAddress, int snmpVersion, String pollingPort) {
+        CommunityTarget target = new CommunityTarget();
+        target.setCommunity(new OctetString(config.getCommunityTarget()));
+        target.setAddress(new TcpAddress(ipAddress + "/" + pollingPort));
+        target.setVersion(snmpVersion);
+        return target;
     }
 }

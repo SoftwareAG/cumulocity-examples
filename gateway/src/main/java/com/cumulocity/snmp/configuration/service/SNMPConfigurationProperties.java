@@ -20,6 +20,6 @@ public class SNMPConfigurationProperties {
     @Value("${snmp.community.target:public}")
     private String communityTarget;
 
-    @Value("${snmp.polling.port:162}")
+    @Value("${snmp.polling.port:161}")
     private String pollingPort;
 }

@@ -33,25 +33,19 @@ import java.lang.reflect.InvocationTargetException;
 @Service
 public class PlatformSubscriber {
 
+    private final Subscriptions managedObjectSubscribers = new Subscriptions();
     @Autowired
     private PlatformProvider platformProvider;
-
     @Autowired
     private ApplicationEventPublisher eventPublisher;
-
     @Autowired
     private Repository<Gateway> gatewayRepository;
-
     @Autowired
     private GatewayFactory gatewayFactory;
-
     @Autowired
     private ManagedObjectRepository managedObjectRepository;
-
     @Autowired
     private Notifications notifications;
-
-    private final Subscriptions managedObjectSubscribers = new Subscriptions();
 
     @EventListener
     @RunWithinContext
@@ -88,20 +82,21 @@ public class PlatformSubscriber {
     }
 
     private void subscribeGatewayInventory(final PlatformParameters platform, final Gateway gateway) {
-        final Subscriber<String, ManagedObjectDeleteAwareNotification> inventorySubscriber = notifications.subscribeInventory(platform, gateway.getId(), new ManagedObjectListener() {
-            @Override
-            public void onUpdate(Object value) throws InvocationTargetException, IllegalAccessException {
-                final Optional<ManagedObjectRepresentation> managedObject = managedObjectRepository.get(gateway);
-                if (managedObject.isPresent()) {
-                    final Optional<Gateway> newGatewayOptional = gatewayFactory.create(gateway, managedObject.get());
-                    if (newGatewayOptional.isPresent()) {
-                        final Gateway newGateway = newGatewayOptional.get();
-                        gatewayRepository.save(newGateway);
-                        eventPublisher.publishEvent(new GatewayUpdateEvent(newGateway));
+        final Subscriber<String, ManagedObjectDeleteAwareNotification> inventorySubscriber = notifications.
+                subscribeInventory(platform, gateway.getId(), new ManagedObjectListener() {
+                    @Override
+                    public void onUpdate(Object value) throws InvocationTargetException, IllegalAccessException {
+                        final Optional<ManagedObjectRepresentation> managedObject = managedObjectRepository.get(gateway);
+                        if (managedObject.isPresent()) {
+                            final Optional<Gateway> newGatewayOptional = gatewayFactory.create(gateway, managedObject.get());
+                            if (newGatewayOptional.isPresent()) {
+                                final Gateway newGateway = newGatewayOptional.get();
+                                gatewayRepository.save(newGateway);
+                                eventPublisher.publishEvent(new GatewayUpdateEvent(newGateway));
+                            }
+                        }
                     }
-                }
-            }
-        });
+                });
         managedObjectSubscribers.add(gateway.getId(), inventorySubscriber);
         eventPublisher.publishEvent(new PlatformSubscribedEvent(gateway));
     }
