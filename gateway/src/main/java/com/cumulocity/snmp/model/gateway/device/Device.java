@@ -24,7 +24,7 @@ public class Device implements IdProvider {
     private GId id;
     private String ipAddress;
     private GId deviceType;
-    private String port;
+    private int port;
     private int snmpVersion;
 
     @UtilityClass

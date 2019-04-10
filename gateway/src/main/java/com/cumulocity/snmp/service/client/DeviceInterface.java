@@ -15,6 +15,7 @@ import org.snmp4j.security.*;
 import org.snmp4j.smi.*;
 import org.snmp4j.transport.AbstractTransportMapping;
 import org.snmp4j.transport.DefaultTcpTransportMapping;
+import org.snmp4j.transport.DefaultUdpTransportMapping;
 import org.snmp4j.util.MultiThreadedMessageDispatcher;
 import org.snmp4j.util.ThreadPool;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,22 +43,20 @@ public class DeviceInterface implements CommandResponder {
 
     @PostConstruct
     public void init() {
-        try {
-            log.debug("Initiating SNMP Listner at address {}, and community {} ",
-                    config.getAddress(), config.getCommunityTarget());
-            listen(new TcpAddress(config.getAddress() + "/" + config.getListenerPort()));
-        } catch (IOException e) {
-            log.error("Exception initiating SNMP TRAP listener ", e);
-        }
+        log.debug("Initiating SNMP Listner at address {}, and community {} ",
+                config.getAddress(), config.getCommunityTarget());
+        listen(new UdpAddress(config.getAddress() + "/" + config.getListenerPort()));
     }
 
-    public synchronized void listen(TransportIpAddress snmpListeningAddress) throws IOException {
+    public synchronized void listen(TransportIpAddress snmpListeningAddress) {
         AbstractTransportMapping transportMapping;
         try {
             if (snmpListeningAddress instanceof TcpAddress) {
                 transportMapping = new DefaultTcpTransportMapping((TcpAddress) snmpListeningAddress);
+            } else if (snmpListeningAddress instanceof UdpAddress) {
+                transportMapping = new DefaultUdpTransportMapping((UdpAddress) snmpListeningAddress);
             } else {
-                log.error("Received request is other than TCP");
+                log.error("Received request format is not supported");
                 return;
             }
 
@@ -78,8 +77,8 @@ public class DeviceInterface implements CommandResponder {
             CommunityTarget target = new CommunityTarget();
             target.setCommunity(new OctetString(config.getCommunityTarget()));
 
-            transportMapping.listen();
             log.debug("Listening for SNMP TRAPs on " + transportMapping.getListenAddress().toString());
+            transportMapping.listen();
         } catch (IOException e) {
             log.error("Exception in SNMP TRAP listener ", e.getMessage(), e);
         }
@@ -126,14 +125,10 @@ public class DeviceInterface implements CommandResponder {
         mapIPAddressToOid.remove(ipAddress);
     }
 
-    public void initiatePolling(String oId, String ipAddress, String pollingPort,
-                                int snmpVersion, PduListener pduListener) throws IOException {
+    public void initiatePolling(String oId, String ipAddress, int pollingPort,
+                                int snmpVersion, PduListener pduListener) {
         if (!isValidSnmpVersion(snmpVersion)) {
             log.error("Invalid SNMP Version assigned to device");
-            return;
-        }
-        if (!isValidPollingPort(pollingPort)) {
-            log.error("Invalid port for device with IP address "+ ipAddress);
             return;
         }
 
@@ -143,11 +138,11 @@ public class DeviceInterface implements CommandResponder {
         Target target;
 
         try {
-            transport = new DefaultTcpTransportMapping();
+            transport = new DefaultUdpTransportMapping();
             transport.listen();
 
             snmp = new Snmp(transport);
-            target = getTarget(ipAddress.trim(), snmpVersion, pollingPort.trim());
+            target = getTarget(ipAddress.trim(), snmpVersion, pollingPort);
             pdu.setType(PDU.GET);
             pdu.add(new VariableBinding(new OID(oId)));
 
@@ -175,24 +170,23 @@ public class DeviceInterface implements CommandResponder {
         }
     }
 
-    private void closeTransport(AbstractTransportMapping transport) throws IOException {
+    private void closeTransport(AbstractTransportMapping transport) {
         if (transport != null) {
-            transport.close();
+            try {
+                transport.close();
+            } catch (IOException e) {
+                log.error("IOException while closing TransportMapping ", e);
+            }
         }
     }
 
-    private void closeSnmp(Snmp snmp) throws IOException {
+    private void closeSnmp(Snmp snmp) {
         if (snmp != null) {
-            snmp.close();
-        }
-    }
-
-    private boolean isValidPollingPort(String pollingPort) {
-        try {
-            Integer.parseInt(pollingPort);
-            return true;
-        } catch (NumberFormatException e) {
-            return false;
+            try {
+                snmp.close();
+            } catch (IOException e) {
+                log.error("IOException while closing SNMP connection ", e);
+            }
         }
     }
 
@@ -201,10 +195,10 @@ public class DeviceInterface implements CommandResponder {
                 || snmpVersion == SnmpConstants.version2c;
     }
 
-    private Target getTarget(String ipAddress, int snmpVersion, String pollingPort) {
+    private Target getTarget(String ipAddress, int snmpVersion, int pollingPort) {
         CommunityTarget target = new CommunityTarget();
         target.setCommunity(new OctetString(config.getCommunityTarget()));
-        target.setAddress(new TcpAddress(ipAddress + "/" + pollingPort));
+        target.setAddress(new UdpAddress(ipAddress + "/" + pollingPort));
         target.setVersion(snmpVersion);
         return target;
     }

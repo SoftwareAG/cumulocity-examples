@@ -28,7 +28,7 @@ public class DeviceFactoryTest {
         deviceFragment.put("ipAddress", "192.168.0.1");
         deviceFragment.put("port", "161");
         deviceFragment.put("version", "1");
-        deviceFragment.put("type",  "/inventory/managedObjects/15257");
+        deviceFragment.put("type", "/inventory/managedObjects/15257");
         ManagedObjectRepresentation managedObject = new ManagedObjectRepresentation();
         managedObject.setId(asGId("15256"));
         managedObject.setProperty(Device.c8y_SNMPDevice, deviceFragment);
@@ -39,7 +39,7 @@ public class DeviceFactoryTest {
         //Then
         assertThat(deviceOptional).is(present());
         assertThat(deviceOptional.get()).isEqualTo(new Device(asGId("15256"), "192.168.0.1", asGId("15257"),
-                "161", 1));
+                161, 1));
     }
 
     @Test

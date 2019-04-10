@@ -12,7 +12,7 @@ public class SNMPConfigurationProperties {
     private String address;
 
     @Value("${snmp.trapListener.port:161}")
-    private String listenerPort;
+    private int listenerPort;
 
     @Value("${snmp.trapListener.threadPoolSize:10}")
     private short threadPoolSize;
@@ -21,5 +21,5 @@ public class SNMPConfigurationProperties {
     private String communityTarget;
 
     @Value("${snmp.polling.port:161}")
-    private String pollingPort;
+    private int pollingPort;
 }

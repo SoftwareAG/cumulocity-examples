@@ -24,7 +24,7 @@ public class DeviceFactory implements Converter<ManagedObjectRepresentation, Opt
             return Optional.of(Device.builder()
                     .id(deviceId)
                     .ipAddress(property.get("ipAddress").toString())
-                    .port(property.get("port").toString())
+                    .port(Integer.parseInt(property.get("port").toString()))
                     .snmpVersion(Integer.parseInt(property.get("version").toString()))
                     .deviceType(parseGId(property.get("type")))
                     .build());
