@@ -147,26 +147,38 @@ public class DeviceInterface implements CommandResponder {
             pdu.add(new VariableBinding(new OID(oId)));
 
             ResponseEvent responseEvent = snmp.send(pdu, target);
-            PDU response = responseEvent.getResponse();
-            if (response == null) {
-                log.error("Polling response null for device {} and OID {} - error:{} peerAddress:{} source:{} request:{}",
-                        ipAddress, oId, responseEvent.getError(), responseEvent.getPeerAddress(),
-                        responseEvent.getSource(), responseEvent.getRequest());
-            } else if (response.getErrorStatus() == PDU.noError) {
-                // Process polled data only if it is Integer
-                if (response.getVariableBindings().get(0).getVariable().getSyntax() == 2) {
-                    pduListener.onPduReceived(response);
-                }
-            } else {
-                log.error("Error in Device polling response");
-                log.error("Error index {} | Error status {} | Error text {} ",
-                        response.getErrorIndex(), response.getErrorStatus(), response.getErrorStatusText());
-            }
+            handleDevicePollingResponse(responseEvent, oId, ipAddress, pduListener);
         } catch (IOException e) {
             log.error("Exception while processing SNMP Polling response ", e);
         } finally {
             closeTransport(transport);
             closeSnmp(snmp);
+        }
+    }
+
+    private void handleDevicePollingResponse(ResponseEvent responseEvent, String oId,
+                                             String ipAddress, PduListener pduListener) {
+        PDU response = responseEvent.getResponse();
+        if (response == null) {
+            log.error("Polling response null for device {} and OID {} - error:{} peerAddress:{} source:{} request:{}",
+                    ipAddress, oId, responseEvent.getError(), responseEvent.getPeerAddress(),
+                    responseEvent.getSource(), responseEvent.getRequest());
+        } else if (response.getErrorStatus() == PDU.noError) {
+            if (response.getVariableBindings().size() == 0) {
+                log.error("No data found after successful device polling");
+                return;
+            }
+            int type = response.getVariableBindings().get(0).getVariable().getSyntax();
+            // Process polled data only if it is Integer32/Counter32/Gauge32/Counter64
+            if (isValidVariableType(type)) {
+                pduListener.onPduReceived(response);
+            } else {
+                log.error("Unsupported data format for measurement calculation");
+            }
+        } else {
+            log.error("Error in Device polling response");
+            log.error("Error index {} | Error status {} | Error text {} ",
+                    response.getErrorIndex(), response.getErrorStatus(), response.getErrorStatusText());
         }
     }
 
@@ -195,11 +207,32 @@ public class DeviceInterface implements CommandResponder {
                 || snmpVersion == SnmpConstants.version2c;
     }
 
+    private boolean isValidVariableType(int type) {
+        return type == SnmpVariableType.INTEGER.toInt()
+                || type == SnmpVariableType.COUNTER32.toInt()
+                || type == SnmpVariableType.GAUGE.toInt()
+                || type == SnmpVariableType.COUNTER64.toInt();
+    }
+
     private Target getTarget(String ipAddress, int snmpVersion, int pollingPort) {
         CommunityTarget target = new CommunityTarget();
         target.setCommunity(new OctetString(config.getCommunityTarget()));
         target.setAddress(new UdpAddress(ipAddress + "/" + pollingPort));
         target.setVersion(snmpVersion);
         return target;
+    }
+
+    public enum SnmpVariableType {
+        INTEGER(2), COUNTER32(65), GAUGE(66), COUNTER64(70);
+
+        private int type;
+
+        SnmpVariableType(int type) {
+            this.type = type;
+        }
+
+        int toInt() {
+            return type;
+        }
     }
 }
