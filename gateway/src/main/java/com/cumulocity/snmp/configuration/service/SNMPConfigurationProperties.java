@@ -22,4 +22,7 @@ public class SNMPConfigurationProperties {
 
     @Value("${snmp.polling.port:161}")
     private int pollingPort;
+
+    @Value("${snmp.polling.version:1}")
+    private int version;
 }
