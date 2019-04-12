@@ -40,10 +40,10 @@ public class DeviceFactory implements Converter<ManagedObjectRepresentation, Opt
     }
 
     private int getPort(Object port) {
-        return (port != null) ? Integer.parseInt((String) port) : config.getPollingPort();
+        return (port != null) ? Integer.parseInt(port.toString()) : config.getPollingPort();
     }
 
     private int getSnmpVersion(Object version) {
-        return (version != null) ? Integer.parseInt((String) version) : config.getVersion();
+        return (version != null) ? Integer.parseInt(version.toString()) : config.getVersion();
     }
 }

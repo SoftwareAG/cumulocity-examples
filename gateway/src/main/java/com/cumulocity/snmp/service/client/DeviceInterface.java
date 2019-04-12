@@ -43,8 +43,8 @@ public class DeviceInterface implements CommandResponder {
 
     @PostConstruct
     public void init() {
-        log.debug("Initiating SNMP Listner at address {}, and community {} ",
-                config.getAddress(), config.getCommunityTarget());
+        log.debug("Initiating SNMP Listner at address {}, port {} and community {} ",
+                config.getAddress(), config.getListenerPort(), config.getCommunityTarget());
         listen(new UdpAddress(config.getAddress() + "/" + config.getListenerPort()));
     }
 
@@ -60,7 +60,7 @@ public class DeviceInterface implements CommandResponder {
                 return;
             }
 
-            ThreadPool threadPool = ThreadPool.create("DispatcherPool", config.getThreadPoolSize());
+            ThreadPool threadPool = ThreadPool.create("TrapListener", config.getThreadPoolSize());
             MessageDispatcher messageDispatcher = new MultiThreadedMessageDispatcher(threadPool,
                     new MessageDispatcherImpl());
 

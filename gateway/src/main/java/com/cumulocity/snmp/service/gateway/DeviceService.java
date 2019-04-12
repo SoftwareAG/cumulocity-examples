@@ -57,7 +57,11 @@ public class DeviceService {
     @RunWithinContext
     public void removeDevice(final GatewayRemovedEvent event) {
         for (final GId child : event.getGateway().getCurrentDeviceIds()) {
-            removeDevice(event.getGateway(), child);
+            try {
+                removeDevice(event.getGateway(), child);
+            } catch (Exception ex) {
+                log.error(ex.getMessage(), ex);
+            }
         }
     }
 
