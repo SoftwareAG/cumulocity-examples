@@ -66,6 +66,16 @@ public class Gateway implements IdProvider, TenantProvider, Credentials {
     @JsonProperty("pollingRate")
     private int pollingRateInSeconds;
 
+    @Wither
+    @Nullable
+    @JsonProperty("autoDiscoveryInterval")
+    private int autoDiscoveryRateInMinutes;
+
+    @Wither
+    @Nullable
+    @JsonProperty("ipRange")
+    private String ipRangeForAutoDiscovery;
+
     @Nullable
     @JsonProperty
     private volatile int numberOfRetries = 0;

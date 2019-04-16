@@ -1,6 +1,7 @@
 package com.cumulocity.snmp.repository.platform;
 
 import com.cumulocity.sdk.client.Platform;
+import com.cumulocity.sdk.client.RestOperations;
 import com.cumulocity.sdk.client.alarm.AlarmApi;
 import com.cumulocity.sdk.client.devicecontrol.DeviceControlApi;
 import com.cumulocity.sdk.client.event.EventApi;
@@ -60,6 +61,12 @@ public class PlatformConfiguration {
     @Scope(scopeName = SCOPE_PROTOTYPE, proxyMode = TARGET_CLASS)
     public EventApi eventApi(PlatformProvider platformProvider) throws ExecutionException{
         return platform(platformProvider).getEventApi();
+    }
+
+    @Bean
+    @Scope(scopeName = SCOPE_PROTOTYPE, proxyMode = TARGET_CLASS)
+    public RestOperations restOperations(PlatformProvider platformProvider) throws ExecutionException{
+        return platform(platformProvider).rest();
     }
 
     @Bean

@@ -141,8 +141,8 @@ public class BootstrapService {
                         gatewayRepository.save(newGateway);
                     }
                     if (!initialized.contains(newGateway.getId())) {
-                        eventPublisher.publishEvent(new GatewayAddedEvent(newGateway));
                         initialized.add(newGateway.getId());
+                        eventPublisher.publishEvent(new GatewayAddedEvent(newGateway));
                     }
 
                     final Optional<ExternalIDRepresentation> externalIdOptional = identityRepository.get(newGateway, identityFactory.createID(properties.getIdentifier()));

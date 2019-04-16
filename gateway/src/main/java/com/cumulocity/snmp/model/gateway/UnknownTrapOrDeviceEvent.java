@@ -6,10 +6,11 @@ import com.cumulocity.snmp.model.core.GatewayProvider;
 import lombok.Data;
 
 @Data
-public class UnknownTrapRecievedEvent implements GatewayProvider, ConfigEvent {
+public class UnknownTrapOrDeviceEvent implements GatewayProvider, ConfigEvent {
 
     private final Gateway gateway;
     private final ConfigEventType type;
+    private final String fragmentType;
 
     @Override
     public String getMessage() {

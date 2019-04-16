@@ -21,7 +21,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
-import static com.cumulocity.snmp.model.gateway.type.mapping.AlarmMapping.c8y_TRAPReceivedFromUnknownDevice;
 import static com.cumulocity.snmp.model.gateway.type.mapping.AlarmMapping.c8y_ValidationError;
 import static com.cumulocity.snmp.model.gateway.type.mapping.AlarmSeverity.CRITICAL;
 import static com.cumulocity.snmp.model.gateway.type.mapping.AlarmSeverity.MAJOR;
@@ -108,12 +107,12 @@ public class ClientValidationService {
 
     @EventListener
     @RunWithinContext
-    public void storeAlarms(final UnknownTrapRecievedEvent event){
+    public void storeAlarms(final UnknownTrapOrDeviceEvent event){
         final Gateway gateway = event.getGateway();
         final Alarms alarms = gateway.getAlarms();
 
         if (!alarms.existsBySourceAndType(gateway.getId(), event.getType())) {
-            final AlarmMapping alarmMapping = AlarmMapping.alarmMapping().type(c8y_TRAPReceivedFromUnknownDevice).text(event.getType().getValue()).severity(MAJOR).build();
+            final AlarmMapping alarmMapping = AlarmMapping.alarmMapping().type(event.getFragmentType()).text(event.getType().getValue()).severity(MAJOR).build();
             final Optional<AlarmRepresentation> representation = alarmRepresentationFactory.apply(new PlatformRepresentationEvent(DateTime.now(), gateway, null, null, alarmMapping, null));
             if (representation.isPresent()) {
                 final Optional<AlarmRepresentation> saved = alarmRepository.create(gateway, representation.get());

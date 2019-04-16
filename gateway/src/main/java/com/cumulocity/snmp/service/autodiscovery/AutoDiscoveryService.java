@@ -6,17 +6,20 @@ import com.cumulocity.rest.representation.inventory.ManagedObjectReferenceRepres
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.RestOperations;
 import com.cumulocity.snmp.annotation.gateway.RunWithinContext;
+import com.cumulocity.snmp.factory.gateway.GatewayFactory;
 import com.cumulocity.snmp.factory.platform.ManagedObjectFactory;
 import com.cumulocity.snmp.model.core.ConfigEventType;
 import com.cumulocity.snmp.model.gateway.Gateway;
-import com.cumulocity.snmp.model.gateway.UnknownTrapRecievedEvent;
+import com.cumulocity.snmp.model.gateway.GatewayAddedEvent;
+import com.cumulocity.snmp.model.gateway.GatewayUpdateEvent;
+import com.cumulocity.snmp.model.gateway.UnknownTrapOrDeviceEvent;
 import com.cumulocity.snmp.model.gateway.device.Device;
-import com.cumulocity.snmp.model.operation.Operation;
 import com.cumulocity.snmp.model.operation.OperationEvent;
 import com.cumulocity.snmp.repository.ManagedObjectRepository;
 import com.cumulocity.snmp.repository.OperationRepository;
 import com.cumulocity.snmp.repository.core.Repository;
 import com.cumulocity.snmp.utils.IPAddressUtil;
+import com.cumulocity.snmp.utils.gateway.Scheduler;
 import com.google.common.base.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.snmp4j.CommunityTarget;
@@ -25,26 +28,35 @@ import org.snmp4j.Snmp;
 import org.snmp4j.TransportMapping;
 import org.snmp4j.event.ResponseEvent;
 import org.snmp4j.mp.SnmpConstants;
-import org.snmp4j.smi.OID;
 import org.snmp4j.smi.OctetString;
 import org.snmp4j.smi.TcpAddress;
-import org.snmp4j.smi.VariableBinding;
+import org.snmp4j.smi.UdpAddress;
 import org.snmp4j.transport.DefaultTcpTransportMapping;
+import org.snmp4j.transport.DefaultUdpTransportMapping;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
+import org.springframework.stereotype.Component;
 
 import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static com.cumulocity.snmp.model.gateway.type.mapping.AlarmMapping.c8y_DeviceNotResponding;
+import static com.cumulocity.snmp.model.gateway.type.mapping.AlarmMapping.c8y_DeviceSnmpNotEnabled;
 
 @Slf4j
+@Component
 public class AutoDiscoveryService {
 
-    private static int timeout=1000;
+    private static int timeout=3000;
 
     private static final String CHILD_DEVICES_PATH = "/inventory/managedObjects/{deviceId}/childDevices";
 
@@ -68,18 +80,107 @@ public class AutoDiscoveryService {
     @Autowired
     private OperationRepository operationRepository;
 
+    @Autowired
+    Scheduler scheduler;
+
+    @Autowired
+    private ManagedObjectRepository managedObjectRepository;
+
+    @Autowired
+    private Repository<Gateway> gatewayRepository;
+
+    @Autowired
+    private GatewayFactory gatewayFactory;
+
+    ScheduledFuture<?> future = null;
+    AtomicInteger currentSchedulingRateInSeconds = new AtomicInteger(0);
+    AtomicBoolean isAutoDiscoveryInProgress = new AtomicBoolean();
+
     @EventListener
-    @RunWithinContext
     public synchronized void update(final OperationEvent event) {
-        final Operation operation = event.getOperation();
+        final String ipRangeSet = event.getIpRange();
         final Gateway gateway = event.getGateway();
 
-        try {
-            //TODO: Segregate the IP range received and scan for each range
-           startScanning("","", gateway);
-        } catch (final Exception ex) {
-            log.error(ex.getMessage(), ex);
-            operationRepository.failed(gateway, operation.getId(), ex.getMessage());
+        if(!isAutoDiscoveryInProgress.get()) {
+            try {
+                isAutoDiscoveryInProgress.set(true);
+                String[] ipRangeList = ipRangeSet.split(",");
+                createRegisteredDeviceMap(gateway);
+                operationRepository.executing(gateway, event.getOperationId());
+                for (String ipRange : ipRangeList) {
+                    startScanning(ipRange.split("-")[0], ipRange.split("-")[1], gateway);
+                }
+                isAutoDiscoveryInProgress.set(false);
+                operationRepository.successful(gateway, event.getOperationId());
+            } catch (Exception e){
+                log.error(e.getMessage(),e);
+                isAutoDiscoveryInProgress.set(false);
+            }
+        } else{
+            operationRepository.failed(gateway, event.getOperationId(),"Device scanning via auto-discovery scheduler is in progress");
+        }
+    }
+
+    @EventListener
+    @RunWithinContext
+    public synchronized void scheduleAutoDiscovery(final GatewayAddedEvent event) {
+        if(event.getGateway().getAutoDiscoveryRateInMinutes()>0){
+            refreshScheduler(event.getGateway());
+        }
+    }
+
+    @EventListener
+    @RunWithinContext
+    public synchronized void scheduleAutoDiscovery(final GatewayUpdateEvent event) {
+        if(event.getGateway().getAutoDiscoveryRateInMinutes()>0){
+            refreshScheduler(event.getGateway());
+        }
+    }
+
+    private void refreshScheduler(final Gateway gateway) {
+        log.debug("Scheduling auto discovery on user defined interval if auto discovery scheduling rate exists");
+        if (gateway.getIpRangeForAutoDiscovery() != null && (gateway.getAutoDiscoveryRateInMinutes() > 0)
+                && (currentSchedulingRateInSeconds.get() != gateway.getAutoDiscoveryRateInMinutes())) {
+            terminateTaskIfRunning();
+            currentSchedulingRateInSeconds.set(gateway.getAutoDiscoveryRateInMinutes());
+            future = scheduler.scheduleWithFixedDelay(new Runnable() {
+                public void run() {
+                    try {
+                        if(!isAutoDiscoveryInProgress.get()) {
+                            isAutoDiscoveryInProgress.set(true);
+                            log.debug("Running scheduled auto discovery");
+                            final Optional<ManagedObjectRepresentation> managedObject = managedObjectRepository.get(gateway);
+                            if (managedObject.isPresent()) {
+                                final Optional<Gateway> newGatewayOptional = gatewayFactory.create(gateway, managedObject.get());
+                                if (newGatewayOptional.isPresent()) {
+                                    final Gateway newGateway = newGatewayOptional.get();
+                                    String[] ipRangeList = newGateway.getIpRangeForAutoDiscovery().split(",");
+                                    createRegisteredDeviceMap(newGateway);
+                                    for (String ipRange : ipRangeList) {
+                                        startScanning(ipRange.split("-")[0], ipRange.split("-")[1], newGateway);
+                                    }
+                                }
+                            }
+
+//                            isAutoDiscoveryInProgress.set(false);
+                        }
+                    } catch (InvocationTargetException e) {
+                        log.error("Exception during SNMP auto discovery device scan ",e);
+                    } catch (IllegalAccessException e) {
+                        log.error("Exception during SNMP auto discovery device scan ",e);
+                    } finally {
+                        isAutoDiscoveryInProgress.set(false);
+                    }
+                }
+            }, 1000 * 60 * currentSchedulingRateInSeconds.get());
+        }
+    }
+
+    private void terminateTaskIfRunning() {
+        log.debug("Deleting auto discovery scheduling task if exists");
+        if (future != null && (!future.isCancelled())) {
+            future.cancel(true);
+            isAutoDiscoveryInProgress.set(false);
         }
     }
 
@@ -89,48 +190,50 @@ public class AutoDiscoveryService {
             IPAddressUtil endIp = new IPAddressUtil(endIpAddress);
 
             do {
-                startIp = startIp.next();
-                createRegisteredDeviceMap(gateway);
                 try {
                     if (InetAddress.getByName(startIp.toString()).isReachable(timeout)){
                         boolean isSnmpEnabled = isDeviceSnmpEnabled(startIp.toString());
                         if(!mapIpAddressToGid.containsKey(startIp.toString()) && isSnmpEnabled) {
-                            final Optional<ManagedObjectRepresentation> managedObjectOptional = inventoryRepository.save(gateway, managedObjectFactory.create("Device-" + startIp.toString()));
+                            log.debug("A new device is found with IP Address " + startIp.toString() +", which is SNMP enabled.");
+                            final Optional<ManagedObjectRepresentation> managedObjectOptional = inventoryRepository.save(gateway, managedObjectFactory.createChildDevice("Device-" + startIp.toString(),startIp.toString()));
                             if (managedObjectOptional.isPresent()) {
-                                createChildDevice(managedObjectOptional.get(), gateway.getId());
+                                referenceChildDevice(gateway,managedObjectOptional.get().getId());
                             }
-                        } else if(!isSnmpEnabled){
-                            //TODO: Change the publishing event class name and fragment type.
-                            eventPublisher.publishEvent(new UnknownTrapRecievedEvent(gateway, new ConfigEventType(
-                                    "A new device is found with IP Address " + startIp.toString() +", which is not SNMP enabled.")));
+                         } else if(!isSnmpEnabled){
+                            log.debug("A new device is found with IP Address " + startIp.toString() +", which is not SNMP enabled.");
+                            eventPublisher.publishEvent(new UnknownTrapOrDeviceEvent(gateway, new ConfigEventType(
+                                    "A new device is found with IP Address " + startIp.toString() +", which is not SNMP enabled."),c8y_DeviceSnmpNotEnabled+startIp.toString()));
                         }
                     } else{
-                        //Checking if the device(IP Address) is registered under the Gateway and raise Alarm/Event
                         if(mapIpAddressToGid.containsKey(startIp.toString())){
-                            //TODO: Change the publishing event class name and fragment type.
-                            eventPublisher.publishEvent(new UnknownTrapRecievedEvent(gateway, new ConfigEventType(
-                                    "No response from device with IP Address " + startIp.toString() +" during auto-discovery device scan.")));
+                            log.debug("No response from device with IP Address " + startIp.toString() +" during auto-discovery device scan.");
+                            eventPublisher.publishEvent(new UnknownTrapOrDeviceEvent(gateway, new ConfigEventType(
+                                    "No response from device with IP Address " + startIp.toString() +" during auto-discovery device scan."),c8y_DeviceNotResponding+startIp.toString()));
                         }
                     }
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    log.error(e.getMessage(),e);
                 }
 
-            } while(!startIp.equals(endIp));
+                startIp = startIp.next();
+
+            } while(!startIp.equals(endIp.next()));
         }
     }
 
-    private ManagedObjectRepresentation createChildDevice(ManagedObjectRepresentation child, GId parentId) {
-        return restOperations.post(buildPath(CHILD_DEVICES_PATH, parentId.getValue()), InventoryMediaType.MANAGED_OBJECT,
+    @RunWithinContext
+    private ManagedObjectRepresentation createChildDevice(Gateway gateway,ManagedObjectRepresentation child) {
+        return restOperations.post(buildPath(CHILD_DEVICES_PATH, gateway.getId().getValue()), InventoryMediaType.MANAGED_OBJECT,
                 InventoryMediaType.MANAGED_OBJECT, child, ManagedObjectRepresentation.class);
     }
 
-    private void referenceChildDevice(GId parent, GId child) {
+    @RunWithinContext
+    private void referenceChildDevice(Gateway gateway, GId child) {
         ManagedObjectReferenceRepresentation childReference = new ManagedObjectReferenceRepresentation();
         ManagedObjectRepresentation childMO = new ManagedObjectRepresentation();
         childMO.setId(child);
         childReference.setManagedObject(childMO);
-        restOperations.post(buildPath(CHILD_DEVICES_PATH, parent.getValue()), InventoryMediaType.MANAGED_OBJECT_REFERENCE, childReference);
+        restOperations.post(buildPath(CHILD_DEVICES_PATH, gateway.getId().getValue()), InventoryMediaType.MANAGED_OBJECT_REFERENCE, childReference);
     }
 
     @SuppressWarnings("SameParameterValue")
@@ -141,13 +244,11 @@ public class AutoDiscoveryService {
 
     private boolean isDeviceSnmpEnabled(String ipAddress){
         PDU pdu = new PDU();
-        /*pdu.add(new VariableBinding(new OID(new int[] {1,3,6,1,2,1,1,1})));
-        pdu.add(new VariableBinding(new OID(new int[] {1,3,6,1,2,1,1,2})));*/
         pdu.setType(PDU.GET);
 
         TransportMapping transport = null;
         try {
-            transport = new DefaultTcpTransportMapping();
+            transport = new DefaultUdpTransportMapping();
             transport.listen();
         } catch (IOException e) {
             e.printStackTrace();
@@ -156,11 +257,9 @@ public class AutoDiscoveryService {
         Snmp snmp = new Snmp(transport);
         CommunityTarget target = new CommunityTarget();
         target.setCommunity(new OctetString("public"));
-        target.setVersion(SnmpConstants.version2c);
+        target.setVersion(SnmpConstants.version1);
 
-        target.setAddress(new TcpAddress(ipAddress + "/" +161));
-        /*target.setRetries(1);
-        target.setTimeout(5000);*/
+        target.setAddress(new UdpAddress(ipAddress + "/" +161));
 
         try {
             ResponseEvent responseEvent = snmp.send(pdu, target);
@@ -175,8 +274,10 @@ public class AutoDiscoveryService {
         return false;
     }
 
+    @RunWithinContext
     private void createRegisteredDeviceMap(Gateway gateway){
         final List<GId> currentDeviceIds = gateway.getCurrentDeviceIds();
+        mapIpAddressToGid.clear();
         if (currentDeviceIds != null) {
             for (final GId gId : currentDeviceIds) {
                 final Optional<Device> deviceOptional = deviceRepository.get(gId);

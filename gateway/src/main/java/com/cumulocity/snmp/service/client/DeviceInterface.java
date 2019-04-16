@@ -1,9 +1,14 @@
 package com.cumulocity.snmp.service.client;
 
+import com.cumulocity.sdk.client.RestOperations;
 import com.cumulocity.snmp.configuration.service.SNMPConfigurationProperties;
+import com.cumulocity.snmp.factory.platform.ManagedObjectFactory;
 import com.cumulocity.snmp.model.core.ConfigEventType;
 import com.cumulocity.snmp.model.gateway.Gateway;
-import com.cumulocity.snmp.model.gateway.UnknownTrapRecievedEvent;
+import com.cumulocity.snmp.model.gateway.UnknownTrapOrDeviceEvent;
+import com.cumulocity.snmp.repository.ManagedObjectRepository;
+import com.cumulocity.snmp.repository.OperationRepository;
+import com.cumulocity.snmp.service.autodiscovery.AutoDiscoveryService;
 import lombok.extern.slf4j.Slf4j;
 import org.snmp4j.*;
 import org.snmp4j.event.ResponseEvent;
@@ -27,6 +32,8 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static com.cumulocity.snmp.model.gateway.type.mapping.AlarmMapping.c8y_TRAPReceivedFromUnknownDevice;
+
 @Slf4j
 @Component
 public class DeviceInterface implements CommandResponder {
@@ -40,6 +47,8 @@ public class DeviceInterface implements CommandResponder {
 
     @Autowired
     private SNMPConfigurationProperties config;
+
+    private static final String CHILD_DEVICES_PATH = "/inventory/managedObjects/{deviceId}/childDevices";
 
     @PostConstruct
     public void init() {
@@ -110,8 +119,8 @@ public class DeviceInterface implements CommandResponder {
                 }
             }
         } else {
-            eventPublisher.publishEvent(new UnknownTrapRecievedEvent(gateway, new ConfigEventType(
-                    "TRAP received from unknown device with IP Address : " + peerIPAddress)));
+            eventPublisher.publishEvent(new UnknownTrapOrDeviceEvent(gateway, new ConfigEventType(
+                    "TRAP received from unknown device with IP Address : " + peerIPAddress),c8y_TRAPReceivedFromUnknownDevice));
         }
     }
 

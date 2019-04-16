@@ -36,6 +36,8 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -85,20 +87,6 @@ public class PlatformSubscriber {
 
     @EventListener
     @RunWithinContext
-    public synchronized void subscribe(final DeviceAddedEvent deviceAddedEvent) {
-        try {
-            final Gateway gateway = deviceAddedEvent.getGateway();
-            final Device device = deviceAddedEvent.getDevice();
-            final PlatformParameters platform = platformProvider.getPlatformProperties(gateway);
-
-            subscribeDeviceOperations(platform, gateway, device);
-        } catch (final Exception ex) {
-            log.error(ex.getMessage(), ex);
-        }
-    }
-
-    @EventListener
-    @RunWithinContext
     public synchronized void unsubscribe(final GatewayRemovedEvent event) {
         try {
             unsubscribeGateway(event.getGateway());
@@ -120,34 +108,29 @@ public class PlatformSubscriber {
     private void subscribeGatewayOperations(final PlatformParameters platform, final Gateway gateway) {
         final OperationNotificationSubscriber operationSubscriber = notifications.subscribeOperations(platform, gateway.getId(), new OperationListener() {
             public void onCreate(OperationRepresentation operationRepresentation) {
-                final Object opcuaDeviceConfigurationChange = operationRepresentation.get(Operation.SNMP_DEVICE);
-                if (opcuaDeviceConfigurationChange != null) {
-                    operationRepository.successful(gateway, operationRepresentation.getId());
-                } else {
-                    final Optional<Operation> operation = operationFactory.create(operationRepresentation);
-                    if (operation.isPresent()) {
-                        eventPublisher.publishEvent(new OperationEvent(gateway, operation.get()));
-                    } else {
-                        operationRepository.failed(gateway, operationRepresentation.getId(), "Operation not supported.");
+                Map<String, String> ipRange = (HashMap) operationRepresentation.getAttrs().get("c8y_SnmpAutoDiscovery");
+                if(ipRange.get("ipRange")!=null){
+                    try {
+                        final Optional<ManagedObjectRepresentation> managedObject = managedObjectRepository.get(gateway);
+                        if (managedObject.isPresent()) {
+                            final Optional<Gateway> newGatewayOptional = gatewayFactory.create(gateway, managedObject.get());
+                            if (newGatewayOptional.isPresent()) {
+                                final Gateway newGateway = newGatewayOptional.get();
+                                gatewayRepository.save(newGateway);
+                                eventPublisher.publishEvent(new OperationEvent(newGateway, ipRange.get("ipRange"),operationRepresentation.getId()));
+                            }
+                        }
+                    } catch (InvocationTargetException e) {
+                        log.error(e.getMessage(),e);
+                    } catch (IllegalAccessException e) {
+                        log.error(e.getMessage(),e);
                     }
+                } else{
+                    operationRepository.failed(gateway, operationRepresentation.getId(), "IP Range is not found.");
                 }
             }
         });
         operationSubscribers.add(gateway.getId(), operationSubscriber);
-    }
-
-    private void subscribeDeviceOperations(PlatformParameters platform, final Gateway gateway, final Device device) {
-        final OperationNotificationSubscriber operationsSubscriber = notifications.subscribeOperations(platform, device.getId(), new OperationListener() {
-            public void onCreate(OperationRepresentation operationRepresentation) {
-                final Optional<Operation> operation = operationFactory.create(operationRepresentation);
-                if (operation.isPresent()) {
-                    eventPublisher.publishEvent(new OperationEvent(gateway, operation.get()));
-                } else {
-                    operationRepository.failed(gateway, operationRepresentation.getId(), "Operation not supported.");
-                }
-            }
-        });
-        operationSubscribers.add(device.getId(), operationsSubscriber);
     }
 
     private void subscribeGatewayInventory(final PlatformParameters platform, final Gateway gateway) {

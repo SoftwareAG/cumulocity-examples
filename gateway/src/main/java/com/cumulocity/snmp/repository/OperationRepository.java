@@ -17,6 +17,7 @@ public class OperationRepository {
 
     public static final String SUCCESSFUL = "SUCCESSFUL";
     public static final String FAILED = "FAILED";
+    public static final String EXECUTING = "EXECUTING";
 
     private final DeviceControlApi deviceControlApi;
 
@@ -26,6 +27,18 @@ public class OperationRepository {
             final OperationRepresentation operation = new OperationRepresentation();
             operation.setId(operationId);
             operation.setStatus(SUCCESSFUL);
+            deviceControlApi.update(operation);
+        } catch (final Exception ex) {
+            log.error(ex.getMessage(), ex);
+        }
+    }
+
+    @RunWithinContext
+    public void executing(Gateway gateway, GId operationId) {
+        try {
+            final OperationRepresentation operation = new OperationRepresentation();
+            operation.setId(operationId);
+            operation.setStatus(EXECUTING);
             deviceControlApi.update(operation);
         } catch (final Exception ex) {
             log.error(ex.getMessage(), ex);
