@@ -32,6 +32,8 @@ public class DeviceInterfaceTest {
     public void ShouldReturnResponseAsNullForPollingIncorrectDevicePort() throws IOException {
         String oId = "1.3.6.1.2.1.1.7.0";
         String ipAddress = "localhost";
+        int port = 6672;
+        int snmpVersion = 2;
 
         final PDU pdu = mock(PDU.class);
 
@@ -44,10 +46,10 @@ public class DeviceInterfaceTest {
         when(variableBindings.get(0)).thenReturn(variableBinding);
         when(variableBinding.getVariable()).thenReturn(variable);
         when(config.getCommunityTarget()).thenReturn("public");
-        when(config.getPollingPort()).thenReturn("123");
+        when(config.getPollingPort()).thenReturn(123);
         doNothing().when(pduListener).onPduReceived(any(PDU.class));
 
-        deviceInterface.initiatePolling(oId, ipAddress, pduListener);
+        deviceInterface.initiatePolling(oId, ipAddress, port, snmpVersion, pduListener);
 
         verify(pduListener, never()).onPduReceived(any(PDU.class));
     }
@@ -56,6 +58,8 @@ public class DeviceInterfaceTest {
     public void ShouldReturnResponseAsNullForPollingIncorrectOid() throws IOException {
         String oId = "1.6.1.2.1.1.7.0";
         String ipAddress = "localhost";
+        int port = 6672;
+        int snmpVersion = 2;
 
         final PDU pdu = mock(PDU.class);
         Vector variableBindings = mock(Vector.class);
@@ -67,9 +71,9 @@ public class DeviceInterfaceTest {
         when(variableBindings.get(0)).thenReturn(variableBinding);
         when(variableBinding.getVariable()).thenReturn(variable);
         when(config.getCommunityTarget()).thenReturn("public");
-        when(config.getPollingPort()).thenReturn("6672");
+        when(config.getPollingPort()).thenReturn(6672);
 
-        deviceInterface.initiatePolling(oId, ipAddress, pduListener);
+        deviceInterface.initiatePolling(oId, ipAddress, port, snmpVersion, pduListener);
 
         verify(pduListener, never()).onPduReceived(pdu);
     }
