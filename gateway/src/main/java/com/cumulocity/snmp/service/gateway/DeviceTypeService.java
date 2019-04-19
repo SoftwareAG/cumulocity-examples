@@ -44,14 +44,16 @@ public class DeviceTypeService {
     public void addDeviceType(final DeviceAddedEvent event) throws ExecutionException {
         final Gateway gateway = event.getGateway();
         final Device device = event.getDevice();
-        final Optional<DeviceType> newDeviceTypeOptional = deviceTypeInventoryRepository.get(gateway, device.getDeviceType());
-        if (newDeviceTypeOptional.isPresent()) {
-            final Optional<DeviceType> previousDeviceTypeOptional = deviceTypePeristedRepository.get(newDeviceTypeOptional.get().getId());
-            if (!previousDeviceTypeOptional.equals(newDeviceTypeOptional)) {
-                final DeviceType deviceType = deviceTypePeristedRepository.save(newDeviceTypeOptional.get());
-                eventPublisher.publishEvent(new DeviceTypeAddedEvent(event.getGateway(), device, deviceType));
-                unsubscribe(deviceType);
-                subscribe(gateway, device, deviceType);
+        if(device.getDeviceType()!=null) {
+            final Optional<DeviceType> newDeviceTypeOptional = deviceTypeInventoryRepository.get(gateway, device.getDeviceType());
+            if (newDeviceTypeOptional.isPresent()) {
+                final Optional<DeviceType> previousDeviceTypeOptional = deviceTypePeristedRepository.get(newDeviceTypeOptional.get().getId());
+                if (!previousDeviceTypeOptional.equals(newDeviceTypeOptional)) {
+                    final DeviceType deviceType = deviceTypePeristedRepository.save(newDeviceTypeOptional.get());
+                    eventPublisher.publishEvent(new DeviceTypeAddedEvent(event.getGateway(), device, deviceType));
+                    unsubscribe(deviceType);
+                    subscribe(gateway, device, deviceType);
+                }
             }
         }
     }

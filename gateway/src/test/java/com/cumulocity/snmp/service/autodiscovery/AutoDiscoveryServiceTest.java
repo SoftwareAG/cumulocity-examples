@@ -1,54 +1,69 @@
 package com.cumulocity.snmp.service.autodiscovery;
 
-import com.cumulocity.model.idtype.GId;
+import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
+import com.cumulocity.snmp.configuration.service.SNMPConfigurationProperties;
 import com.cumulocity.snmp.model.gateway.Gateway;
-import com.cumulocity.snmp.model.gateway.device.Device;
-import com.cumulocity.snmp.model.operation.Operation;
+import com.cumulocity.snmp.model.gateway.GatewayUpdateEvent;
 import com.cumulocity.snmp.model.operation.OperationEvent;
-import com.cumulocity.snmp.repository.core.Repository;
-import org.junit.Before;
-import org.junit.Ignore;
+import com.cumulocity.snmp.repository.ManagedObjectRepository;
+import com.cumulocity.snmp.repository.OperationRepository;
+import com.cumulocity.snmp.utils.gateway.Scheduler;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mockito;
+import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static com.cumulocity.model.idtype.GId.asGId;
-import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-@Ignore
 @RunWith(MockitoJUnitRunner.class)
 public class AutoDiscoveryServiceTest {
 
-    @Autowired
-    Repository<Device> deviceRepository;
+    @Mock
+    private ManagedObjectRepository inventoryRepository;
+
+    @Mock
+    com.google.common.base.Optional<ManagedObjectRepresentation> optional;
+
+    @Mock
+    private OperationRepository operationRepository;
+
+    @Mock
+    private SNMPConfigurationProperties config;
+
+    @Mock
+    Scheduler scheduler;
 
     @InjectMocks
-    AutoDiscoveryService autoDiscoveryService;
+    private AutoDiscoveryService autoDiscoveryService;
 
-    @Before
-    public void setUp(){
-        deviceRepository.save(new Device().withId(asGId(11223)).withIpAddress("192.168.0.1"));
-        deviceRepository.save(new Device().withId(asGId(11224)).withIpAddress("192.168.0.2"));
-    }
+
     @Test
-    public void shouldTestAutoDisocvery(){
-        Operation operation = new Operation();
-//        operation.add("192.168.0.1-192.168.0.5,192.168.1.1-192.168.1.5");
-        OperationEvent operationEvent = new OperationEvent(createGateway(),"", asGId(11226));
-
+    public void shouldTestAutoDiscovery(){
+        OperationEvent operationEvent = new OperationEvent(createGateway(), asGId(11226));
+        Gateway gateway = createGateway();
+        //Given
+        when(inventoryRepository.get(gateway,gateway.getId())).thenReturn(optional);
+        //When
         autoDiscoveryService.update(operationEvent);
+        //Then
+        verify(operationRepository).executing(gateway,asGId(11226));
+        verify(operationRepository).successful(gateway,asGId(11226));
+    }
+
+    @Test
+    public void shouldTestAutoDiscoveryWithScheduler(){
+        //When
+        autoDiscoveryService.scheduleAutoDiscovery(new GatewayUpdateEvent(createGateway()));
+        //Then
+        verify(scheduler).scheduleWithFixedDelay(any(Runnable.class),eq(60000L));
     }
 
     private Gateway createGateway() {
-        List<GId> gIdList = new ArrayList();
-        gIdList.add(asGId(11223));
-        gIdList.add(asGId(11224));
-        return new Gateway().withId(asGId(11225)).withCurrentDeviceIds(gIdList);
+        return new Gateway().withId(asGId(11225)).withAutoDiscoveryRateInMinutes(1).withIpRangeForAutoDiscovery("192.168.0.1-192.168.0.5");
     }
 }

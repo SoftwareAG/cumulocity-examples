@@ -79,8 +79,6 @@ public class ManagedObjectFactory implements PlatformRepresentationFactory<Statu
         deviceIpMap.put("port", "161");
         result.setName(name);
         result.setProperty(Device.c8y_SNMPDevice, deviceIpMap);
-//        result.set(new Object(), Device.c8y_SNMPDevice);
-
 
         return result;
     }

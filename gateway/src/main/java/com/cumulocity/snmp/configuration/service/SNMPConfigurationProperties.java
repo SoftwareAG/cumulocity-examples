@@ -25,4 +25,7 @@ public class SNMPConfigurationProperties {
 
     @Value("${snmp.polling.version:1}")
     private int version;
+
+    @Value("${snmp.polling.devicePingTimeoutPeriod:3}")
+    private int devicePingTimeoutPeriod;
 }

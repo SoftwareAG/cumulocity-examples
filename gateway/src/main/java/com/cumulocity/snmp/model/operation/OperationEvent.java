@@ -8,7 +8,5 @@ import lombok.Data;
 @Data
 public class OperationEvent implements GatewayProvider {
     private final Gateway gateway;
-//    private final Operation operation;
-    private final String ipRange;
     private final GId operationId;
 }

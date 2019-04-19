@@ -82,10 +82,12 @@ public class ClientSubscriber {
         log.debug("Initiating Device add");
         final Gateway gateway = event.getGateway();
         this.gateway = event.getGateway();
-        final Optional<DeviceType> deviceTypeOptional = deviceTypeRepository.get(event.getDevice().getDeviceType());
-        if (deviceTypeOptional.isPresent()) {
-            final Device device = event.getDevice();
-            subscribe(device, deviceTypeOptional.get());
+        if(event.getDevice().getDeviceType()!=null) {
+            final Optional<DeviceType> deviceTypeOptional = deviceTypeRepository.get(event.getDevice().getDeviceType());
+            if (deviceTypeOptional.isPresent()) {
+                final Device device = event.getDevice();
+                subscribe(device, deviceTypeOptional.get());
+            }
         }
     }
 
@@ -143,10 +145,12 @@ public class ClientSubscriber {
                 final Optional<Device> deviceOptional = deviceRepository.get(gId);
                 if (deviceOptional.isPresent()) {
                     final Device device = deviceOptional.get();
-                    final Optional<DeviceType> deviceTypeOptional = deviceTypeRepository.get(device.getDeviceType());
-                    if (deviceTypeOptional.isPresent()) {
-                        log.debug("Adding details to devicePollingData ");
-                        devicePollingData.put(device, deviceTypeOptional.get());
+                    if(device.getDeviceType()!=null) {
+                        final Optional<DeviceType> deviceTypeOptional = deviceTypeRepository.get(device.getDeviceType());
+                        if (deviceTypeOptional.isPresent()) {
+                            log.debug("Adding details to devicePollingData ");
+                            devicePollingData.put(device, deviceTypeOptional.get());
+                        }
                     }
                 }
             }
@@ -181,7 +185,9 @@ public class ClientSubscriber {
 
     private void subscribe() {
         for (Map.Entry<Device, DeviceType> deviceData : devicePollingData.entrySet()) {
-            subscribe(deviceData.getKey(), deviceData.getValue());
+            if(deviceData.getValue()!=null) {
+                subscribe(deviceData.getKey(), deviceData.getValue());
+            }
         }
     }
 

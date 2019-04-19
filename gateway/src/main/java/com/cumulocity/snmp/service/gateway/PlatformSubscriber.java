@@ -1,5 +1,6 @@
 package com.cumulocity.snmp.service.gateway;
 
+import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.PlatformParameters;
@@ -8,9 +9,9 @@ import com.cumulocity.sdk.client.devicecontrol.notification.OperationNotificatio
 import com.cumulocity.sdk.client.notification.Subscriber;
 import com.cumulocity.snmp.annotation.gateway.RunWithinContext;
 import com.cumulocity.snmp.factory.gateway.GatewayFactory;
-import com.cumulocity.snmp.factory.gateway.OperationFactory;
 import com.cumulocity.snmp.model.device.DeviceAddedEvent;
 import com.cumulocity.snmp.model.device.DeviceRemovedEvent;
+import com.cumulocity.snmp.model.device.DeviceUpdatedEvent;
 import com.cumulocity.snmp.model.gateway.Gateway;
 import com.cumulocity.snmp.model.gateway.GatewayAddedEvent;
 import com.cumulocity.snmp.model.gateway.GatewayRemovedEvent;
@@ -20,7 +21,6 @@ import com.cumulocity.snmp.model.notification.Notifications;
 import com.cumulocity.snmp.model.notification.platform.ManagedObjectListener;
 import com.cumulocity.snmp.model.notification.platform.OperationListener;
 import com.cumulocity.snmp.model.notification.platform.Subscriptions;
-import com.cumulocity.snmp.model.operation.Operation;
 import com.cumulocity.snmp.model.operation.OperationEvent;
 import com.cumulocity.snmp.platform.PlatformSubscribedEvent;
 import com.cumulocity.snmp.platform.PlatformUnsubscribedEvent;
@@ -64,9 +64,6 @@ public class PlatformSubscriber {
     @Autowired
     private OperationRepository operationRepository;
 
-    @Autowired
-    private OperationFactory operationFactory;
-
     private final Subscriptions managedObjectSubscribers = new Subscriptions();
     private final Subscriptions operationSubscribers = new Subscriptions();
 
@@ -80,6 +77,20 @@ public class PlatformSubscriber {
             unsubscribeGateway(gateway);
             subscribeGatewayInventory(platform, gateway);
             subscribeGatewayOperations(platform, gateway);
+        } catch (final Exception ex) {
+            log.error(ex.getMessage(), ex);
+        }
+    }
+
+    @EventListener
+    @RunWithinContext
+    public synchronized void subscribe(final DeviceAddedEvent deviceAddedEvent) {
+        try {
+            final Gateway gateway = deviceAddedEvent.getGateway();
+            final Device device = deviceAddedEvent.getDevice();
+            final PlatformParameters platform = platformProvider.getPlatformProperties(gateway);
+
+            subscribeDeviceOperations(platform, gateway, device);
         } catch (final Exception ex) {
             log.error(ex.getMessage(), ex);
         }
@@ -105,29 +116,42 @@ public class PlatformSubscriber {
         }
     }
 
+    private void subscribeDeviceOperations(PlatformParameters platform, final Gateway gateway, final Device device) {
+        final OperationNotificationSubscriber operationsSubscriber = notifications.subscribeOperations(platform, device.getId(), new OperationListener() {
+            public void onCreate(OperationRepresentation operationRepresentation) {
+                log.debug("operationRepresentation",operationRepresentation);
+            }
+        });
+        operationSubscribers.add(device.getId(), operationsSubscriber);
+    }
+
     private void subscribeGatewayOperations(final PlatformParameters platform, final Gateway gateway) {
         final OperationNotificationSubscriber operationSubscriber = notifications.subscribeOperations(platform, gateway.getId(), new OperationListener() {
             public void onCreate(OperationRepresentation operationRepresentation) {
                 Map<String, String> ipRange = (HashMap) operationRepresentation.getAttrs().get("c8y_SnmpAutoDiscovery");
-                if(ipRange.get("ipRange")!=null){
-                    try {
-                        final Optional<ManagedObjectRepresentation> managedObject = managedObjectRepository.get(gateway);
-                        if (managedObject.isPresent()) {
-                            final Optional<Gateway> newGatewayOptional = gatewayFactory.create(gateway, managedObject.get());
-                            if (newGatewayOptional.isPresent()) {
-                                final Gateway newGateway = newGatewayOptional.get();
-                                gatewayRepository.save(newGateway);
-                                eventPublisher.publishEvent(new OperationEvent(newGateway, ipRange.get("ipRange"),operationRepresentation.getId()));
+                Map<String, String> snmpDevice = (HashMap) operationRepresentation.getAttrs().get("c8y_SNMPDevice");
+                final Optional<ManagedObjectRepresentation> managedObject = managedObjectRepository.get(gateway);
+                try {
+                    if (managedObject.isPresent()) {
+                        final Optional<Gateway> newGatewayOptional = gatewayFactory.create(gateway, managedObject.get());
+                        if (newGatewayOptional.isPresent()) {
+                            final Gateway newGateway = newGatewayOptional.get();
+                            gatewayRepository.save(newGateway);
+
+                            if(ipRange!=null && ipRange.get("ipRange")!=null) {
+                                eventPublisher.publishEvent(new OperationEvent(newGateway, operationRepresentation.getId()));
+                            } else if(snmpDevice!=null) {
+                                String deviceId = snmpDevice.get("id");
+                                eventPublisher.publishEvent(new DeviceUpdatedEvent(newGateway,GId.asGId(deviceId)));
                             }
                         }
-                    } catch (InvocationTargetException e) {
-                        log.error(e.getMessage(),e);
-                    } catch (IllegalAccessException e) {
-                        log.error(e.getMessage(),e);
                     }
-                } else{
-                    operationRepository.failed(gateway, operationRepresentation.getId(), "IP Range is not found.");
+                } catch (InvocationTargetException e) {
+                    log.error(e.getMessage(),e);
+                } catch (IllegalAccessException e) {
+                    log.error(e.getMessage(),e);
                 }
+
             }
         });
         operationSubscribers.add(gateway.getId(), operationSubscriber);

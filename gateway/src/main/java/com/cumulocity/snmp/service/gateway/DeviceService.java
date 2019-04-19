@@ -6,6 +6,7 @@ import com.cumulocity.snmp.annotation.gateway.RunWithinContext;
 import com.cumulocity.snmp.factory.gateway.DeviceFactory;
 import com.cumulocity.snmp.model.device.DeviceAddedEvent;
 import com.cumulocity.snmp.model.device.DeviceRemovedEvent;
+import com.cumulocity.snmp.model.device.DeviceUpdatedEvent;
 import com.cumulocity.snmp.model.gateway.Gateway;
 import com.cumulocity.snmp.model.gateway.GatewayAddedEvent;
 import com.cumulocity.snmp.model.gateway.GatewayRemovedEvent;
@@ -61,6 +62,18 @@ public class DeviceService {
                 removeDevice(event.getGateway(), child);
             } catch (Exception ex) {
                 log.error(ex.getMessage(), ex);
+            }
+        }
+    }
+
+    @EventListener
+    @RunWithinContext
+    public void updateDevice(final DeviceUpdatedEvent event) {
+        final Optional<ManagedObjectRepresentation> deviceOptional = managedObjectRepository.get(event.getGateway(), event.getDeviceId());
+        if(deviceOptional.isPresent()){
+            final Optional<Device> device = deviceFactory.convert(deviceOptional.get());
+            if (device.isPresent()) {
+                deviceRepository.save(device.get());
             }
         }
     }
