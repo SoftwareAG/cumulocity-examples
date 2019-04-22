@@ -22,7 +22,9 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -82,7 +84,7 @@ public class ClientSubscriber {
         log.debug("Initiating Device add");
         final Gateway gateway = event.getGateway();
         this.gateway = event.getGateway();
-        if(event.getDevice().getDeviceType()!=null) {
+        if (event.getDevice().getDeviceType() != null) {
             final Optional<DeviceType> deviceTypeOptional = deviceTypeRepository.get(event.getDevice().getDeviceType());
             if (deviceTypeOptional.isPresent()) {
                 final Device device = event.getDevice();
@@ -145,7 +147,7 @@ public class ClientSubscriber {
                 final Optional<Device> deviceOptional = deviceRepository.get(gId);
                 if (deviceOptional.isPresent()) {
                     final Device device = deviceOptional.get();
-                    if(device.getDeviceType()!=null) {
+                    if (device.getDeviceType() != null) {
                         final Optional<DeviceType> deviceTypeOptional = deviceTypeRepository.get(device.getDeviceType());
                         if (deviceTypeOptional.isPresent()) {
                             log.debug("Adding details to devicePollingData ");
@@ -185,7 +187,7 @@ public class ClientSubscriber {
 
     private void subscribe() {
         for (Map.Entry<Device, DeviceType> deviceData : devicePollingData.entrySet()) {
-            if(deviceData.getValue()!=null) {
+            if (deviceData.getValue() != null) {
                 subscribe(deviceData.getKey(), deviceData.getValue());
             }
         }

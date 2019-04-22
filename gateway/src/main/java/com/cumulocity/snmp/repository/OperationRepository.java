@@ -1,6 +1,7 @@
 package com.cumulocity.snmp.repository;
 
 import com.cumulocity.model.idtype.GId;
+import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.devicecontrol.DeviceControlApi;
 import com.cumulocity.snmp.annotation.gateway.RunWithinContext;
@@ -15,10 +16,6 @@ import org.springframework.stereotype.Repository;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class OperationRepository {
 
-    public static final String SUCCESSFUL = "SUCCESSFUL";
-    public static final String FAILED = "FAILED";
-    public static final String EXECUTING = "EXECUTING";
-
     private final DeviceControlApi deviceControlApi;
 
     @RunWithinContext
@@ -26,7 +23,7 @@ public class OperationRepository {
         try {
             final OperationRepresentation operation = new OperationRepresentation();
             operation.setId(operationId);
-            operation.setStatus(SUCCESSFUL);
+            operation.setStatus(OperationStatus.SUCCESSFUL.name());
             deviceControlApi.update(operation);
         } catch (final Exception ex) {
             log.error(ex.getMessage(), ex);
@@ -38,7 +35,7 @@ public class OperationRepository {
         try {
             final OperationRepresentation operation = new OperationRepresentation();
             operation.setId(operationId);
-            operation.setStatus(EXECUTING);
+            operation.setStatus(OperationStatus.EXECUTING.name());
             deviceControlApi.update(operation);
         } catch (final Exception ex) {
             log.error(ex.getMessage(), ex);
@@ -50,7 +47,7 @@ public class OperationRepository {
         try {
             final OperationRepresentation operation = new OperationRepresentation();
             operation.setId(operationId);
-            operation.setStatus(FAILED);
+            operation.setStatus(OperationStatus.FAILED.name());
             operation.setFailureReason(message);
             deviceControlApi.update(operation);
         } catch (final Exception ex) {
