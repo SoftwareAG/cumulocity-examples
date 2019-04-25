@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import static com.cumulocity.snmp.model.gateway.device.Device.c8y_SNMPDevice;
@@ -28,13 +29,9 @@ public class DeviceFactory implements Converter<ManagedObjectRepresentation, Opt
             final GId deviceId = managedObject.getId();
             int port = getPort(property.get("port"));
             int version = getSnmpVersion(property.get("version"));
-            return Optional.of(Device.builder()
-                    .id(deviceId)
-                    .ipAddress(property.get("ipAddress").toString())
-                    .port(port)
-                    .snmpVersion(version)
-                    .deviceType(parseGId(property.get("type")))
-                    .build());
+            Map<String, Object> authMap = (HashMap) property.get("auth");
+            return (authMap == null) ? getDeviceWithoutAuth(property, deviceId, port, version) :
+                    getDeviceWithAuth(property, deviceId, port, version, authMap);
         }
         return absent();
     }
@@ -45,5 +42,35 @@ public class DeviceFactory implements Converter<ManagedObjectRepresentation, Opt
 
     private int getSnmpVersion(Object version) {
         return (version != null) ? Integer.parseInt(version.toString()) : config.getVersion();
+    }
+
+    private int getIntValue(Object value) {
+        return (value != null) ? Integer.parseInt(value.toString()) : 0;
+    }
+
+    private Optional<Device> getDeviceWithoutAuth(Map property, GId deviceId, int port, int version) {
+        return Optional.of(Device.builder()
+                .id(deviceId)
+                .ipAddress(property.get("ipAddress").toString())
+                .port(port)
+                .snmpVersion(version)
+                .deviceType(parseGId(property.get("type")))
+                .build());
+    }
+
+    private Optional<Device> getDeviceWithAuth(Map property, GId deviceId, int port, int version, Map<String, Object> authMap) {
+        return Optional.of(Device.builder()
+                .id(deviceId)
+                .ipAddress(property.get("ipAddress").toString())
+                .port(port)
+                .snmpVersion(version)
+                .deviceType(parseGId(property.get("type")))
+                .username((String) authMap.get("username"))
+                .securityLevel(getIntValue(authMap.get("securityLevel")))
+                .authProtocol(getIntValue(authMap.get("authProtocol")))
+                .authProtocolPassword((String) authMap.get("authPassword"))
+                .privacyProtocol(getIntValue(authMap.get("privProtocol")))
+                .privacyProtocolPassword((String) authMap.get("privPassword"))
+                .build());
     }
 }

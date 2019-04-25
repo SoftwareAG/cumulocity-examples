@@ -1,22 +1,16 @@
 package com.cumulocity.snmp.service.client;
 
-import com.cumulocity.sdk.client.RestOperations;
 import com.cumulocity.snmp.configuration.service.SNMPConfigurationProperties;
-import com.cumulocity.snmp.factory.platform.ManagedObjectFactory;
 import com.cumulocity.snmp.model.core.ConfigEventType;
 import com.cumulocity.snmp.model.gateway.Gateway;
 import com.cumulocity.snmp.model.gateway.UnknownTrapOrDeviceEvent;
-import com.cumulocity.snmp.repository.ManagedObjectRepository;
-import com.cumulocity.snmp.repository.OperationRepository;
-import com.cumulocity.snmp.service.autodiscovery.AutoDiscoveryService;
 import lombok.extern.slf4j.Slf4j;
 import org.snmp4j.*;
-import org.snmp4j.event.ResponseEvent;
 import org.snmp4j.mp.MPv1;
 import org.snmp4j.mp.MPv2c;
 import org.snmp4j.mp.MPv3;
-import org.snmp4j.mp.SnmpConstants;
-import org.snmp4j.security.*;
+import org.snmp4j.security.Priv3DES;
+import org.snmp4j.security.SecurityProtocols;
 import org.snmp4j.smi.*;
 import org.snmp4j.transport.AbstractTransportMapping;
 import org.snmp4j.transport.DefaultTcpTransportMapping;
@@ -48,8 +42,6 @@ public class DeviceInterface implements CommandResponder {
     @Autowired
     private SNMPConfigurationProperties config;
 
-    private static final String CHILD_DEVICES_PATH = "/inventory/managedObjects/{deviceId}/childDevices";
-
     @PostConstruct
     public void init() {
         log.debug("Initiating SNMP Listner at address {}, port {} and community {} ",
@@ -65,7 +57,7 @@ public class DeviceInterface implements CommandResponder {
             } else if (snmpListeningAddress instanceof UdpAddress) {
                 transportMapping = new DefaultUdpTransportMapping((UdpAddress) snmpListeningAddress);
             } else {
-                log.error("Received request format is not supported");
+                log.error("Received address format is unsupported");
                 return;
             }
 
@@ -87,7 +79,7 @@ public class DeviceInterface implements CommandResponder {
             target.setCommunity(new OctetString(config.getCommunityTarget()));
 
             log.debug("Listening for SNMP TRAPs on " + transportMapping.getListenAddress().toString());
-            transportMapping.listen();
+            snmp.listen();
         } catch (IOException e) {
             log.error("Exception in SNMP TRAP listener ", e.getMessage(), e);
         }
@@ -106,7 +98,7 @@ public class DeviceInterface implements CommandResponder {
             return;
         }
 
-        log.debug("SNMP Data Received");
+        log.debug("SNMP Trap Received");
 
         String peerIPAddress = event.getPeerAddress().toString().split("/")[0];
         if (mapIPAddressToOid.containsKey(peerIPAddress)) {
@@ -118,7 +110,7 @@ public class DeviceInterface implements CommandResponder {
             }
         } else {
             eventPublisher.publishEvent(new UnknownTrapOrDeviceEvent(gateway, new ConfigEventType(
-                    "TRAP received from unknown device with IP Address : " + peerIPAddress),c8y_TRAPReceivedFromUnknownDevice));
+                    "TRAP received from unknown device with IP Address : " + peerIPAddress), c8y_TRAPReceivedFromUnknownDevice));
         }
     }
 
@@ -132,116 +124,5 @@ public class DeviceInterface implements CommandResponder {
 
     public void unsubscribe(String ipAddress) {
         mapIPAddressToOid.remove(ipAddress);
-    }
-
-    public void initiatePolling(String oId, String ipAddress, int pollingPort,
-                                int snmpVersion, PduListener pduListener) {
-        if (!isValidSnmpVersion(snmpVersion)) {
-            log.error("Invalid SNMP Version assigned to device");
-            return;
-        }
-
-        PDU pdu = new PDU();
-        AbstractTransportMapping transport = null;
-        Snmp snmp = null;
-        Target target;
-
-        try {
-            transport = new DefaultUdpTransportMapping();
-            transport.listen();
-
-            snmp = new Snmp(transport);
-            target = getTarget(ipAddress.trim(), snmpVersion, pollingPort);
-            pdu.setType(PDU.GET);
-            pdu.add(new VariableBinding(new OID(oId)));
-
-            ResponseEvent responseEvent = snmp.send(pdu, target);
-            handleDevicePollingResponse(responseEvent, oId, ipAddress, pduListener);
-        } catch (IOException e) {
-            log.error("Exception while processing SNMP Polling response ", e);
-        } finally {
-            closeTransport(transport);
-            closeSnmp(snmp);
-        }
-    }
-
-    private void handleDevicePollingResponse(ResponseEvent responseEvent, String oId,
-                                             String ipAddress, PduListener pduListener) {
-        PDU response = responseEvent.getResponse();
-        if (response == null) {
-            log.error("Polling response null for device {} and OID {} - error:{} peerAddress:{} source:{} request:{}",
-                    ipAddress, oId, responseEvent.getError(), responseEvent.getPeerAddress(),
-                    responseEvent.getSource(), responseEvent.getRequest());
-        } else if (response.getErrorStatus() == PDU.noError) {
-            if (response.getVariableBindings().size() == 0) {
-                log.error("No data found after successful device polling");
-                return;
-            }
-            int type = response.getVariableBindings().get(0).getVariable().getSyntax();
-            // Process polled data only if it is Integer32/Counter32/Gauge32/Counter64
-            if (isValidVariableType(type)) {
-                pduListener.onPduReceived(response);
-            } else {
-                log.error("Unsupported data format for measurement calculation");
-            }
-        } else {
-            log.error("Error in Device polling response");
-            log.error("Error index {} | Error status {} | Error text {} ",
-                    response.getErrorIndex(), response.getErrorStatus(), response.getErrorStatusText());
-        }
-    }
-
-    private void closeTransport(AbstractTransportMapping transport) {
-        if (transport != null) {
-            try {
-                transport.close();
-            } catch (IOException e) {
-                log.error("IOException while closing TransportMapping ", e);
-            }
-        }
-    }
-
-    private void closeSnmp(Snmp snmp) {
-        if (snmp != null) {
-            try {
-                snmp.close();
-            } catch (IOException e) {
-                log.error("IOException while closing SNMP connection ", e);
-            }
-        }
-    }
-
-    private boolean isValidSnmpVersion(int snmpVersion) {
-        return snmpVersion == SnmpConstants.version1
-                || snmpVersion == SnmpConstants.version2c;
-    }
-
-    private boolean isValidVariableType(int type) {
-        return type == SnmpVariableType.INTEGER.toInt()
-                || type == SnmpVariableType.COUNTER32.toInt()
-                || type == SnmpVariableType.GAUGE.toInt()
-                || type == SnmpVariableType.COUNTER64.toInt();
-    }
-
-    private Target getTarget(String ipAddress, int snmpVersion, int pollingPort) {
-        CommunityTarget target = new CommunityTarget();
-        target.setCommunity(new OctetString(config.getCommunityTarget()));
-        target.setAddress(new UdpAddress(ipAddress + "/" + pollingPort));
-        target.setVersion(snmpVersion);
-        return target;
-    }
-
-    public enum SnmpVariableType {
-        INTEGER(2), COUNTER32(65), GAUGE(66), COUNTER64(70);
-
-        private int type;
-
-        SnmpVariableType(int type) {
-            this.type = type;
-        }
-
-        int toInt() {
-            return type;
-        }
     }
 }

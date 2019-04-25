@@ -11,7 +11,7 @@ public class SNMPConfigurationProperties {
     @Value("${snmp.trapListener.address:localhost}")
     private String address;
 
-    @Value("${snmp.trapListener.port:161}")
+    @Value("${snmp.trapListener.port:162}")
     private int listenerPort;
 
     @Value("${snmp.trapListener.threadPoolSize:10}")

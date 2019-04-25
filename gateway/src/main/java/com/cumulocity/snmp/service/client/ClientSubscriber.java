@@ -50,6 +50,9 @@ public class ClientSubscriber {
     DeviceInterface deviceInterface;
 
     @Autowired
+    DevicePollingService pollingService;
+
+    @Autowired
     Scheduler scheduler;
 
     ScheduledFuture<?> future = null;
@@ -173,14 +176,13 @@ public class ClientSubscriber {
     private void pollDevice(final Gateway gateway, final Device device) throws IOException {
         for (final Register register : mapIpAddressToRegister.get(device.getIpAddress())) {
             if (register.getMeasurementMapping() != null) {
-                deviceInterface.initiatePolling(register.getOid(), device.getIpAddress(), device.getPort(),
-                        device.getSnmpVersion(), new PduListener() {
-                            @Override
-                            public void onPduReceived(PDU pdu) {
-                                eventPublisher.publishEvent(new ClientDataChangedEvent(gateway, device, register,
-                                        new DateTime(), pdu.getVariableBindings().get(0).getVariable(), true));
-                            }
-                        });
+                pollingService.initiatePolling(register.getOid(), device, new PduListener() {
+                    @Override
+                    public void onPduReceived(PDU pdu) {
+                        eventPublisher.publishEvent(new ClientDataChangedEvent(gateway, device, register,
+                                new DateTime(), pdu.getVariableBindings().get(0).getVariable(), true));
+                    }
+                });
             }
         }
     }

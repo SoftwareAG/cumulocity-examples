@@ -1,17 +1,22 @@
 package com.cumulocity.snmp.service.client;
 
 import com.cumulocity.snmp.configuration.service.SNMPConfigurationProperties;
+import com.cumulocity.snmp.model.gateway.UnknownTrapOrDeviceEvent;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.snmp4j.CommandResponderEvent;
 import org.snmp4j.PDU;
-import org.snmp4j.smi.Variable;
-import org.snmp4j.smi.VariableBinding;
+import org.snmp4j.smi.Address;
+import org.snmp4j.smi.UdpAddress;
 import org.springframework.context.ApplicationEventPublisher;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Vector;
 
 import static org.mockito.Mockito.*;
@@ -29,52 +34,95 @@ public class DeviceInterfaceTest {
     ApplicationEventPublisher eventPublisher;
 
     @Test
-    public void ShouldReturnResponseAsNullForPollingIncorrectDevicePort() throws IOException {
-        String oId = "1.3.6.1.2.1.1.7.0";
-        String ipAddress = "localhost";
-        int port = 6672;
-        int snmpVersion = 2;
+    public void shouldSuccessfullyInitiateTrapListener() throws IOException {
+        UdpAddress udpAddress = mock(UdpAddress.class);
 
-        final PDU pdu = mock(PDU.class);
-
-        Vector variableBindings = mock(Vector.class);
-        VariableBinding variableBinding = mock(VariableBinding.class);
-        Variable variable = mock(Variable.class);
-        PduListener pduListener = mock(PduListener.class);
-
-        when(pdu.getVariableBindings()).thenReturn(variableBindings);
-        when(variableBindings.get(0)).thenReturn(variableBinding);
-        when(variableBinding.getVariable()).thenReturn(variable);
         when(config.getCommunityTarget()).thenReturn("public");
-        when(config.getPollingPort()).thenReturn(123);
-        doNothing().when(pduListener).onPduReceived(any(PDU.class));
 
-        deviceInterface.initiatePolling(oId, ipAddress, port, snmpVersion, pduListener);
-
-        verify(pduListener, never()).onPduReceived(any(PDU.class));
+        deviceInterface.listen(udpAddress);
     }
 
     @Test
-    public void ShouldReturnResponseAsNullForPollingIncorrectOid() throws IOException {
-        String oId = "1.6.1.2.1.1.7.0";
-        String ipAddress = "localhost";
-        int port = 6672;
-        int snmpVersion = 2;
+    public void shouldReturnAsPduIsNull() {
+        CommandResponderEvent event = mock(CommandResponderEvent.class);
 
-        final PDU pdu = mock(PDU.class);
-        Vector variableBindings = mock(Vector.class);
-        VariableBinding variableBinding = mock(VariableBinding.class);
-        Variable variable = mock(Variable.class);
-        PduListener pduListener = mock(PduListener.class);
+        when(event.getPDU()).thenReturn(null);
 
-        when(pdu.getVariableBindings()).thenReturn(variableBindings);
-        when(variableBindings.get(0)).thenReturn(variableBinding);
-        when(variableBinding.getVariable()).thenReturn(variable);
-        when(config.getCommunityTarget()).thenReturn("public");
-        when(config.getPollingPort()).thenReturn(6672);
+        deviceInterface.processPdu(event);
 
-        deviceInterface.initiatePolling(oId, ipAddress, port, snmpVersion, pduListener);
+        verify(event, atLeastOnce()).getPDU();
+    }
 
-        verify(pduListener, never()).onPduReceived(pdu);
+    @Test
+    public void shouldReturnAsVariableBindingIsNull() {
+        CommandResponderEvent event = mock(CommandResponderEvent.class);
+        PDU pdu = mock(PDU.class);
+
+        when(event.getPDU()).thenReturn(pdu);
+
+        deviceInterface.processPdu(event);
+
+        verify(event, atLeastOnce()).getPDU();
+        verify(pdu, atLeastOnce()).getVariableBindings();
+    }
+
+    @Test
+    public void shouldReturnAsNoVariableBindings() {
+        CommandResponderEvent event = mock(CommandResponderEvent.class);
+        PDU pdu = mock(PDU.class);
+        Vector vector = mock(Vector.class);
+
+        when(event.getPDU()).thenReturn(pdu);
+        when(pdu.getVariableBindings()).thenReturn(vector);
+
+        deviceInterface.processPdu(event);
+
+        verify(event, atLeastOnce()).getPDU();
+        verify(pdu, atLeastOnce()).getVariableBindings();
+    }
+
+    @Test
+    public void shouldPublishUnknownTrapRecievedEventWhenReceivedTrapHostIsUnknown() {
+        CommandResponderEvent event = mock(CommandResponderEvent.class);
+        PDU pdu = mock(PDU.class);
+        Vector vector = mock(Vector.class);
+        Address address = mock(Address.class);
+
+        when(event.getPDU()).thenReturn(pdu);
+        when(pdu.getVariableBindings()).thenReturn(vector);
+        when(pdu.getVariableBindings().size()).thenReturn(1);
+        when(event.getPeerAddress()).thenReturn(address);
+        when(event.getPeerAddress().toString()).thenReturn("localhost/162");
+
+        deviceInterface.processPdu(event);
+
+        verify(event, atLeastOnce()).getPDU();
+        verify(pdu, atLeastOnce()).getVariableBindings();
+        verify(eventPublisher, atLeastOnce()).publishEvent(any(UnknownTrapOrDeviceEvent.class));
+    }
+
+    @Test
+    public void shouldDoNothingWhenReceivedTrapHasNoConfiguration() {
+        CommandResponderEvent event = mock(CommandResponderEvent.class);
+        PDU pdu = mock(PDU.class);
+        Vector vector = mock(Vector.class);
+        Address address = mock(Address.class);
+        Map<String, PduListener> listenerMap = mock(HashMap.class);
+        Map<String, Map<String, PduListener>> map = new HashMap<>();
+        map.put("localhost", listenerMap);
+        Iterator variableBindingIterator = mock(Iterator.class);
+
+        when(event.getPDU()).thenReturn(pdu);
+        when(pdu.getVariableBindings()).thenReturn(vector);
+        when(pdu.getVariableBindings().size()).thenReturn(1);
+        when(event.getPeerAddress()).thenReturn(address);
+        when(event.getPeerAddress().toString()).thenReturn("localhost/162");
+        when(pdu.getVariableBindings().iterator()).thenReturn(variableBindingIterator);
+
+        deviceInterface.subscribe(map);
+        deviceInterface.processPdu(event);
+
+        verify(event, atLeastOnce()).getPDU();
+        verify(pdu, atLeastOnce()).getVariableBindings();
     }
 }

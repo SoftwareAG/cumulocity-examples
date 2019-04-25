@@ -21,25 +21,74 @@ public class DeviceFactoryTest {
     DeviceFactory deviceFactory;
 
     @Test
-    public void shouldCreateDevice() {
+    public void shouldCreateDeviceWithoutAuthDetails() {
 
         //Given
         HashMap<Object, Object> deviceFragment = new HashMap<>();
         deviceFragment.put("ipAddress", "192.168.0.1");
         deviceFragment.put("port", "161");
-        deviceFragment.put("version", "1");
+        deviceFragment.put("version", "0");
         deviceFragment.put("type", "/inventory/managedObjects/15257");
         ManagedObjectRepresentation managedObject = new ManagedObjectRepresentation();
         managedObject.setId(asGId("15256"));
         managedObject.setProperty(Device.c8y_SNMPDevice, deviceFragment);
+        Device device = new Device();
+        device.setId(asGId("15256"));
+        device.setIpAddress("192.168.0.1");
+        device.setDeviceType(asGId("15257"));
+        device.setPort(161);
+        device.setSnmpVersion(0);
 
         //When
         Optional<Device> deviceOptional = deviceFactory.convert(managedObject);
 
         //Then
         assertThat(deviceOptional).is(present());
-        assertThat(deviceOptional.get()).isEqualTo(new Device(asGId("15256"), "192.168.0.1", asGId("15257"),
-                161, 1));
+        assertThat(deviceOptional.get()).isEqualTo(device);
+    }
+
+    @Test
+    public void shouldCreateDeviceWithAuthDetails() {
+
+        //Given
+        HashMap<Object, Object> authFragment = new HashMap<>();
+        authFragment.put("username", "testsnmp");
+        authFragment.put("securityLevel", 3);
+        authFragment.put("authProtocol", 2);
+        authFragment.put("authPassword", "testsnmp");
+        authFragment.put("privProtocol", 1);
+        authFragment.put("privPassword", "testsnmp");
+
+        HashMap<Object, Object> deviceFragment = new HashMap<>();
+        deviceFragment.put("ipAddress", "192.168.0.1");
+        deviceFragment.put("port", "161");
+        deviceFragment.put("version", "0");
+        deviceFragment.put("type", "/inventory/managedObjects/15257");
+        deviceFragment.put("auth", authFragment);
+
+        ManagedObjectRepresentation managedObject = new ManagedObjectRepresentation();
+        managedObject.setId(asGId("15256"));
+        managedObject.setProperty(Device.c8y_SNMPDevice, deviceFragment);
+
+        Device device = new Device();
+        device.setId(asGId("15256"));
+        device.setIpAddress("192.168.0.1");
+        device.setDeviceType(asGId("15257"));
+        device.setPort(161);
+        device.setSnmpVersion(0);
+        device.setUsername("testsnmp");
+        device.setSecurityLevel(3);
+        device.setAuthProtocol(2);
+        device.setAuthProtocolPassword("testsnmp");
+        device.setPrivacyProtocol(1);
+        device.setPrivacyProtocolPassword("testsnmp");
+
+        //When
+        Optional<Device> deviceOptional = deviceFactory.convert(managedObject);
+
+        //Then
+        assertThat(deviceOptional).is(present());
+        assertThat(deviceOptional.get()).isEqualTo(device);
     }
 
     @Test

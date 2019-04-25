@@ -26,6 +26,12 @@ public class Device implements IdProvider {
     private GId deviceType;
     private int port;
     private int snmpVersion;
+    private String username;
+    private int securityLevel;
+    private int authProtocol;
+    private String authProtocolPassword;
+    private int privacyProtocol;
+    private String privacyProtocolPassword;
 
     @UtilityClass
     public static class Method {
