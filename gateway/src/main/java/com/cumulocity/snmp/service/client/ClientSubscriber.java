@@ -85,7 +85,6 @@ public class ClientSubscriber {
     @RunWithinContext
     public synchronized void refreshSubscription(final DeviceAddedEvent event) {
         log.debug("Initiating Device add");
-        final Gateway gateway = event.getGateway();
         this.gateway = event.getGateway();
         if (event.getDevice().getDeviceType() != null) {
             final Optional<DeviceType> deviceTypeOptional = deviceTypeRepository.get(event.getDevice().getDeviceType());

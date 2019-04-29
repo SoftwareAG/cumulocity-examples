@@ -2,6 +2,9 @@ package com.cumulocity.snmp.service.client;
 
 import com.cumulocity.snmp.configuration.service.SNMPConfigurationProperties;
 import com.cumulocity.snmp.model.gateway.device.Device;
+import com.cumulocity.snmp.utils.SnmpAuthProtocol;
+import com.cumulocity.snmp.utils.SnmpPrivacyProtocol;
+import com.cumulocity.snmp.utils.SnmpVariableType;
 import lombok.extern.slf4j.Slf4j;
 import org.snmp4j.*;
 import org.snmp4j.event.ResponseEvent;
@@ -127,10 +130,10 @@ public class DevicePollingService {
     }
 
     private Target getV3TargetForNoAuthNoPriv(Snmp snmp, Device device, TransportIpAddress address) {
-        UsmUser user = createUsmUser(new OctetString(SnmpAuthProtocol.SHA.name), null, null, null, null);
+        UsmUser user = createUsmUser(new OctetString(SnmpAuthProtocol.SHA.getName()), null, null, null, null);
         snmp.getUSM().addUser(new OctetString(device.getUsername()), user);
         return getV3Target(device.getSnmpVersion(), address,
-                SnmpAuthProtocol.SHA.name, SecurityLevel.NOAUTH_NOPRIV);
+                SnmpAuthProtocol.SHA.getName(), SecurityLevel.NOAUTH_NOPRIV);
     }
 
     private UsmUser createUsmUser(OctetString securityName, OID authenticationProtocol,
@@ -139,15 +142,15 @@ public class DevicePollingService {
     }
 
     private boolean isValidPrivacyProtocol(int privacyProtocol) {
-        return privacyProtocol == SnmpPrivacyProtocol.DES.value
-                || privacyProtocol == SnmpPrivacyProtocol.AES128.value
-                || privacyProtocol == SnmpPrivacyProtocol.AES192.value
-                || privacyProtocol == SnmpPrivacyProtocol.AES256.value;
+        return privacyProtocol == SnmpPrivacyProtocol.DES.getValue()
+                || privacyProtocol == SnmpPrivacyProtocol.AES128.getValue()
+                || privacyProtocol == SnmpPrivacyProtocol.AES192.getValue()
+                || privacyProtocol == SnmpPrivacyProtocol.AES256.getValue();
     }
 
     private boolean isValidAuthProtocol(int authenticationProtocol) {
-        return authenticationProtocol == SnmpAuthProtocol.MD5.value
-                || authenticationProtocol == SnmpAuthProtocol.SHA.value;
+        return authenticationProtocol == SnmpAuthProtocol.MD5.getValue()
+                || authenticationProtocol == SnmpAuthProtocol.SHA.getValue();
     }
 
     private boolean isValidUserName(String username) {
@@ -207,10 +210,10 @@ public class DevicePollingService {
     }
 
     private boolean isValidVariableType(int type) {
-        return type == SnmpVariableType.INTEGER.toInt()
-                || type == SnmpVariableType.COUNTER32.toInt()
-                || type == SnmpVariableType.GAUGE.toInt()
-                || type == SnmpVariableType.COUNTER64.toInt();
+        return type == SnmpVariableType.INTEGER.getType()
+                || type == SnmpVariableType.COUNTER32.getType()
+                || type == SnmpVariableType.GAUGE.getType()
+                || type == SnmpVariableType.COUNTER64.getType();
     }
 
     private Target getTarget(int snmpVersion, TransportIpAddress targetAddress) {
@@ -230,97 +233,5 @@ public class DevicePollingService {
         target.setSecurityName(new OctetString(securityName));
         target.setTimeout(1000 * 5);
         return target;
-    }
-
-    public enum SnmpVariableType {
-        INTEGER(2), COUNTER32(65), GAUGE(66), COUNTER64(70);
-
-        private int type;
-
-        SnmpVariableType(int type) {
-            this.type = type;
-        }
-
-        int toInt() {
-            return type;
-        }
-    }
-
-    public enum SnmpAuthProtocol {
-        MD5(1, "MD5DES", AuthMD5.ID), SHA(2, "SHADES", AuthSHA.ID);
-
-        private int value;
-        private String name;
-        private OID oId;
-
-        SnmpAuthProtocol(int value, String name, OID oId) {
-            this.value = value;
-            this.name = name;
-            this.oId = oId;
-        }
-
-        public static String getAuthProtocolName(int id) {
-            String name;
-            switch (id) {
-                case 1:
-                    name = "MD5DES";
-                    break;
-                case 2:
-                    name = "SHADES";
-                    break;
-                default:
-                    name = "";
-                    break;
-            }
-            return name;
-        }
-
-        public static OID getAuthProtocolOid(int id) {
-            OID oid;
-            switch (id) {
-                case 1:
-                    oid = AuthMD5.ID;
-                    break;
-                case 2:
-                    oid = AuthSHA.ID;
-                    break;
-                default:
-                    oid = null;
-                    break;
-            }
-            return oid;
-        }
-    }
-
-    public enum SnmpPrivacyProtocol {
-        DES(1), AES128(2), AES192(3), AES256(4);
-
-        private int value;
-
-        SnmpPrivacyProtocol(int value) {
-            this.value = value;
-        }
-
-        public static OID getPrivacyProtocolOid(int id) {
-            OID oid;
-            switch (id) {
-                case 1:
-                    oid = PrivDES.ID;
-                    break;
-                case 2:
-                    oid = PrivAES128.ID;
-                    break;
-                case 3:
-                    oid = PrivAES192.ID;
-                    break;
-                case 4:
-                    oid = PrivAES256.ID;
-                    break;
-                default:
-                    oid = null;
-                    break;
-            }
-            return oid;
-        }
     }
 }
