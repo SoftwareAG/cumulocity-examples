@@ -2,6 +2,7 @@ package com.cumulocity.snmp.service.client;
 
 import com.cumulocity.snmp.configuration.service.SNMPConfigurationProperties;
 import com.cumulocity.snmp.model.gateway.device.Device;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -12,7 +13,6 @@ import org.snmp4j.smi.Variable;
 import org.snmp4j.smi.VariableBinding;
 import org.springframework.context.ApplicationEventPublisher;
 
-import java.io.IOException;
 import java.util.Vector;
 
 import static com.cumulocity.model.idtype.GId.asGId;
@@ -31,24 +31,37 @@ public class DevicePolingServiceTest {
     @Mock
     ApplicationEventPublisher eventPublisher;
 
-    @Test
-    public void ShouldReturnResponseAsNullForPollingIncorrectDevicePortUsingSnmpVersion1() throws IOException {
-        String oId = "1.3.6.1.2.1.1.7.0";
+    String oId;
+    private Device device;
+    private Vector variableBindings;
+    private VariableBinding variableBinding;
+    private Variable variable;
+    private PduListener pduListener;
+    private PDU pdu;
+
+    @Before
+    public void init() {
+        oId = "1.3.6.1.2.1.1.7.0";
         String ipAddress = "localhost";
         int port = 123;
-        int snmpVersion = 0; // version 1
-        final PDU pdu = mock(PDU.class);
 
-        Device device = new Device();
+        pdu = mock(PDU.class);
+
+        device = new Device();
         device.setId(asGId("15256"));
         device.setIpAddress(ipAddress);
         device.setDeviceType(asGId("15257"));
         device.setPort(port);
+        variableBindings = mock(Vector.class);
+        variableBinding = mock(VariableBinding.class);
+        variable = mock(Variable.class);
+        pduListener = mock(PduListener.class);
+    }
+
+    @Test
+    public void ShouldReturnResponseAsNullForPollingIncorrectDevicePortUsingSnmpVersion1() {
+        int snmpVersion = 0; // version 1
         device.setSnmpVersion(snmpVersion);
-        Vector variableBindings = mock(Vector.class);
-        VariableBinding variableBinding = mock(VariableBinding.class);
-        Variable variable = mock(Variable.class);
-        PduListener pduListener = mock(PduListener.class);
 
         when(pdu.getVariableBindings()).thenReturn(variableBindings);
         when(variableBindings.get(0)).thenReturn(variableBinding);
@@ -62,23 +75,9 @@ public class DevicePolingServiceTest {
     }
 
     @Test
-    public void ShouldReturnResponseAsNullForPollingIncorrectOidUsingSnmpVersion1() throws IOException {
-        String oId = "1.6.1.2.1.1.7.0";
-        String ipAddress = "localhost";
-        int port = 123;
+    public void ShouldReturnResponseAsNullForPollingIncorrectOidUsingSnmpVersion1() {
         int snmpVersion = 0; // version 1
-
-        final PDU pdu = mock(PDU.class);
-        Device device = new Device();
-        device.setId(asGId("15256"));
-        device.setIpAddress(ipAddress);
-        device.setDeviceType(asGId("15257"));
-        device.setPort(port);
         device.setSnmpVersion(snmpVersion);
-        Vector variableBindings = mock(Vector.class);
-        VariableBinding variableBinding = mock(VariableBinding.class);
-        Variable variable = mock(Variable.class);
-        PduListener pduListener = mock(PduListener.class);
 
         when(pdu.getVariableBindings()).thenReturn(variableBindings);
         when(variableBindings.get(0)).thenReturn(variableBinding);
@@ -91,23 +90,9 @@ public class DevicePolingServiceTest {
     }
 
     @Test
-    public void ShouldReturnResponseAsNullForPollingIncorrectDevicePortUsingSnmpVersion2c() throws IOException {
-        String oId = "1.3.6.1.2.1.1.7.0";
-        String ipAddress = "localhost";
-        int port = 123;
+    public void ShouldReturnResponseAsNullForPollingIncorrectDevicePortUsingSnmpVersion2c() {
         int snmpVersion = 1; // version 2c
-        final PDU pdu = mock(PDU.class);
-
-        Device device = new Device();
-        device.setId(asGId("15256"));
-        device.setIpAddress(ipAddress);
-        device.setDeviceType(asGId("15257"));
-        device.setPort(port);
         device.setSnmpVersion(snmpVersion);
-        Vector variableBindings = mock(Vector.class);
-        VariableBinding variableBinding = mock(VariableBinding.class);
-        Variable variable = mock(Variable.class);
-        PduListener pduListener = mock(PduListener.class);
 
         when(pdu.getVariableBindings()).thenReturn(variableBindings);
         when(variableBindings.get(0)).thenReturn(variableBinding);
@@ -121,23 +106,9 @@ public class DevicePolingServiceTest {
     }
 
     @Test
-    public void ShouldReturnResponseAsNullForPollingIncorrectOidUsingSnmpVersion2c() throws IOException {
-        String oId = "1.6.1.2.1.1.7.0";
-        String ipAddress = "localhost";
-        int port = 123;
+    public void ShouldReturnResponseAsNullForPollingIncorrectOidUsingSnmpVersion2c() {
         int snmpVersion = 1; // version 2c
-
-        final PDU pdu = mock(PDU.class);
-        Device device = new Device();
-        device.setId(asGId("15256"));
-        device.setIpAddress(ipAddress);
-        device.setDeviceType(asGId("15257"));
-        device.setPort(port);
         device.setSnmpVersion(snmpVersion);
-        Vector variableBindings = mock(Vector.class);
-        VariableBinding variableBinding = mock(VariableBinding.class);
-        Variable variable = mock(Variable.class);
-        PduListener pduListener = mock(PduListener.class);
 
         when(pdu.getVariableBindings()).thenReturn(variableBindings);
         when(variableBindings.get(0)).thenReturn(variableBinding);
@@ -150,23 +121,9 @@ public class DevicePolingServiceTest {
     }
 
     @Test
-    public void ShouldReturnNullResponseAsNoUsernameProvidedUsingSnmpVersion3() throws IOException {
-        String oId = "1.6.1.2.1.1.7.0";
-        String ipAddress = "localhost";
-        int port = 123;
+    public void ShouldReturnNullResponseAsNoUsernameProvidedUsingSnmpVersion3() {
         int snmpVersion = 3; // version 3
-
-        final PDU pdu = mock(PDU.class);
-        Device device = new Device();
-        device.setId(asGId("15256"));
-        device.setIpAddress(ipAddress);
-        device.setDeviceType(asGId("15257"));
-        device.setPort(port);
         device.setSnmpVersion(snmpVersion);
-        Vector variableBindings = mock(Vector.class);
-        VariableBinding variableBinding = mock(VariableBinding.class);
-        Variable variable = mock(Variable.class);
-        PduListener pduListener = mock(PduListener.class);
 
         when(pdu.getVariableBindings()).thenReturn(variableBindings);
         when(variableBindings.get(0)).thenReturn(variableBinding);
@@ -179,24 +136,10 @@ public class DevicePolingServiceTest {
     }
 
     @Test
-    public void ShouldReturnNullResponseAsNoSecurityLevelProvidedUsingSnmpVersion3() throws IOException {
-        String oId = "1.6.1.2.1.1.7.0";
-        String ipAddress = "localhost";
-        int port = 123;
+    public void ShouldReturnNullResponseAsNoSecurityLevelProvidedUsingSnmpVersion3() {
         int snmpVersion = 3; // version 3
-
-        final PDU pdu = mock(PDU.class);
-        Device device = new Device();
-        device.setId(asGId("15256"));
-        device.setIpAddress(ipAddress);
-        device.setDeviceType(asGId("15257"));
-        device.setPort(port);
         device.setSnmpVersion(snmpVersion);
         device.setUsername("testuser");
-        Vector variableBindings = mock(Vector.class);
-        VariableBinding variableBinding = mock(VariableBinding.class);
-        Variable variable = mock(Variable.class);
-        PduListener pduListener = mock(PduListener.class);
 
         when(pdu.getVariableBindings()).thenReturn(variableBindings);
         when(variableBindings.get(0)).thenReturn(variableBinding);
@@ -209,25 +152,11 @@ public class DevicePolingServiceTest {
     }
 
     @Test
-    public void ShouldReturnNullResponseAsUndefinedSecurityLevelProvidedUsingSnmpVersion3() throws IOException {
-        String oId = "1.6.1.2.1.1.7.0";
-        String ipAddress = "localhost";
-        int port = 123;
+    public void ShouldReturnNullResponseAsUndefinedSecurityLevelProvidedUsingSnmpVersion3() {
         int snmpVersion = 3; // version 3
-
-        final PDU pdu = mock(PDU.class);
-        Device device = new Device();
-        device.setId(asGId("15256"));
-        device.setIpAddress(ipAddress);
-        device.setDeviceType(asGId("15257"));
-        device.setPort(port);
         device.setSnmpVersion(snmpVersion);
         device.setUsername("testuser");
         device.setSecurityLevel(0);
-        Vector variableBindings = mock(Vector.class);
-        VariableBinding variableBinding = mock(VariableBinding.class);
-        Variable variable = mock(Variable.class);
-        PduListener pduListener = mock(PduListener.class);
 
         when(pdu.getVariableBindings()).thenReturn(variableBindings);
         when(variableBindings.get(0)).thenReturn(variableBinding);
@@ -240,25 +169,11 @@ public class DevicePolingServiceTest {
     }
 
     @Test
-    public void ShouldReturnNullResponseWithNoAuthNoPrivUsingSnmpVersion3() throws IOException {
-        String oId = "1.6.1.2.1.1.7.0";
-        String ipAddress = "localhost";
-        int port = 123;
+    public void ShouldReturnNullResponseWithNoAuthNoPrivUsingSnmpVersion3() {
         int snmpVersion = 3; // version 3
-
-        final PDU pdu = mock(PDU.class);
-        Device device = new Device();
-        device.setId(asGId("15256"));
-        device.setIpAddress(ipAddress);
-        device.setDeviceType(asGId("15257"));
-        device.setPort(port);
         device.setSnmpVersion(snmpVersion);
         device.setUsername("testuser");
         device.setSecurityLevel(1);
-        Vector variableBindings = mock(Vector.class);
-        VariableBinding variableBinding = mock(VariableBinding.class);
-        Variable variable = mock(Variable.class);
-        PduListener pduListener = mock(PduListener.class);
 
         when(pdu.getVariableBindings()).thenReturn(variableBindings);
         when(variableBindings.get(0)).thenReturn(variableBinding);
@@ -271,27 +186,13 @@ public class DevicePolingServiceTest {
     }
 
     @Test
-    public void ShouldReturnNullResponseWithAuthNoPrivInvalidAuthProtocolUsingSnmpVersion3() throws IOException {
-        String oId = "1.6.1.2.1.1.7.0";
-        String ipAddress = "localhost";
-        int port = 123;
+    public void ShouldReturnNullResponseWithAuthNoPrivInvalidAuthProtocolUsingSnmpVersion3() {
         int snmpVersion = 3; // version 3
-
-        final PDU pdu = mock(PDU.class);
-        Device device = new Device();
-        device.setId(asGId("15256"));
-        device.setIpAddress(ipAddress);
-        device.setDeviceType(asGId("15257"));
-        device.setPort(port);
         device.setSnmpVersion(snmpVersion);
         device.setUsername("testuser");
         device.setSecurityLevel(2);
         device.setAuthProtocol(0);
         device.setAuthProtocolPassword("authpassword");
-        Vector variableBindings = mock(Vector.class);
-        VariableBinding variableBinding = mock(VariableBinding.class);
-        Variable variable = mock(Variable.class);
-        PduListener pduListener = mock(PduListener.class);
 
         when(pdu.getVariableBindings()).thenReturn(variableBindings);
         when(variableBindings.get(0)).thenReturn(variableBinding);
@@ -304,27 +205,13 @@ public class DevicePolingServiceTest {
     }
 
     @Test
-    public void ShouldReturnNullResponseWithAuthNoPrivInvalidAuthProtocolInvalidPasswordUsingSnmpVersion3() throws IOException {
-        String oId = "1.6.1.2.1.1.7.0";
-        String ipAddress = "localhost";
-        int port = 123;
+    public void ShouldReturnNullResponseWithAuthNoPrivInvalidAuthProtocolInvalidPasswordUsingSnmpVersion3() {
         int snmpVersion = 3; // version 3
-
-        final PDU pdu = mock(PDU.class);
-        Device device = new Device();
-        device.setId(asGId("15256"));
-        device.setIpAddress(ipAddress);
-        device.setDeviceType(asGId("15257"));
-        device.setPort(port);
         device.setSnmpVersion(snmpVersion);
         device.setUsername("testuser");
         device.setSecurityLevel(2);
         device.setAuthProtocol(1);
         device.setAuthProtocolPassword("auth123");
-        Vector variableBindings = mock(Vector.class);
-        VariableBinding variableBinding = mock(VariableBinding.class);
-        Variable variable = mock(Variable.class);
-        PduListener pduListener = mock(PduListener.class);
 
         when(pdu.getVariableBindings()).thenReturn(variableBindings);
         when(variableBindings.get(0)).thenReturn(variableBinding);
@@ -337,27 +224,13 @@ public class DevicePolingServiceTest {
     }
 
     @Test
-    public void ShouldReturnNullResponseWithAuthNoPrivInvalidAuthProtocolInvalidPortNumberUsingSnmpVersion3() throws IOException {
-        String oId = "1.6.1.2.1.1.7.0";
-        String ipAddress = "localhost";
-        int port = 123;
+    public void ShouldReturnNullResponseWithAuthNoPrivInvalidAuthProtocolInvalidPortNumberUsingSnmpVersion3() {
         int snmpVersion = 3; // version 3
-
-        final PDU pdu = mock(PDU.class);
-        Device device = new Device();
-        device.setId(asGId("15256"));
-        device.setIpAddress(ipAddress);
-        device.setDeviceType(asGId("15257"));
-        device.setPort(port);
         device.setSnmpVersion(snmpVersion);
         device.setUsername("testuser");
         device.setSecurityLevel(2);
         device.setAuthProtocol(2);
         device.setAuthProtocolPassword("authpass");
-        Vector variableBindings = mock(Vector.class);
-        VariableBinding variableBinding = mock(VariableBinding.class);
-        Variable variable = mock(Variable.class);
-        PduListener pduListener = mock(PduListener.class);
 
         when(pdu.getVariableBindings()).thenReturn(variableBindings);
         when(variableBindings.get(0)).thenReturn(variableBinding);
@@ -370,28 +243,14 @@ public class DevicePolingServiceTest {
     }
 
     @Test
-    public void ShouldReturnNullResponseWithAuthNoPrivInvalidAuthProtocolInvalidPrivProtocolUsingSnmpVersion3() throws IOException {
-        String oId = "1.6.1.2.1.1.7.0";
-        String ipAddress = "localhost";
-        int port = 123;
+    public void ShouldReturnNullResponseWithAuthNoPrivInvalidAuthProtocolInvalidPrivProtocolUsingSnmpVersion3() {
         int snmpVersion = 3; // version 3
-
-        final PDU pdu = mock(PDU.class);
-        Device device = new Device();
-        device.setId(asGId("15256"));
-        device.setIpAddress(ipAddress);
-        device.setDeviceType(asGId("15257"));
-        device.setPort(port);
         device.setSnmpVersion(snmpVersion);
         device.setUsername("testuser");
         device.setSecurityLevel(3);
         device.setAuthProtocol(1);
         device.setAuthProtocolPassword("authpass");
         device.setPrivacyProtocol(0);
-        Vector variableBindings = mock(Vector.class);
-        VariableBinding variableBinding = mock(VariableBinding.class);
-        Variable variable = mock(Variable.class);
-        PduListener pduListener = mock(PduListener.class);
 
         when(pdu.getVariableBindings()).thenReturn(variableBindings);
         when(variableBindings.get(0)).thenReturn(variableBinding);
@@ -404,18 +263,8 @@ public class DevicePolingServiceTest {
     }
 
     @Test
-    public void ShouldReturnNullResponseWithAuthNoPrivInvalidAuthProtocolInvalidPrivProtocolPwdUsingSnmpVersion3() throws IOException {
-        String oId = "1.6.1.2.1.1.7.0";
-        String ipAddress = "localhost";
-        int port = 123;
+    public void ShouldReturnNullResponseWithAuthNoPrivInvalidAuthProtocolInvalidPrivProtocolPwdUsingSnmpVersion3() {
         int snmpVersion = 3; // version 3
-
-        final PDU pdu = mock(PDU.class);
-        Device device = new Device();
-        device.setId(asGId("15256"));
-        device.setIpAddress(ipAddress);
-        device.setDeviceType(asGId("15257"));
-        device.setPort(port);
         device.setSnmpVersion(snmpVersion);
         device.setUsername("testuser");
         device.setSecurityLevel(3);
@@ -423,10 +272,6 @@ public class DevicePolingServiceTest {
         device.setAuthProtocolPassword("authpass");
         device.setPrivacyProtocol(1);
         device.setPrivacyProtocolPassword("privpwd");
-        Vector variableBindings = mock(Vector.class);
-        VariableBinding variableBinding = mock(VariableBinding.class);
-        Variable variable = mock(Variable.class);
-        PduListener pduListener = mock(PduListener.class);
 
         when(pdu.getVariableBindings()).thenReturn(variableBindings);
         when(variableBindings.get(0)).thenReturn(variableBinding);
@@ -439,18 +284,8 @@ public class DevicePolingServiceTest {
     }
 
     @Test
-    public void ShouldReturnNullResponseWithAuthNoPrivInvalidAuthProtocolInvalidPollingPortUsingSnmpVersion3() throws IOException {
-        String oId = "1.6.1.2.1.1.7.0";
-        String ipAddress = "localhost";
-        int port = 123;
+    public void ShouldReturnNullResponseWithAuthNoPrivInvalidAuthProtocolInvalidPollingPortUsingSnmpVersion3() {
         int snmpVersion = 3; // version 3
-
-        final PDU pdu = mock(PDU.class);
-        Device device = new Device();
-        device.setId(asGId("15256"));
-        device.setIpAddress(ipAddress);
-        device.setDeviceType(asGId("15257"));
-        device.setPort(port);
         device.setSnmpVersion(snmpVersion);
         device.setUsername("testuser");
         device.setSecurityLevel(3);
@@ -458,10 +293,6 @@ public class DevicePolingServiceTest {
         device.setAuthProtocolPassword("authpass");
         device.setPrivacyProtocol(2);
         device.setPrivacyProtocolPassword("privpass");
-        Vector variableBindings = mock(Vector.class);
-        VariableBinding variableBinding = mock(VariableBinding.class);
-        Variable variable = mock(Variable.class);
-        PduListener pduListener = mock(PduListener.class);
 
         when(pdu.getVariableBindings()).thenReturn(variableBindings);
         when(variableBindings.get(0)).thenReturn(variableBinding);
