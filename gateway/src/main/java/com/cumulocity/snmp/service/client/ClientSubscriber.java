@@ -61,13 +61,13 @@ public class ClientSubscriber {
     Scheduler scheduler;
 
     @Autowired
-    private DeviceFactory deviceFactory;
+    DeviceFactory deviceFactory;
 
     @Autowired
-    private ManagedObjectRepository managedObjectRepository;
+    ManagedObjectRepository managedObjectRepository;
 
     @Autowired
-    private DeviceTypeInventoryRepository deviceTypeInventoryRepository;
+    DeviceTypeInventoryRepository deviceTypeInventoryRepository;
 
     ScheduledFuture<?> future = null;
     Gateway gateway = null;
@@ -114,7 +114,7 @@ public class ClientSubscriber {
     public void updateDevice(final DeviceUpdatedEvent event) {
         this.gateway = event.getGateway();
         final Optional<ManagedObjectRepresentation> optional = managedObjectRepository.get(gateway, event.getDeviceId());
-        if(optional.isPresent()){
+        if (optional.isPresent()) {
             final Optional<Device> deviceOptional = deviceFactory.convert(optional.get());
             if (deviceOptional.isPresent()) {
                 final Optional<DeviceType> deviceTypeOptional = deviceTypeInventoryRepository.get(gateway, deviceOptional.get().getDeviceType());
