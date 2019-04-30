@@ -17,8 +17,10 @@ import com.cumulocity.snmp.utils.SnmpPrivacyProtocol;
 import com.google.common.base.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.snmp4j.*;
-import org.snmp4j.event.SnmpEngineEvent;
-import org.snmp4j.mp.*;
+import org.snmp4j.mp.MPv1;
+import org.snmp4j.mp.MPv2c;
+import org.snmp4j.mp.MPv3;
+import org.snmp4j.mp.SnmpConstants;
 import org.snmp4j.security.*;
 import org.snmp4j.smi.*;
 import org.snmp4j.transport.AbstractTransportMapping;
@@ -45,20 +47,15 @@ public class DeviceInterface implements CommandResponder {
     Map<String, Map<String, PduListener>> mapIPAddressToOid = new ConcurrentHashMap<>();
 
     Gateway gateway = new Gateway();
-
+    Snmp snmp;
     @Autowired
     private ApplicationEventPublisher eventPublisher;
-
     @Autowired
     private SNMPConfigurationProperties config;
-
     @Autowired
     private DeviceFactory deviceFactory;
-
     @Autowired
     private ManagedObjectRepository managedObjectRepository;
-
-    Snmp snmp;
 
     @PostConstruct
     public void init() {
@@ -87,7 +84,7 @@ public class DeviceInterface implements CommandResponder {
             messageDispatcher.addMessageProcessingModel(new MPv2c());
 
             SecurityProtocols.getInstance().addDefaultProtocols();
-            final USM usm = new USM(SecurityProtocols.getInstance(),new OctetString(MPv3.createLocalEngineID(new OctetString())),0);
+            final USM usm = new USM(SecurityProtocols.getInstance(), new OctetString(MPv3.createLocalEngineID(new OctetString())), 0);
             SecurityProtocols.getInstance().addPrivacyProtocol(new Priv3DES());
             SecurityProtocols.getInstance().addPrivacyProtocol(new PrivAES128());
             SecurityProtocols.getInstance().addPrivacyProtocol(new PrivAES256());
@@ -138,7 +135,7 @@ public class DeviceInterface implements CommandResponder {
             }
         } else {
             eventPublisher.publishEvent(new UnknownTrapOrDeviceEvent(gateway, new ConfigEventType(
-                    "TRAP received from unknown device with IP Address : " + peerIPAddress), c8y_TRAPReceivedFromUnknownDevice+peerIPAddress));
+                    "TRAP received from unknown device with IP Address : " + peerIPAddress), c8y_TRAPReceivedFromUnknownDevice + peerIPAddress));
         }
     }
 
@@ -158,11 +155,11 @@ public class DeviceInterface implements CommandResponder {
     @RunWithinContext
     public void updateSnmpV3Credentilas(final DeviceUpdatedEvent event) {
         final Optional<ManagedObjectRepresentation> optional = managedObjectRepository.get(event.getGateway(), event.getDeviceId());
-        if(optional.isPresent()) {
+        if (optional.isPresent()) {
             final Optional<Device> deviceOPtional = deviceFactory.convert(optional.get());
-            if(deviceOPtional.isPresent()) {
-                if (deviceOPtional.get().getSnmpVersion() == SnmpConstants.version3){
-                    updateSnmpV3Credentials(deviceOPtional.get());
+            if (deviceOPtional.isPresent()) {
+                if (deviceOPtional.get().getSnmpVersion() == SnmpConstants.version3) {
+                    addorUpdateSnmpV3Credentials(deviceOPtional.get());
                 }
             }
         }
@@ -171,8 +168,8 @@ public class DeviceInterface implements CommandResponder {
     @EventListener
     @RunWithinContext
     public synchronized void addSnmpV3Credentilas(final DeviceAddedEvent event) {
-        if(event.getDevice().getSnmpVersion() == SnmpConstants.version3) {
-            addSnmpV3Credentials(event.getDevice());
+        if (event.getDevice().getSnmpVersion() == SnmpConstants.version3) {
+            addorUpdateSnmpV3Credentials(event.getDevice());
         }
     }
 
@@ -182,10 +179,13 @@ public class DeviceInterface implements CommandResponder {
         snmp.getUSM().removeAllUsers(new OctetString(event.getDevice().getUsername()));
     }
 
-    private void addSnmpV3Credentials(Device device) {
-        switch (device.getSecurityLevel()){
+    private void addorUpdateSnmpV3Credentials(Device device) {
+        if (snmp.getUSM().getUser(new OctetString(device.getIpAddress()), new OctetString(device.getUsername())) != null) {
+            snmp.getUSM().removeAllUsers(new OctetString(device.getUsername()), new OctetString(device.getIpAddress()));
+        }
+        switch (device.getSecurityLevel()) {
             case SecurityLevel.NOAUTH_NOPRIV:
-                snmp.getUSM().addUser(new OctetString(device.getUsername()), new OctetString("Myuser1123"),
+                snmp.getUSM().addUser(new OctetString(device.getUsername()), new OctetString(device.getIpAddress()),
                         new UsmUser(new OctetString(device.getUsername()),
                                 null,
                                 null,
@@ -194,7 +194,7 @@ public class DeviceInterface implements CommandResponder {
                 break;
 
             case SecurityLevel.AUTH_NOPRIV:
-                snmp.getUSM().addUser(new OctetString(device.getUsername()), new OctetString("Myuser1123"),
+                snmp.getUSM().addUser(new OctetString(device.getUsername()), new OctetString(device.getIpAddress()),
                         new UsmUser(new OctetString(device.getUsername()),
                                 SnmpAuthProtocol.getAuthProtocolOid(device.getAuthProtocol()),
                                 new OctetString(device.getAuthProtocolPassword()),
@@ -203,50 +203,12 @@ public class DeviceInterface implements CommandResponder {
                 break;
 
             case SecurityLevel.AUTH_PRIV:
-                snmp.getUSM().addUser(new OctetString(device.getUsername()), new OctetString("Myuser1123"),
+                snmp.getUSM().addUser(new OctetString(device.getUsername()), new OctetString(device.getIpAddress()),
                         new UsmUser(new OctetString(device.getUsername()),
                                 SnmpAuthProtocol.getAuthProtocolOid(device.getAuthProtocol()),
                                 new OctetString(device.getAuthProtocolPassword()),
                                 SnmpPrivacyProtocol.getPrivacyProtocolOid(device.getPrivacyProtocol()),
                                 new OctetString(device.getPrivacyProtocolPassword())));
-                break;
-
-            default:
-                log.error("Undefined Security level for SNMP v3");
-                return;
-        }
-    }
-
-    private void updateSnmpV3Credentials(Device device){
-       if(snmp.getUSM().getUserTable().getUserEntries().size() == 0){
-           return;
-       }
-        switch (device.getSecurityLevel()){
-            case SecurityLevel.NOAUTH_NOPRIV:
-                snmp.getUSM().updateUser(new UsmUserEntry(new OctetString(device.getUsername()),new OctetString("Myuser1123"),
-                        new UsmUser(new OctetString(device.getUsername()),
-                                null,
-                                null,
-                                null,
-                                null)));
-                break;
-
-            case SecurityLevel.AUTH_NOPRIV:
-                snmp.getUSM().updateUser(new UsmUserEntry(new OctetString(device.getUsername()), new OctetString("Myuser1123"),
-                        new UsmUser(new OctetString(device.getUsername()),
-                                SnmpAuthProtocol.getAuthProtocolOid(device.getAuthProtocol()),
-                                new OctetString(device.getAuthProtocolPassword()),
-                                null,
-                                null)));
-                break;
-
-            case SecurityLevel.AUTH_PRIV:
-                snmp.getUSM().updateUser(new UsmUserEntry(new OctetString(device.getUsername()),new OctetString("Myuser1123"),
-                        new UsmUser(new OctetString(device.getUsername()),
-                                SnmpAuthProtocol.getAuthProtocolOid(device.getAuthProtocol()),
-                                new OctetString(device.getAuthProtocolPassword()),
-                                SnmpPrivacyProtocol.getPrivacyProtocolOid(device.getPrivacyProtocol()),
-                                new OctetString(device.getPrivacyProtocolPassword()))));
                 break;
 
             default:
