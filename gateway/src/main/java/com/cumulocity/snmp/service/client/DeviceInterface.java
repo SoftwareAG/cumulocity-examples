@@ -46,10 +46,10 @@ public class DeviceInterface implements CommandResponder {
     public void init() {
         log.debug("Initiating SNMP Listner at address {}, port {} and community {} ",
                 config.getAddress(), config.getListenerPort(), config.getCommunityTarget());
-        listen(new UdpAddress(config.getAddress() + "/" + config.getListenerPort()));
+        listen(GenericAddress.parse(config.getAddress() + "/" + config.getListenerPort()));
     }
 
-    public synchronized void listen(TransportIpAddress snmpListeningAddress) {
+    public synchronized void listen(Address snmpListeningAddress) {
         AbstractTransportMapping transportMapping;
         try {
             if (snmpListeningAddress instanceof TcpAddress) {
