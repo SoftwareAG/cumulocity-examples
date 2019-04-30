@@ -1,15 +1,20 @@
 package com.cumulocity.snmp.service.client;
 
 import com.cumulocity.model.idtype.GId;
+import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.snmp.annotation.gateway.RunWithinContext;
+import com.cumulocity.snmp.factory.gateway.DeviceFactory;
 import com.cumulocity.snmp.model.core.ConfigEventType;
 import com.cumulocity.snmp.model.device.DeviceAddedEvent;
 import com.cumulocity.snmp.model.device.DeviceRemovedEvent;
+import com.cumulocity.snmp.model.device.DeviceUpdatedEvent;
 import com.cumulocity.snmp.model.gateway.*;
 import com.cumulocity.snmp.model.gateway.client.ClientDataChangedEvent;
 import com.cumulocity.snmp.model.gateway.device.Device;
 import com.cumulocity.snmp.model.gateway.type.core.Register;
 import com.cumulocity.snmp.model.type.DeviceType;
+import com.cumulocity.snmp.repository.DeviceTypeInventoryRepository;
+import com.cumulocity.snmp.repository.ManagedObjectRepository;
 import com.cumulocity.snmp.repository.core.Repository;
 import com.cumulocity.snmp.utils.gateway.Scheduler;
 import com.google.common.base.Optional;
@@ -55,6 +60,15 @@ public class ClientSubscriber {
     @Autowired
     Scheduler scheduler;
 
+    @Autowired
+    DeviceFactory deviceFactory;
+
+    @Autowired
+    ManagedObjectRepository managedObjectRepository;
+
+    @Autowired
+    DeviceTypeInventoryRepository deviceTypeInventoryRepository;
+
     ScheduledFuture<?> future = null;
     Gateway gateway = null;
     AtomicInteger currentPollingRateInSeconds = new AtomicInteger(0);
@@ -91,6 +105,20 @@ public class ClientSubscriber {
             if (deviceTypeOptional.isPresent()) {
                 final Device device = event.getDevice();
                 subscribe(device, deviceTypeOptional.get());
+            }
+        }
+    }
+
+    @EventListener
+    @RunWithinContext
+    public void updateDevice(final DeviceUpdatedEvent event) {
+        this.gateway = event.getGateway();
+        final Optional<ManagedObjectRepresentation> optional = managedObjectRepository.get(gateway, event.getDeviceId());
+        if (optional.isPresent()) {
+            final Optional<Device> deviceOptional = deviceFactory.convert(optional.get());
+            if (deviceOptional.isPresent()) {
+                final Optional<DeviceType> deviceTypeOptional = deviceTypeInventoryRepository.get(gateway, deviceOptional.get().getDeviceType());
+                subscribe(deviceOptional.get(), deviceTypeOptional.get());
             }
         }
     }
