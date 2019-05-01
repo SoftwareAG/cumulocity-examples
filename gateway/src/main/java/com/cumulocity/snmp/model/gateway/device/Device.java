@@ -32,6 +32,7 @@ public class Device implements IdProvider {
     private String authProtocolPassword;
     private int privacyProtocol;
     private String privacyProtocolPassword;
+    private String engineId;
 
     @UtilityClass
     public static class Method {

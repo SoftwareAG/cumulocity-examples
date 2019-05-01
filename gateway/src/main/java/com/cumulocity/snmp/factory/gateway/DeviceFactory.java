@@ -65,12 +65,13 @@ public class DeviceFactory implements Converter<ManagedObjectRepresentation, Opt
                 .port(port)
                 .snmpVersion(version)
                 .deviceType(parseGId(property.get("type")))
-                .username((String) authMap.get("username"))
+                .username(authMap.get("username").toString())
                 .securityLevel(getIntValue(authMap.get("securityLevel")))
                 .authProtocol(getIntValue(authMap.get("authProtocol")))
-                .authProtocolPassword((String) authMap.get("authPassword"))
+                .authProtocolPassword(authMap.get("authPassword").toString())
                 .privacyProtocol(getIntValue(authMap.get("privProtocol")))
-                .privacyProtocolPassword((String) authMap.get("privPassword"))
+                .privacyProtocolPassword(authMap.get("privPassword").toString())
+                .engineId("engineId")
                 .build());
     }
 }

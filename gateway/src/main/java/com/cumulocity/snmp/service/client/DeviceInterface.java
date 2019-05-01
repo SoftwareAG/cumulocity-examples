@@ -180,12 +180,12 @@ public class DeviceInterface implements CommandResponder {
     }
 
     private void addorUpdateSnmpV3Credentials(Device device) {
-        if (snmp.getUSM().getUser(new OctetString(device.getIpAddress()), new OctetString(device.getUsername())) != null) {
-            snmp.getUSM().removeAllUsers(new OctetString(device.getUsername()), new OctetString(device.getIpAddress()));
+        if (snmp.getUSM().getUser(new OctetString(device.getEngineId()), new OctetString(device.getUsername())) != null) {
+            snmp.getUSM().removeAllUsers(new OctetString(device.getUsername()), new OctetString(device.getEngineId()));
         }
         switch (device.getSecurityLevel()) {
             case SecurityLevel.NOAUTH_NOPRIV:
-                snmp.getUSM().addUser(new OctetString(device.getUsername()), new OctetString(device.getIpAddress()),
+                snmp.getUSM().addUser(new OctetString(device.getUsername()), new OctetString(device.getEngineId()),
                         new UsmUser(new OctetString(device.getUsername()),
                                 null,
                                 null,
@@ -194,7 +194,7 @@ public class DeviceInterface implements CommandResponder {
                 break;
 
             case SecurityLevel.AUTH_NOPRIV:
-                snmp.getUSM().addUser(new OctetString(device.getUsername()), new OctetString(device.getIpAddress()),
+                snmp.getUSM().addUser(new OctetString(device.getUsername()), new OctetString(device.getEngineId()),
                         new UsmUser(new OctetString(device.getUsername()),
                                 SnmpAuthProtocol.getAuthProtocolOid(device.getAuthProtocol()),
                                 new OctetString(device.getAuthProtocolPassword()),
@@ -203,7 +203,7 @@ public class DeviceInterface implements CommandResponder {
                 break;
 
             case SecurityLevel.AUTH_PRIV:
-                snmp.getUSM().addUser(new OctetString(device.getUsername()), new OctetString(device.getIpAddress()),
+                snmp.getUSM().addUser(new OctetString(device.getUsername()), new OctetString(device.getEngineId()),
                         new UsmUser(new OctetString(device.getUsername()),
                                 SnmpAuthProtocol.getAuthProtocolOid(device.getAuthProtocol()),
                                 new OctetString(device.getAuthProtocolPassword()),
