@@ -11,12 +11,10 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.snmp4j.*;
-import org.snmp4j.mp.MPv3;
-import org.snmp4j.mp.SnmpConstants;
-import org.snmp4j.security.*;
-import org.snmp4j.smi.*;
-import org.snmp4j.transport.DefaultUdpTransportMapping;
+import org.snmp4j.CommandResponderEvent;
+import org.snmp4j.PDU;
+import org.snmp4j.smi.Address;
+import org.snmp4j.smi.UdpAddress;
 import org.springframework.context.ApplicationEventPublisher;
 
 import java.io.IOException;
@@ -134,7 +132,7 @@ public class DeviceInterfaceTest {
     }
 
     @Test
-    public void shouldSendV3Trap(){
+    public void shouldSendV3Trap() {
 
         when(config.getAddress()).thenReturn("udp:127.0.0.1");
         when(config.getListenerPort()).thenReturn(6690);
