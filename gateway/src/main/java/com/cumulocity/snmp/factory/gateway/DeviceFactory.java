@@ -71,7 +71,7 @@ public class DeviceFactory implements Converter<ManagedObjectRepresentation, Opt
                 .authProtocolPassword(authMap.get("authPassword").toString())
                 .privacyProtocol(getIntValue(authMap.get("privProtocol")))
                 .privacyProtocolPassword(authMap.get("privPassword").toString())
-                .engineId("engineId")
+                .engineId(authMap.get("engineId").toString())
                 .build());
     }
 }

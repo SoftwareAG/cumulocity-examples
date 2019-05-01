@@ -58,6 +58,7 @@ public class DeviceFactoryTest {
         authFragment.put("authPassword", "testsnmp");
         authFragment.put("privProtocol", 1);
         authFragment.put("privPassword", "testsnmp");
+        authFragment.put("engineId", "12345");
 
         HashMap<Object, Object> deviceFragment = new HashMap<>();
         deviceFragment.put("ipAddress", "192.168.0.1");
@@ -82,6 +83,7 @@ public class DeviceFactoryTest {
         device.setAuthProtocolPassword("testsnmp");
         device.setPrivacyProtocol(1);
         device.setPrivacyProtocolPassword("testsnmp");
+        device.setEngineId("12345");
 
         //When
         Optional<Device> deviceOptional = deviceFactory.convert(managedObject);
