@@ -176,7 +176,7 @@ public class DeviceInterface implements CommandResponder {
     @EventListener
     @RunWithinContext
     public synchronized void removeSnmpV3Credentials(final DeviceRemovedEvent event) {
-        snmp.getUSM().removeAllUsers(new OctetString(event.getDevice().getUsername()));
+        snmp.getUSM().removeAllUsers(new OctetString(event.getDevice().getUsername()),new OctetString(event.getDevice().getEngineId()));
     }
 
     private void addorUpdateSnmpV3Credentials(Device device) {
