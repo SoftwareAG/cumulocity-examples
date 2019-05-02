@@ -44,16 +44,21 @@ import static com.cumulocity.snmp.model.gateway.type.mapping.AlarmMapping.c8y_TR
 @Component
 public class DeviceInterface implements CommandResponder {
 
-    Map<String, Map<String, PduListener>> mapIPAddressToOid = new ConcurrentHashMap<>();
+    private Map<String, Map<String, PduListener>> mapIPAddressToOid = new ConcurrentHashMap<>();
 
-    Gateway gateway = new Gateway();
-    Snmp snmp;
+    private Gateway gateway = new Gateway();
+
+    private Snmp snmp;
+
     @Autowired
     private ApplicationEventPublisher eventPublisher;
+
     @Autowired
     private SNMPConfigurationProperties config;
+
     @Autowired
     private DeviceFactory deviceFactory;
+
     @Autowired
     private ManagedObjectRepository managedObjectRepository;
 
@@ -156,10 +161,10 @@ public class DeviceInterface implements CommandResponder {
     public void updateSnmpV3Credentilas(final DeviceUpdatedEvent event) {
         final Optional<ManagedObjectRepresentation> optional = managedObjectRepository.get(event.getGateway(), event.getDeviceId());
         if (optional.isPresent()) {
-            final Optional<Device> deviceOPtional = deviceFactory.convert(optional.get());
-            if (deviceOPtional.isPresent()) {
-                if (deviceOPtional.get().getSnmpVersion() == SnmpConstants.version3) {
-                    addorUpdateSnmpV3Credentials(deviceOPtional.get());
+            final Optional<Device> deviceOptional = deviceFactory.convert(optional.get());
+            if (deviceOptional.isPresent()) {
+                if (deviceOptional.get().getSnmpVersion() == SnmpConstants.version3) {
+                    addorUpdateSnmpV3Credentials(deviceOptional.get());
                 }
             }
         }
