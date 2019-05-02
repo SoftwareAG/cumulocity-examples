@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -e
-source ${BASH_SOURCE%/*}/common.sh
+
+function update-property {
+    echo "update property ${1} to value ${2}"
+    find . -name 'pom.xml' | xargs sed -i "s/<${1}>.*<\/${1}>/<${1}>${2}<\/${1}>/g"
+}
 
 function update-dependencies {
     echo "Update properties in POMs to new version"

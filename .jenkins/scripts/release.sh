@@ -1,6 +1,5 @@
 #!/bin/bash
 set -e
-source ${BASH_SOURCE%/*}/common.sh
 
 while [ "$1" != "" ]; do
     case $1 in
@@ -15,6 +14,12 @@ while [ "$1" != "" ]; do
     shift
 done
 
+function tag-version {
+    tag=$1
+    hg commit -m "[maven-release-plugin] prepare release ${tag}" || echo ""
+    hg tag -f -m "copy for tag ${tag}" "${tag}"
+}
+
 ./mvnw clean -T 4
 
 hg pull -u 
@@ -23,7 +28,7 @@ hg up -C
 
 echo "Update version to ${version}"
 ./mvnw versions:set -DnewVersion=${version} 
-./mvnw clean install ${release_args} -s $MVN_SETTINGS -U
+./mvnw clean install -DskipTests -Dmaven.javadoc.skip=true -Dskip.microservice.package=false -Dskip.agent.package.container=false
 ./deploy.sh
 
 echo "tagging cumulocity-examples"

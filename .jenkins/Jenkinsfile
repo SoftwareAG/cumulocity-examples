@@ -58,6 +58,12 @@ pipeline {
             }
         }
         stage('Build') {
+            agent {
+                dockerfile {
+                    dir '.jenkins/build'
+                    // without network, to execute tests in isolated network
+                }
+            }
             steps {
                 withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
                     sh "chmod +x .jenkins/scripts/build.sh && .jenkins/scripts/build.sh"
@@ -70,11 +76,11 @@ pipeline {
                 }
             }
         }
-        stage('Deploy') {
+        stage('Deploy images') {
             when {
                 allOf {
                     equals expected: 'DEFAULT', actual: params.build_type
-                    anyOf{
+                    anyOf {
                         branch 'release/**';
                         branch 'develop'
                     }
@@ -117,11 +123,13 @@ pipeline {
                         }
                     }
                     steps {
+                        // update dependencies and pull them from nexus
                         sh "chmod +x .jenkins/scripts/update_dependencies.sh && .jenkins/scripts/update_dependencies.sh ${params.release_version}"
+                        withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
+                            sh "chmod +x .jenkins/scripts/compile.sh && .jenkins/scripts/compile.sh"
+                        }
                         sshagent(['jenkins-hg-key']) {
-                            withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
-                                sh "chmod +x .jenkins/scripts/release.sh && .jenkins/scripts/release.sh -r ${params.release_version} -d ${params.hotfix_version}"
-                            }
+                            sh "chmod +x .jenkins/scripts/release.sh && .jenkins/scripts/release.sh -r ${params.release_version} -d ${params.hotfix_version}"
                         }
                     }
                 }
