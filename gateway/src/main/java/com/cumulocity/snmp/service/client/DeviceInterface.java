@@ -189,6 +189,20 @@ public class DeviceInterface implements CommandResponder {
     }
 
     private void addorUpdateSnmpV3Credentials(Device device) {
+
+        String engineID = device.getEngineId();
+        if ((engineID != null) && (engineID.length() > 0)) {
+            if (engineID.length() < MPv3.MINLEN_ENGINE_ID || engineID.length() > MPv3.MAXLEN_ENGINE_ID) {
+                String txt = "User '" + device.getUsername() +
+                        "' not added because of an engine ID of incorrect length " + engineID.length() +". The length should be greater than 4 and less than 33.";
+                log.error(txt);
+                return;
+            }
+        } else {
+            log.error("Engine Id can't be null or empty");
+            return;
+        }
+
         if (snmp.getUSM().getUser(new OctetString(device.getEngineId()), new OctetString(device.getUsername())) != null) {
             snmp.getUSM().removeAllUsers(new OctetString(device.getUsername()), new OctetString(device.getEngineId()));
         }
