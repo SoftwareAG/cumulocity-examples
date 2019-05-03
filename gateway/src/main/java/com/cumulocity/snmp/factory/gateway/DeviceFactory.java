@@ -30,13 +30,13 @@ public class DeviceFactory implements Converter<ManagedObjectRepresentation, Opt
             int port = getPort(property.get("port"));
             int version = getSnmpVersion(property.get("version"));
             Map<String, Object> authMap = (HashMap) property.get("auth");
-            return isAuthMapExists(authMap) ? getDeviceWithoutAuth(property, deviceId, port, version) :
+            return isAuthMapNullOrEmpty(authMap) ? getDeviceWithoutAuth(property, deviceId, port, version) :
                     getDeviceWithAuth(property, deviceId, port, version, authMap);
         }
         return absent();
     }
 
-    private boolean isAuthMapExists(Map<String, Object> authMap) {
+    private boolean isAuthMapNullOrEmpty(Map<String, Object> authMap) {
         return authMap == null || authMap.size() == 0;
     }
 
