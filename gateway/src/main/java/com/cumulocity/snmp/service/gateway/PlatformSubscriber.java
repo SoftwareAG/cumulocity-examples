@@ -43,29 +43,22 @@ import java.util.Map;
 @Service
 public class PlatformSubscriber {
 
-    @Autowired
-    private PlatformProvider platformProvider;
-
-    @Autowired
-    private ApplicationEventPublisher eventPublisher;
-
-    @Autowired
-    private Repository<Gateway> gatewayRepository;
-
-    @Autowired
-    private GatewayFactory gatewayFactory;
-
-    @Autowired
-    private ManagedObjectRepository managedObjectRepository;
-
-    @Autowired
-    private Notifications notifications;
-
-    @Autowired
-    private OperationRepository operationRepository;
-
     private final Subscriptions managedObjectSubscribers = new Subscriptions();
     private final Subscriptions operationSubscribers = new Subscriptions();
+    @Autowired
+    private PlatformProvider platformProvider;
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
+    @Autowired
+    private Repository<Gateway> gatewayRepository;
+    @Autowired
+    private GatewayFactory gatewayFactory;
+    @Autowired
+    private ManagedObjectRepository managedObjectRepository;
+    @Autowired
+    private Notifications notifications;
+    @Autowired
+    private OperationRepository operationRepository;
 
     @EventListener
     @RunWithinContext
@@ -119,7 +112,7 @@ public class PlatformSubscriber {
     private void subscribeDeviceOperations(PlatformParameters platform, final Gateway gateway, final Device device) {
         final OperationNotificationSubscriber operationsSubscriber = notifications.subscribeOperations(platform, device.getId(), new OperationListener() {
             public void onCreate(OperationRepresentation operationRepresentation) {
-                log.debug("operationRepresentation",operationRepresentation);
+                log.debug("operationRepresentation", operationRepresentation);
             }
         });
         operationSubscribers.add(device.getId(), operationsSubscriber);
@@ -138,18 +131,18 @@ public class PlatformSubscriber {
                             final Gateway newGateway = newGatewayOptional.get();
                             gatewayRepository.save(newGateway);
 
-                            if(ipRange!=null && ipRange.get("ipRange")!=null) {
+                            if (ipRange != null && ipRange.get("ipRange") != null) {
                                 eventPublisher.publishEvent(new OperationEvent(newGateway, operationRepresentation.getId()));
-                            } else if(snmpDevice!=null) {
+                            } else if (snmpDevice != null) {
                                 String deviceId = snmpDevice.get("id");
-                                eventPublisher.publishEvent(new DeviceUpdatedEvent(newGateway,GId.asGId(deviceId)));
+                                eventPublisher.publishEvent(new DeviceUpdatedEvent(newGateway, GId.asGId(deviceId)));
                             }
                         }
                     }
                 } catch (InvocationTargetException e) {
-                    log.error(e.getMessage(),e);
+                    log.error(e.getMessage(), e);
                 } catch (IllegalAccessException e) {
-                    log.error(e.getMessage(),e);
+                    log.error(e.getMessage(), e);
                 }
 
             }

@@ -140,7 +140,8 @@ public class DeviceInterface implements CommandResponder {
             }
         } else {
             eventPublisher.publishEvent(new UnknownTrapOrDeviceEvent(gateway, new ConfigEventType(
-                    "TRAP received from unknown device with IP Address : " + peerIPAddress), c8y_TRAPReceivedFromUnknownDevice + peerIPAddress));
+                    "TRAP received from unknown device with IP Address : " + peerIPAddress),
+                    c8y_TRAPReceivedFromUnknownDevice + peerIPAddress));
         }
     }
 
@@ -181,7 +182,10 @@ public class DeviceInterface implements CommandResponder {
     @EventListener
     @RunWithinContext
     public synchronized void removeSnmpV3Credentials(final DeviceRemovedEvent event) {
-        snmp.getUSM().removeAllUsers(new OctetString(event.getDevice().getUsername()),new OctetString(event.getDevice().getEngineId()));
+        if (event.getDevice().getSnmpVersion() == SnmpConstants.version3) {
+            snmp.getUSM().removeAllUsers(new OctetString(event.getDevice().getUsername()),
+                    new OctetString(event.getDevice().getEngineId()));
+        }
     }
 
     private void addorUpdateSnmpV3Credentials(Device device) {

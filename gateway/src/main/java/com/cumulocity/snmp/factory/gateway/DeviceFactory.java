@@ -30,10 +30,14 @@ public class DeviceFactory implements Converter<ManagedObjectRepresentation, Opt
             int port = getPort(property.get("port"));
             int version = getSnmpVersion(property.get("version"));
             Map<String, Object> authMap = (HashMap) property.get("auth");
-            return (authMap == null) ? getDeviceWithoutAuth(property, deviceId, port, version) :
+            return isAuthMapExists(authMap) ? getDeviceWithoutAuth(property, deviceId, port, version) :
                     getDeviceWithAuth(property, deviceId, port, version, authMap);
         }
         return absent();
+    }
+
+    private boolean isAuthMapExists(Map<String, Object> authMap) {
+        return authMap == null || authMap.size() == 0;
     }
 
     private int getPort(Object port) {
@@ -58,7 +62,8 @@ public class DeviceFactory implements Converter<ManagedObjectRepresentation, Opt
                 .build());
     }
 
-    private Optional<Device> getDeviceWithAuth(Map property, GId deviceId, int port, int version, Map<String, Object> authMap) {
+    private Optional<Device> getDeviceWithAuth(Map property, GId deviceId, int port,
+                                               int version, Map<String, Object> authMap) {
         return Optional.of(Device.builder()
                 .id(deviceId)
                 .ipAddress(property.get("ipAddress").toString())

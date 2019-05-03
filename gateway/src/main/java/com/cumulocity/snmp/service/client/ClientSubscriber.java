@@ -26,7 +26,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -69,19 +69,19 @@ public class ClientSubscriber {
     @Autowired
     DeviceTypeInventoryRepository deviceTypeInventoryRepository;
 
-    ScheduledFuture<?> future = null;
-    Gateway gateway = null;
-    AtomicInteger currentPollingRateInSeconds = new AtomicInteger(0);
+    private ScheduledFuture<?> future = null;
+    private Gateway gateway = null;
+    private AtomicInteger currentPollingRateInSeconds = new AtomicInteger(0);
 
-    Map<String, Map<String, PduListener>> mapIPAddressToOid = new ConcurrentHashMap<>();
-    Map<String, List<Register>> mapIpAddressToRegister = new ConcurrentHashMap<>();
-    Map<Device, DeviceType> devicePollingData = new ConcurrentHashMap<>();
+    private Map<String, Map<String, PduListener>> mapIPAddressToOid = new ConcurrentHashMap<>();
+    private Map<String, List<Register>> mapIpAddressToRegister = new ConcurrentHashMap<>();
+    private Map<Device, DeviceType> devicePollingData = new ConcurrentHashMap<>();
 
     @EventListener
     @RunWithinContext
     public synchronized void refreshSubscription(final DeviceTypeAddedEvent event) {
         log.debug("Initiating DeviceType add");
-        final Device device = event.getDevice();
+        Device device = event.getDevice();
         this.gateway = event.getGateway();
         subscribe(device, event.getDeviceType());
     }
@@ -91,8 +91,22 @@ public class ClientSubscriber {
     public synchronized void refreshSubscription(final DeviceTypeUpdatedEvent event) {
         log.debug("Initiating DeviceType update");
         this.gateway = event.getGateway();
-        final Device device = event.getDevice();
-        subscribe(device, event.getDeviceType());
+        List<Device> devices = getDevicesOfDeviceType(event.getDevice().getDeviceType());
+        for (Device deviceOfGivenDeviceType : devices) {
+            subscribe(deviceOfGivenDeviceType, event.getDeviceType());
+        }
+    }
+
+    @EventListener
+    @RunWithinContext
+    public synchronized void refreshSubscription(final DeviceTypeRemovedEvent event) {
+        log.debug("Initiating DeviceType remove");
+        List<Device> devices = getDevicesOfDeviceType(event.getDeviceTypeId());
+        for (Device device : devices) {
+            mapIPAddressToOid.remove(device.getIpAddress());
+            mapIpAddressToRegister.remove(device.getIpAddress());
+            devicePollingData.remove(device);
+        }
     }
 
     @EventListener
@@ -117,7 +131,8 @@ public class ClientSubscriber {
         if (optional.isPresent()) {
             final Optional<Device> deviceOptional = deviceFactory.convert(optional.get());
             if (deviceOptional.isPresent()) {
-                final Optional<DeviceType> deviceTypeOptional = deviceTypeInventoryRepository.get(gateway, deviceOptional.get().getDeviceType());
+                final Optional<DeviceType> deviceTypeOptional =
+                        deviceTypeInventoryRepository.get(gateway, deviceOptional.get().getDeviceType());
                 subscribe(deviceOptional.get(), deviceTypeOptional.get());
             }
         }
@@ -168,7 +183,7 @@ public class ClientSubscriber {
         this.gateway = null;
     }
 
-    private void updateSubscriptions() throws IOException {
+    private void updateSubscriptions() {
         log.debug("Updating Device Subscription");
         deviceInterface.setGateway(gateway);
         final List<GId> currentDeviceIds = gateway.getCurrentDeviceIds();
@@ -194,13 +209,13 @@ public class ClientSubscriber {
         }
     }
 
-    private void pollDevices() throws IOException {
+    private void pollDevices() {
         for (Device device : devicePollingData.keySet()) {
             pollDevice(gateway, device);
         }
     }
 
-    private void pollDevice(final Gateway gateway, final Device device) throws IOException {
+    private void pollDevice(final Gateway gateway, final Device device) {
         for (final Register register : mapIpAddressToRegister.get(device.getIpAddress())) {
             if (register.getMeasurementMapping() != null) {
                 pollingService.initiatePolling(register.getOid(), device, new PduListener() {
@@ -264,10 +279,13 @@ public class ClientSubscriber {
 
     private void unsubscribe(Device device) {
         log.debug("Device unsubscribed");
-        deviceInterface.unsubscribe(device.getIpAddress());
-        mapIPAddressToOid.remove(device.getIpAddress());
-        mapIpAddressToRegister.remove(device.getIpAddress());
-        devicePollingData.remove(device);
+        List<Device> devices = getDevicesOfDeviceType(device.getDeviceType());
+        for (Device deviceOfType : devices) {
+            deviceInterface.unsubscribe(deviceOfType.getIpAddress());
+            mapIPAddressToOid.remove(deviceOfType.getIpAddress());
+            mapIpAddressToRegister.remove(deviceOfType.getIpAddress());
+            devicePollingData.remove(deviceOfType);
+        }
     }
 
     private void refreshScheduler() {
@@ -278,12 +296,8 @@ public class ClientSubscriber {
             currentPollingRateInSeconds.set(gateway.getPollingRateInSeconds());
             future = scheduler.scheduleWithFixedDelay(new Runnable() {
                 public void run() {
-                    try {
-                        log.debug("Running scheduled device polling");
-                        pollDevices();
-                    } catch (IOException e) {
-                        log.error("Exception during SNMP Device Polling ", e);
-                    }
+                    log.debug("Running scheduled device polling");
+                    pollDevices();
                 }
             }, 1000 * currentPollingRateInSeconds.get());
         }
@@ -294,5 +308,15 @@ public class ClientSubscriber {
         if (future != null && (!future.isCancelled())) {
             future.cancel(true);
         }
+    }
+
+    private List<Device> getDevicesOfDeviceType(GId deviceTypeGId) {
+        List<Device> devices = new ArrayList<>();
+        for (Map.Entry<Device, DeviceType> data : devicePollingData.entrySet()) {
+            if (data.getValue().getId().equals(deviceTypeGId)) {
+                devices.add(data.getKey());
+            }
+        }
+        return devices;
     }
 }

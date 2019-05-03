@@ -10,7 +10,7 @@ public class ManagedObjectListener {
 
     }
 
-    public void onDelete() {
+    public void onDelete(Object value) {
 
     }
 

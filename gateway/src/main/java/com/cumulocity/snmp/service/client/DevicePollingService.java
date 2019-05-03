@@ -35,7 +35,7 @@ public class DevicePollingService {
         PDU pdu;
         AbstractTransportMapping transport = null;
         Snmp snmp = null;
-        Target target = null;
+        Target target;
 
         try {
             transport = new DefaultUdpTransportMapping();
@@ -79,7 +79,7 @@ public class DevicePollingService {
                             return;
                         }
                         if (device.getAuthProtocolPassword().length() < 8 || device.getPrivacyProtocolPassword().length() < 8) {
-                            log.error("Invalid entry. Auth and Privacy password must be fo at least 8 characters");
+                            log.error("Invalid entry. Auth and Privacy password must be for at least 8 characters");
                             return;
                         }
                         target = getV3TargetForAuthPriv(snmp, device, address);

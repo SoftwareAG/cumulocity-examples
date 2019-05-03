@@ -19,7 +19,8 @@ import java.lang.reflect.InvocationTargetException;
 @Service
 public class Notifications {
 
-    public InventoryRealtimeDeleteAwareNotificationsSubscriber subscribeInventory(PlatformParameters platform, GId id, final ManagedObjectListener listener) {
+    public InventoryRealtimeDeleteAwareNotificationsSubscriber subscribeInventory(PlatformParameters platform,
+                                                                                  GId id, final ManagedObjectListener listener) {
         final InventoryRealtimeDeleteAwareNotificationsSubscriber result = createInventorySubscriber(platform);
         result.subscribe(id.getValue(), new SubscriptionListener<String, ManagedObjectDeleteAwareNotification>() {
             @Override
@@ -33,7 +34,7 @@ public class Notifications {
                         log.error(e.getMessage(),e);
                     }
                 } else if ("DELETE".equals(notification.getRealtimeAction())) {
-                    listener.onDelete();
+                    listener.onDelete(notification.getData());
                 }
             }
 
@@ -49,7 +50,8 @@ public class Notifications {
         return new InventoryRealtimeDeleteAwareNotificationsSubscriber(platform);
     }
 
-    public OperationNotificationSubscriber subscribeOperations(PlatformParameters platform, GId id, final OperationListener listener) {
+    public OperationNotificationSubscriber subscribeOperations(PlatformParameters platform, GId id,
+                                                               final OperationListener listener) {
         final OperationNotificationSubscriber result = createOperationsSubscriber(platform);
         result.subscribe(id, new SubscriptionListener<GId, OperationRepresentation>() {
             @Override

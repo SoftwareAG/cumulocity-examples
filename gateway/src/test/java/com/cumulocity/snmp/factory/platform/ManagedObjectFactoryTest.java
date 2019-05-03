@@ -7,8 +7,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import static org.junit.Assert.*;
-
 @RunWith(MockitoJUnitRunner.class)
 public class ManagedObjectFactoryTest {
 
@@ -16,8 +14,8 @@ public class ManagedObjectFactoryTest {
     ManagedObjectFactory managedObjectFactory;
 
     @Test
-    public void createManagedObject(){
+    public void createManagedObject() {
         ManagedObjectRepresentation managedObjectRepresentation = managedObjectFactory.create("snmp-agent");
-        Assert.assertEquals(managedObjectRepresentation.getType(),"c8y_SNMP");
+        Assert.assertEquals(managedObjectRepresentation.getType(), "c8y_SNMP");
     }
 }

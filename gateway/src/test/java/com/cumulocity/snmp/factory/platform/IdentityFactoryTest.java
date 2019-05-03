@@ -6,13 +6,11 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.HashMap;
 
 import static com.cumulocity.model.idtype.GId.asGId;
-import static org.junit.Assert.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class IdentityFactoryTest {
@@ -21,7 +19,7 @@ public class IdentityFactoryTest {
     IdentityFactory identityFactory;
 
     @Test
-    public void createExternalId(){
+    public void createExternalId() {
 
         final HashMap<Object, Object> property = new HashMap<>();
         property.put("transmitRate", "20");
@@ -31,7 +29,7 @@ public class IdentityFactoryTest {
         managedObjectRepresentation.setProperty("c8y_SNMPGateway", property);
         ExternalIDRepresentation externalIDRepresentation = identityFactory.create("snmp-agent", managedObjectRepresentation);
 
-        Assert.assertEquals(externalIDRepresentation.getType(),"c8y_Serial");
+        Assert.assertEquals(externalIDRepresentation.getType(), "c8y_Serial");
 
     }
 }

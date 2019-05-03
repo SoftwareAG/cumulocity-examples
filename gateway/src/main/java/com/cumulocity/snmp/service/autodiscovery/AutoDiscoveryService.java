@@ -114,18 +114,22 @@ public class AutoDiscoveryService {
     @EventListener
     @RunWithinContext
     public synchronized void scheduleAutoDiscovery(final GatewayAddedEvent event) {
-        if (event.getGateway().getAutoDiscoveryRateInMinutes() > 0) {
-            refreshScheduler(event.getGateway());
-        } else {
-            terminateTaskIfRunning();
+        if (event.getGateway() != null) {
+            scheduleAutoDiscovery(event.getGateway());
         }
     }
 
     @EventListener
     @RunWithinContext
     public synchronized void scheduleAutoDiscovery(final GatewayUpdateEvent event) {
-        if (event.getGateway().getAutoDiscoveryRateInMinutes() > 0) {
-            refreshScheduler(event.getGateway());
+        if (event.getGateway() != null) {
+            scheduleAutoDiscovery(event.getGateway());
+        }
+    }
+
+    private void scheduleAutoDiscovery(Gateway gateway) {
+        if (gateway.getAutoDiscoveryRateInMinutes() > 0) {
+            refreshScheduler(gateway);
         } else {
             terminateTaskIfRunning();
         }

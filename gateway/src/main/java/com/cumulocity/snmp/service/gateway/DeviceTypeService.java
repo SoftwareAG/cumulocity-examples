@@ -5,6 +5,7 @@ import com.cumulocity.sdk.client.PlatformParameters;
 import com.cumulocity.snmp.annotation.gateway.RunWithinContext;
 import com.cumulocity.snmp.model.device.DeviceAddedEvent;
 import com.cumulocity.snmp.model.gateway.DeviceTypeAddedEvent;
+import com.cumulocity.snmp.model.gateway.DeviceTypeRemovedEvent;
 import com.cumulocity.snmp.model.gateway.DeviceTypeUpdatedEvent;
 import com.cumulocity.snmp.model.gateway.Gateway;
 import com.cumulocity.snmp.model.gateway.device.Device;
@@ -45,9 +46,11 @@ public class DeviceTypeService {
         final Gateway gateway = event.getGateway();
         final Device device = event.getDevice();
         if(device.getDeviceType()!=null) {
-            final Optional<DeviceType> newDeviceTypeOptional = deviceTypeInventoryRepository.get(gateway, device.getDeviceType());
+            final Optional<DeviceType> newDeviceTypeOptional = deviceTypeInventoryRepository.get(
+                    gateway, device.getDeviceType());
             if (newDeviceTypeOptional.isPresent()) {
-                final Optional<DeviceType> previousDeviceTypeOptional = deviceTypePeristedRepository.get(newDeviceTypeOptional.get().getId());
+                final Optional<DeviceType> previousDeviceTypeOptional = deviceTypePeristedRepository.get(
+                        newDeviceTypeOptional.get().getId());
                 if (!previousDeviceTypeOptional.equals(newDeviceTypeOptional)) {
                     final DeviceType deviceType = deviceTypePeristedRepository.save(newDeviceTypeOptional.get());
                     eventPublisher.publishEvent(new DeviceTypeAddedEvent(event.getGateway(), device, deviceType));
@@ -58,7 +61,8 @@ public class DeviceTypeService {
         }
     }
 
-    private void subscribe(final Gateway gateway, final Device device, final DeviceType deviceType) throws ExecutionException {
+    private void subscribe(final Gateway gateway, final Device device, final DeviceType deviceType)
+            throws ExecutionException {
         final PlatformParameters platform = platformProvider.getPlatformProperties(gateway);
         final GId id = deviceType.getId();
 
@@ -69,7 +73,9 @@ public class DeviceTypeService {
             }
 
             @Override
-            public void onDelete() {
+            public void onDelete(Object value) {
+                GId gId = objectMapper.convertValue(value, GId.class);
+                eventPublisher.publishEvent(new DeviceTypeRemovedEvent(gId));
                 subscribers.disconnect(id);
             }
         }));

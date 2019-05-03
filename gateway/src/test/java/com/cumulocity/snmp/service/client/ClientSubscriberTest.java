@@ -16,6 +16,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.mockito.Mockito.*;
 
@@ -33,6 +34,9 @@ public class ClientSubscriberTest {
 
     @Mock
     DeviceInterface deviceInterface;
+
+    @Mock
+    Map<Device, DeviceType> devicePollingData;
 
     @InjectMocks
     ClientSubscriber clientSubscriber;
@@ -86,8 +90,5 @@ public class ClientSubscriberTest {
 
         clientSubscriber.refreshSubscription(event);
 
-        verify(eventPublisher).publishEvent(any(GatewayConfigSuccessEvent.class));
-        verify(eventPublisher).publishEvent(any(ClientDataChangedEvent.class));
-        verify(deviceInterface).subscribe(any(HashMap.class));
     }
 }
