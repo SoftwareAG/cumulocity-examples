@@ -4,7 +4,6 @@ import com.cumulocity.snmp.configuration.service.SNMPConfigurationProperties;
 import com.cumulocity.snmp.model.gateway.device.Device;
 import com.cumulocity.snmp.utils.SnmpAuthProtocol;
 import com.cumulocity.snmp.utils.SnmpPrivacyProtocol;
-import com.cumulocity.snmp.utils.SnmpVariableType;
 import lombok.extern.slf4j.Slf4j;
 import org.snmp4j.*;
 import org.snmp4j.event.ResponseEvent;
@@ -169,13 +168,7 @@ public class DevicePollingService {
                 log.error("No data found after successful device polling");
                 return;
             }
-            int type = response.getVariableBindings().get(0).getVariable().getSyntax();
-            // Process polled data only if it is Integer32/Counter32/Gauge32/Counter64
-            if (isValidVariableType(type)) {
-                pduListener.onPduReceived(response);
-            } else {
-                log.error("Unsupported data format for measurement calculation");
-            }
+            pduListener.onVariableBindingReceived(response.getVariableBindings().get(0));
         } else {
             log.error("Error in Device polling response");
             log.error("Error index {} | Error status {} | Error text {} ",
@@ -207,13 +200,6 @@ public class DevicePollingService {
         return snmpVersion == SnmpConstants.version1
                 || snmpVersion == SnmpConstants.version2c
                 || snmpVersion == SnmpConstants.version3;
-    }
-
-    private boolean isValidVariableType(int type) {
-        return type == SnmpVariableType.INTEGER.getType()
-                || type == SnmpVariableType.COUNTER32.getType()
-                || type == SnmpVariableType.GAUGE.getType()
-                || type == SnmpVariableType.COUNTER64.getType();
     }
 
     private Target getTarget(int snmpVersion, TransportIpAddress targetAddress) {

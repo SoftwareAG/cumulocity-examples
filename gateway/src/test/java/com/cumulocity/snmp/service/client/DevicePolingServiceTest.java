@@ -67,11 +67,11 @@ public class DevicePolingServiceTest {
         when(variableBindings.get(0)).thenReturn(variableBinding);
         when(variableBinding.getVariable()).thenReturn(variable);
         when(config.getCommunityTarget()).thenReturn("public");
-        doNothing().when(pduListener).onPduReceived(any(PDU.class));
+        doNothing().when(pduListener).onVariableBindingReceived(any(VariableBinding.class));
 
         pollingService.initiatePolling(oId, device, pduListener);
 
-        verify(pduListener, never()).onPduReceived(any(PDU.class));
+        verify(pduListener, never()).onVariableBindingReceived(any(VariableBinding.class));
     }
 
     @Test
@@ -86,7 +86,7 @@ public class DevicePolingServiceTest {
 
         pollingService.initiatePolling(oId, device, pduListener);
 
-        verify(pduListener, never()).onPduReceived(pdu);
+        verify(pduListener, never()).onVariableBindingReceived(variableBinding);
     }
 
     @Test
@@ -98,11 +98,11 @@ public class DevicePolingServiceTest {
         when(variableBindings.get(0)).thenReturn(variableBinding);
         when(variableBinding.getVariable()).thenReturn(variable);
         when(config.getCommunityTarget()).thenReturn("public");
-        doNothing().when(pduListener).onPduReceived(any(PDU.class));
+        doNothing().when(pduListener).onVariableBindingReceived(any(VariableBinding.class));
 
         pollingService.initiatePolling(oId, device, pduListener);
 
-        verify(pduListener, never()).onPduReceived(any(PDU.class));
+        verify(pduListener, never()).onVariableBindingReceived(any(VariableBinding.class));
     }
 
     @Test
@@ -117,7 +117,7 @@ public class DevicePolingServiceTest {
 
         pollingService.initiatePolling(oId, device, pduListener);
 
-        verify(pduListener, never()).onPduReceived(pdu);
+        verify(pduListener, never()).onVariableBindingReceived(variableBinding);
     }
 
     @Test
@@ -132,7 +132,7 @@ public class DevicePolingServiceTest {
 
         pollingService.initiatePolling(oId, device, pduListener);
 
-        verify(pduListener, never()).onPduReceived(pdu);
+        verify(pduListener, never()).onVariableBindingReceived(variableBinding);
     }
 
     @Test
@@ -148,7 +148,7 @@ public class DevicePolingServiceTest {
 
         pollingService.initiatePolling(oId, device, pduListener);
 
-        verify(pduListener, never()).onPduReceived(pdu);
+        verify(pduListener, never()).onVariableBindingReceived(variableBinding);
     }
 
     @Test
@@ -165,7 +165,7 @@ public class DevicePolingServiceTest {
 
         pollingService.initiatePolling(oId, device, pduListener);
 
-        verify(pduListener, never()).onPduReceived(pdu);
+        verify(pduListener, never()).onVariableBindingReceived(variableBinding);
     }
 
     @Test
@@ -182,7 +182,7 @@ public class DevicePolingServiceTest {
 
         pollingService.initiatePolling(oId, device, pduListener);
 
-        verify(pduListener, never()).onPduReceived(pdu);
+        verify(pduListener, never()).onVariableBindingReceived(variableBinding);
     }
 
     @Test
@@ -201,7 +201,7 @@ public class DevicePolingServiceTest {
 
         pollingService.initiatePolling(oId, device, pduListener);
 
-        verify(pduListener, never()).onPduReceived(pdu);
+        verify(pduListener, never()).onVariableBindingReceived(variableBinding);
     }
 
     @Test
@@ -220,7 +220,7 @@ public class DevicePolingServiceTest {
 
         pollingService.initiatePolling(oId, device, pduListener);
 
-        verify(pduListener, never()).onPduReceived(pdu);
+        verify(pduListener, never()).onVariableBindingReceived(variableBinding);
     }
 
     @Test
@@ -239,7 +239,7 @@ public class DevicePolingServiceTest {
 
         pollingService.initiatePolling(oId, device, pduListener);
 
-        verify(pduListener, never()).onPduReceived(pdu);
+        verify(pduListener, never()).onVariableBindingReceived(variableBinding);
     }
 
     @Test
@@ -259,7 +259,7 @@ public class DevicePolingServiceTest {
 
         pollingService.initiatePolling(oId, device, pduListener);
 
-        verify(pduListener, never()).onPduReceived(pdu);
+        verify(pduListener, never()).onVariableBindingReceived(variableBinding);
     }
 
     @Test
@@ -280,7 +280,7 @@ public class DevicePolingServiceTest {
 
         pollingService.initiatePolling(oId, device, pduListener);
 
-        verify(pduListener, never()).onPduReceived(pdu);
+        verify(pduListener, never()).onVariableBindingReceived(variableBinding);
     }
 
     @Test
@@ -301,6 +301,6 @@ public class DevicePolingServiceTest {
 
         pollingService.initiatePolling(oId, device, pduListener);
 
-        verify(pduListener, never()).onPduReceived(pdu);
+        verify(pduListener, never()).onVariableBindingReceived(variableBinding);
     }
 }

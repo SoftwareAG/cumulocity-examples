@@ -1,7 +1,7 @@
 package com.cumulocity.snmp.service.client;
 
-import org.snmp4j.PDU;
+import org.snmp4j.smi.VariableBinding;
 
 public interface PduListener {
-    void onPduReceived(PDU pdu);
+    void onVariableBindingReceived(VariableBinding variableBinding);
 }

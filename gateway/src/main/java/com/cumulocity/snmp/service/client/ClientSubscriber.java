@@ -20,7 +20,7 @@ import com.cumulocity.snmp.utils.gateway.Scheduler;
 import com.google.common.base.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
-import org.snmp4j.PDU;
+import org.snmp4j.smi.VariableBinding;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
@@ -220,9 +220,9 @@ public class ClientSubscriber {
             if (register.getMeasurementMapping() != null) {
                 pollingService.initiatePolling(register.getOid(), device, new PduListener() {
                     @Override
-                    public void onPduReceived(PDU pdu) {
+                    public void onVariableBindingReceived(VariableBinding variableBinding) {
                         eventPublisher.publishEvent(new ClientDataChangedEvent(gateway, device, register,
-                                new DateTime(), pdu.getVariableBindings().get(0).getVariable(), true));
+                                new DateTime(), variableBinding, true));
                     }
                 });
             }
@@ -249,9 +249,9 @@ public class ClientSubscriber {
             for (final Register register : deviceType.getRegisters()) {
                 mapOidToPduListener.put(register.getOid(), new PduListener() {
                     @Override
-                    public void onPduReceived(PDU pdu) {
+                    public void onVariableBindingReceived(VariableBinding variableBinding) {
                         eventPublisher.publishEvent(new ClientDataChangedEvent(gateway, device, register,
-                                new DateTime(), pdu.getType(), false));
+                                new DateTime(), variableBinding, false));
                     }
                 });
             }

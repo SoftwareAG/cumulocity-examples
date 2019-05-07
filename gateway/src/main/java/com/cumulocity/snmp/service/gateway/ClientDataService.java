@@ -11,10 +11,12 @@ import com.cumulocity.snmp.model.gateway.type.core.Register;
 import com.cumulocity.snmp.model.gateway.type.mapping.MeasurementMapping;
 import com.cumulocity.snmp.model.notification.platform.PlatformRepresentationEvent;
 import com.cumulocity.snmp.repository.core.PlatformRepresentationRepository;
+import com.cumulocity.snmp.utils.SnmpVariableType;
 import com.google.common.base.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
+import org.snmp4j.smi.VariableBinding;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
@@ -58,6 +60,11 @@ public class ClientDataService {
     }
 
     private void storeDataChange(ClientDataChangedEvent event, Mapping mapping) {
+        if (mapping instanceof MeasurementMapping && !isValidVariableType((VariableBinding) event.getValue())) {
+            log.error("Unsupported data format for measurement calculation");
+            return;
+        }
+
         final Device device = event.getDevice();
         final Gateway gateway = event.getGateway();
         final Register register = event.getRegister();
@@ -69,7 +76,7 @@ public class ClientDataService {
 
         final PlatformRepresentationFactory representationFactory = findRepresentationFactory(mapping);
         final Optional representationOptional = representationFactory.apply(new PlatformRepresentationEvent(date,
-                event.getGateway(), device, register, mapping, event.getValue()));
+                event.getGateway(), device, register, mapping, ((VariableBinding) event.getValue()).getVariable()));
         if (representationOptional.isPresent()) {
             final Object representation = representationOptional.get();
             final PlatformRepresentationRepository repository = findRepresentationRepository(representation);
@@ -87,5 +94,13 @@ public class ClientDataService {
     private PlatformRepresentationRepository findRepresentationRepository(Object representation) {
         return findBeanByGenericType(applicationContext, PlatformRepresentationRepository.class,
                 representation.getClass());
+    }
+
+    private boolean isValidVariableType(VariableBinding pdu) {
+        int type = pdu.getVariable().getSyntax();
+        return type == SnmpVariableType.INTEGER.getType()
+                || type == SnmpVariableType.COUNTER32.getType()
+                || type == SnmpVariableType.GAUGE.getType()
+                || type == SnmpVariableType.COUNTER64.getType();
     }
 }
