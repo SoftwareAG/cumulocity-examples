@@ -5,10 +5,7 @@ import com.cumulocity.snmp.annotation.core.PersistableType;
 import com.cumulocity.snmp.model.core.IdProvider;
 import com.cumulocity.snmp.model.core.TenantProvider;
 import com.google.common.base.Function;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.UtilityClass;
 import lombok.experimental.Wither;
 
@@ -17,6 +14,7 @@ import lombok.experimental.Wither;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode(of = "id")
 @PersistableType(value = "Device", runWithinContext = TenantProvider.class, inMemory = true)
 public class Device implements IdProvider {
     public static final String c8y_SNMPDevice = "c8y_SNMPDevice";
