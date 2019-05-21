@@ -21,6 +21,8 @@
         <jackson-datatype-joda>2.4.0</jackson-datatype-joda>
         <jackson-datatype-guava>2.8.4</jackson-datatype-guava>
         <c8y.microservice.version>${c8y.microservice-new.version}</c8y.microservice.version>
+        <cometd.version>3.0.0</cometd.version>
+        <aspectj.version>1.8.7</aspectj.version>
     </properties>
 
     <dependencies>
@@ -148,31 +150,31 @@
         <dependency>
             <groupId>org.aspectj</groupId>
             <artifactId>aspectjrt</artifactId>
-            <version>1.8.7</version>
+            <version>${aspectj.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.aspectj</groupId>
             <artifactId>aspectjweaver</artifactId>
-            <version>1.8.7</version>
+            <version>${aspectj.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.cometd.java</groupId>
             <artifactId>cometd-java-common</artifactId>
-            <version>3.0.0</version>
+            <version>${cometd.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.cometd.java</groupId>
             <artifactId>bayeux-api</artifactId>
-            <version>3.0.0</version>
+            <version>${cometd.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.cometd.java</groupId>
             <artifactId>cometd-java-client</artifactId>
-            <version>3.0.0</version>
+            <version>${cometd.version}</version>
         </dependency>
     </dependencies>
 
@@ -263,24 +265,6 @@
                     </execution>
                 </executions>
             </plugin>
-
-            <!--
-            <plugin>
-                <groupId>com.nsn.cumulocity.clients-java</groupId>
-                <artifactId>microservice-package-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>3rd-license-generate</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>package</goal>
-                        </goals>
-                        <configuration>
-                            <rpmSkip>false</rpmSkip>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>  -->
         </plugins>
     </build>
 </project>

@@ -35,6 +35,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -105,9 +106,6 @@ public class DeviceInterface implements CommandResponder {
 
             snmp.addCommandResponder(this);
 
-            CommunityTarget target = new CommunityTarget();
-            target.setCommunity(new OctetString(config.getCommunityTarget()));
-
             log.debug("Listening for SNMP TRAPs on " + transportMapping.getListenAddress().toString());
             snmp.listen();
         } catch (IOException e) {
@@ -136,6 +134,8 @@ public class DeviceInterface implements CommandResponder {
             for (VariableBinding var : pdu.getVariableBindings()) {
                 if (oidToPduListener.containsKey(var.getOid().toString())) {
                     oidToPduListener.get(var.getOid().toString()).onVariableBindingReceived(var);
+                } else {
+                    log.debug("No configuration mappings found for received Trap");
                 }
             }
         } else {
@@ -155,6 +155,10 @@ public class DeviceInterface implements CommandResponder {
 
     public void unsubscribe(String ipAddress) {
         mapIPAddressToOid.remove(ipAddress);
+    }
+
+    public Map<String, PduListener> removeOidMappings(String ipAddress) {
+        return mapIPAddressToOid.put(ipAddress, Collections.EMPTY_MAP);
     }
 
     @EventListener

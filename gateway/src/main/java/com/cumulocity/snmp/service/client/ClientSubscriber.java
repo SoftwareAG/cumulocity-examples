@@ -43,31 +43,31 @@ import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 public class ClientSubscriber {
 
     @Autowired
-    Repository<DeviceType> deviceTypeRepository;
+    private Repository<DeviceType> deviceTypeRepository;
 
     @Autowired
-    Repository<Device> deviceRepository;
+    private Repository<Device> deviceRepository;
 
     @Autowired
-    ApplicationEventPublisher eventPublisher;
+    private ApplicationEventPublisher eventPublisher;
 
     @Autowired
-    DeviceInterface deviceInterface;
+    private DeviceInterface deviceInterface;
 
     @Autowired
-    DevicePollingService pollingService;
+    private DevicePollingService pollingService;
 
     @Autowired
-    Scheduler scheduler;
+    private Scheduler scheduler;
 
     @Autowired
-    DeviceFactory deviceFactory;
+    private DeviceFactory deviceFactory;
 
     @Autowired
-    ManagedObjectRepository managedObjectRepository;
+    private ManagedObjectRepository managedObjectRepository;
 
     @Autowired
-    DeviceTypeInventoryRepository deviceTypeInventoryRepository;
+    private DeviceTypeInventoryRepository deviceTypeInventoryRepository;
 
     private ScheduledFuture<?> future = null;
     private Gateway gateway = null;
@@ -105,6 +105,7 @@ public class ClientSubscriber {
         for (Device device : devices) {
             mapIPAddressToOid.remove(device.getIpAddress());
             mapIpAddressToRegister.remove(device.getIpAddress());
+            deviceInterface.removeOidMappings(device.getIpAddress());
             devicePollingData.remove(device);
         }
     }

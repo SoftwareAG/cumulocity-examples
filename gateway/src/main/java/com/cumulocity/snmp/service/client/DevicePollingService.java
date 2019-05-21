@@ -12,6 +12,7 @@ import org.snmp4j.mp.SnmpConstants;
 import org.snmp4j.security.*;
 import org.snmp4j.smi.*;
 import org.snmp4j.transport.AbstractTransportMapping;
+import org.snmp4j.transport.DefaultTcpTransportMapping;
 import org.snmp4j.transport.DefaultUdpTransportMapping;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,14 +36,18 @@ public class DevicePollingService {
         AbstractTransportMapping transport = null;
         Snmp snmp = null;
         Target target;
+        TransportIpAddress address;
 
         try {
-            transport = new DefaultUdpTransportMapping();
+            if (config.getAddress().startsWith("tcp")) {
+                transport = new DefaultTcpTransportMapping();
+                address = new TcpAddress(device.getIpAddress() + "/" + device.getPort());
+            } else {
+                transport = new DefaultUdpTransportMapping();
+                address = new UdpAddress(device.getIpAddress() + "/" + device.getPort());
+            }
             transport.listen();
-
             snmp = new Snmp(transport);
-            TransportIpAddress address = new UdpAddress(device.getIpAddress() + "/" + device.getPort());
-
             if (device.getSnmpVersion() == SnmpConstants.version3) {
                 if (!isValidUserName(device.getUsername())) {
                     log.error("Invalid entry. Should provide username for SNMP v3 device");

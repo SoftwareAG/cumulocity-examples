@@ -6,6 +6,7 @@ import com.cumulocity.snmp.model.device.DeviceAddedEvent;
 import com.cumulocity.snmp.model.gateway.Gateway;
 import com.cumulocity.snmp.model.gateway.UnknownTrapOrDeviceEvent;
 import com.cumulocity.snmp.model.gateway.device.Device;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -151,6 +152,13 @@ public class DeviceInterfaceTest {
 
         verify(event, atLeastOnce()).getPDU();
         verify(pdu, atLeastOnce()).getVariableBindings();
+    }
+
+    public void shouldReturnEmptyOidMappingsForGivenIpAddress() {
+        String ipAddress = "127.0.0.1";
+        Map<String, PduListener> mappings = deviceInterface.removeOidMappings(ipAddress);
+
+        Assert.assertTrue(mappings.isEmpty());
     }
 
     private Gateway getGatewayInstance() {
