@@ -43,31 +43,31 @@ import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 public class ClientSubscriber {
 
     @Autowired
-    Repository<DeviceType> deviceTypeRepository;
+    private Repository<DeviceType> deviceTypeRepository;
 
     @Autowired
-    Repository<Device> deviceRepository;
+    private Repository<Device> deviceRepository;
 
     @Autowired
-    ApplicationEventPublisher eventPublisher;
+    private ApplicationEventPublisher eventPublisher;
 
     @Autowired
-    DeviceInterface deviceInterface;
+    private DeviceInterface deviceInterface;
 
     @Autowired
-    DevicePollingService pollingService;
+    private DevicePollingService pollingService;
 
     @Autowired
-    Scheduler scheduler;
+    private Scheduler scheduler;
 
     @Autowired
-    DeviceFactory deviceFactory;
+    private DeviceFactory deviceFactory;
 
     @Autowired
-    ManagedObjectRepository managedObjectRepository;
+    private ManagedObjectRepository managedObjectRepository;
 
     @Autowired
-    DeviceTypeInventoryRepository deviceTypeInventoryRepository;
+    private DeviceTypeInventoryRepository deviceTypeInventoryRepository;
 
     private ScheduledFuture<?> future = null;
     private Gateway gateway = null;
@@ -140,11 +140,18 @@ public class ClientSubscriber {
 
     @EventListener
     @RunWithinContext
+    public synchronized void unsubscribe(final DeviceRemovedEvent event) {
+        log.debug("Initiating Device remove");
+        unsubscribe(event.getDevice());
+    }
+
+    @EventListener
+    @RunWithinContext
     public synchronized void refreshSubscriptions(final GatewayAddedEvent event) {
         log.debug("Initiating Gateway add");
         this.gateway = event.getGateway();
         try {
-            refreshScheduler();
+            handleScheduler();
             updateSubscriptions();
         } catch (final Exception ex) {
             log.error(ex.getMessage(), ex);
@@ -158,7 +165,7 @@ public class ClientSubscriber {
         log.debug("Initiating Gateway update");
         this.gateway = event.getGateway();
         try {
-            refreshScheduler();
+            handleScheduler();
             updateSubscriptions();
         } catch (final Exception ex) {
             log.error(ex.getMessage(), ex);
@@ -167,20 +174,25 @@ public class ClientSubscriber {
 
     @EventListener
     @RunWithinContext
-    public synchronized void unsubscribe(final DeviceRemovedEvent event) {
-        log.debug("Initiating Device remove");
-        unsubscribe(event.getDevice());
-    }
-
-    @EventListener
-    @RunWithinContext
     public synchronized void unsubscribe(final GatewayRemovedEvent event) {
         log.debug("Initiating Gateway delete");
-        terminateTaskIfRunning();
+        terminateSchedulerIfRunning();
         devicePollingData.clear();
         mapIPAddressToOid.clear();
         mapIpAddressToRegister.clear();
         this.gateway = null;
+    }
+
+    private void handleScheduler() {
+        if (isChildDeviesAvailable() && isPollingRateAvailable()) {
+            refreshScheduler();
+        } else {
+            terminateSchedulerIfRunning();
+        }
+    }
+
+    private boolean isPollingRateAvailable() {
+        return this.gateway.getPollingRateInSeconds()!=0;
     }
 
     private void updateSubscriptions() {
@@ -286,13 +298,16 @@ public class ClientSubscriber {
             mapIpAddressToRegister.remove(deviceOfType.getIpAddress());
             devicePollingData.remove(deviceOfType);
         }
+        if (!isChildDeviesAvailable()) {
+            terminateSchedulerIfRunning();
+        }
     }
 
     private void refreshScheduler() {
         log.debug("Scheduling Device Polling on user defined interval if polling rate exists");
         if (gateway != null && (gateway.getPollingRateInSeconds() > 0)
-                && (currentPollingRateInSeconds.get() != gateway.getPollingRateInSeconds())) {
-            terminateTaskIfRunning();
+                && (!isSchedulerRunning() || (currentPollingRateInSeconds.get() != gateway.getPollingRateInSeconds()))) {
+            terminateSchedulerIfRunning();
             currentPollingRateInSeconds.set(gateway.getPollingRateInSeconds());
             future = scheduler.scheduleWithFixedDelay(new Runnable() {
                 public void run() {
@@ -303,11 +318,20 @@ public class ClientSubscriber {
         }
     }
 
-    private void terminateTaskIfRunning() {
+    private boolean isChildDeviesAvailable() {
+        List<GId> childDevices = gateway.getCurrentDeviceIds();
+        return (childDevices != null) && (childDevices.size() > 0);
+    }
+
+    private void terminateSchedulerIfRunning() {
         log.debug("Deleting Task if exists");
         if (future != null && (!future.isCancelled())) {
             future.cancel(true);
         }
+    }
+
+    private boolean isSchedulerRunning() {
+        return future != null && (!future.isCancelled());
     }
 
     private List<Device> getDevicesOfDeviceType(GId deviceTypeGId) {
