@@ -22,9 +22,13 @@ public class IPAddressUtil {
                         (Integer.parseInt(parts[3], 10) << (8*0)) & 0x000000FF;
     }
 
-    public static boolean isValid(String address)
+    public static boolean isValidIPv4(String address) {
+        return IPAddress.isValidIPv4(address);
+    }
+
+    public static boolean isValidIPv6(String address)
     {
-        return IPAddress.isValid(address);
+        return IPAddress.isValidIPv6(address);
     }
 
     public int getOctet(int i) {
