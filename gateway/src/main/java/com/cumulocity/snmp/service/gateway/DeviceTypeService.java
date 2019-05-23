@@ -1,9 +1,12 @@
 package com.cumulocity.snmp.service.gateway;
 
 import com.cumulocity.model.idtype.GId;
+import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.PlatformParameters;
 import com.cumulocity.snmp.annotation.gateway.RunWithinContext;
+import com.cumulocity.snmp.factory.gateway.DeviceFactory;
 import com.cumulocity.snmp.model.device.DeviceAddedEvent;
+import com.cumulocity.snmp.model.device.DeviceUpdatedEvent;
 import com.cumulocity.snmp.model.gateway.DeviceTypeAddedEvent;
 import com.cumulocity.snmp.model.gateway.DeviceTypeRemovedEvent;
 import com.cumulocity.snmp.model.gateway.DeviceTypeUpdatedEvent;
@@ -14,6 +17,7 @@ import com.cumulocity.snmp.model.notification.platform.ManagedObjectListener;
 import com.cumulocity.snmp.model.notification.platform.Subscriptions;
 import com.cumulocity.snmp.model.type.DeviceType;
 import com.cumulocity.snmp.repository.DeviceTypeInventoryRepository;
+import com.cumulocity.snmp.repository.ManagedObjectRepository;
 import com.cumulocity.snmp.repository.core.Repository;
 import com.cumulocity.snmp.repository.platform.PlatformProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -39,13 +43,15 @@ public class DeviceTypeService {
     private final Notifications notifications;
     private final Subscriptions subscribers = new Subscriptions();
     private final ObjectMapper objectMapper;
+    private final ManagedObjectRepository managedObjectRepository;
+    private final DeviceFactory deviceFactory;
 
     @EventListener
     @RunWithinContext
     public void addDeviceType(final DeviceAddedEvent event) throws ExecutionException {
         final Gateway gateway = event.getGateway();
         final Device device = event.getDevice();
-        if(device.getDeviceType()!=null) {
+        if (device.getDeviceType() != null) {
             final Optional<DeviceType> newDeviceTypeOptional = deviceTypeInventoryRepository.get(
                     gateway, device.getDeviceType());
             if (newDeviceTypeOptional.isPresent()) {
@@ -56,6 +62,33 @@ public class DeviceTypeService {
                     eventPublisher.publishEvent(new DeviceTypeAddedEvent(event.getGateway(), device, deviceType));
                     unsubscribe(deviceType);
                     subscribe(gateway, device, deviceType);
+                }
+            }
+        }
+    }
+
+    @EventListener
+    @RunWithinContext
+    public void updateDeviceType(final DeviceUpdatedEvent event) throws ExecutionException {
+        final Gateway gateway = event.getGateway();
+        final Device device;
+        final Optional<ManagedObjectRepresentation> optional = managedObjectRepository.get(event.getGateway(), event.getDeviceId());
+        if (optional.isPresent()) {
+            final Optional<Device> deviceOptional = deviceFactory.convert(optional.get());
+            if (deviceOptional.isPresent()) {
+                device = deviceOptional.get();
+                if (device.getDeviceType() != null) {
+                    final Optional<DeviceType> newDeviceTypeOptional = deviceTypeInventoryRepository.get(
+                            gateway, device.getDeviceType());
+                    if (newDeviceTypeOptional.isPresent()) {
+                        final Optional<DeviceType> previousDeviceTypeOptional = deviceTypePeristedRepository.get(
+                                newDeviceTypeOptional.get().getId());
+                        if (!previousDeviceTypeOptional.equals(newDeviceTypeOptional)) {
+                            final DeviceType deviceType = deviceTypePeristedRepository.save(newDeviceTypeOptional.get());
+                            unsubscribe(deviceType);
+                            subscribe(gateway, device, deviceType);
+                        }
+                    }
                 }
             }
         }

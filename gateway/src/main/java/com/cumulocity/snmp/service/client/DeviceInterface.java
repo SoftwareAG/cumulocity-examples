@@ -130,13 +130,16 @@ public class DeviceInterface implements CommandResponder {
 
         String peerIPAddress = event.getPeerAddress().toString().split("/")[0];
         if (mapIPAddressToOid.containsKey(peerIPAddress)) {
+            boolean isMappingFound = false;
             Map<String, PduListener> oidToPduListener = mapIPAddressToOid.get(peerIPAddress);
             for (VariableBinding var : pdu.getVariableBindings()) {
                 if (oidToPduListener.containsKey(var.getOid().toString())) {
                     oidToPduListener.get(var.getOid().toString()).onVariableBindingReceived(var);
-                } else {
-                    log.debug("No configuration mappings found for received Trap");
+                    isMappingFound = true;
                 }
+            }
+            if (!isMappingFound) {
+                log.debug("No configuration mappings found for received Trap");
             }
         } else {
             eventPublisher.publishEvent(new UnknownTrapOrDeviceEvent(gateway, new ConfigEventType(
