@@ -1,9 +1,6 @@
 package com.cumulocity.snmp.factory.platform;
 
-import c8y.Hardware;
-import c8y.IsDevice;
-import c8y.Mobile;
-import c8y.SupportedOperations;
+import c8y.*;
 import com.cumulocity.model.Agent;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.snmp.factory.gateway.core.PlatformRepresentationFactory;
@@ -29,6 +26,8 @@ import static com.google.common.base.Optional.of;
 
 @Component
 public class ManagedObjectFactory implements PlatformRepresentationFactory<StatusMapping, ManagedObjectRepresentation> {
+
+    private static short DEFAULT_CONNECTION_INTERVAL = 10;
 
     private LoadingCache<Device, ManagedObjectRepresentation> cache = CacheBuilder
             .newBuilder()
@@ -58,6 +57,7 @@ public class ManagedObjectFactory implements PlatformRepresentationFactory<Statu
         result.set(new IsDevice());
         result.set(new Hardware());
         result.set(new Mobile());
+        result.set(new RequiredAvailability(DEFAULT_CONNECTION_INTERVAL));
         result.set(new Object(), c8y_SNMPGateway);
 
         result.set(createSupportedOperationsFragment());
