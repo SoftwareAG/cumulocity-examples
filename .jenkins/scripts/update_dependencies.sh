@@ -14,8 +14,10 @@ function update-dependencies {
     do
         update-property $property ${1}
     done
-    hg commit -m "Update dependencies to new version"
+    if [ "$2" != "no-commit" ]; then
+        hg commit -m "Update dependencies to new version"
+    fi
 
 }
 
-update-dependencies $1
+update-dependencies $1 $2

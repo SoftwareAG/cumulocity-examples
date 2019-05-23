@@ -8,8 +8,9 @@ pipeline {
     triggers { pollSCM('H/5 * * * *') }
     options {
         buildDiscarder(logRotator(numToKeepStr: '10'))
-        timeout(time: 1, unit: 'HOURS')
+        timeout(time: 4, unit: 'HOURS')
         disableConcurrentBuilds()
+        lock('cumulocity-examples')
     }
     parameters {
         choice(name: 'build_type', choices: ['DEFAULT', 'RELEASE', 'HOTFIX']);
@@ -50,20 +51,16 @@ pipeline {
                 }
             }
         }
-        stage('Compile') {
-            steps {
-                withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
-                    sh "chmod +x .jenkins/scripts/compile.sh && .jenkins/scripts/compile.sh"
-                }
-            }
-        }
+        // Separate Compile and Build does not make sense currently as build cannot be run in isolated network.
+        // It cannot be run in isolated network due to jarhell in tests (agent-framework 8.18) that are not resolved at compile time.
+        //stage('Compile') {
+        //    steps {
+        //        withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
+        //            sh "chmod +x .jenkins/scripts/compile.sh && .jenkins/scripts/compile.sh"
+        //        }
+        //    }
+        //}
         stage('Build') {
-            agent {
-                dockerfile {
-                    dir '.jenkins/build'
-                    // without network, to execute tests in isolated network
-                }
-            }
             steps {
                 withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
                     sh "chmod +x .jenkins/scripts/build.sh && .jenkins/scripts/build.sh"
@@ -88,8 +85,10 @@ pipeline {
 
             }
             steps {
-                withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
-                    sh "chmod +x .jenkins/scripts/deploy.sh && .jenkins/scripts/deploy.sh"
+                sshagent(['jenkins-hg-key']) {
+                    withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
+                        sh "chmod +x .jenkins/scripts/deploy.sh && .jenkins/scripts/deploy.sh snapshot"
+                    }
                 }
             }
         }
@@ -112,7 +111,9 @@ pipeline {
                         equals expected: 'RELEASE', actual: params.build_type
                     }
                     steps {
-                        sh "chmod +x .jenkins/scripts/prepare_release.sh && .jenkins/scripts/prepare_release.sh ${params.release_version}"
+                        withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
+                            sh "chmod +x .jenkins/scripts/prepare_release.sh && .jenkins/scripts/prepare_release.sh ${params.release_version}"
+                        }
                     }
                 }
                 stage('Release') {
@@ -123,13 +124,12 @@ pipeline {
                         }
                     }
                     steps {
-                        // update dependencies and pull them from nexus
                         sh "chmod +x .jenkins/scripts/update_dependencies.sh && .jenkins/scripts/update_dependencies.sh ${params.release_version}"
-                        withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
-                            sh "chmod +x .jenkins/scripts/compile.sh && .jenkins/scripts/compile.sh"
-                        }
                         sshagent(['jenkins-hg-key']) {
-                            sh "chmod +x .jenkins/scripts/release.sh && .jenkins/scripts/release.sh -r ${params.release_version} -d ${params.hotfix_version}"
+                            withCredentials([usernamePassword(credentialsId: 'bitbucket-m2m', passwordVariable: 'BITBUCKET_PASSWORD', usernameVariable: 'BITBUCKET_USER'),
+                                             file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
+                                    sh "chmod +x .jenkins/scripts/release.sh && .jenkins/scripts/release.sh -r ${params.release_version} -d ${params.hotfix_version}"
+                            }
                         }
                     }
                 }
@@ -140,12 +140,16 @@ pipeline {
                     stages {
                         stage('Close and merge release branch') {
                             steps {
-                                sh "chmod +x .jenkins/scripts/finish_release.sh && .jenkins/scripts/finish_release.sh ${params.release_version}"
+                                withCredentials([usernamePassword(credentialsId: 'bitbucket-m2m', passwordVariable: 'BITBUCKET_PASSWORD', usernameVariable: 'BITBUCKET_USER')]) {
+                                    sh "chmod +x .jenkins/scripts/finish_release.sh && .jenkins/scripts/finish_release.sh ${params.release_version}"
+                                }
                             }
                         }
                         stage('Bump develop branch') {
                             steps {
-                                sh "chmod +x .jenkins/scripts/update_develop.sh && .jenkins/scripts/update_develop.sh ${params.hotfix_version} ${params.development_version}"
+                                withCredentials([usernamePassword(credentialsId: 'bitbucket-m2m', passwordVariable: 'BITBUCKET_PASSWORD', usernameVariable: 'BITBUCKET_USER')]) {
+                                    sh "chmod +x .jenkins/scripts/update_develop.sh && .jenkins/scripts/update_develop.sh ${params.hotfix_version} ${params.development_version}"
+                                }
                             }
                         }
                     }

@@ -1,11 +1,8 @@
-FROM buildpack-deps:stretch-scm
+FROM centos:centos7
 ENV SDKMAN_DIR /usr/local/sdkman
-RUN apt-get update \
-      && apt-get upgrade -y \
-      && apt-get install -y sudo libltdl-dev rpm openssh-client openssl gnupg mercurial curl zip unzip\
-      && curl -s "https://get.sdkman.io" | bash \
-      && bash -c 'source "$SDKMAN_DIR/bin/sdkman-init.sh" && sdk install java $(sdk list java | grep 7.0 | awk "{print $3}" )'\
-      && rm -rf /var/lib/apt/lists/* \
-      && apt-get clean
+RUN yum install -y sudo libltdl-dev libtool-ltdl rpm rpm-build redhat-rpm-config openssh-clients mercurial curl zip unzip which procmail bind-utils
+RUN curl -s "https://get.sdkman.io" | bash \
+      && bash -c 'source "$SDKMAN_DIR/bin/sdkman-init.sh" && sdk install java 8.0.212-zulu'
 ENV MAVEN_OPTS="-Xms1024m -Xmx4096m -XX:PermSize=1024m -XX:+TieredCompilation -XX:TieredStopAtLevel=1 -Dhttps.protocols=TLSv1.2"
 ENV JAVA_HOME="$SDKMAN_DIR/candidates/java/current"
+ENV LANG C.UTF-8

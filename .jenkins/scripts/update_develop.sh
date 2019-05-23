@@ -10,4 +10,4 @@ find . -name 'pom.xml' | xargs sed -i "s/<version>${hotfix_version}<\\/version>/
 update-dependencies ${development_version}
 
 hg commit -m 'Update dependencies to next SNAPSHOT version'
-hg push -b develop
+hg push -b develop https://${BITBUCKET_USER}:${BITBUCKET_PASSWORD}@bitbucket.org/m2m/cumulocity-examples

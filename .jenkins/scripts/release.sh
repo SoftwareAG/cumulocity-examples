@@ -22,22 +22,33 @@ function tag-version {
 
 ./mvnw clean -T 4
 
-hg pull -u 
-hg up -C
+branch_name=$(hg branch)
+if [ "!develop" == "!branch_name" ]; then
+    branch_name="release/r${version}"
+fi
+echo "branch name: $branch_name"
+
+hg up -C ${branch_name}
 
 
 echo "Update version to ${version}"
-./mvnw versions:set -DnewVersion=${version} 
-./mvnw clean install -DskipTests -Dmaven.javadoc.skip=true -Dskip.microservice.package=false -Dskip.agent.package.container=false
-./deploy.sh
+./mvnw versions:set -DnewVersion=${version}
+
+
+# tests are run to make sure all dependencies with ${project.version} work correctly
+# same for usage of -s $MVN_SETTINGS.
+./mvnw clean install -Dmaven.javadoc.skip=true -s $MVN_SETTINGS
+chmod +x .jenkins/scripts/deploy.sh
+.jenkins/scripts/deploy.sh release
 
 echo "tagging cumulocity-examples"
-tag-version "c8y-examples-${version}"
+tag-version "c8y-agents-${version}"
 
 echo "Update version to ${next_version}"
-./mvnw versions:set -DnewVersion=${next_version} -DgenerateBackupPoms=false
+.jenkins/scripts/update_dependencies.sh ${next_version}
+./mvnw versions:set -DnewVersion=${next_version} -DgenerateBackupPoms=false -s $MVN_SETTINGS
 hg commit -m "[maven-release-plugin] prepare for next development iteration"
 
 branch_name=$(hg branch)
-hg push -r${branch_name} ssh://hg@bitbucket.org/m2m/cumulocity-examples
+hg push -r${branch_name} https://${BITBUCKET_USER}:${BITBUCKET_PASSWORD}@bitbucket.org/m2m/cumulocity-examples --new-branch
 
