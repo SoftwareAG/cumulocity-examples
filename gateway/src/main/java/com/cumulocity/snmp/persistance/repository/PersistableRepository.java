@@ -19,7 +19,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import static com.google.common.base.Optional.fromNullable;
-import static com.google.common.base.Throwables.propagate;
+import static com.google.common.base.Throwables.throwIfUnchecked;
 import static com.google.common.collect.FluentIterable.from;
 
 @Slf4j
@@ -80,7 +80,8 @@ public class PersistableRepository<T extends IdProvider> implements Repository<T
             return fromNullable(getStore(clazz).get(getKeyAsString(key))).transform(initContext());
         } catch (final Exception ex) {
             log.error(ex.getMessage(), ex);
-            throw propagate(ex);
+            throwIfUnchecked(ex);
+            throw new RuntimeException(ex);
         }
     }
 
@@ -92,7 +93,8 @@ public class PersistableRepository<T extends IdProvider> implements Repository<T
             return from(store.values()).transform(initContext()).toList();
         } catch (final Exception ex) {
             log.error(ex.getMessage(), ex);
-            throw propagate(ex);
+            throwIfUnchecked(ex);
+            throw new RuntimeException(ex);
         }
     }
 
@@ -103,7 +105,8 @@ public class PersistableRepository<T extends IdProvider> implements Repository<T
             return getStore(clazz).containsKey(keyAsString);
         } catch (final Exception ex) {
             log.error(ex.getMessage(), ex);
-            throw propagate(ex);
+            throwIfUnchecked(ex);
+            throw new RuntimeException(ex);
         }
     }
 
@@ -117,7 +120,8 @@ public class PersistableRepository<T extends IdProvider> implements Repository<T
         } catch (final Exception ex) {
             log.error(ex.getMessage(), ex);
             dbStore.rollback();
-            throw propagate(ex);
+            throwIfUnchecked(ex);
+            throw new RuntimeException(ex);
         }
     }
 
@@ -131,7 +135,8 @@ public class PersistableRepository<T extends IdProvider> implements Repository<T
         } catch (final Exception ex) {
             log.error(ex.getMessage(), ex);
             dbStore.rollback();
-            throw propagate(ex);
+            throwIfUnchecked(ex);
+            throw new RuntimeException(ex);
         }
     }
 
@@ -142,7 +147,8 @@ public class PersistableRepository<T extends IdProvider> implements Repository<T
         } catch (final Exception ex) {
             log.error(ex.getMessage(), ex);
             dbStore.rollback();
-            throw propagate(ex);
+            throwIfUnchecked(ex);
+            throw new RuntimeException(ex);
         }
     }
 

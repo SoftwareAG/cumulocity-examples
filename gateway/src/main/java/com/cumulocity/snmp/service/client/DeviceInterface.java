@@ -166,13 +166,13 @@ public class DeviceInterface implements CommandResponder {
 
     @EventListener
     @RunWithinContext
-    public void updateSnmpV3Credentilas(final DeviceUpdatedEvent event) {
+    public void updateSnmpV3Credentials(final DeviceUpdatedEvent event) {
         final Optional<ManagedObjectRepresentation> optional = managedObjectRepository.get(event.getGateway(), event.getDeviceId());
         if (optional.isPresent()) {
             final Optional<Device> deviceOptional = deviceFactory.convert(optional.get());
             if (deviceOptional.isPresent()) {
                 if (deviceOptional.get().getSnmpVersion() == SnmpConstants.version3) {
-                    addorUpdateSnmpV3Credentials(deviceOptional.get());
+                    addOrUpdateSnmpV3Credentials(deviceOptional.get());
                 }
             }
         }
@@ -180,9 +180,9 @@ public class DeviceInterface implements CommandResponder {
 
     @EventListener
     @RunWithinContext
-    public synchronized void addSnmpV3Credentilas(final DeviceAddedEvent event) {
+    public synchronized void addSnmpV3Credentials(final DeviceAddedEvent event) {
         if (event.getDevice().getSnmpVersion() == SnmpConstants.version3) {
-            addorUpdateSnmpV3Credentials(event.getDevice());
+            addOrUpdateSnmpV3Credentials(event.getDevice());
         }
     }
 
@@ -195,7 +195,7 @@ public class DeviceInterface implements CommandResponder {
         }
     }
 
-    private void addorUpdateSnmpV3Credentials(Device device) {
+    private void addOrUpdateSnmpV3Credentials(Device device) {
 
         String engineID = device.getEngineId();
         if (engineID == null || engineID.length() < MPv3.MINLEN_ENGINE_ID || engineID.length() > MPv3.MAXLEN_ENGINE_ID) {

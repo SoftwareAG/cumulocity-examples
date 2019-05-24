@@ -3,7 +3,6 @@ package com.cumulocity.snmp.persistance.repository;
 import com.cumulocity.snmp.configuration.service.GatewayConfigurationProperties;
 import com.cumulocity.snmp.persistance.model.PersistableTypeMetadata;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Throwables;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -23,6 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 
 import static com.cumulocity.snmp.repository.configuration.RepositoryConfiguration.findConfSubdirectory;
+import static com.google.common.base.Throwables.throwIfUnchecked;
 import static java.util.concurrent.TimeUnit.DAYS;
 
 @Slf4j
@@ -112,7 +112,8 @@ public class DBStore<T> {
                 db = result;
             } catch (final Exception ex) {
                 log.error(ex.getLocalizedMessage(), ex);
-                throw Throwables.propagate(ex);
+                throwIfUnchecked(ex);
+                throw new RuntimeException(ex);
             }
         }
         return db;

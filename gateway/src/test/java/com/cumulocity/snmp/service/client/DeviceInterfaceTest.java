@@ -139,7 +139,7 @@ public class DeviceInterfaceTest {
         when(config.getListenerPort()).thenReturn(6690);
         when(config.getCommunityTarget()).thenReturn("public");
         deviceInterface.init();
-        deviceInterface.addSnmpV3Credentilas(new DeviceAddedEvent(getGatewayInstance(), getDevice()));
+        deviceInterface.addSnmpV3Credentials(new DeviceAddedEvent(getGatewayInstance(), getDevice()));
 
         CommandResponderEvent event = mock(CommandResponderEvent.class);
         PDU pdu = mock(PDU.class);

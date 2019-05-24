@@ -10,7 +10,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import static com.google.common.base.Optional.fromNullable;
-import static com.google.common.base.Throwables.propagate;
+import static com.google.common.base.Throwables.throwIfUnchecked;
 
 @Slf4j
 @UtilityClass
@@ -33,7 +33,8 @@ public class PlatformRepositoryUtils {
         } else if (unauthorizedResponse(ex)) {
             return Optional.absent();
         } else {
-            throw propagate(ex);
+            throwIfUnchecked(ex);
+            throw new RuntimeException(ex);
         }
     }
 
