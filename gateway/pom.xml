@@ -11,7 +11,7 @@
     <groupId>snmp-agent-gateway</groupId>
     <artifactId>snmp-agent-gateway</artifactId>
     <packaging>jar</packaging>
-    <name>snmp-agent-gateway</name>
+    <name>Cumulocity :: Agents :: SNMP Agent :: Gateway</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -21,6 +21,7 @@
         <jackson-datatype-joda>2.4.0</jackson-datatype-joda>
         <jackson-datatype-guava>2.8.4</jackson-datatype-guava>
         <c8y.microservice.version>${c8y.microservice-new.version}</c8y.microservice.version>
+        <jetty.version>9.0.0.v20130308</jetty.version>
         <cometd.version>3.0.0</cometd.version>
         <aspectj.version>1.8.7</aspectj.version>
     </properties>
@@ -34,8 +35,7 @@
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
+            <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
         <!--SNMP4J-->
@@ -75,7 +75,6 @@
         <dependency>
             <groupId>com.nsn.cumulocity.shared-components</groupId>
             <artifactId>common-notification</artifactId>
-
             <exclusions>
                 <exclusion>
                     <groupId>javax.ws.rs</groupId>
@@ -130,6 +129,7 @@
             <artifactId>jackson-datatype-joda</artifactId>
             <version>${jackson-datatype-joda}</version>
         </dependency>
+
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-guava</artifactId>
@@ -163,6 +163,18 @@
             <groupId>org.cometd.java</groupId>
             <artifactId>cometd-java-common</artifactId>
             <version>${cometd.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.eclipse.jetty</groupId>
+                    <artifactId>jetty-util-ajax</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>com.googlecode.java-ipv6</groupId>
+            <artifactId>java-ipv6</artifactId>
+            <version>0.17</version>
         </dependency>
 
         <dependency>
@@ -178,9 +190,36 @@
         </dependency>
 
         <dependency>
-            <groupId>com.googlecode.java-ipv6</groupId>
-            <artifactId>java-ipv6</artifactId>
-            <version>0.17</version>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-util</artifactId>
+            <version>${jetty.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-util-ajax</artifactId>
+            <version>9.2.0.v20140526</version>
+        </dependency>
+
+        <!--For Integration Test-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.snmp4j</groupId>
+            <artifactId>snmp4j-agent</artifactId>
+            <version>${snmp4j.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.cometd.java</groupId>
+            <artifactId>cometd-java-server</artifactId>
+            <version>2.8.0</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -191,7 +230,7 @@
                 <groupId>com.nsn.cumulocity.clients-java</groupId>
                 <artifactId>microservice-dependencies</artifactId>
                 <version>${c8y.microservice.version}</version>
-		<type>pom</type>
+                <type>pom</type>
                 <scope>import</scope>
             </dependency>
         </dependencies>
@@ -271,6 +310,24 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <!--
+            <plugin>
+                <groupId>com.nsn.cumulocity.clients-java</groupId>
+                <artifactId>microservice-package-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>3rd-license-generate</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>package</goal>
+                        </goals>
+                        <configuration>
+                            <rpmSkip>false</rpmSkip>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>  -->
         </plugins>
     </build>
 </project>
