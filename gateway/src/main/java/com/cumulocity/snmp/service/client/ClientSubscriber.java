@@ -116,7 +116,8 @@ public class ClientSubscriber {
         log.debug("Initiating Device add");
         this.gateway = event.getGateway();
         if (event.getDevice().getDeviceType() != null) {
-            final Optional<DeviceType> deviceTypeOptional = deviceTypeRepository.get(event.getDevice().getDeviceType());
+            final Optional<DeviceType> deviceTypeOptional =
+                    deviceTypeInventoryRepository.get(gateway, event.getDevice().getDeviceType());
             if (deviceTypeOptional.isPresent()) {
                 final Device device = event.getDevice();
                 subscribe(device, deviceTypeOptional.get());
@@ -206,16 +207,17 @@ public class ClientSubscriber {
                 if (deviceOptional.isPresent()) {
                     final Device device = deviceOptional.get();
                     if (device.getDeviceType() != null) {
-                        final Optional<DeviceType> deviceTypeOptional = deviceTypeRepository.get(device.getDeviceType());
+                        final Optional<DeviceType> deviceTypeOptional =
+                                deviceTypeInventoryRepository.get(gateway, deviceOptional.get().getDeviceType());
                         if (deviceTypeOptional.isPresent()) {
-                            log.debug("Adding details to devicePollingData ");
+                            log.debug("Adding/Updating device details for polling");
                             devicePollingData.put(device, deviceTypeOptional.get());
                         }
                     }
                 }
             }
-            if (gateway.getPollingRateInSeconds() <= 0) {
-                log.debug("Device polling will be scheduled once as no polling rate found");
+            if (gateway.getPollingRateInSeconds() == 0) {
+                log.debug("Device polling will be scheduled once polling rate is found");
                 pollDevices();
             }
             subscribe();
@@ -229,16 +231,21 @@ public class ClientSubscriber {
     }
 
     private void pollDevice(final Gateway gateway, final Device device) {
-        for (final Register register : mapIpAddressToRegister.get(device.getIpAddress())) {
-            if (register.getMeasurementMapping() != null) {
-                pollingService.initiatePolling(register.getOid(), device, new PduListener() {
-                    @Override
-                    public void onVariableBindingReceived(VariableBinding variableBinding) {
-                        eventPublisher.publishEvent(new ClientDataChangedEvent(gateway, device, register,
-                                new DateTime(), variableBinding, true));
-                    }
-                });
+        List<Register> registers = mapIpAddressToRegister.get(device.getIpAddress());
+        if (registers != null) {
+            for (final Register register : registers) {
+                if (register.getMeasurementMapping() != null) {
+                    pollingService.initiatePolling(register.getOid(), device, new PduListener() {
+                        @Override
+                        public void onVariableBindingReceived(VariableBinding variableBinding) {
+                            eventPublisher.publishEvent(new ClientDataChangedEvent(gateway, device, register,
+                                    new DateTime(), variableBinding, true));
+                        }
+                    });
+                }
             }
+        } else {
+            log.debug("No data mappings found for device ", device.getIpAddress());
         }
     }
 
@@ -271,6 +278,7 @@ public class ClientSubscriber {
             mapIPAddressToOid.put(device.getIpAddress(), mapOidToPduListener);
             mapIpAddressToRegister.put(device.getIpAddress(), deviceType.getRegisters());
             deviceInterface.subscribe(mapIPAddressToOid);
+            devicePollingData.remove(device);
             devicePollingData.put(device, deviceType);
         } catch (final Exception ex) {
             log.error(ex.getMessage(), ex);
