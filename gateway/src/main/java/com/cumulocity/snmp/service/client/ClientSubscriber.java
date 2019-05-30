@@ -4,7 +4,6 @@ import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.snmp.annotation.gateway.RunWithinContext;
 import com.cumulocity.snmp.factory.gateway.DeviceFactory;
-import com.cumulocity.snmp.model.core.ConfigEventType;
 import com.cumulocity.snmp.model.device.DeviceAddedEvent;
 import com.cumulocity.snmp.model.device.DeviceRemovedEvent;
 import com.cumulocity.snmp.model.device.DeviceUpdatedEvent;
@@ -156,8 +155,8 @@ public class ClientSubscriber {
             handleScheduler();
             updateSubscriptions();
         } catch (final Exception ex) {
+            log.error("Failed to add gateway");
             log.error(ex.getMessage(), ex);
-            eventPublisher.publishEvent(new GatewayConfigErrorEvent(gateway, new ConfigEventType(ex.getMessage())));
         }
     }
 
@@ -170,6 +169,7 @@ public class ClientSubscriber {
             handleScheduler();
             updateSubscriptions();
         } catch (final Exception ex) {
+            log.error("Failed to update gateway");
             log.error(ex.getMessage(), ex);
         }
     }
@@ -186,7 +186,7 @@ public class ClientSubscriber {
     }
 
     private void handleScheduler() {
-        if (isChildDeviesAvailable() && isPollingRateAvailable()) {
+        if (isChildDevicesAvailable() && isPollingRateAvailable()) {
             refreshScheduler();
         } else {
             terminateSchedulerIfRunning();
@@ -194,7 +194,7 @@ public class ClientSubscriber {
     }
 
     private boolean isPollingRateAvailable() {
-        return this.gateway.getPollingRateInSeconds()!=0;
+        return this.gateway.getPollingRateInSeconds() != 0;
     }
 
     private void updateSubscriptions() {
@@ -281,8 +281,8 @@ public class ClientSubscriber {
             devicePollingData.remove(device);
             devicePollingData.put(device, deviceType);
         } catch (final Exception ex) {
+            log.error("Failed to subscribe device configuration mapping");
             log.error(ex.getMessage(), ex);
-            eventPublisher.publishEvent(new GatewayConfigErrorEvent(gateway, new ConfigEventType(ex.getMessage())));
         }
     }
 
@@ -307,7 +307,7 @@ public class ClientSubscriber {
             mapIpAddressToRegister.remove(deviceOfType.getIpAddress());
             devicePollingData.remove(deviceOfType);
         }
-        if (!isChildDeviesAvailable()) {
+        if (!isChildDevicesAvailable()) {
             terminateSchedulerIfRunning();
         }
     }
@@ -327,7 +327,7 @@ public class ClientSubscriber {
         }
     }
 
-    private boolean isChildDeviesAvailable() {
+    private boolean isChildDevicesAvailable() {
         List<GId> childDevices = gateway.getCurrentDeviceIds();
         return (childDevices != null) && (childDevices.size() > 0);
     }

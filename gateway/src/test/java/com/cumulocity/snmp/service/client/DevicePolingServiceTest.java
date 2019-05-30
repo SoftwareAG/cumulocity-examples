@@ -227,6 +227,7 @@ public class DevicePolingServiceTest {
         int snmpVersion = 3; // version 3
         device.setSnmpVersion(snmpVersion);
         device.setUsername("testuser");
+        device.setEngineId("123456");
 
         when(config.getAddress()).thenReturn("udp:localhost");
         when(pdu.getVariableBindings()).thenReturn(variableBindings);
@@ -244,6 +245,7 @@ public class DevicePolingServiceTest {
         int snmpVersion = 3; // version 3
         device.setSnmpVersion(snmpVersion);
         device.setUsername("testuser");
+        device.setEngineId("123456");
 
         when(config.getAddress()).thenReturn("tcp:localhost");
         when(pdu.getVariableBindings()).thenReturn(variableBindings);
@@ -261,6 +263,7 @@ public class DevicePolingServiceTest {
         int snmpVersion = 3; // version 3
         device.setSnmpVersion(snmpVersion);
         device.setUsername("testuser");
+        device.setEngineId("123456");
         device.setSecurityLevel(0);
 
         when(config.getAddress()).thenReturn("udp:localhost");
@@ -279,6 +282,7 @@ public class DevicePolingServiceTest {
         int snmpVersion = 3; // version 3
         device.setSnmpVersion(snmpVersion);
         device.setUsername("testuser");
+        device.setEngineId("123456");
         device.setSecurityLevel(1);
 
         when(config.getAddress()).thenReturn("udp:localhost");
@@ -297,6 +301,7 @@ public class DevicePolingServiceTest {
         int snmpVersion = 3; // version 3
         device.setSnmpVersion(snmpVersion);
         device.setUsername("testuser");
+        device.setEngineId("123456");
         device.setSecurityLevel(2);
         device.setAuthProtocol(0);
         device.setAuthProtocolPassword("authpassword");
@@ -317,6 +322,7 @@ public class DevicePolingServiceTest {
         int snmpVersion = 3; // version 3
         device.setSnmpVersion(snmpVersion);
         device.setUsername("testuser");
+        device.setEngineId("123456");
         device.setSecurityLevel(2);
         device.setAuthProtocol(1);
         device.setAuthProtocolPassword("auth123");
@@ -337,6 +343,7 @@ public class DevicePolingServiceTest {
         int snmpVersion = 3; // version 3
         device.setSnmpVersion(snmpVersion);
         device.setUsername("testuser");
+        device.setEngineId("123456");
         device.setSecurityLevel(2);
         device.setAuthProtocol(2);
         device.setAuthProtocolPassword("authpass");
@@ -357,6 +364,7 @@ public class DevicePolingServiceTest {
         int snmpVersion = 3; // version 3
         device.setSnmpVersion(snmpVersion);
         device.setUsername("testuser");
+        device.setEngineId("123456");
         device.setSecurityLevel(3);
         device.setAuthProtocol(1);
         device.setAuthProtocolPassword("authpass");
@@ -378,6 +386,7 @@ public class DevicePolingServiceTest {
         int snmpVersion = 3; // version 3
         device.setSnmpVersion(snmpVersion);
         device.setUsername("testuser");
+        device.setEngineId("123456");
         device.setSecurityLevel(3);
         device.setAuthProtocol(1);
         device.setAuthProtocolPassword("authpass");
@@ -400,6 +409,7 @@ public class DevicePolingServiceTest {
         int snmpVersion = 3; // version 3
         device.setSnmpVersion(snmpVersion);
         device.setUsername("testuser");
+        device.setEngineId("123456");
         device.setSecurityLevel(3);
         device.setAuthProtocol(1);
         device.setAuthProtocolPassword("authpass");
@@ -422,6 +432,7 @@ public class DevicePolingServiceTest {
         int snmpVersion = 3; // version 3
         device.setSnmpVersion(snmpVersion);
         device.setUsername("testuser");
+        device.setEngineId("123456");
         device.setSecurityLevel(3);
         device.setAuthProtocol(1);
         device.setAuthProtocolPassword("authpass");
@@ -444,6 +455,7 @@ public class DevicePolingServiceTest {
         int snmpVersion = 3; // version 3
         device.setSnmpVersion(snmpVersion);
         device.setUsername("testuser");
+        device.setEngineId("123456");
         device.setSecurityLevel(3);
         device.setAuthProtocol(1);
         device.setAuthProtocolPassword("authpass");

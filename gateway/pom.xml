@@ -11,7 +11,7 @@
     <groupId>snmp-agent-gateway</groupId>
     <artifactId>snmp-agent-gateway</artifactId>
     <packaging>jar</packaging>
-    <name>snmp-agent-gateway</name>
+    <name>Cumulocity :: Agents :: SNMP Agent :: Gateway</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

@@ -7,7 +7,6 @@ import com.cumulocity.snmp.utils.SnmpPrivacyProtocol;
 import lombok.extern.slf4j.Slf4j;
 import org.snmp4j.*;
 import org.snmp4j.event.ResponseEvent;
-import org.snmp4j.mp.MPv3;
 import org.snmp4j.mp.SnmpConstants;
 import org.snmp4j.security.*;
 import org.snmp4j.smi.*;
@@ -55,9 +54,11 @@ public class DevicePollingService {
                 }
                 pdu = new ScopedPDU();
 
-                OctetString localEngineId = new OctetString(MPv3.createLocalEngineID());
+                OctetString localEngineId = new OctetString(device.getEngineId());
                 USM usm = new USM(SecurityProtocols.getInstance(), localEngineId, 0);
                 SecurityModels.getInstance().addSecurityModel(usm);
+
+                snmp.setLocalEngine(localEngineId.getValue(), 0, 0);
 
                 switch (device.getSecurityLevel()) {
                     case SecurityLevel.NOAUTH_NOPRIV:
