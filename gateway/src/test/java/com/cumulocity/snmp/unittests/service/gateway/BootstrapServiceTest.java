@@ -129,7 +129,7 @@ public class BootstrapServiceTest {
         bootstrapService.syncGateways();
 
         //Then
-//        verify(eventPublisher).publishEvent(any(GatewayAddedEvent.class));
+        verify(gatewayRepository, atLeastOnce()).findAll();
 
     }
 

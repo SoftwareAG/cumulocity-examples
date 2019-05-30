@@ -198,7 +198,7 @@
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-util-ajax</artifactId>
-            <version>9.2.0.v20140526</version>
+            <version>${jetty.version}</version>
         </dependency>
 
         <!--For Integration Test-->

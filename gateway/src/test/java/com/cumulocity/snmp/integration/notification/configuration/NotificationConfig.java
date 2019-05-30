@@ -8,11 +8,9 @@ import com.cumulocity.snmp.integration.notification.controller.DeviceControllNot
 import org.cometd.server.BayeuxServerImpl;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ComponentScan("com.cumulocity.snmp")
 public class NotificationConfig {
 
     @Bean

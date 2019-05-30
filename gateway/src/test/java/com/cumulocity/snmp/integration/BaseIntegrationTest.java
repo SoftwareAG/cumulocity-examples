@@ -92,14 +92,7 @@ public abstract class BaseIntegrationTest {
 
     protected ManagedObjectRepresentation createDeviceType(String oid) {
         final ManagedObjectRepresentation register = new ManagedObjectRepresentation();
-//        final HashMap<Object, Object> alarmMapping = new HashMap<>();
-//        alarmMapping.put("severity","MAJOR");
-//        alarmMapping.put("text","NordexAlarm02");
-//        alarmMapping.put("raiseAlarmTemplate","300");
-//        alarmMapping.put("type","c8y_Alamr02");
-
         register.setProperty("oid", oid);
-//        register.setProperty("alarmMapping", alarmMapping);
         final List<ManagedObjectRepresentation> registerList = new ArrayList<>();
         registerList.add(register);
 
