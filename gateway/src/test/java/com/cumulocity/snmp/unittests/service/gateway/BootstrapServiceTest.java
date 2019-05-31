@@ -1,15 +1,12 @@
 package com.cumulocity.snmp.unittests.service.gateway;
 
-import com.cumulocity.model.ID;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.devicebootstrap.DeviceCredentialsRepresentation;
 import com.cumulocity.rest.representation.identity.ExternalIDRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.Platform;
-import com.cumulocity.sdk.client.PlatformImpl;
 import com.cumulocity.sdk.client.devicecontrol.DeviceCredentialsApi;
 import com.cumulocity.sdk.client.inventory.InventoryApi;
-import com.cumulocity.sdk.client.inventory.InventoryApiImpl;
 import com.cumulocity.snmp.configuration.service.GatewayConfigurationProperties;
 import com.cumulocity.snmp.factory.gateway.GatewayFactory;
 import com.cumulocity.snmp.factory.platform.IdentityFactory;
@@ -27,7 +24,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.context.ApplicationEventPublisher;
 
@@ -43,17 +39,14 @@ public class BootstrapServiceTest {
     @Mock
     ApplicationEventPublisher eventPublisher;
 
-    @Spy
-    Platform bootstrapPlatform = new PlatformImpl();
+    @Mock
+    Platform bootstrapPlatform;
 
-    @Spy
+    @Mock
     DeviceCredentialsRepository deviceCredentialsRepository;
 
     @Mock
     Repository<Gateway> gatewayRepository;
-
-    @Mock
-    Optional<Gateway> gatewayOptional;
 
     @Mock
     ManagedObjectMapper managedObjectMapper;
@@ -70,7 +63,7 @@ public class BootstrapServiceTest {
     @Mock
     InventoryApi inventoryApi;
 
-    @Spy
+    @Mock
     ManagedObjectRepository inventoryRepository;
 
     @Mock
@@ -83,22 +76,13 @@ public class BootstrapServiceTest {
     Scheduler scheduler;
 
     @Mock
-    Optional<DeviceCredentialsRepresentation> deviceCredentialsRepresentationOptional;
-
-    @Mock
     DeviceCredentialsApi deviceCredentialsApi;
 
     @Mock
     DeviceCredentialsRepresentation deviceCredentialsRepresentation;
 
     @Mock
-    Optional<ExternalIDRepresentation> existingExternalIdOptional;
-
-    @Mock
     ExternalIDRepresentation existingExternalId;
-
-    @Mock
-    Optional<ManagedObjectRepresentation> managedObjectRepresentationOptional;
 
     @Mock
     ManagedObjectRepresentation managedObjectRepresentation;
@@ -109,20 +93,17 @@ public class BootstrapServiceTest {
 
     @Test
     public void shouldTestSyncGatewaysWithGatewayConfig() throws InvocationTargetException, IllegalAccessException {
+        Gateway gateway = mock(Gateway.class);
+        ExternalIDRepresentation externalIDRepresentation = mock(ExternalIDRepresentation.class);
 
         //Given
         when(properties.getIdentifier()).thenReturn("snmp-agent");
-        deviceCredentialsRepository.setBootstrapPlatform(bootstrapPlatform);
-        doReturn(deviceCredentialsApi).when(bootstrapPlatform).getDeviceCredentialsApi();
-        when(deviceCredentialsApi.pollCredentials("snmp-agent")).thenReturn(deviceCredentialsRepresentation);
-        when(identityRepository.get(any(DeviceCredentialsRepresentation.class), any(ID.class))).thenReturn(existingExternalIdOptional);
-        when(managedObjectFactory.create(anyString())).thenReturn(managedObjectRepresentation);
-        inventoryApi = mock(InventoryApiImpl.class);
-        inventoryRepository.setInventory(inventoryApi);
-        when(inventoryApi.create(any(ManagedObjectRepresentation.class))).thenReturn(managedObjectRepresentation);
-        when(gatewayFactory.create(deviceCredentialsRepresentation, managedObjectRepresentation)).thenReturn(gatewayOptional);
-        when(gatewayOptional.isPresent()).thenReturn(true);
-        when(gatewayOptional.get()).thenReturn(getGatewayInstance());
+        when(inventoryRepository.get(any(Gateway.class))).thenReturn(Optional.of(managedObjectRepresentation));
+        when(gatewayFactory.create(any(Gateway.class), any(ManagedObjectRepresentation.class))).thenReturn(Optional.of(gateway));
+        when(deviceCredentialsRepository.get(anyString())).thenReturn(Optional.of(deviceCredentialsRepresentation));
+        when(identityRepository.get(any(DeviceCredentialsRepresentation.class), any(GId.class))).thenReturn(Optional.<ExternalIDRepresentation>absent());
+        when(inventoryRepository.save(any(DeviceCredentialsRepresentation.class), any(ManagedObjectRepresentation.class))).thenReturn(Optional.of(managedObjectRepresentation));
+        when(gatewayFactory.create(deviceCredentialsRepresentation, managedObjectRepresentation)).thenReturn(Optional.of(gateway));
         when(identityFactory.create(properties.getIdentifier(), managedObjectRepresentation)).thenReturn(existingExternalId);
 
         //When

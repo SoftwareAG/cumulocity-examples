@@ -2,11 +2,9 @@ package com.cumulocity.snmp.service.gateway;
 
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.snmp.annotation.gateway.RunWithinContext;
-import com.cumulocity.snmp.model.core.ConfigEventType;
 import com.cumulocity.snmp.model.core.Credentials;
 import com.cumulocity.snmp.model.core.MeasurementUnit;
 import com.cumulocity.snmp.model.gateway.Gateway;
-import com.cumulocity.snmp.model.gateway.GatewayConfigErrorEvent;
 import com.cumulocity.snmp.repository.configuration.ContextProvider;
 import com.google.common.base.Optional;
 import lombok.AccessLevel;
@@ -100,8 +98,8 @@ public class GroupMeasurementService {
             autowireCapableBeanFactory.autowireBean(measurementUnit);
             measurementUnit.execute();
         } catch (final Exception ex) {
+            log.error("Failed to send measurement to Cumulocity platform");
             log.error(ex.getMessage(), ex);
-            eventPublisher.publishEvent(new GatewayConfigErrorEvent(gateway, new ConfigEventType(ex.getMessage())));
         }
     }
 }

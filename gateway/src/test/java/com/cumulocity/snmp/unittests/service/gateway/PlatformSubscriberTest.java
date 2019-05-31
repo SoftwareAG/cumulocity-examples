@@ -33,25 +33,25 @@ import static org.mockito.Mockito.when;
 public class PlatformSubscriberTest {
 
     @Mock
-    private PlatformProvider platformProvider;
+    PlatformProvider platformProvider;
 
     @Mock
-    private ApplicationEventPublisher eventPublisher;
+    ApplicationEventPublisher eventPublisher;
 
     @Mock
-    private InventoryRealtimeDeleteAwareNotificationsSubscriber inventorySubscriber;
+    InventoryRealtimeDeleteAwareNotificationsSubscriber inventorySubscriber;
 
     @Mock
     private OperationNotificationSubscriber operationNotificationSubscriber;
 
     @Mock
-    private Notifications notifications;
+    Notifications notifications;
 
     @Mock
-    private PlatformParameters platformParameters;
+    PlatformParameters platformParameters;
 
     @InjectMocks
-    private PlatformSubscriber platformSubscriber;
+    PlatformSubscriber platformSubscriber;
 
     @Before
     public void before() throws ExecutionException {

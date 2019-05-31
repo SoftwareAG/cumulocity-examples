@@ -68,6 +68,9 @@ public class AutoDiscoveryService {
     private Map<String, GId> mapIpAddressToGid = new HashMap<>();
 
     @Autowired
+    private SNMPConfigurationProperties config;
+
+    @Autowired
     private ManagedObjectRepository inventoryRepository;
 
     @Autowired
@@ -93,9 +96,6 @@ public class AutoDiscoveryService {
 
     @Autowired
     private DeviceFactory deviceFactory;
-
-    @Autowired
-    private SNMPConfigurationProperties config;
 
     private static final String UDP = "udp";
 
@@ -281,7 +281,7 @@ public class AutoDiscoveryService {
         target.setCommunity(new OctetString("public"));
         target.setVersion(SnmpConstants.version1);
 
-        String url = ipAddress + "/" + 161;
+        String url = ipAddress + "/" + config.getPollingPort();
         if (config.getAddress().startsWith(TCP)) {
             target.setAddress(new TcpAddress(url));
             transportIpAddress = new TcpAddress(url);

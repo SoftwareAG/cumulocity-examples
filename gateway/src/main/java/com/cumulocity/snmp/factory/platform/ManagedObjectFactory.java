@@ -3,6 +3,7 @@ package com.cumulocity.snmp.factory.platform;
 import c8y.*;
 import com.cumulocity.model.Agent;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
+import com.cumulocity.snmp.configuration.service.SNMPConfigurationProperties;
 import com.cumulocity.snmp.factory.gateway.core.PlatformRepresentationFactory;
 import com.cumulocity.snmp.model.gateway.device.Device;
 import com.cumulocity.snmp.model.gateway.type.mapping.StatusMapping;
@@ -11,6 +12,7 @@ import com.google.common.base.Optional;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
@@ -28,6 +30,9 @@ import static com.google.common.base.Optional.of;
 public class ManagedObjectFactory implements PlatformRepresentationFactory<StatusMapping, ManagedObjectRepresentation> {
 
     private static short DEFAULT_CONNECTION_INTERVAL = 10;
+
+    @Autowired
+    private SNMPConfigurationProperties config;
 
     private LoadingCache<Device, ManagedObjectRepresentation> cache = CacheBuilder
             .newBuilder()
@@ -76,7 +81,7 @@ public class ManagedObjectFactory implements PlatformRepresentationFactory<Statu
         final ManagedObjectRepresentation result = new ManagedObjectRepresentation();
         Map<String, String> deviceIpMap = new HashMap();
         deviceIpMap.put("ipAddress", ipAddress);
-        deviceIpMap.put("port", "161");
+        deviceIpMap.put("port", config.getPollingPort()+"");
         result.setName(name);
         result.set(new RequiredAvailability(DEFAULT_CONNECTION_INTERVAL));
         result.setProperty(Device.c8y_SNMPDevice, deviceIpMap);
