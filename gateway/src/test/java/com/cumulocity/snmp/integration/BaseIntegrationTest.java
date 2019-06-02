@@ -26,8 +26,9 @@ import org.snmp4j.transport.DefaultUdpTransportMapping;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -38,10 +39,11 @@ import static com.cumulocity.snmp.model.gateway.device.Device.c8y_SNMPDevice;
 import static com.cumulocity.snmp.utils.SimpleTypeUtils.GID_PREFIX;
 
 
-@RunWith(SpringRunner.class)
+@RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = {Main.class, TestConfiguration.class, NotificationConfig.class},
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource(value = "/snmp-agent-gateway.properties")
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public abstract class BaseIntegrationTest {
 
     @Autowired
@@ -167,7 +169,7 @@ public abstract class BaseIntegrationTest {
         }
     }
 
-    public void sendV3Trap(String ipAddress, int port, String Oid, String username, String authpassphrase, String privacypassphrase) {
+    public void sendV3Trap(String ipAddress, int port, String Oid, String username, String authpassphrase, String privacypassphrase, String enginId) {
         try {
             TransportMapping transport = new DefaultUdpTransportMapping();
             transport.listen();
@@ -179,10 +181,10 @@ public abstract class BaseIntegrationTest {
             SecurityProtocols.getInstance().addPrivacyProtocol(new Priv3DES());
             SecurityModels.getInstance().addSecurityModel(usm);
 
-            snmp.getUSM().addUser(new OctetString(username), new OctetString("12345"),
+            snmp.getUSM().addUser(new OctetString(username), new OctetString(enginId),
                     new UsmUser(new OctetString(username), AuthMD5.ID, new OctetString(authpassphrase), PrivDES.ID, new OctetString(privacypassphrase)));
 
-            snmp.setLocalEngine(new OctetString("12345").getValue(), 0, 0);
+            snmp.setLocalEngine(new OctetString(enginId).getValue(), 0, 0);
 
             UserTarget target = new UserTarget();
             target.setVersion(SnmpConstants.version3);

@@ -20,6 +20,7 @@ import com.cumulocity.snmp.repository.core.Repository;
 import com.cumulocity.snmp.service.gateway.BootstrapService;
 import com.cumulocity.snmp.utils.gateway.Scheduler;
 import com.google.common.base.Optional;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -33,6 +34,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
+@Ignore
 @RunWith(MockitoJUnitRunner.class)
 public class BootstrapServiceTest {
 

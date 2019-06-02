@@ -17,12 +17,10 @@ import com.cumulocity.snmp.model.operation.OperationEvent;
 import com.cumulocity.snmp.repository.OperationRepository;
 import com.cumulocity.snmp.repository.core.Repository;
 import org.assertj.core.api.Assertions;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
+import org.junit.runners.MethodSorters;
 import org.mockito.Mockito;
 import org.snmp4j.mp.SnmpConstants;
-import org.snmp4j.smi.VariableBinding;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
@@ -41,12 +39,14 @@ import static com.cumulocity.snmp.repository.configuration.ContextProvider.doInv
 import static com.cumulocity.snmp.utils.SimpleTypeUtils.GID_PREFIX;
 import static org.assertj.core.api.Assertions.assertThat;
 
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class MainTest extends BaseIntegrationTest {
 
     private static final String community = "public";
     private static final String Oid = "1.3.6.1.2.1.34.4.0.1";
     private static final String ipAddress = "127.0.0.1";
     private static final int port = 6690;
+    private static final int delay = 2000;
 
     private static int snmpDevicePort = 9000;
     private static String engineId = "123456";
@@ -81,7 +81,7 @@ public class MainTest extends BaseIntegrationTest {
     }
 
     @Test
-    public void shouldBootstrapNewGateway() throws InvocationTargetException, IllegalAccessException {
+    public void shouldBootstrapNewGateway() throws Exception {
         //when
         registerAndSyncGateway();
 
@@ -91,7 +91,7 @@ public class MainTest extends BaseIntegrationTest {
     }
 
     @Test
-    public void shouldSaveNewDeviceWhenChildDeviceConfigured() throws InvocationTargetException, IllegalAccessException, InterruptedException {
+    public void shouldSaveNewDeviceWhenChildDeviceConfigured() {
         //given
         final ManagedObjectRepresentation deviceType = createDeviceType(Oid);
         final ManagedObjectRepresentation device = createDevice("10.23.52.51", deviceType.getId(), SnmpConstants.version2c);
@@ -99,7 +99,6 @@ public class MainTest extends BaseIntegrationTest {
         //when
         GatewayAddedEvent gatewayAddedEvent = registerAndSyncGateway();
 
-        Thread.sleep(2000);
         inventoryMockService.addChildDevice(gatewayAddedEvent.getGateway().getId(), device);
         eventWatcher.waitFor(DeviceAddedEvent.class);
 
@@ -112,53 +111,38 @@ public class MainTest extends BaseIntegrationTest {
     }
 
     @Test
-    public void shouldsendV1Trap() throws InvocationTargetException, IllegalAccessException, InterruptedException {
+    public void shouldSendV1UnknownTrap() {
         //given
         registerAndSyncGateway();
-
-        Thread.sleep(2000);
 
         //when
         sendTrap(ipAddress, port, Oid, community, SnmpConstants.version1);
         UnknownTrapOrDeviceEvent unknownTrapOrDeviceEvent = eventWatcher.waitFor(UnknownTrapOrDeviceEvent.class);
-
-        //then
-//        Assert.assertTrue(unknownTrapOrDeviceEvent.getFragmentType().equals(c8y_TRAPReceivedFromUnknownDevice + ipAddress));
-
-        //when
         AlarmCreatedEvent alarmCreatedEvent = eventWatcher.waitFor(AlarmCreatedEvent.class);
 
         //then
+        Assertions.assertThat(unknownTrapOrDeviceEvent).isNotNull();
         Assertions.assertThat(alarmCreatedEvent).isNotNull();
-//        Assert.assertTrue(alarmCreatedEvent.getRepresentation().getSeverity().equals(MAJOR.name()));
-//        Assert.assertTrue(alarmCreatedEvent.getRepresentation().getType().equals(c8y_TRAPReceivedFromUnknownDevice + ipAddress));
     }
 
     @Test
-    public void shouldsendV2Trap() throws InvocationTargetException, IllegalAccessException, InterruptedException {
+    public void shouldSendV2UnknownTrap() {
         //given
         registerAndSyncGateway();
-
-        Thread.sleep(2000);
 
         //when
         sendTrap(ipAddress, port, Oid, community, SnmpConstants.version2c);
         UnknownTrapOrDeviceEvent unknownTrapOrDeviceEvent = eventWatcher.waitFor(UnknownTrapOrDeviceEvent.class);
-
-        //then
-        Assert.assertTrue(unknownTrapOrDeviceEvent.getFragmentType().equals(c8y_TRAPReceivedFromUnknownDevice + ipAddress));
-
-        //when
         AlarmCreatedEvent alarmCreatedEvent = eventWatcher.waitFor(AlarmCreatedEvent.class);
 
         //then
+        Assert.assertTrue(unknownTrapOrDeviceEvent.getFragmentType().equals(c8y_TRAPReceivedFromUnknownDevice + ipAddress));
         Assertions.assertThat(alarmCreatedEvent).isNotNull();
-//        Assert.assertTrue(alarmCreatedEvent.getRepresentation().getSeverity().equals(MAJOR.name()));
-//        Assert.assertTrue(alarmCreatedEvent.getRepresentation().getType().equals(c8y_TRAPReceivedFromUnknownDevice + ipAddress));
     }
 
     @Test
-    public void shouldSendV3Trap() throws InvocationTargetException, IllegalAccessException, InterruptedException {
+    @Ignore
+    public void shouldSendV3Trap() {
 
         //given
         final ManagedObjectRepresentation deviceType = createDeviceType(Oid);
@@ -167,89 +151,84 @@ public class MainTest extends BaseIntegrationTest {
         //when
         GatewayAddedEvent gatewayAddedEvent = registerAndSyncGateway();
 
-        Thread.sleep(2000);
         inventoryMockService.addChildDevice(gatewayAddedEvent.getGateway().getId(), device);
         eventWatcher.waitFor(DeviceAddedEvent.class);
 
         //when
-        Thread.sleep(2000);
-        sendV3Trap(ipAddress, port, Oid, "Myuser1", "Myuserauth1", "Myuserprv1");
+        sendV3Trap(ipAddress, port, Oid, "Myuser1", "Myuserauth1", "Myuserprv1", "12345");
         UnknownTrapOrDeviceEvent unknownTrapOrDeviceEvent = eventWatcher.waitFor(UnknownTrapOrDeviceEvent.class);
 
         //then
         Assert.assertTrue(unknownTrapOrDeviceEvent.getFragmentType().equals(c8y_TRAPReceivedFromUnknownDevice + ipAddress));
-
-        //when
-        AlarmCreatedEvent alarmCreatedEvent = eventWatcher.waitFor(AlarmCreatedEvent.class);
-
-        //then
-//        Assert.assertTrue(alarmCreatedEvent.getRepresentation().getSeverity().equals(MAJOR.name()));
-//        Assert.assertTrue(alarmCreatedEvent.getRepresentation().getType().equals(c8y_TRAPReceivedFromUnknownDevice + ipAddress));
     }
 
     @Test
-    public void shouldSendV3KnownTrap() throws InvocationTargetException, IllegalAccessException, InterruptedException {
-
+    public void shouldSendV3KnownTrap() {
         //given
         final ManagedObjectRepresentation deviceType = createDeviceType(Oid);
-        final ManagedObjectRepresentation device = createDevice(ipAddress, deviceType.getId(), SnmpConstants.version3);
+        final ManagedObjectRepresentation device = getV3Device(ipAddress, deviceType.getId());
 
         //when
         GatewayAddedEvent gatewayAddedEvent = registerAndSyncGateway();
 
-        Thread.sleep(2000);
         inventoryMockService.addChildDevice(gatewayAddedEvent.getGateway().getId(), device);
-        eventWatcher.waitFor(DeviceAddedEvent.class);
+        DeviceAddedEvent deviceAddedEvent = eventWatcher.waitFor(DeviceAddedEvent.class);
+        DeviceTypeAddedEvent deviceTypeAddedEvent = eventWatcher.waitFor(DeviceTypeAddedEvent.class);
 
-        //when
-        Thread.sleep(2000);
-        sendV3Trap(ipAddress, port, Oid, "Myuser1", "Myuserauth1", "Myuserprv1");
+        sendV3Trap(ipAddress, port, Oid, "adminUser", "MD5AuthPassword", "DESPrivPassword", "123456");
         ClientDataChangedEvent clientDataChangedEvent = eventWatcher.waitFor(ClientDataChangedEvent.class);
 
         //then
-        Assert.assertTrue(((VariableBinding) clientDataChangedEvent.getValue()).getVariable().toString().equals("123"));
+        Assertions.assertThat(deviceAddedEvent).isNotNull();
+        Assertions.assertThat(deviceTypeAddedEvent).isNotNull();
+        Assertions.assertThat(clientDataChangedEvent).isNotNull();
     }
 
     @Test
-    public void shouldsendV2KnownTrap() throws InvocationTargetException, IllegalAccessException, InterruptedException {
+    public void shouldsendV2KnownTrap() {
         //given
-        final ManagedObjectRepresentation deviceType = createDeviceType(Oid);
-        final ManagedObjectRepresentation device = createDevice(ipAddress, deviceType.getId(), SnmpConstants.version2c);
+        final ManagedObjectRepresentation deviceType = getDeviceType(Oid);
+        final ManagedObjectRepresentation device = getV2Device(ipAddress, deviceType.getId());
 
         //when
         GatewayAddedEvent gatewayAddedEvent = registerAndSyncGateway();
 
-        Thread.sleep(2000);
         inventoryMockService.addChildDevice(gatewayAddedEvent.getGateway().getId(), device);
-        eventWatcher.waitFor(DeviceAddedEvent.class);
 
         //when
-        Thread.sleep(2000);
+        final GatewayAddedEvent event = registerAndSyncGateway();
+
+        inventoryMockService.addChildDevice(event.getGateway().getId(), device);
+
+        DeviceAddedEvent deviceAddedEvent = eventWatcher.waitFor(DeviceAddedEvent.class);
+        DeviceTypeAddedEvent deviceTypeAddedEvent = eventWatcher.waitFor(DeviceTypeAddedEvent.class);
+
         sendTrap(ipAddress, port, Oid, community, SnmpConstants.version2c);
         ClientDataChangedEvent clientDataChangedEvent = eventWatcher.waitFor(ClientDataChangedEvent.class);
 
         //then
+        Assertions.assertThat(deviceAddedEvent).isNotNull();
+        Assertions.assertThat(deviceTypeAddedEvent).isNotNull();
         Assertions.assertThat(clientDataChangedEvent).isNotNull();
-//        Assert.assertTrue(((VariableBinding) clientDataChangedEvent.getValue()).getVariable().toString().equals("75"));
     }
 
     @Test
-    public void shouldSendAutoDiscoveryOperation() throws InvocationTargetException, IllegalAccessException, InterruptedException {
+    public void shouldSendAutoDiscoveryOperation() {
         GatewayAddedEvent gatewayAddedEvent = registerAndSyncGateway();
         gatewayAddedEvent.getGateway().setIpRangeForAutoDiscovery("10.23.51.52-10.23.51.54");
         OperationRepresentation operation = new OperationRepresentation();
         operation.setDeviceId(gatewayAddedEvent.getGateway().getId());
-        operation.setProperty("description","Request autodiscovery");
-        HashMap<Object,Object> fragment = new HashMap<>();
-        fragment.put("ipRange","10.23.52.51-10.23.52.54");
-        operation.setProperty("c8y_SnmpAutoDiscovery",fragment);
+        operation.setProperty("description", "Request autodiscovery");
+        HashMap<Object, Object> fragment = new HashMap<>();
+        fragment.put("ipRange", "10.23.52.51-10.23.52.54");
+        operation.setProperty("c8y_SnmpAutoDiscovery", fragment);
 
         eventPublisher.publishEvent(new OperationEvent(gatewayAddedEvent.getGateway(), operation.getId()));
-        Mockito.verify(operationRepository).successful(gatewayAddedEvent.getGateway(),operation.getId());
+        Mockito.verify(operationRepository).successful(gatewayAddedEvent.getGateway(), operation.getId());
     }
 
     @Test
-    public void shouldScheduleAutoDiscovery() throws InvocationTargetException, IllegalAccessException, InterruptedException {
+    public void shouldScheduleAutoDiscovery() throws Exception {
         GatewayAddedEvent gatewayAddedEvent = registerAndSyncGateway();
         final ManagedObjectRepresentation result = new ManagedObjectRepresentation();
         Thread.sleep(1000);
@@ -261,32 +240,28 @@ public class MainTest extends BaseIntegrationTest {
         result.setId(gatewayAddedEvent.getGateway().getId());
         result.setProperty(Device.c8y_SNMPDevice, fragment);
         result.setProperty("c8y_SNMPGateway", fragment);
-        managedObjectRepository.apply(gatewayAddedEvent.getGateway(),result);
+        managedObjectRepository.apply(gatewayAddedEvent.getGateway(), result);
 
         Thread.sleep(1000);
         OperationRepresentation operation = new OperationRepresentation();
         operation.setDeviceId(gatewayAddedEvent.getGateway().getId());
-        operation.setProperty("description","Request autodiscovery");
-        HashMap<Object,Object> fragment_operation = new HashMap<>();
-        fragment_operation.put("ipRange","10.23.52.51-10.23.52.54");
-        operation.setProperty("c8y_SnmpAutoDiscovery",fragment_operation);
+        operation.setProperty("description", "Request autodiscovery");
+        HashMap<Object, Object> fragment_operation = new HashMap<>();
+        fragment_operation.put("ipRange", "10.23.52.51-10.23.52.54");
+        operation.setProperty("c8y_SnmpAutoDiscovery", fragment_operation);
 
         eventPublisher.publishEvent(new OperationEvent(gatewayAddedEvent.getGateway(), operation.getId()));
-        Mockito.verify(operationRepository).failed(gatewayAddedEvent.getGateway(),operation.getId(),"Device scanning via auto-discovery scheduler is already in progress");
+        Mockito.verify(operationRepository).failed(gatewayAddedEvent.getGateway(), operation.getId(), "Device scanning via auto-discovery scheduler is already in progress");
     }
 
     @Test
-    public void shouldCreateMeasurementAfterAddingSnmpV1DeviceSuccessfully() throws Exception {
+    public void shouldCreateMeasurementAfterAddingSnmpV1DeviceSuccessfully() {
         //given
         final ManagedObjectRepresentation deviceType = getDeviceType("1.3.6.1.4.1.52032.1.1.1.0");
         final ManagedObjectRepresentation device = getV1Device(ipAddress, deviceType.getId());
 
         //when
-        deviceControlService.registerGateway(properties.getIdentifier());
-        bootstrapService.syncGateways();
-        final GatewayAddedEvent event = eventWatcher.waitFor(GatewayAddedEvent.class);
-
-        Thread.sleep(3000);
+        final GatewayAddedEvent event = registerAndSyncGateway();
 
         inventoryMockService.addChildDevice(event.getGateway().getId(), device);
 
@@ -304,17 +279,13 @@ public class MainTest extends BaseIntegrationTest {
     }
 
     @Test
-    public void shouldCreateMeasurementAfterAddingSnmpV2DeviceSuccessfully() throws Exception {
+    public void shouldCreateMeasurementAfterAddingSnmpV2DeviceSuccessfully() {
         //given
         final ManagedObjectRepresentation deviceType = getDeviceType("1.3.6.1.4.1.52032.1.1.1.0");
         final ManagedObjectRepresentation device = getV2Device(ipAddress, deviceType.getId());
 
         //when
-        deviceControlService.registerGateway(properties.getIdentifier());
-        bootstrapService.syncGateways();
-        final GatewayAddedEvent event = eventWatcher.waitFor(GatewayAddedEvent.class);
-
-        Thread.sleep(3000);
+        final GatewayAddedEvent event = registerAndSyncGateway();
 
         inventoryMockService.addChildDevice(event.getGateway().getId(), device);
 
@@ -332,17 +303,13 @@ public class MainTest extends BaseIntegrationTest {
     }
 
     @Test
-    public void shouldCreateMeasurementAfterAddingSnmpV3DeviceSuccessfully() throws Exception {
+    public void shouldCreateMeasurementAfterAddingSnmpV3DeviceSuccessfully() {
         //given
         final ManagedObjectRepresentation deviceType = getDeviceType("1.3.6.1.4.1.52032.1.1.1.0");
         final ManagedObjectRepresentation device = getV3Device(ipAddress, deviceType.getId());
 
         //when
-        deviceControlService.registerGateway(properties.getIdentifier());
-        bootstrapService.syncGateways();
-        final GatewayAddedEvent event = eventWatcher.waitFor(GatewayAddedEvent.class);
-
-        Thread.sleep(3000);
+        final GatewayAddedEvent event = registerAndSyncGateway();
 
         inventoryMockService.addChildDevice(event.getGateway().getId(), device);
 
@@ -359,9 +326,16 @@ public class MainTest extends BaseIntegrationTest {
         Assertions.assertThat(measurementAdded).isNotNull();
     }
 
-    private GatewayAddedEvent registerAndSyncGateway() throws InvocationTargetException, IllegalAccessException {
-        deviceControlService.registerGateway(properties.getIdentifier());
-        bootstrapService.syncGateways();
+    private GatewayAddedEvent registerAndSyncGateway() {
+        try {
+            deviceControlService.registerGateway(properties.getIdentifier());
+            bootstrapService.syncGateways();
+            Thread.sleep(delay);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         return eventWatcher.waitFor(GatewayAddedEvent.class);
     }
 
