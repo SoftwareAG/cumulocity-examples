@@ -273,6 +273,9 @@
             <plugin>
                 <groupId>com.nsn.cumulocity.clients-java</groupId>
                 <artifactId>microservice-package-maven-plugin</artifactId>
+                <configuration>
+                    <containerSkip>true</containerSkip>
+                </configuration>
             </plugin>
 
             <plugin>
