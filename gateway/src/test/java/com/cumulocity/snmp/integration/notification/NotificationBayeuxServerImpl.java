@@ -14,7 +14,6 @@ public class NotificationBayeuxServerImpl extends BayeuxServerImpl implements In
     public void afterPropertiesSet() throws Exception {
         addExtension(new AcknowledgedMessagesExtension());
         setTransports(new BayeuxNotificationJSONTransport(this));
-//        initializeServerTransports();
         initializeDefaultTransports();
 
         setOptions(buildConfiguration());

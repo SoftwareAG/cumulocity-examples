@@ -43,29 +43,10 @@ public class NotificationController extends HttpServlet {
     public void handleTransport(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
         try {
             final HttpTransport transport = resolveHttpTransport(request);
-            AsyncContext context = null;
             try {
                 server.setCurrentTransport(transport);
                 transport.setCurrentRequest(request);
                 transport.handle(request, response);
-                /*if(!request.isAsyncStarted()){
-                    if(request.isAsyncSupported()){
-                        context = request.startAsync();
-                    }
-                }
-//                context = request.getAsyncContext();
-                context.start(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            transport.handle(request, response);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        } catch (ServletException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });*/
             } finally {
                 transport.setCurrentRequest(null);
                 server.setCurrentTransport(null);
