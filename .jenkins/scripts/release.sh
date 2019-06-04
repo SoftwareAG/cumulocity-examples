@@ -33,7 +33,9 @@ hg up -C ${branch_name}
 
 echo "Update version to ${version}"
 ./mvnw versions:set -DnewVersion=${version}
-
+cd java-agent/assembly/
+./mvnw versions:set -DnewVersion=${version}
+cd ../..
 
 # tests are run to make sure all dependencies with ${project.version} work correctly
 # same for usage of -s $MVN_SETTINGS.
@@ -47,6 +49,9 @@ tag-version "c8y-agents-${version}"
 echo "Update version to ${next_version}"
 .jenkins/scripts/update_dependencies.sh ${next_version}
 ./mvnw versions:set -DnewVersion=${next_version} -DgenerateBackupPoms=false -s $MVN_SETTINGS
+cd java-agent/assembly/
+./mvnw versions:set -DnewVersion=${next_version} -DgenerateBackupPoms=false -s $MVN_SETTINGS
+cd ../..
 hg commit -m "[maven-release-plugin] prepare for next development iteration"
 
 branch_name=$(hg branch)
