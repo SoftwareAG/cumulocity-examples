@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -e
+
 source ${BASH_SOURCE%/*}/update_dependencies.sh
 
 hotfix_version=$1
