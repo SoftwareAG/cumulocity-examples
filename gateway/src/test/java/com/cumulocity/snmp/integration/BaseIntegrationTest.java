@@ -16,6 +16,7 @@ import com.cumulocity.snmp.repository.core.GatewayRepository;
 import com.cumulocity.snmp.service.gateway.BootstrapService;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.runner.RunWith;
 import org.snmp4j.*;
 import org.snmp4j.mp.MPv3;
@@ -38,7 +39,7 @@ import java.util.List;
 import static com.cumulocity.snmp.model.gateway.device.Device.c8y_SNMPDevice;
 import static com.cumulocity.snmp.utils.SimpleTypeUtils.GID_PREFIX;
 
-
+@Ignore
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = {Main.class, TestConfiguration.class, NotificationConfig.class},
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)

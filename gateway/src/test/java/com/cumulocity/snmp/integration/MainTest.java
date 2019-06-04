@@ -40,6 +40,7 @@ import static com.cumulocity.snmp.utils.SimpleTypeUtils.GID_PREFIX;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@Ignore
 public class MainTest extends BaseIntegrationTest {
 
     private static final String community = "public";
