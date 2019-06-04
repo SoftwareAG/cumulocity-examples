@@ -124,7 +124,6 @@ pipeline {
                         }
                     }
                     steps {
-                        sh "chmod +x .jenkins/scripts/update_dependencies.sh && .jenkins/scripts/update_dependencies.sh ${params.release_version}"
                         sshagent(['jenkins-hg-key']) {
                             withCredentials([usernamePassword(credentialsId: 'bitbucket-m2m', passwordVariable: 'BITBUCKET_PASSWORD', usernameVariable: 'BITBUCKET_USER'),
                                              file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
