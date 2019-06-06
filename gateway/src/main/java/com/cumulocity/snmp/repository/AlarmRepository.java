@@ -3,6 +3,7 @@ package com.cumulocity.snmp.repository;
 import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
 import com.cumulocity.sdk.client.alarm.AlarmApi;
 import com.cumulocity.snmp.annotation.gateway.RunWithinContext;
+import com.cumulocity.snmp.model.core.AlarmUnit;
 import com.cumulocity.snmp.model.core.Credentials;
 import com.cumulocity.snmp.repository.core.PlatformRepresentationRepository;
 import com.google.common.base.Optional;
@@ -18,6 +19,8 @@ import static com.cumulocity.snmp.utils.PlatformRepositoryUtils.handleSuccess;
 public class AlarmRepository implements PlatformRepresentationRepository<AlarmRepresentation> {
 
     private final AlarmApi alarmApi;
+    private final AlarmUnit alarmUnit;
+    private final com.cumulocity.snmp.repository.core.Repository<AlarmUnit> alarmUnitRepository;
 
     @RunWithinContext
     public Optional<AlarmRepresentation> apply(final Credentials gateway, final AlarmRepresentation alarmRepresentation) {
@@ -27,8 +30,10 @@ public class AlarmRepository implements PlatformRepresentationRepository<AlarmRe
     @RunWithinContext
     public Optional<AlarmRepresentation> create(final Credentials gateway, final AlarmRepresentation alarmRepresentation) {
         try {
-            return handleSuccess(alarmApi.create(alarmRepresentation));
+            alarmUnit.syncRepresentation(alarmRepresentation);
+            return alarmUnit.execute();
         } catch (final Exception ex) {
+            alarmUnitRepository.save(alarmUnit);
             return handleException(ex);
         }
     }

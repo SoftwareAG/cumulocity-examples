@@ -6,6 +6,7 @@ import com.cumulocity.snmp.model.core.Credentials;
 import com.cumulocity.snmp.model.core.MeasurementUnit;
 import com.cumulocity.snmp.model.gateway.Gateway;
 import com.cumulocity.snmp.repository.configuration.ContextProvider;
+import com.cumulocity.snmp.repository.core.Repository;
 import com.google.common.base.Optional;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -34,6 +35,7 @@ public class GroupMeasurementService {
     private final Executor worker;
     private final AutowireCapableBeanFactory autowireCapableBeanFactory;
     private final ApplicationEventPublisher eventPublisher;
+    private final Repository<MeasurementUnit> measurementUnitRepository;
 
     @RunWithinContext
     public void queueForExecution(final Credentials credentials, final MeasurementUnit measurementUnit) {
@@ -98,6 +100,7 @@ public class GroupMeasurementService {
             autowireCapableBeanFactory.autowireBean(measurementUnit);
             measurementUnit.execute();
         } catch (final Exception ex) {
+            measurementUnitRepository.save(measurementUnit);
             log.error("Failed to send measurement to Cumulocity platform");
             log.error(ex.getMessage(), ex);
         }

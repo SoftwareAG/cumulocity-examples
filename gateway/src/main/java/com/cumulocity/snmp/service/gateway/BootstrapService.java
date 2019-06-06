@@ -4,10 +4,14 @@ import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.devicebootstrap.DeviceCredentialsRepresentation;
 import com.cumulocity.rest.representation.identity.ExternalIDRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
+import com.cumulocity.snmp.annotation.gateway.RunWithinContext;
 import com.cumulocity.snmp.configuration.service.GatewayConfigurationProperties;
 import com.cumulocity.snmp.factory.gateway.GatewayFactory;
 import com.cumulocity.snmp.factory.platform.IdentityFactory;
 import com.cumulocity.snmp.factory.platform.ManagedObjectFactory;
+import com.cumulocity.snmp.model.core.AlarmUnit;
+import com.cumulocity.snmp.model.core.EventUnit;
+import com.cumulocity.snmp.model.core.MeasurementUnit;
 import com.cumulocity.snmp.model.gateway.Gateway;
 import com.cumulocity.snmp.model.gateway.GatewayAddedEvent;
 import com.cumulocity.snmp.model.gateway.GatewayRemovedEvent;
@@ -21,6 +25,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -64,6 +69,18 @@ public class BootstrapService {
 
     @Autowired
     Scheduler scheduler;
+
+    @Autowired
+    Repository<MeasurementUnit> measurementUnitRepository;
+
+    @Autowired
+    Repository<AlarmUnit> alarmUnitRepository;
+
+    @Autowired
+    Repository<EventUnit> eventUnitRepository;
+
+    @Autowired
+    AutowireCapableBeanFactory autowireCapableBeanFactory;
 
     private List<GId> initialized = new ArrayList<>();
 
@@ -137,6 +154,7 @@ public class BootstrapService {
                 final Optional<Gateway> newGatewayOptional = gatewayFactory.create(gateway, managedObject);
                 if (newGatewayOptional.isPresent()) {
                     final Gateway newGateway = newGatewayOptional.get();
+                    syncOffineData(newGateway);
                     if (!gateway.equals(newGateway)) {
                         gatewayRepository.save(newGateway);
                     }
@@ -177,5 +195,45 @@ public class BootstrapService {
             gatewayRepository.delete(gateway.getId());
             eventPublisher.publishEvent(new GatewayRemovedEvent(gateway));
         }
+    }
+
+    @RunWithinContext
+    private void syncOffineData(final Gateway gateway) {
+        Collection<MeasurementUnit> measurementUnits = measurementUnitRepository.findAll();
+        for (MeasurementUnit measurementUnit : measurementUnits) {
+            autowireCapableBeanFactory.autowireBean(measurementUnit);
+            try {
+                measurementUnit.execute();
+                measurementUnitRepository.delete(measurementUnit.getId());
+                log.debug("Measurements available");
+            } catch (Exception e) {
+                log.error(e.getMessage());
+            }
+        }
+        measurementUnitRepository.clear();
+
+        Collection<AlarmUnit> alarmUnits = alarmUnitRepository.findAll();
+        for (AlarmUnit alarmUnit : alarmUnits) {
+            try {
+                alarmUnit.execute();
+                alarmUnitRepository.delete(alarmUnit.getId());
+                log.debug("Alarms available");
+            } catch (Exception e) {
+                log.error(e.getMessage());
+            }
+        }
+        alarmUnitRepository.clear();
+
+        Collection<EventUnit> eventUnits = eventUnitRepository.findAll();
+        for (EventUnit eventUnit : eventUnits) {
+            try {
+                eventUnit.execute();
+                eventUnitRepository.delete(eventUnit.getId());
+                log.debug("Events available");
+            } catch (Exception e) {
+                log.error(e.getMessage());
+            }
+        }
+        eventUnitRepository.clear();
     }
 }

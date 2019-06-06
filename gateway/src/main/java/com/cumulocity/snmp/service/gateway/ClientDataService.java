@@ -74,16 +74,20 @@ public class ClientDataService {
             date = DateTime.now();
         }
 
-        final PlatformRepresentationFactory representationFactory = findRepresentationFactory(mapping);
-        final Optional representationOptional = representationFactory.apply(new PlatformRepresentationEvent(date,
-                event.getGateway(), device, register, mapping, ((VariableBinding) event.getValue()).getVariable()));
-        if (representationOptional.isPresent()) {
-            final Object representation = representationOptional.get();
-            final PlatformRepresentationRepository repository = findRepresentationRepository(representation);
-            final Optional saved = repository.apply(gateway, representation);
-            if (!saved.isPresent()) {
-                eventPublisher.publishEvent(new DeviceRemovedEvent(gateway, device));
+        try {
+            final PlatformRepresentationFactory representationFactory = findRepresentationFactory(mapping);
+            final Optional representationOptional = representationFactory.apply(new PlatformRepresentationEvent(date,
+                    event.getGateway(), device, register, mapping, ((VariableBinding) event.getValue()).getVariable()));
+            if (representationOptional.isPresent()) {
+                final Object representation = representationOptional.get();
+                final PlatformRepresentationRepository repository = findRepresentationRepository(representation);
+                final Optional saved = repository.apply(gateway, representation);
+                if (!saved.isPresent()) {
+                    eventPublisher.publishEvent(new DeviceRemovedEvent(gateway, device));
+                }
             }
+        } catch (Exception e) {
+            log.error(e.getMessage());
         }
     }
 
