@@ -154,7 +154,7 @@ public class BootstrapService {
                 final Optional<Gateway> newGatewayOptional = gatewayFactory.create(gateway, managedObject);
                 if (newGatewayOptional.isPresent()) {
                     final Gateway newGateway = newGatewayOptional.get();
-                    syncOffineData(newGateway);
+                    syncOfflineData(newGateway);
                     if (!gateway.equals(newGateway)) {
                         gatewayRepository.save(newGateway);
                     }
@@ -198,7 +198,7 @@ public class BootstrapService {
     }
 
     @RunWithinContext
-    private void syncOffineData(final Gateway gateway) {
+    private void syncOfflineData(final Gateway gateway) {
         Collection<MeasurementUnit> measurementUnits = measurementUnitRepository.findAll();
         for (MeasurementUnit measurementUnit : measurementUnits) {
             autowireCapableBeanFactory.autowireBean(measurementUnit);
