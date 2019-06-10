@@ -8,9 +8,26 @@
   "requiredRoles": [
     "ROLE_TENANT_MANAGEMENT_READ",
     "ROLE_OPTION_MANAGEMENT_READ",
-    "ROLE_USER_MANAGEMENT_READ"
+    "ROLE_USER_MANAGEMENT_READ",
+    "ROLE_DEVICE_CONTROL_ADMIN"
   ],
   "roles": [
     "ROLE_DEVICE_CONTROL_ADMIN"
-  ]
+  ],
+  "livenessProbe": {
+    "httpGet": {
+      "path": "/health",
+      "port": 80
+    },
+    "initialDelaySeconds": 200,
+    "periodSeconds": 10
+  },
+  "readinessProbe": {
+    "httpGet": {
+      "path": "/health",
+      "port": 80
+    },
+    "initialDelaySeconds": 220,
+    "periodSeconds": 10
+  }
 }
