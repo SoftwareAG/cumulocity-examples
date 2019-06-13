@@ -114,12 +114,20 @@ public class AutoDiscoveryService {
                 for (String ipRange : ipRangeList) {
                     filterIpForDeviceScan(ipRange.split("-")[0], ipRange.split("-")[1], gateway);
                 }
-                isAutoDiscoveryInProgress.set(false);
                 operationRepository.successful(gateway, event.getOperationId());
-            } catch (Exception e) {
+            } catch (NullPointerException e) {
+                log.error("The ip range is not saved to managed object. Please save the ip range to managed object /inventory/managedObjects");
                 log.error(e.getMessage(), e);
+            } catch (ArrayIndexOutOfBoundsException e){
+                log.error("Please make sure the ip range format is correct. E.g The correct format should be '10.23.52.51-10.23.52.54' or 'fe80::aad:996f:3d24:2911-fe80::aad:996f:3d24:2918'");
+                operationRepository.failed(gateway, event.getOperationId(), "Auto-discovery process failed as the ip range format is wrong.");
+                log.error(e.getMessage(), e);
+            } catch (Exception e){
+                log.error(e.getMessage(), e);
+            } finally {
                 isAutoDiscoveryInProgress.set(false);
             }
+
         } else {
             operationRepository.failed(gateway, event.getOperationId(), "Device scanning via auto-discovery scheduler is already in progress");
         }
@@ -205,10 +213,10 @@ public class AutoDiscoveryService {
                 startIp = startIp.next();
             } while (!startIp.equals(endIp.next()));
 
-        } else if (IPAddressUtil.isValidIPv6(startIpAddress) && IPAddressUtil.isValidIPv6(endIpAddress)) {
+        } else if (IPAddressUtil.isValidIPv6(startIpAddress.split("[/%]", 2)[0]) && IPAddressUtil.isValidIPv6(endIpAddress.split("[/%]", 2)[0])) {
             log.debug("Received IP Address range is of type IPv6");
-            IPv6Address startIpv6Address = IPv6Address.fromString(startIpAddress);
-            IPv6Address endIpv6Address = IPv6Address.fromString(endIpAddress);
+            IPv6Address startIpv6Address = IPv6Address.fromString(startIpAddress.split("[/%]", 2)[0]);
+            IPv6Address endIpv6Address = IPv6Address.fromString(endIpAddress.split("[/%]", 2)[0]);
             do {
                 startScanning(gateway, startIpv6Address.toString(), timeoutInMilliseconds);
                 startIpv6Address = startIpv6Address.add(1);

@@ -44,9 +44,22 @@ public class AutoDiscoveryServiceTest {
 
 
     @Test
-    public void shouldTestAutoDiscovery(){
-        OperationEvent operationEvent = new OperationEvent(createGateway(), asGId(11226));
-        Gateway gateway = createGateway();
+    public void shouldTestAutoDiscoveryIpv4(){
+        OperationEvent operationEvent = new OperationEvent(createGatewayIpv4Range(), asGId(11226));
+        Gateway gateway = createGatewayIpv4Range();
+        //Given
+        when(inventoryRepository.get(gateway,gateway.getId())).thenReturn(optional);
+        //When
+        autoDiscoveryService.update(operationEvent);
+        //Then
+        verify(operationRepository).executing(gateway,asGId(11226));
+        verify(operationRepository).successful(gateway,asGId(11226));
+    }
+
+    @Test
+    public void shouldTestAutoDiscoveryIpv6(){
+        OperationEvent operationEvent = new OperationEvent(createGatewayIpv4Range(), asGId(11226));
+        Gateway gateway = createGatewayIpv6Range();
         //Given
         when(inventoryRepository.get(gateway,gateway.getId())).thenReturn(optional);
         //When
@@ -59,12 +72,16 @@ public class AutoDiscoveryServiceTest {
     @Test
     public void shouldTestAutoDiscoveryWithScheduler(){
         //When
-        autoDiscoveryService.scheduleAutoDiscovery(new GatewayUpdateEvent(createGateway()));
+        autoDiscoveryService.scheduleAutoDiscovery(new GatewayUpdateEvent(createGatewayIpv4Range()));
         //Then
         verify(scheduler).scheduleWithFixedDelay(any(Runnable.class),eq(60000L));
     }
 
-    private Gateway createGateway() {
+    private Gateway createGatewayIpv4Range() {
         return new Gateway().withId(asGId(11225)).withAutoDiscoveryRateInMinutes(1).withIpRangeForAutoDiscovery("192.168.0.1-192.168.0.5");
+    }
+
+    private Gateway createGatewayIpv6Range() {
+        return new Gateway().withId(asGId(11225)).withAutoDiscoveryRateInMinutes(1).withIpRangeForAutoDiscovery("fe80:0:0:0:aad:996f:3d24:2911%2-fe80:0:0:0:aad:996f:3d24:2918%2");
     }
 }

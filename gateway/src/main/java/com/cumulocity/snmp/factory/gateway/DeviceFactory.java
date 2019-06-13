@@ -4,7 +4,9 @@ import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.snmp.configuration.service.SNMPConfigurationProperties;
 import com.cumulocity.snmp.model.gateway.device.Device;
+import com.cumulocity.snmp.utils.IPAddressUtil;
 import com.google.common.base.Optional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
@@ -15,8 +17,10 @@ import java.util.Map;
 import static com.cumulocity.snmp.model.gateway.device.Device.c8y_SNMPDevice;
 import static com.cumulocity.snmp.utils.SimpleTypeUtils.parseGId;
 import static com.google.common.base.Optional.absent;
+import static com.googlecode.ipv6.IPv6Address.fromString;
 
 @Component
+@Slf4j
 public class DeviceFactory implements Converter<ManagedObjectRepresentation, Optional<Device>> {
 
     @Autowired
@@ -55,7 +59,7 @@ public class DeviceFactory implements Converter<ManagedObjectRepresentation, Opt
     private Optional<Device> getDeviceWithoutAuth(Map property, GId deviceId, int port, int version) {
         return Optional.of(Device.builder()
                 .id(deviceId)
-                .ipAddress(property.get("ipAddress").toString())
+                .ipAddress(getFormattedIpAddress(property.get("ipAddress").toString()))
                 .port(port)
                 .snmpVersion(version)
                 .deviceType(parseGId(property.get("type")))
@@ -66,7 +70,7 @@ public class DeviceFactory implements Converter<ManagedObjectRepresentation, Opt
                                                int version, Map<String, Object> authMap) {
         return Optional.of(Device.builder()
                 .id(deviceId)
-                .ipAddress(property.get("ipAddress").toString())
+                .ipAddress(getFormattedIpAddress(property.get("ipAddress").toString()))
                 .port(port)
                 .snmpVersion(version)
                 .deviceType(parseGId(property.get("type")))
@@ -78,5 +82,17 @@ public class DeviceFactory implements Converter<ManagedObjectRepresentation, Opt
                 .privacyProtocolPassword((String) authMap.get("privPassword"))
                 .engineId((String) authMap.get("engineId"))
                 .build());
+    }
+
+    private String getFormattedIpAddress(String ipAddress){
+        try {
+            if (IPAddressUtil.isValidIPv6(ipAddress.split("[/%]", 2)[0])) {
+                return fromString(ipAddress.split("[/%]", 2)[0]).toString();
+            }
+        } catch (Exception e){
+          log.error("Invalid IP-Address format!!");
+          log.error(e.getMessage());
+        }
+        return ipAddress;
     }
 }

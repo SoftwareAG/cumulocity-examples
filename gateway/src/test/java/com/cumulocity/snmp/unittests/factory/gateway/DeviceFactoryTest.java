@@ -94,6 +94,34 @@ public class DeviceFactoryTest {
         assertThat(deviceOptional.get()).isEqualTo(device);
     }
 
+
+    @Test
+    public void shouldCreateDeviceWithIpv6() {
+
+        //Given
+        HashMap<Object, Object> deviceFragment = new HashMap<>();
+        deviceFragment.put("ipAddress", "fe80:0:0:0:aad:996f:3d24:2911%2");
+        deviceFragment.put("port", "161");
+        deviceFragment.put("version", "0");
+        deviceFragment.put("type", "/inventory/managedObjects/15257");
+        ManagedObjectRepresentation managedObject = new ManagedObjectRepresentation();
+        managedObject.setId(asGId("15256"));
+        managedObject.setProperty(Device.c8y_SNMPDevice, deviceFragment);
+        Device device = new Device();
+        device.setId(asGId("15256"));
+        device.setIpAddress("192.168.0.1");
+        device.setDeviceType(asGId("15257"));
+        device.setPort(161);
+        device.setSnmpVersion(0);
+
+        //When
+        Optional<Device> deviceOptional = deviceFactory.convert(managedObject);
+
+        //Then
+        assertThat(deviceOptional).is(present());
+        assertThat(deviceOptional.get()).isEqualTo(device);
+    }
+
     @Test
     public void shouldNotCreateDevice() {
 

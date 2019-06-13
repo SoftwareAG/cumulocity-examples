@@ -12,6 +12,7 @@ import com.cumulocity.snmp.model.gateway.Gateway;
 import com.cumulocity.snmp.model.gateway.UnknownTrapOrDeviceEvent;
 import com.cumulocity.snmp.model.gateway.device.Device;
 import com.cumulocity.snmp.repository.ManagedObjectRepository;
+import com.cumulocity.snmp.utils.IPAddressUtil;
 import com.cumulocity.snmp.utils.SnmpAuthProtocol;
 import com.cumulocity.snmp.utils.SnmpPrivacyProtocol;
 import com.google.common.base.Optional;
@@ -40,6 +41,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static com.cumulocity.snmp.model.gateway.type.mapping.AlarmMapping.c8y_TRAPReceivedFromUnknownDevice;
+import static com.googlecode.ipv6.IPv6Address.fromString;
 
 @Slf4j
 @Component
@@ -129,6 +131,11 @@ public class DeviceInterface implements CommandResponder {
         log.debug("SNMP Trap Received");
 
         String peerIPAddress = event.getPeerAddress().toString().split("/")[0];
+
+        if(IPAddressUtil.isValidIPv6(peerIPAddress.split("[/%]", 2)[0])){
+            peerIPAddress = fromString(peerIPAddress.split("[/%]", 2)[0]).toString();
+        }
+
         if (mapIPAddressToOid.containsKey(peerIPAddress)) {
             boolean isMappingFound = false;
             Map<String, PduListener> oidToPduListener = mapIPAddressToOid.get(peerIPAddress);
