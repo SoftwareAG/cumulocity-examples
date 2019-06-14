@@ -89,9 +89,8 @@ public class DeviceFactory implements Converter<ManagedObjectRepresentation, Opt
             if (IPAddressUtil.isValidIPv6(ipAddress.split("[/%]", 2)[0])) {
                 return fromString(ipAddress.split("[/%]", 2)[0]).toString();
             }
-        } catch (Exception e){
-          log.error("Invalid IP-Address format!!");
-          log.error(e.getMessage());
+        } catch (IllegalArgumentException e){
+          log.error("Invalid IP-Address format!!",e);
         }
         return ipAddress;
     }

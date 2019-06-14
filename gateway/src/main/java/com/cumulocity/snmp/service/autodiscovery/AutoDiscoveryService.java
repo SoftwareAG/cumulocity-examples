@@ -23,6 +23,7 @@ import com.cumulocity.snmp.repository.core.Repository;
 import com.cumulocity.snmp.utils.IPAddressUtil;
 import com.cumulocity.snmp.utils.gateway.Scheduler;
 import com.google.common.base.Optional;
+import com.google.common.base.Strings;
 import com.googlecode.ipv6.IPv6Address;
 import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
@@ -108,20 +109,21 @@ public class AutoDiscoveryService {
         if (!isAutoDiscoveryInProgress.get()) {
             try {
                 isAutoDiscoveryInProgress.set(true);
+                if(Strings.isNullOrEmpty(gateway.getIpRangeForAutoDiscovery())){
+                    log.error("The ip range is not saved to managed object. Please save the ip range to managed object /inventory/managedObjects");
+                    return;
+                }
                 String[] ipRangeList = gateway.getIpRangeForAutoDiscovery().split(",");
                 createRegisteredDeviceMap(gateway);
                 operationRepository.executing(gateway, event.getOperationId());
                 for (String ipRange : ipRangeList) {
-                    filterIpForDeviceScan(ipRange.split("-")[0], ipRange.split("-")[1], gateway);
+                    if(ipRange.split("-").length == 2){
+                        filterIpForDeviceScan(ipRange.split("-")[0], ipRange.split("-")[1], gateway);
+                    } else{
+                        log.error("The ip range '"+ipRange+"' format is incorrect. The correct format should be similar to '10.23.52.51-10.23.52.54' or 'fe80::aad:996f:3d24:2911-fe80::aad:996f:3d24:2918'");
+                    }
                 }
                 operationRepository.successful(gateway, event.getOperationId());
-            } catch (NullPointerException e) {
-                log.error("The ip range is not saved to managed object. Please save the ip range to managed object /inventory/managedObjects");
-                log.error(e.getMessage(), e);
-            } catch (ArrayIndexOutOfBoundsException e){
-                log.error("Please make sure the ip range format is correct. E.g The correct format should be '10.23.52.51-10.23.52.54' or 'fe80::aad:996f:3d24:2911-fe80::aad:996f:3d24:2918'");
-                operationRepository.failed(gateway, event.getOperationId(), "Auto-discovery process failed as the ip range format is wrong.");
-                log.error(e.getMessage(), e);
             } catch (Exception e){
                 log.error(e.getMessage(), e);
             } finally {
