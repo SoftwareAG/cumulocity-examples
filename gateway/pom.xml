@@ -16,7 +16,6 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <package.directory>snmp</package.directory>
         <snmp4j.version>2.5.3</snmp4j.version>
         <java.version>1.7</java.version>
         <jackson-datatype-joda>2.4.0</jackson-datatype-joda>
