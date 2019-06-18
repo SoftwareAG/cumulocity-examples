@@ -4,24 +4,28 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 
 import org.joda.time.DateTime;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
+import org.springframework.context.event.EventListener;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
 import com.cumulocity.microservice.autoconfigure.MicroserviceApplication;
-import com.cumulocity.model.authentication.CumulocityCredentials;
+import com.cumulocity.microservice.context.ContextService;
+import com.cumulocity.microservice.context.credentials.MicroserviceCredentials;
+import com.cumulocity.microservice.settings.service.MicroserviceSettingsService;
+import com.cumulocity.microservice.subscription.model.MicroserviceSubscriptionAddedEvent;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
 import com.cumulocity.rest.representation.event.EventRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.Platform;
-import com.cumulocity.sdk.client.PlatformImpl;
-import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.event.EventFilter;
 
 import net.minidev.json.JSONObject;
@@ -30,115 +34,83 @@ import net.minidev.json.JSONObject;
 @RestController
 public class App {
 
+	@Autowired
+	private MicroserviceSettingsService settingsService;
+	
+	@Autowired
+	private ContextService<MicroserviceCredentials> contextService;
+	
+	@Autowired
     private Platform platform;
-    private Map<String, String> c8yEnv = new HashMap<>();
-    private final String trackerId = "<YOUR_TRACKER_ID>";
-    private final String ipstackKey= "<YOUR_IPSTACK_KEY>";
+	
+    private Map<String, String> c8yEnv;
 
 	public static void main (String[] args) {
         SpringApplication.run(App.class, args);
-
-        App microservice = new App();
-        
-        microservice.platformLogin();
-        microservice.createAlarm();
     }
     
-
-    /**
+	
+	/**
      * Get some of the environment variables of the container
+     * and load the microservice settings
      */
-    private void subsetEnvironmentValues () {
+	@PostConstruct
+    private void init () {
+		// Environment variables
         var env = System.getenv();
-
-        c8yEnv.put("app_name", env.get("APPLICATION_NAME"));
+        
+        c8yEnv = new HashMap<>();
+        c8yEnv.put("app.name", env.get("APPLICATION_NAME"));
         c8yEnv.put("url", env.get("C8Y_BASEURL"));
         c8yEnv.put("jdk", env.get("JAVA_VERSION"));
         c8yEnv.put("tenant", env.get("C8Y_TENANT"));
         c8yEnv.put("user", env.get("C8Y_USER"));
         c8yEnv.put("password", env.get("C8Y_PASSWORD"));
         c8yEnv.put("isolation", env.get("C8Y_MICROSERVICE_ISOLATION"));
-        c8yEnv.put("memory_limit", env.get("MEMORY_LIMIT"));
+        c8yEnv.put("memory.limit", env.get("MEMORY_LIMIT"));
+        
+        // Required ID and key
+        c8yEnv.put("tracker.id", settingsService.get("tracker.id"));
+        c8yEnv.put("ipstack.key", settingsService.get("ipstack.key"));
     }
-    
-    
-    /**
-     * Login into the platform using the environment credentials
-     */
-    private void platformLogin () {
-    	subsetEnvironmentValues();
-    	
-    	try {
-    		// Platform credentials
-            var username = c8yEnv.get("tenant") + "/" + c8yEnv.get("user");
-            var password = c8yEnv.get("password");
-
-            // Login to the platform
-            platform = new PlatformImpl(c8yEnv.get("url"), new CumulocityCredentials(username, password));
-        } 
-    	catch (SDKException sdke) {
-            if (sdke.getHttpStatus() == 401) {
-                System.err.println("[ERROR] Security/Unauthorized. Invalid credentials!");
-            }
-        }
-    }
-    
-    /**
-     * @return the platform with an authenticated user
-     */
-    private Platform getPlatform () {
-    	if (platform == null) {
-    		platformLogin();
-    	}
-    	
-    	return platform;
-    }
-    
-    
-    /**
-     * Create a warning alarm if the current user has permissions
-     */
-    @SuppressWarnings("rawtypes")
-	private void createAlarm () {
-	    // Get current user from the platform
-	    var currentUser = getPlatform().getUserApi().getCurrentUser();
 	
-	    // Verify if the current user can create alarms
-	    var canCreateAlarms = false;
-	    for (Object role : currentUser.getEffectiveRoles()) {
-	        if (((HashMap) role).get("id").equals("ROLE_ALARM_ADMIN")) {
-	            canCreateAlarms = true;
-	        }
-	    } 
 	
-	    // Create a warning alarm
-	    if (canCreateAlarms) {
-	    	var source = new ManagedObjectRepresentation();
-	        source.setId(GId.asGId(trackerId));
+	/**
+	 * Create a warning alarm on microservice subscription
+	 * 
+	 */
+	@EventListener(MicroserviceSubscriptionAddedEvent.class)
+	public void createAlarm (MicroserviceSubscriptionAddedEvent event) {
+		contextService.callWithinContext(event.getCredentials(), () -> {
+			var source = new ManagedObjectRepresentation();
+	        source.setId(GId.asGId(c8yEnv.get("tracker.id")));
 	    	
 	    	var alarm = new AlarmRepresentation();
-	    	alarm.setSeverity("WARNING");
 	    	alarm.setSource(source);
-	    	alarm.setType("c8y_Application__Microservice_started");
-	    	alarm.setText("The microservice " + c8yEnv.get("app_name") + " has been started");
+	    	alarm.setSeverity("WARNING");
 	    	alarm.setStatus("ACTIVE");
-	    	alarm.setDateTime(new DateTime(System.currentTimeMillis()));
+	    	alarm.setDateTime(DateTime.now());
+	    	alarm.setType("c8y_Application__Microservice_subscribed");
+	    	alarm.setText("The microservice " + c8yEnv.get("app.name") + 
+	    				  " has been subscribed to tenant " + c8yEnv.get("tenant"));
 	    	
-	        getPlatform().getAlarmApi().create(alarm);
-	    }
-    }
-    
+		    platform.getAlarmApi().create(alarm);
 
+		    return true;
+		});
+	}
+	
+	
     /**
      * Create a LocationUpdate event based on the client's IP 
      * 
      * @param String    The public IP of the client
-     * @return The event
+     * @return The created event
      */
     public EventRepresentation createLocationUpdateEvent (String ip) {
         // Get location details from ipstack
         var rest = new RestTemplate();
-        var apiURL = "http://api.ipstack.com/" + ip + "?access_key=" + ipstackKey;
+        var apiURL = "http://api.ipstack.com/" + ip + "?access_key=" + c8yEnv.get("ipstack.key");
         var location = rest.getForObject(apiURL, Location.class);
 
         // Prepare a LocationUpdate event using Cumulocity's API
@@ -147,26 +119,26 @@ public class App {
         c8y_Position.put("lng", location.getLongitude());
 
         var source = new ManagedObjectRepresentation();
-        source.setId(GId.asGId(trackerId));
+        source.setId(GId.asGId(c8yEnv.get("tracker.id")));
 
         var event = new EventRepresentation();
         event.setSource(source);
         event.setType("c8y_LocationUpdate");
-        event.setDateTime(new DateTime(System.currentTimeMillis()));
+        event.setDateTime(DateTime.now());
         event.setText("Accessed from " + ip + 
                       " (" + (location.getCity() != null ? location.getCity() + ", " : "") + location.getCountry_code() + ")");
         event.setProperty("c8y_Position", c8y_Position);
         event.setProperty("ip", ip);
         
         // Create the event in the platform
-        getPlatform().getEventApi().create(event);
+        platform.getEventApi().create(event);
 
         return event;
     }
 
     
     /* * * * * * * * * * Application endpoints * * * * * * * * * */
-
+   
     // Check the microservice status/health (implemented by default)
     // GET /health
 
@@ -184,9 +156,6 @@ public class App {
     // Return the environment values
     @RequestMapping("environment")
     public Map<String, String> environment () {
-    	if (c8yEnv.isEmpty()) {
-    		subsetEnvironmentValues();
-    	}
         return c8yEnv;
     }
 
@@ -202,7 +171,7 @@ public class App {
     public ArrayList<Object> getLocations (@RequestParam(value = "max", defaultValue = "5") int max) {
     	var locations = new ArrayList<Object>();
     	var filter = new EventFilter().byType("c8y_LocationUpdate");
-        var eventCollection = getPlatform().getEventApi().getEventsByFilter(filter).get(max);
+        var eventCollection = platform.getEventApi().getEventsByFilter(filter).get(max);
     	
         eventCollection.getEvents().forEach((event) -> {
         	var map = new HashMap<String, Object>();

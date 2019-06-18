@@ -5,6 +5,16 @@
 		"name": "Cumulocity GmbH"
 	},
 	"isolation": "PER_TENANT",
+	"settings": [
+		{
+			"key": "ipstack.key",
+			"defaultValue": "<your-ipstack-key>"
+		},
+		{
+            "key": "tracker.id",
+            "defaultValue": "<your-tracker-id>"
+        }
+	],
 	"requiredRoles": [
 		"ROLE_EVENT_READ",
 		"ROLE_EVENT_ADMIN",
