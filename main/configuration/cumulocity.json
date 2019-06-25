@@ -4,6 +4,7 @@
   "provider": {
     "name": "Cumulocity GmbH"
   },
+  "contextPath":"mibparser",
   "isolation": "MULTI_TENANT",
   "requiredRoles": [
     "ROLE_TENANT_MANAGEMENT_READ",
@@ -20,7 +21,8 @@
       "port": 80
     },
     "initialDelaySeconds": 200,
-    "periodSeconds": 10
+    "periodSeconds": 10,
+    "timeoutSeconds": 10
   },
   "readinessProbe": {
     "httpGet": {
@@ -28,6 +30,7 @@
       "port": 80
     },
     "initialDelaySeconds": 220,
-    "periodSeconds": 10
+    "periodSeconds": 10,
+    "timeoutSeconds": 10
   }
 }
