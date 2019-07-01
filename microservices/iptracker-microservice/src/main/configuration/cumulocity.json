@@ -1,0 +1,40 @@
+{
+	"apiVersion": "1",
+	"version": "@project.version@",
+	"provider": {
+		"name": "Cumulocity GmbH"
+	},
+	"isolation": "PER_TENANT",
+	"settings": [
+		{
+			"key": "ipstack.key",
+			"defaultValue": "<your-ipstack-key>"
+		},
+		{
+			"key": "tracker.id",
+			"defaultValue": "<your-tracker-id>"
+		}
+	],
+	"livenessProbe": {
+		"httpGet": {
+			"path": "/health"
+		},
+		"initialDelaySeconds": 60,
+		"periodSeconds": 10
+	},
+	"readinessProbe": {
+		"httpGet": {
+			"path": "/health",
+			"port": 80
+		},
+		"initialDelaySeconds": 20,
+		"periodSeconds": 10
+	},
+	"requiredRoles": [
+		"ROLE_EVENT_READ",
+		"ROLE_EVENT_ADMIN",
+		"ROLE_ALARM_READ",
+		"ROLE_ALARM_ADMIN"
+	],
+	"roles": []
+}
