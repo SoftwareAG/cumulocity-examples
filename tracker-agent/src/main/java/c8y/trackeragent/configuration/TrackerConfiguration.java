@@ -177,7 +177,8 @@ public class TrackerConfiguration {
         return Arrays.asList(
                 TrackingProtocol.COBAN, 
                 TrackingProtocol.RFV16,
-                TrackingProtocol.MT90G
+                TrackingProtocol.MT90G,
+                TrackingProtocol.APLICOM_D
         );
     }
 

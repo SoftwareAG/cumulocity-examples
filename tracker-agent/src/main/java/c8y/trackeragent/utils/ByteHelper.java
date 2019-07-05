@@ -35,5 +35,23 @@ public class ByteHelper {
         }
     }
 
+    public static String toHexString(byte[] data) {
+        StringBuilder sb = new StringBuilder();
+        for (byte b: data)
+            sb.append(String.format("%02X", b));
+        return sb.toString();
+    }
+
+    // credits: https://stackoverflow.com/questions/140131/convert-a-string-representation-of-a-hex-dump-to-a-byte-array-using-java
+    public static byte[] getHexBytes(String hexString){
+        int len = hexString.length();
+        byte[] data = new byte[len / 2];
+        for (int i = 0; i < len; i += 2) {
+            data[i / 2] = (byte) ((Character.digit(hexString.charAt(i), 16) << 4)
+                    + Character.digit(hexString.charAt(i+1), 16));
+        }
+        return data;
+    }
+
 
 }
