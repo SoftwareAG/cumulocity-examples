@@ -1,5 +1,6 @@
 package c8y.trackeragent.protocol;
 
+import c8y.trackeragent.protocol.aplicomd.ConnectedAplicomDTracker;
 import c8y.trackeragent.protocol.coban.ConnectedCobanTracker;
 import c8y.trackeragent.protocol.mt90g.ConnectedMT90GTracker;
 import c8y.trackeragent.protocol.queclink.ConnectedQueclinkTracker;
@@ -41,6 +42,12 @@ public enum TrackingProtocol {
         @Override
         public boolean accept(byte firstByte) {
             return firstByte == '$';
+        }
+    },
+    APLICOM_D(ConnectedAplicomDTracker.class, "separatorsNotUsed", "") {
+        @Override
+        public boolean accept(byte firstByte) {
+            return firstByte == 'D';
         }
     };
 
