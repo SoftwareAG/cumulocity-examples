@@ -14,13 +14,14 @@
         <maven.compiler.target>1.7</maven.compiler.target>
         <spring-boot-dependencies.version>1.5.16.RELEASE</spring-boot-dependencies.version>
         <main.class>c8y.example.helloworld.HelloWorldMain</main.class>
+        <c8y.version>1004.0.0-SNAPSHOT</c8y.version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>com.nsn.cumulocity.clients-java</groupId>
             <artifactId>microservice-autoconfigure</artifactId>
-            <version>1004.0.0-SNAPSHOT</version>
+            <version>${c8y.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -54,7 +55,7 @@
             <plugin>
                 <groupId>com.nsn.cumulocity.clients-java</groupId>
                 <artifactId>microservice-package-maven-plugin</artifactId>
-                <version>1004.0.0-SNAPSHOT</version>
+                <version>${c8y.version}</version>
                 <executions>
                     <execution>
                         <id>package</id>
