@@ -7,7 +7,7 @@ function update-property {
 
 function update-dependencies {
     echo "Update properties in POMs to new version"
-    PROPERTIES=(cumulocity.root.version cumulocity.dependencies.version cumulocity.model.version cumulocity.shared-components.version cumulocity.core.version c8y.core.version c8y.microservice-new.version c8y.clients.version c8y.dependencies.version c8y.model.version c8y.shared-components.version)
+    PROPERTIES=(c8y.version)
 
     for property in "${PROPERTIES[@]}"
     do
