@@ -85,9 +85,12 @@ pipeline {
 
             }
             steps {
-                sshagent(['jenkins-hg-key']) {
-                    withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
-                        sh "chmod +x .jenkins/scripts/deploy.sh && .jenkins/scripts/deploy.sh snapshot"
+                echo "wait for lock on deploy2yum.sh"
+                lock('deploy2yum') {
+                    sshagent(['jenkins-hg-key']) {
+                        withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
+                            sh "chmod +x .jenkins/scripts/deploy.sh && .jenkins/scripts/deploy.sh snapshot"
+                        }
                     }
                 }
             }
@@ -124,10 +127,13 @@ pipeline {
                         }
                     }
                     steps {
-                        sshagent(['jenkins-hg-key']) {
-                            withCredentials([usernamePassword(credentialsId: 'bitbucket-m2m', passwordVariable: 'BITBUCKET_PASSWORD', usernameVariable: 'BITBUCKET_USER'),
-                                             file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
+                        echo "wait for lock on deploy2yum.sh"
+                        lock('deploy2yum') {
+                            sshagent(['jenkins-hg-key']) {
+                                withCredentials([usernamePassword(credentialsId: 'bitbucket-m2m', passwordVariable: 'BITBUCKET_PASSWORD', usernameVariable: 'BITBUCKET_USER'),
+                                                 file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
                                     sh "chmod +x .jenkins/scripts/release.sh && .jenkins/scripts/release.sh -r ${params.release_version} -d ${params.hotfix_version}"
+                                }
                             }
                         }
                     }
