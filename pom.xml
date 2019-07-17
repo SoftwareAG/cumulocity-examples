@@ -12,6 +12,7 @@
 
 	<properties>
 		<c8y.version>1004.0.2-SNAPSHOT</c8y.version>
+		<c8y.microservice.version>1004.0.1</c8y.microservice.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.7</maven.compiler.source>
 		<maven.compiler.target>1.7</maven.compiler.target>
@@ -25,7 +26,6 @@
 			<id>develop</id>
 			<properties>
 				<!-- current SNAPSHOT version of c8y-client -->
-				<!--<c8y.version>1004.0.2-SNAPSHOT</c8y.version>-->
 			</properties>
 			<distributionManagement>
 				<snapshotRepository>
@@ -41,7 +41,6 @@
 			<id>production</id>
 			<properties>
 				<!-- current RELEASE version of c8y-client -->
-				<!--<c8y.version>1004.0.2-SNAPSHOT</c8y.version>-->
 			</properties>
 			<distributionManagement>
 				<!-- TODO remove snapshotRepository after release -->

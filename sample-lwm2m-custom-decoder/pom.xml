@@ -79,7 +79,7 @@
             <plugin>
                 <groupId>com.nsn.cumulocity.clients-java</groupId>
                 <artifactId>microservice-package-maven-plugin</artifactId>
-                <version>${project.parent.version}</version>
+                <version>${c8y.microservice.version}</version>
                 <executions>
                     <execution>
                         <id>package</id>
