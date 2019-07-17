@@ -25,7 +25,7 @@
 			<id>develop</id>
 			<properties>
 				<!-- current SNAPSHOT version of c8y-client -->
-				<!--<c8y.version>${c8y.version}</c8y.version>-->
+				<!--<c8y.version>9.20.1</c8y.version>-->
 			</properties>
 			<distributionManagement>
 				<snapshotRepository>
@@ -41,7 +41,7 @@
 			<id>production</id>
 			<properties>
 				<!-- current RELEASE version of c8y-client -->
-				<!--<c8y.version>${c8y.version}</c8y.version>-->
+				<!--<c8y.version>9.20.1</c8y.version>-->
 			</properties>
 			<distributionManagement>
 				<!-- TODO remove snapshotRepository after release -->
