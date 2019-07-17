@@ -20,7 +20,7 @@
         <dependency>
             <groupId>c8y.example</groupId>
             <artifactId>remote-access-driver</artifactId>
-            <version>9.20.1</version>
+            <version>${project.version}</version>
         </dependency>
 		<dependency>
 			<groupId>com.google.code</groupId>
