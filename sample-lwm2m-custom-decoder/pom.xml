@@ -35,7 +35,7 @@
         <dependency>
             <groupId>com.nsn.cumulocity.clients-java</groupId>
             <artifactId>microservice-autoconfigure</artifactId>
-            <version>${project.parent.version}</version>
+            <version>${c8y.version.tmp}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
