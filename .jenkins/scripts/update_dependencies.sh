@@ -7,7 +7,7 @@ function update-property {
 
 function update-dependencies {
     echo "Update properties in POMs to new version"
-    PROPERTIES=(c8y.version)
+    PROPERTIES=(c8y.version.tmp)
 
     for property in "${PROPERTIES[@]}"
     do
