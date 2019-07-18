@@ -11,7 +11,7 @@
 	<packaging>pom</packaging>
 
 	<properties>
-		<c8y.version>1004.0.2-SNAPSHOT</c8y.version>
+		<c8y.version.tmp>1004.0.1</c8y.version.tmp>
 		<c8y.microservice.version>1004.0.1</c8y.microservice.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.7</maven.compiler.source>
@@ -95,12 +95,12 @@
 			<dependency>
 				<groupId>com.nsn.cumulocity.clients-java</groupId>
 				<artifactId>java-client</artifactId>
-				<version>${c8y.version}</version>
+				<version>${c8y.version.tmp}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.nsn.cumulocity.model</groupId>
 				<artifactId>device-capability-model</artifactId>
-				<version>${c8y.version}</version>
+				<version>${c8y.version.tmp}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.guava</groupId>
