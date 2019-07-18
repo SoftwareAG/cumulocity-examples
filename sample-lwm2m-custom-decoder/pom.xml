@@ -25,7 +25,7 @@
         <dependency>
             <groupId>com.nsn.cumulocity.clients-java</groupId>
             <artifactId>custom-decoders</artifactId>
-            <version>${project.parent.version}</version>
+            <version>${c8y.version.tmp}</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
