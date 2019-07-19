@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>c8y.example</groupId>
 		<artifactId>c8y-jv</artifactId>
-        <version>1004.0.2-SNAPSHOT</version>
+        <version>1004.0.4-SNAPSHOT</version>
 	</parent>
 	
 	<artifactId>tinkerforge-driver</artifactId>
