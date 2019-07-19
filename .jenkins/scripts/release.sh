@@ -39,7 +39,7 @@ cd ../..
 cd hello-world-microservice
 ../mvnw versions:set -DnewVersion=${version}
 cd ..
-.jenkins/scripts/update_dependencies.sh ${version}
+#.jenkins/scripts/update_dependencies.sh ${version}
 
 # tests are run to make sure all dependencies with ${project.version} work correctly
 # same for usage of -s $MVN_SETTINGS.
@@ -51,7 +51,7 @@ echo "tagging cumulocity-examples"
 tag-version "c8y-agents-${version}"
 
 echo "Update version to ${next_version}"
-.jenkins/scripts/update_dependencies.sh ${next_version}
+#.jenkins/scripts/update_dependencies.sh ${next_version}
 ./mvnw versions:set -DnewVersion=${next_version} -DgenerateBackupPoms=false -s $MVN_SETTINGS
 cd java-agent/assembly/
 ../../mvnw versions:set -DnewVersion=${next_version} -DgenerateBackupPoms=false -s $MVN_SETTINGS
