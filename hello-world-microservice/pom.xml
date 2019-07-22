@@ -15,7 +15,6 @@
         <spring-boot-dependencies.version>1.5.16.RELEASE</spring-boot-dependencies.version>
         <main.class>c8y.example.helloworld.HelloWorldMain</main.class>
         <c8y.version>1004.6.3-SNAPSHOT</c8y.version>
-        <asd>1</asd>
     </properties>
 
     <dependencies>
