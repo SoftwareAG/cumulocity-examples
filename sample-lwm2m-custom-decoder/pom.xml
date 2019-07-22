@@ -25,7 +25,7 @@
         <dependency>
             <groupId>com.nsn.cumulocity.clients-java</groupId>
             <artifactId>custom-decoders</artifactId>
-            <version>${c8y.version}</version>
+            <version>${c8y.version.tmp}</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
@@ -35,7 +35,7 @@
         <dependency>
             <groupId>com.nsn.cumulocity.clients-java</groupId>
             <artifactId>microservice-autoconfigure</artifactId>
-            <version>${c8y.version}</version>
+            <version>${c8y.version.tmp}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -79,7 +79,7 @@
             <plugin>
                 <groupId>com.nsn.cumulocity.clients-java</groupId>
                 <artifactId>microservice-package-maven-plugin</artifactId>
-                <version>${c8y.version}</version>
+                <version>${c8y.microservice.version}</version>
                 <executions>
                     <execution>
                         <id>package</id>

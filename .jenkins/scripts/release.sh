@@ -39,13 +39,13 @@ cd ../..
 cd hello-world-microservice
 ../mvnw versions:set -DnewVersion=${version}
 cd ..
-.jenkins/scripts/update_dependencies.sh ${version}
+#.jenkins/scripts/update_dependencies.sh ${version}
 
 # tests are run to make sure all dependencies with ${project.version} work correctly
 # same for usage of -s $MVN_SETTINGS.
 ./mvnw clean install -Dmaven.javadoc.skip=true -s $MVN_SETTINGS
 chmod +x .jenkins/scripts/deploy.sh
-.jenkins/scripts/deploy.sh release
+#.jenkins/scripts/deploy.sh release
 
 echo "tagging cumulocity-examples"
 tag-version "c8y-agents-${version}"
