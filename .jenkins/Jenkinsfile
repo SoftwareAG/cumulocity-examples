@@ -51,15 +51,13 @@ pipeline {
                 }
             }
         }
-        // Separate Compile and Build does not make sense currently as build cannot be run in isolated network.
-        // It cannot be run in isolated network due to jarhell in tests (agent-framework 8.18) that are not resolved at compile time.
-        //stage('Compile') {
-        //    steps {
-        //        withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
-        //            sh "chmod +x .jenkins/scripts/compile.sh && .jenkins/scripts/compile.sh"
-        //        }
-        //    }
-        //}
+        stage('Compile') {
+            steps {
+                withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
+                    sh "chmod +x .jenkins/scripts/compile.sh && .jenkins/scripts/compile.sh"
+                }
+            }
+        }
         stage('Build') {
             steps {
                 withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
