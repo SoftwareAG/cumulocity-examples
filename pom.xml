@@ -6,7 +6,7 @@
 
 	<groupId>c8y.example</groupId>
 	<artifactId>c8y-examples</artifactId>
-	<version>9.20.12</version>
+	<version>9.20.13-SNAPSHOT</version>
 	<name>Cumulocity :: Examples</name>
 	<packaging>pom</packaging>
 
