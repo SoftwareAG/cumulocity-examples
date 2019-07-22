@@ -6,12 +6,12 @@
 
 	<groupId>c8y.example</groupId>
 	<artifactId>c8y-examples</artifactId>
-	<version>9.20.13-SNAPSHOT</version>
+	<version>9.20.13</version>
 	<name>Cumulocity :: Examples</name>
 	<packaging>pom</packaging>
 
 	<properties>
-		<c8y.version>9.20.13-SNAPSHOT</c8y.version>
+		<c8y.version>9.20.13</c8y.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.7</maven.compiler.source>
 		<maven.compiler.target>1.7</maven.compiler.target>
