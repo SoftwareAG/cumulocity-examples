@@ -1,6 +1,6 @@
 #!/bin/sh
 set -e
-./mvnw clean deploy -DskipTests -s $MVN_SETTINGS
+# ./mvnw clean deploy -DskipTests -s $MVN_SETTINGS
 #/var/lib/jenkins/bin/deploy2yum.sh -p $(find ./ -name *.rpm)
 if [ "!$1" = "!release" ]
 then
