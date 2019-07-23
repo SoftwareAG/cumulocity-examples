@@ -45,13 +45,13 @@ cd ..
 # same for usage of -s $MVN_SETTINGS.
 ./mvnw clean install -Dmaven.javadoc.skip=true -s $MVN_SETTINGS
 chmod +x .jenkins/scripts/deploy.sh
-#.jenkins/scripts/deploy.sh release
+.jenkins/scripts/deploy.sh release
 
 echo "tagging cumulocity-examples"
 tag-version "c8y-agents-${version}"
 
 echo "Update version to ${next_version}"
-.jenkins/scripts/update_dependencies.sh ${next_version}
+#.jenkins/scripts/update_dependencies.sh ${next_version}
 ./mvnw versions:set -DnewVersion=${next_version} -DgenerateBackupPoms=false -s $MVN_SETTINGS
 cd java-agent/assembly/
 ../../mvnw versions:set -DnewVersion=${next_version} -DgenerateBackupPoms=false -s $MVN_SETTINGS
