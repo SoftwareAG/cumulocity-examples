@@ -21,9 +21,78 @@ pipeline {
     }
 
     stages {
-        stage('Fail in case of incorrect input parameters') {
-            when {
-                not {
+        lock('release-lock') {
+            stage('Fail in case of incorrect input parameters') {
+                when {
+                    not {
+                        anyOf {
+                            allOf {
+                                equals expected: 'RELEASE', actual: params.build_type;
+                                branch 'develop'
+                            };
+                            allOf {
+                                equals expected: 'HOTFIX', actual: params.build_type;
+                                branch 'release/*'
+                            }
+                            equals expected: 'DEFAULT', actual: params.build_type
+                        }
+                    }
+                }
+                steps {
+                    error("Incorrect input parameters")
+                }
+            }
+            stage('Checkout') {
+                steps {
+                    withCredentials([usernamePassword(credentialsId: 'bitbucket-m2m', passwordVariable: 'BITBUCKET_PASSWORD', usernameVariable: 'BITBUCKET_USER')]) {
+                        sh "chmod +x .jenkins/scripts/status.sh && .jenkins/scripts/status.sh 'INPROGRESS' ${JOB_NAME} ${BUILD_TAG} "
+                    }
+                    withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
+                        sh "chmod +x .jenkins/scripts/clean.sh && .jenkins/scripts/clean.sh"
+                    }
+                }
+            }
+            stage('Compile') {
+                steps {
+                    withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
+                        sh "chmod +x .jenkins/scripts/compile.sh && .jenkins/scripts/compile.sh"
+                    }
+                }
+            }
+            stage('Build') {
+                steps {
+                    withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
+                        sh "chmod +x .jenkins/scripts/build.sh && .jenkins/scripts/build.sh"
+                    }
+                }
+                post {
+                    always {
+                        junit(testResults: '**/TEST-*.xml', keepLongStdio: true)
+                        jacoco()
+                    }
+                }
+            }
+            stage('Deploy images') {
+                when {
+                    allOf {
+                        equals expected: 'DEFAULT', actual: params.build_type
+                        anyOf {
+                            branch 'release/**';
+                            branch 'develop'
+                        }
+                    }
+
+                }
+                steps {
+                    sshagent(['jenkins-hg-key']) {
+                        withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
+                            sh "chmod +x .jenkins/scripts/deploy.sh && .jenkins/scripts/deploy.sh snapshot"
+                        }
+                    }
+                }
+            }
+            stage('Release') {
+                when {
                     anyOf {
                         allOf {
                             equals expected: 'RELEASE', actual: params.build_type;
@@ -33,119 +102,52 @@ pipeline {
                             equals expected: 'HOTFIX', actual: params.build_type;
                             branch 'release/*'
                         }
-                        equals expected: 'DEFAULT', actual: params.build_type
                     }
                 }
-            }
-            steps {
-                error("Incorrect input parameters")
-            }
-        }
-        stage('Checkout') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'bitbucket-m2m', passwordVariable: 'BITBUCKET_PASSWORD', usernameVariable: 'BITBUCKET_USER')]) {
-                    sh "chmod +x .jenkins/scripts/status.sh && .jenkins/scripts/status.sh 'INPROGRESS' ${JOB_NAME} ${BUILD_TAG} "
-                }
-                withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
-                    sh "chmod +x .jenkins/scripts/clean.sh && .jenkins/scripts/clean.sh"
-                }
-            }
-        }
-        stage('Compile') {
-            steps {
-                withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
-                    sh "chmod +x .jenkins/scripts/compile.sh && .jenkins/scripts/compile.sh"
-                }
-            }
-        }
-        stage('Build') {
-            steps {
-                withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
-                    sh "chmod +x .jenkins/scripts/build.sh && .jenkins/scripts/build.sh"
-                }
-            }
-            post {
-                always {
-                    junit(testResults: '**/TEST-*.xml', keepLongStdio: true)
-                    jacoco()
-                }
-            }
-        }
-        stage('Deploy images') {
-            when {
-                allOf {
-                    equals expected: 'DEFAULT', actual: params.build_type
-                    anyOf {
-                        branch 'release/**';
-                        branch 'develop'
-                    }
-                }
-
-            }
-            steps {
-                sshagent(['jenkins-hg-key']) {
-                    withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
-                        sh "chmod +x .jenkins/scripts/deploy.sh && .jenkins/scripts/deploy.sh snapshot"
-                    }
-                }
-            }
-        }
-        stage('Release') {
-            when {
-                anyOf {
-                    allOf {
-                        equals expected: 'RELEASE', actual: params.build_type;
-                        branch 'develop'
-                    };
-                    allOf {
-                        equals expected: 'HOTFIX', actual: params.build_type;
-                        branch 'release/*'
-                    }
-                }
-            }
-            stages {
-                stage('Prepare release') {
-                    when {
-                        equals expected: 'RELEASE', actual: params.build_type
-                    }
-                    steps {
-                        withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
-                            sh "chmod +x .jenkins/scripts/prepare_release.sh && .jenkins/scripts/prepare_release.sh ${params.release_version}"
+                stages {
+                    stage('Prepare release') {
+                        when {
+                            equals expected: 'RELEASE', actual: params.build_type
                         }
-                    }
-                }
-                stage('Release') {
-                    when {
-                        anyOf {
-                            equals expected: 'RELEASE', actual: params.build_type;
-                            equals expected: 'HOTFIX', actual: params.build_type
-                        }
-                    }
-                    steps {
-                        sshagent(['jenkins-hg-key']) {
-                            withCredentials([usernamePassword(credentialsId: 'bitbucket-m2m', passwordVariable: 'BITBUCKET_PASSWORD', usernameVariable: 'BITBUCKET_USER'),
-                                             file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
-                                    sh "chmod +x .jenkins/scripts/release.sh && .jenkins/scripts/release.sh -r ${params.release_version} -d ${params.hotfix_version}"
+                        steps {
+                            withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
+                                sh "chmod +x .jenkins/scripts/prepare_release.sh && .jenkins/scripts/prepare_release.sh ${params.release_version}"
                             }
                         }
                     }
-                }
-                stage('Finish release') {
-                    when {
-                        equals expected: 'RELEASE', actual: params.build_type
-                    }
-                    stages {
-                        stage('Close and merge release branch') {
-                            steps {
-                                withCredentials([usernamePassword(credentialsId: 'bitbucket-m2m', passwordVariable: 'BITBUCKET_PASSWORD', usernameVariable: 'BITBUCKET_USER')]) {
-                                    sh "chmod +x .jenkins/scripts/finish_release.sh && .jenkins/scripts/finish_release.sh ${params.release_version}"
+                    stage('Release') {
+                        when {
+                            anyOf {
+                                equals expected: 'RELEASE', actual: params.build_type;
+                                equals expected: 'HOTFIX', actual: params.build_type
+                            }
+                        }
+                        steps {
+                            sshagent(['jenkins-hg-key']) {
+                                withCredentials([usernamePassword(credentialsId: 'bitbucket-m2m', passwordVariable: 'BITBUCKET_PASSWORD', usernameVariable: 'BITBUCKET_USER'),
+                                                 file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
+                                        sh "chmod +x .jenkins/scripts/release.sh && .jenkins/scripts/release.sh -r ${params.release_version} -d ${params.hotfix_version}"
                                 }
                             }
                         }
-                        stage('Bump develop branch') {
-                            steps {
-                                withCredentials([usernamePassword(credentialsId: 'bitbucket-m2m', passwordVariable: 'BITBUCKET_PASSWORD', usernameVariable: 'BITBUCKET_USER')]) {
-                                    sh "chmod +x .jenkins/scripts/update_develop.sh && .jenkins/scripts/update_develop.sh ${params.hotfix_version} ${params.development_version}"
+                    }
+                    stage('Finish release') {
+                        when {
+                            equals expected: 'RELEASE', actual: params.build_type
+                        }
+                        stages {
+                            stage('Close and merge release branch') {
+                                steps {
+                                    withCredentials([usernamePassword(credentialsId: 'bitbucket-m2m', passwordVariable: 'BITBUCKET_PASSWORD', usernameVariable: 'BITBUCKET_USER')]) {
+                                        sh "chmod +x .jenkins/scripts/finish_release.sh && .jenkins/scripts/finish_release.sh ${params.release_version}"
+                                    }
+                                }
+                            }
+                            stage('Bump develop branch') {
+                                steps {
+                                    withCredentials([usernamePassword(credentialsId: 'bitbucket-m2m', passwordVariable: 'BITBUCKET_PASSWORD', usernameVariable: 'BITBUCKET_USER')]) {
+                                        sh "chmod +x .jenkins/scripts/update_develop.sh && .jenkins/scripts/update_develop.sh ${params.hotfix_version} ${params.development_version}"
+                                    }
                                 }
                             }
                         }
