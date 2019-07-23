@@ -21,69 +21,74 @@ pipeline {
     }
 
     stages {
-        lock('release-lock') {
-            stage('Fail in case of incorrect input parameters') {
-                when {
-                    not {
-                        anyOf {
-                            allOf {
-                                equals expected: 'RELEASE', actual: params.build_type;
-                                branch 'develop'
-                            };
-                            allOf {
-                                equals expected: 'HOTFIX', actual: params.build_type;
-                                branch 'release/*'
-                            }
-                            equals expected: 'DEFAULT', actual: params.build_type
-                        }
-                    }
-                }
-                steps {
-                    error("Incorrect input parameters")
-                }
-            }
-            stage('Checkout') {
-                steps {
-                    withCredentials([usernamePassword(credentialsId: 'bitbucket-m2m', passwordVariable: 'BITBUCKET_PASSWORD', usernameVariable: 'BITBUCKET_USER')]) {
-                        sh "chmod +x .jenkins/scripts/status.sh && .jenkins/scripts/status.sh 'INPROGRESS' ${JOB_NAME} ${BUILD_TAG} "
-                    }
-                    withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
-                        sh "chmod +x .jenkins/scripts/clean.sh && .jenkins/scripts/clean.sh"
-                    }
-                }
-            }
-            stage('Compile') {
-                steps {
-                    withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
-                        sh "chmod +x .jenkins/scripts/compile.sh && .jenkins/scripts/compile.sh"
-                    }
-                }
-            }
-            stage('Build') {
-                steps {
-                    withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
-                        sh "chmod +x .jenkins/scripts/build.sh && .jenkins/scripts/build.sh"
-                    }
-                }
-                post {
-                    always {
-                        junit(testResults: '**/TEST-*.xml', keepLongStdio: true)
-                        jacoco()
-                    }
-                }
-            }
-            stage('Deploy images') {
-                when {
-                    allOf {
-                        equals expected: 'DEFAULT', actual: params.build_type
-                        anyOf {
-                            branch 'release/**';
+        stage('Fail in case of incorrect input parameters') {
+            when {
+                not {
+                    anyOf {
+                        allOf {
+                            equals expected: 'RELEASE', actual: params.build_type;
                             branch 'develop'
+                        };
+                        allOf {
+                            equals expected: 'HOTFIX', actual: params.build_type;
+                            branch 'release/*'
                         }
+                        equals expected: 'DEFAULT', actual: params.build_type
+                    }
+                }
+            }
+            steps {
+                error("Incorrect input parameters")
+            }
+        }
+        stage('Checkout') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'bitbucket-m2m', passwordVariable: 'BITBUCKET_PASSWORD', usernameVariable: 'BITBUCKET_USER')]) {
+                    sh "chmod +x .jenkins/scripts/status.sh && .jenkins/scripts/status.sh 'INPROGRESS' ${JOB_NAME} ${BUILD_TAG} "
+                }
+                withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
+                    sh "chmod +x .jenkins/scripts/clean.sh && .jenkins/scripts/clean.sh"
+                }
+            }
+        }
+        stage('Compile') {
+            steps {
+                withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
+                    sh "chmod +x .jenkins/scripts/compile.sh && .jenkins/scripts/compile.sh"
+                }
+            }
+        }
+        stage('Build') {
+            agent {
+                dockerfile {
+                    dir '.jenkins/build'
+                }
+            }
+            steps {
+                withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
+                    sh "chmod +x .jenkins/scripts/build.sh && .jenkins/scripts/build.sh"
+                }
+            }
+            post {
+                always {
+                    junit(testResults: '**/TEST-*.xml', keepLongStdio: true)
+                    jacoco()
+                }
+            }
+        }
+        stage('Deploy images') {
+            when {
+                allOf {
+                    equals expected: 'DEFAULT', actual: params.build_type
+                    anyOf {
+                        branch 'release/**';
+                        branch 'develop'
                     }
 
-                }
-                steps {
+            }
+            steps {
+                echo "wait for lock on deploy2yum.sh"
+                lock('deploy2yum') {
                     sshagent(['jenkins-hg-key']) {
                         withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
                             sh "chmod +x .jenkins/scripts/deploy.sh && .jenkins/scripts/deploy.sh snapshot"
@@ -91,7 +96,9 @@ pipeline {
                     }
                 }
             }
-            stage('Release') {
+        }
+        stage('Release') {
+            lock('release-lock') {
                 when {
                     anyOf {
                         allOf {
@@ -123,10 +130,13 @@ pipeline {
                             }
                         }
                         steps {
-                            sshagent(['jenkins-hg-key']) {
-                                withCredentials([usernamePassword(credentialsId: 'bitbucket-m2m', passwordVariable: 'BITBUCKET_PASSWORD', usernameVariable: 'BITBUCKET_USER'),
-                                                 file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
-                                        sh "chmod +x .jenkins/scripts/release.sh && .jenkins/scripts/release.sh -r ${params.release_version} -d ${params.hotfix_version}"
+                            echo "wait for lock on deploy2yum.sh"
+                            lock('deploy2yum') {
+                                sshagent(['jenkins-hg-key']) {
+                                    withCredentials([usernamePassword(credentialsId: 'bitbucket-m2m', passwordVariable: 'BITBUCKET_PASSWORD', usernameVariable: 'BITBUCKET_USER'),
+                                                     file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
+                                            sh "chmod +x .jenkins/scripts/release.sh && .jenkins/scripts/release.sh -r ${params.release_version} -d ${params.hotfix_version}"
+                                    }
                                 }
                             }
                         }
