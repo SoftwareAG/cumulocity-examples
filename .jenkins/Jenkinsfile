@@ -9,8 +9,6 @@ pipeline {
     options {
         buildDiscarder(logRotator(numToKeepStr: '10'))
         timeout(time: 4, unit: 'HOURS')
-        disableConcurrentBuilds()
-        lock('cumulocity-examples')
     }
     parameters {
         choice(name: 'build_type', choices: ['DEFAULT', 'RELEASE', 'HOTFIX']);
