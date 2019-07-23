@@ -24,7 +24,7 @@
         <dependency>
             <groupId>com.cumulocity.sms.client</groupId>
             <artifactId>sms-client</artifactId>
-            <version>${c8y.version.tmp}</version>
+            <version>${c8y.version}</version>
         </dependency>
 
         <dependency>
