@@ -96,66 +96,67 @@ pipeline {
             }
         }
         stage('Release') {
-            lock('release-lock') {
-                when {
-                    anyOf {
-                        allOf {
-                            equals expected: 'RELEASE', actual: params.build_type;
-                            branch 'develop'
-                        };
-                        allOf {
-                            equals expected: 'HOTFIX', actual: params.build_type;
-                            branch 'release/*'
+            options {
+                lock('release-lock')
+            }
+            when {
+                anyOf {
+                    allOf {
+                        equals expected: 'RELEASE', actual: params.build_type;
+                        branch 'develop'
+                    };
+                    allOf {
+                        equals expected: 'HOTFIX', actual: params.build_type;
+                        branch 'release/*'
+                    }
+                }
+            }
+            stages {
+                stage('Prepare release') {
+                    when {
+                        equals expected: 'RELEASE', actual: params.build_type
+                    }
+                    steps {
+                        withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
+                            sh "chmod +x .jenkins/scripts/prepare_release.sh && .jenkins/scripts/prepare_release.sh ${params.release_version}"
                         }
                     }
                 }
-                stages {
-                    stage('Prepare release') {
-                        when {
-                            equals expected: 'RELEASE', actual: params.build_type
-                        }
-                        steps {
-                            withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
-                                sh "chmod +x .jenkins/scripts/prepare_release.sh && .jenkins/scripts/prepare_release.sh ${params.release_version}"
-                            }
+                stage('Release') {
+                    when {
+                        anyOf {
+                            equals expected: 'RELEASE', actual: params.build_type;
+                            equals expected: 'HOTFIX', actual: params.build_type
                         }
                     }
-                    stage('Release') {
-                        when {
-                            anyOf {
-                                equals expected: 'RELEASE', actual: params.build_type;
-                                equals expected: 'HOTFIX', actual: params.build_type
-                            }
-                        }
-                        steps {
-                            echo "wait for lock on deploy2yum.sh"
-                            lock('deploy2yum') {
-                                sshagent(['jenkins-hg-key']) {
-                                    withCredentials([usernamePassword(credentialsId: 'bitbucket-m2m', passwordVariable: 'BITBUCKET_PASSWORD', usernameVariable: 'BITBUCKET_USER'),
-                                                     file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
-                                            sh "chmod +x .jenkins/scripts/release.sh && .jenkins/scripts/release.sh -r ${params.release_version} -d ${params.hotfix_version}"
-                                    }
+                    steps {
+                        echo "wait for lock on deploy2yum.sh"
+                        lock('deploy2yum') {
+                            sshagent(['jenkins-hg-key']) {
+                                withCredentials([usernamePassword(credentialsId: 'bitbucket-m2m', passwordVariable: 'BITBUCKET_PASSWORD', usernameVariable: 'BITBUCKET_USER'),
+                                                 file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
+                                        sh "chmod +x .jenkins/scripts/release.sh && .jenkins/scripts/release.sh -r ${params.release_version} -d ${params.hotfix_version}"
                                 }
                             }
                         }
                     }
-                    stage('Finish release') {
-                        when {
-                            equals expected: 'RELEASE', actual: params.build_type
-                        }
-                        stages {
-                            stage('Close and merge release branch') {
-                                steps {
-                                    withCredentials([usernamePassword(credentialsId: 'bitbucket-m2m', passwordVariable: 'BITBUCKET_PASSWORD', usernameVariable: 'BITBUCKET_USER')]) {
-                                        sh "chmod +x .jenkins/scripts/finish_release.sh && .jenkins/scripts/finish_release.sh ${params.release_version}"
-                                    }
+                }
+                stage('Finish release') {
+                    when {
+                        equals expected: 'RELEASE', actual: params.build_type
+                    }
+                    stages {
+                        stage('Close and merge release branch') {
+                            steps {
+                                withCredentials([usernamePassword(credentialsId: 'bitbucket-m2m', passwordVariable: 'BITBUCKET_PASSWORD', usernameVariable: 'BITBUCKET_USER')]) {
+                                    sh "chmod +x .jenkins/scripts/finish_release.sh && .jenkins/scripts/finish_release.sh ${params.release_version}"
                                 }
                             }
-                            stage('Bump develop branch') {
-                                steps {
-                                    withCredentials([usernamePassword(credentialsId: 'bitbucket-m2m', passwordVariable: 'BITBUCKET_PASSWORD', usernameVariable: 'BITBUCKET_USER')]) {
-                                        sh "chmod +x .jenkins/scripts/update_develop.sh && .jenkins/scripts/update_develop.sh ${params.hotfix_version} ${params.development_version}"
-                                    }
+                        }
+                        stage('Bump develop branch') {
+                            steps {
+                                withCredentials([usernamePassword(credentialsId: 'bitbucket-m2m', passwordVariable: 'BITBUCKET_PASSWORD', usernameVariable: 'BITBUCKET_USER')]) {
+                                    sh "chmod +x .jenkins/scripts/update_develop.sh && .jenkins/scripts/update_develop.sh ${params.hotfix_version} ${params.development_version}"
                                 }
                             }
                         }
