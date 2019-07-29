@@ -150,19 +150,6 @@
         <pluginManagement>
             <plugins>
 	            <plugin>
-	                <groupId>com.nsn.cumulocity.clients-java</groupId>
-	                <artifactId>agent-framework-package</artifactId>
-	                <version>${c8y.agent-framework.version}</version>
-	                <executions>
-	                    <execution>
-	                        <phase>package</phase>
-	                        <goals>
-	                            <goal>agent-package</goal>
-	                        </goals>
-	                    </execution>
-	                </executions>
-	            </plugin>
-	            <plugin>
 	                <groupId>org.springframework.boot</groupId>
 	                <artifactId>spring-boot-maven-plugin</artifactId>
 	                <version>${spring.boot.version}</version>
@@ -189,7 +176,7 @@
                         <DynamicDependency>
                             <groupId>com.nsn.cumulocity.clients-java</groupId>
                             <artifactId>agent-framework-package</artifactId>
-                            <version>8.18.3</version>
+                            <version>${c8y.agent-framework.version}</version>
                             <repositoryType>PLUGIN</repositoryType>
                         </DynamicDependency>
                     </dynamicDependencies>
@@ -210,6 +197,7 @@
             <plugin>
                 <groupId>com.nsn.cumulocity.clients-java</groupId>
                 <artifactId>agent-framework-package</artifactId>
+                <version>${c8y.agent-framework.version}</version>
             </plugin>            
         </plugins>
         <resources>
