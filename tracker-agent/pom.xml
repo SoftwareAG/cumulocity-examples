@@ -149,7 +149,7 @@
     <build>
         <pluginManagement>
             <plugins>
-<!--	            <plugin>
+	            <plugin>
 	                <groupId>com.nsn.cumulocity.clients-java</groupId>
 	                <artifactId>agent-framework-package</artifactId>
 	                <version>${c8y.agent-framework.version}</version>
@@ -161,7 +161,7 @@
 	                        </goals>
 	                    </execution>
 	                </executions>
-	            </plugin>-->
+	            </plugin>
 	            <plugin>
 	                <groupId>org.springframework.boot</groupId>
 	                <artifactId>spring-boot-maven-plugin</artifactId>
@@ -180,7 +180,7 @@
             </plugins>
         </pluginManagement>    
         <plugins>
-<!--            <plugin>
+            <plugin>
                 <groupId>de.qaware.maven</groupId>
                 <artifactId>go-offline-maven-plugin</artifactId>
                 <version>1.2.1</version>
@@ -194,7 +194,7 @@
                         </DynamicDependency>
                     </dynamicDependencies>
                 </configuration>
-            </plugin>-->
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
