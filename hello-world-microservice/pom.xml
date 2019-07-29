@@ -38,6 +38,33 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>de.qaware.maven</groupId>
+                <artifactId>go-offline-maven-plugin</artifactId>
+                <version>1.2.1</version>
+                <configuration>
+                    <dynamicDependencies>
+                        <DynamicDependency>
+                            <groupId>com.nsn.cumulocity.clients-java</groupId>
+                            <artifactId>agent-framework-package</artifactId>
+                            <version>8.18.3</version>
+                            <repositoryType>PLUGIN</repositoryType>
+                        </DynamicDependency>
+                        <DynamicDependency>
+                            <groupId>com.nsn.cumulocity.clients-java</groupId>
+                            <artifactId>microservice-autoconfigure</artifactId>
+                            <version>${c8y.version}</version>
+                            <repositoryType>PLUGIN</repositoryType>
+                        </DynamicDependency>
+                        <DynamicDependency>
+                            <groupId>com.nsn.cumulocity.clients-java</groupId>
+                            <artifactId>microservice-autoconfigure</artifactId>
+                            <version>${c8y.version}</version>
+                            <repositoryType>MAIN</repositoryType>
+                        </DynamicDependency>
+                    </dynamicDependencies>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${spring-boot-dependencies.version}</version>
