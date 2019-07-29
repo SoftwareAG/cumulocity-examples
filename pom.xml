@@ -180,6 +180,12 @@
 								<version>8.18.3</version>
 								<repositoryType>PLUGIN</repositoryType>
 							</DynamicDependency>
+							<DynamicDependency>
+								<groupId>com.nsn.cumulocity.clients-java</groupId>
+								<artifactId>microservice-autoconfigure</artifactId>
+								<version>${c8y.version}</version>
+								<repositoryType>MAIN</repositoryType>
+							</DynamicDependency>
 						</dynamicDependencies>
 					</configuration>
 				</plugin>
