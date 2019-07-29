@@ -56,21 +56,6 @@
                 <groupId>com.nsn.cumulocity.clients-java</groupId>
                 <artifactId>microservice-package-maven-plugin</artifactId>
                 <version>${c8y.version}</version>
-                <executions>
-                    <execution>
-                        <id>package</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>package</goal>
-                        </goals>
-                        <configuration>
-                            <name>hello-world</name>
-                            <image>hello-world</image>
-                            <encoding>UTF-8</encoding>
-                            <rpmSkip>true</rpmSkip>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>
