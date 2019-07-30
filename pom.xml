@@ -63,7 +63,7 @@
 	<modules>
 <!--		<module>tracker-agent</module>-->
 		<module>hello-world-microservice</module>
-        <module>sample-lwm2m-custom-decoder</module>
+<!--        <module>sample-lwm2m-custom-decoder</module>-->
     </modules>
 
 	<licenses>
