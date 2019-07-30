@@ -16,6 +16,7 @@
         <maven.compiler.target>1.7</maven.compiler.target>
         <spring.boot.version>1.2.1.RELEASE</spring.boot.version>
         <package.name>tracker-agent-server</package.name>
+        <package.directory>tracker-agent</package.directory>
         <agent.main.class>c8y.trackeragent.Main</agent.main.class>
         <c8y.agent-framework.version>8.18.3</c8y.agent-framework.version>
     </properties>
@@ -146,38 +147,6 @@
         </dependency>
     </dependencies>
     <build>
-        <pluginManagement>
-            <plugins>
-	            <plugin>
-	                <groupId>com.nsn.cumulocity.clients-java</groupId>
-	                <artifactId>agent-framework-package</artifactId>
-	                <version>${c8y.agent-framework.version}</version>
-	                <executions>
-	                    <execution>
-	                        <phase>package</phase>
-	                        <goals>
-	                            <goal>agent-package</goal>
-	                        </goals>
-	                    </execution>
-	                </executions>
-	            </plugin>
-	            <plugin>
-	                <groupId>org.springframework.boot</groupId>
-	                <artifactId>spring-boot-maven-plugin</artifactId>
-	                <version>${spring.boot.version}</version>
-	                <configuration>
-	                    <mainClass>${agent.main.class}</mainClass>
-	                </configuration>
-	                <executions>
-	                    <execution>
-	                        <goals>
-	                            <goal>repackage</goal>
-	                        </goals>
-	                    </execution>
-	                </executions>
-	            </plugin>
-            </plugins>
-        </pluginManagement>    
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -190,12 +159,13 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring.boot.version}</version>
             </plugin>
             <plugin>
                 <groupId>com.nsn.cumulocity.clients-java</groupId>
                 <artifactId>agent-framework-package</artifactId>
                 <version>${c8y.agent-framework.version}</version>
-            </plugin>            
+            </plugin>
         </plugins>
         <resources>
             <resource>
