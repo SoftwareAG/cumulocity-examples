@@ -18,6 +18,9 @@
 
 		<slf4j.version>1.7.0</slf4j.version>
 		<spring.version>3.2.6.RELEASE</spring.version>
+        <surefire.version>2.16</surefire.version>
+        <rpm.version>2.1-alpha-3</rpm.version>
+        <docker.version>0.4.13</docker.version>
 	</properties>
 
 	<profiles>
@@ -140,12 +143,63 @@
 				</plugin>
 				<plugin>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>2.16</version>
+					<version>${surefire.version}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>rpm-maven-plugin</artifactId>
-					<version>2.1-alpha-3</version>
+					<version>${rpm.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>de.qaware.maven</groupId>
+					<artifactId>go-offline-maven-plugin</artifactId>
+					<version>1.2.1</version>
+					<configuration>
+						<dynamicDependencies>
+							<DynamicDependency>
+								<groupId>org.apache.maven.surefire</groupId>
+								<artifactId>surefire-junit4</artifactId>
+								<version>${surefire.version}</version>
+								<repositoryType>PLUGIN</repositoryType>
+							</DynamicDependency>
+							<DynamicDependency>
+								<groupId>org.codehaus.mojo</groupId>
+								<artifactId>rpm-maven-plugin</artifactId>
+								<version>${rpm.version}</version>
+								<repositoryType>PLUGIN</repositoryType>
+							</DynamicDependency>
+							<DynamicDependency>
+								<groupId>com.spotify</groupId>
+								<artifactId>docker-maven-plugin</artifactId>
+								<version>${docker.version}</version>
+								<repositoryType>PLUGIN</repositoryType>
+							</DynamicDependency>
+							<DynamicDependency>
+								<groupId>org.apache.maven.plugins</groupId>
+								<artifactId>maven-war-plugin</artifactId>
+								<version>2.4</version>
+								<repositoryType>PLUGIN</repositoryType>
+							</DynamicDependency>
+							<DynamicDependency>
+								<groupId>com.nsn.cumulocity.clients-java</groupId>
+								<artifactId>agent-framework-package</artifactId>
+								<version>8.18.3</version>
+								<repositoryType>PLUGIN</repositoryType>
+							</DynamicDependency>
+							<DynamicDependency>
+								<groupId>com.nsn.cumulocity.clients-java</groupId>
+								<artifactId>microservice-autoconfigure</artifactId>
+								<version>${c8y.version}</version>
+								<repositoryType>MAIN</repositoryType>
+							</DynamicDependency>
+							<DynamicDependency>
+								<groupId>com.nsn.cumulocity.clients-java</groupId>
+								<artifactId>microservice-autoconfigure</artifactId>
+								<version>${c8y.version}</version>
+								<repositoryType>PLUGIN</repositoryType>
+							</DynamicDependency>
+						</dynamicDependencies>
+					</configuration>
 				</plugin>
 			</plugins>
 		</pluginManagement>
