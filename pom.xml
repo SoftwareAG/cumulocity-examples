@@ -61,9 +61,9 @@
 	</profiles>
 
 	<modules>
-<!--		<module>tracker-agent</module>-->
+		<module>tracker-agent</module>
 		<module>hello-world-microservice</module>
-<!--        <module>sample-lwm2m-custom-decoder</module>-->
+        <module>sample-lwm2m-custom-decoder</module>
     </modules>
 
 	<licenses>
@@ -176,15 +176,15 @@
 							</DynamicDependency>
 							<DynamicDependency>
 								<groupId>com.nsn.cumulocity.clients-java</groupId>
-								<artifactId>agent-framework-package</artifactId>
-								<version>8.18.3</version>
+								<artifactId>microservice-package-maven-plugin</artifactId>
+								<version>${c8y.version}</version>
 								<repositoryType>PLUGIN</repositoryType>
 							</DynamicDependency>
 							<DynamicDependency>
 								<groupId>com.nsn.cumulocity.clients-java</groupId>
-								<artifactId>microservice-autoconfigure</artifactId>
-								<version>${c8y.version}</version>
-								<repositoryType>MAIN</repositoryType>
+								<artifactId>agent-framework-package</artifactId>
+								<version>8.18.3</version>
+								<repositoryType>PLUGIN</repositoryType>
 							</DynamicDependency>
 							<DynamicDependency>
 								<groupId>com.nsn.cumulocity.clients-java</groupId>

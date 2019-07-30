@@ -1,4 +1,3 @@
 #!/bin/bash
 set -e
-./mvnw clean install -s $MVN_SETTINGS -U -DskipTests -Dskip.agent.package.container=true -Dskip.microservice.package=true -T 4
-./mvnw de.qaware.maven:go-offline-maven-plugin:resolve-dependencies
+./mvnw clean install dependency:go-offline de.qaware.maven:go-offline-maven-plugin:resolve-dependencies -s $MVN_SETTINGS -U -DskipTests -T 4
