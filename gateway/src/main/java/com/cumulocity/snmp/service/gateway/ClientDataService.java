@@ -87,8 +87,7 @@ public class ClientDataService {
                 }
             }
         } catch (Exception e) {
-            log.error("Failed to send Alarm/Event/Measurement to the platform.");
-            log.error(e.getMessage());
+            log.error("Failed to send Alarm/Event/Measurement to the platform", e);
         }
     }
 
