@@ -21,6 +21,9 @@ package com.cumulocity.mibparser.rest;
 
 import com.cumulocity.mibparser.model.MibUploadResult;
 import com.cumulocity.mibparser.service.MibParserService;
+import com.cumulocity.microservice.context.ContextService;
+import com.cumulocity.microservice.context.credentials.MicroserviceCredentials;
+import com.cumulocity.microservice.context.credentials.UserCredentials;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -42,13 +45,21 @@ public class MibParserController {
     @Autowired
     private MibParserService mibParserService;
 
+    @Autowired
+    private ContextService<MicroserviceCredentials> contextService;
+
+    @Autowired
+    private ContextService<UserCredentials> userContextService;
+
     @RequestMapping(value = "/uploadzip",
             method = RequestMethod.POST,
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public MibUploadResult mibZipUpload(@RequestParam(REQUEST_PARAM_NAME) @NotNull final MultipartFile file)
             throws Exception {
-        log.info("Received MIB Zip file: " + file.getOriginalFilename());
-        return mibParserService.processMibZipFile(file);
+        String tenant = contextService.getContext().getTenant();
+        String username = userContextService.getContext().getUsername();
+        log.info("Received MIB Zip file: " + file.getOriginalFilename() + " for " + tenant + "/" + username);
+        return mibParserService.processMibZipFile(file, tenant, username);
     }
 }

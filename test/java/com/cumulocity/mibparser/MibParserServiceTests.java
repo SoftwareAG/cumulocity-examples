@@ -43,9 +43,12 @@ public class MibParserServiceTests {
     @InjectMocks
     private MibParserServiceImpl mibParserService;
 
+    private String tenant = "testtenant";
+    private String username = "testusername";
+
     @Test(expected = NullPointerException.class)
     public void shouldThrowNullPointerExceptionWhileProcessMibZipFile() throws IOException, IllegalArgumentException {
-        mibParserService.processMibZipFile(mock(MultipartFile.class));
+        mibParserService.processMibZipFile(mock(MultipartFile.class), tenant, username);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -53,14 +56,14 @@ public class MibParserServiceTests {
             throws IOException, IllegalArgumentException {
         MultipartFile file = new MockMultipartFile("Test_MIB.zip", new FileInputStream(
                 new File(System.getProperties().get("user.dir") + "/src/test/resources/Test_MIB_No_Manifest.zip")));
-        mibParserService.processMibZipFile(file);
+        mibParserService.processMibZipFile(file, tenant, username);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldThrowIllegalArgumentExceptionWhenMibsMissing() throws IOException, IllegalArgumentException {
         MultipartFile file = new MockMultipartFile("Test_MIB.zip", new FileInputStream(
                 new File(System.getProperties().get("user.dir") + "/src/test/resources/Test_No_MIB.zip")));
-        mibParserService.processMibZipFile(file);
+        mibParserService.processMibZipFile(file, tenant, username);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -68,14 +71,14 @@ public class MibParserServiceTests {
             throws IOException, IllegalArgumentException {
         MultipartFile file = new MockMultipartFile("Test_MIB.zip", new FileInputStream(
                 new File(System.getProperties().get("user.dir") + "/src/test/resources/Test_No_Main_MIB.zip")));
-        mibParserService.processMibZipFile(file);
+        mibParserService.processMibZipFile(file, tenant, username);
     }
 
     @Test(expected = IOException.class)
     public void shouldThrowIOExceptionWhenZipFileNotFound() throws IOException, IllegalArgumentException {
         MultipartFile file = new MockMultipartFile("Test_MIB.zip", new FileInputStream(
                 new File(System.getProperties().get("user.dir") + "/src/test/resources/Test.zip")));
-        mibParserService.processMibZipFile(file);
+        mibParserService.processMibZipFile(file, tenant, username);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -83,7 +86,7 @@ public class MibParserServiceTests {
             throws IOException, IllegalArgumentException {
         MultipartFile file = new MockMultipartFile("Test_MIB_With_No_Dependencies", new FileInputStream(
                 new File(System.getProperties().get("user.dir") + "/src/test/resources/Test_MIB_With_No_Dependencies.zip")));
-        mibParserService.processMibZipFile(file);
+        mibParserService.processMibZipFile(file, tenant, username);
     }
 
 
@@ -92,13 +95,13 @@ public class MibParserServiceTests {
             throws IOException, IllegalArgumentException {
         MultipartFile file = new MockMultipartFile("Test_MIB_With_Folder", new FileInputStream(
                 new File(System.getProperties().get("user.dir") + "/src/test/resources/Test_MIB_With_Folder.zip")));
-        mibParserService.processMibZipFile(file);
+        mibParserService.processMibZipFile(file, tenant, username);
     }
 
     @Test
     public void shouldProcessMibZipFileSuccessfully() throws IOException, IllegalArgumentException {
         MultipartFile file = new MockMultipartFile("Test_MIB.zip", new FileInputStream(
                 new File(System.getProperties().get("user.dir") + "/src/test/resources/Test_MIB.zip")));
-        mibParserService.processMibZipFile(file);
+        mibParserService.processMibZipFile(file, tenant, username);
     }
 }

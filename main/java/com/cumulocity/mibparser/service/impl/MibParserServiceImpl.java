@@ -49,19 +49,26 @@ import static com.cumulocity.mibparser.utils.MibParserUtil.*;
 public class MibParserServiceImpl implements MibParserService {
 
     @Override
-    public MibUploadResult processMibZipFile(MultipartFile multipartFile) throws IOException {
+    public MibUploadResult processMibZipFile(MultipartFile multipartFile, String tenant, String username) {
         MibLoader mibLoader = new MibLoader();
-        String path = getTempDirectoryPath();
+        String path = getTempDirectoryPath(multipartFile.getOriginalFilename(), tenant, username);
         File parentFile = createTempDirectory(path);
 
         try {
             List<Mib> mibs = extractAndLoadMainMibs(multipartFile.getInputStream(), path, mibLoader);
             return extractMibInformation(mibs);
         } catch (MibLoaderException e) {
-            log.error(MISSING_MIB_DEPENDENCIES);
+            log.error(MISSING_MIB_DEPENDENCIES, e);
             throw new IllegalArgumentException(MISSING_MIB_DEPENDENCIES);
+        } catch (IOException e) {
+            log.error(IO_EXCEPTION_DURING_ZIP_FILE_PROCESSING, e);
+            throw new IllegalArgumentException(IO_EXCEPTION_DURING_ZIP_FILE_PROCESSING);
         } finally {
-            FileUtils.deleteDirectory(parentFile);
+            try {
+                FileUtils.deleteDirectory(parentFile);
+            } catch (IOException e) {
+                log.error(FAILED_TO_DELETE_TMP_DIR, e);
+            }
             mibLoader.unloadAll();
             mibLoader.removeAllDirs();
         }

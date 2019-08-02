@@ -37,8 +37,16 @@ public class MibParserUtil {
         return file;
     }
 
-    public static String getTempDirectoryPath() {
-        return System.getProperty(TMPDIR) + File.separator + TEMP_DIR_NAME + System.currentTimeMillis();
+    public static String getTempDirectoryPath(String filename, String tenant, String username) {
+        StringBuffer buffer = new StringBuffer()
+                .append(System.getProperty(TMPDIR))
+                .append(File.separator)
+                .append(TEMP_DIR_NAME)
+                .append(tenant).append("-")
+                .append(username).append("-")
+                .append(filename).append("-")
+                .append(System.nanoTime());
+        return buffer.toString();
     }
 
     public static List<String> readMainFile(File file) throws IOException {

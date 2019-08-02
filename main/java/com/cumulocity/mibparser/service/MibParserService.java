@@ -26,5 +26,5 @@ import java.io.IOException;
 
 public interface MibParserService {
 
-    MibUploadResult processMibZipFile(MultipartFile file) throws IOException;
+    MibUploadResult processMibZipFile(MultipartFile file, String tenant, String user) throws IOException;
 }

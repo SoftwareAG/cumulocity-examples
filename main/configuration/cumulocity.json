@@ -4,7 +4,7 @@
   "provider": {
     "name": "Cumulocity GmbH"
   },
-  "contextPath":"mibparser",
+  "contextPath": "mibparser",
   "isolation": "MULTI_TENANT",
   "requiredRoles": [
     "ROLE_TENANT_MANAGEMENT_READ",
