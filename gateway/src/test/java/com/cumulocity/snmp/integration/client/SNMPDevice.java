@@ -46,7 +46,6 @@ public class SNMPDevice extends BaseAgent {
         device.sendColdStartNotification();
         createManagedObjects(device);
         log.debug("SNMP Device Started");
-        System.out.println("SNMP Device Started");
 
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override

@@ -188,7 +188,7 @@ public class MainTest extends BaseIntegrationTest {
     @Test
     public void shouldsendV2KnownTrap() {
         //given
-        final ManagedObjectRepresentation deviceType = getDeviceType(Oid);
+        final ManagedObjectRepresentation deviceType = getDeviceType(Oid, false);
         final ManagedObjectRepresentation device = getV2Device(ipAddress, deviceType.getId());
 
         //when
@@ -258,7 +258,7 @@ public class MainTest extends BaseIntegrationTest {
     @Test
     public void shouldCreateMeasurementAfterAddingSnmpV1DeviceSuccessfully() {
         //given
-        final ManagedObjectRepresentation deviceType = getDeviceType("1.3.6.1.4.1.52032.1.1.1.0");
+        final ManagedObjectRepresentation deviceType = getDeviceType("1.3.6.1.4.1.52032.1.1.1.0", false);
         final ManagedObjectRepresentation device = getV1Device(ipAddress, deviceType.getId());
 
         //when
@@ -277,12 +277,14 @@ public class MainTest extends BaseIntegrationTest {
         Assertions.assertThat(deviceTypeAddedEvent).isNotNull();
         Assertions.assertThat(clientDataChangedEvent).isNotNull();
         Assertions.assertThat(measurementAdded).isNotNull();
+        Assert.assertFalse(measurementAdded.getMeasurement().hasProperty("nx_WEA_27ANA1"));
+        Assert.assertFalse(measurementAdded.getMeasurement().hasProperty("nx_WEA_27ANA2"));
     }
 
     @Test
     public void shouldCreateMeasurementAfterAddingSnmpV2DeviceSuccessfully() {
         //given
-        final ManagedObjectRepresentation deviceType = getDeviceType("1.3.6.1.4.1.52032.1.1.1.0");
+        final ManagedObjectRepresentation deviceType = getDeviceType("1.3.6.1.4.1.52032.1.1.1.0", false);
         final ManagedObjectRepresentation device = getV2Device(ipAddress, deviceType.getId());
 
         //when
@@ -301,12 +303,14 @@ public class MainTest extends BaseIntegrationTest {
         Assertions.assertThat(deviceTypeAddedEvent).isNotNull();
         Assertions.assertThat(clientDataChangedEvent).isNotNull();
         Assertions.assertThat(measurementAdded).isNotNull();
+        Assert.assertFalse(measurementAdded.getMeasurement().hasProperty("nx_WEA_27ANA1"));
+        Assert.assertFalse(measurementAdded.getMeasurement().hasProperty("nx_WEA_27ANA2"));
     }
 
     @Test
     public void shouldCreateMeasurementAfterAddingSnmpV3DeviceSuccessfully() {
         //given
-        final ManagedObjectRepresentation deviceType = getDeviceType("1.3.6.1.4.1.52032.1.1.1.0");
+        final ManagedObjectRepresentation deviceType = getDeviceType("1.3.6.1.4.1.52032.1.1.1.0", false);
         final ManagedObjectRepresentation device = getV3Device(ipAddress, deviceType.getId());
 
         //when
@@ -325,6 +329,86 @@ public class MainTest extends BaseIntegrationTest {
         Assertions.assertThat(deviceTypeAddedEvent).isNotNull();
         Assertions.assertThat(clientDataChangedEvent).isNotNull();
         Assertions.assertThat(measurementAdded).isNotNull();
+        Assert.assertFalse(measurementAdded.getMeasurement().hasProperty("nx_WEA_27ANA1"));
+        Assert.assertFalse(measurementAdded.getMeasurement().hasProperty("nx_WEA_27ANA2"));
+    }
+
+    @Test
+    public void shouldCreateMeasurementAfterAddingSnmpV1DeviceSuccessfullyWithStaticFragments() {
+        //given
+        final ManagedObjectRepresentation deviceType = getDeviceType("1.3.6.1.4.1.52032.1.1.1.0", true);
+        final ManagedObjectRepresentation device = getV1Device(ipAddress, deviceType.getId());
+
+        //when
+        final GatewayAddedEvent event = registerAndSyncGateway();
+
+        inventoryMockService.addChildDevice(event.getGateway().getId(), device);
+
+        DeviceAddedEvent deviceAddedEvent = eventWatcher.waitFor(DeviceAddedEvent.class);
+        DeviceTypeAddedEvent deviceTypeAddedEvent = eventWatcher.waitFor(DeviceTypeAddedEvent.class);
+        ClientDataChangedEvent clientDataChangedEvent = eventWatcher.waitFor(ClientDataChangedEvent.class);
+        MeasurementMockService.MeasurementAdded measurementAdded =
+                eventWatcher.waitFor(MeasurementMockService.MeasurementAdded.class);
+
+        //then
+        Assertions.assertThat(deviceAddedEvent).isNotNull();
+        Assertions.assertThat(deviceTypeAddedEvent).isNotNull();
+        Assertions.assertThat(clientDataChangedEvent).isNotNull();
+        Assertions.assertThat(measurementAdded).isNotNull();
+        Assert.assertTrue(measurementAdded.getMeasurement().hasProperty("nx_WEA_27ANA1"));
+        Assert.assertTrue(measurementAdded.getMeasurement().hasProperty("nx_WEA_27ANA2"));
+    }
+
+    @Test
+    public void shouldCreateMeasurementAfterAddingSnmpV2DeviceSuccessfullyWithStaticFragments() {
+        //given
+        final ManagedObjectRepresentation deviceType = getDeviceType("1.3.6.1.4.1.52032.1.1.1.0", true);
+        final ManagedObjectRepresentation device = getV2Device(ipAddress, deviceType.getId());
+
+        //when
+        final GatewayAddedEvent event = registerAndSyncGateway();
+
+        inventoryMockService.addChildDevice(event.getGateway().getId(), device);
+
+        DeviceAddedEvent deviceAddedEvent = eventWatcher.waitFor(DeviceAddedEvent.class);
+        DeviceTypeAddedEvent deviceTypeAddedEvent = eventWatcher.waitFor(DeviceTypeAddedEvent.class);
+        ClientDataChangedEvent clientDataChangedEvent = eventWatcher.waitFor(ClientDataChangedEvent.class);
+        MeasurementMockService.MeasurementAdded measurementAdded =
+                eventWatcher.waitFor(MeasurementMockService.MeasurementAdded.class);
+
+        //then
+        Assertions.assertThat(deviceAddedEvent).isNotNull();
+        Assertions.assertThat(deviceTypeAddedEvent).isNotNull();
+        Assertions.assertThat(clientDataChangedEvent).isNotNull();
+        Assertions.assertThat(measurementAdded).isNotNull();
+        Assert.assertTrue(measurementAdded.getMeasurement().hasProperty("nx_WEA_27ANA1"));
+        Assert.assertTrue(measurementAdded.getMeasurement().hasProperty("nx_WEA_27ANA2"));
+    }
+
+    @Test
+    public void shouldCreateMeasurementAfterAddingSnmpV3DeviceSuccessfullyWithStaticFragments() {
+        //given
+        final ManagedObjectRepresentation deviceType = getDeviceType("1.3.6.1.4.1.52032.1.1.1.0", true);
+        final ManagedObjectRepresentation device = getV3Device(ipAddress, deviceType.getId());
+
+        //when
+        final GatewayAddedEvent event = registerAndSyncGateway();
+
+        inventoryMockService.addChildDevice(event.getGateway().getId(), device);
+
+        DeviceAddedEvent deviceAddedEvent = eventWatcher.waitFor(DeviceAddedEvent.class);
+        DeviceTypeAddedEvent deviceTypeAddedEvent = eventWatcher.waitFor(DeviceTypeAddedEvent.class);
+        ClientDataChangedEvent clientDataChangedEvent = eventWatcher.waitFor(ClientDataChangedEvent.class);
+        MeasurementMockService.MeasurementAdded measurementAdded =
+                eventWatcher.waitFor(MeasurementMockService.MeasurementAdded.class);
+
+        //then
+        Assertions.assertThat(deviceAddedEvent).isNotNull();
+        Assertions.assertThat(deviceTypeAddedEvent).isNotNull();
+        Assertions.assertThat(clientDataChangedEvent).isNotNull();
+        Assertions.assertThat(measurementAdded).isNotNull();
+        Assert.assertTrue(measurementAdded.getMeasurement().hasProperty("nx_WEA_27ANA1"));
+        Assert.assertTrue(measurementAdded.getMeasurement().hasProperty("nx_WEA_27ANA2"));
     }
 
     private GatewayAddedEvent registerAndSyncGateway() {
@@ -340,8 +424,8 @@ public class MainTest extends BaseIntegrationTest {
         return eventWatcher.waitFor(GatewayAddedEvent.class);
     }
 
-    private ManagedObjectRepresentation getDeviceType(String oid) {
-        final List<ManagedObjectRepresentation> registerList = getReisters(oid);
+    private ManagedObjectRepresentation getDeviceType(String oid, boolean withStaticFragments) {
+        final List<ManagedObjectRepresentation> registerList = getRegisters(oid, withStaticFragments);
 
         final ManagedObjectRepresentation managedObject = new ManagedObjectRepresentation();
         managedObject.setProperty("fieldbusType", "snmp");
@@ -406,7 +490,7 @@ public class MainTest extends BaseIntegrationTest {
         return inventoryMockService.store(child);
     }
 
-    private List<ManagedObjectRepresentation> getReisters(String oid) {
+    private List<ManagedObjectRepresentation> getRegisters(String oid, boolean withStaticFragments) {
         final ManagedObjectRepresentation register = new ManagedObjectRepresentation();
         register.setProperty("oid", oid);
         register.setProperty("name", "Test");
@@ -415,6 +499,9 @@ public class MainTest extends BaseIntegrationTest {
         Map<String, Object> measurementMapping = new HashMap<>();
         measurementMapping.put("series", "c8y_test");
         measurementMapping.put("type", "Test");
+        if (withStaticFragments) {
+            measurementMapping.put("staticFragments", new String[]{"nx_WEA_27ANA1", "nx_WEA_27ANA2"});
+        }
         register.setProperty("measurementMapping", measurementMapping);
         List<ManagedObjectRepresentation> registers = new ArrayList<>();
         registers.add(register);

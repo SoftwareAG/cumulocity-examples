@@ -38,7 +38,6 @@ public class MeasurementUnit implements IdProvider {
     }
 
     public void execute() {
-        System.out.println("MeasurementUnit | Measurement :: " + representation);
         measurementApi.create(representation);
     }
 }
