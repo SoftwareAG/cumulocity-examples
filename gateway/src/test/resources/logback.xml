@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<configuration>
-    <include resource="org/springframework/boot/logging/logback/base.xml"/>
-    <logger name="com.cumulocity" level="INFO" />
-    <logger name="org.cometd" level="INFO" />
-    <logger name="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping" level="WARN" />
-    <logger name="org.springframework.web.servlet.DispatcherServlet" level="WARN" />
-</configuration>

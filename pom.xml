@@ -1,47 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <groupId>c8y.agents</groupId>
         <artifactId>c8y-agents</artifactId>
         <version>1005.2.0-SNAPSHOT</version>
     </parent>
-    <artifactId>snmp-agent</artifactId>
 
-    <packaging>pom</packaging>
+    <artifactId>snmp-agent</artifactId>
     <name>Cumulocity :: Agents :: SNMP Agent</name>
-    <description>SNMP to Cumulocity's API</description>
+    <description>Cumulocity SNMP Agent</description>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>server</module>
+        <module>integration-test</module>
+    </modules>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring-boot-dependencies.version>1.5.17.RELEASE</spring-boot-dependencies.version>
-        <mapdb.version>2.0-beta13</mapdb.version>
-        <apache.commons>3.4</apache.commons>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <spring-boot-dependencies.version>2.1.7.RELEASE</spring-boot-dependencies.version>
+        <spring-statemachine-core-version>2.1.3.RELEASE</spring-statemachine-core-version>
     </properties>
-
-    <modules>
-        <module>gateway</module>
-    </modules>
-
-    <build>
-        <plugins>
-            <!-- for Spock -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.19.1</version>
-                <configuration>
-                    <includes>
-                        <include>**/*Test.java</include>
-                        <include>**/*Spec.java</include>
-                    </includes>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 
     <dependencyManagement>
         <dependencies>
+            <!--Spring Boot dependencies-->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
@@ -49,177 +37,24 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-
             <dependency>
-                <groupId>org.mapdb</groupId>
-                <artifactId>mapdb</artifactId>
-                <version>${mapdb.version}</version>
+                <groupId>org.springframework.statemachine</groupId>
+                <artifactId>spring-statemachine-core</artifactId>
+                <version>${spring-statemachine-core-version}</version>
             </dependency>
 
+            <!--Cumulocity dependencies-->
             <dependency>
-                <groupId>org.apache.commons</groupId>
-                <artifactId>commons-lang3</artifactId>
-                <version>${apache.commons}</version>
+                <groupId>com.nsn.cumulocity.clients-java</groupId>
+                <artifactId>microservice-autoconfigure</artifactId>
+                <version>${c8y.microservice-new.version}</version>
             </dependency>
-
-            <dependency>
-                <groupId>com.fasterxml.jackson</groupId>
-                <artifactId>jackson-bom</artifactId>
-                <version>${jackson.version}</version>
-                <scope>import</scope>
-                <type>pom</type>
-            </dependency>
-
             <dependency>
                 <groupId>com.nsn.cumulocity.clients-java</groupId>
                 <artifactId>microservice-dependencies</artifactId>
                 <version>${c8y.microservice-new.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
-            </dependency>
-
-            <dependency>
-                <groupId>com.nsn.cumulocity.clients-java</groupId>
-                <artifactId>microservice-autoconfigure</artifactId>
-                <version>${c8y.microservice-new.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.nsn.cumulocity.clients-java</groupId>
-                <artifactId>java-client</artifactId>
-                <version>${c8y.clients.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <artifactId>rest-representation</artifactId>
-                        <groupId>com.nsn.cumulocity.model</groupId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.nsn.cumulocity.shared-components</groupId>
-                        <artifactId>common-notification</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.nsn.cumulocity.shared-components</groupId>
-                        <artifactId>common-rest</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.codehaus.jackson</groupId>
-                        <artifactId>jackson-core-asl</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.codehaus.jackson</groupId>
-                        <artifactId>jackson-mapper-asl</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.cometd.java</groupId>
-                        <artifactId>cometd-java-common</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.cometd.java</groupId>
-                        <artifactId>bayeux-api</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-
-            <dependency>
-                <groupId>com.nsn.cumulocity.shared-components</groupId>
-                <artifactId>common-rest</artifactId>
-                <version>${c8y.core.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <artifactId>guava</artifactId>
-                        <groupId>com.nsn.cumulocity.dependencies.osgi</groupId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.codehaus.jackson</groupId>
-                        <artifactId>jackson-core-asl</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.codehaus.jackson</groupId>
-                        <artifactId>jackson-mapper-asl</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.validation</groupId>
-                        <artifactId>com.springsource.javax.validation</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.cometd.java</groupId>
-                        <artifactId>cometd-java-common</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.cometd.java</groupId>
-                        <artifactId>bayeux-api</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-
-            <dependency>
-                <groupId>com.nsn.cumulocity.shared-components</groupId>
-                <artifactId>common-notification</artifactId>
-                <version>${c8y.core.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.nsn.cumulocity.model</groupId>
-                <artifactId>core-model</artifactId>
-                <version>${c8y.core.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>com.nsn.cumulocity.dependencies.osgi</groupId>
-                        <artifactId>guava</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-
-            <dependency>
-                <groupId>com.nsn.cumulocity.model</groupId>
-                <artifactId>application-model</artifactId>
-                <version>${c8y.core.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <artifactId>guava</artifactId>
-                        <groupId>com.nsn.cumulocity.dependencies.osgi</groupId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.validation</groupId>
-                        <artifactId>com.springsource.javax.validation</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-
-            <dependency>
-                <groupId>com.nsn.cumulocity.model</groupId>
-                <artifactId>device-capability-model</artifactId>
-                <version>${c8y.core.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <artifactId>guava</artifactId>
-                        <groupId>com.nsn.cumulocity.dependencies.osgi</groupId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.validation</groupId>
-                        <artifactId>com.springsource.javax.validation</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.cometd.java</groupId>
-                        <artifactId>cometd-java-client</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-
-            <dependency>
-                <groupId>com.nsn.cumulocity.model</groupId>
-                <artifactId>rest-representation</artifactId>
-                <version>${c8y.core.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>javax.validation</groupId>
-                        <artifactId>com.springsource.javax.validation</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.nsn.cumulocity.dependencies.osgi</groupId>
-                        <artifactId>guava</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
         </dependencies>
     </dependencyManagement>
