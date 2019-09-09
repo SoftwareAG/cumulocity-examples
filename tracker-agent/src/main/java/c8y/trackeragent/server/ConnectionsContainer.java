@@ -65,7 +65,9 @@ public class ConnectionsContainer {
         if (oldConnectionForImei != null
                 && !oldConnectionForImei.hasChannel(channel)) {
             connectionsPerImei.remove(imei);
-            connections.remove(oldConnectionForImei.getConnectionDetails().getChannel());
+            if (oldConnectionForImei.getReportBuffer().isEmpty())
+                connections.remove(oldConnectionForImei.getConnectionDetails().getChannel());
+            else log.info("Legacy connection will not be removed due to a non empty buffer.");
             oldConnectionForImei.close();
             log.info("Removed and close legacy connection for imei {}.", imei);
         }
@@ -97,8 +99,8 @@ public class ConnectionsContainer {
         Iterator<ActiveConnection> it = connections.values().iterator();
         while (it.hasNext()) {
             ActiveConnection connection = it.next();
-            if (!connection.getConnectionDetails().getChannel().isOpen()) {
-                logger.info("Found closed connection in container: {}, removing it", connection);
+            if (!connection.getConnectionDetails().getChannel().isOpen() && connection.getReportBuffer().isEmpty()) {
+                logger.info("Found closed connection with an empty buffer: {}, removing it", connection);
                 it.remove();
                 remove(connection.getConnectionDetails().getImei());
                 continue;
@@ -126,6 +128,8 @@ public class ConnectionsContainer {
         ActiveConnection activeConnection = connections.get(channel);
         if (activeConnection == null) {
             logger.warn("Connection for channel: {} has been already removed.", channel);
+        } else if (!activeConnection.getReportBuffer().isEmpty()) {
+            logger.info("Active connection will not be removed due to a non empty buffer.");
         } else {
             logger.info("Remove connection: {}", activeConnection);
             connections.remove(channel);
