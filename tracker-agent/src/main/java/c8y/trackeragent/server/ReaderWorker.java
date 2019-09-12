@@ -19,7 +19,6 @@ public class ReaderWorker implements Runnable {
         while (true) {
             IncomingMessage msg = incomingMessageProvider.next();
             if (msg == null) {
-                logger.warn("Nothing left to do.");
                 break;
             }
             logger.debug("Process next message from the queue.");
