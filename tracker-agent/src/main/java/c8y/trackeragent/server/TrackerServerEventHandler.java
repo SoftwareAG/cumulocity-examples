@@ -2,6 +2,8 @@ package c8y.trackeragent.server;
 
 import static java.util.concurrent.Executors.newFixedThreadPool;
 
+import java.util.Arrays;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 
 import javax.annotation.PostConstruct;
@@ -21,21 +23,22 @@ import c8y.trackeragent.tracker.ConnectedTracker;
 import c8y.trackeragent.tracker.ConnectedTrackerFactory;
 
 @Component
-public class TrackerServerEventHandler implements ActiveConnectionProvider {
+public class TrackerServerEventHandler implements IncomingMessageProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(TrackerServerEventHandler.class);
 
     private final ExecutorService workers;
     private final ConnectedTrackerFactory connectedTrackerFactory;    
-    private final ConnectionsContainer connectionsContainer;    
-    private final Object monitor = new Object();
+    private final ConnectionsContainer connectionsContainer;
     private final TrackerConfiguration trackerConfiguration;
+    private final ConcurrentLinkedQueue<IncomingMessage> incomingMessages;
 
     @Autowired
     public TrackerServerEventHandler(ConnectedTrackerFactory connectedTrackerFactory, ConnectionsContainer connectionsContainer, TrackerConfiguration trackerConfiguration) {
         this.connectedTrackerFactory = connectedTrackerFactory;
         this.connectionsContainer = connectionsContainer;
         this.trackerConfiguration = trackerConfiguration;
+        this.incomingMessages = new ConcurrentLinkedQueue<>();
         this.workers = newFixedThreadPool(trackerConfiguration.getNumberOfReaderWorkers());
     }
 
@@ -50,30 +53,35 @@ public class TrackerServerEventHandler implements ActiveConnectionProvider {
 
     public void handle(ReadDataEvent readDataEvent) {
         try {
-            synchronized (monitor) {
-                ActiveConnection connection = getActiveConnection(readDataEvent);
-                connection.getReportBuffer().append(readDataEvent.getData(), readDataEvent.getNumRead());
-                ReaderWorker worker = new ReaderWorker(this);
-                workers.execute(worker);
-            }
+            ActiveConnection connection = getActiveConnection(readDataEvent);
+            incomingMessages.add(
+                    new IncomingMessage(
+                            connection.getConnectionDetails(),
+                            connection.getConnectedTracker(),
+                            Arrays.copyOf(readDataEvent.getData(), readDataEvent.getNumRead()))
+            );
+            ReaderWorker worker = new ReaderWorker(this);
+            workers.execute(worker);
         } catch (Exception e) {
             logger.error("Exception handling read event " + readDataEvent, e);
         }
     }
     
     public void handle(CloseConnectionEvent closeConnectionEvent) {
-        synchronized (monitor) {
+        synchronized (connectionsContainer) {
             connectionsContainer.remove(closeConnectionEvent.getChannel());
         }
     }
 
     private ActiveConnection getActiveConnection(ReadDataEvent readEvent) throws Exception {
-        ActiveConnection connection = connectionsContainer.get(readEvent.getChannel());
-        if (connection == null) {
-            connection = createConnection(readEvent);
-            connectionsContainer.add(connection);
+        synchronized (connectionsContainer) {
+            ActiveConnection connection = connectionsContainer.get(readEvent.getChannel());
+            if (connection == null) {
+                connection = createConnection(readEvent);
+                connectionsContainer.add(connection);
+            }
+            return connection;
         }
-        return connection;
     }
 
     private ActiveConnection createConnection(ReadDataEvent readEvent) throws Exception {
@@ -86,9 +94,7 @@ public class TrackerServerEventHandler implements ActiveConnectionProvider {
     }
 
     @Override
-    public ActiveConnection next() {
-        synchronized (monitor) {
-            return connectionsContainer.next();
-        }
+    public IncomingMessage next() {
+        return incomingMessages.poll();
     }
 }
