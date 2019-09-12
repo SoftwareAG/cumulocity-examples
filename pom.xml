@@ -1,61 +1,127 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-    <parent>
-        <groupId>c8y.agents</groupId>
-        <artifactId>c8y-agents</artifactId>
-        <version>1005.2.0-SNAPSHOT</version>
-    </parent>
+	<modelVersion>4.0.0</modelVersion>
 
-    <artifactId>snmp-agent</artifactId>
-    <name>Cumulocity :: Agents :: SNMP Agent</name>
-    <description>Cumulocity SNMP Agent</description>
-    <packaging>pom</packaging>
+	<parent>
+		<groupId>c8y.agents</groupId>
+		<artifactId>c8y-agents</artifactId>
+		<version>1005.2.0-SNAPSHOT</version>
+	</parent>
 
-    <modules>
-        <module>server</module>
-        <module>integration-test</module>
-    </modules>
+	<name>Cumulocity :: Agents :: SNMP Agent</name>
+	<description>Cumulocity SNMP Agent</description>
+	<artifactId>snmp-agent</artifactId>
+	<packaging>pom</packaging>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <spring-boot-dependencies.version>2.1.7.RELEASE</spring-boot-dependencies.version>
-        <spring-statemachine-core-version>2.1.3.RELEASE</spring-statemachine-core-version>
-    </properties>
+	<modules>
+		<module>snmp-device-gateway</module>
+		<module>integration-test</module>
+	</modules>
 
-    <dependencyManagement>
-        <dependencies>
-            <!--Spring Boot dependencies-->
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-dependencies</artifactId>
-                <version>${spring-boot-dependencies.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.statemachine</groupId>
-                <artifactId>spring-statemachine-core</artifactId>
-                <version>${spring-statemachine-core-version}</version>
-            </dependency>
+	<properties>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<spring.boot.version>2.1.7.RELEASE</spring.boot.version>
+		<cumulocity.core.version>${project.version}</cumulocity.core.version>
+		<c8y.microservice.version>${c8y.microservice-new.version}</c8y.microservice.version>
+	</properties>
 
-            <!--Cumulocity dependencies-->
-            <dependency>
-                <groupId>com.nsn.cumulocity.clients-java</groupId>
-                <artifactId>microservice-autoconfigure</artifactId>
-                <version>${c8y.microservice-new.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.nsn.cumulocity.clients-java</groupId>
-                <artifactId>microservice-dependencies</artifactId>
-                <version>${c8y.microservice-new.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.yaml</groupId>
+					<artifactId>snakeyaml</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+	</dependencies>
+
+	<dependencyManagement>
+		<dependencies>
+			<!--Spring Boot dependencies -->
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-dependencies</artifactId>
+				<version>${spring.boot.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter</artifactId>
+				<version>${spring.boot.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>jul-to-slf4j</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.apache.logging.log4j</groupId>
+						<artifactId>log4j-to-slf4j</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<!-- Cumulocity Dependencies -->
+			<dependency>
+				<groupId>com.nsn.cumulocity.clients-java</groupId>
+				<artifactId>java-client</artifactId>
+				<version>${c8y.clients.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>com.nsn.cumulocity.shared-components</groupId>
+						<artifactId>common-notification</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.cometd.java</groupId>
+						<artifactId>cometd-java-client</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>com.nsn.cumulocity.shared-components</groupId>
+				<artifactId>common-notification</artifactId>
+				<version>${c8y.core.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.cometd.java</groupId>
+						<artifactId>cometd-java-client</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>com.nsn.cumulocity.model</groupId>
+				<artifactId>device-capability-model</artifactId>
+				<version>${c8y.core.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.cometd.java</groupId>
+						<artifactId>cometd-java-client</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>com.nsn.cumulocity.model</groupId>
+				<artifactId>core-model</artifactId>
+				<version>${c8y.core.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.nsn.cumulocity.shared-components</groupId>
+				<artifactId>common-rest</artifactId>
+				<version>${c8y.core.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.nsn.cumulocity.dependencies.osgi</groupId>
+				<artifactId>svenson</artifactId>
+				<version>${svenson.version}-${c8y.core.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 </project>
