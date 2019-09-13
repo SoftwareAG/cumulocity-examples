@@ -65,6 +65,7 @@ public class ConnectionsContainer {
         if (oldConnectionForImei != null
                 && !oldConnectionForImei.hasChannel(channel)) {
             connectionsPerImei.remove(imei);
+            connections.remove(oldConnectionForImei.getConnectionDetails().getChannel());
             oldConnectionForImei.close();
             log.info("Removed and close legacy connection for imei {}.", imei);
         }

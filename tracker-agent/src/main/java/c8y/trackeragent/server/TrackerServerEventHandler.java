@@ -3,7 +3,6 @@ package c8y.trackeragent.server;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 
 import java.util.Arrays;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 
 import javax.annotation.PostConstruct;
@@ -23,7 +22,7 @@ import c8y.trackeragent.tracker.ConnectedTracker;
 import c8y.trackeragent.tracker.ConnectedTrackerFactory;
 
 @Component
-public class TrackerServerEventHandler implements IncomingMessageProvider {
+public class TrackerServerEventHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(TrackerServerEventHandler.class);
 
@@ -31,14 +30,12 @@ public class TrackerServerEventHandler implements IncomingMessageProvider {
     private final ConnectedTrackerFactory connectedTrackerFactory;    
     private final ConnectionsContainer connectionsContainer;
     private final TrackerConfiguration trackerConfiguration;
-    private final ConcurrentLinkedQueue<IncomingMessage> incomingMessages;
 
     @Autowired
     public TrackerServerEventHandler(ConnectedTrackerFactory connectedTrackerFactory, ConnectionsContainer connectionsContainer, TrackerConfiguration trackerConfiguration) {
         this.connectedTrackerFactory = connectedTrackerFactory;
         this.connectionsContainer = connectionsContainer;
         this.trackerConfiguration = trackerConfiguration;
-        this.incomingMessages = new ConcurrentLinkedQueue<>();
         this.workers = newFixedThreadPool(trackerConfiguration.getNumberOfReaderWorkers());
     }
 
@@ -54,13 +51,12 @@ public class TrackerServerEventHandler implements IncomingMessageProvider {
     public void handle(ReadDataEvent readDataEvent) {
         try {
             ActiveConnection connection = getActiveConnection(readDataEvent);
-            incomingMessages.add(
+            ReaderWorker worker = new ReaderWorker(
                     new IncomingMessage(
                             connection.getConnectionDetails(),
                             connection.getConnectedTracker(),
                             Arrays.copyOf(readDataEvent.getData(), readDataEvent.getNumRead()))
             );
-            ReaderWorker worker = new ReaderWorker(this);
             workers.execute(worker);
         } catch (Exception e) {
             logger.error("Exception handling read event " + readDataEvent, e);
@@ -91,10 +87,5 @@ public class TrackerServerEventHandler implements IncomingMessageProvider {
         ConnectionDetails connectionDetails = new ConnectionDetails(trackingProtocol, outWriter,
                 readEvent.getChannel(), connectionsContainer);
         return new ActiveConnection(connectionDetails, connectedTracker);
-    }
-
-    @Override
-    public IncomingMessage next() {
-        return incomingMessages.poll();
     }
 }

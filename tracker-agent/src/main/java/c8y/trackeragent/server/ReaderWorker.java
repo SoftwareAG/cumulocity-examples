@@ -4,29 +4,26 @@ import c8y.trackeragent.utils.ByteHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.validation.constraints.NotNull;
+
 public class ReaderWorker implements Runnable {
 
     private static final Logger logger = LoggerFactory.getLogger(ReaderWorker.class);
 
-    private final IncomingMessageProvider incomingMessageProvider;
+    @NotNull
+    private final IncomingMessage incomingMessage;
 
-    public ReaderWorker(IncomingMessageProvider taskProvider) {
-        this.incomingMessageProvider = taskProvider;
+    public ReaderWorker(IncomingMessage incomingMessage) {
+        this.incomingMessage = incomingMessage;
     }
 
     @Override
     public void run() {
-        while (true) {
-            IncomingMessage msg = incomingMessageProvider.next();
-            if (msg == null) {
-                break;
-            }
-            logger.debug("Process next message from the queue.");
-            try {
-                msg.getConnectedTracker().executeReports(msg.getConnectionDetails(), msg.getMsg());
-            } catch (Exception ex) {
-                logger.error("Error processing connection 0x" + ByteHelper.toHexString(msg.getMsg()) + "!", ex);
-            }
+        logger.debug("Processing {}.", incomingMessage);
+        try {
+            incomingMessage.process();
+        } catch (Exception ex) {
+            logger.error("Error processing {} !", incomingMessage, ex);
         }
     }
 
