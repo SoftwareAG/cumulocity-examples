@@ -93,28 +93,6 @@ public class ConnectionsContainer {
         return connections.values();
     }
 
-    public ActiveConnection next() {
-        Iterator<ActiveConnection> it = connections.values().iterator();
-        while (it.hasNext()) {
-            ActiveConnection connection = it.next();
-            if (!connection.getConnectionDetails().getChannel().isOpen()) {
-                logger.info("Found closed connection in container: {}, removing it", connection);
-                it.remove();
-                remove(connection.getConnectionDetails().getImei());
-                continue;
-            }
-            if (connection.isProcessing()) {
-                continue;
-            }
-            if (connection.getReportBuffer().isEmpty()) {
-                continue;
-            }
-            connection.setProcessing(true);
-            return connection;
-        }
-        return null;
-    }
-
     public void remove(String imei) {
         if (StringUtils.isEmpty(imei)) {
             return;

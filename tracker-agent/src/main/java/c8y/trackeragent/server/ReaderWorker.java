@@ -1,42 +1,30 @@
 package c8y.trackeragent.server;
 
+import c8y.trackeragent.utils.ByteHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.validation.constraints.NotNull;
 
 public class ReaderWorker implements Runnable {
 
     private static final Logger logger = LoggerFactory.getLogger(ReaderWorker.class);
 
-    private final ActiveConnectionProvider connectionProvider;
+    @NotNull
+    private final IncomingMessage incomingMessage;
 
-    public ReaderWorker(ActiveConnectionProvider taskProvider) {
-        this.connectionProvider = taskProvider;
+    public ReaderWorker(IncomingMessage incomingMessage) {
+        this.incomingMessage = incomingMessage;
     }
 
     @Override
     public void run() {
-        while (true) {
-            ActiveConnection connection = connectionProvider.next();
-            if (connection == null) {
-                break;
-            }
-            logger.debug("Process next connection from the queue.");
-            try {
-                process(connection);
-            } catch (Exception ex) {
-                logger.error("Error processing connection " + connection + "!", ex);
-            } finally {
-                connection.setProcessing(false);
-            }
+        logger.debug("Processing {}.", incomingMessage);
+        try {
+            incomingMessage.process();
+        } catch (Exception ex) {
+            logger.error("Error processing {} !", incomingMessage, ex);
         }
-    }
-
-    private void process(ActiveConnection connection) {
-        byte[] data = connection.getReportBuffer().pollReport();
-        if (data == null) {
-            return;
-        }        
-        connection.getConnectedTracker().executeReports(connection.getConnectionDetails(), data);
     }
 
 }
