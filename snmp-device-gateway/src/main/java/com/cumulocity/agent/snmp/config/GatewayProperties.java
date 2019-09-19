@@ -1,99 +1,103 @@
 package com.cumulocity.agent.snmp.config;
 
-import javax.validation.constraints.Pattern;
-
+import lombok.Data;
+import lombok.ToString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 
-import lombok.Data;
-import lombok.ToString;
+import javax.validation.constraints.Pattern;
 
 @Data
 @Configuration
 @PropertySources(value = {
 		@PropertySource(value = "file:${user.home}/.snmp/snmp-agent-gateway.properties", ignoreResourceNotFound = true),
-		@PropertySource(value = "file:/etc/snmp/snmp-agent-gateway.properties", ignoreResourceNotFound = true) })
+		@PropertySource(value = "file:${user.home}/.snmp/snmp-agent-gateway-${spring.profiles.active}.properties", ignoreResourceNotFound = true) })
 public class GatewayProperties {
 
-	@Value("${gateway.identifier}")
-	private String gatewayIdentifier;
-
-	@Value("${gateway.bootstrapFixedDelay:10000}")
-	private int bootstrapFixedDelay;
-
-	@Value("${gateway.availability.interval:10}")
-	private int gatewayAvailabilityInterval;
-
-	@Value(("${gateway.bootstrap.force:false}"))
-	private boolean forcedBootstrap;
-
-	@Value("${C8Y.baseURL}")
-	@Pattern(regexp = "https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)")
-	private String baseUrl;
-
-	@Value("${C8Y.forceInitialHost:true}")
-	private boolean forceInitialHost;
-
-	@Value("${gateway.platform.connectionPool.max:25}")
-	private Integer platformConnectionPoolMax;
-
-	@Value("${gateway.platform.connectionPool.perHost:15}")
-	private Integer platformConnectionPoolPerHost;
-
 	@Autowired
-	private DeviceBootstrapProperties bootstrapProperties;
+	private BootstrapProperties bootstrapProperties;
 
 	@Autowired
 	private SnmpProperties snmpProperties;
 
+
+	@Value("#{'${gateway.identifier:snmp-agent}'.trim()}")
+	private String gatewayIdentifier;
+
+	@Value("#{'${gateway.bootstrapFixedDelay:10000}'.trim()}")
+	private int bootstrapFixedDelay;
+
+	@Value("#{'${gateway.availability.interval:10000}'.trim()}")
+	private int gatewayAvailabilityInterval;
+
+	@Value("#{'${gateway.bootstrap.force:false}'.trim()}")
+	private boolean forcedBootstrap;
+
+	@Value("#{'${C8Y.baseURL:http://developers.cumulocity.com}'.trim()}")
+	@Pattern(regexp = "https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)")
+	private String baseUrl;
+
+	@Value("#{'${C8Y.forceInitialHost:true}'.trim()}")
+	private boolean forceInitialHost;
+
+	@Value("#{'${gateway.platform.connectionPool.max:25}'.trim()}")
+	private Integer platformConnectionPoolMax;
+
+	@Value("#{'${gateway.platform.connectionPool.perHost:15}'.trim()}")
+	private Integer platformConnectionPoolPerHost;
+
+
+
 	@Configuration
 	@Data
 	@ToString(exclude = "password")
-	public class DeviceBootstrapProperties {
+	public class BootstrapProperties {
 
-		@Value("${C8Y.bootstrap.tenant}")
+		@Value("#{'${C8Y.bootstrap.tenant:management}'.trim()}")
 		private String tenantId;
 
-		@Value("${C8Y.bootstrap.user}")
+		@Value("#{'${C8Y.bootstrap.user:devicebootstrap}'.trim()}")
 		private String username;
 
-		@Value("${C8Y.bootstrap.password}")
+		@Value("#{'${C8Y.bootstrap.password:}'.trim()}")
 		private String password;
 
-		@Value("${gateway.bootstrapFixedDelay:10000}")
+		@Value("#{'${gateway.bootstrapFixedDelay:10000}'.trim()}")
 		private Long bootstrapDelay;
 	}
+
+
 
 	@Configuration
 	@Data
 	@ToString
 	public class SnmpProperties {
 
-		@Value("${snmp.trapListener.protocol}")
+		@Value("#{'${snmp.trapListener.protocol:}'.trim()}")
 		private String trapListenerProtocol;
 
-		@Value("${snmp.trapListener.port}")
+		@Value("#{'${snmp.trapListener.port:162}'.trim()}")
 		private int trapListenerPort;
 
-		@Value("${snmp.trapListener.address}")
+		@Value("#{'${snmp.trapListener.address:}'.trim()}")
 		private String trapListenerAddress;
 
-		@Value("${snmp.community.target}")
+		@Value("#{'${snmp.community.target}'.trim()}")
 		private String communityTarget;
 
-		@Value("${snmp.polling.port}")
+		@Value("#{'${snmp.polling.port:161}'.trim()}")
 		private int pollingPort;
 
-		@Value("${snmp.polling.version}")
+		@Value("#{'${snmp.polling.version:0}'.trim()}")
 		private int pollingVersion;
 
-		@Value("${snmp.trapListener.threadPoolSize}")
-		private int trapListenerThreadPoolSize;
-
-		@Value("${snmp.autodiscovery.devicePingTimeoutPeriod}")
+		@Value("#{'${snmp.autodiscovery.devicePingTimeoutPeriod:3}'.trim()}")
 		private int autoDiscoveryDevicePingTimeoutPeriod;
+
+		@Value("#{'${snmp.trapListener.threadPoolSize:10}'.trim()}")
+		private int trapListenerThreadPoolSize;
 	}
 }

@@ -1,33 +1,12 @@
 package com.cumulocity.agent.snmp.bootstrap.service;
 
-import static java.util.Optional.empty;
-import static java.util.Optional.ofNullable;
-
-import c8y.Hardware;
-import c8y.IsDevice;
-import c8y.Mobile;
-import c8y.RequiredAvailability;
-import c8y.SupportedOperations;
-
-import java.util.Objects;
-import java.util.Optional;
-
-import org.apache.commons.httpclient.HttpStatus;
-import org.springframework.beans.factory.BeanCreationException;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.event.EventListener;
-import org.springframework.scheduling.TaskScheduler;
-import org.springframework.stereotype.Service;
-
+import c8y.*;
 import com.cumulocity.agent.snmp.bootstrap.model.BootstrapReadyEvent;
 import com.cumulocity.agent.snmp.bootstrap.model.CredentialsAvailableEvent;
-import com.cumulocity.agent.snmp.bootstrap.model.DeviceCredentials;
 import com.cumulocity.agent.snmp.config.GatewayProperties;
 import com.cumulocity.agent.snmp.platform.config.PlatformProvider;
 import com.cumulocity.agent.snmp.platform.model.PlatformConnectionReadyEvent;
-import com.cumulocity.agent.snmp.repository.DataStore;
+import com.cumulocity.agent.snmp.service.DeviceCredentialsStoreService;
 import com.cumulocity.agent.snmp.utils.Constants;
 import com.cumulocity.model.Agent;
 import com.cumulocity.model.ID;
@@ -38,28 +17,44 @@ import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.identity.IdentityApi;
 import com.cumulocity.sdk.client.inventory.InventoryApi;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.httpclient.HttpStatus;
+import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.stereotype.Service;
+
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.ScheduledFuture;
+
+import static java.util.Optional.empty;
+import static java.util.Optional.ofNullable;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class BootstrapService implements InitializingBean {
 
-	private final TaskScheduler scheduler;
+	private final DeviceCredentialsStoreService deviceCredentialsStoreService;
+
+	private final TaskScheduler taskScheduler;
 
 	private final IdentityApi identityApi;
 
 	private final InventoryApi inventoryApi;
 
-	private final DataStore credentialStore;
-
-	private final GatewayProperties properties;
+	private final GatewayProperties gatewayProperties;
 
 	private final PlatformProvider platformProvider;
 
 	private final ApplicationEventPublisher eventPublisher;
+
+	private ScheduledFuture deviceCredentialsPoller;
 
 	@Override
 	public void afterPropertiesSet() {
@@ -67,27 +62,27 @@ public class BootstrapService implements InitializingBean {
 	}
 
 	@EventListener
-	public void createDeviceIfNotExist(PlatformConnectionReadyEvent platformConnectionReadyEvent) {
-		log.info("Platform connection is ready, creating device if it's not there");
+	private void createDeviceIfNotExist(PlatformConnectionReadyEvent platformConnectionReadyEvent) {
+		log.debug("Platform connection is ready.");
 
 		try {
 			ManagedObjectRepresentation deviceMO;
 
-			ID deviceId = createID(properties.getGatewayIdentifier());
+			ID deviceId = createID(gatewayProperties.getGatewayIdentifier());
 			Optional<ExternalIDRepresentation> existingIdentity = getExternalID(deviceId);
 
 			if (!existingIdentity.isPresent()) {
 				deviceMO = createGatewayManagedObject();
 				createExternalID(deviceId, deviceMO);
-				log.info("Device created with ID: {}", deviceMO.getId().getValue());
+				log.info("Device created with id {}", deviceMO.getId().getValue());
 			} else {
 				GId deviceMoID = existingIdentity.get().getManagedObject().getId();
 				deviceMO = inventoryApi.get(deviceMoID);
-				log.info("Device with ID: {} already present in the platform", deviceMO.getId().getValue());
+				log.info("Device with id {} already present in the platform", deviceMO.getId().getValue());
 
 				if (!platformConnectionReadyEvent.getCurrentUser().equals(deviceMO.getOwner())) {
-					log.error("Current gateway device managed object is owned by another user ({}) , please change it to [{}]. "
-						+ "\n Shutting down platform...", deviceMO.getOwner(), platformConnectionReadyEvent.getCurrentUser());
+					log.error("Current gateway device managed object is owned by another user ({}), change it to [{}]. "
+						+ "\n Shutting down agent...", deviceMO.getOwner(), platformConnectionReadyEvent.getCurrentUser());
 					System.exit(0);
 				}
 			}
@@ -97,8 +92,8 @@ public class BootstrapService implements InitializingBean {
 		} catch (BeanCreationException e) {
 			if (detectInvalidCredentials(e)) {
 				log.error("Invalid device credentials detected! Removing local cached credentials...");
-				credentialStore.remove();
-				log.info("Local credentials removed! Please bootstrap the device agent again. \n Shutting down platform...");
+				deviceCredentialsStoreService.remove();
+				log.info("Local credentials removed! bootstrap the agent again. \n Shutting down the agent...");
 				System.exit(0);
 			}
 
@@ -124,44 +119,55 @@ public class BootstrapService implements InitializingBean {
 	}
 
 	private void scheduleDeviceCredentialsPoll() {
-		scheduler.scheduleWithFixedDelay(() -> {
-			if (platformProvider.isCredentialsAvailable()) {
-				return;
-			}
+		deviceCredentialsPoller = taskScheduler.scheduleWithFixedDelay(() -> {
+//			while(!Thread.currentThread().isInterrupted() && !platformProvider.isCredentialsAvailable()) {
+				try {
+					log.info("Fetching device credentials...");
 
-			log.info("Polling device credentials...");
+					DeviceCredentialsRepresentation deviceCredentials = deviceCredentialsStoreService.fetch();
+					if (deviceCredentials != null && !gatewayProperties.isForcedBootstrap()) {
+						log.info("Device credentials are available locally");
+					} else {
+						log.info("Device credentials are either unavailable locally or bootstrap is forced. Fetching them from the platform...");
+						deviceCredentials = pollDeviceCredentials();
+					}
 
-			DeviceCredentials deviceCredentials;
-			Optional<DeviceCredentials> credentialsOptional = credentialStore.get();
+					if (deviceCredentials != null) {
+						log.info("Obtained device credentials");
 
-			if (credentialsOptional.isPresent() && !properties.isForcedBootstrap()) {
-				log.info("Credentials available locally");
-				deviceCredentials = credentialsOptional.get();
-			} else {
-				log.info("Credentials not available locally or bootstrap is forced, polling from server...");
-				deviceCredentials = pollDeviceCredentials();
-			}
-
-			if (!Objects.isNull(deviceCredentials)) {
-				log.info("Obtained device credentials");
-				eventPublisher.publishEvent(new CredentialsAvailableEvent(deviceCredentials));
-			}
-		}, properties.getBootstrapProperties().getBootstrapDelay());
+						eventPublisher.publishEvent(new CredentialsAvailableEvent(deviceCredentials));
+					}
+					else {
+						Thread.sleep(gatewayProperties.getBootstrapFixedDelay());
+					}
+				} catch(Throwable t) {
+					log.error("Unable to connect to the platform, correct the issue and restart the agent.", t);
+					System.exit(0);
+				}
+//			}
+		}, gatewayProperties.getBootstrapFixedDelay());
 	}
 
-	private DeviceCredentials pollDeviceCredentials() {
-		DeviceCredentials deviceCredentials = null;
-		DeviceCredentialsRepresentation credRep;
+	@EventListener
+	private void stopDeviceCredentialsPoll(CredentialsAvailableEvent credentialsAvailableEvent) {
+		deviceCredentialsPoller.cancel(true);
+	}
+
+	private DeviceCredentialsRepresentation pollDeviceCredentials() {
+		DeviceCredentialsRepresentation deviceCredentials = null;
 
 		try {
-			credRep = platformProvider.getBootstrapPlatform().getDeviceCredentialsApi().pollCredentials(properties.getGatewayIdentifier());
-			deviceCredentials = new DeviceCredentials(credRep.getTenantId(), credRep.getUsername(), credRep.getPassword());
-			credentialStore.store(deviceCredentials);
+			deviceCredentials = platformProvider.getBootstrapPlatform().getDeviceCredentialsApi().pollCredentials(gatewayProperties.getGatewayIdentifier());
+			deviceCredentialsStoreService.store(deviceCredentials);
 		} catch (SDKException e) {
 			if (e.getHttpStatus() == HttpStatus.SC_NOT_FOUND) {
-				log.warn("There is no newDeviceRequest or deviceRequest has not been accepted for device id {}. "
-						+ "Please register device manually under Device Management user interface", properties.getGatewayIdentifier());
+				log.warn("A device with id {} is either not registerd or not accepted. "
+						+ "Register or accept a device with id {}, using Device Management user interface.", gatewayProperties.getGatewayIdentifier(), gatewayProperties.getGatewayIdentifier());
+			} else if(e.getHttpStatus() == HttpStatus.SC_UNAUTHORIZED) {
+				log.error("Unable to connect to the platform as incorrect bootstrap credentials were provided. Update the credentials in file:${user.home}/.snmp/snmp-agent-gateway.gatewayProperties and restart the agent.", e);
+				throw e;
 			} else {
+				log.error("Unable to connect to the platform, correct the issue and restart the agent.", e);
 				throw e;
 			}
 		}
@@ -200,14 +206,14 @@ public class BootstrapService implements InitializingBean {
 		operation.add(Constants.SUPPORTED_OPERATIONS);
 
 		ManagedObjectRepresentation deviceMO = new ManagedObjectRepresentation();
-		deviceMO.setName(properties.getGatewayIdentifier());
+		deviceMO.setName(gatewayProperties.getGatewayIdentifier());
 		deviceMO.setType(Constants.GATEWAY_TYPE);
 		deviceMO.set(new Agent());
 		deviceMO.set(new IsDevice());
 		deviceMO.set(new Hardware());
 		deviceMO.set(new Mobile());
 		deviceMO.set(new Object(), Constants.C8Y_SNMP_GATEWAY);
-		deviceMO.set(new RequiredAvailability(properties.getGatewayAvailabilityInterval()));
+		deviceMO.set(new RequiredAvailability(gatewayProperties.getGatewayAvailabilityInterval()));
 		deviceMO.set(operation);
 
 		return inventoryApi.create(deviceMO);

@@ -1,34 +1,32 @@
 package com.cumulocity.agent.snmp.platform.config;
 
 import com.cumulocity.agent.snmp.bootstrap.model.CredentialsAvailableEvent;
-import com.cumulocity.agent.snmp.bootstrap.model.DeviceCredentials;
 import com.cumulocity.agent.snmp.config.GatewayProperties;
 import com.cumulocity.agent.snmp.platform.model.PlatformConnectionReadyEvent;
 import com.cumulocity.common.utils.ObjectUtils;
 import com.cumulocity.model.authentication.CumulocityBasicCredentials;
+import com.cumulocity.rest.representation.devicebootstrap.DeviceCredentialsRepresentation;
 import com.cumulocity.sdk.client.*;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.Objects;
-
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PlatformProvider implements InitializingBean {
 
-	private Platform platform;
+	private final GatewayProperties gatewayProperties;
 
 	private Platform bootstrapPlatform;
 
-	private final GatewayProperties properties;
+	private Platform platform;
 
 	private final ApplicationEventPublisher eventPublisher;
 
@@ -44,6 +42,15 @@ public class PlatformProvider implements InitializingBean {
 		return bootstrapPlatform;
 	}
 
+	@Override
+	public void afterPropertiesSet() {
+		CumulocityBasicCredentials credentials = CumulocityBasicCredentials.builder()
+				.tenantId(gatewayProperties.getBootstrapProperties().getTenantId())
+				.username(gatewayProperties.getBootstrapProperties().getUsername())
+				.password(gatewayProperties.getBootstrapProperties().getPassword()).build();
+		bootstrapPlatform = createPlatform(credentials);
+	}
+
 	public boolean isCredentialsAvailable() {
 		return !ObjectUtils.isNull(platform);
 	}
@@ -54,44 +61,30 @@ public class PlatformProvider implements InitializingBean {
 			return;
 		}
 
-		log.info("Device credentials available, setting up platform connection");
+		log.info("Device credentials available, setting up a connection to the platform.");
 
-		DeviceCredentials deviceCredentials = credentialsAvailableEvent.getDeviceCredentials();
-		CumulocityBasicCredentials credentials = createCredentials(deviceCredentials);
+		DeviceCredentialsRepresentation deviceCredentials = credentialsAvailableEvent.getDeviceCredentials();
+		CumulocityBasicCredentials credentials = CumulocityBasicCredentials.builder()
+				.tenantId(deviceCredentials.getTenantId())
+				.username(deviceCredentials.getUsername())
+				.password(deviceCredentials.getPassword())
+				.build();
 		platform = createPlatform(credentials);
+
 		configurePlatform((PlatformImpl) platform);
 
 		eventPublisher.publishEvent(new PlatformConnectionReadyEvent(deviceCredentials.getUsername()));
 	}
 
-	@Override
-	public void afterPropertiesSet() {
-		CumulocityBasicCredentials credentials = createCredentials();
-		bootstrapPlatform = createPlatform(credentials);
-	}
-
-	private CumulocityBasicCredentials createCredentials() {
-		GatewayProperties.DeviceBootstrapProperties prop = properties.getBootstrapProperties();
-		return createCredentials(prop.getTenantId(), prop.getUsername(), prop.getPassword());
-	}
-
-	private CumulocityBasicCredentials createCredentials(DeviceCredentials credentials) {
-		return createCredentials(credentials.getTenantId(), credentials.getUsername(), credentials.getPassword());
-	}
-
-	private CumulocityBasicCredentials createCredentials(String tenantId, String username, String password) {
-		return CumulocityBasicCredentials.builder().tenantId(tenantId).username(username).password(password).build();
-	}
-
 	private Platform createPlatform(CumulocityBasicCredentials credentials) {
-		return PlatformBuilder.platform().withBaseUrl(properties.getBaseUrl())
-				.withForceInitialHost(properties.isForceInitialHost()).withCredentials(credentials).build();
+		return PlatformBuilder.platform().withBaseUrl(gatewayProperties.getBaseUrl())
+				.withForceInitialHost(gatewayProperties.isForceInitialHost()).withCredentials(credentials).build();
 	}
 
 	private void configurePlatform(PlatformImpl platform) {
 		platform.setHttpClientConfig(HttpClientConfig.httpConfig()
-				.pool(ConnectionPoolConfig.connectionPool().enabled(true).max(properties.getPlatformConnectionPoolMax())
-						.perHost(properties.getPlatformConnectionPoolPerHost()).build())
+				.pool(ConnectionPoolConfig.connectionPool().enabled(true).max(gatewayProperties.getPlatformConnectionPoolMax())
+						.perHost(gatewayProperties.getPlatformConnectionPoolPerHost()).build())
 				.build());
 	}
 }

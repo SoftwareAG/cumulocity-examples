@@ -31,6 +31,18 @@
 			<artifactId>lombok</artifactId>
 		</dependency>
 
+		<!-- Chronicle-Queue https://github.com/OpenHFT/Chronicle-Queue Dependencies -->
+		<dependency>
+			<groupId>net.openhft</groupId>
+			<artifactId>chronicle-queue</artifactId>
+		</dependency>
+
+		<!-- Chronicle-Map https://github.com/OpenHFT/Chronicle-Map Dependencies -->
+		<dependency>
+			<groupId>net.openhft</groupId>
+			<artifactId>chronicle-map</artifactId>
+		</dependency>
+
 		<!-- Cumulocity Dependencies -->
 		<dependency>
 			<groupId>com.nsn.cumulocity.clients-java</groupId>

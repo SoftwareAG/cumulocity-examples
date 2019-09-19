@@ -1,5 +1,6 @@
 package com.cumulocity.agent.snmp.bootstrap.model;
 
+import com.cumulocity.rest.representation.devicebootstrap.DeviceCredentialsRepresentation;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
@@ -7,5 +8,5 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CredentialsAvailableEvent {
 
-	private final DeviceCredentials deviceCredentials;
+	private final DeviceCredentialsRepresentation deviceCredentials;
 }

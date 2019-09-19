@@ -1,0 +1,36 @@
+package com.cumulocity.agent.snmp.pubsub.subscriber;
+
+import com.cumulocity.agent.snmp.pubsub.service.EventPubSub;
+import com.cumulocity.sdk.client.event.EventApi;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+@Component
+public class EventSubscriber extends Subscriber<EventPubSub> {
+
+    @Autowired
+    private EventApi eventApi;
+
+    @Override
+    public void handleMessage(String message) {
+        eventApi.create(new EventRepresentation(message));
+    }
+
+
+    public static class EventRepresentation extends com.cumulocity.rest.representation.event.EventRepresentation {
+
+        private String jsonString;
+
+        public EventRepresentation() {
+        }
+
+        public EventRepresentation(String jsonString) {
+            this.jsonString = jsonString;
+        }
+
+        @Override
+        public String toJSON() {
+            return jsonString;
+        }
+    }
+}
