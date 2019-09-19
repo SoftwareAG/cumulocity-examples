@@ -17,7 +17,7 @@
 	<packaging>pom</packaging>
 
 	<modules>
-		<module>snmp-device-gateway</module>
+		<module>server</module>
 		<module>integration-test</module>
 	</modules>
 
@@ -26,22 +26,10 @@
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<spring.boot.version>2.1.7.RELEASE</spring.boot.version>
+		<spring-statemachine-core-version>2.1.3.RELEASE</spring-statemachine-core-version>
 		<cumulocity.core.version>${project.version}</cumulocity.core.version>
 		<c8y.microservice.version>${c8y.microservice-new.version}</c8y.microservice.version>
 	</properties>
-
-	<dependencies>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>org.yaml</groupId>
-					<artifactId>snakeyaml</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-	</dependencies>
 
 	<dependencyManagement>
 		<dependencies>
@@ -67,6 +55,25 @@
 						<artifactId>log4j-to-slf4j</artifactId>
 					</exclusion>
 				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.statemachine</groupId>
+				<artifactId>spring-statemachine-core</artifactId>
+				<version>${spring-statemachine-core-version}</version>
+			</dependency>
+
+  			<!-- Chronicle-Queue https://github.com/OpenHFT/Chronicle-Queue Dependencies -->
+			<dependency>
+				<groupId>net.openhft</groupId>
+				<artifactId>chronicle-queue</artifactId>
+				<version>5.17.21</version>
+			</dependency>
+
+			<!-- Chronicle-Map https://github.com/OpenHFT/Chronicle-Map Dependencies -->
+			<dependency>
+				<groupId>net.openhft</groupId>
+				<artifactId>chronicle-map</artifactId>
+				<version>3.17.4</version>
 			</dependency>
 
 			<!-- Cumulocity Dependencies -->
