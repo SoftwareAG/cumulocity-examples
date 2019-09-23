@@ -138,6 +138,20 @@ pipeline {
                         }
                     }
                 }
+				stage('Scan third party dependencies') {
+					when {
+                        anyOf {
+                            equals expected: 'RELEASE', actual: params.build_type;
+                            equals expected: 'HOTFIX', actual: params.build_type
+                        }
+                    }
+					steps {
+						echo "executing scan of third party dependencies"
+						withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
+                            sh "chmod +x .jenkins/scripts/scan_dependencies.sh && .jenkins/scripts/scan_dependencies.sh
+                        }
+					}
+				}
                 stage('Finish release') {
                     when {
                         equals expected: 'RELEASE', actual: params.build_type
