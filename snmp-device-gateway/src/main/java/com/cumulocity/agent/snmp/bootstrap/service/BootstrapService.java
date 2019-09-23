@@ -6,7 +6,6 @@ import com.cumulocity.agent.snmp.bootstrap.model.CredentialsAvailableEvent;
 import com.cumulocity.agent.snmp.config.GatewayProperties;
 import com.cumulocity.agent.snmp.platform.config.PlatformProvider;
 import com.cumulocity.agent.snmp.platform.model.PlatformConnectionReadyEvent;
-import com.cumulocity.agent.snmp.service.DeviceCredentialsStoreService;
 import com.cumulocity.agent.snmp.utils.Constants;
 import com.cumulocity.model.Agent;
 import com.cumulocity.model.ID;
@@ -120,31 +119,26 @@ public class BootstrapService implements InitializingBean {
 
 	private void scheduleDeviceCredentialsPoll() {
 		deviceCredentialsPoller = taskScheduler.scheduleWithFixedDelay(() -> {
-//			while(!Thread.currentThread().isInterrupted() && !platformProvider.isCredentialsAvailable()) {
-				try {
-					log.info("Fetching device credentials...");
+            try {
+                log.info("Fetching device credentials...");
 
-					DeviceCredentialsRepresentation deviceCredentials = deviceCredentialsStoreService.fetch();
-					if (deviceCredentials != null && !gatewayProperties.isForcedBootstrap()) {
-						log.info("Device credentials are available locally");
-					} else {
-						log.info("Device credentials are either unavailable locally or bootstrap is forced. Fetching them from the platform...");
-						deviceCredentials = pollDeviceCredentials();
-					}
+                DeviceCredentialsRepresentation deviceCredentials = deviceCredentialsStoreService.fetch();
+                if (deviceCredentials != null && !gatewayProperties.isForcedBootstrap()) {
+                    log.info("Device credentials are available locally");
+                } else {
+                    log.info("Device credentials are either unavailable locally or bootstrap is forced. Fetching them from the platform...");
+                    deviceCredentials = pollDeviceCredentials();
+                }
 
-					if (deviceCredentials != null) {
-						log.info("Obtained device credentials");
+                if (deviceCredentials != null) {
+                    log.info("Obtained device credentials");
 
-						eventPublisher.publishEvent(new CredentialsAvailableEvent(deviceCredentials));
-					}
-					else {
-						Thread.sleep(gatewayProperties.getBootstrapFixedDelay());
-					}
-				} catch(Throwable t) {
-					log.error("Unable to connect to the platform, correct the issue and restart the agent.", t);
-					System.exit(0);
-				}
-//			}
+                    eventPublisher.publishEvent(new CredentialsAvailableEvent(deviceCredentials));
+                }
+            } catch(Throwable t) {
+                log.error("Unable to connect to the platform, correct the issue and restart the agent.", t);
+                System.exit(0);
+            }
 		}, gatewayProperties.getBootstrapFixedDelay());
 	}
 

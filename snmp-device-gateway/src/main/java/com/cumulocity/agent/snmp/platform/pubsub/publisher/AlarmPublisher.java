@@ -1,6 +1,6 @@
-package com.cumulocity.agent.snmp.pubsub.publisher;
+package com.cumulocity.agent.snmp.platform.pubsub.publisher;
 
-import com.cumulocity.agent.snmp.pubsub.service.AlarmPubSub;
+import com.cumulocity.agent.snmp.platform.pubsub.service.AlarmPubSub;
 import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
 import org.springframework.stereotype.Service;
 

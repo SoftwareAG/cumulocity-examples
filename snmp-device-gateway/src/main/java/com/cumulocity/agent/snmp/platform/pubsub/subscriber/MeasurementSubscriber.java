@@ -1,12 +1,11 @@
-package com.cumulocity.agent.snmp.pubsub.subscriber;
+package com.cumulocity.agent.snmp.platform.pubsub.subscriber;
 
-import com.cumulocity.agent.snmp.pubsub.service.MeasurementPubSub;
+import com.cumulocity.agent.snmp.platform.pubsub.service.MeasurementPubSub;
 import com.cumulocity.sdk.client.measurement.MeasurementApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
-import java.util.stream.Collectors;
 
 @Component
 public class MeasurementSubscriber extends Subscriber<MeasurementPubSub> {
@@ -27,11 +26,11 @@ public class MeasurementSubscriber extends Subscriber<MeasurementPubSub> {
 
     @Override
     public void handleMessage(String message) {
-        measurementApi.create(new MeasurementRepresentation(message));
+        measurementApi.createWithoutResponse(new MeasurementRepresentation(message));
     }
 
     @Override
-    public void handleBulkMessages(Collection<String> messageCollection) {
+    public void handleMessages(Collection<String> messageCollection) {
         measurementApi.createBulkWithoutResponse(new MeasurementCollectionRepresentation(messageCollection));
     }
 
@@ -66,7 +65,7 @@ public class MeasurementSubscriber extends Subscriber<MeasurementPubSub> {
         @Override
         public String toJSON() {
             return "{\"measurements\":["
-                    + jsonStrings.stream().collect(Collectors.joining(","))
+                    + String.join(",", jsonStrings)
                     + "]}";
         }
     }

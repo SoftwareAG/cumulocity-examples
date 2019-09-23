@@ -1,6 +1,6 @@
-package com.cumulocity.agent.snmp.pubsub.subscriber;
+package com.cumulocity.agent.snmp.platform.pubsub.subscriber;
 
-import com.cumulocity.agent.snmp.pubsub.service.AlarmPubSub;
+import com.cumulocity.agent.snmp.platform.pubsub.service.AlarmPubSub;
 import com.cumulocity.sdk.client.alarm.AlarmApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

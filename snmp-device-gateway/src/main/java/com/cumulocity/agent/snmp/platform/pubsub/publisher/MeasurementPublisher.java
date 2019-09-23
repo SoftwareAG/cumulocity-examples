@@ -1,6 +1,6 @@
-package com.cumulocity.agent.snmp.pubsub.publisher;
+package com.cumulocity.agent.snmp.platform.pubsub.publisher;
 
-import com.cumulocity.agent.snmp.pubsub.service.MeasurementPubSub;
+import com.cumulocity.agent.snmp.platform.pubsub.service.MeasurementPubSub;
 import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
 import org.springframework.stereotype.Service;
 

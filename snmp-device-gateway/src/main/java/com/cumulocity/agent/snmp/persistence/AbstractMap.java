@@ -22,7 +22,7 @@ import java.util.function.Function;
  * @param <V> Value
  */
 @Slf4j
-public class AbstractMap<K, V> implements ConcurrentMap<K, V>, AutoCloseable {
+public class AbstractMap<K, V> implements ConcurrentMap<K, V> {
 
     private final String name;
 
@@ -178,7 +178,6 @@ public class AbstractMap<K, V> implements ConcurrentMap<K, V>, AutoCloseable {
         return chronicleMap.merge(key, value, remappingFunction);
     }
 
-    @Override
     public void close() throws Exception {
         log.info("'{}' Map closed.", this.name);
         chronicleMap.close();

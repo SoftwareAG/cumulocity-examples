@@ -1,31 +1,34 @@
-package com.cumulocity.agent.snmp.service;
+package com.cumulocity.agent.snmp.bootstrap.service;
 
+import com.cumulocity.agent.snmp.bootstrap.model.DeviceCredentialsKey;
+import com.cumulocity.agent.snmp.bootstrap.repository.DeviceCredentialsStore;
 import com.cumulocity.agent.snmp.config.GatewayProperties;
-import com.cumulocity.agent.snmp.repository.DeviceCredenialsStore;
 import com.cumulocity.model.JSONBase;
 import com.cumulocity.rest.representation.devicebootstrap.DeviceCredentialsRepresentation;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PreDestroy;
 
-@Service
 @Slf4j
-public class DeviceCredentialsStoreService {
+@Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+class DeviceCredentialsStoreService {
 
     @Autowired
-    private GatewayProperties gatewayProperties;
+    private final GatewayProperties gatewayProperties;
 
     @Autowired
-    private DeviceCredenialsStore deviceCredentialsStore;
+    private final DeviceCredentialsStore deviceCredentialsStore;
 
 
-    public void store(DeviceCredentialsRepresentation credentials) {
+    void store(DeviceCredentialsRepresentation credentials) {
         deviceCredentialsStore.put(createDeviceCredentialsKey(), credentials.toJSON());
     }
 
-    public DeviceCredentialsRepresentation fetch() {
+    DeviceCredentialsRepresentation fetch() {
         String deviceCredentialsJson = deviceCredentialsStore.get(createDeviceCredentialsKey());
         if(deviceCredentialsJson != null) {
             return JSONBase.fromJSON(deviceCredentialsJson, DeviceCredentialsRepresentation.class);
@@ -34,7 +37,7 @@ public class DeviceCredentialsStoreService {
         return null;
     }
 
-    public DeviceCredentialsRepresentation remove() {
+    DeviceCredentialsRepresentation remove() {
         String deviceCredentialsJson = deviceCredentialsStore.remove(createDeviceCredentialsKey());
 
         if(deviceCredentialsJson != null) {
@@ -53,8 +56,8 @@ public class DeviceCredentialsStoreService {
         }
     }
 
-    private DeviceCredenialsStore.DeviceCredentialsKey createDeviceCredentialsKey() {
-        return new DeviceCredenialsStore.DeviceCredentialsKey(
+    private DeviceCredentialsKey createDeviceCredentialsKey() {
+        return new DeviceCredentialsKey(
                 gatewayProperties.getBaseUrl(),
                 gatewayProperties.getBootstrapProperties().getTenantId(),
                 gatewayProperties.getBootstrapProperties().getUsername());

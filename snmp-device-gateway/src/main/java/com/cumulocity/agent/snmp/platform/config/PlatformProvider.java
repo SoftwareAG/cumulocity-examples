@@ -3,8 +3,8 @@ package com.cumulocity.agent.snmp.platform.config;
 import com.cumulocity.agent.snmp.bootstrap.model.CredentialsAvailableEvent;
 import com.cumulocity.agent.snmp.config.GatewayProperties;
 import com.cumulocity.agent.snmp.platform.model.PlatformConnectionReadyEvent;
-import com.cumulocity.common.utils.ObjectUtils;
 import com.cumulocity.model.authentication.CumulocityBasicCredentials;
+import com.cumulocity.rest.representation.BaseResourceRepresentation;
 import com.cumulocity.rest.representation.devicebootstrap.DeviceCredentialsRepresentation;
 import com.cumulocity.sdk.client.*;
 import lombok.RequiredArgsConstructor;
@@ -13,8 +13,10 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
 
+import java.io.InputStream;
 import java.util.Objects;
 
 @Slf4j
@@ -24,14 +26,18 @@ public class PlatformProvider implements InitializingBean {
 
 	private final GatewayProperties gatewayProperties;
 
-	private Platform bootstrapPlatform;
+    private final TaskScheduler taskScheduler;
+
+    private Platform bootstrapPlatform;
 
 	private Platform platform;
 
 	private final ApplicationEventPublisher eventPublisher;
 
-	public Platform getPlatform() {
-		if (!isCredentialsAvailable()) {
+    private volatile boolean isPlatformAvailable = false;
+
+    public Platform getPlatform() {
+		if (platform == null) {
 			throw new IllegalStateException("Credentials are not available yet.");
 		}
 
@@ -51,11 +57,7 @@ public class PlatformProvider implements InitializingBean {
 		bootstrapPlatform = createPlatform(credentials);
 	}
 
-	public boolean isCredentialsAvailable() {
-		return !ObjectUtils.isNull(platform);
-	}
-
-	@EventListener
+    @EventListener
 	public void onCredentialsAvailable(CredentialsAvailableEvent credentialsAvailableEvent) {
 		if (!Objects.isNull(platform)) {
 			return;
@@ -74,15 +76,70 @@ public class PlatformProvider implements InitializingBean {
 		configurePlatform((PlatformImpl) platform);
 
 		eventPublisher.publishEvent(new PlatformConnectionReadyEvent(deviceCredentials.getUsername()));
+
+        startPlatformAvailabilityMonitor();
 	}
 
-	private Platform createPlatform(CumulocityBasicCredentials credentials) {
+    public boolean isPlatformAvailable() {
+        return isPlatformAvailable;
+    }
+
+    public void markPlatfromAsUnavailable() {
+        isPlatformAvailable = false;
+    }
+
+    private void startPlatformAvailabilityMonitor() {
+        taskScheduler.scheduleWithFixedDelay(() -> {
+            if (!isPlatformAvailable) {
+                if(checkPlatformAvailability()) {
+                    isPlatformAvailable = true;
+                }
+                else {
+                    log.info("Platform is unavailable. Waiting for {} seconds before retry.", gatewayProperties.getBootstrapFixedDelay()/1000);
+                }
+            }
+        }, gatewayProperties.getBootstrapFixedDelay());
+    }
+
+    private boolean checkPlatformAvailability() {
+        try {
+            return (this.platform != null && (this.platform.getMeasurementApi() != null));
+        } catch(Throwable t) {
+            log.debug("Platform is unavailable or the device credentials are incorrect.", t);
+        }
+
+        return false;
+    }
+
+    private Platform createPlatform(CumulocityBasicCredentials credentials) {
 		return PlatformBuilder.platform().withBaseUrl(gatewayProperties.getBaseUrl())
 				.withForceInitialHost(gatewayProperties.isForceInitialHost()).withCredentials(credentials).build();
 	}
 
 	private void configurePlatform(PlatformImpl platform) {
-		platform.setHttpClientConfig(HttpClientConfig.httpConfig()
+	    // A custom ResponseMapper is registered to handle the posting of the JSON string based resources
+        // to the Platform as is without needing to parse and convert them into BaseResourceRepresentation
+        ((PlatformParameters) this.platform).setResponseMapper(
+                new ResponseMapper() {
+                    @Override
+                    public CharSequence write(Object o) {
+                        // If the BaseResourceRepresentation object passed is one of the classes defined in
+                        // one of this agent packages, then just call toJSON() method to serialize.
+                        if (o instanceof BaseResourceRepresentation && o.getClass().getName().startsWith("com.cumulocity.agent.snmp")) {
+                            return ((BaseResourceRepresentation) o).toJSON();
+                        }
+
+                        return null;
+                    }
+
+                    @Override
+                    public <T> T read(InputStream inputStream, Class<T> aClass) {
+                        return null;
+                    }
+                }
+        );
+
+        platform.setHttpClientConfig(HttpClientConfig.httpConfig()
 				.pool(ConnectionPoolConfig.connectionPool().enabled(true).max(gatewayProperties.getPlatformConnectionPoolMax())
 						.perHost(gatewayProperties.getPlatformConnectionPoolPerHost()).build())
 				.build());

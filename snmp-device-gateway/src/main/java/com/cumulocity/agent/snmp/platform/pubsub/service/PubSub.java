@@ -1,11 +1,9 @@
-package com.cumulocity.agent.snmp.pubsub.service;
+package com.cumulocity.agent.snmp.platform.pubsub.service;
 
 import com.cumulocity.agent.snmp.persistence.Queue;
-import com.cumulocity.agent.snmp.platform.service.SnmpAgentGatewayService;
-import com.cumulocity.agent.snmp.pubsub.subscriber.Subscriber;
-import com.cumulocity.sdk.client.SDKException;
+import com.cumulocity.agent.snmp.platform.config.PlatformProvider;
+import com.cumulocity.agent.snmp.platform.pubsub.subscriber.Subscriber;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.httpclient.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.TaskScheduler;
 
@@ -29,7 +27,7 @@ public abstract class PubSub<Q extends Queue, S extends Subscriber> {
     private TaskScheduler taskScheduler;
 
     @Autowired
-    private SnmpAgentGatewayService snmpAgentGatewayService;
+    private PlatformProvider platformProvider;
 
     @Autowired
     private Q queue;
@@ -58,7 +56,7 @@ public abstract class PubSub<Q extends Queue, S extends Subscriber> {
             scheduledSubscribers = new ScheduledFuture[subscriptionThreadCount];
             Subscription newSubscription = new Subscription(subscriber);
             for(int i = 0; i< subscriptionThreadCount; i++) {
-                scheduledSubscribers[i] = taskScheduler.scheduleWithFixedDelay(newSubscription, Duration.ofMillis(10 * subscriptionThreadCount));
+                scheduledSubscribers[i] = taskScheduler.scheduleWithFixedDelay(newSubscription, Duration.ofMillis(1));
             }
         }
 
@@ -77,35 +75,30 @@ public abstract class PubSub<Q extends Queue, S extends Subscriber> {
 
         private final S subscriber;
 
-        public Subscription(S subscriber) {
+        private Subscription(S subscriber) {
             this.subscriber = subscriber;
         }
 
         @Override
         public void run() {
-            boolean isBatchingSupported = subscriber.isBatchingSupported();
-            int batchSize = subscriber.getBatchSize();
-
             Collection<String> messagesFromQueue = null;
             String oneMessage = null;
             try {
-                if(!snmpAgentGatewayService.isPlatformAvailable()) {
-                    log.debug("Draining of the '" + queue.getName() + "' Queue is suspended temporarily as the platform is unavailable");
-
-                    snmpAgentGatewayService.waitForPlatformToBeAvailable();
-
+                if(!platformProvider.isPlatformAvailable()) {
+                    log.debug("Draining of the '" + queue.getName() + "' Queue is suspended as the platform is unavailable");
                     return;
                 }
 
                 // TODO: Get the transmitRateInSeconds from the platform
                 long transmitRateInSeconds = 0;
+                int batchSize = subscriber.getBatchSize();
 
-                if(isBatchingSupported && transmitRateInSeconds > 0) {
+                if(subscriber.isBatchingSupported() && transmitRateInSeconds > 0) {
                     while(!Thread.currentThread().isInterrupted()) {
                         messagesFromQueue = new ArrayList<>(subscriber.getBatchSize());
                         int size = queue.drainTo(messagesFromQueue, batchSize);
                         if(size > 0) {
-                            subscriber.handleBulkMessages(messagesFromQueue);
+                            subscriber.onMessages(messagesFromQueue);
                         }
 
                         if(size <= batchSize) {
@@ -119,58 +112,28 @@ public abstract class PubSub<Q extends Queue, S extends Subscriber> {
 
                         oneMessage = queue.dequeue();
                         if (oneMessage != null && !oneMessage.isEmpty()) {
-                            subscriber.handleMessage(oneMessage);
+                            subscriber.onMessage(oneMessage);
                         } else {
                             break;
                         }
                     }
                 }
             } catch(Throwable t) {
-                boolean isExceptionDueToInvalidMessage = false;
-                if(t instanceof SDKException) {
-                    int httpStatus = ((SDKException) t).getHttpStatus();
-                    if (httpStatus >= HttpStatus.SC_BAD_REQUEST && httpStatus < HttpStatus.SC_INTERNAL_SERVER_ERROR
-                            && !(httpStatus == HttpStatus.SC_UNAUTHORIZED || httpStatus == HttpStatus.SC_PAYMENT_REQUIRED || httpStatus == HttpStatus.SC_FORBIDDEN)) {
-                        isExceptionDueToInvalidMessage = true;
-                    }
+                // Unable to publish as the platform is unavailable,
+                // so mark the platform as unavailable and put the message(s) already read, back into the queue.
+
+                log.debug("Marking the platform as unavailable.");
+                platformProvider.markPlatfromAsUnavailable();
+
+                log.error("Failed to publish the contents of '" + queue.getName() + "' Queue to the Platform. May be Platform is unavailable.", t);
+                log.error("Placing the failed messages back in the '" + queue.getName() + "' Queue. " +
+                        "Will be published when Platform is back online again.");
+
+                if(oneMessage != null) {
+                    rollbackMessagesToQueue(Collections.singletonList(oneMessage));
                 }
-
-                if(isExceptionDueToInvalidMessage) {
-                    // If the error is caused by an invalid message which is being processed, we will not be able to do much here.
-                    // Just log the message with the exception details and continue.
-
-                    log.error("Failed to publish the contents of '" + queue.getName() + "' Queue to the Platform.", t);
-
-                    // Log the messages and continue
-                    if(oneMessage != null) {
-                        log.error(oneMessage + " - Skipped publishing this message to the Platform.");
-                    }
-                    else if(messagesFromQueue != null && !messagesFromQueue.isEmpty()) {
-                        for(String oneMessageFromQueue : messagesFromQueue) {
-                            log.error(oneMessage + " - Skipped publishing this message to the Platform.");
-                        }
-                    }
-                }
-                else {
-                    if(!(t instanceof InterruptedException)) {
-                        // Unable to publish as the platform is unavailable,
-                        // so mark the platform as unavailable and put the message(s) already read, back into the queue.
-
-                        log.debug("Marking the platform as unavailable.");
-                        snmpAgentGatewayService.markPlatfromAsUnavailable();
-
-                        log.error("Failed to publish the contents of '" + queue.getName() + "' Queue to the Platform. May be Platform is unavailable.", t);
-                        log.error("Placing the failed messages back in the '" + queue.getName() + "' Queue. " +
-                                "Will be published when Platform is back online again.");
-
-                    }
-
-                    if(oneMessage != null) {
-                        rollbackMessagesToQueue(Collections.singletonList(oneMessage));
-                    }
-                    else if(messagesFromQueue != null && !messagesFromQueue.isEmpty()) {
-                        rollbackMessagesToQueue(messagesFromQueue);
-                    }
+                else if(messagesFromQueue != null && !messagesFromQueue.isEmpty()) {
+                    rollbackMessagesToQueue(messagesFromQueue);
                 }
             }
         }

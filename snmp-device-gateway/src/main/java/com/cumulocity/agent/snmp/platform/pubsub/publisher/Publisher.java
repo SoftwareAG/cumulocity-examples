@@ -1,6 +1,6 @@
-package com.cumulocity.agent.snmp.pubsub.publisher;
+package com.cumulocity.agent.snmp.platform.pubsub.publisher;
 
-import com.cumulocity.agent.snmp.pubsub.service.PubSub;
+import com.cumulocity.agent.snmp.platform.pubsub.service.PubSub;
 import com.cumulocity.rest.representation.BaseResourceRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 

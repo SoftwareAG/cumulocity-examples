@@ -1,4 +1,4 @@
-package com.cumulocity.agent.snmp.pubsub.queue;
+package com.cumulocity.agent.snmp.platform.pubsub.queue;
 
 import com.cumulocity.agent.snmp.config.GatewayProperties;
 import com.cumulocity.agent.snmp.persistence.AbstractQueue;

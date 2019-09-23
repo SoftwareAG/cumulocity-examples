@@ -1,6 +1,6 @@
-package com.cumulocity.agent.snmp.pubsub.publisher;
+package com.cumulocity.agent.snmp.platform.pubsub.publisher;
 
-import com.cumulocity.agent.snmp.pubsub.service.EventPubSub;
+import com.cumulocity.agent.snmp.platform.pubsub.service.EventPubSub;
 import com.cumulocity.rest.representation.event.EventRepresentation;
 import org.springframework.stereotype.Service;
 
