@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="30 seconds">
+	<include resource="org/springframework/boot/logging/logback/defaults.xml" />
+
+	<timestamp key="timestamp" datePattern="yyyyMMdd" />
+
+	<appender name="STDOUT"
+		class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>${CONSOLE_LOG_PATTERN}</pattern>
+			<charset>utf8</charset>
+		</encoder>
+	</appender>
+
+	<appender name="FILE" class="ch.qos.logback.core.FileAppender">
+		<file>${user.home}/.snmp/log/integration-test/snmp-agent-gateway-test-${timestamp}.log
+		</file>
+		<append>true</append>
+		<encoder>
+			<pattern>${FILE_LOG_PATTERN}</pattern>
+		</encoder>
+	</appender>
+
+	<logger name="c8y" level="INFO" />
+	<logger name="com.cumulocity" level="INFO" />
+	<logger name="com.cumulocity.agent.snmp" level="DEBUG" />
+
+	<root level="INFO">
+		<appender-ref ref="STDOUT" />
+		<appender-ref ref="FILE" />
+	</root>
+</configuration>
