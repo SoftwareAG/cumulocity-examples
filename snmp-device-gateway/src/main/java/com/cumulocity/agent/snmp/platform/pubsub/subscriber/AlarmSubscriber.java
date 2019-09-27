@@ -24,7 +24,7 @@ public class AlarmSubscriber extends Subscriber<AlarmPubSub> {
         public AlarmRepresentation() {
         }
 
-        public AlarmRepresentation(String jsonString) {
+        AlarmRepresentation(String jsonString) {
             this.jsonString = jsonString;
         }
 

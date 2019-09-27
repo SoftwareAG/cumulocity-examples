@@ -26,12 +26,12 @@ public class MeasurementSubscriber extends Subscriber<MeasurementPubSub> {
 
     @Override
     public void handleMessage(String message) {
-        measurementApi.createWithoutResponse(new MeasurementRepresentation(message));
+        measurementApi.create(new MeasurementRepresentation(message));
     }
 
     @Override
     public void handleMessages(Collection<String> messageCollection) {
-        measurementApi.createBulkWithoutResponse(new MeasurementCollectionRepresentation(messageCollection));
+        measurementApi.createBulk(new MeasurementCollectionRepresentation(messageCollection));
     }
 
 
@@ -41,7 +41,7 @@ public class MeasurementSubscriber extends Subscriber<MeasurementPubSub> {
         public MeasurementRepresentation() {
         }
 
-        public MeasurementRepresentation(String jsonString) {
+        MeasurementRepresentation(String jsonString) {
             this.jsonString = jsonString;
         }
 
@@ -58,7 +58,7 @@ public class MeasurementSubscriber extends Subscriber<MeasurementPubSub> {
         public MeasurementCollectionRepresentation() {
         }
 
-        public MeasurementCollectionRepresentation(Collection<String> jsonStrings) {
+        MeasurementCollectionRepresentation(Collection<String> jsonStrings) {
             this.jsonStrings = jsonStrings;
         }
 

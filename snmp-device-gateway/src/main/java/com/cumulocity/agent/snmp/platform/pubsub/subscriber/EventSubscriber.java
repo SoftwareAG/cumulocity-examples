@@ -24,7 +24,7 @@ public class EventSubscriber extends Subscriber<EventPubSub> {
         public EventRepresentation() {
         }
 
-        public EventRepresentation(String jsonString) {
+        EventRepresentation(String jsonString) {
             this.jsonString = jsonString;
         }
 
