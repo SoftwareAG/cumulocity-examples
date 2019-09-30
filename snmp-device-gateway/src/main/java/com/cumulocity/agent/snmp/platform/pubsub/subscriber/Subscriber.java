@@ -1,5 +1,6 @@
 package com.cumulocity.agent.snmp.platform.pubsub.subscriber;
 
+import com.cumulocity.agent.snmp.config.ConcurrencyConfiguration;
 import com.cumulocity.agent.snmp.platform.pubsub.service.PubSub;
 import com.cumulocity.sdk.client.SDKException;
 import lombok.extern.slf4j.Slf4j;
@@ -20,16 +21,29 @@ import java.util.Collection;
 public abstract class Subscriber<PS extends PubSub> {
 
     @Autowired
+    ConcurrencyConfiguration concurrencyConfiguration;
+
+    @Autowired
     private PS pubSub;
 
+
+    private long currentTransmitRateInSeconds;
+
+
+    public long getTransmitRateInSeconds() {
+        // TODO: Get the transmitRateInSeconds from the platform
+        return 0;
+    }
 
     public boolean isBatchingSupported() {
         return false;
     }
 
     public int getBatchSize() {
-        return 0;
+        return 200;
     }
+
+    public abstract int getConcurrentSubscriptionsCount();
 
     public void onMessage(String message) {
         try {
@@ -79,12 +93,21 @@ public abstract class Subscriber<PS extends PubSub> {
 
     @PostConstruct
     private void subscribe() {
+        this.currentTransmitRateInSeconds = getTransmitRateInSeconds();
         pubSub.subscribe(this);
     }
 
     @PreDestroy
     private void unsubscribe() {
         pubSub.unsubscribe(this);
+    }
+
+//  TODO: @EventListener
+    private void refreshSubscription(/* TODO: GatewayDataRefreshedEvent */) {
+        if(currentTransmitRateInSeconds != getTransmitRateInSeconds()) {
+            pubSub.unsubscribe(this);
+            pubSub.subscribe(this);
+        }
     }
 
     private boolean isExceptionDueToInvalidMessage(SDKException sdke) {

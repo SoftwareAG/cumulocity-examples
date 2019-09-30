@@ -18,10 +18,9 @@ import java.util.concurrent.ScheduledFuture;
  * which polls on the queue and passes the messages to the subscriber for handling.
  *
  * @param <Q> Queue to PubSub
- * @param <S> Subscriber which handles the messages
  */
 @Slf4j
-public abstract class PubSub<Q extends Queue, S extends Subscriber> {
+public abstract class PubSub<Q extends Queue> {
 
     @Autowired
     private TaskScheduler taskScheduler;
@@ -34,28 +33,22 @@ public abstract class PubSub<Q extends Queue, S extends Subscriber> {
 
     private ScheduledFuture[] scheduledSubscribers;
 
-    public abstract int getSubscriptionThreadCount();
-
     public void publish(String message) {
         queue.enqueue(message);
     }
 
-    public void subscribe(S subscriber) {
+    public void subscribe(Subscriber subscriber) {
 
-        int subscriptionThreadCount = getSubscriptionThreadCount();
-
-        // TODO: Get the transmitRateInSeconds from the platform
-        long transmitRateInSeconds = 0;
-
-        if(transmitRateInSeconds > 0) {
+        if(subscriber.isBatchingSupported() && subscriber.getTransmitRateInSeconds() > 0) {
             scheduledSubscribers = new ScheduledFuture[1];
             Subscription newSubscription = new Subscription(subscriber);
-            scheduledSubscribers[0] = taskScheduler.scheduleWithFixedDelay(newSubscription, Duration.ofSeconds(transmitRateInSeconds));
+            scheduledSubscribers[0] = taskScheduler.scheduleWithFixedDelay(newSubscription, Duration.ofSeconds(subscriber.getTransmitRateInSeconds()));
         }
         else {
-            scheduledSubscribers = new ScheduledFuture[subscriptionThreadCount];
+            int concurrentSubscriptionsCount = subscriber.getConcurrentSubscriptionsCount();
+            scheduledSubscribers = new ScheduledFuture[concurrentSubscriptionsCount];
             Subscription newSubscription = new Subscription(subscriber);
-            for(int i = 0; i< subscriptionThreadCount; i++) {
+            for(int i = 0; i< concurrentSubscriptionsCount; i++) {
                 scheduledSubscribers[i] = taskScheduler.scheduleWithFixedDelay(newSubscription, Duration.ofMillis(1));
             }
         }
@@ -63,7 +56,7 @@ public abstract class PubSub<Q extends Queue, S extends Subscriber> {
         log.debug("{} subscribed to queue {}", subscriber.getClass().getName(), queue.getName());
     }
 
-    public void unsubscribe(S subscriber) {
+    public void unsubscribe(Subscriber subscriber) {
         for(ScheduledFuture oneScheduledSubscriber : scheduledSubscribers) {
             oneScheduledSubscriber.cancel(true);
         }
@@ -73,9 +66,9 @@ public abstract class PubSub<Q extends Queue, S extends Subscriber> {
 
     private final class Subscription implements Runnable {
 
-        private final S subscriber;
+        private final Subscriber subscriber;
 
-        private Subscription(S subscriber) {
+        private Subscription(Subscriber subscriber) {
             this.subscriber = subscriber;
         }
 
@@ -89,11 +82,9 @@ public abstract class PubSub<Q extends Queue, S extends Subscriber> {
                     return;
                 }
 
-                // TODO: Get the transmitRateInSeconds from the platform
-                long transmitRateInSeconds = 0;
                 int batchSize = subscriber.getBatchSize();
 
-                if(subscriber.isBatchingSupported() && transmitRateInSeconds > 0) {
+                if(subscriber.isBatchingSupported() && subscriber.getTransmitRateInSeconds() > 0) {
                     while(!Thread.currentThread().isInterrupted()) {
                         messagesFromQueue = new ArrayList<>(subscriber.getBatchSize());
                         int size = queue.drainTo(messagesFromQueue, batchSize);
@@ -101,7 +92,7 @@ public abstract class PubSub<Q extends Queue, S extends Subscriber> {
                             subscriber.onMessages(messagesFromQueue);
                         }
 
-                        if(size <= batchSize) {
+                        if(size < batchSize) {
                             break;
                         }
                     }

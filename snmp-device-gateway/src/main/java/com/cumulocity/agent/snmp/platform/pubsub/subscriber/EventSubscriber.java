@@ -12,6 +12,11 @@ public class EventSubscriber extends Subscriber<EventPubSub> {
     private EventApi eventApi;
 
     @Override
+    public int getConcurrentSubscriptionsCount() {
+        return concurrencyConfiguration.getSchedulerPoolSize() * 10/100; // 10% of the total threads available for scheduler
+    }
+
+    @Override
     public void handleMessage(String message) {
         eventApi.create(new EventRepresentation(message));
     }

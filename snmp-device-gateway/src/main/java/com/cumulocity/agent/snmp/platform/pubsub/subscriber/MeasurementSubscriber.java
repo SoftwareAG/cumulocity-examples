@@ -25,6 +25,11 @@ public class MeasurementSubscriber extends Subscriber<MeasurementPubSub> {
     }
 
     @Override
+    public int getConcurrentSubscriptionsCount() {
+        return concurrencyConfiguration.getSchedulerPoolSize() * 30/100; // 30% of the total threads available for scheduler
+    }
+
+    @Override
     public void handleMessage(String message) {
         measurementApi.create(new MeasurementRepresentation(message));
     }
