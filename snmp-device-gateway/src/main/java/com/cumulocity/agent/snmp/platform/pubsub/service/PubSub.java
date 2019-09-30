@@ -1,8 +1,9 @@
 package com.cumulocity.agent.snmp.platform.pubsub.service;
 
 import com.cumulocity.agent.snmp.persistence.Queue;
-import com.cumulocity.agent.snmp.platform.config.PlatformProvider;
+import com.cumulocity.agent.snmp.platform.service.PlatformProvider;
 import com.cumulocity.agent.snmp.platform.pubsub.subscriber.Subscriber;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.TaskScheduler;

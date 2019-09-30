@@ -4,7 +4,7 @@ import c8y.*;
 import com.cumulocity.agent.snmp.bootstrap.model.BootstrapReadyEvent;
 import com.cumulocity.agent.snmp.bootstrap.model.CredentialsAvailableEvent;
 import com.cumulocity.agent.snmp.config.GatewayProperties;
-import com.cumulocity.agent.snmp.platform.config.PlatformProvider;
+import com.cumulocity.agent.snmp.platform.service.PlatformProvider;
 import com.cumulocity.agent.snmp.platform.model.PlatformConnectionReadyEvent;
 import com.cumulocity.agent.snmp.utils.Constants;
 import com.cumulocity.model.Agent;
@@ -53,7 +53,7 @@ public class BootstrapService implements InitializingBean {
 
 	private final ApplicationEventPublisher eventPublisher;
 
-	private ScheduledFuture deviceCredentialsPoller;
+	private ScheduledFuture<?> deviceCredentialsPoller;
 
 	@Override
 	public void afterPropertiesSet() {
@@ -170,7 +170,7 @@ public class BootstrapService implements InitializingBean {
 	}
 
 	private ID createID(String identifier) {
-		return new ID(Constants.EXTERNAL_ID_TYPE, identifier);
+		return new ID(Constants.C8Y_EXTERNAL_ID_TYPE, identifier);
 	}
 
 	private Optional<ExternalIDRepresentation> getExternalID(ID id) {
@@ -197,11 +197,11 @@ public class BootstrapService implements InitializingBean {
 
 	private ManagedObjectRepresentation createGatewayManagedObject() {
 		SupportedOperations operation = new SupportedOperations();
-		operation.add(Constants.SUPPORTED_OPERATIONS);
+		operation.add(Constants.C8Y_SUPPORTED_OPERATIONS);
 
 		ManagedObjectRepresentation deviceMO = new ManagedObjectRepresentation();
 		deviceMO.setName(gatewayProperties.getGatewayIdentifier());
-		deviceMO.setType(Constants.GATEWAY_TYPE);
+		deviceMO.setType(Constants.C8Y_SNMP_GATEWAY_TYPE);
 		deviceMO.set(new Agent());
 		deviceMO.set(new IsDevice());
 		deviceMO.set(new Hardware());

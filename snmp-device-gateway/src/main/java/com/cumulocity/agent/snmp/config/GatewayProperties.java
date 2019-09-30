@@ -23,14 +23,13 @@ public class GatewayProperties {
 	@Autowired
 	private SnmpProperties snmpProperties;
 
-
 	@Value("#{'${gateway.identifier:snmp-agent}'.trim()}")
 	private String gatewayIdentifier;
 
 	@Value("#{'${gateway.bootstrapFixedDelay:10000}'.trim()}")
 	private int bootstrapFixedDelay;
 
-	@Value("#{'${gateway.availability.interval:10000}'.trim()}")
+	@Value("#{'${gateway.availability.interval:10}'.trim()}")
 	private int gatewayAvailabilityInterval;
 
 	@Value("#{'${gateway.bootstrap.force:false}'.trim()}")
@@ -49,8 +48,6 @@ public class GatewayProperties {
 	@Value("#{'${gateway.platform.connectionPool.perHost:15}'.trim()}")
 	private Integer platformConnectionPoolPerHost;
 
-
-
 	@Configuration
 	@Data
 	@ToString(exclude = "password")
@@ -64,12 +61,7 @@ public class GatewayProperties {
 
 		@Value("#{'${C8Y.bootstrap.password:}'.trim()}")
 		private String password;
-
-		@Value("#{'${gateway.bootstrapFixedDelay:10000}'.trim()}")
-		private Long bootstrapDelay;
 	}
-
-
 
 	@Configuration
 	@Data
