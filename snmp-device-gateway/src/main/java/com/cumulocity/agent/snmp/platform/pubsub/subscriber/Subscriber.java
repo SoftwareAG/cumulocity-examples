@@ -52,11 +52,8 @@ public abstract class Subscriber<PS extends PubSub> {
             if (isExceptionDueToInvalidMessage(sdke)) {
                 // If the error is caused by an invalid message which is being processed, we will not be able to do much here.
                 // Just log the message with the exception details and continue.
-                log.error("Message published to the platform is invalid.", sdke);
-                log.error("Skipping the processing of the following message");
-
                 // Log the message and return
-                log.error("SKIPPED - " + message);
+                log.error("Skipped publishing the following invalid message to the Platform.\n{}", message, sdke);
             }
             else {
                 throw sdke;
@@ -71,12 +68,9 @@ public abstract class Subscriber<PS extends PubSub> {
             if (isExceptionDueToInvalidMessage(sdke)) {
                 // If the error is caused by an invalid message which is being processed, we will not be able to do much here.
                 // Just log the message with the exception details and continue.
-                log.error("Messages published to the platform are invalid.", sdke);
-                log.error("Skipping the processing of the following messages");
-
                 // Log the messages and return
-                for(String oneMessage:messageCollection) {
-                    log.error("SKIPPED - " + oneMessage);
+                for(String oneMessage : messageCollection) {
+                    log.error("Skipped publishing the following invalid message to the Platform.\n{}", oneMessage, sdke);
                 }
             }
             else {
@@ -107,6 +101,8 @@ public abstract class Subscriber<PS extends PubSub> {
         if(currentTransmitRateInSeconds != getTransmitRateInSeconds()) {
             pubSub.unsubscribe(this);
             pubSub.subscribe(this);
+
+            log.debug("{} refreshed its subscription as the transmit rate changed.", this.getClass().getName());
         }
     }
 

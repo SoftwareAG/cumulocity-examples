@@ -52,7 +52,7 @@ class DeviceCredentialsStoreService {
         try {
             deviceCredentialsStore.close();
         } catch (Exception e) {
-            log.error("Error while closing the '" + deviceCredentialsStore.getName() + "' Map.", e);
+            log.error("Error while closing the '{}' Map.", deviceCredentialsStore.getName(), e);
         }
     }
 

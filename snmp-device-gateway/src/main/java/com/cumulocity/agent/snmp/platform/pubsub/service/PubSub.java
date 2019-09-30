@@ -79,7 +79,7 @@ public abstract class PubSub<Q extends Queue> {
             String oneMessage = null;
             try {
                 if(!platformProvider.isPlatformAvailable()) {
-                    log.debug("Draining of the '" + queue.getName() + "' Queue is suspended as the platform is unavailable");
+                    log.debug("Draining of the '{}' Queue is suspended as the platform is unavailable", queue.getName());
                     return;
                 }
 
@@ -117,9 +117,8 @@ public abstract class PubSub<Q extends Queue> {
                 log.debug("Marking the platform as unavailable.");
                 platformProvider.markPlatfromAsUnavailable();
 
-                log.error("Failed to publish the contents of '" + queue.getName() + "' Queue to the Platform. May be Platform is unavailable.", t);
-                log.error("Placing the failed messages back in the '" + queue.getName() + "' Queue. " +
-                        "Will be published when Platform is back online again.");
+                log.error("Failed to publish the contents of '{}' Queue to the Platform. May be Platform is unavailable." +
+                        "\nPlacing the failed messages back in the Queue. Will be published when Platform is back online again.", queue.getName(), t);
 
                 if(oneMessage != null) {
                     rollbackMessagesToQueue(Collections.singletonList(oneMessage));
@@ -136,8 +135,7 @@ public abstract class PubSub<Q extends Queue> {
                     queue.enqueue(oneMessage);
                 } catch(Throwable t) {
                     // Log this message string and the exception as we can't do much and continue to execute the loop
-                    log.error("Error occurred while placing the message back in the '" + queue.getName() + "' Queue.", t);
-                    log.error(oneMessage + " - Skipped publishing this message to the Platform.");
+                    log.error("Skipped publishing the following message to the Platform, as an error occurred while placing the message back in the '{}' Queue.\n{}", queue.getName(), oneMessage, t);
                 }
             }
         }
