@@ -86,7 +86,7 @@ public abstract class AbstractQueue implements Queue {
             producerQueue.acquireAppender().writeText(message);
             pauser.unpause();
         } catch(Throwable t) {
-            log.error("Enqueue to the '" + this.name + "' Queue, resulted in a timeout.", t);
+            log.error("Enqueue to the '{}' Queue, resulted in a timeout.", this.name, t);
             throw t;
         } finally {
             LOCK_TO_ENSURE_NO_ONE_IS_ACCESSING_THE_QUEUE.readLock().unlock();
@@ -113,7 +113,7 @@ public abstract class AbstractQueue implements Queue {
                 pauser.pause();
             }
         } catch (Throwable t) {
-            log.error("Peek from the '" + this.name + "' Queue, resulted in an unexpected error.", t);
+            log.error("Peek from the '{}' Queue, resulted in an unexpected error.", this.name, t);
 
             returnValue = null;
         } finally {
@@ -146,7 +146,7 @@ public abstract class AbstractQueue implements Queue {
                 pauser.pause();
             }
         } catch (Throwable t) {
-            log.error("Dequeue from the '" + this.name + "' Queue, resulted in an unexpected error. No message dequeued.", t);
+            log.error("Dequeue from the '{}' Queue, resulted in an unexpected error. No message dequeued.", this.name, t);
             documentContext.rollbackOnClose();
 
             returnValue = null;
@@ -195,7 +195,7 @@ public abstract class AbstractQueue implements Queue {
                 pauser.pause();
             }
         } catch (Throwable t) {
-            log.error("Draining of the '" + this.name + "' Queue, resulted in an unexpected error. Returning the messages already drained.", t);
+            log.error("Draining of the '{}' Queue, resulted in an unexpected error. Returning the messages already drained.", this.name, t);
             documentContext.rollbackOnClose();
         } finally {
             documentContext.close();
@@ -259,7 +259,7 @@ public abstract class AbstractQueue implements Queue {
                                     try {
                                         return (Files.readAttributes(fileInTheFolder, BasicFileAttributes.class).creationTime().compareTo(releasedFileCreationTime) < 0);
                                     } catch (IOException ioe) {
-                                        log.error("Unexpected error while cleaning up old store files of the '" + queueName + "' Queue", ioe);
+                                        log.error("Unexpected error while cleaning up old store files of the '{}' Queue", queueName, ioe);
                                         return false;
                                     }
                                 }
@@ -272,11 +272,11 @@ public abstract class AbstractQueue implements Queue {
                                 // Here the exception can be ignored, as the handle to the file being deleted
                                 // may still be held by some other process. This will eventually be deleted
                                 // in subsequent cleanup cycles.
-                                log.trace("Could not remove the old store file '" + fileInTheFolder + "' of the '" + queueName + "' Queue", ioe);
+                                log.trace("Could not remove the old store file '{}' of the '{}' Queue", fileInTheFolder, queueName, ioe);
                             }
                         });
             } catch (IOException ioe) {
-                log.error("Unexpected error while cleaning up old store files of the '" + queueName + "' Queue", ioe);
+                log.error("Unexpected error while cleaning up old store files of the '{}' Queue", queueName, ioe);
             }
         }
     }
