@@ -10,9 +10,12 @@ import java.io.Serializable;
 @EqualsAndHashCode
 @RequiredArgsConstructor
 public final class DeviceCredentialsKey implements Serializable {
-    private final String bootstrapUrl;
 
-    private final String bootstrapTenant;
+	private static final long serialVersionUID = 1388522837251535065L;
 
-    private final String bootstrapUser;
+	private final String bootstrapUrl;
+
+	private final String bootstrapTenant;
+
+	private final String bootstrapUser;
 }

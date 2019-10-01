@@ -85,7 +85,7 @@ public class BootstrapService implements InitializingBean {
 					System.exit(0);
 				}
 			}
-
+			
 			eventPublisher.publishEvent(new BootstrapReadyEvent(deviceMO));
 
 		} catch (BeanCreationException e) {
