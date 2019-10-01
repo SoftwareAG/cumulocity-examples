@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import org.apache.commons.httpclient.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
@@ -21,6 +22,7 @@ import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.inventory.ManagedObjectReferenceCollectionRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectReferenceRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
+import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.inventory.InventoryApi;
 
 import lombok.Getter;
@@ -62,7 +64,7 @@ public class GatewayDataProvider {
 		scheduleGatewayDataRefresh();
 	}
 
-	private void updateGatewayObjects() {
+	protected void updateGatewayObjects() {
 
 		GId id = gatewayDevice.getId();
 		ManagedObjectRepresentation newGatewatDevice = inventoryApi.get(id);
@@ -70,25 +72,29 @@ public class GatewayDataProvider {
 
 		Map<GId, DeviceProtocolManagedObjectWrapper> newDeviceProtocolMap = new HashMap<>();
 		ManagedObjectReferenceCollectionRepresentation deviceCollections = newGatewatDevice.getChildDevices();
-		deviceCollections.forEach(new Consumer<ManagedObjectReferenceRepresentation>() {
-			@Override
-			public void accept(ManagedObjectReferenceRepresentation childDeviceRep) {
-				ManagedObjectRepresentation childDeviceMo = inventoryApi.get(childDeviceRep.getManagedObject().getId());
-				if (childDeviceMo.hasProperty(Constants.C8Y_SNMP_DEVICE)) {
-					DeviceManagedObjectWrapper childDeviceWrapper = new DeviceManagedObjectWrapper(childDeviceMo);
-					String type = childDeviceWrapper.getProperties().getType();
-					if (type != null) {
-						GId deviceProtocolID = getDeviceProtocolID(type);
-						ManagedObjectRepresentation deviceProtocol = inventoryApi.get(deviceProtocolID);
-						newDeviceProtocolMap.put(deviceProtocolID,
-								new DeviceProtocolManagedObjectWrapper(deviceProtocol));
-					} else {
-						log.error("Missing device protocol configuration for the SNMP device {}",
-								childDeviceMo.getName());
-					}
-				}
-			}
-		});
+		deviceCollections.forEach(childDeviceRep -> {
+            try {
+                ManagedObjectRepresentation childDeviceMo = inventoryApi.get(childDeviceRep.getManagedObject().getId());
+                if (childDeviceMo.hasProperty(Constants.C8Y_SNMP_DEVICE)) {
+                    DeviceManagedObjectWrapper childDeviceWrapper = new DeviceManagedObjectWrapper(childDeviceMo);
+                    String type = childDeviceWrapper.getProperties().getType();
+                    if (type != null) {
+                        GId deviceProtocolID = getDeviceProtocolID(type);
+                        ManagedObjectRepresentation deviceProtocol = inventoryApi.get(deviceProtocolID);
+                        newDeviceProtocolMap.put(deviceProtocolID, new DeviceProtocolManagedObjectWrapper(deviceProtocol));
+                    } else {
+                        log.error("Missing device protocol configuration for the SNMP device {}", childDeviceMo.getName());
+                    }
+                }
+            } catch (SDKException sdkException) {
+                if (sdkException.getHttpStatus() == HttpStatus.SC_NOT_FOUND) {
+                    log.error("Unable to find child device object - {} or its device protocol mapping object from platform",
+                            childDeviceRep.getManagedObject().getName());
+                } else {
+                    throw sdkException;
+                }
+            }
+        });
 
 		gatewayDevice = newGatewatDeviceWrapper;
 		currentDeviceProtocolMap = newDeviceProtocolMap;
@@ -96,21 +102,20 @@ public class GatewayDataProvider {
 		eventPublisher.publishEvent(new GatewayDataRefreshedEvent(gatewayDevice));
 	}
 
-	private void scheduleGatewayDataRefresh() {
+	protected void scheduleGatewayDataRefresh() {
 		taskScheduler.scheduleWithFixedDelay(() -> {
 			if (platformProvider.isPlatformAvailable()) {
 				try {
-					System.out.println("Refreshing gateway objects");
 					updateGatewayObjects();
 				} catch (Throwable t) {
 					// Forcefully catching throwable, as we do not want to stop the scheduler on exception.
 					log.error("Unable to refresh gateway managed objects", t);
 				}
 			} else {
-				log.debug("Platform is unavailable. Waiting for {} seconds before retry.",
-						gatewayProperties.getBootstrapFixedDelay() / 1000);
+				log.debug("Platform is unavailable. Waiting for {} minutes before retry.",
+						gatewayProperties.getGatewayObjectRefreshInterval());
 			}
-		}, gatewayProperties.getBootstrapFixedDelay());
+		}, gatewayProperties.getGatewayObjectRefreshInterval());
 	}
 
 	private GId getDeviceProtocolID(String type) {

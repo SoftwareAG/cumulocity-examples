@@ -32,6 +32,9 @@ public class GatewayProperties {
 	@Value("#{'${gateway.availability.interval:10}'.trim()}")
 	private int gatewayAvailabilityInterval;
 
+	@Value("#{'${gateway.objects.refresh.interval:1}'.trim()}")
+	private int gatewayObjectRefreshInterval;
+
 	@Value("#{'${gateway.bootstrap.force:false}'.trim()}")
 	private boolean forcedBootstrap;
 
