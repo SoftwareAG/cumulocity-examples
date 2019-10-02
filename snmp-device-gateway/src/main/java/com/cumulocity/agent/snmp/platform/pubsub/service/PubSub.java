@@ -1,9 +1,8 @@
 package com.cumulocity.agent.snmp.platform.pubsub.service;
 
 import com.cumulocity.agent.snmp.persistence.Queue;
-import com.cumulocity.agent.snmp.platform.service.PlatformProvider;
 import com.cumulocity.agent.snmp.platform.pubsub.subscriber.Subscriber;
-
+import com.cumulocity.agent.snmp.platform.service.PlatformProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.TaskScheduler;
@@ -32,7 +31,7 @@ public abstract class PubSub<Q extends Queue> {
     @Autowired
     private Q queue;
 
-    private ScheduledFuture[] scheduledSubscribers;
+    private ScheduledFuture[] concurrentSubscriptions;
 
     public void publish(String message) {
         queue.enqueue(message);
@@ -41,16 +40,16 @@ public abstract class PubSub<Q extends Queue> {
     public void subscribe(Subscriber subscriber) {
 
         if(subscriber.isBatchingSupported() && subscriber.getTransmitRateInSeconds() > 0) {
-            scheduledSubscribers = new ScheduledFuture[1];
+            concurrentSubscriptions = new ScheduledFuture[1];
             Subscription newSubscription = new Subscription(subscriber);
-            scheduledSubscribers[0] = taskScheduler.scheduleWithFixedDelay(newSubscription, Duration.ofSeconds(subscriber.getTransmitRateInSeconds()));
+            concurrentSubscriptions[0] = taskScheduler.scheduleWithFixedDelay(newSubscription, Duration.ofSeconds(subscriber.getTransmitRateInSeconds()));
         }
         else {
             int concurrentSubscriptionsCount = subscriber.getConcurrentSubscriptionsCount();
-            scheduledSubscribers = new ScheduledFuture[concurrentSubscriptionsCount];
+            concurrentSubscriptions = new ScheduledFuture[concurrentSubscriptionsCount];
             Subscription newSubscription = new Subscription(subscriber);
             for(int i = 0; i< concurrentSubscriptionsCount; i++) {
-                scheduledSubscribers[i] = taskScheduler.scheduleWithFixedDelay(newSubscription, Duration.ofMillis(1));
+                concurrentSubscriptions[i] = taskScheduler.scheduleWithFixedDelay(newSubscription, Duration.ofMillis(1));
             }
         }
 
@@ -58,10 +57,13 @@ public abstract class PubSub<Q extends Queue> {
     }
 
     public void unsubscribe(Subscriber subscriber) {
-        for(ScheduledFuture oneScheduledSubscriber : scheduledSubscribers) {
-            oneScheduledSubscriber.cancel(true);
+        if(concurrentSubscriptions == null) {
+            return;
         }
 
+        for(ScheduledFuture oneConcurrentSubscription : concurrentSubscriptions) {
+            oneConcurrentSubscription.cancel(true);
+        }
         log.debug("{} unsubscribed to queue {}", subscriber.getClass().getName(), queue.getName());
     }
 

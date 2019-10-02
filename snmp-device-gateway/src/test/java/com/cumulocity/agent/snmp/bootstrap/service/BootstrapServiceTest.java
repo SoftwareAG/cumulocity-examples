@@ -1,23 +1,5 @@
 package com.cumulocity.agent.snmp.bootstrap.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.*;
-
-import java.security.Permission;
-
-import org.apache.commons.httpclient.HttpStatus;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.mockito.stubbing.Answer;
-import org.springframework.beans.factory.BeanCreationException;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.scheduling.TaskScheduler;
-import org.springframework.test.util.ReflectionTestUtils;
-
 import com.cumulocity.agent.snmp.bootstrap.model.BootstrapReadyEvent;
 import com.cumulocity.agent.snmp.bootstrap.model.CredentialsAvailableEvent;
 import com.cumulocity.agent.snmp.config.GatewayProperties;
@@ -33,6 +15,23 @@ import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.devicecontrol.DeviceCredentialsApi;
 import com.cumulocity.sdk.client.identity.IdentityApi;
 import com.cumulocity.sdk.client.inventory.InventoryApi;
+import org.apache.commons.httpclient.HttpStatus;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
+import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.test.util.ReflectionTestUtils;
+
+import java.security.Permission;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BootstrapServiceTest {

@@ -17,6 +17,7 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
+import java.time.Duration;
 import java.util.Objects;
 
 @Slf4j
@@ -98,7 +99,7 @@ public class PlatformProvider implements InitializingBean {
                     log.info("Platform is unavailable. Waiting for {} seconds before retry.", gatewayProperties.getBootstrapFixedDelay()/1000);
                 }
             }
-        }, gatewayProperties.getBootstrapFixedDelay());
+        }, Duration.ofMillis(gatewayProperties.getBootstrapFixedDelay()));
     }
 
     private boolean checkPlatformAvailability() {

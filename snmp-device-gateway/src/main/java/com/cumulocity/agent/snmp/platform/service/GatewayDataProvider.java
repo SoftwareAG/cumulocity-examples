@@ -1,16 +1,5 @@
 package com.cumulocity.agent.snmp.platform.service;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Consumer;
-
-import org.apache.commons.httpclient.HttpStatus;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.event.EventListener;
-import org.springframework.scheduling.TaskScheduler;
-import org.springframework.stereotype.Service;
-
 import com.cumulocity.agent.snmp.bootstrap.model.BootstrapReadyEvent;
 import com.cumulocity.agent.snmp.config.GatewayProperties;
 import com.cumulocity.agent.snmp.platform.model.DeviceManagedObjectWrapper;
@@ -20,13 +9,21 @@ import com.cumulocity.agent.snmp.platform.model.GatewayManagedObjectWrapper;
 import com.cumulocity.agent.snmp.utils.Constants;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.inventory.ManagedObjectReferenceCollectionRepresentation;
-import com.cumulocity.rest.representation.inventory.ManagedObjectReferenceRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.inventory.InventoryApi;
-
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.httpclient.HttpStatus;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.stereotype.Service;
+
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -54,13 +51,14 @@ public class GatewayDataProvider {
 	private Map<GId, DeviceProtocolManagedObjectWrapper> currentDeviceProtocolMap = new HashMap<>();
 
 	@EventListener(BootstrapReadyEvent.class)
-	public void handle(BootstrapReadyEvent event) {
+	protected void refreshGatewayObjects(BootstrapReadyEvent event) {
 		log.debug("Obtaining gateway device children and its corresponding device protocol mapping" + event);
 
 		ManagedObjectRepresentation gatewayManagedObject = event.getGatewayDevice();
 		gatewayDevice = new GatewayManagedObjectWrapper(gatewayManagedObject);
 
 		updateGatewayObjects();
+
 		scheduleGatewayDataRefresh();
 	}
 
@@ -88,7 +86,7 @@ public class GatewayDataProvider {
                 }
             } catch (SDKException sdkException) {
                 if (sdkException.getHttpStatus() == HttpStatus.SC_NOT_FOUND) {
-                    log.error("Unable to find child device object - {} or its device protocol mapping object from platform",
+                    log.error("Unable to find child device object {} or its device protocol mapping object from platform",
                             childDeviceRep.getManagedObject().getName());
                 } else {
                     throw sdkException;
@@ -112,10 +110,9 @@ public class GatewayDataProvider {
 					log.error("Unable to refresh gateway managed objects", t);
 				}
 			} else {
-				log.debug("Platform is unavailable. Waiting for {} minutes before retry.",
-						gatewayProperties.getGatewayObjectRefreshInterval());
+				log.debug("Platform is unavailable. Waiting for {} minutes before retrying gateway data refresh.", gatewayProperties.getGatewayObjectRefreshIntervalInMinutes());
 			}
-		}, gatewayProperties.getGatewayObjectRefreshInterval());
+		}, Duration.ofMinutes(gatewayProperties.getGatewayObjectRefreshIntervalInMinutes()));
 	}
 
 	private GId getDeviceProtocolID(String type) {

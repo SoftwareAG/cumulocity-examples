@@ -1,13 +1,15 @@
 package com.cumulocity.agent.snmp.platform.pubsub.subscriber;
 
 import com.cumulocity.agent.snmp.config.ConcurrencyConfiguration;
+import com.cumulocity.agent.snmp.platform.model.GatewayDataRefreshedEvent;
 import com.cumulocity.agent.snmp.platform.pubsub.service.PubSub;
+import com.cumulocity.agent.snmp.platform.service.GatewayDataProvider;
 import com.cumulocity.sdk.client.SDKException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.httpclient.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.EventListener;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.util.Collection;
 
@@ -24,15 +26,17 @@ public abstract class Subscriber<PS extends PubSub> {
     ConcurrencyConfiguration concurrencyConfiguration;
 
     @Autowired
+    private GatewayDataProvider gatewayDataProvider;
+
+    @Autowired
     private PS pubSub;
 
 
-    private long currentTransmitRateInSeconds;
+    private long currentTransmitRateInSeconds = -1;
 
 
     public long getTransmitRateInSeconds() {
-        // TODO: Get the transmitRateInSeconds from the platform
-        return 0;
+        return gatewayDataProvider.getGatewayDevice().getSnmpCommunicationAttrs().getTransmitRate();
     }
 
     public boolean isBatchingSupported() {
@@ -85,25 +89,28 @@ public abstract class Subscriber<PS extends PubSub> {
         throw new UnsupportedOperationException();
     }
 
-    @PostConstruct
+    @EventListener(GatewayDataRefreshedEvent.class)
     private void subscribe() {
-        this.currentTransmitRateInSeconds = getTransmitRateInSeconds();
-        pubSub.subscribe(this);
+        if(currentTransmitRateInSeconds == -1) {
+            pubSub.subscribe(this); // Subscribing for the first time
+
+            this.currentTransmitRateInSeconds = getTransmitRateInSeconds();
+        }
+        else if(isBatchingSupported() && currentTransmitRateInSeconds != getTransmitRateInSeconds()) {
+            // Refresh only when the Transmit Rate is changed for Subscribers supporting batching
+            pubSub.unsubscribe(this);
+
+            pubSub.subscribe(this);
+
+            this.currentTransmitRateInSeconds = getTransmitRateInSeconds();
+
+            log.debug("{} refreshed its subscription as the transmit rate changed.", this.getClass().getName());
+        }
     }
 
     @PreDestroy
     private void unsubscribe() {
         pubSub.unsubscribe(this);
-    }
-
-//  TODO: @EventListener
-    private void refreshSubscription(/* TODO: GatewayDataRefreshedEvent */) {
-        if(currentTransmitRateInSeconds != getTransmitRateInSeconds()) {
-            pubSub.unsubscribe(this);
-            pubSub.subscribe(this);
-
-            log.debug("{} refreshed its subscription as the transmit rate changed.", this.getClass().getName());
-        }
     }
 
     private boolean isExceptionDueToInvalidMessage(SDKException sdke) {

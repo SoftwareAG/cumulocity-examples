@@ -9,5 +9,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public final class GatewayDataRefreshedEvent {
 
-	private GatewayManagedObjectWrapper gatewayDeviceMo;
+	private GatewayManagedObjectWrapper gatewayDeviceManagedObject;
 }

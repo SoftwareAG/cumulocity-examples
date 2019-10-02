@@ -1,26 +1,5 @@
 package com.cumulocity.agent.snmp.platform.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.commons.httpclient.HttpStatus;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.scheduling.TaskScheduler;
-
 import com.cumulocity.agent.snmp.bootstrap.model.BootstrapReadyEvent;
 import com.cumulocity.agent.snmp.config.GatewayProperties;
 import com.cumulocity.agent.snmp.platform.model.GatewayDataRefreshedEvent;
@@ -31,6 +10,26 @@ import com.cumulocity.rest.representation.inventory.ManagedObjectReferenceRepres
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.inventory.InventoryApi;
+import org.apache.commons.httpclient.HttpStatus;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.scheduling.TaskScheduler;
+
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GatewayDataProviderTest {
@@ -64,7 +63,7 @@ public class GatewayDataProviderTest {
 
 		when(inventoryApi.get(any())).thenReturn(gatewayDeviceMo);
 
-		gatewayDataprovider.handle(event);
+		gatewayDataprovider.refreshGatewayObjects(event);
 
 		verify(gatewayDataprovider).updateGatewayObjects();
 		verify(eventPublisher).publishEvent(any(GatewayDataRefreshedEvent.class));
@@ -78,13 +77,13 @@ public class GatewayDataProviderTest {
 		gatewayDeviceMo.setChildDevices(childDevices);
 		BootstrapReadyEvent event = new BootstrapReadyEvent(gatewayDeviceMo);
 
-		when(properties.getGatewayObjectRefreshInterval()).thenReturn(2);
+		when(properties.getGatewayObjectRefreshIntervalInMinutes()).thenReturn(2);
 		when(inventoryApi.get(any())).thenReturn(gatewayDeviceMo);
 
-		gatewayDataprovider.handle(event);
+		gatewayDataprovider.refreshGatewayObjects(event);
 
 		verify(gatewayDataprovider, times(1)).scheduleGatewayDataRefresh();
-		verify(taskScheduler).scheduleWithFixedDelay(any(Runnable.class), eq(2L));
+		verify(taskScheduler).scheduleWithFixedDelay(any(Runnable.class), eq(Duration.ofMinutes(2)));
 	}
 
 	@Test
@@ -125,7 +124,7 @@ public class GatewayDataProviderTest {
 		assertNull(gatewayDataprovider.getGatewayDevice());
 		assertEquals(gatewayDataprovider.getCurrentDeviceProtocolMap().size(), 0);
 
-		gatewayDataprovider.handle(event);
+		gatewayDataprovider.refreshGatewayObjects(event);
 
 		assertNotNull(gatewayDataprovider.getGatewayDevice());
 		assertEquals(gatewayDataprovider.getCurrentDeviceProtocolMap().size(), 1);
@@ -169,7 +168,7 @@ public class GatewayDataProviderTest {
 		assertNull(gatewayDataprovider.getGatewayDevice());
 		assertEquals(gatewayDataprovider.getCurrentDeviceProtocolMap().size(), 0);
 
-		gatewayDataprovider.handle(event);
+		gatewayDataprovider.refreshGatewayObjects(event);
 
 		assertEquals(gatewayDataprovider.getCurrentDeviceProtocolMap().size(), 0);
 	}

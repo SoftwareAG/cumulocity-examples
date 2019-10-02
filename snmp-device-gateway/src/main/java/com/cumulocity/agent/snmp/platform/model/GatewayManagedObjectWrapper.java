@@ -1,15 +1,14 @@
 package com.cumulocity.agent.snmp.platform.model;
 
-import java.util.List;
-import java.util.Map;
-
 import com.cumulocity.agent.snmp.utils.Constants;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Getter
@@ -56,10 +55,10 @@ public class GatewayManagedObjectWrapper extends AbstractManagedObjectWrapper {
 
 		private String ipRange;
 
-		private int pollingRate;
+		private long pollingRate;
 
-		private int transmitRate;
+		private long transmitRate;
 
-		private int autoDiscoveryInterval;
+		private long autoDiscoveryInterval;
 	}
 }
