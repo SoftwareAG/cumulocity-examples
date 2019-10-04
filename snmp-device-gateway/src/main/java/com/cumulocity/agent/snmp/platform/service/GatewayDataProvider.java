@@ -1,6 +1,5 @@
 package com.cumulocity.agent.snmp.platform.service;
 
-import com.cumulocity.agent.snmp.bootstrap.model.BootstrapReadyEvent;
 import com.cumulocity.agent.snmp.config.GatewayProperties;
 import com.cumulocity.agent.snmp.platform.model.DeviceManagedObjectWrapper;
 import com.cumulocity.agent.snmp.platform.model.DeviceProtocolManagedObjectWrapper;
@@ -17,7 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.httpclient.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 
@@ -50,20 +48,16 @@ public class GatewayDataProvider {
 	@Getter
 	private Map<GId, DeviceProtocolManagedObjectWrapper> currentDeviceProtocolMap = new HashMap<>();
 
-	@EventListener(BootstrapReadyEvent.class)
-	protected void refreshGatewayObjects(BootstrapReadyEvent event) {
-		log.debug("Obtaining gateway device children and its corresponding device protocol mapping" + event);
-
-		ManagedObjectRepresentation gatewayManagedObject = event.getGatewayDevice();
+	public void updateGatewayObjects(ManagedObjectRepresentation gatewayManagedObject) {
 		gatewayDevice = new GatewayManagedObjectWrapper(gatewayManagedObject);
 
-		updateGatewayObjects();
+		log.debug("Obtaining gateway device children and its corresponding device protocol mapping");
+		refreshGatewayObjects();
 
 		scheduleGatewayDataRefresh();
 	}
 
-	protected void updateGatewayObjects() {
-
+	protected void refreshGatewayObjects() {
 		GId id = gatewayDevice.getId();
 		ManagedObjectRepresentation newGatewatDevice = inventoryApi.get(id);
 		GatewayManagedObjectWrapper newGatewatDeviceWrapper = new GatewayManagedObjectWrapper(newGatewatDevice);
@@ -94,17 +88,23 @@ public class GatewayDataProvider {
             }
         });
 
-		gatewayDevice = newGatewatDeviceWrapper;
-		currentDeviceProtocolMap = newDeviceProtocolMap;
-
-		eventPublisher.publishEvent(new GatewayDataRefreshedEvent(gatewayDevice));
+		synchronized (gatewayDevice) {
+			gatewayDevice = newGatewatDeviceWrapper;
+			currentDeviceProtocolMap = newDeviceProtocolMap;
+		}
 	}
 
 	protected void scheduleGatewayDataRefresh() {
 		taskScheduler.scheduleWithFixedDelay(() -> {
 			if (platformProvider.isPlatformAvailable()) {
 				try {
-					updateGatewayObjects();
+					log.debug("Refreshing gateway managed objects...");
+
+					refreshGatewayObjects();
+
+					eventPublisher.publishEvent(new GatewayDataRefreshedEvent(gatewayDevice));
+
+					log.debug("Refreshing gateway managed objects completed.");
 				} catch (Throwable t) {
 					// Forcefully catching throwable, as we do not want to stop the scheduler on exception.
 					log.error("Unable to refresh gateway managed objects", t);
