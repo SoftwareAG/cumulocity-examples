@@ -4,6 +4,7 @@ import com.cumulocity.agent.snmp.bootstrap.model.BootstrapReadyEvent;
 import com.cumulocity.agent.snmp.bootstrap.model.CredentialsAvailableEvent;
 import com.cumulocity.agent.snmp.config.GatewayProperties;
 import com.cumulocity.agent.snmp.platform.model.PlatformConnectionReadyEvent;
+import com.cumulocity.agent.snmp.platform.service.GatewayDataProvider;
 import com.cumulocity.agent.snmp.platform.service.PlatformProvider;
 import com.cumulocity.agent.snmp.utils.Constants;
 import com.cumulocity.model.idtype.GId;
@@ -31,6 +32,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.security.Permission;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -53,6 +55,9 @@ public class BootstrapServiceTest {
 
 	@Mock
 	private PlatformProvider platformProvider;
+
+	@Mock
+	private GatewayDataProvider gatewayDataProvider;
 
 	@Mock
 	private DeviceCredentialsStoreService dataStore;
@@ -114,8 +119,8 @@ public class BootstrapServiceTest {
 		verify(deviceCredentialsApi).pollCredentials("gateway#1");
 		verify(eventPublisher).publishEvent(any(CredentialsAvailableEvent.class));
 		verify(dataStore).store(argThat(object -> "test".equals(deviceCredentials.getTenantId())
-                && "user".equals(deviceCredentials.getUsername())
-                && "password".equals(deviceCredentials.getPassword())));
+				&& "user".equals(deviceCredentials.getUsername())
+				&& "password".equals(deviceCredentials.getPassword())));
 	}
 
 	@Test
@@ -142,8 +147,8 @@ public class BootstrapServiceTest {
 		verify(deviceCredentialsApi).pollCredentials("gateway#1");
 		verify(eventPublisher).publishEvent(any(CredentialsAvailableEvent.class));
 		verify(dataStore).store(argThat(object -> "test".equals(deviceCredentials.getTenantId())
-                && "user".equals(deviceCredentials.getUsername())
-                && "password".equals(deviceCredentials.getPassword())));
+				&& "user".equals(deviceCredentials.getUsername())
+				&& "password".equals(deviceCredentials.getPassword())));
 	}
 
 	@Test
@@ -196,6 +201,29 @@ public class BootstrapServiceTest {
 
 		verify(inventoryApi, times(1)).get(deviceMO.getId());
 		verify(eventPublisher).publishEvent(any(BootstrapReadyEvent.class));
+	}
+
+	@Test
+	public void shouldUpdateGatewayObjectOnPlatformConnectionReadyEvent() {
+		PlatformConnectionReadyEvent event = new PlatformConnectionReadyEvent("device_SnmpTest");
+		ManagedObjectRepresentation deviceMO = new ManagedObjectRepresentation();
+		deviceMO.setName("gateway#1");
+		deviceMO.setType(Constants.C8Y_SNMP_GATEWAY_TYPE);
+		deviceMO.setId(new GId("123"));
+		deviceMO.setOwner("device_SnmpTest");
+
+		ExternalIDRepresentation externalId = new ExternalIDRepresentation();
+		externalId.setExternalId("gateway#1");
+		externalId.setType(Constants.C8Y_EXTERNAL_ID_TYPE);
+		externalId.setManagedObject(deviceMO);
+
+		when(properties.getGatewayIdentifier()).thenReturn("gateway#1");
+		when(identityApi.getExternalId(any())).thenReturn(externalId);
+		when(inventoryApi.get(deviceMO.getId())).thenReturn(deviceMO);
+
+		ReflectionTestUtils.invokeMethod(bootstrapService, "createDeviceIfNotExist", event);
+
+		verify(gatewayDataProvider).updateGatewayObjects(any());
 	}
 
 	@Test
