@@ -30,26 +30,21 @@ public class DeviceCredentialsStoreTest {
 
     @Before
     public void setUp() {
-        Mockito.when(gatewayProperties.getGatewayIdentifier()).thenReturn("snmp-agent-test");
-        deviceCredentialsStore = Mockito.spy(new DeviceCredentialsStore(gatewayProperties));
-
         persistentFilePath = Paths.get(
                 System.getProperty("user.home"),
                 ".snmp",
-                gatewayProperties.getGatewayIdentifier().toLowerCase(),
+                this.getClass().getSimpleName().toLowerCase(),
                 "chronicle",
                 "maps",
                 "device-credentials-store.dat");
+
+        Mockito.when(gatewayProperties.getGatewayIdentifier()).thenReturn(this.getClass().getSimpleName());
+        deviceCredentialsStore = Mockito.spy(new DeviceCredentialsStore(gatewayProperties));
     }
 
     @After
     public void tearDown() {
-        try {
-            deviceCredentialsStore.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail(e.getMessage());
-        }
+        deviceCredentialsStore.close();
 
         persistentFilePath.toFile().delete();
     }
@@ -321,7 +316,7 @@ public class DeviceCredentialsStoreTest {
     }
 
     private DeviceCredentialsKey createDeviceCredentialsKey(String suffix) {
-        return new DeviceCredentialsKey("http://developers.cumulocity.com_" + suffix, "TENANT_" + suffix, "USER_" + suffix);
+        return new DeviceCredentialsKey("http://developers.cumulocity.com." + suffix, "TENANT_" + suffix, "USER_" + suffix);
     }
 
     private String createValue(String suffix) {

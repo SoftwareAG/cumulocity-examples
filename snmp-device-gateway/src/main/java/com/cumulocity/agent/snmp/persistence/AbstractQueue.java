@@ -26,16 +26,18 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 @Slf4j
 public abstract class AbstractQueue implements Queue {
 
-    private String name;
+    private final String name;
+    private final File persistenceFolder;
 
-    private ChronicleQueue producerQueue;
-    private ChronicleQueue consumerQueue;
-    private ExcerptTailer tailer;
+    private final ChronicleQueue producerQueue;
+    private final ChronicleQueue consumerQueue;
+    private final ExcerptTailer tailer;
 
-    private ReadWriteLock LOCK_TO_ENSURE_NO_ONE_IS_ACCESSING_THE_QUEUE = new ReentrantReadWriteLock(true);
+    private final ReadWriteLock LOCK_TO_ENSURE_NO_ONE_IS_ACCESSING_THE_QUEUE = new ReentrantReadWriteLock(true);
+    private final Pauser pauser = Pauser.balanced();
+
     private boolean isClosed = false;
 
-    private Pauser pauser = Pauser.balanced();
 
 
     public AbstractQueue(String queueName, File persistenceFolder) {
@@ -44,9 +46,13 @@ public abstract class AbstractQueue implements Queue {
         }
         this.name = queueName;
 
+        if (persistenceFolder == null) {
+            throw new NullPointerException("persistenceFolder");
+        }
         if(!persistenceFolder.exists()) {
             persistenceFolder.mkdirs();
         }
+        this.persistenceFolder = persistenceFolder;
 
         log.info("Creating/Loading '{}' Queue, backed by the folder '{}'", this.name, persistenceFolder.getPath());
 
@@ -72,13 +78,18 @@ public abstract class AbstractQueue implements Queue {
         return this.name;
     }
 
+    public File getPersistenceFolder() {
+        return this.persistenceFolder;
+    }
+
     @Override
     public void enqueue(String message) {
-        if(isClosed) {
-            throw new IllegalStateException("Cannot call enqueue after the '" + this.name + "' Queue is closed.");
-        }
         if (message == null) {
             throw new NullPointerException("message");
+        }
+
+        if(isClosed) {
+            throw new IllegalStateException("Cannot call enqueue after the '" + this.name + "' Queue is closed.");
         }
 
         LOCK_TO_ENSURE_NO_ONE_IS_ACCESSING_THE_QUEUE.readLock().lock();
@@ -102,8 +113,10 @@ public abstract class AbstractQueue implements Queue {
         String returnValue = null;
 
         LOCK_TO_ENSURE_NO_ONE_IS_ACCESSING_THE_QUEUE.readLock().lock();
-        DocumentContext documentContext = tailer.readingDocument();
+
+        DocumentContext documentContext = null;
         try {
+            documentContext = tailer.readingDocument();
             if(documentContext.isPresent()) {
                 pauser.reset();
 
@@ -117,8 +130,10 @@ public abstract class AbstractQueue implements Queue {
 
             returnValue = null;
         } finally {
-            documentContext.rollbackOnClose();
-            documentContext.close();
+            if(documentContext != null) {
+                documentContext.rollbackOnClose();
+                documentContext.close();
+            }
 
             LOCK_TO_ENSURE_NO_ONE_IS_ACCESSING_THE_QUEUE.readLock().unlock();
         }
@@ -135,8 +150,10 @@ public abstract class AbstractQueue implements Queue {
         String returnValue = null;
 
         LOCK_TO_ENSURE_NO_ONE_IS_ACCESSING_THE_QUEUE.readLock().lock();
-        DocumentContext documentContext = tailer.readingDocument();
+
+        DocumentContext documentContext = null;
         try {
+            documentContext = tailer.readingDocument();
             if(documentContext.isPresent()) {
                 pauser.reset();
 
@@ -147,11 +164,15 @@ public abstract class AbstractQueue implements Queue {
             }
         } catch (Throwable t) {
             log.error("Dequeue from the '{}' Queue, resulted in an unexpected error. No message dequeued.", this.name, t);
-            documentContext.rollbackOnClose();
+            if(documentContext != null) {
+                documentContext.rollbackOnClose();
+            }
 
             returnValue = null;
         } finally {
-            documentContext.close();
+            if(documentContext != null) {
+                documentContext.close();
+            }
 
             LOCK_TO_ENSURE_NO_ONE_IS_ACCESSING_THE_QUEUE.readLock().unlock();
         }
@@ -173,9 +194,11 @@ public abstract class AbstractQueue implements Queue {
         }
 
         LOCK_TO_ENSURE_NO_ONE_IS_ACCESSING_THE_QUEUE.readLock().lock();
-        DocumentContext documentContext = tailer.readingDocument();
+
         int elementCount = 0;
+        DocumentContext documentContext = null;
         try {
+            documentContext = tailer.readingDocument();
             if(documentContext.isPresent()) {
                 pauser.reset();
 
@@ -196,9 +219,13 @@ public abstract class AbstractQueue implements Queue {
             }
         } catch (Throwable t) {
             log.error("Draining of the '{}' Queue, resulted in an unexpected error. Returning the messages already drained.", this.name, t);
-            documentContext.rollbackOnClose();
+            if(documentContext != null) {
+                documentContext.rollbackOnClose();
+            }
         } finally {
-            documentContext.close();
+            if(documentContext != null) {
+                documentContext.close();
+            }
 
             LOCK_TO_ENSURE_NO_ONE_IS_ACCESSING_THE_QUEUE.readLock().unlock();
         }
@@ -227,17 +254,18 @@ public abstract class AbstractQueue implements Queue {
     }
 
 
+
     /**
      * Store files created by the Chronicle Queue are not deleted automatically.
      * This is a callback class invoked by teh Chronicle Queue when a new file is acquired and released.
      * We remove the files when released by the tailer/consumer if it is not locked by any other process.
      */
     @Slf4j
-    private static class StoreFileListenerForDeletion implements StoreFileListener {
+    static class StoreFileListenerForDeletion implements StoreFileListener {
 
         private final String queueName;
 
-        private  StoreFileListenerForDeletion(String queueName) {
+        StoreFileListenerForDeletion(String queueName) {
             this.queueName = queueName;
         }
 
@@ -251,30 +279,39 @@ public abstract class AbstractQueue implements Queue {
             log.trace("'{}' Queue, released the store file '{}' for cycle '{}'", queueName, releasedFile.getPath(), cycle);
 
             try {
-                final FileTime releasedFileCreationTime = Files.readAttributes(releasedFile.toPath(), BasicFileAttributes.class).creationTime();
+                final FileTime releasedFileLastAccessTime = Files.readAttributes(releasedFile.toPath(), BasicFileAttributes.class).lastAccessTime();
 
                 Files.list(releasedFile.getParentFile().toPath())
-                        .filter(fileInTheFolder -> !fileInTheFolder.getFileName().toString().toLowerCase().startsWith("metadata")) // Filter out the metadata files
+                        // Filter out folders and the metadata files. Basically select only files with '.cq4' extension
+                        .filter(fileInTheFolder -> {
+                            String fileName = fileInTheFolder.getFileName().toString().toLowerCase();
+
+                            return fileInTheFolder.toFile().isFile() && !fileName.startsWith("metadata") && fileName.endsWith(".cq4");
+                        })
+
+                        // Select the files which were last accessed/modified earlier than the creation time of the file which is being released now
                         .filter(fileInTheFolder -> {
                                     try {
-                                        return (Files.readAttributes(fileInTheFolder, BasicFileAttributes.class).creationTime().compareTo(releasedFileCreationTime) < 0);
+                                        return (Files.readAttributes(fileInTheFolder, BasicFileAttributes.class).lastAccessTime().compareTo(releasedFileLastAccessTime) < 0);
                                     } catch (IOException ioe) {
                                         log.error("Unexpected error while cleaning up old store files of the '{}' Queue", queueName, ioe);
                                         return false;
                                     }
                                 }
                         )
+
+                        // Delete the filtered files
                         .forEach(fileInTheFolder -> {
                             try {
                                 Files.delete(fileInTheFolder);
                                 log.trace("Deleted the old store file '{}' of the '{}' Queue", fileInTheFolder, queueName);
                             } catch (IOException ioe) {
-                                // Here the exception can be ignored, as the handle to the file being deleted
-                                // may still be held by some other process. This will eventually be deleted
-                                // in subsequent cleanup cycles.
+                                // Here the exception can be ignored, as the handle to the file being deleted may still be held a Tailer.
+                                // This file will eventually be deleted in subsequent cleanup cycles.
                                 log.trace("Could not remove the old store file '{}' of the '{}' Queue", fileInTheFolder, queueName, ioe);
                             }
                         });
+
             } catch (IOException ioe) {
                 log.error("Unexpected error while cleaning up old store files of the '{}' Queue", queueName, ioe);
             }
