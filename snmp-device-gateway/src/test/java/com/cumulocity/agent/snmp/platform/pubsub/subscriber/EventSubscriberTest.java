@@ -4,6 +4,7 @@ import com.cumulocity.agent.snmp.config.ConcurrencyConfiguration;
 import com.cumulocity.agent.snmp.platform.model.GatewayManagedObjectWrapper;
 import com.cumulocity.agent.snmp.platform.pubsub.service.EventPubSub;
 import com.cumulocity.agent.snmp.platform.service.GatewayDataProvider;
+import com.cumulocity.agent.snmp.platform.service.PlatformProvider;
 import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.event.EventApi;
 import org.junit.Test;
@@ -14,8 +15,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import java.util.Collections;
+
+import static org.junit.Assert.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EventSubscriberTest {
@@ -37,6 +39,9 @@ public class EventSubscriberTest {
 
     @Mock
     private GatewayManagedObjectWrapper.SnmpCommunicationProperties snmpCommunicationProperties;
+
+    @Mock
+    private PlatformProvider platformProvider;
 
     @InjectMocks
     private EventSubscriber eventSubscriber;
@@ -104,19 +109,30 @@ public class EventSubscriberTest {
 
         Mockito.when(eventApi.create(Mockito.any(EventSubscriber.EventRepresentation.class))).thenReturn(null);
 
-        eventSubscriber.onMessage("SOME STRING");
+        try {
+            eventSubscriber.onMessage("SOME STRING");
+        } catch (PlatformPublishException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
 
         Mockito.verify(eventApi).create(eventRepresentationCaptor.capture());
 
         assertEquals("SOME STRING", eventRepresentationCaptor.getValue().toJSON());
     }
 
-    @Test(expected = SDKException.class)
-    public void should_onMessage_whenEventApiThrowsSDKException() {
+    @Test(expected = PlatformPublishException.class)
+    public void should_onMessage_whenEventApiThrowsSDKException() throws PlatformPublishException {
         SDKException sdkException = new SDKException(500, "SOME ERROR MESSAGE");
         Mockito.when(eventApi.create(Mockito.any(EventSubscriber.EventRepresentation.class))).thenThrow(sdkException);
 
-        eventSubscriber.onMessage("SOME STRING");
+        try {
+            eventSubscriber.onMessage("SOME STRING");
+        } catch (PlatformPublishException ppe) {
+            Mockito.verify(platformProvider).markPlatfromAsUnavailable();
+            assertEquals(Collections.singletonList("SOME STRING"), ppe.getFailedMessages());
+            throw ppe;
+        }
     }
 
     @Test
@@ -126,7 +142,12 @@ public class EventSubscriberTest {
         SDKException sdkException = new SDKException(400, "SOME ERROR MESSAGE");
         Mockito.when(eventApi.create(Mockito.any(EventSubscriber.EventRepresentation.class))).thenThrow(sdkException);
 
-        eventSubscriber.onMessage("SOME STRING");
+        try {
+            eventSubscriber.onMessage("SOME STRING");
+        } catch (PlatformPublishException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
 
         Mockito.verify(eventApi).create(eventRepresentationCaptor.capture());
 
@@ -140,47 +161,76 @@ public class EventSubscriberTest {
         SDKException sdkException = new SDKException(404, "SOME ERROR MESSAGE");
         Mockito.when(eventApi.create(Mockito.any(EventSubscriber.EventRepresentation.class))).thenThrow(sdkException);
 
-        eventSubscriber.onMessage("SOME STRING");
+        try {
+            eventSubscriber.onMessage("SOME STRING");
+        } catch (PlatformPublishException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
 
         Mockito.verify(eventApi).create(eventRepresentationCaptor.capture());
 
         assertEquals("SOME STRING", eventRepresentationCaptor.getValue().toJSON());
     }
 
-    @Test(expected = SDKException.class)
-    public void should_onMessage_whenEventApiThrowsSDKException_with_HTTPStatus_401() {
+    @Test(expected = PlatformPublishException.class)
+    public void should_onMessage_whenEventApiThrowsSDKException_with_HTTPStatus_401() throws PlatformPublishException {
         SDKException sdkException = new SDKException(401, "SOME ERROR MESSAGE");
         Mockito.when(eventApi.create(Mockito.any(EventSubscriber.EventRepresentation.class))).thenThrow(sdkException);
 
-        eventSubscriber.onMessage("SOME STRING");
+        try {
+            eventSubscriber.onMessage("SOME STRING");
+        } catch (PlatformPublishException ppe) {
+            Mockito.verify(platformProvider).markPlatfromAsUnavailable();
+            assertEquals(Collections.singletonList("SOME STRING"), ppe.getFailedMessages());
+            throw ppe;
+        }
     }
 
-    @Test(expected = SDKException.class)
-    public void should_onMessage_whenEventApiThrowsSDKException_with_HTTPStatus_402() {
+    @Test(expected = PlatformPublishException.class)
+    public void should_onMessage_whenEventApiThrowsSDKException_with_HTTPStatus_402() throws PlatformPublishException {
         SDKException sdkException = new SDKException(402, "SOME ERROR MESSAGE");
         Mockito.when(eventApi.create(Mockito.any(EventSubscriber.EventRepresentation.class))).thenThrow(sdkException);
 
-        eventSubscriber.onMessage("SOME STRING");
+        try {
+            eventSubscriber.onMessage("SOME STRING");
+        } catch (PlatformPublishException ppe) {
+            Mockito.verify(platformProvider).markPlatfromAsUnavailable();
+            assertEquals(Collections.singletonList("SOME STRING"), ppe.getFailedMessages());
+            throw ppe;
+        }
     }
 
-    @Test(expected = SDKException.class)
-    public void should_onMessage_whenEventApiThrowsSDKException_with_HTTPStatus_408() {
+    @Test(expected = PlatformPublishException.class)
+    public void should_onMessage_whenEventApiThrowsSDKException_with_HTTPStatus_408() throws PlatformPublishException {
         SDKException sdkException = new SDKException(408, "SOME ERROR MESSAGE");
         Mockito.when(eventApi.create(Mockito.any(EventSubscriber.EventRepresentation.class))).thenThrow(sdkException);
 
-        eventSubscriber.onMessage("SOME STRING");
+        try {
+            eventSubscriber.onMessage("SOME STRING");
+        } catch (PlatformPublishException ppe) {
+            Mockito.verify(platformProvider).markPlatfromAsUnavailable();
+            assertEquals(Collections.singletonList("SOME STRING"), ppe.getFailedMessages());
+            throw ppe;
+        }
     }
 
-    @Test(expected = SDKException.class)
-    public void should_onMessage_whenEventApiThrowsSDKException_with_HTTPStatus_500() {
+    @Test(expected = PlatformPublishException.class)
+    public void should_onMessage_whenEventApiThrowsSDKException_with_HTTPStatus_500() throws PlatformPublishException {
         SDKException sdkException = new SDKException(500, "SOME ERROR MESSAGE");
         Mockito.when(eventApi.create(Mockito.any(EventSubscriber.EventRepresentation.class))).thenThrow(sdkException);
 
-        eventSubscriber.onMessage("SOME STRING");
+        try {
+            eventSubscriber.onMessage("SOME STRING");
+        } catch (PlatformPublishException ppe) {
+            Mockito.verify(platformProvider).markPlatfromAsUnavailable();
+            assertEquals(Collections.singletonList("SOME STRING"), ppe.getFailedMessages());
+            throw ppe;
+        }
     }
 
     @Test(expected = UnsupportedOperationException.class)
-    public void should_onMessages_NotSupportedByEventSubscriber() {
+    public void should_onMessages_NotSupportedByEventSubscriber() throws PlatformPublishException {
         eventSubscriber.onMessages(null);
     }
 
@@ -224,5 +274,14 @@ public class EventSubscriberTest {
         Mockito.verifyZeroInteractions(eventPubSub);
 
         assertEquals(-1, eventSubscriber.getTransmitRateInSeconds());
+    }
+
+    @Test
+    public void isReady_should_invoke_isPlatformAvailable() {
+        Mockito.when(platformProvider.isPlatformAvailable()).thenReturn(Boolean.TRUE);
+
+        assertTrue(eventSubscriber.isReady());
+
+        Mockito.verify(platformProvider).isPlatformAvailable();
     }
 }

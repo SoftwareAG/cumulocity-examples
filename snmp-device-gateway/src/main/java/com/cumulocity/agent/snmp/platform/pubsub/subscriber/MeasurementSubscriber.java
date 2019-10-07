@@ -19,12 +19,6 @@ public class MeasurementSubscriber extends Subscriber<MeasurementPubSub> {
     }
 
     @Override
-    public int getBatchSize() {
-        // 200 is the default value, which should suffice. This can be made configurable if required.
-        return 200;
-    }
-
-    @Override
     public int getConcurrentSubscriptionsCount() {
         return concurrencyConfiguration.getSchedulerPoolSize() * 30/100; // 30% of the total threads available for scheduler
     }

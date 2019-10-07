@@ -4,6 +4,7 @@ import com.cumulocity.agent.snmp.config.ConcurrencyConfiguration;
 import com.cumulocity.agent.snmp.platform.model.GatewayManagedObjectWrapper;
 import com.cumulocity.agent.snmp.platform.pubsub.service.MeasurementPubSub;
 import com.cumulocity.agent.snmp.platform.service.GatewayDataProvider;
+import com.cumulocity.agent.snmp.platform.service.PlatformProvider;
 import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.measurement.MeasurementApi;
 import org.junit.Test;
@@ -15,15 +16,15 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MeasurementSubscriberTest {
 
-    public static final List<String> JSON_STRINGS = Arrays.asList("Message 1", "Message 2");
+    private static final List<String> JSON_STRINGS = Arrays.asList("Message 1", "Message 2");
 
     @Mock
     private ConcurrencyConfiguration concurrencyConfiguration;
@@ -42,6 +43,9 @@ public class MeasurementSubscriberTest {
 
     @Mock
     private GatewayManagedObjectWrapper.SnmpCommunicationProperties snmpCommunicationProperties;
+
+    @Mock
+    private PlatformProvider platformProvider;
 
     @InjectMocks
     private MeasurementSubscriber measurementSubscriber;
@@ -128,19 +132,30 @@ public class MeasurementSubscriberTest {
 
         Mockito.when(measurementApi.create(Mockito.any(MeasurementSubscriber.MeasurementRepresentation.class))).thenReturn(null);
 
-        measurementSubscriber.onMessage("SOME STRING");
+        try {
+            measurementSubscriber.onMessage("SOME STRING");
+        } catch (PlatformPublishException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
 
         Mockito.verify(measurementApi).create(measurementRepresentationCaptor.capture());
 
         assertEquals("SOME STRING", measurementRepresentationCaptor.getValue().toJSON());
     }
 
-    @Test(expected = SDKException.class)
-    public void should_onMessage_whenMeasurementApiThrowsSDKException() {
+    @Test(expected = PlatformPublishException.class)
+    public void should_onMessage_whenMeasurementApiThrowsSDKException() throws PlatformPublishException {
         SDKException sdkException = new SDKException(500, "SOME ERROR MESSAGE");
         Mockito.when(measurementApi.create(Mockito.any(MeasurementSubscriber.MeasurementRepresentation.class))).thenThrow(sdkException);
 
-        measurementSubscriber.onMessage("SOME STRING");
+        try {
+            measurementSubscriber.onMessage("SOME STRING");
+        } catch (PlatformPublishException ppe) {
+            Mockito.verify(platformProvider).markPlatfromAsUnavailable();
+            assertEquals(Collections.singletonList("SOME STRING"), ppe.getFailedMessages());
+            throw ppe;
+        }
     }
 
     @Test
@@ -150,7 +165,12 @@ public class MeasurementSubscriberTest {
         SDKException sdkException = new SDKException(400, "SOME ERROR MESSAGE");
         Mockito.when(measurementApi.create(Mockito.any(MeasurementSubscriber.MeasurementRepresentation.class))).thenThrow(sdkException);
 
-        measurementSubscriber.onMessage("SOME STRING");
+        try {
+            measurementSubscriber.onMessage("SOME STRING");
+        } catch (PlatformPublishException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
 
         Mockito.verify(measurementApi).create(measurementRepresentationCaptor.capture());
 
@@ -164,43 +184,72 @@ public class MeasurementSubscriberTest {
         SDKException sdkException = new SDKException(404, "SOME ERROR MESSAGE");
         Mockito.when(measurementApi.create(Mockito.any(MeasurementSubscriber.MeasurementRepresentation.class))).thenThrow(sdkException);
 
-        measurementSubscriber.onMessage("SOME STRING");
+        try {
+            measurementSubscriber.onMessage("SOME STRING");
+        } catch (PlatformPublishException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
 
         Mockito.verify(measurementApi).create(measurementRepresentationCaptor.capture());
 
         assertEquals("SOME STRING", measurementRepresentationCaptor.getValue().toJSON());
     }
 
-    @Test(expected = SDKException.class)
-    public void should_onMessage_whenMeasurementApiThrowsSDKException_with_HTTPStatus_401() {
+    @Test(expected = PlatformPublishException.class)
+    public void should_onMessage_whenMeasurementApiThrowsSDKException_with_HTTPStatus_401() throws PlatformPublishException {
         SDKException sdkException = new SDKException(401, "SOME ERROR MESSAGE");
         Mockito.when(measurementApi.create(Mockito.any(MeasurementSubscriber.MeasurementRepresentation.class))).thenThrow(sdkException);
 
-        measurementSubscriber.onMessage("SOME STRING");
+        try {
+            measurementSubscriber.onMessage("SOME STRING");
+        } catch (PlatformPublishException ppe) {
+            Mockito.verify(platformProvider).markPlatfromAsUnavailable();
+            assertEquals(Collections.singletonList("SOME STRING"), ppe.getFailedMessages());
+            throw ppe;
+        }
     }
 
-    @Test(expected = SDKException.class)
-    public void should_onMessage_whenMeasurementApiThrowsSDKException_with_HTTPStatus_402() {
+    @Test(expected = PlatformPublishException.class)
+    public void should_onMessage_whenMeasurementApiThrowsSDKException_with_HTTPStatus_402() throws PlatformPublishException {
         SDKException sdkException = new SDKException(402, "SOME ERROR MESSAGE");
         Mockito.when(measurementApi.create(Mockito.any(MeasurementSubscriber.MeasurementRepresentation.class))).thenThrow(sdkException);
 
-        measurementSubscriber.onMessage("SOME STRING");
+        try {
+            measurementSubscriber.onMessage("SOME STRING");
+        } catch (PlatformPublishException ppe) {
+            Mockito.verify(platformProvider).markPlatfromAsUnavailable();
+            assertEquals(Collections.singletonList("SOME STRING"), ppe.getFailedMessages());
+            throw ppe;
+        }
     }
 
-    @Test(expected = SDKException.class)
-    public void should_onMessage_whenMeasurementApiThrowsSDKException_with_HTTPStatus_408() {
+    @Test(expected = PlatformPublishException.class)
+    public void should_onMessage_whenMeasurementApiThrowsSDKException_with_HTTPStatus_408() throws PlatformPublishException {
         SDKException sdkException = new SDKException(408, "SOME ERROR MESSAGE");
         Mockito.when(measurementApi.create(Mockito.any(MeasurementSubscriber.MeasurementRepresentation.class))).thenThrow(sdkException);
 
-        measurementSubscriber.onMessage("SOME STRING");
+        try {
+            measurementSubscriber.onMessage("SOME STRING");
+        } catch (PlatformPublishException ppe) {
+            Mockito.verify(platformProvider).markPlatfromAsUnavailable();
+            assertEquals(Collections.singletonList("SOME STRING"), ppe.getFailedMessages());
+            throw ppe;
+        }
     }
 
-    @Test(expected = SDKException.class)
-    public void should_onMessage_whenMeasurementApiThrowsSDKException_with_HTTPStatus_500() {
+    @Test(expected = PlatformPublishException.class)
+    public void should_onMessage_whenMeasurementApiThrowsSDKException_with_HTTPStatus_500() throws PlatformPublishException {
         SDKException sdkException = new SDKException(500, "SOME ERROR MESSAGE");
         Mockito.when(measurementApi.create(Mockito.any(MeasurementSubscriber.MeasurementRepresentation.class))).thenThrow(sdkException);
 
-        measurementSubscriber.onMessage("SOME STRING");
+        try {
+            measurementSubscriber.onMessage("SOME STRING");
+        } catch (PlatformPublishException ppe) {
+            Mockito.verify(platformProvider).markPlatfromAsUnavailable();
+            assertEquals(Collections.singletonList("SOME STRING"), ppe.getFailedMessages());
+            throw ppe;
+        }
     }
 
     @Test
@@ -210,7 +259,12 @@ public class MeasurementSubscriberTest {
         Mockito.when(measurementApi.createBulk(Mockito.any(MeasurementSubscriber.MeasurementCollectionRepresentation.class))).thenReturn(null);
 
         List<String> jsonStrings = Arrays.asList("Message 1", "Message 2");
-        measurementSubscriber.onMessages(jsonStrings);
+        try {
+            measurementSubscriber.onMessages(jsonStrings);
+        } catch (PlatformPublishException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
 
         Mockito.verify(measurementApi).createBulk(measurementCollectionRepresentationCaptor.capture());
 
@@ -219,13 +273,19 @@ public class MeasurementSubscriberTest {
                 + "]}", measurementCollectionRepresentationCaptor.getValue().toJSON());
     }
 
-    @Test(expected = SDKException.class)
-    public void should_onMessages_whenMeasurementApiThrowsSDKException() {
+    @Test(expected = PlatformPublishException.class)
+    public void should_onMessages_whenMeasurementApiThrowsSDKException() throws PlatformPublishException {
         SDKException sdkException = new SDKException(500, "SOME ERROR MESSAGE");
         Mockito.when(measurementApi.createBulk(Mockito.any(MeasurementSubscriber.MeasurementCollectionRepresentation.class))).thenThrow(sdkException);
 
         List<String> jsonStrings = Arrays.asList("Message 1", "Message 2");
-        measurementSubscriber.onMessages(jsonStrings);
+        try {
+            measurementSubscriber.onMessages(jsonStrings);
+        } catch (PlatformPublishException ppe) {
+            Mockito.verify(platformProvider).markPlatfromAsUnavailable();
+            assertEquals(jsonStrings, ppe.getFailedMessages());
+            throw ppe;
+        }
     }
 
     @Test
@@ -236,7 +296,12 @@ public class MeasurementSubscriberTest {
         Mockito.when(measurementApi.createBulk(Mockito.any(MeasurementSubscriber.MeasurementCollectionRepresentation.class))).thenThrow(sdkException);
 
         List<String> jsonStrings = Arrays.asList("Message 1", "Message 2");
-        measurementSubscriber.onMessages(jsonStrings);
+        try {
+            measurementSubscriber.onMessages(jsonStrings);
+        } catch (PlatformPublishException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
 
         Mockito.verify(measurementApi).createBulk(measurementCollectionRepresentationCaptor.capture());
 
@@ -253,7 +318,12 @@ public class MeasurementSubscriberTest {
         Mockito.when(measurementApi.createBulk(Mockito.any(MeasurementSubscriber.MeasurementCollectionRepresentation.class))).thenThrow(sdkException);
 
         List<String> jsonStrings = Arrays.asList("Message 1", "Message 2");
-        measurementSubscriber.onMessages(jsonStrings);
+        try {
+            measurementSubscriber.onMessages(jsonStrings);
+        } catch (PlatformPublishException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
 
         Mockito.verify(measurementApi).createBulk(measurementCollectionRepresentationCaptor.capture());
 
@@ -262,40 +332,64 @@ public class MeasurementSubscriberTest {
                 + "]}", measurementCollectionRepresentationCaptor.getValue().toJSON());
     }
 
-    @Test(expected = SDKException.class)
-    public void should_onMessages_whenMeasurementApiThrowsSDKException_with_HTTPStatus_401() {
+    @Test(expected = PlatformPublishException.class)
+    public void should_onMessages_whenMeasurementApiThrowsSDKException_with_HTTPStatus_401() throws PlatformPublishException {
         SDKException sdkException = new SDKException(401, "SOME ERROR MESSAGE");
         Mockito.when(measurementApi.createBulk(Mockito.any(MeasurementSubscriber.MeasurementCollectionRepresentation.class))).thenThrow(sdkException);
 
         List<String> jsonStrings = Arrays.asList("Message 1", "Message 2");
-        measurementSubscriber.onMessages(jsonStrings);
+        try {
+            measurementSubscriber.onMessages(jsonStrings);
+        } catch (PlatformPublishException ppe) {
+            Mockito.verify(platformProvider).markPlatfromAsUnavailable();
+            assertEquals(jsonStrings, ppe.getFailedMessages());
+            throw ppe;
+        }
     }
 
-    @Test(expected = SDKException.class)
-    public void should_onMessages_whenMeasurementApiThrowsSDKException_with_HTTPStatus_402() {
+    @Test(expected = PlatformPublishException.class)
+    public void should_onMessages_whenMeasurementApiThrowsSDKException_with_HTTPStatus_402() throws PlatformPublishException {
         SDKException sdkException = new SDKException(402, "SOME ERROR MESSAGE");
         Mockito.when(measurementApi.createBulk(Mockito.any(MeasurementSubscriber.MeasurementCollectionRepresentation.class))).thenThrow(sdkException);
 
         List<String> jsonStrings = Arrays.asList("Message 1", "Message 2");
-        measurementSubscriber.onMessages(jsonStrings);
+        try {
+            measurementSubscriber.onMessages(jsonStrings);
+        } catch (PlatformPublishException ppe) {
+            Mockito.verify(platformProvider).markPlatfromAsUnavailable();
+            assertEquals(jsonStrings, ppe.getFailedMessages());
+            throw ppe;
+        }
     }
 
-    @Test(expected = SDKException.class)
-    public void should_onMessages_whenMeasurementApiThrowsSDKException_with_HTTPStatus_408() {
+    @Test(expected = PlatformPublishException.class)
+    public void should_onMessages_whenMeasurementApiThrowsSDKException_with_HTTPStatus_408() throws PlatformPublishException {
         SDKException sdkException = new SDKException(408, "SOME ERROR MESSAGE");
         Mockito.when(measurementApi.createBulk(Mockito.any(MeasurementSubscriber.MeasurementCollectionRepresentation.class))).thenThrow(sdkException);
 
         List<String> jsonStrings = Arrays.asList("Message 1", "Message 2");
-        measurementSubscriber.onMessages(jsonStrings);
+        try {
+            measurementSubscriber.onMessages(jsonStrings);
+        } catch (PlatformPublishException ppe) {
+            Mockito.verify(platformProvider).markPlatfromAsUnavailable();
+            assertEquals(jsonStrings, ppe.getFailedMessages());
+            throw ppe;
+        }
     }
 
-    @Test(expected = SDKException.class)
-    public void should_onMessages_whenMeasurementApiThrowsSDKException_with_HTTPStatus_500() {
+    @Test(expected = PlatformPublishException.class)
+    public void should_onMessages_whenMeasurementApiThrowsSDKException_with_HTTPStatus_500() throws PlatformPublishException {
         SDKException sdkException = new SDKException(500, "SOME ERROR MESSAGE");
         Mockito.when(measurementApi.createBulk(Mockito.any(MeasurementSubscriber.MeasurementCollectionRepresentation.class))).thenThrow(sdkException);
 
         List<String> jsonStrings = Arrays.asList("Message 1", "Message 2");
-        measurementSubscriber.onMessages(jsonStrings);
+        try {
+            measurementSubscriber.onMessages(jsonStrings);
+        } catch (PlatformPublishException ppe) {
+            Mockito.verify(platformProvider).markPlatfromAsUnavailable();
+            assertEquals(jsonStrings, ppe.getFailedMessages());
+            throw ppe;
+        }
     }
 
     @Test
@@ -357,5 +451,14 @@ public class MeasurementSubscriberTest {
         Mockito.verifyZeroInteractions(measurementPubSub);
 
         assertEquals(-1, measurementSubscriber.getTransmitRateInSeconds());
+    }
+
+    @Test
+    public void isReady_should_invoke_isPlatformAvailable() {
+        Mockito.when(platformProvider.isPlatformAvailable()).thenReturn(Boolean.TRUE);
+
+        assertTrue(measurementSubscriber.isReady());
+
+        Mockito.verify(platformProvider).isPlatformAvailable();
     }
 }

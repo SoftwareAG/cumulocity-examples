@@ -4,6 +4,7 @@ import com.cumulocity.agent.snmp.config.ConcurrencyConfiguration;
 import com.cumulocity.agent.snmp.platform.model.GatewayManagedObjectWrapper;
 import com.cumulocity.agent.snmp.platform.pubsub.service.AlarmPubSub;
 import com.cumulocity.agent.snmp.platform.service.GatewayDataProvider;
+import com.cumulocity.agent.snmp.platform.service.PlatformProvider;
 import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.alarm.AlarmApi;
 import org.junit.Test;
@@ -14,8 +15,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import java.util.Collections;
+
+import static org.junit.Assert.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AlarmSubscriberTest {
@@ -37,6 +39,9 @@ public class AlarmSubscriberTest {
 
     @Mock
     private GatewayManagedObjectWrapper.SnmpCommunicationProperties snmpCommunicationProperties;
+
+    @Mock
+    private PlatformProvider platformProvider;
 
     @InjectMocks
     private AlarmSubscriber alarmSubscriber;
@@ -104,19 +109,30 @@ public class AlarmSubscriberTest {
 
         Mockito.when(alarmApi.create(Mockito.any(AlarmSubscriber.AlarmRepresentation.class))).thenReturn(null);
 
-        alarmSubscriber.onMessage("SOME STRING");
+        try {
+            alarmSubscriber.onMessage("SOME STRING");
+        } catch (PlatformPublishException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
 
         Mockito.verify(alarmApi).create(alarmRepresentationCaptor.capture());
 
         assertEquals("SOME STRING", alarmRepresentationCaptor.getValue().toJSON());
     }
 
-    @Test(expected = SDKException.class)
-    public void should_onMessage_whenAlarmApiThrowsSDKException() {
+    @Test(expected = PlatformPublishException.class)
+    public void should_onMessage_whenAlarmApiThrowsSDKException() throws PlatformPublishException {
         SDKException sdkException = new SDKException(500, "SOME ERROR MESSAGE");
         Mockito.when(alarmApi.create(Mockito.any(AlarmSubscriber.AlarmRepresentation.class))).thenThrow(sdkException);
 
-        alarmSubscriber.onMessage("SOME STRING");
+        try {
+            alarmSubscriber.onMessage("SOME STRING");
+        } catch (PlatformPublishException ppe) {
+            Mockito.verify(platformProvider).markPlatfromAsUnavailable();
+            assertEquals(Collections.singletonList("SOME STRING"), ppe.getFailedMessages());
+            throw ppe;
+        }
     }
 
     @Test
@@ -126,7 +142,12 @@ public class AlarmSubscriberTest {
         SDKException sdkException = new SDKException(400, "SOME ERROR MESSAGE");
         Mockito.when(alarmApi.create(Mockito.any(AlarmSubscriber.AlarmRepresentation.class))).thenThrow(sdkException);
 
-        alarmSubscriber.onMessage("SOME STRING");
+        try {
+            alarmSubscriber.onMessage("SOME STRING");
+        } catch (PlatformPublishException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
 
         Mockito.verify(alarmApi).create(alarmRepresentationCaptor.capture());
 
@@ -140,47 +161,76 @@ public class AlarmSubscriberTest {
         SDKException sdkException = new SDKException(404, "SOME ERROR MESSAGE");
         Mockito.when(alarmApi.create(Mockito.any(AlarmSubscriber.AlarmRepresentation.class))).thenThrow(sdkException);
 
-        alarmSubscriber.onMessage("SOME STRING");
+        try {
+            alarmSubscriber.onMessage("SOME STRING");
+        } catch (PlatformPublishException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
 
         Mockito.verify(alarmApi).create(alarmRepresentationCaptor.capture());
 
         assertEquals("SOME STRING", alarmRepresentationCaptor.getValue().toJSON());
     }
 
-    @Test(expected = SDKException.class)
-    public void should_onMessage_whenAlarmApiThrowsSDKException_with_HTTPStatus_401() {
+    @Test(expected = PlatformPublishException.class)
+    public void should_onMessage_whenAlarmApiThrowsSDKException_with_HTTPStatus_401() throws PlatformPublishException {
         SDKException sdkException = new SDKException(401, "SOME ERROR MESSAGE");
         Mockito.when(alarmApi.create(Mockito.any(AlarmSubscriber.AlarmRepresentation.class))).thenThrow(sdkException);
 
-        alarmSubscriber.onMessage("SOME STRING");
+        try {
+            alarmSubscriber.onMessage("SOME STRING");
+        } catch (PlatformPublishException ppe) {
+            Mockito.verify(platformProvider).markPlatfromAsUnavailable();
+            assertEquals(Collections.singletonList("SOME STRING"), ppe.getFailedMessages());
+            throw ppe;
+        }
     }
 
-    @Test(expected = SDKException.class)
-    public void should_onMessage_whenAlarmApiThrowsSDKException_with_HTTPStatus_402() {
+    @Test(expected = PlatformPublishException.class)
+    public void should_onMessage_whenAlarmApiThrowsSDKException_with_HTTPStatus_402() throws PlatformPublishException {
         SDKException sdkException = new SDKException(402, "SOME ERROR MESSAGE");
         Mockito.when(alarmApi.create(Mockito.any(AlarmSubscriber.AlarmRepresentation.class))).thenThrow(sdkException);
 
-        alarmSubscriber.onMessage("SOME STRING");
+        try {
+            alarmSubscriber.onMessage("SOME STRING");
+        } catch (PlatformPublishException ppe) {
+            Mockito.verify(platformProvider).markPlatfromAsUnavailable();
+            assertEquals(Collections.singletonList("SOME STRING"), ppe.getFailedMessages());
+            throw ppe;
+        }
     }
 
-    @Test(expected = SDKException.class)
-    public void should_onMessage_whenAlarmApiThrowsSDKException_with_HTTPStatus_408() {
+    @Test(expected = PlatformPublishException.class)
+    public void should_onMessage_whenAlarmApiThrowsSDKException_with_HTTPStatus_408() throws PlatformPublishException {
         SDKException sdkException = new SDKException(408, "SOME ERROR MESSAGE");
         Mockito.when(alarmApi.create(Mockito.any(AlarmSubscriber.AlarmRepresentation.class))).thenThrow(sdkException);
 
-        alarmSubscriber.onMessage("SOME STRING");
+        try {
+            alarmSubscriber.onMessage("SOME STRING");
+        } catch (PlatformPublishException ppe) {
+            Mockito.verify(platformProvider).markPlatfromAsUnavailable();
+            assertEquals(Collections.singletonList("SOME STRING"), ppe.getFailedMessages());
+            throw ppe;
+        }
     }
 
-    @Test(expected = SDKException.class)
-    public void should_onMessage_whenAlarmApiThrowsSDKException_with_HTTPStatus_500() {
+    @Test(expected = PlatformPublishException.class)
+    public void should_onMessage_whenAlarmApiThrowsSDKException_with_HTTPStatus_500() throws PlatformPublishException {
         SDKException sdkException = new SDKException(500, "SOME ERROR MESSAGE");
         Mockito.when(alarmApi.create(Mockito.any(AlarmSubscriber.AlarmRepresentation.class))).thenThrow(sdkException);
 
-        alarmSubscriber.onMessage("SOME STRING");
+        try {
+            alarmSubscriber.onMessage("SOME STRING");
+        } catch (PlatformPublishException ppe) {
+            Mockito.verify(platformProvider).markPlatfromAsUnavailable();
+            assertEquals(Collections.singletonList("SOME STRING"), ppe.getFailedMessages());
+            throw ppe;
+        }
     }
 
     @Test(expected = UnsupportedOperationException.class)
-    public void should_onMessages_NotSupportedByAlarmSubscriber() {
+    public void should_onMessages_NotSupportedByAlarmSubscriber() throws PlatformPublishException {
         alarmSubscriber.onMessages(null);
     }
 
@@ -224,5 +274,14 @@ public class AlarmSubscriberTest {
         Mockito.verifyZeroInteractions(alarmPubSub);
 
         assertEquals(-1, alarmSubscriber.getTransmitRateInSeconds());
+    }
+
+    @Test
+    public void isReady_should_invoke_isPlatformAvailable() {
+        Mockito.when(platformProvider.isPlatformAvailable()).thenReturn(Boolean.TRUE);
+
+        assertTrue(alarmSubscriber.isReady());
+
+        Mockito.verify(platformProvider).isPlatformAvailable();
     }
 }

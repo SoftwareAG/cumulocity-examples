@@ -2,8 +2,8 @@ package com.cumulocity.agent.snmp.platform.pubsub.publisher;
 
 import com.cumulocity.agent.snmp.platform.pubsub.service.MeasurementPubSub;
 import com.cumulocity.model.idtype.GId;
-import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
+import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
 import org.joda.time.DateTime;
 import org.junit.Test;
 import org.junit.runner.RunWith;
