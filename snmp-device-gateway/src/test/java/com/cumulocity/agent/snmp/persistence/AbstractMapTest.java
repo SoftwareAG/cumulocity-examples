@@ -9,6 +9,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import static org.junit.Assert.*;
 
@@ -292,6 +295,121 @@ public class AbstractMapTest {
         assertTrue(abstractMapImplForTest.containsKey("KEY_ONE"));
         assertTrue(abstractMapImplForTest.containsValue("VALUE_NEW_ONE"));
         assertFalse(abstractMapImplForTest.containsValue("VALUE_NEW_NEW_ONE"));
+    }
+
+    @Test
+    public void shouldApplyOnForEach() {
+        Map<String, String> expectedElements = createMapWithEntries(10);
+        abstractMapImplForTest.putAll(expectedElements);
+
+        final Map<String, String> acceptedElements = new HashMap<>();
+        abstractMapImplForTest.forEach(new BiConsumer<String, String>() {
+            @Override
+            public void accept(String key, String value) {
+                acceptedElements.put(key, value);
+            }
+        });
+
+        assertEquals(expectedElements, acceptedElements);
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void shouldReplaceAll() {
+        Map<String, String> expectedElements = createMapWithEntries(10);
+        abstractMapImplForTest.putAll(expectedElements);
+
+        final Map<String, String> acceptedElements = new HashMap<>();
+        abstractMapImplForTest.replaceAll(new BiFunction<String, String, String>() {
+            @Override
+            public String apply(String key, String value) {
+                return "REPLACED";
+            }
+        });
+    }
+
+    @Test
+    public void shouldComputeIfAbsent() {
+        Function<String, String> computeFunction = new Function<String, String>() {
+            @Override
+            public String apply(String key) {
+                return "NEW COMPUTED VALUE FOR KEY " + key;
+            }
+        };
+
+        abstractMapImplForTest.put("KEY_PRESENT", "VALUE_ONE");
+
+        // computeIfAbsent when key present
+        String newValue = abstractMapImplForTest.computeIfAbsent("KEY_PRESENT", computeFunction);
+        assertEquals("VALUE_ONE", newValue);
+
+        // computeIfAbsent when key absent
+        newValue = abstractMapImplForTest.computeIfAbsent("KEY_ABSENT", computeFunction);
+        assertEquals("NEW COMPUTED VALUE FOR KEY KEY_ABSENT", newValue);
+        assertTrue(abstractMapImplForTest.containsKey("KEY_ABSENT"));
+    }
+
+    @Test
+    public void shouldComputeIfPresent() {
+        BiFunction<String, String, String> computeFunction = new BiFunction<String, String, String>() {
+            @Override
+            public String apply(String key, String oldValue) {
+                return "NEW COMPUTED VALUE FOR KEY " + key;
+            }
+        };
+
+        abstractMapImplForTest.put("KEY_PRESENT", "VALUE_ONE");
+
+        // computeIfPresent when key present
+        String newValue = abstractMapImplForTest.computeIfPresent("KEY_PRESENT", computeFunction);
+        assertEquals("NEW COMPUTED VALUE FOR KEY KEY_PRESENT", newValue);
+
+        // computeIfPresent when key absent
+        String oldValue = abstractMapImplForTest.computeIfPresent("KEY_ABSENT", computeFunction);
+        assertNull(oldValue);
+        assertEquals(null, abstractMapImplForTest.get("KEY_ABSENT"));
+    }
+
+    @Test
+    public void shouldCompute() {
+        BiFunction<String, String, String> computeFunction = new BiFunction<String, String, String>() {
+            @Override
+            public String apply(String key, String oldValue) {
+                return "NEW COMPUTED VALUE FOR KEY " + key;
+            }
+        };
+
+        abstractMapImplForTest.put("KEY_PRESENT", "VALUE_ONE");
+
+        // compute when key present
+        String newValue = abstractMapImplForTest.compute("KEY_PRESENT", computeFunction);
+        assertEquals("NEW COMPUTED VALUE FOR KEY KEY_PRESENT", newValue);
+
+        // compute when key absent
+        newValue = abstractMapImplForTest.compute("KEY_ABSENT", computeFunction);
+        assertEquals("NEW COMPUTED VALUE FOR KEY KEY_ABSENT", newValue);
+        assertTrue(abstractMapImplForTest.containsKey("KEY_ABSENT"));
+    }
+
+    @Test
+    public void shouldMerge() {
+        BiFunction<String, String, String> computeFunction = new BiFunction<String, String, String>() {
+            @Override
+            public String apply(String oldValue, String newValue) {
+                return "NEW COMPUTED VALUE " + newValue;
+            }
+        };
+
+        abstractMapImplForTest.put("KEY_PRESENT", "VALUE_ONE");
+
+        // merge when key present
+        String newValue = abstractMapImplForTest.merge("KEY_PRESENT", "NEW_VALUE_ONE", computeFunction);
+        assertEquals("NEW COMPUTED VALUE NEW_VALUE_ONE", newValue);
+        assertEquals("NEW COMPUTED VALUE NEW_VALUE_ONE", abstractMapImplForTest.get("KEY_PRESENT"));
+
+        // merge when key absent
+        newValue = abstractMapImplForTest.merge("KEY_ABSENT", "NEW_VALUE_ONE", computeFunction);
+        assertEquals("NEW_VALUE_ONE", newValue);
+        assertEquals("NEW_VALUE_ONE", abstractMapImplForTest.get("KEY_ABSENT"));
     }
 
     private Map<String, String> createMapWithEntries(int count) {

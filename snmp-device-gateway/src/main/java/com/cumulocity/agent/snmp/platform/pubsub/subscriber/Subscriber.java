@@ -1,5 +1,6 @@
 package com.cumulocity.agent.snmp.platform.pubsub.subscriber;
 
+import com.cumulocity.agent.snmp.bootstrap.model.BootstrapReadyEvent;
 import com.cumulocity.agent.snmp.config.ConcurrencyConfiguration;
 import com.cumulocity.agent.snmp.platform.model.GatewayDataRefreshedEvent;
 import com.cumulocity.agent.snmp.platform.pubsub.service.PubSub;
@@ -32,11 +33,11 @@ public abstract class Subscriber<PS extends PubSub> {
     private PS pubSub;
 
 
-    private long currentTransmitRateInSeconds = -1;
+    private long transmitRateInSeconds = -1;
 
 
     public long getTransmitRateInSeconds() {
-        return gatewayDataProvider.getGatewayDevice().getSnmpCommunicationAttrs().getTransmitRate();
+        return transmitRateInSeconds;
     }
 
     public boolean isBatchingSupported() {
@@ -89,33 +90,50 @@ public abstract class Subscriber<PS extends PubSub> {
         throw new UnsupportedOperationException();
     }
 
+    @EventListener(BootstrapReadyEvent.class)
+    void subscribe() {
+        pubSub.subscribe(this); // Subscribing for the first time
+
+        this.transmitRateInSeconds = fetchTransmitRateFromGatewayDevice();
+
+        log.debug("{} subscribed to {}.", this.getClass().getName(), pubSub.getClass().getName());
+    }
+
     @EventListener(GatewayDataRefreshedEvent.class)
-    private void subscribe() {
-        if(currentTransmitRateInSeconds == -1) {
-            pubSub.subscribe(this); // Subscribing for the first time
+    void refreshSubscription() {
+        if(isBatchingSupported()) {
+            long transmitRateFromGatewayDevice = fetchTransmitRateFromGatewayDevice();
+            if(transmitRateInSeconds != transmitRateFromGatewayDevice) {
+                // Refresh the subscription only when the Transmit Rate
+                // has changed for the Subscribers supporting batching
+                pubSub.unsubscribe(this);
+                pubSub.subscribe(this);
 
-            this.currentTransmitRateInSeconds = getTransmitRateInSeconds();
-        }
-        else if(isBatchingSupported() && currentTransmitRateInSeconds != getTransmitRateInSeconds()) {
-            // Refresh only when the Transmit Rate is changed for Subscribers supporting batching
-            pubSub.unsubscribe(this);
+                this.transmitRateInSeconds = transmitRateFromGatewayDevice;
 
-            pubSub.subscribe(this);
-
-            this.currentTransmitRateInSeconds = getTransmitRateInSeconds();
-
-            log.debug("{} refreshed its subscription as the transmit rate changed.", this.getClass().getName());
+                log.debug("{} refreshed its subscription as the transmit rate changed.", this.getClass().getName());
+            }
         }
     }
 
     @PreDestroy
-    private void unsubscribe() {
+    void unsubscribe() {
         pubSub.unsubscribe(this);
+
+        log.debug("{} unsubscribed to {}.", this.getClass().getName(), pubSub.getClass().getName());
+    }
+
+    private long fetchTransmitRateFromGatewayDevice() {
+        return gatewayDataProvider.getGatewayDevice().getSnmpCommunicationProperties().getTransmitRate();
     }
 
     private boolean isExceptionDueToInvalidMessage(SDKException sdke) {
         int httpStatus = sdke.getHttpStatus();
-        return httpStatus >= HttpStatus.SC_BAD_REQUEST && httpStatus < HttpStatus.SC_INTERNAL_SERVER_ERROR
-                && !(httpStatus == HttpStatus.SC_UNAUTHORIZED || httpStatus == HttpStatus.SC_PAYMENT_REQUIRED);
+        return     httpStatus >= HttpStatus.SC_BAD_REQUEST
+                && httpStatus < HttpStatus.SC_INTERNAL_SERVER_ERROR
+                && !(   httpStatus == HttpStatus.SC_UNAUTHORIZED
+                     || httpStatus == HttpStatus.SC_PAYMENT_REQUIRED
+                     || httpStatus == HttpStatus.SC_REQUEST_TIMEOUT
+                    );
     }
 }

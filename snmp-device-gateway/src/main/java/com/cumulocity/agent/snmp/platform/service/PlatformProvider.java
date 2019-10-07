@@ -58,7 +58,7 @@ public class PlatformProvider implements InitializingBean {
 		bootstrapPlatform = createPlatform(credentials);
 	}
 
-    @EventListener
+    @EventListener(CredentialsAvailableEvent.class)
 	public void onCredentialsAvailable(CredentialsAvailableEvent credentialsAvailableEvent) {
 		if (!Objects.isNull(platform)) {
 			return;

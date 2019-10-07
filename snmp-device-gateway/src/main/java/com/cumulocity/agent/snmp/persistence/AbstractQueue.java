@@ -89,7 +89,7 @@ public abstract class AbstractQueue implements Queue {
         }
 
         if(isClosed) {
-            throw new IllegalStateException("Cannot call enqueue after the '" + this.name + "' Queue is closed.");
+            throw new IllegalStateException("Cannot call enqueue as the '" + this.name + "' Queue is closed.");
         }
 
         LOCK_TO_ENSURE_NO_ONE_IS_ACCESSING_THE_QUEUE.readLock().lock();
@@ -107,7 +107,7 @@ public abstract class AbstractQueue implements Queue {
     @Override
     public synchronized String peek() {
         if(isClosed) {
-            throw new IllegalStateException("Cannot call peek after the '" + this.name + "' Queue is closed.");
+            throw new IllegalStateException("Cannot peek as the '" + this.name + "' Queue is closed.");
         }
 
         String returnValue = null;
@@ -144,7 +144,7 @@ public abstract class AbstractQueue implements Queue {
     @Override
     public synchronized String dequeue() {
         if(isClosed) {
-            throw new IllegalStateException("Cannot call dequeue after the '" + this.name + "' Queue is closed.");
+            throw new IllegalStateException("Cannot call dequeue as the '" + this.name + "' Queue is closed.");
         }
 
         String returnValue = null;
@@ -183,7 +183,7 @@ public abstract class AbstractQueue implements Queue {
     @Override
     public synchronized int drainTo(Collection<String> collection, int maxElements) {
         if(isClosed) {
-            throw new IllegalStateException("Cannot call drainTo after the '" + this.name + "' Queue is closed.");
+            throw new IllegalStateException("Cannot call drainTo as the '" + this.name + "' Queue is closed.");
         }
 
         if (collection == null) {

@@ -166,7 +166,7 @@ public abstract class AbstractMap<K, V> implements ConcurrentMap<K, V>, AutoClos
 
     @Override
     public void replaceAll(BiFunction<? super K, ? super V, ? extends V> function) {
-        chronicleMap.replaceAll(function);
+        throw new UnsupportedOperationException("replaceAll");
     }
 
     @Override
