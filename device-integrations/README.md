@@ -1,5 +1,5 @@
 # Device integrations
-
+<br><br>
 This sections contains detailed explanations and basic examples on how to integrate the following devices:
 
 *   [Gemalto Cinterion](cinterion/)
