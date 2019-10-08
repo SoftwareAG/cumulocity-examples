@@ -1,12 +1,13 @@
 package com.cumulocity.agent.snmp.platform.pubsub.service.subscription;
 
 import com.cumulocity.agent.snmp.persistence.Queue;
-import com.cumulocity.agent.snmp.platform.pubsub.subscriber.PlatformPublishException;
 import com.cumulocity.agent.snmp.platform.pubsub.subscriber.Subscriber;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
+@Slf4j
 public class BatchMessagesSubscription extends Subscription {
 
     public BatchMessagesSubscription(Queue queue, Subscriber subscriber) {
@@ -14,8 +15,8 @@ public class BatchMessagesSubscription extends Subscription {
     }
 
     @Override
-    protected boolean process() throws PlatformPublishException {
-        boolean continueProcessing = true;
+    protected boolean deliver() {
+        boolean continueDelivering = false;
 
         int batchSize = getSubscriber().getBatchSize();
 
@@ -23,13 +24,19 @@ public class BatchMessagesSubscription extends Subscription {
         int size = getQueue().drainTo(messagesFromQueue, batchSize);
 
         if(size > 0) {
-            getSubscriber().onMessages(messagesFromQueue);
+            try {
+                getSubscriber().onMessages(messagesFromQueue);
+
+                if(size >= batchSize) {
+                    continueDelivering = true;
+                }
+            } catch(Throwable t) {
+                // Throwable is caught to ensure that the messages are not lost on any condition
+                log.error("Failed to deliver the messages from '{}' Queue to the '{}' Subscriber. Messages are put back in the queue for retry.", getQueue().getName(), getSubscriber().getClass().getSimpleName(), t);
+                rollbackMessagesToQueue(messagesFromQueue);
+            }
         }
 
-        if(size < batchSize) {
-            continueProcessing = false;
-        }
-
-        return continueProcessing;
+        return continueDelivering;
     }
 }

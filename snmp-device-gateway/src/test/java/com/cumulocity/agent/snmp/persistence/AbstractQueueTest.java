@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -44,6 +45,7 @@ public class AbstractQueueTest {
         if(persistentFolderPath.toFile().exists()) {
             try {
                 Files.list(persistentFolderPath).forEach(fileInTheFolder -> fileInTheFolder.toFile().delete());
+                persistentFolderPath.getParent().toFile().delete();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -147,6 +149,33 @@ public class AbstractQueueTest {
     public void shouldThrowExceptionForPeekIfQueueIsClosed() {
         abstractQueueImplForTest.close();
         abstractQueueImplForTest.peek();
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void shouldThrowExceptionForDrainToIfQueueIsClosed() {
+        abstractQueueImplForTest.close();
+        // DRAIN TO
+        List<String> collectionToDrainTo = Collections.EMPTY_LIST;
+        abstractQueueImplForTest.drainTo(collectionToDrainTo, 10);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void shouldThrowExceptionForDrainToWhenPassedCollectionIsNull() {
+        // DRAIN TO
+        abstractQueueImplForTest.drainTo(null, 10);
+    }
+
+    @Test
+    public void shouldReturnZeroWhenTheMaxElementsPassedIsEqualOrLessThanZero() {
+        List<String> collectionToDrainTo = Collections.EMPTY_LIST;
+
+        // DRAIN TO 0
+        assertEquals(0, abstractQueueImplForTest.drainTo(collectionToDrainTo, 0));
+        assertEquals(Collections.EMPTY_LIST, collectionToDrainTo);
+
+        // DRAIN TO -1
+        assertEquals(0, abstractQueueImplForTest.drainTo(collectionToDrainTo, -1));
+        assertEquals(Collections.EMPTY_LIST, collectionToDrainTo);
     }
 
     @Test

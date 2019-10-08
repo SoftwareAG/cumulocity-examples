@@ -1,13 +1,21 @@
 package com.cumulocity.agent.snmp.platform.pubsub.service.subscription;
 
 import com.cumulocity.agent.snmp.persistence.Queue;
-import com.cumulocity.agent.snmp.platform.pubsub.subscriber.PlatformPublishException;
 import com.cumulocity.agent.snmp.platform.pubsub.subscriber.Subscriber;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Collection;
 
+/**
+ * Drains the queue and delivers the messages to the subscriber.
+ *
+ * Before draining the queue and delivering the messages, it ensure that the
+ * Subscriber is ready to accept/handle the messages.
+ *
+ * Rolls back the read messages if it receives a SubscriberException from Subscriber.
+ *
+ */
 
 @Slf4j
 public abstract class Subscription implements Runnable {
@@ -27,27 +35,24 @@ public abstract class Subscription implements Runnable {
     @Override
     public void run() {
         try {
-            if(!subscriber.isReady()) {
-                log.debug("Draining of the '{}' Queue is suspended as the subscriber {} is not ready.", queue.getName(), subscriber.getClass().getSimpleName());
+            if(!subscriber.isReadyToAcceptMessages()) {
+                log.debug("Draining of the '{}' Queue is suspended as the '{}' Subscriber is not ready.", queue.getName(), this.subscriber.getClass().getSimpleName());
                 return;
             }
 
-            boolean continueProcessing = true;
-            while(!Thread.currentThread().isInterrupted() && continueProcessing) {
-                continueProcessing = process();
+            boolean continueDelivering = true;
+            while(!Thread.currentThread().isInterrupted() && continueDelivering) {
+                continueDelivering = deliver();
             }
-        } catch(PlatformPublishException ppe) {
-            log.error("{} subscriber failed to process the messages from '{}' Queue. Message is put back in the queue for retry.", this.getClass().getSimpleName(), queue.getName(), ppe);
-            rollbackMessagesToQueue(ppe.getFailedMessages());
         } catch(Throwable t) {
             // Throwable is caught to ensure that the scheduled subscription continues. This logged and ignored.
-            log.error("{} subscriber failed to process the messages from '{}' Queue.", this.getClass().getSimpleName(), queue.getName(), t);
+            log.error("Unexpected error occurred while delivering messages from '{}' Queue to the '{}' Subscriber.", this.getClass().getSimpleName(), queue.getName(), t);
         }
     }
 
-    protected abstract boolean process() throws PlatformPublishException;
+    protected abstract boolean deliver();
 
-    private void rollbackMessagesToQueue(Collection<String> messages) {
+    void rollbackMessagesToQueue(Collection<String> messages) {
         if(messages == null || messages.isEmpty()) {
             return;
         }
@@ -57,7 +62,7 @@ public abstract class Subscription implements Runnable {
                 queue.enqueue(oneMessage);
             } catch(Throwable t) {
                 // Log this message string and the exception as we can't do much and continue to execute the loop
-                log.error("Skipped publishing the following message to the Platform, as an error occurred while placing the message back in the '{}' Queue.\n{}", queue.getName(), oneMessage, t);
+                log.error("Skipped delivering the following message to the '{}' Subscriber as an error occurred while placing the message back in the '{}' Queue.\n{}", queue.getName(), this.subscriber.getClass().getSimpleName(), oneMessage, t);
             }
         }
     }

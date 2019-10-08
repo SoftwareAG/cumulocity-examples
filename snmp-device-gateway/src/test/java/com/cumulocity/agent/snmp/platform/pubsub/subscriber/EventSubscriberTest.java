@@ -15,8 +15,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.util.Collections;
-
 import static org.junit.Assert.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -111,7 +109,7 @@ public class EventSubscriberTest {
 
         try {
             eventSubscriber.onMessage("SOME STRING");
-        } catch (PlatformPublishException e) {
+        } catch (SubscriberException e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -121,16 +119,15 @@ public class EventSubscriberTest {
         assertEquals("SOME STRING", eventRepresentationCaptor.getValue().toJSON());
     }
 
-    @Test(expected = PlatformPublishException.class)
-    public void should_onMessage_whenEventApiThrowsSDKException() throws PlatformPublishException {
+    @Test(expected = SubscriberException.class)
+    public void should_onMessage_whenEventApiThrowsSDKException() throws SubscriberException {
         SDKException sdkException = new SDKException(500, "SOME ERROR MESSAGE");
         Mockito.when(eventApi.create(Mockito.any(EventSubscriber.EventRepresentation.class))).thenThrow(sdkException);
 
         try {
             eventSubscriber.onMessage("SOME STRING");
-        } catch (PlatformPublishException ppe) {
+        } catch (SubscriberException ppe) {
             Mockito.verify(platformProvider).markPlatfromAsUnavailable();
-            assertEquals(Collections.singletonList("SOME STRING"), ppe.getFailedMessages());
             throw ppe;
         }
     }
@@ -144,7 +141,7 @@ public class EventSubscriberTest {
 
         try {
             eventSubscriber.onMessage("SOME STRING");
-        } catch (PlatformPublishException e) {
+        } catch (SubscriberException e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -163,7 +160,7 @@ public class EventSubscriberTest {
 
         try {
             eventSubscriber.onMessage("SOME STRING");
-        } catch (PlatformPublishException e) {
+        } catch (SubscriberException e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -173,64 +170,60 @@ public class EventSubscriberTest {
         assertEquals("SOME STRING", eventRepresentationCaptor.getValue().toJSON());
     }
 
-    @Test(expected = PlatformPublishException.class)
-    public void should_onMessage_whenEventApiThrowsSDKException_with_HTTPStatus_401() throws PlatformPublishException {
+    @Test(expected = SubscriberException.class)
+    public void should_onMessage_whenEventApiThrowsSDKException_with_HTTPStatus_401() throws SubscriberException {
         SDKException sdkException = new SDKException(401, "SOME ERROR MESSAGE");
         Mockito.when(eventApi.create(Mockito.any(EventSubscriber.EventRepresentation.class))).thenThrow(sdkException);
 
         try {
             eventSubscriber.onMessage("SOME STRING");
-        } catch (PlatformPublishException ppe) {
+        } catch (SubscriberException ppe) {
             Mockito.verify(platformProvider).markPlatfromAsUnavailable();
-            assertEquals(Collections.singletonList("SOME STRING"), ppe.getFailedMessages());
             throw ppe;
         }
     }
 
-    @Test(expected = PlatformPublishException.class)
-    public void should_onMessage_whenEventApiThrowsSDKException_with_HTTPStatus_402() throws PlatformPublishException {
+    @Test(expected = SubscriberException.class)
+    public void should_onMessage_whenEventApiThrowsSDKException_with_HTTPStatus_402() throws SubscriberException {
         SDKException sdkException = new SDKException(402, "SOME ERROR MESSAGE");
         Mockito.when(eventApi.create(Mockito.any(EventSubscriber.EventRepresentation.class))).thenThrow(sdkException);
 
         try {
             eventSubscriber.onMessage("SOME STRING");
-        } catch (PlatformPublishException ppe) {
+        } catch (SubscriberException ppe) {
             Mockito.verify(platformProvider).markPlatfromAsUnavailable();
-            assertEquals(Collections.singletonList("SOME STRING"), ppe.getFailedMessages());
             throw ppe;
         }
     }
 
-    @Test(expected = PlatformPublishException.class)
-    public void should_onMessage_whenEventApiThrowsSDKException_with_HTTPStatus_408() throws PlatformPublishException {
+    @Test(expected = SubscriberException.class)
+    public void should_onMessage_whenEventApiThrowsSDKException_with_HTTPStatus_408() throws SubscriberException {
         SDKException sdkException = new SDKException(408, "SOME ERROR MESSAGE");
         Mockito.when(eventApi.create(Mockito.any(EventSubscriber.EventRepresentation.class))).thenThrow(sdkException);
 
         try {
             eventSubscriber.onMessage("SOME STRING");
-        } catch (PlatformPublishException ppe) {
+        } catch (SubscriberException ppe) {
             Mockito.verify(platformProvider).markPlatfromAsUnavailable();
-            assertEquals(Collections.singletonList("SOME STRING"), ppe.getFailedMessages());
             throw ppe;
         }
     }
 
-    @Test(expected = PlatformPublishException.class)
-    public void should_onMessage_whenEventApiThrowsSDKException_with_HTTPStatus_500() throws PlatformPublishException {
+    @Test(expected = SubscriberException.class)
+    public void should_onMessage_whenEventApiThrowsSDKException_with_HTTPStatus_500() throws SubscriberException {
         SDKException sdkException = new SDKException(500, "SOME ERROR MESSAGE");
         Mockito.when(eventApi.create(Mockito.any(EventSubscriber.EventRepresentation.class))).thenThrow(sdkException);
 
         try {
             eventSubscriber.onMessage("SOME STRING");
-        } catch (PlatformPublishException ppe) {
+        } catch (SubscriberException ppe) {
             Mockito.verify(platformProvider).markPlatfromAsUnavailable();
-            assertEquals(Collections.singletonList("SOME STRING"), ppe.getFailedMessages());
             throw ppe;
         }
     }
 
     @Test(expected = UnsupportedOperationException.class)
-    public void should_onMessages_NotSupportedByEventSubscriber() throws PlatformPublishException {
+    public void should_onMessages_NotSupportedByEventSubscriber() throws SubscriberException {
         eventSubscriber.onMessages(null);
     }
 
@@ -280,7 +273,7 @@ public class EventSubscriberTest {
     public void isReady_should_invoke_isPlatformAvailable() {
         Mockito.when(platformProvider.isPlatformAvailable()).thenReturn(Boolean.TRUE);
 
-        assertTrue(eventSubscriber.isReady());
+        assertTrue(eventSubscriber.isReadyToAcceptMessages());
 
         Mockito.verify(platformProvider).isPlatformAvailable();
     }

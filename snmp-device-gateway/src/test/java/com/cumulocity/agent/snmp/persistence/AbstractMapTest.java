@@ -3,8 +3,8 @@ package com.cumulocity.agent.snmp.persistence;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -39,6 +39,43 @@ public class AbstractMapTest {
         abstractMapImplForTest.close();
 
         persistentFilePath.toFile().delete();
+        persistentFilePath.getParent().toFile().delete();
+    }
+
+    @Test(expected=NullPointerException.class)
+    public void shouldCreateFailForNullMapName() {
+        new AbstractMapImplForTest(null, persistentFilePath.toFile());
+    }
+
+    @Test(expected=NullPointerException.class)
+    public void shouldCreateFailForNullPersistenceFile() {
+        new AbstractMapImplForTest("SOME QUEUE", null);
+    }
+
+    @Test
+    public void shouldCreatePersistenceFileIfRequired() {
+        Path filePath = Paths.get(
+                System.getProperty("user.home"),
+                ".snmp",
+                "test",
+                AbstractMapImplForTest.class.getSimpleName().toLowerCase() + ".dat");
+        filePath.toFile().delete();
+        filePath.getParent().toFile().delete();
+        assertFalse(filePath.getParent().toFile().exists());
+
+        AbstractMapImplForTest map = null;
+        try {
+
+            map = new AbstractMapImplForTest("SOME QUEUE", filePath.toFile());
+
+            assertTrue(filePath.getParent().toFile().exists());
+        } finally {
+            if(map != null) {
+                map.close();
+            }
+            filePath.toFile().delete();
+            filePath.getParent().toFile().delete();
+        }
     }
 
     @Test
@@ -423,7 +460,17 @@ public class AbstractMapTest {
     }
 
     private class AbstractMapImplForTest extends AbstractMap<String, String> {
-        @Autowired
+        AbstractMapImplForTest(String queueName, File persistenceFile) {
+            super(queueName,
+                    String.class,
+                    100,
+                    String.class,
+                    10_000,
+                    10,
+                    persistenceFile
+            );
+        }
+
         AbstractMapImplForTest() {
             super(AbstractMapImplForTest.class.getSimpleName(),
                     String.class,

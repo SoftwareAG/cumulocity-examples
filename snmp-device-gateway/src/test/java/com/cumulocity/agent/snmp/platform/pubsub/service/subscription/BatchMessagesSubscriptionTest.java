@@ -1,18 +1,19 @@
 package com.cumulocity.agent.snmp.platform.pubsub.service.subscription;
 
 import com.cumulocity.agent.snmp.persistence.Queue;
-import com.cumulocity.agent.snmp.platform.pubsub.subscriber.PlatformPublishException;
 import com.cumulocity.agent.snmp.platform.pubsub.subscriber.Subscriber;
+import com.cumulocity.agent.snmp.platform.pubsub.subscriber.SubscriberException;
 import com.cumulocity.sdk.client.SDKException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.fail;
@@ -32,7 +33,7 @@ public class BatchMessagesSubscriptionTest {
 
     @Test
     public void shouldNotProcessIfSubscriberNotReady() {
-        Mockito.when(subscriber.isReady()).thenReturn(Boolean.FALSE);
+        Mockito.when(subscriber.isReadyToAcceptMessages()).thenReturn(Boolean.FALSE);
 
         subscripton.run();
 
@@ -42,7 +43,7 @@ public class BatchMessagesSubscriptionTest {
 
     @Test
     public void shouldProcessMessagesUntilNoneFound() {
-        Mockito.when(subscriber.isReady()).thenReturn(Boolean.TRUE);
+        Mockito.when(subscriber.isReadyToAcceptMessages()).thenReturn(Boolean.TRUE);
 
         int batchSize = 10;
         Mockito.when(subscriber.getBatchSize()).thenReturn(Integer.valueOf(batchSize));
@@ -53,22 +54,31 @@ public class BatchMessagesSubscriptionTest {
         Mockito.verify(queue, Mockito.times(2)).drainTo(Mockito.anyCollection(), Mockito.eq(batchSize));
         try {
             Mockito.verify(subscriber, Mockito.times(2)).onMessages(Mockito.anyCollection());
-        } catch (PlatformPublishException e) {
+        } catch (SubscriberException e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
     }
 
     @Test
-    public void shouldRollbackMessagesWhenProcessThrowsPlatformPublishException() throws PlatformPublishException {
-        Mockito.when(subscriber.isReady()).thenReturn(Boolean.TRUE);
+    public void shouldRollbackMessagesWhenProcessThrowsSubscriberException() throws SubscriberException {
+        Mockito.when(subscriber.isReadyToAcceptMessages()).thenReturn(Boolean.TRUE);
 
         int batchSize = 10;
         Mockito.when(subscriber.getBatchSize()).thenReturn(Integer.valueOf(batchSize));
-        Mockito.when(queue.drainTo(Mockito.anyCollection(), Mockito.eq(batchSize))).thenReturn(Integer.valueOf(batchSize));
 
-        List<String> failedMessages = Arrays.asList("MESSAGE 1", "MESSAGE 2");
-        Mockito.doThrow(new PlatformPublishException(failedMessages, new SDKException("Error processing messages.")))
+        final List<String> failedMessages = Arrays.asList("MESSAGE 1", "MESSAGE 2", "MESSAGE 3");
+        Mockito.doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+                List<String> messagesFromQueue = (List<String>) invocationOnMock.getArguments()[0];
+                messagesFromQueue.addAll(failedMessages);
+
+                return Integer.valueOf(messagesFromQueue.size());
+            }
+        }).when(queue).drainTo(Mockito.anyCollection(), Mockito.eq(batchSize));
+
+        Mockito.doThrow(new SubscriberException(new SDKException("Error processing messages.")))
                     .when(subscriber).onMessages(Mockito.anyCollection());
 
         subscripton.run();
@@ -80,35 +90,24 @@ public class BatchMessagesSubscriptionTest {
     }
 
     @Test
-    public void shouldRollbackMessagesWhenProcessThrowsPlatformPublishException_1() throws PlatformPublishException {
-        Mockito.when(subscriber.isReady()).thenReturn(Boolean.TRUE);
+    public void shouldRollbackMessagesWhenProcessThrowsSubscriberException_1() throws SubscriberException {
+        Mockito.when(subscriber.isReadyToAcceptMessages()).thenReturn(Boolean.TRUE);
 
         int batchSize = 10;
         Mockito.when(subscriber.getBatchSize()).thenReturn(Integer.valueOf(batchSize));
-        Mockito.when(queue.drainTo(Mockito.anyCollection(), Mockito.eq(batchSize))).thenReturn(Integer.valueOf(batchSize));
 
-        List<String> failedMessages = Collections.EMPTY_LIST;
-        Mockito.doThrow(new PlatformPublishException(failedMessages, new SDKException("Error processing messages.")))
-                .when(subscriber).onMessages(Mockito.anyCollection());
+        final List<String> failedMessages = Arrays.asList("MESSAGE 1", "MESSAGE 2", "MESSAGE 3");
+        Mockito.doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+                List<String> messagesFromQueue = (List<String>) invocationOnMock.getArguments()[0];
+                messagesFromQueue.addAll(failedMessages);
 
-        subscripton.run();
+                return Integer.valueOf(messagesFromQueue.size());
+            }
+        }).when(queue).drainTo(Mockito.anyCollection(), Mockito.eq(batchSize));
 
-        Mockito.verify(queue, Mockito.times(failedMessages.size())).enqueue(Mockito.startsWith("MESSAGE "));
-
-        Mockito.verify(queue, Mockito.times(1)).drainTo(Mockito.anyCollection(), Mockito.eq(batchSize));
-        Mockito.verify(subscriber, Mockito.times(1)).onMessages(Mockito.anyCollection());
-    }
-
-    @Test
-    public void shouldRollbackMessagesWhenProcessThrowsPlatformPublishException_2() throws PlatformPublishException {
-        Mockito.when(subscriber.isReady()).thenReturn(Boolean.TRUE);
-
-        int batchSize = 10;
-        Mockito.when(subscriber.getBatchSize()).thenReturn(Integer.valueOf(batchSize));
-        Mockito.when(queue.drainTo(Mockito.anyCollection(), Mockito.eq(batchSize))).thenReturn(Integer.valueOf(batchSize));
-
-        List<String> failedMessages = Arrays.asList("MESSAGE 1", "MESSAGE 2", "MESSAGE 3");
-        Mockito.doThrow(new PlatformPublishException(failedMessages, new SDKException("Error processing messages.")))
+        Mockito.doThrow(new SubscriberException(new SDKException("Error processing messages.")))
                 .when(subscriber).onMessages(Mockito.anyCollection());
 
         Mockito.doThrow(new NullPointerException()).when(queue).enqueue(Mockito.eq("MESSAGE 2"));
@@ -122,14 +121,23 @@ public class BatchMessagesSubscriptionTest {
     }
 
     @Test
-    public void shouldCatchThrowableAndReturnGracefully() throws PlatformPublishException {
-        Mockito.when(subscriber.isReady()).thenReturn(Boolean.TRUE);
+    public void shouldCatchThrowableAndReturnGracefully() throws SubscriberException {
+        Mockito.when(subscriber.isReadyToAcceptMessages()).thenReturn(Boolean.TRUE);
 
         int batchSize = 10;
         Mockito.when(subscriber.getBatchSize()).thenReturn(Integer.valueOf(batchSize));
-        Mockito.when(queue.drainTo(Mockito.anyCollection(), Mockito.eq(batchSize))).thenReturn(Integer.valueOf(batchSize));
 
-        List<String> failedMessages = Arrays.asList("MESSAGE 1", "MESSAGE 2");
+        final List<String> failedMessages = Arrays.asList("MESSAGE 1", "MESSAGE 2", "MESSAGE 3");
+        Mockito.doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+                List<String> messagesFromQueue = (List<String>) invocationOnMock.getArguments()[0];
+                messagesFromQueue.addAll(failedMessages);
+
+                return Integer.valueOf(messagesFromQueue.size());
+            }
+        }).when(queue).drainTo(Mockito.anyCollection(), Mockito.eq(batchSize));
+
         Mockito.doThrow(new NullPointerException())
                 .when(subscriber).onMessages(Mockito.anyCollection());
 

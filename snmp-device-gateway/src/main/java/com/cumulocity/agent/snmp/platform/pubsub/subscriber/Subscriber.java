@@ -13,7 +13,6 @@ import org.springframework.context.event.EventListener;
 
 import javax.annotation.PreDestroy;
 import java.util.Collection;
-import java.util.Collections;
 
 /**
  * Subscriber to handle messages,
@@ -46,7 +45,7 @@ public abstract class Subscriber<PS extends PubSub> {
         return transmitRateInSeconds;
     }
 
-    public boolean isReady() {
+    public boolean isReadyToAcceptMessages() {
         return platformProvider.isPlatformAvailable();
     }
 
@@ -62,7 +61,7 @@ public abstract class Subscriber<PS extends PubSub> {
 
     public abstract int getConcurrentSubscriptionsCount();
 
-    public void onMessage(String message) throws PlatformPublishException {
+    public void onMessage(String message) throws SubscriberException {
         try {
             handleMessage(message);
         } catch(SDKException sdke) {
@@ -70,24 +69,24 @@ public abstract class Subscriber<PS extends PubSub> {
                 // If the error is caused by an invalid message which is being processed, we will not be able to do much here.
                 // Just log the message with the exception details and continue.
                 // Log the message and return
-                log.error("Skipped publishing the following invalid message to the Platform.\n{}", message, sdke);
+                log.error("'{}' Subscriber skipped publishing the following invalid message to the Platform.\n{}", this.getClass().getSimpleName(), message, sdke);
             }
             else {
-                log.error("{} subscriber failed to publish message to the Platform. May be Platform is unavailable." +
+                log.error("'{}' Subscriber failed to publish message to the Platform. May be Platform is unavailable." +
                         "\nThrowing exception so the failed message is put back in the Queue. " +
                         "Will be published when Platform is back online again.", this.getClass().getSimpleName(), sdke);
 
                 // Unable to publish as the platform is unavailable,
                 // so mark the platform as unavailable and put the message(s) already read, back into the queue.
-                log.debug("{} subscriber is marking the platform as unavailable.", this.getClass().getSimpleName());
                 platformProvider.markPlatfromAsUnavailable();
+                log.debug("'{}' Subscriber has marked the platform as unavailable.", this.getClass().getSimpleName());
 
-                throw new PlatformPublishException(Collections.singletonList(message), sdke);
+                throw new SubscriberException(sdke);
             }
         }
     }
 
-    public void onMessages(Collection<String> messageCollection) throws PlatformPublishException {
+    public void onMessages(Collection<String> messageCollection) throws SubscriberException {
         try {
             handleMessages(messageCollection);
         } catch(SDKException sdke) {
@@ -96,20 +95,20 @@ public abstract class Subscriber<PS extends PubSub> {
                 // Just log the message with the exception details and continue.
                 // Log the messages and return
                 for(String oneMessage : messageCollection) {
-                    log.error("Skipped publishing the following invalid message to the Platform.\n{}", oneMessage, sdke);
+                    log.error("'{}' Subscriber skipped publishing the following invalid message to the Platform.\n{}", this.getClass().getSimpleName(), oneMessage, sdke);
                 }
             }
             else {
-                log.error("{} subscriber failed to publish messages to the Platform. May be Platform is unavailable." +
+                log.error("'{}' Subscriber failed to publish messages to the Platform. May be Platform is unavailable." +
                         "\nThrowing exception so the failed messages are put back in the Queue. " +
                         "Will be published when Platform is back online again.", this.getClass().getSimpleName(), sdke);
 
                 // Unable to publish as the platform is unavailable,
                 // so mark the platform as unavailable and put the message(s) already read, back into the queue.
-                log.debug("{} subscriber is marking the platform as unavailable.", this.getClass().getSimpleName());
                 platformProvider.markPlatfromAsUnavailable();
+                log.debug("'{}' Subscriber has marked the platform as unavailable.", this.getClass().getSimpleName());
 
-                throw new PlatformPublishException(messageCollection, sdke);
+                throw new SubscriberException(sdke);
             }
         }
     }
@@ -129,9 +128,9 @@ public abstract class Subscriber<PS extends PubSub> {
         }
         // TODO: REMOVE THIS CODE AFTER LISTENING TO BootstrapReadyEvent
 
-        pubSub.subscribe(this); // Subscribing for the first time
-
         this.transmitRateInSeconds = fetchTransmitRateFromGatewayDevice();
+
+        pubSub.subscribe(this); // Subscribing for the first time
 
         log.debug("{} subscribed to {}.", this.getClass().getName(), pubSub.getClass().getName());
     }
@@ -144,9 +143,11 @@ public abstract class Subscriber<PS extends PubSub> {
                 // Refresh the subscription only when the Transmit Rate
                 // has changed for the Subscribers supporting batching
                 pubSub.unsubscribe(this);
-                pubSub.subscribe(this);
 
+                // Update the transmit rate before resubscribing
                 this.transmitRateInSeconds = transmitRateFromGatewayDevice;
+
+                pubSub.subscribe(this);
 
                 log.debug("{} refreshed its subscription as the transmit rate changed.", this.getClass().getName());
             }
