@@ -1,6 +1,6 @@
 # Device integrations
 
-<hr/>
+------------------------
 
 This sections contains detailed explanations and basic examples on how to integrate the following devices:
 
