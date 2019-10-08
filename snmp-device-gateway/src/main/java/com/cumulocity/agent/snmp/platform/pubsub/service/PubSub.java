@@ -32,7 +32,8 @@ public abstract class PubSub<Q extends Queue> {
     @Autowired
     private Q queue;
 
-    ScheduledFuture[] subscriptions;
+    private ScheduledFuture[] subscriptions;
+
 
     public void publish(String message) {
         if(message == null) {

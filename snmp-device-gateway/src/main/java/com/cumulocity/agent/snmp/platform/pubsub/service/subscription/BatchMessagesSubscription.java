@@ -22,7 +22,6 @@ public class BatchMessagesSubscription extends Subscription {
 
         Collection<String> messagesFromQueue = new ArrayList<>(batchSize);
         int size = getQueue().drainTo(messagesFromQueue, batchSize);
-
         if(size > 0) {
             try {
                 getSubscriber().onMessages(messagesFromQueue);

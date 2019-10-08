@@ -9,6 +9,7 @@ import org.junit.runner.RunWith;
 import org.mockito.*;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.scheduling.TaskScheduler;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.Duration;
 import java.util.concurrent.ScheduledFuture;
@@ -65,7 +66,7 @@ public class PubSubTest {
         Mockito.verify(taskScheduler, Mockito.times(concurrentSubscriptionsCount)).scheduleWithFixedDelay(subscriptionArgumentCaptor.capture(), Mockito.eq(Duration.ofMillis(1)));
         assertEquals(subscriber, subscriptionArgumentCaptor.getValue().getSubscriber());
 
-        assertEquals(concurrentSubscriptionsCount, pubSub.subscriptions.length);
+        assertEquals(concurrentSubscriptionsCount, ((ScheduledFuture[])ReflectionTestUtils.getField(pubSub, "subscriptions")).length);
     }
 
     @Test
@@ -79,7 +80,7 @@ public class PubSubTest {
 
         Mockito.verifyZeroInteractions(taskScheduler);
 
-        assertNull(pubSub.subscriptions);
+        assertNull(((ScheduledFuture[])ReflectionTestUtils.getField(pubSub, "subscriptions")));
     }
 
     @Test
@@ -97,7 +98,7 @@ public class PubSubTest {
         Mockito.verify(taskScheduler, Mockito.times(1)).scheduleWithFixedDelay(subscriptionArgumentCaptor.capture(), Mockito.eq(Duration.ofSeconds(transmitRateInSeconds)));
         assertEquals(subscriber, subscriptionArgumentCaptor.getValue().getSubscriber());
 
-        assertEquals(1, pubSub.subscriptions.length);
+        assertEquals(1, ((ScheduledFuture[])ReflectionTestUtils.getField(pubSub, "subscriptions")).length);
     }
 
     @Test
@@ -116,7 +117,7 @@ public class PubSubTest {
         Mockito.verify(taskScheduler, Mockito.times(concurrentSubscriptionsCount)).scheduleWithFixedDelay(subscriptionArgumentCaptor.capture(), Mockito.eq(Duration.ofMillis(1)));
         assertEquals(subscriber, subscriptionArgumentCaptor.getValue().getSubscriber());
 
-        assertEquals(concurrentSubscriptionsCount, pubSub.subscriptions.length);
+        assertEquals(concurrentSubscriptionsCount, ((ScheduledFuture[])ReflectionTestUtils.getField(pubSub, "subscriptions")).length);
     }
 
     @Test(expected = IllegalStateException.class)
@@ -133,25 +134,25 @@ public class PubSubTest {
     @Test
     public void shouldUnsubscribe() {
         ScheduledFuture mockScheduledFuture = Mockito.mock(ScheduledFuture.class);
-        pubSub.subscriptions = new ScheduledFuture[] {mockScheduledFuture, mockScheduledFuture};
+        ReflectionTestUtils.setField(pubSub, "subscriptions", new ScheduledFuture[] {mockScheduledFuture, mockScheduledFuture});
 
         pubSub.unsubscribe(subscriber);
 
         Mockito.verify(mockScheduledFuture, Mockito.times(2)).cancel(true);
 
-        assertNull(pubSub.subscriptions);
+        assertNull(((ScheduledFuture[])ReflectionTestUtils.getField(pubSub, "subscriptions")));
     }
 
     @Test
     public void shouldUnsubscribe_withNullConcurrentSubscriptions() {
         ScheduledFuture mockScheduledFuture = Mockito.mock(ScheduledFuture.class);
-        pubSub.subscriptions = null;
+        ReflectionTestUtils.setField(pubSub, "subscriptions", null);
 
         pubSub.unsubscribe(subscriber);
 
         Mockito.verifyZeroInteractions(mockScheduledFuture);
 
-        assertNull(pubSub.subscriptions);
+        assertNull(((ScheduledFuture[])ReflectionTestUtils.getField(pubSub, "subscriptions")));
     }
 
     private static class PubSubImplForTest extends PubSub<Queue> {

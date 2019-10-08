@@ -408,7 +408,7 @@ public class MeasurementSubscriberTest {
     }
 
     @Test
-    public void should_refreshSubscription_successfully() {
+    public void should_RefreshSubscription_successfully() {
         // Transmit rate is initialized with -1
         assertEquals(-1, measurementSubscriber.getTransmitRateInSeconds());
 

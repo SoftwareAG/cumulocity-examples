@@ -137,20 +137,22 @@ public abstract class Subscriber<PS extends PubSub> {
 
     @EventListener(GatewayDataRefreshedEvent.class)
     void refreshSubscription() {
-        if(isBatchingSupported()) {
-            long transmitRateFromGatewayDevice = fetchTransmitRateFromGatewayDevice();
-            if(transmitRateInSeconds != transmitRateFromGatewayDevice) {
-                // Refresh the subscription only when the Transmit Rate
-                // has changed for the Subscribers supporting batching
-                pubSub.unsubscribe(this);
+        if(!isBatchingSupported()) {
+            return;
+        }
 
-                // Update the transmit rate before resubscribing
-                this.transmitRateInSeconds = transmitRateFromGatewayDevice;
+        long transmitRateFromGatewayDevice = fetchTransmitRateFromGatewayDevice();
+        if(transmitRateInSeconds != transmitRateFromGatewayDevice) {
+            // Refresh the subscription only when the Transmit Rate
+            // has changed for the Subscribers supporting batching
+            pubSub.unsubscribe(this);
 
-                pubSub.subscribe(this);
+            // Update the transmit rate before resubscribing
+            this.transmitRateInSeconds = transmitRateFromGatewayDevice;
 
-                log.debug("{} refreshed its subscription as the transmit rate changed.", this.getClass().getName());
-            }
+            pubSub.subscribe(this);
+
+            log.debug("{} refreshed its subscription as the transmit rate changed.", this.getClass().getName());
         }
     }
 
