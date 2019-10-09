@@ -14,13 +14,13 @@ public class DeviceCredentialsStore extends AbstractMap<DeviceCredentialsKey, St
     private static final String DEVICE_CREDENTIALS_STORE = "device-credentials-store";
 
     @Autowired
-    public DeviceCredentialsStore(GatewayProperties gatewayProperties) {
+    DeviceCredentialsStore(GatewayProperties gatewayProperties) {
         super(DEVICE_CREDENTIALS_STORE,
                 DeviceCredentialsKey.class,
                 100,
                 String.class,
                 10_000,
-                10,
+                10, // Chronicle Map is optimized for 10 entries as we actually store only one entry with device credentials
                 Paths.get(
                         System.getProperty("user.home"),
                         ".snmp",

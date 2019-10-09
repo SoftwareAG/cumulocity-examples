@@ -29,11 +29,11 @@ public class PlatformProvider implements InitializingBean {
 
     private final TaskScheduler taskScheduler;
 
+    private final ApplicationEventPublisher eventPublisher;
+
     private Platform bootstrapPlatform;
 
 	private Platform platform;
-
-	private final ApplicationEventPublisher eventPublisher;
 
     private volatile boolean isPlatformAvailable = false;
 
@@ -58,8 +58,8 @@ public class PlatformProvider implements InitializingBean {
 		bootstrapPlatform = createPlatform(credentials);
 	}
 
-    @EventListener
-	public void onCredentialsAvailable(CredentialsAvailableEvent credentialsAvailableEvent) {
+    @EventListener(CredentialsAvailableEvent.class)
+	void onCredentialsAvailable(CredentialsAvailableEvent credentialsAvailableEvent) {
 		if (!Objects.isNull(platform)) {
 			return;
 		}
