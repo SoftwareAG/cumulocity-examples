@@ -20,7 +20,10 @@ public class MeasurementSubscriber extends Subscriber<MeasurementPubSub> {
 
     @Override
     public int getConcurrentSubscriptionsCount() {
-        return concurrencyConfiguration.getSchedulerPoolSize() * 30/100; // 30% of the total threads available for scheduler
+        // 30% of the total threads available for scheduler
+        int count = concurrencyConfiguration.getSchedulerPoolSize() * 30 / 100;
+
+        return (count <= 0)? 1 : count;
     }
 
     @Override
