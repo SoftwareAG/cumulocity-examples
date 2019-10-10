@@ -3,7 +3,6 @@ package com.cumulocity.agent.snmp.config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
@@ -18,6 +17,10 @@ public class ConcurrencyConfiguration {
 
 	@Value("#{'${gateway.executor.threadpool.maxSize:20}'.trim()}")
 	private Integer executorMaxPoolSize;
+
+	public int getSchedulerPoolSize() {
+		return schedulerPoolSize;
+	}
 
 	@Bean("taskScheduler")
 	public ThreadPoolTaskScheduler threadPoolTaskScheduler() {
@@ -38,17 +41,5 @@ public class ConcurrencyConfiguration {
 		executor.setMaxPoolSize(max);
 		executor.setThreadNamePrefix(prefix);
 		return executor;
-	}
-
-	public int getMeasurementThreadPoolSize() {
-		return schedulerPoolSize * 30/100; // 10% of the total threads available
-	}
-
-	public int getAlarmThreadPoolSize() {
-		return schedulerPoolSize * 10/100; // 10% of the total threads available
-	}
-
-	public int getEventThreadPoolSize() {
-		return schedulerPoolSize * 10/100; // 10% of the total threads available
 	}
 }

@@ -4,8 +4,9 @@ import c8y.*;
 import com.cumulocity.agent.snmp.bootstrap.model.BootstrapReadyEvent;
 import com.cumulocity.agent.snmp.bootstrap.model.CredentialsAvailableEvent;
 import com.cumulocity.agent.snmp.config.GatewayProperties;
-import com.cumulocity.agent.snmp.platform.config.PlatformProvider;
 import com.cumulocity.agent.snmp.platform.model.PlatformConnectionReadyEvent;
+import com.cumulocity.agent.snmp.platform.service.GatewayDataProvider;
+import com.cumulocity.agent.snmp.platform.service.PlatformProvider;
 import com.cumulocity.agent.snmp.utils.Constants;
 import com.cumulocity.model.Agent;
 import com.cumulocity.model.ID;
@@ -39,21 +40,23 @@ import static java.util.Optional.ofNullable;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class BootstrapService implements InitializingBean {
 
-	private final DeviceCredentialsStoreService deviceCredentialsStoreService;
-
-	private final TaskScheduler taskScheduler;
-
 	private final IdentityApi identityApi;
 
 	private final InventoryApi inventoryApi;
-
-	private final GatewayProperties gatewayProperties;
+	
+	private final TaskScheduler taskScheduler;
 
 	private final PlatformProvider platformProvider;
 
+	private final GatewayProperties gatewayProperties;
+
+	private final GatewayDataProvider gatewayDataProvider;
+
 	private final ApplicationEventPublisher eventPublisher;
 
-	private ScheduledFuture deviceCredentialsPoller;
+	private final DeviceCredentialsStoreService deviceCredentialsStoreService;
+
+	private ScheduledFuture<?> deviceCredentialsPoller;
 
 	@Override
 	public void afterPropertiesSet() {
@@ -86,7 +89,11 @@ public class BootstrapService implements InitializingBean {
 				}
 			}
 
-			eventPublisher.publishEvent(new BootstrapReadyEvent(deviceMO));
+			gatewayDataProvider.updateGatewayObjects(deviceMO);
+			
+			log.debug("Bootstrapping gateway device is completed.");
+
+			eventPublisher.publishEvent(new BootstrapReadyEvent());
 
 		} catch (BeanCreationException e) {
 			if (detectInvalidCredentials(e)) {
@@ -158,7 +165,7 @@ public class BootstrapService implements InitializingBean {
 				log.warn("A device with id {} is either not registerd or not accepted. "
 						+ "Register or accept a device with id {}, using Device Management user interface.", gatewayProperties.getGatewayIdentifier(), gatewayProperties.getGatewayIdentifier());
 			} else if(e.getHttpStatus() == HttpStatus.SC_UNAUTHORIZED) {
-				log.error("Unable to connect to the platform as incorrect bootstrap credentials were provided. Update the credentials in file:${user.home}/.snmp/snmp-agent-gateway.gatewayProperties and restart the agent.", e);
+				log.error("Unable to connect to the platform as incorrect bootstrap credentials were provided. Update the credentials in file:${user.home}/.snmp/snmp-agent-gateway.properties and restart the agent.", e);
 				throw e;
 			} else {
 				log.error("Unable to connect to the platform, correct the issue and restart the agent.", e);
@@ -170,7 +177,7 @@ public class BootstrapService implements InitializingBean {
 	}
 
 	private ID createID(String identifier) {
-		return new ID(Constants.EXTERNAL_ID_TYPE, identifier);
+		return new ID(Constants.C8Y_EXTERNAL_ID_TYPE, identifier);
 	}
 
 	private Optional<ExternalIDRepresentation> getExternalID(ID id) {
@@ -197,11 +204,11 @@ public class BootstrapService implements InitializingBean {
 
 	private ManagedObjectRepresentation createGatewayManagedObject() {
 		SupportedOperations operation = new SupportedOperations();
-		operation.add(Constants.SUPPORTED_OPERATIONS);
+		operation.add(Constants.C8Y_SUPPORTED_OPERATIONS);
 
 		ManagedObjectRepresentation deviceMO = new ManagedObjectRepresentation();
 		deviceMO.setName(gatewayProperties.getGatewayIdentifier());
-		deviceMO.setType(Constants.GATEWAY_TYPE);
+		deviceMO.setType(Constants.C8Y_SNMP_GATEWAY_TYPE);
 		deviceMO.set(new Agent());
 		deviceMO.set(new IsDevice());
 		deviceMO.set(new Hardware());

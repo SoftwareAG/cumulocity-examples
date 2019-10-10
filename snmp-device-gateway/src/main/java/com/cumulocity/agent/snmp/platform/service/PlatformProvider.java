@@ -1,4 +1,4 @@
-package com.cumulocity.agent.snmp.platform.config;
+package com.cumulocity.agent.snmp.platform.service;
 
 import com.cumulocity.agent.snmp.bootstrap.model.CredentialsAvailableEvent;
 import com.cumulocity.agent.snmp.config.GatewayProperties;
@@ -17,6 +17,7 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
+import java.time.Duration;
 import java.util.Objects;
 
 @Slf4j
@@ -28,11 +29,11 @@ public class PlatformProvider implements InitializingBean {
 
     private final TaskScheduler taskScheduler;
 
+    private final ApplicationEventPublisher eventPublisher;
+
     private Platform bootstrapPlatform;
 
 	private Platform platform;
-
-	private final ApplicationEventPublisher eventPublisher;
 
     private volatile boolean isPlatformAvailable = false;
 
@@ -57,8 +58,8 @@ public class PlatformProvider implements InitializingBean {
 		bootstrapPlatform = createPlatform(credentials);
 	}
 
-    @EventListener
-	public void onCredentialsAvailable(CredentialsAvailableEvent credentialsAvailableEvent) {
+    @EventListener(CredentialsAvailableEvent.class)
+	void onCredentialsAvailable(CredentialsAvailableEvent credentialsAvailableEvent) {
 		if (!Objects.isNull(platform)) {
 			return;
 		}
@@ -98,7 +99,7 @@ public class PlatformProvider implements InitializingBean {
                     log.info("Platform is unavailable. Waiting for {} seconds before retry.", gatewayProperties.getBootstrapFixedDelay()/1000);
                 }
             }
-        }, gatewayProperties.getBootstrapFixedDelay());
+        }, Duration.ofMillis(gatewayProperties.getBootstrapFixedDelay()));
     }
 
     private boolean checkPlatformAvailability() {

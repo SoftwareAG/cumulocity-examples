@@ -1,4 +1,4 @@
-package com.cumulocity.agent.snmp.platform.config;
+package com.cumulocity.agent.snmp.platform.service;
 
 import com.cumulocity.sdk.client.RestOperations;
 import com.cumulocity.sdk.client.alarm.AlarmApi;

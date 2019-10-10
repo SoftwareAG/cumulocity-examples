@@ -22,9 +22,11 @@ import java.util.function.Function;
  * @param <V> Value
  */
 @Slf4j
-public class AbstractMap<K, V> implements ConcurrentMap<K, V> {
+public abstract class AbstractMap<K, V> implements ConcurrentMap<K, V>, AutoCloseable {
 
     private final String name;
+
+    private final File persistenceFile;
 
     private final ChronicleMap<K, V> chronicleMap;
 
@@ -34,6 +36,11 @@ public class AbstractMap<K, V> implements ConcurrentMap<K, V> {
             throw new NullPointerException("mapName");
         }
         this.name = mapName;
+
+        if (persistenceFile == null) {
+            throw new NullPointerException("persistenceFile");
+        }
+        this.persistenceFile = persistenceFile;
 
         if (!persistenceFile.getParentFile().exists()) {
             persistenceFile.getParentFile().mkdirs();
@@ -57,6 +64,10 @@ public class AbstractMap<K, V> implements ConcurrentMap<K, V> {
 
     public String getName() {
         return this.name;
+    }
+
+    public File getPersistenceFile() {
+        return this.persistenceFile;
     }
 
     @Override
@@ -155,7 +166,7 @@ public class AbstractMap<K, V> implements ConcurrentMap<K, V> {
 
     @Override
     public void replaceAll(BiFunction<? super K, ? super V, ? extends V> function) {
-        chronicleMap.replaceAll(function);
+        throw new UnsupportedOperationException("replaceAll");
     }
 
     @Override
@@ -178,7 +189,8 @@ public class AbstractMap<K, V> implements ConcurrentMap<K, V> {
         return chronicleMap.merge(key, value, remappingFunction);
     }
 
-    public void close() throws Exception {
+    @Override
+    public void close() {
         log.info("'{}' Map closed.", this.name);
         chronicleMap.close();
     }

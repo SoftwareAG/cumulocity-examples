@@ -19,19 +19,18 @@ public class MeasurementSubscriber extends Subscriber<MeasurementPubSub> {
     }
 
     @Override
-    public int getBatchSize() {
-        // 200 is the default value, which should suffice. This can be made configurable if required.
-        return 200;
+    public int getConcurrentSubscriptionsCount() {
+        return concurrencyConfiguration.getSchedulerPoolSize() * 30/100; // 30% of the total threads available for scheduler
     }
 
     @Override
     public void handleMessage(String message) {
-        measurementApi.createWithoutResponse(new MeasurementRepresentation(message));
+        measurementApi.create(new MeasurementRepresentation(message));
     }
 
     @Override
     public void handleMessages(Collection<String> messageCollection) {
-        measurementApi.createBulkWithoutResponse(new MeasurementCollectionRepresentation(messageCollection));
+        measurementApi.createBulk(new MeasurementCollectionRepresentation(messageCollection));
     }
 
 
@@ -41,7 +40,7 @@ public class MeasurementSubscriber extends Subscriber<MeasurementPubSub> {
         public MeasurementRepresentation() {
         }
 
-        public MeasurementRepresentation(String jsonString) {
+        MeasurementRepresentation(String jsonString) {
             this.jsonString = jsonString;
         }
 
@@ -58,7 +57,7 @@ public class MeasurementSubscriber extends Subscriber<MeasurementPubSub> {
         public MeasurementCollectionRepresentation() {
         }
 
-        public MeasurementCollectionRepresentation(Collection<String> jsonStrings) {
+        MeasurementCollectionRepresentation(Collection<String> jsonStrings) {
             this.jsonStrings = jsonStrings;
         }
 

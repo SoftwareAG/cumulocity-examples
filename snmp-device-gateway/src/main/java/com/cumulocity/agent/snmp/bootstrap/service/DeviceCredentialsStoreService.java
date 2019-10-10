@@ -17,14 +17,16 @@ import javax.annotation.PreDestroy;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 class DeviceCredentialsStoreService {
 
-    @Autowired
     private final GatewayProperties gatewayProperties;
 
-    @Autowired
     private final DeviceCredentialsStore deviceCredentialsStore;
 
 
     void store(DeviceCredentialsRepresentation credentials) {
+        if(credentials == null) {
+            throw new NullPointerException("credentials");
+        }
+
         deviceCredentialsStore.put(createDeviceCredentialsKey(), credentials.toJSON());
     }
 
@@ -48,12 +50,8 @@ class DeviceCredentialsStoreService {
     }
 
     @PreDestroy
-    private void closeDeviceCredentialsStore() {
-        try {
-            deviceCredentialsStore.close();
-        } catch (Exception e) {
-            log.error("Error while closing the '" + deviceCredentialsStore.getName() + "' Map.", e);
-        }
+    void closeDeviceCredentialsStore() {
+        deviceCredentialsStore.close();
     }
 
     private DeviceCredentialsKey createDeviceCredentialsKey() {
