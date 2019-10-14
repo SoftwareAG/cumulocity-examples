@@ -111,12 +111,12 @@ public class GatewayDataProviderTest {
 		when(properties.getGatewayObjectRefreshIntervalInMinutes()).thenReturn(1);
 
 		assertNull(gatewayDataProvider.getGatewayDevice());
-		assertEquals(gatewayDataProvider.getCurrentDeviceProtocolMap().size(), 0);
+		assertEquals(gatewayDataProvider.getDeviceProtocolMap().size(), 0);
 
 		gatewayDataProvider.updateGatewayObjects(gatewayDeviceMo);
 
 		assertNotNull(gatewayDataProvider.getGatewayDevice());
-		assertEquals(gatewayDataProvider.getCurrentDeviceProtocolMap().size(), 1);
+		assertEquals(gatewayDataProvider.getDeviceProtocolMap().size(), 1);
 	}
 
 	@Test
@@ -155,11 +155,11 @@ public class GatewayDataProviderTest {
 		when(properties.getGatewayObjectRefreshIntervalInMinutes()).thenReturn(1);
 
 		assertNull(gatewayDataProvider.getGatewayDevice());
-		assertEquals(gatewayDataProvider.getCurrentDeviceProtocolMap().size(), 0);
+		assertEquals(gatewayDataProvider.getDeviceProtocolMap().size(), 0);
 
 		gatewayDataProvider.updateGatewayObjects(gatewayDeviceMo);
 
-		assertEquals(gatewayDataProvider.getCurrentDeviceProtocolMap().size(), 0);
+		assertEquals(gatewayDataProvider.getDeviceProtocolMap().size(), 0);
 	}
 
 	@Test(timeout = 5000L)

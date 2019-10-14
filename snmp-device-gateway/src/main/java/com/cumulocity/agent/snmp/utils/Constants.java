@@ -16,4 +16,13 @@ public class Constants {
 	public static final String C8Y_SNMP_GATEWAY = "c8y_SNMPGateway";
 
 	public static final String C8Y_SUPPORTED_OPERATIONS = "c8y_SNMPConfiguration";
+
+	/**
+	 * SNMP constants used during resolving Opaque variable
+	 */
+	public static final byte TAG1 = (byte) 0x9f;
+
+	public static final byte TAG_FLOAT = (byte) 0x78;
+
+	public static final byte TAG_DOUBLE = (byte) 0x79;
 }

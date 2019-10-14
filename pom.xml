@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		 xmlns="http://maven.apache.org/POM/4.0.0"
-		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 
@@ -22,10 +22,11 @@
 	</modules>
 
 	<properties>
+		<snmp4j.version>3.3.1</snmp4j.version>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<spring.boot.version>2.1.7.RELEASE</spring.boot.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<cumulocity.core.version>${project.version}</cumulocity.core.version>
 		<c8y.microservice.version>${c8y.microservice-new.version}</c8y.microservice.version>
 	</properties>
@@ -69,18 +70,23 @@
 				</exclusions>
 			</dependency>
 
-			<!-- Chronicle-Queue https://github.com/OpenHFT/Chronicle-Queue Dependencies -->
+			<!-- Chronicle-Queue -->
 			<dependency>
 				<groupId>net.openhft</groupId>
 				<artifactId>chronicle-queue</artifactId>
 				<version>5.17.21</version>
 			</dependency>
-
-			<!-- Chronicle-Map https://github.com/OpenHFT/Chronicle-Map Dependencies -->
 			<dependency>
 				<groupId>net.openhft</groupId>
 				<artifactId>chronicle-map</artifactId>
 				<version>3.17.4</version>
+			</dependency>
+
+			<!--SNMP4J -->
+			<dependency>
+				<groupId>org.snmp4j</groupId>
+				<artifactId>snmp4j</artifactId>
+				<version>${snmp4j.version}</version>
 			</dependency>
 
 			<!-- Cumulocity Dependencies -->

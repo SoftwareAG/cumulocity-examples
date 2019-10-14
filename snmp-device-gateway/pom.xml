@@ -31,16 +31,20 @@
 			<artifactId>lombok</artifactId>
 		</dependency>
 
-		<!-- Chronicle-Queue https://github.com/OpenHFT/Chronicle-Queue Dependencies -->
+		<!-- Chronicle-Queue -->
 		<dependency>
 			<groupId>net.openhft</groupId>
 			<artifactId>chronicle-queue</artifactId>
 		</dependency>
-
-		<!-- Chronicle-Map https://github.com/OpenHFT/Chronicle-Map Dependencies -->
 		<dependency>
 			<groupId>net.openhft</groupId>
 			<artifactId>chronicle-map</artifactId>
+		</dependency>
+
+		<!--SNMP4J -->
+		<dependency>
+			<groupId>org.snmp4j</groupId>
+			<artifactId>snmp4j</artifactId>
 		</dependency>
 
 		<!-- Cumulocity Dependencies -->

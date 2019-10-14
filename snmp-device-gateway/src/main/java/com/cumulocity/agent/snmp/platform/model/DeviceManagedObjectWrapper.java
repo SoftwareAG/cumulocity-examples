@@ -70,4 +70,10 @@ public class DeviceManagedObjectWrapper extends AbstractManagedObjectWrapper {
 
 		private int securityLevel;
 	}
+
+	public String getDeviceProtocol() {
+		String[] data = properties.getType().trim().split("/");
+		String deviceProtocol = data[data.length - 1];
+		return deviceProtocol;
+	}
 }
