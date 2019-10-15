@@ -11,7 +11,6 @@ import org.snmp4j.PDU;
 import org.snmp4j.asn1.BER;
 import org.snmp4j.asn1.BERInputStream;
 import org.snmp4j.smi.AbstractVariable;
-import org.snmp4j.smi.Address;
 import org.snmp4j.smi.Counter64;
 import org.snmp4j.smi.Integer32;
 import org.snmp4j.smi.IpAddress;
@@ -50,19 +49,19 @@ import lombok.extern.slf4j.Slf4j;
 public class TrapHandler implements CommandResponder {
 
 	@Autowired
-	AlarmPublisher alarmPublisher;
+	private AlarmPublisher alarmPublisher;
 
 	@Autowired
-	EventPublisher eventPublisher;
+	private EventPublisher eventPublisher;
 
 	@Autowired
-	GatewayDataProvider dataProvider;
+	private GatewayDataProvider dataProvider;
 
 	@Autowired
-	MeasurementPublisher measurementPublisher;
+	private MeasurementPublisher measurementPublisher;
 
 	@Override
-	public <A extends Address> void processPdu(CommandResponderEvent<A> event) {
+	public void processPdu(CommandResponderEvent event) {
 
 		PDU pdu = event.getPDU();
 		if (pdu == null) {
@@ -182,7 +181,7 @@ public class TrapHandler implements CommandResponder {
 			} else if (valueAsVar instanceof UnsignedInteger32) {
 				if (valueAsVar instanceof TimeTicks) {
 					long epochcentisecond = valueAsVar.toLong();
-					retvalue = new Double(epochcentisecond / 100.0);
+					retvalue = epochcentisecond / 100.0;
 				} else {
 					retvalue = valueAsVar.toLong();
 				}
@@ -207,8 +206,6 @@ public class TrapHandler implements CommandResponder {
 					}
 					retvalue = valueAsVar.toString();
 				}
-			} else if (valueAsVar instanceof Null) {
-				retvalue = null;
 			} else if (valueAsVar instanceof IpAddress) {
 				retvalue = ((IpAddress) valueAsVar).getInetAddress();
 			} else {
@@ -234,9 +231,9 @@ public class TrapHandler implements CommandResponder {
 
 			if (t1 == Constants.TAG1) {
 				if (t2 == Constants.TAG_FLOAT && l == 4) {
-					value = new Float(bais.getFloat());
+					value = bais.getFloat();
 				} else if (t2 == Constants.TAG_DOUBLE && l == 8) {
-					value = new Double(bais.getDouble());
+					value = bais.getDouble();
 				}
 			}
 		} catch (IOException e) {

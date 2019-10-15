@@ -121,11 +121,13 @@ public class GatewayDataProvider {
 		DeviceManagedObjectWrapper childDeviceWrapper = new DeviceManagedObjectWrapper(childDeviceMo);
 		String deviceProtocolName = childDeviceWrapper.getDeviceProtocol();
 		if (deviceProtocolName != null) {
-			DeviceProtocolManagedObjectWrapper deviceProtocolWrapper = fetchDeviceProtocol(deviceProtocolName,
-					newProtocolMap);
-			newDeviceProtocolMap.put(childDeviceWrapper.getProperties().getIpAddress().toLowerCase(),
-					childDeviceWrapper);
-			newProtocolMap.put(deviceProtocolName, deviceProtocolWrapper);
+			DeviceProtocolManagedObjectWrapper deviceProtocolWrapper = fetchDeviceProtocol(deviceProtocolName, newProtocolMap);
+
+			if (deviceProtocolWrapper != null) {
+				String deviceIp = childDeviceWrapper.getProperties().getIpAddress().toLowerCase();
+				newDeviceProtocolMap.put(deviceIp, childDeviceWrapper);
+				newProtocolMap.put(deviceProtocolName, deviceProtocolWrapper);
+			}
 		} else {
 			log.error("Missing device protocol configuration for the SNMP device {}", childDeviceMo.getName());
 		}

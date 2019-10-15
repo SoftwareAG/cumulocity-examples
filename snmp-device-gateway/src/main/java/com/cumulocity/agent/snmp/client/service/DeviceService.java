@@ -1,10 +1,12 @@
 package com.cumulocity.agent.snmp.client.service;
 
 import java.io.IOException;
+import java.net.ProtocolException;
 import java.util.Map;
 
 import javax.annotation.PreDestroy;
 
+import org.snmp4j.MessageDispatcher;
 import org.snmp4j.MessageDispatcherImpl;
 import org.snmp4j.Snmp;
 import org.snmp4j.TransportMapping;
@@ -25,6 +27,7 @@ import com.cumulocity.agent.snmp.platform.model.DeviceManagedObjectWrapper.SnmpD
 import com.cumulocity.agent.snmp.platform.model.GatewayDataRefreshedEvent;
 import com.cumulocity.agent.snmp.platform.service.GatewayDataProvider;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -32,42 +35,45 @@ import lombok.extern.slf4j.Slf4j;
 public class DeviceService {
 
 	@Autowired
-	TrapHandler trapHandler;
+	private TrapHandler trapHandler;
 
 	@Autowired
-	GatewayDataProvider gatewayDataProvider;
+	private GatewayDataProvider gatewayDataProvider;
 
 	@Autowired
-	GatewayProperties.SnmpProperties snmpProperties;
+	private GatewayProperties.SnmpProperties snmpProperties;
 
+	@Getter
 	private Snmp snmp = null;
 
-	@EventListener
-	private void init(BootstrapReadyEvent event) {
+	@EventListener(BootstrapReadyEvent.class)
+	private void createSnmpListener() {
 		try {
 			configureUserSecurityModel();
 
 			int poolSize = snmpProperties.getTrapListenerThreadPoolSize();
-			ThreadPool threadPool = ThreadPool.create("trap-listener-pool", poolSize);
-			MultiThreadedMessageDispatcher dispatcher = new MultiThreadedMessageDispatcher(threadPool,
-					new MessageDispatcherImpl());
+			ThreadPool threadPool = ThreadPool.create("snmp-dispatcher-thread", poolSize);
+			MessageDispatcher msgdispatcher = new MessageDispatcherImpl();
+
+			MultiThreadedMessageDispatcher dispatcher = new MultiThreadedMessageDispatcher(threadPool, msgdispatcher);
+			dispatcher.addMessageProcessingModel(new MPv1());
+			dispatcher.addMessageProcessingModel(new MPv2c());
+			dispatcher.addMessageProcessingModel(new MPv3());
+
 			TransportMapping<? extends Address> transportMapping = createTrasportMapping();
 
 			snmp = new Snmp(dispatcher, transportMapping);
-			snmp.getMessageDispatcher().addMessageProcessingModel(new MPv1());
-			snmp.getMessageDispatcher().addMessageProcessingModel(new MPv2c());
-			snmp.getMessageDispatcher().addMessageProcessingModel(new MPv3());
 			snmp.addCommandResponder(trapHandler);
 			snmp.listen();
 
-			log.info("Started trap listening at {}" + transportMapping.getListenAddress().toString());
+			log.info("Started trap listening at {}", transportMapping.getListenAddress().toString());
 		} catch (IOException ex) {
-			log.error("Failed while staring the trap listener ", ex);
+			log.error("Failed while staring the trap listener", ex);
 		}
 	}
 
-	@EventListener
-	private void refreshCredentials(GatewayDataRefreshedEvent event) {
+	@EventListener(GatewayDataRefreshedEvent.class)
+	private void refreshCredentials() {
 		configureUserSecurityModel();
 	}
 
@@ -99,13 +105,13 @@ public class DeviceService {
 
 			if (properties.getVersion() == SnmpConstants.version3) {
 				DeviceAuthentication authDetails = properties.getAuth();
-
-				OctetString userName = new OctetString(authDetails.getUsername());
-				OctetString engineID = new OctetString(authDetails.getEngineId());
-
 				UsmUser user = createUser(authDetails);
 
-				usm.addUser(userName, engineID, user);
+				if (user != null) {
+					OctetString userName = new OctetString(authDetails.getUsername());
+					OctetString engineID = new OctetString(authDetails.getEngineId());
+					usm.addUser(userName, engineID, user);
+				}
 			}
 		});
 	}
@@ -130,7 +136,7 @@ public class DeviceService {
 			return new UsmUser(userName, authProtocolOid, authPassword, privacyProtocolOid, privacyPassword);
 
 		default:
-			log.error("Unsupported {} Security level configured for the {} user configured for device having {} as engine id",
+			log.error("Unsupported {} Security level found in {} user configured for device having {} as engine id",
 					authDetails.getSecurityLevel(), userName, authDetails.getEngineId());
 			return null;
 		}
@@ -176,9 +182,9 @@ public class DeviceService {
 		} else if (snmpListeningAddress instanceof UdpAddress) {
 			return new DefaultUdpTransportMapping((UdpAddress) snmpListeningAddress);
 		} else {
-			log.error("Unable to service snmp devices. Unsupported {} protocol selected. "
-					+ "Currently supported protocols are TCP and UDP.", snmpProperties.getTrapListenerProtocol());
-			return null;
+			String msg = "Unable to service snmp devices. Unsupported " + snmpProperties.getTrapListenerProtocol()
+					+ " protocol selected. " + "Currently supported protocols are TCP and UDP.";
+			throw new ProtocolException(msg);
 		}
 	}
 }
