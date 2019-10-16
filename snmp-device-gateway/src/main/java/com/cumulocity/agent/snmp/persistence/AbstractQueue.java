@@ -304,7 +304,7 @@ public abstract class AbstractQueue implements Queue {
                         .forEach(fileInTheFolder -> {
                             try {
                                 Files.delete(fileInTheFolder);
-                                log.trace("Deleted the old store file '{}' of the '{}' Queue", fileInTheFolder, queueName);
+                                log.trace("Deleted the old store file '{}' of the '{}' Queue", fileInTheFolder.toString(), queueName);
                             } catch (IOException ioe) {
                                 // Here the exception can be ignored, as the handle to the file being deleted may still be held a Tailer.
                                 // This file will eventually be deleted in subsequent cleanup cycles.

@@ -13,7 +13,10 @@ public class AlarmSubscriber extends Subscriber<AlarmPubSub> {
 
     @Override
     public int getConcurrentSubscriptionsCount() {
-        return concurrencyConfiguration.getSchedulerPoolSize() * 10/100; // 10% of the total threads available for scheduler
+        // 10% of the total threads available for scheduler
+        int count = concurrencyConfiguration.getSchedulerPoolSize() * 10 / 100;
+
+        return (count <= 0)? 1 : count;
     }
 
     @Override
