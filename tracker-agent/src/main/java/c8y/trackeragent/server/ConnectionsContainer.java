@@ -20,6 +20,7 @@
 
 package c8y.trackeragent.server;
 
+import com.google.common.base.Predicate;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +32,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static com.google.common.collect.FluentIterable.from;
 
 @Component
 @Slf4j
@@ -52,12 +55,22 @@ public class ConnectionsContainer {
     }
 
     private void registerNewConnectionPerImei(String imei, SocketChannel channel) {
-        for (ActiveConnection connection : connections.values()) {
-            if (connection.hasImei(imei) && connection.hasChannel(channel)) {
+        for (ActiveConnection connection : from(connections.values()).filter(byImeiAndChannel(imei, channel))) {
+            final ActiveConnection connectionPerImei = connectionsPerImei.get(imei);
+            if (connectionPerImei == null || !connectionPerImei.equals(connection)) {
                 connectionsPerImei.put(imei, connection);
                 log.info("New connection for imei {} registered.", imei);
             }
         }
+    }
+
+    private Predicate<ActiveConnection> byImeiAndChannel(final String imei, final SocketChannel channel) {
+        return new Predicate<ActiveConnection>() {
+            @Override
+            public boolean apply(final ActiveConnection connection) {
+                return connection.hasImei(imei) && connection.hasChannel(channel);
+            }
+        };
     }
 
     private void removeAndCloseLegacyConnection(String imei, SocketChannel channel) {
@@ -91,28 +104,6 @@ public class ConnectionsContainer {
 
     protected Collection<ActiveConnection> getAll() {
         return connections.values();
-    }
-
-    public ActiveConnection next() {
-        Iterator<ActiveConnection> it = connections.values().iterator();
-        while (it.hasNext()) {
-            ActiveConnection connection = it.next();
-            if (!connection.getConnectionDetails().getChannel().isOpen()) {
-                logger.info("Found closed connection in container: {}, removing it", connection);
-                it.remove();
-                remove(connection.getConnectionDetails().getImei());
-                continue;
-            }
-            if (connection.isProcessing()) {
-                continue;
-            }
-            if (connection.getReportBuffer().isEmpty()) {
-                continue;
-            }
-            connection.setProcessing(true);
-            return connection;
-        }
-        return null;
     }
 
     public void remove(String imei) {

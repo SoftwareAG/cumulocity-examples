@@ -2,6 +2,7 @@ package c8y.trackeragent.server;
 
 import static java.util.concurrent.Executors.newFixedThreadPool;
 
+import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 
 import javax.annotation.PostConstruct;
@@ -21,14 +22,13 @@ import c8y.trackeragent.tracker.ConnectedTracker;
 import c8y.trackeragent.tracker.ConnectedTrackerFactory;
 
 @Component
-public class TrackerServerEventHandler implements ActiveConnectionProvider {
+public class TrackerServerEventHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(TrackerServerEventHandler.class);
 
     private final ExecutorService workers;
     private final ConnectedTrackerFactory connectedTrackerFactory;    
-    private final ConnectionsContainer connectionsContainer;    
-    private final Object monitor = new Object();
+    private final ConnectionsContainer connectionsContainer;
     private final TrackerConfiguration trackerConfiguration;
 
     @Autowired
@@ -50,30 +50,34 @@ public class TrackerServerEventHandler implements ActiveConnectionProvider {
 
     public void handle(ReadDataEvent readDataEvent) {
         try {
-            synchronized (monitor) {
-                ActiveConnection connection = getActiveConnection(readDataEvent);
-                connection.getReportBuffer().append(readDataEvent.getData(), readDataEvent.getNumRead());
-                ReaderWorker worker = new ReaderWorker(this);
-                workers.execute(worker);
-            }
+            ActiveConnection connection = getActiveConnection(readDataEvent);
+            ReaderWorker worker = new ReaderWorker(
+                    new IncomingMessage(
+                            connection.getConnectionDetails(),
+                            connection.getConnectedTracker(),
+                            Arrays.copyOf(readDataEvent.getData(), readDataEvent.getNumRead()))
+            );
+            workers.execute(worker);
         } catch (Exception e) {
             logger.error("Exception handling read event " + readDataEvent, e);
         }
     }
     
     public void handle(CloseConnectionEvent closeConnectionEvent) {
-        synchronized (monitor) {
+        synchronized (connectionsContainer) {
             connectionsContainer.remove(closeConnectionEvent.getChannel());
         }
     }
 
     private ActiveConnection getActiveConnection(ReadDataEvent readEvent) throws Exception {
-        ActiveConnection connection = connectionsContainer.get(readEvent.getChannel());
-        if (connection == null) {
-            connection = createConnection(readEvent);
-            connectionsContainer.add(connection);
+        synchronized (connectionsContainer) {
+            ActiveConnection connection = connectionsContainer.get(readEvent.getChannel());
+            if (connection == null) {
+                connection = createConnection(readEvent);
+                connectionsContainer.add(connection);
+            }
+            return connection;
         }
-        return connection;
     }
 
     private ActiveConnection createConnection(ReadDataEvent readEvent) throws Exception {
@@ -83,12 +87,5 @@ public class TrackerServerEventHandler implements ActiveConnectionProvider {
         ConnectionDetails connectionDetails = new ConnectionDetails(trackingProtocol, outWriter,
                 readEvent.getChannel(), connectionsContainer);
         return new ActiveConnection(connectionDetails, connectedTracker);
-    }
-
-    @Override
-    public ActiveConnection next() {
-        synchronized (monitor) {
-            return connectionsContainer.next();
-        }
     }
 }

@@ -41,7 +41,9 @@ public class TrackerServerFuzzyTest extends TrackerServerTestSupport {
         assertThat(reportExecutorLatch.getCount()).isEqualTo(0L);
         for (TestConnectedTrackerImpl executor : getExecutors()) {
             assertThat(executor.getProcessed()).hasSize(TOTAL_REPORST_PER_WRITER);
-            assertThat(executor.getProcessed()).isEqualTo(sentReports);
+            // Order should not matter and all sentReports are unique.
+            for (String msg: sentReports)
+                assertThat(executor.getProcessed().contains(msg)).isTrue();
         }
     }
 
