@@ -25,7 +25,7 @@ public class BatchMessagesSubscriptionTest {
     private Queue queue;
 
     @Mock
-    private Subscriber subscriber;
+    private Subscriber<?> subscriber;
 
     @InjectMocks
     private BatchMessagesSubscription subscripton;
@@ -68,9 +68,10 @@ public class BatchMessagesSubscriptionTest {
         Mockito.when(subscriber.getBatchSize()).thenReturn(Integer.valueOf(batchSize));
 
         final List<String> failedMessages = Arrays.asList("MESSAGE 1", "MESSAGE 2", "MESSAGE 3");
-        Mockito.doAnswer(new Answer() {
+        Mockito.doAnswer(new Answer<Integer>() {
             @Override
-            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+            @SuppressWarnings("unchecked")
+            public Integer answer(InvocationOnMock invocationOnMock) throws Throwable {
                 List<String> messagesFromQueue = (List<String>) invocationOnMock.getArguments()[0];
                 messagesFromQueue.addAll(failedMessages);
 
@@ -97,9 +98,10 @@ public class BatchMessagesSubscriptionTest {
         Mockito.when(subscriber.getBatchSize()).thenReturn(Integer.valueOf(batchSize));
 
         final List<String> failedMessages = Arrays.asList("MESSAGE 1", "MESSAGE 2", "MESSAGE 3");
-        Mockito.doAnswer(new Answer() {
+        Mockito.doAnswer(new Answer<Integer>() {
             @Override
-            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+            @SuppressWarnings("unchecked")
+            public Integer answer(InvocationOnMock invocationOnMock) throws Throwable {
                 List<String> messagesFromQueue = (List<String>) invocationOnMock.getArguments()[0];
                 messagesFromQueue.addAll(failedMessages);
 
@@ -128,9 +130,10 @@ public class BatchMessagesSubscriptionTest {
         Mockito.when(subscriber.getBatchSize()).thenReturn(Integer.valueOf(batchSize));
 
         final List<String> failedMessages = Arrays.asList("MESSAGE 1", "MESSAGE 2", "MESSAGE 3");
-        Mockito.doAnswer(new Answer() {
+        Mockito.doAnswer(new Answer<Integer>() {
             @Override
-            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+            @SuppressWarnings("unchecked")
+            public Integer answer(InvocationOnMock invocationOnMock) throws Throwable {
                 List<String> messagesFromQueue = (List<String>) invocationOnMock.getArguments()[0];
                 messagesFromQueue.addAll(failedMessages);
 

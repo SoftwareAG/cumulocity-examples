@@ -24,7 +24,7 @@ import java.util.Collection;
  * @param <PS> PubSub service to subscribe to.
  */
 @Slf4j
-public abstract class Subscriber<PS extends PubSub> {
+public abstract class Subscriber<PS extends PubSub<?>> {
 
     @Autowired
     ConcurrencyConfiguration concurrencyConfiguration;

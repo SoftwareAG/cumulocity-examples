@@ -44,12 +44,14 @@ public class AbstractMapTest {
 
     @Test(expected=NullPointerException.class)
     public void shouldCreateFailForNullMapName() {
-        new AbstractMapImplForTest(null, persistentFilePath.toFile());
+        try(AbstractMapImplForTest obj = new AbstractMapImplForTest(null, persistentFilePath.toFile())) {
+        }
     }
 
     @Test(expected=NullPointerException.class)
     public void shouldCreateFailForNullPersistenceFile() {
-        new AbstractMapImplForTest("SOME QUEUE", null);
+        try(AbstractMapImplForTest obj = new AbstractMapImplForTest("SOME QUEUE", null)){
+        }
     }
 
     @Test
@@ -156,7 +158,7 @@ public class AbstractMapTest {
         assertEquals("VALUE_TWO", abstractMapImplForTest.get("KEY_ONE"));
 
         //REMOVE
-        String removed = abstractMapImplForTest.remove("KEY_ONE");
+        abstractMapImplForTest.remove("KEY_ONE");
 
         assertEquals(0, abstractMapImplForTest.size());
         assertTrue(abstractMapImplForTest.isEmpty());
@@ -355,7 +357,6 @@ public class AbstractMapTest {
         Map<String, String> expectedElements = createMapWithEntries(10);
         abstractMapImplForTest.putAll(expectedElements);
 
-        final Map<String, String> acceptedElements = new HashMap<>();
         abstractMapImplForTest.replaceAll(new BiFunction<String, String, String>() {
             @Override
             public String apply(String key, String value) {

@@ -5,12 +5,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.After;
 import org.junit.Before;
@@ -131,6 +133,7 @@ public class DeviceServiceTest {
 		SecurityModel securityModel = SecurityModels.getInstance().getSecurityModel(modeID);
 		assertNull(securityModel);
 
+		// Action
 		ReflectionTestUtils.invokeMethod(deviceService, "createSnmpListener");
 
 		securityModel = SecurityModels.getInstance().getSecurityModel(modeID);
@@ -203,9 +206,7 @@ public class DeviceServiceTest {
 		assertNotNull(securityModel);
 		assertThat(securityModel, instanceOf(USM.class));
 		assertEquals(0, ((USM) securityModel).getUserTable().getUserEntries().size());
-		assertEquals(1, listAppender.list.size());
-		assertEquals(Level.ERROR, listAppender.list.get(0).getLevel());
-		assertEquals(errorMsg, listAppender.list.get(0).getFormattedMessage());
+		assertTrue(checkLogExist(errorMsg));
 	}
 
 	@Test
@@ -264,9 +265,7 @@ public class DeviceServiceTest {
 		ReflectionTestUtils.invokeMethod(deviceService, "createSnmpListener");
 
 		assertNull(deviceService.getSnmp());
-		assertEquals(1, listAppender.list.size());
-		assertEquals(Level.ERROR, listAppender.list.get(0).getLevel());
-		assertEquals(errorMsg, listAppender.list.get(0).getFormattedMessage());
+		assertTrue(checkLogExist(errorMsg));
 	}
 
 	@After
@@ -278,5 +277,17 @@ public class DeviceServiceTest {
 		listAppender.stop();
 		listAppender.list.clear();
 		logger.detachAppender(listAppender);
+	}
+
+	private boolean checkLogExist(String errorMsg) {
+		AtomicBoolean found = new AtomicBoolean(false);
+		listAppender.list.forEach(logEvent -> {
+			if (logEvent.getFormattedMessage().equalsIgnoreCase(errorMsg)) {
+				found.set(true);
+				assertEquals(Level.ERROR, logEvent.getLevel());
+			}
+		});
+
+		return found.get();
 	}
 }

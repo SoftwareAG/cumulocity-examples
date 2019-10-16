@@ -5,7 +5,6 @@ import com.cumulocity.agent.snmp.platform.pubsub.service.subscription.BatchMessa
 import com.cumulocity.agent.snmp.platform.pubsub.service.subscription.SingleMessageSubscription;
 import com.cumulocity.agent.snmp.platform.pubsub.service.subscription.Subscription;
 import com.cumulocity.agent.snmp.platform.pubsub.subscriber.Subscriber;
-import com.cumulocity.agent.snmp.platform.service.PlatformProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.TaskScheduler;
@@ -27,12 +26,9 @@ public abstract class PubSub<Q extends Queue> {
     private TaskScheduler taskScheduler;
 
     @Autowired
-    private PlatformProvider platformProvider;
-
-    @Autowired
     private Q queue;
 
-    private ScheduledFuture[] subscriptions;
+    private ScheduledFuture<?>[] subscriptions;
 
 
     public void publish(String message) {
@@ -43,7 +39,7 @@ public abstract class PubSub<Q extends Queue> {
         queue.enqueue(message);
     }
 
-    public void subscribe(Subscriber subscriber) {
+    public <PS extends PubSub<?>> void subscribe(Subscriber<PS> subscriber) {
         if(subscriptions != null) {
             throw new IllegalStateException("Duplicate subscriptions.");
         }
@@ -67,12 +63,12 @@ public abstract class PubSub<Q extends Queue> {
         log.debug("{} subscribed to queue {}", subscriber.getClass().getName(), queue.getName());
     }
 
-    public void unsubscribe(Subscriber subscriber) {
+    public void unsubscribe(Subscriber<?> subscriber) {
         if(subscriptions == null) {
             return;
         }
 
-        for(ScheduledFuture oneConcurrentSubscription : subscriptions) {
+        for(ScheduledFuture<?> oneConcurrentSubscription : subscriptions) {
             oneConcurrentSubscription.cancel(true);
         }
 

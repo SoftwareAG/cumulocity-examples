@@ -5,7 +5,7 @@ import com.cumulocity.rest.representation.BaseResourceRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 
 
-public abstract class Publisher<PS extends PubSub, R extends BaseResourceRepresentation> {
+public abstract class Publisher<PS extends PubSub<?>, R extends BaseResourceRepresentation> {
 
     @Autowired
     private PS pubSub;

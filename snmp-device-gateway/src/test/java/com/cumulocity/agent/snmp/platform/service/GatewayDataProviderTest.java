@@ -145,9 +145,6 @@ public class GatewayDataProviderTest {
 
 		gatewayDeviceMo.setChildDevices(childDevices);
 
-		ManagedObjectRepresentation deviceProtocolMo = new ManagedObjectRepresentation();
-		deviceProtocolMo.setId(new GId("device-protocol"));
-
 		when(inventoryApi.get(new GId("snmp-agent"))).thenReturn(gatewayDeviceMo);
 		when(inventoryApi.get(new GId("child-device"))).thenReturn(childDeviceMo);
 		when(inventoryApi.get(new GId("device-protocol")))
@@ -159,7 +156,8 @@ public class GatewayDataProviderTest {
 
 		gatewayDataProvider.updateGatewayObjects(gatewayDeviceMo);
 
-		assertEquals(gatewayDataProvider.getDeviceProtocolMap().size(), 0);
+		assertEquals(1, gatewayDataProvider.getDeviceProtocolMap().size());
+		assertNull(gatewayDataProvider.getProtocolMap().get("device-protocol"));
 	}
 
 	@Test(timeout = 5000L)
@@ -181,10 +179,10 @@ public class GatewayDataProviderTest {
 		when(platformProvider.isPlatformAvailable()).thenReturn(true);
 
 		doAnswer((Answer<Void>) invocation -> {
-            Thread.sleep(4000);
-            latch.countDown();
-            return null;
-        }).when(gatewayDataProvider).refreshGatewayObjects();
+			Thread.sleep(4000);
+			latch.countDown();
+			return null;
+		}).when(gatewayDataProvider).refreshGatewayObjects();
 
 		gatewayDataProvider.scheduleGatewayDataRefresh();
 		latch.await();

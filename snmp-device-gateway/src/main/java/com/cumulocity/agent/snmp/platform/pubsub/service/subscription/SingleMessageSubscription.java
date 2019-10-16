@@ -9,7 +9,7 @@ import java.util.Collections;
 @Slf4j
 public class SingleMessageSubscription extends Subscription {
 
-    public SingleMessageSubscription(Queue queue, Subscriber subscriber) {
+    public SingleMessageSubscription(Queue queue, Subscriber<?> subscriber) {
         super(queue, subscriber);
     }
 

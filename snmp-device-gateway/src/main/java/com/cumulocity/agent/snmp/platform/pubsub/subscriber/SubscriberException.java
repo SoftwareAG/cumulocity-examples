@@ -1,7 +1,10 @@
 package com.cumulocity.agent.snmp.platform.pubsub.subscriber;
 
 public class SubscriberException extends Exception {
-    public SubscriberException(Throwable cause) {
+
+	private static final long serialVersionUID = 1L;
+
+	public SubscriberException(Throwable cause) {
         super(cause);
     }
 }

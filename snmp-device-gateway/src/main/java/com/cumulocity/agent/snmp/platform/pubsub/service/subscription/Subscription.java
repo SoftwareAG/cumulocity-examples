@@ -24,10 +24,10 @@ public abstract class Subscription implements Runnable {
     private final Queue queue;
 
     @Getter
-    private final Subscriber subscriber;
+    private final Subscriber<?> subscriber;
 
 
-    Subscription(Queue queue, Subscriber subscriber) {
+    Subscription(Queue queue, Subscriber<?> subscriber) {
         this.queue = queue;
         this.subscriber = subscriber;
     }

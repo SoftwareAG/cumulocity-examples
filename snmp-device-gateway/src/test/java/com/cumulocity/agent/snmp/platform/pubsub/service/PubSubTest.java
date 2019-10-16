@@ -30,7 +30,7 @@ public class PubSubTest {
     private Queue queue;
 
     @Mock
-    private Subscriber subscriber;
+    private Subscriber<?> subscriber;
 
     @InjectMocks
     private PubSubImplForTest pubSub;
@@ -58,8 +58,8 @@ public class PubSubTest {
         int concurrentSubscriptionsCount = 3;
         Mockito.when(subscriber.getConcurrentSubscriptionsCount()).thenReturn(Integer.valueOf(concurrentSubscriptionsCount));
 
-        ScheduledFuture mockScheduledFuture = Mockito.mock(ScheduledFuture.class);
-        Mockito.when(taskScheduler.scheduleWithFixedDelay(Mockito.any(Subscription.class), Mockito.any(Duration.class))).thenReturn(mockScheduledFuture);
+        ScheduledFuture<?> mockScheduledFuture = Mockito.mock(ScheduledFuture.class);
+        Mockito.doReturn(mockScheduledFuture).when(taskScheduler).scheduleWithFixedDelay(Mockito.any(Subscription.class), Mockito.any(Duration.class));
 
         pubSub.subscribe(subscriber);
 
@@ -90,8 +90,8 @@ public class PubSubTest {
         long transmitRateInSeconds = 10;
         Mockito.when(subscriber.getTransmitRateInSeconds()).thenReturn(Long.valueOf(transmitRateInSeconds));
 
-        ScheduledFuture mockScheduledFuture = Mockito.mock(ScheduledFuture.class);
-        Mockito.when(taskScheduler.scheduleWithFixedDelay(Mockito.any(Subscription.class), Mockito.any(Duration.class))).thenReturn(mockScheduledFuture);
+        ScheduledFuture<?> mockScheduledFuture = Mockito.mock(ScheduledFuture.class);
+        Mockito.doReturn(mockScheduledFuture).when(taskScheduler).scheduleWithFixedDelay(Mockito.any(Subscription.class), Mockito.any(Duration.class));
 
         pubSub.subscribe(subscriber);
 
@@ -109,8 +109,8 @@ public class PubSubTest {
         int concurrentSubscriptionsCount = 3;
         Mockito.when(subscriber.getConcurrentSubscriptionsCount()).thenReturn(Integer.valueOf(concurrentSubscriptionsCount));
 
-        ScheduledFuture mockScheduledFuture = Mockito.mock(ScheduledFuture.class);
-        Mockito.when(taskScheduler.scheduleWithFixedDelay(Mockito.any(Subscription.class), Mockito.any(Duration.class))).thenReturn(mockScheduledFuture);
+        ScheduledFuture<?> mockScheduledFuture = Mockito.mock(ScheduledFuture.class);
+        Mockito.doReturn(mockScheduledFuture).when(taskScheduler).scheduleWithFixedDelay(Mockito.any(Subscription.class), Mockito.any(Duration.class));
 
         pubSub.subscribe(subscriber);
 
@@ -133,7 +133,7 @@ public class PubSubTest {
 
     @Test
     public void shouldUnsubscribe() {
-        ScheduledFuture mockScheduledFuture = Mockito.mock(ScheduledFuture.class);
+        ScheduledFuture<?> mockScheduledFuture = Mockito.mock(ScheduledFuture.class);
         ReflectionTestUtils.setField(pubSub, "subscriptions", new ScheduledFuture[] {mockScheduledFuture, mockScheduledFuture});
 
         pubSub.unsubscribe(subscriber);
@@ -145,7 +145,7 @@ public class PubSubTest {
 
     @Test
     public void shouldUnsubscribe_withNullConcurrentSubscriptions() {
-        ScheduledFuture mockScheduledFuture = Mockito.mock(ScheduledFuture.class);
+        ScheduledFuture<?> mockScheduledFuture = Mockito.mock(ScheduledFuture.class);
         ReflectionTestUtils.setField(pubSub, "subscriptions", null);
 
         pubSub.unsubscribe(subscriber);

@@ -105,8 +105,7 @@ public class GatewayDataProvider {
 
 					log.debug("Refreshing gateway managed objects completed.");
 				} catch (Throwable t) {
-					// Forcefully catching throwable, as we do not want to stop the scheduler on
-					// exception.
+					// Forcefully catching throwable, as we do not want to stop the scheduler on exception.
 					log.error("Unable to refresh gateway managed objects", t);
 				}
 			} else {
@@ -118,39 +117,36 @@ public class GatewayDataProvider {
 
 	private void updateDeviceProtocol(Map<String, DeviceManagedObjectWrapper> newDeviceProtocolMap,
 			Map<String, DeviceProtocolManagedObjectWrapper> newProtocolMap, ManagedObjectRepresentation childDeviceMo) {
-		DeviceManagedObjectWrapper childDeviceWrapper = new DeviceManagedObjectWrapper(childDeviceMo);
-		String deviceProtocolName = childDeviceWrapper.getDeviceProtocol();
-		if (deviceProtocolName != null) {
-			DeviceProtocolManagedObjectWrapper deviceProtocolWrapper = fetchDeviceProtocol(deviceProtocolName, newProtocolMap);
 
-			if (deviceProtocolWrapper != null) {
-				String deviceIp = childDeviceWrapper.getProperties().getIpAddress().toLowerCase();
-				newDeviceProtocolMap.put(deviceIp, childDeviceWrapper);
-				newProtocolMap.put(deviceProtocolName, deviceProtocolWrapper);
-			}
+		DeviceManagedObjectWrapper childDeviceWrapper = new DeviceManagedObjectWrapper(childDeviceMo);
+		String deviceIp = childDeviceWrapper.getProperties().getIpAddress().toLowerCase();
+		newDeviceProtocolMap.put(deviceIp, childDeviceWrapper);
+
+		String protocolName = childDeviceWrapper.getDeviceProtocol();
+		if (protocolName != null && !protocolName.isEmpty()) {
+			updateProtocolMap(protocolName, newProtocolMap);
 		} else {
 			log.error("Missing device protocol configuration for the SNMP device {}", childDeviceMo.getName());
 		}
 	}
 
-	private DeviceProtocolManagedObjectWrapper fetchDeviceProtocol(String deviceProtocol,
+	private DeviceProtocolManagedObjectWrapper updateProtocolMap(String protocolName,
 			Map<String, DeviceProtocolManagedObjectWrapper> newProtocolMap) {
 
 		DeviceProtocolManagedObjectWrapper deviceProtocolWrapper = null;
 
-		if (newProtocolMap.containsKey(deviceProtocol)) {
-			deviceProtocolWrapper = newProtocolMap.get(deviceProtocol);
+		if (newProtocolMap.containsKey(protocolName)) {
+			deviceProtocolWrapper = newProtocolMap.get(protocolName);
 		} else {
 			try {
-				GId deviceProtocolId = new GId(deviceProtocol);
+				GId deviceProtocolId = new GId(protocolName);
 				ManagedObjectRepresentation deviceProtocolMo = inventoryApi.get(deviceProtocolId);
 				deviceProtocolWrapper = new DeviceProtocolManagedObjectWrapper(deviceProtocolMo);
-				newProtocolMap.put(deviceProtocol, deviceProtocolWrapper);
+				newProtocolMap.put(protocolName, deviceProtocolWrapper);
 			} catch (SDKException sdk) {
 				if (sdk.getHttpStatus() == HttpStatus.SC_NOT_FOUND) {
-					log.error(
-							"{} device procotol managed object not found in the platform but configured in the device.",
-							deviceProtocol, sdk);
+					log.error("{} device procotol managed object not found in the platform "
+							+ "but configured in the device.", protocolName, sdk);
 				} else {
 					throw sdk;
 				}

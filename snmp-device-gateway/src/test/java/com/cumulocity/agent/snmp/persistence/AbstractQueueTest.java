@@ -54,7 +54,8 @@ public class AbstractQueueTest {
 
     @Test(expected = NullPointerException.class)
     public void shouldThrowNPEIfQueueNameNotProvided() {
-        new AbstractQueue(null, persistentFolderPath.toFile()) {};
+        try(AbstractQueue queue = new AbstractQueue(null, persistentFolderPath.toFile()) {}){
+        }
     }
 
     @Test
@@ -64,7 +65,8 @@ public class AbstractQueueTest {
 
     @Test(expected = NullPointerException.class)
     public void shouldThrowNPEIfPersistenceFolderNotProvided() {
-        new AbstractQueue("QUEUE_ONE", null) {};
+    	try(AbstractQueue queue = new AbstractQueue("QUEUE_ONE", null) {}) {
+    	}
     }
 
     @Test
@@ -155,7 +157,7 @@ public class AbstractQueueTest {
     public void shouldThrowExceptionForDrainToIfQueueIsClosed() {
         abstractQueueImplForTest.close();
         // DRAIN TO
-        List<String> collectionToDrainTo = Collections.EMPTY_LIST;
+        List<String> collectionToDrainTo = Collections.emptyList();
         abstractQueueImplForTest.drainTo(collectionToDrainTo, 10);
     }
 
@@ -167,7 +169,7 @@ public class AbstractQueueTest {
 
     @Test
     public void shouldReturnZeroWhenTheMaxElementsPassedIsEqualOrLessThanZero() {
-        List<String> collectionToDrainTo = Collections.EMPTY_LIST;
+        List<String> collectionToDrainTo = Collections.emptyList();
 
         // DRAIN TO 0
         assertEquals(0, abstractQueueImplForTest.drainTo(collectionToDrainTo, 0));

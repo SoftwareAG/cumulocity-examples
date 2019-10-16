@@ -20,7 +20,7 @@ public class SingleMessageSubscriptionTest {
     private Queue queue;
 
     @Mock
-    private Subscriber subscriber;
+    private Subscriber<?> subscriber;
 
     @InjectMocks
     private SingleMessageSubscription subscription;

@@ -10,7 +10,7 @@ import java.util.Collection;
 @Slf4j
 public class BatchMessagesSubscription extends Subscription {
 
-    public BatchMessagesSubscription(Queue queue, Subscriber subscriber) {
+    public BatchMessagesSubscription(Queue queue, Subscriber<?> subscriber) {
         super(queue, subscriber);
     }
 

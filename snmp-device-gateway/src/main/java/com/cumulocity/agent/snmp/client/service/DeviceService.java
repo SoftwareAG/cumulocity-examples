@@ -60,7 +60,7 @@ public class DeviceService {
 			dispatcher.addMessageProcessingModel(new MPv2c());
 			dispatcher.addMessageProcessingModel(new MPv3());
 
-			TransportMapping<? extends Address> transportMapping = createTrasportMapping();
+			TransportMapping<? extends Address> transportMapping = createTransportMapping();
 
 			snmp = new Snmp(dispatcher, transportMapping);
 			snmp.addCommandResponder(trapHandler);
@@ -172,7 +172,7 @@ public class DeviceService {
 		}
 	}
 
-	private TransportMapping<? extends Address> createTrasportMapping() throws IOException {
+	private TransportMapping<? extends Address> createTransportMapping() throws IOException {
 		String addStr = snmpProperties.getTrapListenerProtocol() + ":" + snmpProperties.getTrapListenerAddress() + "/"
 				+ snmpProperties.getTrapListenerPort();
 		Address snmpListeningAddress = GenericAddress.parse(addStr);

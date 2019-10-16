@@ -6,13 +6,11 @@ import com.cumulocity.agent.snmp.config.GatewayProperties;
 import com.cumulocity.model.JSONBase;
 import com.cumulocity.rest.representation.devicebootstrap.DeviceCredentialsRepresentation;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PreDestroy;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 class DeviceCredentialsStoreService {

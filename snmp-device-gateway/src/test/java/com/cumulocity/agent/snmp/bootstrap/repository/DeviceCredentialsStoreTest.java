@@ -127,7 +127,7 @@ public class DeviceCredentialsStoreTest {
         assertEquals(createValue("TWO"), deviceCredentialsStore.get(createDeviceCredentialsKey("ONE")));
 
         //REMOVE
-        String removed = deviceCredentialsStore.remove(createDeviceCredentialsKey("ONE"));
+        deviceCredentialsStore.remove(createDeviceCredentialsKey("ONE"));
 
         assertEquals(0, deviceCredentialsStore.size());
         assertTrue(deviceCredentialsStore.isEmpty());

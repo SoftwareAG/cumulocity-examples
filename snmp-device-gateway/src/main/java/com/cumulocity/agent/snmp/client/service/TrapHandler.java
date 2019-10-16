@@ -11,6 +11,7 @@ import org.snmp4j.PDU;
 import org.snmp4j.asn1.BER;
 import org.snmp4j.asn1.BERInputStream;
 import org.snmp4j.smi.AbstractVariable;
+import org.snmp4j.smi.Address;
 import org.snmp4j.smi.Counter64;
 import org.snmp4j.smi.Integer32;
 import org.snmp4j.smi.IpAddress;
@@ -62,48 +63,79 @@ public class TrapHandler implements CommandResponder {
 
 	@Override
 	public void processPdu(CommandResponderEvent event) {
-
 		PDU pdu = event.getPDU();
 		if (pdu == null) {
 			log.error("No data present in the received trap");
 			return;
 		}
 
+		String deviceIp = getDeviceIp(event);
+		if (deviceIp == null) {
+			log.error("Failed to translate peer address {}", event);
+			return;
+		}
+
+		if (!dataProvider.getDeviceProtocolMap().containsKey(deviceIp)) {
+			log.error("Trap received from an unknown device with '{}' IP address", deviceIp);
+			handleUnknownDevice(deviceIp);
+			return;
+		}
+
+		log.debug("Processing received trap from {} device : {}", deviceIp, pdu);
+		processDevicePdu(deviceIp, pdu);
+
+		event.setProcessed(true);
+	}
+
+	private String getDeviceIp(CommandResponderEvent event) {
+		Address peerAddress = event.getPeerAddress();
+		if (peerAddress == null || !peerAddress.isValid()) {
+			return null;
+		}
+
+		return peerAddress.toString().split("/")[0].toLowerCase();
+	}
+
+	private void handleUnknownDevice(String deviceIp) {
+		AlarmMapping alarmMapping = new AlarmMapping();
+		alarmMapping.setSeverity("MAJOR");
+		alarmMapping.setType("c8y_TRAPReceivedFromUnknownDevice");
+		alarmMapping.setText("Trap received from an unknown device with IP address : " + deviceIp);
+
+		process(alarmMapping, dataProvider.getGatewayDevice().getManagedObject());
+	}
+
+	private void processDevicePdu(String deviceIp, PDU pdu) {
 		if (pdu.getVariableBindings() == null || pdu.getVariableBindings().size() == 0) {
 			log.debug("No OID found in the received trap");
 			return;
 		}
 
-		String deviceIp = event.getPeerAddress().toString().split("/")[0].toLowerCase();
 		Map<String, DeviceManagedObjectWrapper> deviceProtocolMap = dataProvider.getDeviceProtocolMap();
-
-		if (!deviceProtocolMap.containsKey(deviceIp)) {
-			AlarmMapping alarmMapping = new AlarmMapping();
-			alarmMapping.setSeverity("MAJOR");
-			alarmMapping.setType("c8y_TRAPReceivedFromUnknownDevice");
-			alarmMapping.setText("Trap received from an unknown device with IP address : " + deviceIp);
-
-			process(alarmMapping, dataProvider.getGatewayDevice().getManagedObject());
-
-			return;
-		}
-
 		DeviceManagedObjectWrapper deviceMo = deviceProtocolMap.get(deviceIp);
 		String deviceProtocol = deviceMo.getDeviceProtocol();
 		DeviceProtocolManagedObjectWrapper deviceProtocolWrapper = dataProvider.getProtocolMap().get(deviceProtocol);
-		Map<String, Register> oidMap = deviceProtocolWrapper.getOidMap();
+
+		if (deviceProtocolWrapper == null) {
+			log.error("{} device procotol object not found at the gateway for the {} device", deviceProtocol, deviceIp);
+			return;
+		}
 
 		boolean isMappingFound = false;
+		Map<String, Register> oidMap = deviceProtocolWrapper.getOidMap();
+
 		for (VariableBinding binding : pdu.getVariableBindings()) {
 			String oid = binding.getOid().toString();
 			if (oidMap.containsKey(oid)) {
 				Register register = oidMap.get(oid);
+
 				process(register.getAlarmMapping(), deviceMo.getManagedObject());
 				process(register.getEventMapping(), deviceMo.getManagedObject());
 				process(binding, register, deviceMo.getManagedObject());
+
 				isMappingFound = true;
 			} else {
-				log.error("{} oid could not be found in the {} device protocol selected for the device {}",
+				log.error("{} OID could not be found in the {} device protocol selected for the device {}",
 						binding.getOid(), deviceProtocol, deviceIp);
 			}
 		}
@@ -112,8 +144,6 @@ public class TrapHandler implements CommandResponder {
 			log.debug("No configuration mappings found for received trap from the device {}",
 					deviceMo.getProperties().getIpAddress());
 		}
-
-		event.setProcessed(true);
 	}
 
 	private void process(AlarmMapping alarmMapping, ManagedObjectRepresentation managedObject) {
@@ -208,6 +238,8 @@ public class TrapHandler implements CommandResponder {
 				}
 			} else if (valueAsVar instanceof IpAddress) {
 				retvalue = ((IpAddress) valueAsVar).getInetAddress();
+			} else if (valueAsVar instanceof Null) {
+				// Nothing to do here
 			} else {
 				log.warn("Unknown syntax " + AbstractVariable.getSyntaxString(valueAsVar.getSyntax()));
 			}
