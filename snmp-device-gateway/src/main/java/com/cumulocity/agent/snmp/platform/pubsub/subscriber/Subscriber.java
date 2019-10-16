@@ -1,5 +1,6 @@
 package com.cumulocity.agent.snmp.platform.pubsub.subscriber;
 
+import com.cumulocity.agent.snmp.bootstrap.model.BootstrapReadyEvent;
 import com.cumulocity.agent.snmp.config.ConcurrencyConfiguration;
 import com.cumulocity.agent.snmp.platform.model.GatewayDataRefreshedEvent;
 import com.cumulocity.agent.snmp.platform.pubsub.service.PubSub;
@@ -119,15 +120,8 @@ public abstract class Subscriber<PS extends PubSub> {
         throw new UnsupportedOperationException();
     }
 
-    //TODO: @EventListener(BootstrapReadyEvent.class)
-    @EventListener(GatewayDataRefreshedEvent.class)
+    @EventListener(BootstrapReadyEvent.class)
     void subscribe() {
-        // TODO: REMOVE THIS CODE AFTER LISTENING TO BootstrapReadyEvent
-        if(transmitRateInSeconds != -1) {
-            return;
-        }
-        // TODO: REMOVE THIS CODE AFTER LISTENING TO BootstrapReadyEvent
-
         this.transmitRateInSeconds = fetchTransmitRateFromGatewayDevice();
 
         pubSub.subscribe(this); // Subscribing for the first time
