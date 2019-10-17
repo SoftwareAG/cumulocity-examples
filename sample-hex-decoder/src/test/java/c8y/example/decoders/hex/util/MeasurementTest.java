@@ -59,4 +59,18 @@ public class MeasurementTest {
         for (String check: CHECKS)
             assertTrue(MessageFormat.format(ERROR_FORMAT, check, json), json.contains(check));
     }
+
+    @Test
+    public void get() {
+        Measurement m = new Measurement();
+        m.set("c8y_Temperature.T.value", 23);
+        m.set("c8y_Battery.voltage.value", 3347);
+        m.set("c8y_SignalStrength.RSSI.value", -98);
+        m.set("c8y_SignalStrength.SNR.value", 15);
+
+        assertEquals(m.get("c8y_Temperature.T.value"), 23);
+        assertEquals(m.get("c8y_Battery.voltage.value"), 3347);
+        assertEquals(m.get("c8y_SignalStrength.RSSI.value"), -98);
+        assertEquals(m.get("c8y_SignalStrength.SNR.value"), 15);
+    }
 }

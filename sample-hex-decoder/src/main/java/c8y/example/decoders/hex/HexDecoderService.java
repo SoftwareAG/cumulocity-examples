@@ -92,7 +92,7 @@ public class HexDecoderService implements DecoderService {
 
         // Position Fragment
         Position pos = new Position();
-        pos.setAlt(BigDecimal.valueOf(msg.getLatitude()));
+        pos.setLat(BigDecimal.valueOf(msg.getLatitude()));
         pos.setLng(BigDecimal.valueOf(msg.getLongtitude()));
 
         // Location Update Event
