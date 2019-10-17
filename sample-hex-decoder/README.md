@@ -38,9 +38,9 @@ Where:
 
 This data is mapped to the following cumulocity data:
 
- - **Accelerometer alarm** - created if the accelerometer flag is set 
- 
- ```json
+ - **Accelerometer alarm** - created if the accelerometer flag is set:
+
+```json
  {  
      "source":{  
          "id":"<Target device ID>"
@@ -50,11 +50,11 @@ This data is mapped to the following cumulocity data:
      "severity":"MAJOR",
      "time":"<Timestamp from the Report>"
  }
- ```
+```
 
- - **Button event** - created if the button flag is set
- 
- ```json
+ - **Button event** - created if the button flag is set:
+
+```json
 {  
     "source":{  
         "id":"<Target device ID>"
@@ -65,8 +65,8 @@ This data is mapped to the following cumulocity data:
 }
 ```
 
- - **Location event** - Created using Latitude and Longitude values
- 
+ - **Location event** - Created using Latitude and Longitude values:
+
 ```json
 {  
     "source":{  
@@ -82,8 +82,8 @@ This data is mapped to the following cumulocity data:
 }
 ```
 
- - **Measurement** - Created using the battery, RSSI, SNR and Temperature values
- 
+ - **Measurement** - Created using the battery, RSSI, SNR and Temperature values:
+
 ```json
 {  
     "source":{  
@@ -103,6 +103,3 @@ This data is mapped to the following cumulocity data:
     }
 }
 ```
-
-
-
