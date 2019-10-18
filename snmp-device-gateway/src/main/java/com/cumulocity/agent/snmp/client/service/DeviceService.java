@@ -10,13 +10,34 @@ import org.snmp4j.MessageDispatcher;
 import org.snmp4j.MessageDispatcherImpl;
 import org.snmp4j.Snmp;
 import org.snmp4j.TransportMapping;
-import org.snmp4j.mp.*;
-import org.snmp4j.security.*;
-import org.snmp4j.smi.*;
-import org.snmp4j.transport.*;
-import org.snmp4j.util.*;
+import org.snmp4j.mp.MPv1;
+import org.snmp4j.mp.MPv2c;
+import org.snmp4j.mp.MPv3;
+import org.snmp4j.mp.SnmpConstants;
+import org.snmp4j.security.AuthMD5;
+import org.snmp4j.security.AuthSHA;
+import org.snmp4j.security.PrivAES128;
+import org.snmp4j.security.PrivAES192;
+import org.snmp4j.security.PrivAES256;
+import org.snmp4j.security.PrivDES;
+import org.snmp4j.security.SecurityLevel;
+import org.snmp4j.security.SecurityModels;
+import org.snmp4j.security.SecurityProtocols;
+import org.snmp4j.security.USM;
+import org.snmp4j.security.UsmUser;
+import org.snmp4j.smi.Address;
+import org.snmp4j.smi.GenericAddress;
+import org.snmp4j.smi.OID;
+import org.snmp4j.smi.OctetString;
+import org.snmp4j.smi.TcpAddress;
+import org.snmp4j.smi.UdpAddress;
+import org.snmp4j.transport.DefaultTcpTransportMapping;
+import org.snmp4j.transport.DefaultUdpTransportMapping;
+import org.snmp4j.util.MultiThreadedMessageDispatcher;
+import org.snmp4j.util.ThreadPool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 
 import com.cumulocity.agent.snmp.bootstrap.model.BootstrapReadyEvent;
@@ -27,7 +48,6 @@ import com.cumulocity.agent.snmp.platform.model.DeviceManagedObjectWrapper.SnmpD
 import com.cumulocity.agent.snmp.platform.model.GatewayDataRefreshedEvent;
 import com.cumulocity.agent.snmp.platform.service.GatewayDataProvider;
 
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -35,27 +55,30 @@ import lombok.extern.slf4j.Slf4j;
 public class DeviceService {
 
 	@Autowired
-	private TrapHandler trapHandler;
+	private GatewayProperties.SnmpProperties snmpProperties;
 
 	@Autowired
 	private GatewayDataProvider gatewayDataProvider;
 
 	@Autowired
-	private GatewayProperties.SnmpProperties snmpProperties;
+	TaskScheduler taskScheduler;
 
-	@Getter
-	private Snmp snmp = null;
+	@Autowired
+	private TrapHandler trapHandler;
+
+	Snmp snmp = null;
 
 	@EventListener(BootstrapReadyEvent.class)
-	private void createSnmpListener() {
+	private void createSnmpDeviceListener() {
 		try {
 			configureUserSecurityModel();
 
 			int poolSize = snmpProperties.getTrapListenerThreadPoolSize();
 			ThreadPool threadPool = ThreadPool.create("snmp-dispatcher-thread", poolSize);
-			MessageDispatcher msgdispatcher = new MessageDispatcherImpl();
+			MessageDispatcher messageDispatcher = new MessageDispatcherImpl();
 
-			MultiThreadedMessageDispatcher dispatcher = new MultiThreadedMessageDispatcher(threadPool, msgdispatcher);
+			MultiThreadedMessageDispatcher dispatcher = new MultiThreadedMessageDispatcher(threadPool,
+					messageDispatcher);
 			dispatcher.addMessageProcessingModel(new MPv1());
 			dispatcher.addMessageProcessingModel(new MPv2c());
 			dispatcher.addMessageProcessingModel(new MPv3());
@@ -105,12 +128,12 @@ public class DeviceService {
 
 			if (properties.getVersion() == SnmpConstants.version3) {
 				DeviceAuthentication authDetails = properties.getAuth();
-				UsmUser user = createUser(authDetails);
+				UsmUser usmUser = createUser(authDetails);
 
-				if (user != null) {
+				if (usmUser != null) {
 					OctetString userName = new OctetString(authDetails.getUsername());
 					OctetString engineID = new OctetString(authDetails.getEngineId());
-					usm.addUser(userName, engineID, user);
+					usm.addUser(userName, engineID, usmUser);
 				}
 			}
 		});
@@ -173,9 +196,11 @@ public class DeviceService {
 	}
 
 	private TransportMapping<? extends Address> createTransportMapping() throws IOException {
-		String addStr = snmpProperties.getTrapListenerProtocol() + ":" + snmpProperties.getTrapListenerAddress() + "/"
-				+ snmpProperties.getTrapListenerPort();
-		Address snmpListeningAddress = GenericAddress.parse(addStr);
+		// If the trap listener address is empty, loopback address will be used by
+		// GenericAdress
+		String addressString = snmpProperties.getTrapListenerProtocol() + ":" + snmpProperties.getTrapListenerAddress()
+				+ "/" + snmpProperties.getTrapListenerPort();
+		Address snmpListeningAddress = GenericAddress.parse(addressString);
 
 		if (snmpListeningAddress instanceof TcpAddress) {
 			return new DefaultTcpTransportMapping((TcpAddress) snmpListeningAddress);

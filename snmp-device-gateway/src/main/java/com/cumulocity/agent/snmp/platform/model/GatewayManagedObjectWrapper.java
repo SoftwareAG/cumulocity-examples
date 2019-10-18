@@ -49,5 +49,9 @@ public class GatewayManagedObjectWrapper extends AbstractManagedObjectWrapper {
 		private long transmitRate;
 
 		private long autoDiscoveryInterval;
+		
+		public long getPollingRateInMinutes() {
+			return pollingRate;
+		}
 	}
 }

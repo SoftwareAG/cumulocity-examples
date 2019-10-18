@@ -50,17 +50,18 @@ import lombok.extern.slf4j.Slf4j;
 public class TrapHandler implements CommandResponder {
 
 	@Autowired
+	private GatewayDataProvider dataProvider;
+
+	@Autowired
 	private AlarmPublisher alarmPublisher;
 
 	@Autowired
 	private EventPublisher eventPublisher;
 
 	@Autowired
-	private GatewayDataProvider dataProvider;
-
-	@Autowired
 	private MeasurementPublisher measurementPublisher;
 
+	
 	@Override
 	public void processPdu(CommandResponderEvent event) {
 		PDU pdu = event.getPDU();
@@ -71,12 +72,12 @@ public class TrapHandler implements CommandResponder {
 
 		String deviceIp = getDeviceIp(event);
 		if (deviceIp == null) {
-			log.error("Failed to translate peer address {}", event);
+			log.error("Failed to translate received trap.\n{}", event);
 			return;
 		}
 
 		if (!dataProvider.getDeviceProtocolMap().containsKey(deviceIp)) {
-			log.error("Trap received from an unknown device with '{}' IP address", deviceIp);
+			log.error("Trap received from an unknown device with IP address : {}", deviceIp);
 			handleUnknownDevice(deviceIp);
 			return;
 		}
@@ -117,7 +118,8 @@ public class TrapHandler implements CommandResponder {
 		DeviceProtocolManagedObjectWrapper deviceProtocolWrapper = dataProvider.getProtocolMap().get(deviceProtocol);
 
 		if (deviceProtocolWrapper == null) {
-			log.error("{} device procotol object not found at the gateway for the {} device", deviceProtocol, deviceIp);
+			log.error("{} device procotol object not found at the gateway for the device with IP address {}",
+					deviceProtocol, deviceIp);
 			return;
 		}
 
@@ -175,23 +177,18 @@ public class TrapHandler implements CommandResponder {
 		MeasurementMapping measurementMapping = register.getMeasurementMapping();
 
 		if (measurementMapping != null) {
+			Map<String, Object> series = Maps.newHashMap();
+			series.put("value", parse(binding.getVariable()));
+			series.put("unit", register.getUnit());
+
+			Map<String, Object> type = Maps.newHashMap();
+			type.put(measurementMapping.getSeries(), series);
+
 			MeasurementRepresentation newMeasurement = new MeasurementRepresentation();
 			newMeasurement.setSource(managedObject);
 			newMeasurement.setDateTime(DateTime.now());
 			newMeasurement.setType(measurementMapping.getType());
-
-			Map<String, Object> series = Maps.newHashMap();
-			String seriesKey = measurementMapping.getSeries().replace(" ", "_");
-
-			Map<String, Object> type = Maps.newHashMap();
-			String typeKey = measurementMapping.getType().replace(" ", "_");
-
-			series.put("value", parse(binding.getVariable()));
-			series.put("unit", register.getUnit());
-
-			type.put(seriesKey, series);
-
-			newMeasurement.setProperty(typeKey, type);
+			newMeasurement.setProperty(measurementMapping.getType(), type);
 
 			Map<String, Map<?, ?>> staticFragmentsMap = measurementMapping.getStaticFragmentsMap();
 			if (staticFragmentsMap != null && !staticFragmentsMap.isEmpty()) {

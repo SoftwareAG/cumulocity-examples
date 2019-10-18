@@ -1,15 +1,15 @@
 package com.cumulocity.agent.snmp.platform.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonSetter;
-
-import lombok.Data;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.validation.constraints.NotNull;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonSetter;
+
+import lombok.Data;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -36,4 +36,19 @@ public class MeasurementMapping {
 			}
 		}
 	}
+
+	@JsonSetter("type")
+	public void setType(String type) {
+		if (type != null) {
+			this.type = type.replace(" ", "_");
+		}
+	}
+
+	@JsonSetter("series")
+	public void setSeries(String series) {
+		if (series != null) {
+			this.series = series.replace(" ", "_");
+		}
+	}
+
 }

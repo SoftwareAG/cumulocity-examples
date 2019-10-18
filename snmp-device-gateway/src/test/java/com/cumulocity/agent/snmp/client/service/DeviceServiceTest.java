@@ -22,7 +22,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.LoggerFactory;
-import org.snmp4j.Snmp;
 import org.snmp4j.TransportMapping;
 import org.snmp4j.security.AuthMD5;
 import org.snmp4j.security.PrivDES;
@@ -134,7 +133,7 @@ public class DeviceServiceTest {
 		assertNull(securityModel);
 
 		// Action
-		ReflectionTestUtils.invokeMethod(deviceService, "createSnmpListener");
+		ReflectionTestUtils.invokeMethod(deviceService, "createSnmpDeviceListener");
 
 		securityModel = SecurityModels.getInstance().getSecurityModel(modeID);
 		assertNotNull(securityModel);
@@ -150,7 +149,7 @@ public class DeviceServiceTest {
 		assertNull(securityModel);
 
 		// Action
-		ReflectionTestUtils.invokeMethod(deviceService, "createSnmpListener");
+		ReflectionTestUtils.invokeMethod(deviceService, "createSnmpDeviceListener");
 
 		securityModel = SecurityModels.getInstance().getSecurityModel(modeID);
 		assertNotNull(securityModel);
@@ -214,16 +213,14 @@ public class DeviceServiceTest {
 	public void shouldConfigureTcpTransportMappingForTcp() {
 		when(snmpProperties.getTrapListenerProtocol()).thenReturn("tcp");
 
-		Snmp snmp = deviceService.getSnmp();
-		assertNull(snmp);
+		assertNull(deviceService.snmp);
 
 		// Action
-		ReflectionTestUtils.invokeMethod(deviceService, "createSnmpListener");
+		ReflectionTestUtils.invokeMethod(deviceService, "createSnmpDeviceListener");
 
-		snmp = deviceService.getSnmp();
-		assertNotNull(snmp);
+		assertNotNull(deviceService.snmp);
 
-		Collection<TransportMapping> mappings = snmp.getMessageDispatcher().getTransportMappings();
+		Collection<TransportMapping> mappings = deviceService.snmp.getMessageDispatcher().getTransportMappings();
 		assertNotNull(mappings);
 		assertEquals(1, mappings.size());
 
@@ -237,16 +234,14 @@ public class DeviceServiceTest {
 	public void shouldConfigureUdpTransportMappingForUdp() {
 		when(snmpProperties.getTrapListenerProtocol()).thenReturn("udp");
 
-		Snmp snmp = deviceService.getSnmp();
-		assertNull(snmp);
+		assertNull(deviceService.snmp);
 
 		// Action
-		ReflectionTestUtils.invokeMethod(deviceService, "createSnmpListener");
+		ReflectionTestUtils.invokeMethod(deviceService, "createSnmpDeviceListener");
 
-		snmp = deviceService.getSnmp();
-		assertNotNull(snmp);
+		assertNotNull(deviceService.snmp);
 
-		Collection<TransportMapping> mappings = snmp.getMessageDispatcher().getTransportMappings();
+		Collection<TransportMapping> mappings = deviceService.snmp.getMessageDispatcher().getTransportMappings();
 		assertNotNull(mappings);
 		assertEquals(1, mappings.size());
 
@@ -262,9 +257,9 @@ public class DeviceServiceTest {
 		when(snmpProperties.getTrapListenerProtocol()).thenReturn("ip");
 
 		// Action
-		ReflectionTestUtils.invokeMethod(deviceService, "createSnmpListener");
+		ReflectionTestUtils.invokeMethod(deviceService, "createSnmpDeviceListener");
 
-		assertNull(deviceService.getSnmp());
+		assertNull(deviceService.snmp);
 		assertTrue(checkLogExist(errorMsg));
 	}
 
