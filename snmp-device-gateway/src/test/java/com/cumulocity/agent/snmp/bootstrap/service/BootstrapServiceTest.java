@@ -3,10 +3,10 @@ package com.cumulocity.agent.snmp.bootstrap.service;
 import com.cumulocity.agent.snmp.bootstrap.model.BootstrapReadyEvent;
 import com.cumulocity.agent.snmp.bootstrap.model.CredentialsAvailableEvent;
 import com.cumulocity.agent.snmp.config.GatewayProperties;
+import com.cumulocity.agent.snmp.platform.model.GatewayManagedObjectWrapper;
 import com.cumulocity.agent.snmp.platform.model.PlatformConnectionReadyEvent;
 import com.cumulocity.agent.snmp.platform.service.GatewayDataProvider;
 import com.cumulocity.agent.snmp.platform.service.PlatformProvider;
-import com.cumulocity.agent.snmp.utils.Constants;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.devicebootstrap.DeviceCredentialsRepresentation;
 import com.cumulocity.rest.representation.identity.ExternalIDRepresentation;
@@ -175,7 +175,7 @@ public class BootstrapServiceTest {
 		verify(identityApi, times(1)).create(any());
 		verify(eventPublisher).publishEvent(any(BootstrapReadyEvent.class));
 		verify(identityApi).create(argThat(extID -> extID.getExternalId().equals(properties.getGatewayIdentifier())
-				&& extID.getType().equals(Constants.C8Y_EXTERNAL_ID_TYPE)
+				&& extID.getType().equals(GatewayManagedObjectWrapper.C8Y_EXTERNAL_ID_TYPE)
 				&& extID.getManagedObject().getName().equals(properties.getGatewayIdentifier())));
 	}
 
@@ -184,13 +184,13 @@ public class BootstrapServiceTest {
 		PlatformConnectionReadyEvent event = new PlatformConnectionReadyEvent("device_SnmpTest");
 		ManagedObjectRepresentation deviceMO = new ManagedObjectRepresentation();
 		deviceMO.setName("gateway#1");
-		deviceMO.setType(Constants.C8Y_SNMP_GATEWAY_TYPE);
+		deviceMO.setType(GatewayManagedObjectWrapper.C8Y_SNMP_GATEWAY_TYPE);
 		deviceMO.setId(new GId("123"));
 		deviceMO.setOwner("device_SnmpTest");
 
 		ExternalIDRepresentation externalId = new ExternalIDRepresentation();
 		externalId.setExternalId("gateway#1");
-		externalId.setType(Constants.C8Y_EXTERNAL_ID_TYPE);
+		externalId.setType(GatewayManagedObjectWrapper.C8Y_EXTERNAL_ID_TYPE);
 		externalId.setManagedObject(deviceMO);
 
 		when(properties.getGatewayIdentifier()).thenReturn("gateway#1");
@@ -208,13 +208,13 @@ public class BootstrapServiceTest {
 		PlatformConnectionReadyEvent event = new PlatformConnectionReadyEvent("device_SnmpTest");
 		ManagedObjectRepresentation deviceMO = new ManagedObjectRepresentation();
 		deviceMO.setName("gateway#1");
-		deviceMO.setType(Constants.C8Y_SNMP_GATEWAY_TYPE);
+		deviceMO.setType(GatewayManagedObjectWrapper.C8Y_SNMP_GATEWAY_TYPE);
 		deviceMO.setId(new GId("123"));
 		deviceMO.setOwner("device_SnmpTest");
 
 		ExternalIDRepresentation externalId = new ExternalIDRepresentation();
 		externalId.setExternalId("gateway#1");
-		externalId.setType(Constants.C8Y_EXTERNAL_ID_TYPE);
+		externalId.setType(GatewayManagedObjectWrapper.C8Y_EXTERNAL_ID_TYPE);
 		externalId.setManagedObject(deviceMO);
 
 		when(properties.getGatewayIdentifier()).thenReturn("gateway#1");
@@ -233,13 +233,13 @@ public class BootstrapServiceTest {
 
 		ManagedObjectRepresentation deviceMO = new ManagedObjectRepresentation();
 		deviceMO.setName("gateway#1");
-		deviceMO.setType(Constants.C8Y_SNMP_GATEWAY_TYPE);
+		deviceMO.setType(GatewayManagedObjectWrapper.C8Y_SNMP_GATEWAY_TYPE);
 		deviceMO.setId(new GId("123"));
 		deviceMO.setOwner("test-user");
 
 		ExternalIDRepresentation externalId = new ExternalIDRepresentation();
 		externalId.setExternalId("gateway#1");
-		externalId.setType(Constants.C8Y_EXTERNAL_ID_TYPE);
+		externalId.setType(GatewayManagedObjectWrapper.C8Y_EXTERNAL_ID_TYPE);
 		externalId.setManagedObject(deviceMO);
 
 		when(properties.getGatewayIdentifier()).thenReturn("gateway#1");

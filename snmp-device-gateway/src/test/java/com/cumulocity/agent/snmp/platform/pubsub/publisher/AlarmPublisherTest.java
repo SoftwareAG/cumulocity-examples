@@ -60,7 +60,7 @@ public class AlarmPublisherTest {
 
         AlarmMapping mapping = new AlarmMapping();
         mapping.setSeverity(AlarmSeverity.MAJOR.name());
-        mapping.setType("c8y_TRAPReceivedFromUnknownDevice");
+        mapping.setType(AlarmMapping.c8y_TRAPReceivedFromUnknownDevice);
         mapping.setText("ALARM TEXT");
 
         alarmPublisher.publish(mapping, source);

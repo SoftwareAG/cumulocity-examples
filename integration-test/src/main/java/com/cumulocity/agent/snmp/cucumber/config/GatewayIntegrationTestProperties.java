@@ -1,13 +1,12 @@
 package com.cumulocity.agent.snmp.cucumber.config;
 
-import javax.validation.constraints.Pattern;
-
+import lombok.Data;
+import lombok.ToString;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
-import lombok.Data;
-import lombok.ToString;
+import javax.validation.constraints.Pattern;
 
 @Data
 @Configuration

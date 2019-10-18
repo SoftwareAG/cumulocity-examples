@@ -1,8 +1,8 @@
 package com.cumulocity.agent.snmp.platform.service;
 
 import com.cumulocity.agent.snmp.config.GatewayProperties;
+import com.cumulocity.agent.snmp.platform.model.DeviceManagedObjectWrapper;
 import com.cumulocity.agent.snmp.platform.model.GatewayDataRefreshedEvent;
-import com.cumulocity.agent.snmp.utils.Constants;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.inventory.ManagedObjectReferenceCollectionRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectReferenceRepresentation;
@@ -94,7 +94,7 @@ public class GatewayDataProviderTest {
 		propertiesMap.put("type", "/inventory/managedObjects/device-protocol");
 		propertiesMap.put("ipAddress", "127.0.0.1");
 
-		childDeviceMo.set(propertiesMap, Constants.C8Y_SNMP_DEVICE);
+		childDeviceMo.set(propertiesMap, DeviceManagedObjectWrapper.C8Y_SNMP_DEVICE);
 
 		List<ManagedObjectReferenceRepresentation> childDeviceRefList = new ArrayList<>();
 		childDeviceRefList.add(childDeviceRef);
@@ -137,7 +137,7 @@ public class GatewayDataProviderTest {
 		propertiesMap.put("type", "/inventory/managedObjects/device-protocol");
 		propertiesMap.put("ipAddress", "127.0.0.1");
 
-		childDeviceMo.set(propertiesMap, Constants.C8Y_SNMP_DEVICE);
+		childDeviceMo.set(propertiesMap, DeviceManagedObjectWrapper.C8Y_SNMP_DEVICE);
 
 		List<ManagedObjectReferenceRepresentation> childDeviceRefList = new ArrayList<>();
 		childDeviceRefList.add(childDeviceRef);

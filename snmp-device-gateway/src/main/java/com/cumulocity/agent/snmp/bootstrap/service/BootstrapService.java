@@ -4,10 +4,10 @@ import c8y.*;
 import com.cumulocity.agent.snmp.bootstrap.model.BootstrapReadyEvent;
 import com.cumulocity.agent.snmp.bootstrap.model.CredentialsAvailableEvent;
 import com.cumulocity.agent.snmp.config.GatewayProperties;
+import com.cumulocity.agent.snmp.platform.model.GatewayManagedObjectWrapper;
 import com.cumulocity.agent.snmp.platform.model.PlatformConnectionReadyEvent;
 import com.cumulocity.agent.snmp.platform.service.GatewayDataProvider;
 import com.cumulocity.agent.snmp.platform.service.PlatformProvider;
-import com.cumulocity.agent.snmp.utils.Constants;
 import com.cumulocity.model.Agent;
 import com.cumulocity.model.ID;
 import com.cumulocity.model.idtype.GId;
@@ -76,15 +76,15 @@ public class BootstrapService implements InitializingBean {
 			if (!existingIdentity.isPresent()) {
 				deviceMO = createGatewayManagedObject();
 				createExternalID(deviceId, deviceMO);
-				log.info("Device created with id {}", deviceMO.getId().getValue());
+				log.info("A new device named '{}' created with id '{}'.", gatewayProperties.getGatewayIdentifier(), deviceMO.getId().getValue());
 			} else {
 				GId deviceMoID = existingIdentity.get().getManagedObject().getId();
 				deviceMO = inventoryApi.get(deviceMoID);
-				log.info("Device with id {} already present in the platform", deviceMO.getId().getValue());
+				log.info("Device named '{}' is already present in the platform with id '{}'.", gatewayProperties.getGatewayIdentifier(), deviceMO.getId().getValue());
 
 				if (!platformConnectionReadyEvent.getCurrentUser().equals(deviceMO.getOwner())) {
-					log.error("Current gateway device managed object is owned by another user ({}), change it to [{}]. "
-						+ "\n Shutting down agent...", deviceMO.getOwner(), platformConnectionReadyEvent.getCurrentUser());
+					log.error("Device named '{}' is owned by another user '{}', change it to '{}' and restsrt the agent. "
+						+ "\n Shutting down agent...", gatewayProperties.getGatewayIdentifier(), deviceMO.getOwner(), platformConnectionReadyEvent.getCurrentUser());
 					System.exit(0);
 				}
 			}
@@ -99,7 +99,8 @@ public class BootstrapService implements InitializingBean {
 			if (detectInvalidCredentials(e)) {
 				log.error("Invalid device credentials detected! Removing local cached credentials...");
 				deviceCredentialsStoreService.remove();
-				log.info("Local credentials removed! bootstrap the agent again. \n Shutting down the agent...");
+				log.info("Local credentials removed! \n Shutting down the agent...");
+
 				System.exit(0);
 			}
 
@@ -177,7 +178,7 @@ public class BootstrapService implements InitializingBean {
 	}
 
 	private ID createID(String identifier) {
-		return new ID(Constants.C8Y_EXTERNAL_ID_TYPE, identifier);
+		return new ID(GatewayManagedObjectWrapper.C8Y_EXTERNAL_ID_TYPE, identifier);
 	}
 
 	private Optional<ExternalIDRepresentation> getExternalID(ID id) {
@@ -204,16 +205,16 @@ public class BootstrapService implements InitializingBean {
 
 	private ManagedObjectRepresentation createGatewayManagedObject() {
 		SupportedOperations operation = new SupportedOperations();
-		operation.add(Constants.C8Y_SUPPORTED_OPERATIONS);
+		operation.add(GatewayManagedObjectWrapper.C8Y_SUPPORTED_OPERATIONS);
 
 		ManagedObjectRepresentation deviceMO = new ManagedObjectRepresentation();
 		deviceMO.setName(gatewayProperties.getGatewayIdentifier());
-		deviceMO.setType(Constants.C8Y_SNMP_GATEWAY_TYPE);
+		deviceMO.setType(GatewayManagedObjectWrapper.C8Y_SNMP_GATEWAY_TYPE);
 		deviceMO.set(new Agent());
 		deviceMO.set(new IsDevice());
 		deviceMO.set(new Hardware());
 		deviceMO.set(new Mobile());
-		deviceMO.set(new Object(), Constants.C8Y_SNMP_GATEWAY);
+		deviceMO.set(new Object(), GatewayManagedObjectWrapper.C8Y_SNMP_GATEWAY);
 		deviceMO.set(new RequiredAvailability(gatewayProperties.getGatewayAvailabilityInterval()));
 		deviceMO.set(operation);
 

@@ -71,13 +71,13 @@ public class GatewayProperties {
 	@ToString
 	public class SnmpProperties {
 
-		@Value("#{'${snmp.trapListener.protocol:}'.trim()}")
+		@Value("#{'${snmp.trapListener.protocol:UDP}'.trim()}")
 		private String trapListenerProtocol;
 
 		@Value("#{'${snmp.trapListener.port:162}'.trim()}")
 		private int trapListenerPort;
 
-		@Value("#{'${snmp.trapListener.address:}'.trim()}")
+		@Value("#{'${snmp.trapListener.address:localhost}'.trim()}")
 		private String trapListenerAddress;
 
 		@Value("#{'${snmp.community.target}'.trim()}")
@@ -94,5 +94,14 @@ public class GatewayProperties {
 
 		@Value("#{'${snmp.trapListener.threadPoolSize:10}'.trim()}")
 		private int trapListenerThreadPoolSize;
+
+
+		public boolean isTrapListenerProtocolUdp() {
+			return "UDP".equalsIgnoreCase(trapListenerProtocol);
+		}
+
+		public boolean isTrapListenerProtocolTcp() {
+			return "TCP".equalsIgnoreCase(trapListenerProtocol);
+		}
 	}
 }

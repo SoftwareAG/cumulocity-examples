@@ -5,7 +5,6 @@ import com.cumulocity.agent.snmp.platform.pubsub.publisher.AlarmPublisher;
 import com.cumulocity.agent.snmp.platform.pubsub.publisher.EventPublisher;
 import com.cumulocity.agent.snmp.platform.pubsub.publisher.MeasurementPublisher;
 import com.cumulocity.agent.snmp.platform.service.GatewayDataProvider;
-import com.cumulocity.agent.snmp.utils.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.snmp4j.CommandResponder;
 import org.snmp4j.CommandResponderEvent;
@@ -23,6 +22,16 @@ import java.util.Map;
 @Slf4j
 @Component
 public class TrapHandler implements CommandResponder {
+
+	/**
+	 * SNMP constants used during resolving Opaque variable
+	 */
+	private static final byte TAG1 = (byte) 0x9f;
+
+	private static final byte TAG_FLOAT = (byte) 0x78;
+
+	private static final byte TAG_DOUBLE = (byte) 0x79;
+
 
 	@Autowired
 	private GatewayDataProvider dataProvider;
@@ -75,7 +84,7 @@ public class TrapHandler implements CommandResponder {
 	private void handleUnknownDevice(String deviceIp) {
 		AlarmMapping alarmMapping = new AlarmMapping();
 		alarmMapping.setSeverity(AlarmSeverity.MAJOR.name());
-		alarmMapping.setType("c8y_TRAPReceivedFromUnknownDevice");
+		alarmMapping.setType(AlarmMapping.c8y_TRAPReceivedFromUnknownDevice);
 		alarmMapping.setText("Trap received from an unknown device with IP address : " + deviceIp);
 
 		alarmPublisher.publish(alarmMapping, dataProvider.getGatewayDevice().getManagedObject());
@@ -188,10 +197,10 @@ public class TrapHandler implements CommandResponder {
 			byte t1 = bais.get();
 			byte t2 = bais.get();
 
-			if (t1 == Constants.TAG1) {
-				if (t2 == Constants.TAG_FLOAT && l == 4) {
+			if (t1 == TAG1) {
+				if (t2 == TAG_FLOAT && l == 4) {
 					value = bais.getFloat();
-				} else if (t2 == Constants.TAG_DOUBLE && l == 8) {
+				} else if (t2 == TAG_DOUBLE && l == 8) {
 					value = bais.getDouble();
 				}
 			}

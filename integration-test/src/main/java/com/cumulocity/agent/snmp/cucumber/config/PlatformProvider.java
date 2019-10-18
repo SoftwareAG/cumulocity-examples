@@ -1,16 +1,14 @@
 package com.cumulocity.agent.snmp.cucumber.config;
 
-import javax.annotation.PostConstruct;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.cumulocity.agent.snmp.cucumber.config.GatewayIntegrationTestProperties.TenantProperties;
 import com.cumulocity.model.authentication.CumulocityBasicCredentials;
 import com.cumulocity.sdk.client.Platform;
 import com.cumulocity.sdk.client.PlatformBuilder;
-
 import lombok.Getter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
 
 @Component
 public class PlatformProvider {

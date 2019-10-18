@@ -218,7 +218,7 @@ public class TrapHandlerTest {
 
 		AlarmMapping mapping = alarmCaptor.getValue();
 		assertEquals("MAJOR", mapping.getSeverity());
-		assertEquals("c8y_TRAPReceivedFromUnknownDevice", mapping.getType());
+		assertEquals(AlarmMapping.c8y_TRAPReceivedFromUnknownDevice, mapping.getType());
 		assertEquals(gatewayDeviceMo.getId(), gatewayDeviceMoCaptor.getValue().getId());
 	}
 

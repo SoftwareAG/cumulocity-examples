@@ -5,7 +5,6 @@ import com.cumulocity.agent.snmp.platform.model.DeviceManagedObjectWrapper;
 import com.cumulocity.agent.snmp.platform.model.DeviceProtocolManagedObjectWrapper;
 import com.cumulocity.agent.snmp.platform.model.GatewayDataRefreshedEvent;
 import com.cumulocity.agent.snmp.platform.model.GatewayManagedObjectWrapper;
-import com.cumulocity.agent.snmp.utils.Constants;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.inventory.ManagedObjectReferenceCollectionRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
@@ -72,7 +71,7 @@ public class GatewayDataProvider {
 		deviceCollections.forEach(childDeviceRep -> {
 			try {
 				ManagedObjectRepresentation childDeviceMo = inventoryApi.get(childDeviceRep.getManagedObject().getId());
-				if (childDeviceMo.hasProperty(Constants.C8Y_SNMP_DEVICE)) {
+				if (childDeviceMo.hasProperty(DeviceManagedObjectWrapper.C8Y_SNMP_DEVICE)) {
 					updateDeviceProtocol(newDeviceProtocolMap, newProtocolMap, childDeviceMo);
 				}
 			} catch (SDKException sdkException) {

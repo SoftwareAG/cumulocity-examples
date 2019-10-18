@@ -1,6 +1,5 @@
 package com.cumulocity.agent.snmp.platform.model;
 
-import com.cumulocity.agent.snmp.utils.Constants;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
@@ -15,6 +14,8 @@ import java.util.concurrent.ConcurrentHashMap;
 @Getter
 public class DeviceProtocolManagedObjectWrapper extends AbstractManagedObjectWrapper {
 
+	public static final String C8Y_REGISTERS = "c8y_Registers";
+
 	Map<String, Register> oidMap = new ConcurrentHashMap<>();
 
 	public DeviceProtocolManagedObjectWrapper(ManagedObjectRepresentation deviceProtocolMO) {
@@ -24,7 +25,7 @@ public class DeviceProtocolManagedObjectWrapper extends AbstractManagedObjectWra
 	}
 
 	private void loadRegisters() {
-		Object registersObj = managedObject.get(Constants.C8Y_REGISTERS);
+		Object registersObj = managedObject.get(C8Y_REGISTERS);
 		if (registersObj instanceof List) {
 			ObjectMapper mapper = new ObjectMapper();
 			List<Register> registers = mapper.convertValue(registersObj,
@@ -33,7 +34,7 @@ public class DeviceProtocolManagedObjectWrapper extends AbstractManagedObjectWra
 				oidMap.put(register.getOid().toLowerCase(), register);
 			}
 		} else {
-			log.info("Did not find {} fragment in the received gateway managed object {}", Constants.C8Y_REGISTERS,
+			log.info("Did not find {} fragment in the received gateway managed object {}", C8Y_REGISTERS,
 					managedObject.getName());
 		}
 	}

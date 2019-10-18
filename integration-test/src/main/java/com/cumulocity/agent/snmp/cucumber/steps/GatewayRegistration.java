@@ -1,7 +1,6 @@
 package com.cumulocity.agent.snmp.cucumber.steps;
 
-import static org.junit.Assert.*;
-
+import c8y.IsDevice;
 import com.cumulocity.agent.snmp.cucumber.config.GatewayIntegrationTestProperties;
 import com.cumulocity.agent.snmp.cucumber.config.PlatformProvider;
 import com.cumulocity.agent.snmp.cucumber.config.TenantProvider;
@@ -14,15 +13,12 @@ import com.cumulocity.rest.representation.devicebootstrap.NewDeviceRequestRepres
 import com.cumulocity.rest.representation.identity.ExternalIDRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.Platform;
-
-import c8y.IsDevice;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +28,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.List;
+
+import static org.junit.Assert.*;
 
 @Slf4j
 public class GatewayRegistration {

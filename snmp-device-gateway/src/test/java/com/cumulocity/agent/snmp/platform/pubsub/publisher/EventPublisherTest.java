@@ -1,5 +1,6 @@
 package com.cumulocity.agent.snmp.platform.pubsub.publisher;
 
+import com.cumulocity.agent.snmp.platform.model.AlarmMapping;
 import com.cumulocity.agent.snmp.platform.model.EventMapping;
 import com.cumulocity.agent.snmp.platform.pubsub.service.EventPubSub;
 import com.cumulocity.model.idtype.GId;
@@ -56,7 +57,7 @@ public class EventPublisherTest {
         source.setId(GId.asGId(1));
 
         EventMapping mapping = new EventMapping();
-        mapping.setType("c8y_TRAPReceivedFromUnknownDevice");
+        mapping.setType(AlarmMapping.c8y_TRAPReceivedFromUnknownDevice);
         mapping.setText("EVENT TEXT");
 
         eventPublisher.publish(mapping, source);

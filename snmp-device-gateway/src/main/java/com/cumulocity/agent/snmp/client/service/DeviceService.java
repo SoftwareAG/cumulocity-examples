@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PreDestroy;
 import java.io.IOException;
+import java.net.BindException;
 import java.net.ProtocolException;
 import java.util.Map;
 
@@ -51,7 +52,7 @@ public class DeviceService {
 	Snmp snmp = null;
 
 	@EventListener(BootstrapReadyEvent.class)
-	private void createSnmpDeviceListener() {
+	private void createSnmpDeviceListener() throws IOException {
 		try {
 			configureUserSecurityModel();
 
@@ -65,15 +66,22 @@ public class DeviceService {
 			dispatcher.addMessageProcessingModel(new MPv2c());
 			dispatcher.addMessageProcessingModel(new MPv3());
 
-			TransportMapping<? extends Address> transportMapping = createTransportMapping();
+			TransportMapping<? extends Address> transportMapping =
+					createTransportMapping(snmpProperties.getTrapListenerProtocol(),
+											snmpProperties.getTrapListenerPort(),
+											snmpProperties.getTrapListenerAddress());
 
 			snmp = new Snmp(dispatcher, transportMapping);
 			snmp.addCommandResponder(trapHandler);
 			snmp.listen();
 
-			log.info("Started trap listening at {}", transportMapping.getListenAddress().toString());
-		} catch (IOException ex) {
-			log.error("Failed while staring the trap listener", ex);
+			log.info("Started listening to traps at {}", transportMapping.getListenAddress().toString());
+		} catch (BindException be) {
+			log.error("Failed to start listening to traps. Port {}/{} is already in use. \nUpdate the 'snmp.trapListener.port' and 'snmp.trapListener.address' properties and restart the agent. Shutting down the agent...", snmpProperties.getTrapListenerAddress(), snmpProperties.getTrapListenerPort(), be);
+			System.exit(0);
+		} catch (IOException ioe) {
+			log.error("Failed to start listening to traps on port {}/{}. \nUpdate the 'snmp.trapListener.port' and 'snmp.trapListener.address' properties and restart the agent. Shutting down the agent...", snmpProperties.getTrapListenerAddress(), snmpProperties.getTrapListenerPort(), ioe);
+			System.exit(0);
 		}
 	}
 
@@ -177,11 +185,11 @@ public class DeviceService {
 		}
 	}
 
-	private TransportMapping<? extends Address> createTransportMapping() throws IOException {
-		// If the trap listener address is empty, loopback address will be used by
-		// GenericAdress
-		String addressString = snmpProperties.getTrapListenerProtocol() + ":" + snmpProperties.getTrapListenerAddress()
-				+ "/" + snmpProperties.getTrapListenerPort();
+	TransportMapping<? extends Address> createTransportMapping(String protocol, int port, String bindingAddress) throws IOException {
+		String addressString = 			protocol
+				+ ":" + bindingAddress.split("[/%]", 2)[0]
+				+ "/" + port;
+
 		Address snmpListeningAddress = GenericAddress.parse(addressString);
 
 		if (snmpListeningAddress instanceof TcpAddress) {
@@ -189,8 +197,10 @@ public class DeviceService {
 		} else if (snmpListeningAddress instanceof UdpAddress) {
 			return new DefaultUdpTransportMapping((UdpAddress) snmpListeningAddress);
 		} else {
-			String msg = "Unable to service snmp devices. Unsupported " + snmpProperties.getTrapListenerProtocol()
+			String msg = "Unable to service snmp devices. Unsupported " + protocol
 					+ " protocol selected. " + "Currently supported protocols are TCP and UDP.";
+			log.error(msg);
+
 			throw new ProtocolException(msg);
 		}
 	}

@@ -1,6 +1,5 @@
 package com.cumulocity.agent.snmp.platform.model;
 
-import com.cumulocity.agent.snmp.utils.Constants;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,6 +12,8 @@ import java.util.List;
 @Getter
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DeviceManagedObjectWrapper extends AbstractManagedObjectWrapper {
+
+	public static final String C8Y_SNMP_DEVICE = "c8y_SNMPDevice";
 
 	private SnmpDeviceProperties properties;
 
@@ -27,13 +28,13 @@ public class DeviceManagedObjectWrapper extends AbstractManagedObjectWrapper {
 	}
 
 	private void loadProperties() {
-		Object fragmentObj = managedObject.get(Constants.C8Y_SNMP_DEVICE);
+		Object fragmentObj = managedObject.get(C8Y_SNMP_DEVICE);
 		if (fragmentObj != null) {
 			ObjectMapper mapper = new ObjectMapper();
 			properties = mapper.convertValue(fragmentObj, SnmpDeviceProperties.class);
 		} else {
 			log.info("Did not find correct {} fragment in the received gateway managed object {}",
-					Constants.C8Y_SNMP_DEVICE, managedObject.getName());
+					C8Y_SNMP_DEVICE, managedObject.getName());
 		}
 	}
 

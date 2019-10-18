@@ -7,7 +7,6 @@ import ch.qos.logback.core.read.ListAppender;
 import com.cumulocity.agent.snmp.config.GatewayProperties;
 import com.cumulocity.agent.snmp.platform.model.DeviceManagedObjectWrapper;
 import com.cumulocity.agent.snmp.platform.service.GatewayDataProvider;
-import com.cumulocity.agent.snmp.utils.Constants;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import org.junit.After;
@@ -26,6 +25,7 @@ import org.snmp4j.transport.DefaultTcpTransportMapping;
 import org.snmp4j.transport.DefaultUdpTransportMapping;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -103,7 +103,7 @@ public class DeviceServiceTest {
 
 		snmpDeviceMo = new ManagedObjectRepresentation();
 		snmpDeviceMo.setId(new GId("snmp-device"));
-		snmpDeviceMo.set(SnmpDeviceProperties, Constants.C8Y_SNMP_DEVICE);
+		snmpDeviceMo.set(SnmpDeviceProperties, DeviceManagedObjectWrapper.C8Y_SNMP_DEVICE);
 
 		DeviceManagedObjectWrapper deviceMoWrapper = new DeviceManagedObjectWrapper(snmpDeviceMo);
 		deviceProtocolMap.put("snmp-device", deviceMoWrapper);
@@ -239,17 +239,19 @@ public class DeviceServiceTest {
 		});
 	}
 
-	@Test
-	public void shouldLogErrorForInvalidTransportProtocol() {
-		String errorMsg = "Failed while staring the trap listener";
-
-		when(snmpProperties.getTrapListenerProtocol()).thenReturn("ip");
+	@Test(expected = IOException.class)
+	public void shouldLogErrorForInvalidTransportProtocol() throws IOException {
+		String errorMsg = "Unable to service snmp devices. Unsupported";
 
 		// Action
-		ReflectionTestUtils.invokeMethod(deviceService, "createSnmpDeviceListener");
+		try {
+			deviceService.createTransportMapping("", 1010, "localhost");
+		} catch (IOException e) {
+			assertNull(deviceService.snmp);
+			assertTrue(checkLogExist(errorMsg));
 
-		assertNull(deviceService.snmp);
-		assertTrue(checkLogExist(errorMsg));
+			throw e;
+		}
 	}
 
 	@After
@@ -266,7 +268,7 @@ public class DeviceServiceTest {
 	private boolean checkLogExist(String errorMsg) {
 		AtomicBoolean found = new AtomicBoolean(false);
 		listAppender.list.forEach(logEvent -> {
-			if (logEvent.getFormattedMessage().equalsIgnoreCase(errorMsg)) {
+			if (logEvent.getFormattedMessage().contains(errorMsg)) {
 				found.set(true);
 				assertEquals(Level.ERROR, logEvent.getLevel());
 			}
