@@ -135,14 +135,14 @@ public abstract class Subscriber<PS extends PubSub<?>> {
             return;
         }
 
-        long transmitRateFromGatewayDevice = fetchTransmitRateFromGatewayDevice();
-        if(transmitRateInSeconds != transmitRateFromGatewayDevice) {
+        long newTransmitRateFromGatewayDevice = fetchTransmitRateFromGatewayDevice();
+        if(transmitRateInSeconds != newTransmitRateFromGatewayDevice) {
             // Refresh the subscription only when the Transmit Rate
             // has changed for the Subscribers supporting batching
             pubSub.unsubscribe(this);
 
             // Update the transmit rate before resubscribing
-            this.transmitRateInSeconds = transmitRateFromGatewayDevice;
+            this.transmitRateInSeconds = newTransmitRateFromGatewayDevice;
 
             pubSub.subscribe(this);
 

@@ -1,18 +1,16 @@
 package com.cumulocity.agent.snmp.client.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Vector;
-import java.util.concurrent.atomic.AtomicBoolean;
-
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
+import com.cumulocity.agent.snmp.platform.model.*;
+import com.cumulocity.agent.snmp.platform.pubsub.publisher.AlarmPublisher;
+import com.cumulocity.agent.snmp.platform.pubsub.publisher.EventPublisher;
+import com.cumulocity.agent.snmp.platform.pubsub.publisher.MeasurementPublisher;
+import com.cumulocity.agent.snmp.platform.service.GatewayDataProvider;
+import com.cumulocity.model.idtype.GId;
+import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,34 +23,17 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.LoggerFactory;
 import org.snmp4j.CommandResponderEvent;
 import org.snmp4j.PDU;
-import org.snmp4j.smi.Address;
-import org.snmp4j.smi.Integer32;
-import org.snmp4j.smi.OID;
-import org.snmp4j.smi.UdpAddress;
-import org.snmp4j.smi.Variable;
-import org.snmp4j.smi.VariableBinding;
+import org.snmp4j.smi.*;
 
-import com.cumulocity.agent.snmp.platform.model.AlarmMapping;
-import com.cumulocity.agent.snmp.platform.model.DeviceManagedObjectWrapper;
-import com.cumulocity.agent.snmp.platform.model.DeviceProtocolManagedObjectWrapper;
-import com.cumulocity.agent.snmp.platform.model.EventMapping;
-import com.cumulocity.agent.snmp.platform.model.GatewayManagedObjectWrapper;
-import com.cumulocity.agent.snmp.platform.model.MeasurementMapping;
-import com.cumulocity.agent.snmp.platform.model.Register;
-import com.cumulocity.agent.snmp.platform.pubsub.publisher.AlarmPublisher;
-import com.cumulocity.agent.snmp.platform.pubsub.publisher.EventPublisher;
-import com.cumulocity.agent.snmp.platform.pubsub.publisher.MeasurementPublisher;
-import com.cumulocity.agent.snmp.platform.service.GatewayDataProvider;
-import com.cumulocity.model.idtype.GId;
-import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
-import com.cumulocity.rest.representation.event.EventRepresentation;
-import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
-import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Vector;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.read.ListAppender;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TrapHandlerTest {
@@ -90,11 +71,13 @@ public class TrapHandlerTest {
 
 	private ListAppender<ILoggingEvent> listAppender;
 
-	private ArgumentCaptor<AlarmRepresentation> alarmCaptor;
+	private ArgumentCaptor<AlarmMapping> alarmCaptor;
 
-	private ArgumentCaptor<EventRepresentation> eventCaptor;
+	private ArgumentCaptor<EventMapping> eventCaptor;
 
-	private ArgumentCaptor<MeasurementRepresentation> measurementCaptor;
+	private ArgumentCaptor<MeasurementMapping> measurementCaptor;
+
+	private ArgumentCaptor<ManagedObjectRepresentation> gatewayDeviceMoCaptor;
 
 	private Address address;
 
@@ -126,9 +109,10 @@ public class TrapHandlerTest {
 		logger.setLevel(Level.DEBUG);
 		listAppender.start();
 
-		alarmCaptor = ArgumentCaptor.forClass(AlarmRepresentation.class);
-		eventCaptor = ArgumentCaptor.forClass(EventRepresentation.class);
-		measurementCaptor = ArgumentCaptor.forClass(MeasurementRepresentation.class);
+		alarmCaptor = ArgumentCaptor.forClass(AlarmMapping.class);
+		eventCaptor = ArgumentCaptor.forClass(EventMapping.class);
+		measurementCaptor = ArgumentCaptor.forClass(MeasurementMapping.class);
+		gatewayDeviceMoCaptor = ArgumentCaptor.forClass(ManagedObjectRepresentation.class);
 
 		address = new UdpAddress("10.0.0.1/65214");
 
@@ -139,7 +123,7 @@ public class TrapHandlerTest {
 		alarmMapping = new AlarmMapping();
 		alarmMapping.setType("c8y_SNMPAlarm");
 		alarmMapping.setText("Test SNMP alarm");
-		alarmMapping.setSeverity("MINOR");
+		alarmMapping.setSeverity(AlarmSeverity.MINOR.name());
 
 		eventMapping = new EventMapping();
 		eventMapping.setType("c8y_SNMPEvent");
@@ -226,13 +210,16 @@ public class TrapHandlerTest {
 		when(gatewayDataProvider.getDeviceProtocolMap()).thenReturn(Collections.emptyMap());
 
 		// Action
-		trapHandler.processPdu(event);
-		verify(alarmPublisher).publish(alarmCaptor.capture());
+		ManagedObjectRepresentation source = new ManagedObjectRepresentation();
+		source.setId(GId.asGId(1));
 
-		AlarmRepresentation alarm = alarmCaptor.getValue();
-		assertEquals("MAJOR", alarm.getSeverity());
-		assertEquals("c8y_TRAPReceivedFromUnknownDevice", alarm.getType());
-		assertEquals(gatewayDeviceMo, alarm.getSource());
+		trapHandler.processPdu(event);
+		verify(alarmPublisher).publish(alarmCaptor.capture(), gatewayDeviceMoCaptor.capture());
+
+		AlarmMapping mapping = alarmCaptor.getValue();
+		assertEquals("MAJOR", mapping.getSeverity());
+		assertEquals("c8y_TRAPReceivedFromUnknownDevice", mapping.getType());
+		assertEquals(gatewayDeviceMo.getId(), gatewayDeviceMoCaptor.getValue().getId());
 	}
 
 	@Test
@@ -266,15 +253,15 @@ public class TrapHandlerTest {
 		// Action
 		trapHandler.processPdu(event);
 
-		verify(alarmPublisher, times(1)).publish(alarmCaptor.capture());
-		verify(eventPublisher, times(0)).publish(eventCaptor.capture());
-		verify(measurementPublisher, times(0)).publish(measurementCaptor.capture());
+		verify(alarmPublisher, times(1)).publish(alarmCaptor.capture(), gatewayDeviceMoCaptor.capture());
+		verify(eventPublisher, times(0)).publish(eventCaptor.capture(), gatewayDeviceMoCaptor.capture());
+		verify(measurementPublisher, times(0)).publish(measurementCaptor.capture(), gatewayDeviceMoCaptor.capture(), any(), anyString());
 
-		AlarmRepresentation alarm = alarmCaptor.getValue();
+		AlarmMapping alarm = alarmCaptor.getValue();
 		assertEquals("MINOR", alarm.getSeverity());
 		assertEquals("c8y_SNMPAlarm", alarm.getType());
 		assertEquals("Test SNMP alarm", alarm.getText());
-		assertEquals(device1Mo.getId(), alarm.getSource().getId());
+		assertEquals(device1Mo.getId(), gatewayDeviceMoCaptor.getValue().getId());
 	}
 
 	@Test
@@ -284,14 +271,14 @@ public class TrapHandlerTest {
 		// Action
 		trapHandler.processPdu(event);
 
-		verify(alarmPublisher, times(0)).publish(alarmCaptor.capture());
-		verify(eventPublisher, times(1)).publish(eventCaptor.capture());
-		verify(measurementPublisher, times(0)).publish(measurementCaptor.capture());
+		verify(alarmPublisher, times(0)).publish(alarmCaptor.capture(), gatewayDeviceMoCaptor.capture());
+		verify(eventPublisher, times(1)).publish(eventCaptor.capture(), gatewayDeviceMoCaptor.capture());
+		verify(measurementPublisher, times(0)).publish(measurementCaptor.capture(), gatewayDeviceMoCaptor.capture(), any(), anyString());
 
-		EventRepresentation eventResult = eventCaptor.getValue();
+		EventMapping eventResult = eventCaptor.getValue();
 		assertEquals("c8y_SNMPEvent", eventResult.getType());
 		assertEquals("Test SNMP event", eventResult.getText());
-		assertEquals(device1Mo.getId(), eventResult.getSource().getId());
+		assertEquals(device1Mo.getId(), gatewayDeviceMoCaptor.getValue().getId());
 	}
 
 	@Test
@@ -302,21 +289,13 @@ public class TrapHandlerTest {
 		// Action
 		trapHandler.processPdu(event);
 
-		verify(alarmPublisher, times(0)).publish(alarmCaptor.capture());
-		verify(eventPublisher, times(0)).publish(eventCaptor.capture());
-		verify(measurementPublisher, times(1)).publish(measurementCaptor.capture());
+		verify(alarmPublisher, times(0)).publish(alarmCaptor.capture(), gatewayDeviceMoCaptor.capture());
+		verify(eventPublisher, times(0)).publish(eventCaptor.capture(), gatewayDeviceMoCaptor.capture());
+		verify(measurementPublisher, times(1)).publish(measurementCaptor.capture(), gatewayDeviceMoCaptor.capture(), eq(Integer.valueOf(10)), eq("cm"));
 
-		MeasurementRepresentation measurement = measurementCaptor.getValue();
-		Map<String, Object> attrs = measurement.getAttrs();
+		MeasurementMapping measurement = measurementCaptor.getValue();
 		assertEquals("c8y_SNMPMeasurement", measurement.getType());
-		assertEquals(device1Mo.getId(), measurement.getSource().getId());
-		assertNotNull(attrs.get("c8y_SNMPMeasurement"));
-		if (attrs.get("c8y_SNMPMeasurement") instanceof Map) {
-			Map<String, Object> fragMap = (Map<String, Object>) attrs.get("c8y_SNMPMeasurement");
-			Map<String, Object> dataMap = (Map<String, Object>) fragMap.get("T");
-			assertEquals(10, dataMap.get("value"));
-			assertEquals("cm", dataMap.get("unit"));
-		}
+		assertEquals(device1Mo.getId(), gatewayDeviceMoCaptor.getValue().getId());
 	}
 
 	@Test
@@ -327,20 +306,20 @@ public class TrapHandlerTest {
 		// Action
 		trapHandler.processPdu(event);
 
-		verify(alarmPublisher, times(1)).publish(alarmCaptor.capture());
-		verify(eventPublisher, times(1)).publish(eventCaptor.capture());
-		verify(measurementPublisher, times(0)).publish(measurementCaptor.capture());
+		verify(alarmPublisher, times(1)).publish(alarmCaptor.capture(), gatewayDeviceMoCaptor.capture());
+		verify(eventPublisher, times(1)).publish(eventCaptor.capture(), gatewayDeviceMoCaptor.capture());
+		verify(measurementPublisher, times(0)).publish(measurementCaptor.capture(), gatewayDeviceMoCaptor.capture(), any(), anyString());
 
-		AlarmRepresentation alarm = alarmCaptor.getValue();
+		AlarmMapping alarm = alarmCaptor.getValue();
 		assertEquals("MINOR", alarm.getSeverity());
 		assertEquals("c8y_SNMPAlarm", alarm.getType());
 		assertEquals("Test SNMP alarm", alarm.getText());
-		assertEquals(device1Mo.getId(), alarm.getSource().getId());
+		assertEquals(device1Mo.getId(), gatewayDeviceMoCaptor.getValue().getId());
 
-		EventRepresentation eventResult = eventCaptor.getValue();
+		EventMapping eventResult = eventCaptor.getValue();
 		assertEquals("c8y_SNMPEvent", eventResult.getType());
 		assertEquals("Test SNMP event", eventResult.getText());
-		assertEquals(device1Mo.getId(), eventResult.getSource().getId());
+		assertEquals(device1Mo.getId(), gatewayDeviceMoCaptor.getValue().getId());
 	}
 
 	@Test
@@ -355,25 +334,14 @@ public class TrapHandlerTest {
 		// Action
 		trapHandler.processPdu(event);
 
-		verify(alarmPublisher, times(0)).publish(alarmCaptor.capture());
-		verify(eventPublisher, times(0)).publish(eventCaptor.capture());
-		verify(measurementPublisher, times(1)).publish(measurementCaptor.capture());
+		verify(alarmPublisher, times(0)).publish(alarmCaptor.capture(), gatewayDeviceMoCaptor.capture());
+		verify(eventPublisher, times(0)).publish(eventCaptor.capture(), gatewayDeviceMoCaptor.capture());
+		verify(measurementPublisher, times(1)).publish(measurementCaptor.capture(), gatewayDeviceMoCaptor.capture(), eq(Integer.valueOf(10)), eq("cm"));
 
-		MeasurementRepresentation measurement = measurementCaptor.getValue();
-		Map<String, Object> attrs = measurement.getAttrs();
+		MeasurementMapping measurement = measurementCaptor.getValue();
 		assertEquals("c8y_SNMPMeasurement", measurement.getType());
-		assertEquals(device1Mo.getId(), measurement.getSource().getId());
-		assertNotNull(attrs.get("c8y_SNMPMeasurement"));
-		if (attrs.get("c8y_SNMPMeasurement") instanceof Map) {
-			Map<String, Object> fragMap = (Map<String, Object>) attrs.get("c8y_SNMPMeasurement");
-			Map<String, Object> dataMap = (Map<String, Object>) fragMap.get("T");
-			assertEquals(10, dataMap.get("value"));
-			assertEquals("cm", dataMap.get("unit"));
-		}
-
-		assertNotNull(attrs.get("c8y_StaticFragment"));
-		Map<String, Object> dataMap = (Map<String, Object>) attrs.get("c8y_StaticFragment");
-		assertEquals("value1", dataMap.get("key1"));
+		assertEquals(device1Mo.getId(), gatewayDeviceMoCaptor.getValue().getId());
+		assertEquals(staticFragmentsMap, measurement.getStaticFragmentsMap());
 	}
 
 	@After

@@ -1,49 +1,24 @@
 package com.cumulocity.agent.snmp.client.service;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.Map;
-
-import org.joda.time.DateTime;
-import org.snmp4j.CommandResponder;
-import org.snmp4j.CommandResponderEvent;
-import org.snmp4j.PDU;
-import org.snmp4j.asn1.BER;
-import org.snmp4j.asn1.BERInputStream;
-import org.snmp4j.smi.AbstractVariable;
-import org.snmp4j.smi.Address;
-import org.snmp4j.smi.Counter64;
-import org.snmp4j.smi.Integer32;
-import org.snmp4j.smi.IpAddress;
-import org.snmp4j.smi.Null;
-import org.snmp4j.smi.OID;
-import org.snmp4j.smi.OctetString;
-import org.snmp4j.smi.Opaque;
-import org.snmp4j.smi.TimeTicks;
-import org.snmp4j.smi.UnsignedInteger32;
-import org.snmp4j.smi.Variable;
-import org.snmp4j.smi.VariableBinding;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import com.cumulocity.agent.snmp.platform.model.AlarmMapping;
-import com.cumulocity.agent.snmp.platform.model.DeviceManagedObjectWrapper;
-import com.cumulocity.agent.snmp.platform.model.DeviceProtocolManagedObjectWrapper;
-import com.cumulocity.agent.snmp.platform.model.EventMapping;
-import com.cumulocity.agent.snmp.platform.model.MeasurementMapping;
-import com.cumulocity.agent.snmp.platform.model.Register;
+import com.cumulocity.agent.snmp.platform.model.*;
 import com.cumulocity.agent.snmp.platform.pubsub.publisher.AlarmPublisher;
 import com.cumulocity.agent.snmp.platform.pubsub.publisher.EventPublisher;
 import com.cumulocity.agent.snmp.platform.pubsub.publisher.MeasurementPublisher;
 import com.cumulocity.agent.snmp.platform.service.GatewayDataProvider;
 import com.cumulocity.agent.snmp.utils.Constants;
-import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
-import com.cumulocity.rest.representation.event.EventRepresentation;
-import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
-import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
-import com.google.common.collect.Maps;
-
 import lombok.extern.slf4j.Slf4j;
+import org.snmp4j.CommandResponder;
+import org.snmp4j.CommandResponderEvent;
+import org.snmp4j.PDU;
+import org.snmp4j.asn1.BER;
+import org.snmp4j.asn1.BERInputStream;
+import org.snmp4j.smi.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.Map;
 
 @Slf4j
 @Component
@@ -99,11 +74,11 @@ public class TrapHandler implements CommandResponder {
 
 	private void handleUnknownDevice(String deviceIp) {
 		AlarmMapping alarmMapping = new AlarmMapping();
-		alarmMapping.setSeverity("MAJOR");
+		alarmMapping.setSeverity(AlarmSeverity.MAJOR.name());
 		alarmMapping.setType("c8y_TRAPReceivedFromUnknownDevice");
 		alarmMapping.setText("Trap received from an unknown device with IP address : " + deviceIp);
 
-		process(alarmMapping, dataProvider.getGatewayDevice().getManagedObject());
+		alarmPublisher.publish(alarmMapping, dataProvider.getGatewayDevice().getManagedObject());
 	}
 
 	private void processDevicePdu(String deviceIp, PDU pdu) {
@@ -131,75 +106,30 @@ public class TrapHandler implements CommandResponder {
 			if (oidMap.containsKey(oid)) {
 				Register register = oidMap.get(oid);
 
-				process(register.getAlarmMapping(), deviceMo.getManagedObject());
-				process(register.getEventMapping(), deviceMo.getManagedObject());
-				process(binding, register, deviceMo.getManagedObject());
+				if(register.getAlarmMapping() != null) {
+					alarmPublisher.publish(register.getAlarmMapping(), deviceMo.getManagedObject());
+				}
+
+				if(register.getEventMapping() != null) {
+					eventPublisher.publish(register.getEventMapping(), deviceMo.getManagedObject());
+				}
+
+				if(register.getMeasurementMapping() != null) {
+					measurementPublisher.publish(register.getMeasurementMapping(), deviceMo.getManagedObject(), parse(binding.getVariable()), register.getUnit());
+				}
 
 				isMappingFound = true;
 			} else {
-				log.error("{} OID could not be found in the {} device protocol selected for the device {}",
-						binding.getOid(), deviceProtocol, deviceIp);
+				log.warn("{} OID could not be found in the {} device protocol selected for the device {}", binding.getOid(), deviceProtocol, deviceIp);
 			}
 		}
 
 		if (!isMappingFound) {
-			log.debug("No configuration mappings found for received trap from the device {}",
-					deviceMo.getProperties().getIpAddress());
+			log.debug("No configuration mappings found for received trap from the device {}", deviceMo.getProperties().getIpAddress());
 		}
 	}
 
-	private void process(AlarmMapping alarmMapping, ManagedObjectRepresentation managedObject) {
-		if (alarmMapping != null) {
-			AlarmRepresentation newAlarm = new AlarmRepresentation();
-			newAlarm.setSource(managedObject);
-			newAlarm.setDateTime(DateTime.now());
-			newAlarm.setType(alarmMapping.getType());
-			newAlarm.setText(alarmMapping.getText());
-			newAlarm.setSeverity(alarmMapping.getSeverity());
-
-			alarmPublisher.publish(newAlarm);
-		}
-	}
-
-	private void process(EventMapping eventMapping, ManagedObjectRepresentation managedObject) {
-		if (eventMapping != null) {
-			EventRepresentation newEvent = new EventRepresentation();
-			newEvent.setSource(managedObject);
-			newEvent.setDateTime(DateTime.now());
-			newEvent.setType(eventMapping.getType());
-			newEvent.setText(eventMapping.getText());
-
-			eventPublisher.publish(newEvent);
-		}
-	}
-
-	private void process(VariableBinding binding, Register register, ManagedObjectRepresentation managedObject) {
-		MeasurementMapping measurementMapping = register.getMeasurementMapping();
-
-		if (measurementMapping != null) {
-			Map<String, Object> series = Maps.newHashMap();
-			series.put("value", parse(binding.getVariable()));
-			series.put("unit", register.getUnit());
-
-			Map<String, Object> type = Maps.newHashMap();
-			type.put(measurementMapping.getSeries(), series);
-
-			MeasurementRepresentation newMeasurement = new MeasurementRepresentation();
-			newMeasurement.setSource(managedObject);
-			newMeasurement.setDateTime(DateTime.now());
-			newMeasurement.setType(measurementMapping.getType());
-			newMeasurement.setProperty(measurementMapping.getType(), type);
-
-			Map<String, Map<?, ?>> staticFragmentsMap = measurementMapping.getStaticFragmentsMap();
-			if (staticFragmentsMap != null && !staticFragmentsMap.isEmpty()) {
-				newMeasurement.getAttrs().putAll(staticFragmentsMap);
-			}
-
-			measurementPublisher.publish(newMeasurement);
-		}
-	}
-
-	private Object parse(Variable valueAsVar) {
+	Object parse(Variable valueAsVar) {
 		Object retvalue = null;
 
 		if (valueAsVar != null) {
@@ -234,7 +164,7 @@ public class TrapHandler implements CommandResponder {
 					retvalue = valueAsVar.toString();
 				}
 			} else if (valueAsVar instanceof IpAddress) {
-				retvalue = ((IpAddress) valueAsVar).getInetAddress();
+				retvalue = ((IpAddress) valueAsVar).getInetAddress().getHostName();
 			} else if (valueAsVar instanceof Null) {
 				// Nothing to do here
 			} else {
@@ -245,7 +175,7 @@ public class TrapHandler implements CommandResponder {
 		return retvalue;
 	}
 
-	private Object resolveOpaque(Opaque var) {
+	Object resolveOpaque(Opaque var) {
 		// If not resolved, we will return the data as an array of bytes
 		Object value = var.getValue();
 

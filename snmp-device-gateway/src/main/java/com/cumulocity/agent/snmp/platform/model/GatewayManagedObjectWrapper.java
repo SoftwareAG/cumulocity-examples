@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.ws.rs.core.UriBuilder;
 import java.util.List;
 import java.util.Map;
 
@@ -14,11 +15,15 @@ import java.util.Map;
 @Getter
 public class GatewayManagedObjectWrapper extends AbstractManagedObjectWrapper {
 
+	public final String childDevicesPath;
+
 	private SnmpCommunicationProperties SnmpCommunicationProperties;
 
 
 	public GatewayManagedObjectWrapper(ManagedObjectRepresentation gatewayMo) {
 		super(gatewayMo);
+
+		this.childDevicesPath = UriBuilder.fromPath("/inventory/managedObjects/{deviceId}/childDevices").build(getId().toString()).getPath();
 
 		loadSnmpCommunicationProperties();
 	}

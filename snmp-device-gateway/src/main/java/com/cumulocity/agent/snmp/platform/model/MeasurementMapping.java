@@ -1,15 +1,13 @@
 package com.cumulocity.agent.snmp.platform.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import lombok.Data;
+
+import javax.validation.constraints.NotNull;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.validation.constraints.NotNull;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonSetter;
-
-import lombok.Data;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
