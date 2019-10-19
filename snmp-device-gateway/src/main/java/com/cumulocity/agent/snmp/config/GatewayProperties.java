@@ -77,7 +77,7 @@ public class GatewayProperties {
 		@Value("#{'${snmp.trapListener.port:162}'.trim()}")
 		private int trapListenerPort;
 
-		@Value("#{'${snmp.trapListener.address:localhost}'.trim()}")
+		@Value("#{'${snmp.trapListener.address:}'.trim()}")
 		private String trapListenerAddress;
 
 		@Value("#{'${snmp.community.target}'.trim()}")

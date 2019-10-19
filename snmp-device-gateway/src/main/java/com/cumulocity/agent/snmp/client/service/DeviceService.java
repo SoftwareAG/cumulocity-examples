@@ -7,6 +7,7 @@ import com.cumulocity.agent.snmp.platform.model.DeviceManagedObjectWrapper.Devic
 import com.cumulocity.agent.snmp.platform.model.DeviceManagedObjectWrapper.SnmpDeviceProperties;
 import com.cumulocity.agent.snmp.platform.model.GatewayDataRefreshedEvent;
 import com.cumulocity.agent.snmp.platform.service.GatewayDataProvider;
+import com.cumulocity.agent.snmp.util.IpAddressUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.snmp4j.MessageDispatcher;
 import org.snmp4j.MessageDispatcherImpl;
@@ -66,10 +67,11 @@ public class DeviceService {
 			dispatcher.addMessageProcessingModel(new MPv2c());
 			dispatcher.addMessageProcessingModel(new MPv3());
 
+			String trapListenerBindingAddress = IpAddressUtil.sanitizeIpAddress(snmpProperties.getTrapListenerAddress(), true);
 			TransportMapping<? extends Address> transportMapping =
-					createTransportMapping(snmpProperties.getTrapListenerProtocol(),
+					createTransportMapping( snmpProperties.getTrapListenerProtocol(),
 											snmpProperties.getTrapListenerPort(),
-											snmpProperties.getTrapListenerAddress());
+											trapListenerBindingAddress);
 
 			snmp = new Snmp(dispatcher, transportMapping);
 			snmp.addCommandResponder(trapHandler);
@@ -79,8 +81,8 @@ public class DeviceService {
 		} catch (BindException be) {
 			log.error("Failed to start listening to traps. Port {}/{} is already in use. \nUpdate the 'snmp.trapListener.port' and 'snmp.trapListener.address' properties and restart the agent. Shutting down the agent...", snmpProperties.getTrapListenerAddress(), snmpProperties.getTrapListenerPort(), be);
 			System.exit(0);
-		} catch (IOException ioe) {
-			log.error("Failed to start listening to traps on port {}/{}. \nUpdate the 'snmp.trapListener.port' and 'snmp.trapListener.address' properties and restart the agent. Shutting down the agent...", snmpProperties.getTrapListenerAddress(), snmpProperties.getTrapListenerPort(), ioe);
+		} catch (IOException | IllegalArgumentException t) {
+			log.error("Failed to start listening to traps on port {}/{}. \nUpdate the 'snmp.trapListener.port' and 'snmp.trapListener.address' properties and restart the agent. Shutting down the agent...", snmpProperties.getTrapListenerAddress(), snmpProperties.getTrapListenerPort(), t);
 			System.exit(0);
 		}
 	}
@@ -186,11 +188,7 @@ public class DeviceService {
 	}
 
 	TransportMapping<? extends Address> createTransportMapping(String protocol, int port, String bindingAddress) throws IOException {
-		String addressString = 			protocol
-				+ ":" + bindingAddress.split("[/%]", 2)[0]
-				+ "/" + port;
-
-		Address snmpListeningAddress = GenericAddress.parse(addressString);
+		Address snmpListeningAddress = GenericAddress.parse(protocol + ":" + bindingAddress + "/" + port);
 
 		if (snmpListeningAddress instanceof TcpAddress) {
 			return new DefaultTcpTransportMapping((TcpAddress) snmpListeningAddress);

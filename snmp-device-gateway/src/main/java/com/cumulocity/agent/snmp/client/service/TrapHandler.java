@@ -5,6 +5,7 @@ import com.cumulocity.agent.snmp.platform.pubsub.publisher.AlarmPublisher;
 import com.cumulocity.agent.snmp.platform.pubsub.publisher.EventPublisher;
 import com.cumulocity.agent.snmp.platform.pubsub.publisher.MeasurementPublisher;
 import com.cumulocity.agent.snmp.platform.service.GatewayDataProvider;
+import com.cumulocity.agent.snmp.util.IpAddressUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.snmp4j.CommandResponder;
 import org.snmp4j.CommandResponderEvent;
@@ -78,7 +79,12 @@ public class TrapHandler implements CommandResponder {
 			return null;
 		}
 
-		return peerAddress.toString().split("/")[0].toLowerCase();
+		try {
+			return IpAddressUtil.sanitizeIpAddress(peerAddress.toString());
+		} catch(IllegalArgumentException iae) {
+			log.warn("Error while parsing the IP Address from the received trap.\n{}", event, iae);
+			return null;
+		}
 	}
 
 	private void handleUnknownDevice(String deviceIp) {
@@ -173,7 +179,7 @@ public class TrapHandler implements CommandResponder {
 					retvalue = valueAsVar.toString();
 				}
 			} else if (valueAsVar instanceof IpAddress) {
-				retvalue = ((IpAddress) valueAsVar).getInetAddress().getHostName();
+				retvalue = ((IpAddress) valueAsVar).getInetAddress().getHostAddress();
 			} else if (valueAsVar instanceof Null) {
 				// Nothing to do here
 			} else {

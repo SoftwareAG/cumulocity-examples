@@ -5,6 +5,7 @@ import com.cumulocity.agent.snmp.platform.model.DeviceManagedObjectWrapper;
 import com.cumulocity.agent.snmp.platform.model.DeviceProtocolManagedObjectWrapper;
 import com.cumulocity.agent.snmp.platform.model.GatewayDataRefreshedEvent;
 import com.cumulocity.agent.snmp.platform.model.GatewayManagedObjectWrapper;
+import com.cumulocity.agent.snmp.util.IpAddressUtil;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.inventory.ManagedObjectReferenceCollectionRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
@@ -118,7 +119,16 @@ public class GatewayDataProvider {
 			Map<String, DeviceProtocolManagedObjectWrapper> newProtocolMap, ManagedObjectRepresentation childDeviceMo) {
 
 		DeviceManagedObjectWrapper childDeviceWrapper = new DeviceManagedObjectWrapper(childDeviceMo);
-		String deviceIp = childDeviceWrapper.getProperties().getIpAddress().toLowerCase();
+		String deviceIp = null;
+		try {
+			deviceIp = IpAddressUtil.sanitizeIpAddress(childDeviceWrapper.getProperties().getIpAddress());
+		} catch(IllegalArgumentException iae) {
+			log.error("Invalid IP Address <{}> specified in the SNMP device named {}.",
+					childDeviceWrapper.getProperties().getIpAddress(),
+					childDeviceMo.getName(), iae);
+
+			deviceIp = childDeviceWrapper.getProperties().getIpAddress();
+		}
 		newDeviceProtocolMap.put(deviceIp, childDeviceWrapper);
 
 		String protocolName = childDeviceWrapper.getDeviceProtocol();
