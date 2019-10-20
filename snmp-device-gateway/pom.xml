@@ -47,6 +47,31 @@
 			<artifactId>snmp4j</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.cometd.java</groupId>
+			<artifactId>cometd-java-common</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.cometd.java</groupId>
+			<artifactId>cometd-java-client</artifactId>
+		</dependency>
+
+        <dependency>
+            <groupId>org.cometd.java</groupId>
+            <artifactId>bayeux-api</artifactId>
+        </dependency>
+
+        <dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-util</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-util-ajax</artifactId>
+		</dependency>
+
 		<!-- Cumulocity Dependencies -->
 		<dependency>
 			<groupId>com.nsn.cumulocity.clients-java</groupId>
@@ -59,31 +84,6 @@
 		<dependency>
 			<groupId>com.nsn.cumulocity.shared-components</groupId>
 			<artifactId>common-notification</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.cometd.java</groupId>
-			<artifactId>cometd-java-common</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.cometd.java</groupId>
-			<artifactId>bayeux-api</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.cometd.java</groupId>
-			<artifactId>cometd-java-client</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-util</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-util-ajax</artifactId>
 		</dependency>
 
 		<!-- jackson -->

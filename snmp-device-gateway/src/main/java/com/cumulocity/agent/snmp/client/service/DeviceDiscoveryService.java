@@ -183,11 +183,11 @@ public class DeviceDiscoveryService {
                             // Create a new Child Device
                             createAndRegisterAChildDevice(currentIpString);
                         } else if (!isDeviceSnmpEnabled) {
-                            handleNoResponseFromDeviceSituation("A device with IP Address <" + currentIpString + ">, which is not SNMP enabled, found during auto-discovery device scan.", AlarmMapping.c8y_DeviceSnmpNotEnabled + currentIpString);
+                            handleNoResponseFromDevice("A device with IP Address <" + currentIpString + ">, which is not SNMP enabled, found during auto-discovery device scan.", AlarmMapping.c8y_DeviceSnmpNotEnabled + currentIpString);
                         }
                     } else {
                         if (childDevicesMap.containsKey(currentIpString)) {
-                            handleNoResponseFromDeviceSituation("Existing SNMP device with IP Address <" + currentIpString + "> didn't respond during auto-discovery device scan.", AlarmMapping.c8y_DeviceNotResponding + currentIpString);
+                            handleNoResponseFromDevice("Existing SNMP device with IP Address <" + currentIpString + "> didn't respond during auto-discovery device scan.", AlarmMapping.c8y_DeviceNotResponding + currentIpString);
                         } else {
                             log.debug("No device is found at IP Address <{}> during auto-discovery device scan.", currentIpString);
                         }
@@ -296,7 +296,7 @@ public class DeviceDiscoveryService {
         }
     }
 
-    private void handleNoResponseFromDeviceSituation(String type, String text) {
+    private void handleNoResponseFromDevice(String type, String text) {
         log.debug(text + " An alarm published to the Platform.");
 
         AlarmMapping alarmMapping = new AlarmMapping();

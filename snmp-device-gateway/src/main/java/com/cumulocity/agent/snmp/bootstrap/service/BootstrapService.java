@@ -144,7 +144,7 @@ public class BootstrapService implements InitializingBean {
                     eventPublisher.publishEvent(new CredentialsAvailableEvent(deviceCredentials));
                 }
             } catch(Throwable t) {
-                log.error("Unable to connect to the platform, correct the issue and restart the agent.", t);
+                log.error("Unable to connect to the platform, correct the issue and restart the agent. \nShutting down the agent...", t);
                 System.exit(0);
             }
 		}, gatewayProperties.getBootstrapFixedDelay());
@@ -168,10 +168,10 @@ public class BootstrapService implements InitializingBean {
 				log.warn("A device with id {} is either not registerd or not accepted. "
 						+ "Register or accept a device with id {}, using Device Management user interface.", gatewayProperties.getGatewayIdentifier(), gatewayProperties.getGatewayIdentifier());
 			} else if(e.getHttpStatus() == HttpStatus.SC_UNAUTHORIZED) {
-				log.error("Unable to connect to the platform as incorrect bootstrap credentials were provided. Update the credentials in file:${user.home}/.snmp/snmp-agent-gateway.properties and restart the agent.", e);
+				log.error("Unable to connect to the platform as incorrect bootstrap credentials were provided. Update the credentials in file:${user.home}/.snmp/snmp-agent-gateway.properties and restart the agent. \nShutting down the agent...", e);
 				throw e;
 			} else {
-				log.error("Unable to connect to the platform, correct the issue and restart the agent.", e);
+				log.error("Unable to connect to the platform, correct the issue and restart the agent. \nShutting down the agent...", e);
 				throw e;
 			}
 		}
