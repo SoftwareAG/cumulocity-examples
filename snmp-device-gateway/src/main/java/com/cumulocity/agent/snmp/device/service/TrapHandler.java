@@ -1,4 +1,4 @@
-package com.cumulocity.agent.snmp.client.service;
+package com.cumulocity.agent.snmp.device.service;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;

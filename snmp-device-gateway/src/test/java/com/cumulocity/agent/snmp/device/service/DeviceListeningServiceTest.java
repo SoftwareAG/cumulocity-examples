@@ -1,4 +1,4 @@
-package com.cumulocity.agent.snmp.client.service;
+package com.cumulocity.agent.snmp.device.service;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.assertEquals;
@@ -48,7 +48,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 
 @RunWith(MockitoJUnitRunner.class)
-public class DeviceServiceTest {
+public class DeviceListeningServiceTest {
 
 	@Mock
 	TrapHandler trapHandler;
@@ -60,7 +60,7 @@ public class DeviceServiceTest {
 	GatewayProperties.SnmpProperties snmpProperties;
 
 	@InjectMocks
-	DeviceService deviceService;
+	DeviceListeningService deviceListeningService;
 
 	private Logger logger;
 
@@ -133,7 +133,7 @@ public class DeviceServiceTest {
 		assertNull(securityModel);
 
 		// Action
-		ReflectionTestUtils.invokeMethod(deviceService, "createSnmpDeviceListener");
+		ReflectionTestUtils.invokeMethod(deviceListeningService, "createSnmpDeviceListener");
 
 		securityModel = SecurityModels.getInstance().getSecurityModel(modeID);
 		assertNotNull(securityModel);
@@ -149,7 +149,7 @@ public class DeviceServiceTest {
 		assertNull(securityModel);
 
 		// Action
-		ReflectionTestUtils.invokeMethod(deviceService, "createSnmpDeviceListener");
+		ReflectionTestUtils.invokeMethod(deviceListeningService, "createSnmpDeviceListener");
 
 		securityModel = SecurityModels.getInstance().getSecurityModel(modeID);
 		assertNotNull(securityModel);
@@ -175,7 +175,7 @@ public class DeviceServiceTest {
 		gatewayDataProvider.getDeviceProtocolMap().put("snmp-device", deviceMoWrapper);
 
 		// Action
-		ReflectionTestUtils.invokeMethod(deviceService, "refreshCredentials");
+		ReflectionTestUtils.invokeMethod(deviceListeningService, "refreshCredentials");
 
 		SecurityModel securityModel = SecurityModels.getInstance().getSecurityModel(modeID);
 		assertNotNull(securityModel);
@@ -199,7 +199,7 @@ public class DeviceServiceTest {
 		assertNull(securityModel);
 
 		// Action
-		ReflectionTestUtils.invokeMethod(deviceService, "configureUserSecurityModel");
+		ReflectionTestUtils.invokeMethod(deviceListeningService, "configureUserSecurityModel");
 
 		securityModel = SecurityModels.getInstance().getSecurityModel(modeID);
 		assertNotNull(securityModel);
@@ -213,14 +213,14 @@ public class DeviceServiceTest {
 	public void shouldConfigureTcpTransportMappingForTcp() {
 		when(snmpProperties.getTrapListenerProtocol()).thenReturn("tcp");
 
-		assertNull(deviceService.snmp);
+		assertNull(deviceListeningService.snmp);
 
 		// Action
-		ReflectionTestUtils.invokeMethod(deviceService, "createSnmpDeviceListener");
+		ReflectionTestUtils.invokeMethod(deviceListeningService, "createSnmpDeviceListener");
 
-		assertNotNull(deviceService.snmp);
+		assertNotNull(deviceListeningService.snmp);
 
-		Collection<TransportMapping> mappings = deviceService.snmp.getMessageDispatcher().getTransportMappings();
+		Collection<TransportMapping> mappings = deviceListeningService.snmp.getMessageDispatcher().getTransportMappings();
 		assertNotNull(mappings);
 		assertEquals(1, mappings.size());
 
@@ -234,14 +234,14 @@ public class DeviceServiceTest {
 	public void shouldConfigureUdpTransportMappingForUdp() {
 		when(snmpProperties.getTrapListenerProtocol()).thenReturn("udp");
 
-		assertNull(deviceService.snmp);
+		assertNull(deviceListeningService.snmp);
 
 		// Action
-		ReflectionTestUtils.invokeMethod(deviceService, "createSnmpDeviceListener");
+		ReflectionTestUtils.invokeMethod(deviceListeningService, "createSnmpDeviceListener");
 
-		assertNotNull(deviceService.snmp);
+		assertNotNull(deviceListeningService.snmp);
 
-		Collection<TransportMapping> mappings = deviceService.snmp.getMessageDispatcher().getTransportMappings();
+		Collection<TransportMapping> mappings = deviceListeningService.snmp.getMessageDispatcher().getTransportMappings();
 		assertNotNull(mappings);
 		assertEquals(1, mappings.size());
 
@@ -256,9 +256,9 @@ public class DeviceServiceTest {
 
 		// Action
 		try {
-			deviceService.createTransportMapping("", 1010, "localhost");
+			deviceListeningService.createTransportMapping("", 1010, "localhost");
 		} catch (IOException e) {
-			assertNull(deviceService.snmp);
+			assertNull(deviceListeningService.snmp);
 			assertTrue(checkLogExist(errorMsg));
 
 			throw e;
@@ -267,7 +267,7 @@ public class DeviceServiceTest {
 
 	@After
 	public void tearDown() {
-		deviceService.stop();
+		deviceListeningService.stop();
 
 		SecurityModels.getInstance().removeSecurityModel(modeID);
 

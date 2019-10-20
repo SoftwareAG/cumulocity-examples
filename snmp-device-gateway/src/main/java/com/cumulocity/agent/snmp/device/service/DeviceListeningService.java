@@ -1,4 +1,4 @@
-package com.cumulocity.agent.snmp.client.service;
+package com.cumulocity.agent.snmp.device.service;
 
 import java.io.IOException;
 import java.net.BindException;
@@ -54,7 +54,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-public class DeviceService {
+public class DeviceListeningService {
 
 	@Autowired
 	private GatewayProperties.SnmpProperties snmpProperties;

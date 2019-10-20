@@ -1,4 +1,4 @@
-package com.cumulocity.agent.snmp.client.service;
+package com.cumulocity.agent.snmp.device.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
