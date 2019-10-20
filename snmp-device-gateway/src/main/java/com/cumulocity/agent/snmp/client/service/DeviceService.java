@@ -53,7 +53,7 @@ public class DeviceService {
 	Snmp snmp = null;
 
 	@EventListener(BootstrapReadyEvent.class)
-	private void createSnmpDeviceListener() throws IOException {
+	private void createSnmpDeviceListener() {
 		try {
 			configureUserSecurityModel();
 
@@ -79,10 +79,10 @@ public class DeviceService {
 
 			log.info("Started listening to traps at {}", transportMapping.getListenAddress().toString());
 		} catch (BindException be) {
-			log.error("Failed to start listening to traps. Port {}/{} is already in use. \nUpdate the 'snmp.trapListener.port' and 'snmp.trapListener.address' properties and restart the agent. Shutting down the agent...", snmpProperties.getTrapListenerAddress(), snmpProperties.getTrapListenerPort(), be);
+			log.error("Failed to start listening to traps. Port {}/{} is already in use. \nUpdate the 'snmp.trapListener.port' and 'snmp.trapListener.address' properties and restart the agent. \nShutting down the agent...", snmpProperties.getTrapListenerAddress(), snmpProperties.getTrapListenerPort(), be);
 			System.exit(0);
 		} catch (IOException | IllegalArgumentException t) {
-			log.error("Failed to start listening to traps on port {}/{}. \nUpdate the 'snmp.trapListener.port' and 'snmp.trapListener.address' properties and restart the agent. Shutting down the agent...", snmpProperties.getTrapListenerAddress(), snmpProperties.getTrapListenerPort(), t);
+			log.error("Failed to start listening to traps on port {}/{}. \nUpdate the 'snmp.trapListener.port' and 'snmp.trapListener.address' properties and restart the agent. \nShutting down the agent...", snmpProperties.getTrapListenerAddress(), snmpProperties.getTrapListenerPort(), t);
 			System.exit(0);
 		}
 	}
@@ -93,7 +93,7 @@ public class DeviceService {
 	}
 
 	@PreDestroy
-	public void stop() {
+	private void stop() {
 		try {
 			if (snmp != null) {
 				snmp.close();

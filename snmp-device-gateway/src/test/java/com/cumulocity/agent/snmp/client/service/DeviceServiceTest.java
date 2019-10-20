@@ -26,6 +26,7 @@ import org.snmp4j.transport.DefaultUdpTransportMapping;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.IOException;
+import java.security.Permission;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -112,6 +113,8 @@ public class DeviceServiceTest {
 		when(snmpProperties.getTrapListenerAddress()).thenReturn("127.0.0.1");
 		when(snmpProperties.getTrapListenerPort()).thenReturn(161);
 		when(gatewayDataProvider.getDeviceProtocolMap()).thenReturn(Collections.emptyMap());
+
+		System.setSecurityManager(new NoExitSecurityManager());
 	}
 
 	@Test
@@ -151,6 +154,43 @@ public class DeviceServiceTest {
 		assertEquals(authPass, user.getAuthenticationPassphrase());
 		assertEquals(PrivDES.ID, user.getPrivacyProtocol());
 		assertEquals(privPass, user.getPrivacyPassphrase());
+	}
+
+	@Test(expected = ExitException.class)
+	public void shouldCreateSnmpDeviceListenerFailIfPortIsAlreadyInUse() {
+		when(snmpProperties.getTrapListenerThreadPoolSize()).thenReturn(1);
+		when(snmpProperties.getTrapListenerProtocol()).thenReturn("TCP");
+		when(snmpProperties.getTrapListenerAddress()).thenReturn("127.0.0.1");
+		when(snmpProperties.getTrapListenerPort()).thenReturn(162);
+
+		// Action
+		ReflectionTestUtils.invokeMethod(deviceService, "createSnmpDeviceListener");
+
+		// Trying to listen on same port again
+		try {
+			ReflectionTestUtils.invokeMethod(deviceService, "createSnmpDeviceListener");
+		} catch(ExitException ee) {
+			checkLogExist("Failed to start listening to traps. Port 127.0.0.1/162 is already in use.");
+			checkLogExist("Update the 'snmp.trapListener.port' and 'snmp.trapListener.address' properties and restart the agent. Shutting down the agent...");
+
+			throw ee;
+		}
+	}
+
+	@Test(expected = ExitException.class)
+	public void shouldCreateSnmpDeviceListenerFailIfBindingAddressIsInvalid() {
+		when(snmpProperties.getTrapListenerThreadPoolSize()).thenReturn(1);
+		when(snmpProperties.getTrapListenerAddress()).thenReturn("localhost");
+
+		// Action
+		try {
+			ReflectionTestUtils.invokeMethod(deviceService, "createSnmpDeviceListener");
+		} catch(ExitException ee) {
+			checkLogExist("Failed to start listening to traps on port 127.0.0.1/162.");
+			checkLogExist("Update the 'snmp.trapListener.port' and 'snmp.trapListener.address' properties and restart the agent. Shutting down the agent...");
+
+			throw ee;
+		}
 	}
 
 	@Test
@@ -213,7 +253,7 @@ public class DeviceServiceTest {
 		assertNotNull(mappings);
 		assertEquals(1, mappings.size());
 
-		mappings.forEach(transportMapping -> {
+		mappings.forEach((TransportMapping transportMapping) -> {
 			assertThat(transportMapping, instanceOf(DefaultTcpTransportMapping.class));
 		});
 	}
@@ -263,6 +303,8 @@ public class DeviceServiceTest {
 		listAppender.stop();
 		listAppender.list.clear();
 		logger.detachAppender(listAppender);
+
+		System.setSecurityManager(null); // or save and restore original
 	}
 
 	private boolean checkLogExist(String errorMsg) {
@@ -275,5 +317,32 @@ public class DeviceServiceTest {
 		});
 
 		return found.get();
+	}
+
+	private static class ExitException extends SecurityException {
+		final int status;
+
+		ExitException(int status) {
+			super("There is no escape!");
+			this.status = status;
+		}
+	}
+
+	private static class NoExitSecurityManager extends SecurityManager {
+		@Override
+		public void checkPermission(Permission perm) {
+			// allow anything.
+		}
+
+		@Override
+		public void checkPermission(Permission perm, Object context) {
+			// allow anything.
+		}
+
+		@Override
+		public void checkExit(int status) {
+			super.checkExit(status);
+			throw new ExitException(status);
+		}
 	}
 }

@@ -83,8 +83,8 @@ public class BootstrapService implements InitializingBean {
 				log.info("Device named '{}' is already present in the platform with id '{}'.", gatewayProperties.getGatewayIdentifier(), deviceMO.getId().getValue());
 
 				if (!platformConnectionReadyEvent.getCurrentUser().equals(deviceMO.getOwner())) {
-					log.error("Device named '{}' is owned by another user '{}', change it to '{}' and restsrt the agent. "
-						+ "\n Shutting down agent...", gatewayProperties.getGatewayIdentifier(), deviceMO.getOwner(), platformConnectionReadyEvent.getCurrentUser());
+					log.error("Device named '{}' is owned by another user '{}', change it to '{}' and restart the agent. "
+						+ "\nShutting down agent...", gatewayProperties.getGatewayIdentifier(), deviceMO.getOwner(), platformConnectionReadyEvent.getCurrentUser());
 					System.exit(0);
 				}
 			}
@@ -99,7 +99,7 @@ public class BootstrapService implements InitializingBean {
 			if (detectInvalidCredentials(e)) {
 				log.error("Invalid device credentials detected! Removing local cached credentials...");
 				deviceCredentialsStoreService.remove();
-				log.info("Local credentials removed! \n Shutting down the agent...");
+				log.info("Local credentials removed! \nRestart the agent. \nShutting down the agent...");
 
 				System.exit(0);
 			}
@@ -152,7 +152,9 @@ public class BootstrapService implements InitializingBean {
 
 	@EventListener
 	private void stopDeviceCredentialsPoll(CredentialsAvailableEvent credentialsAvailableEvent) {
-		deviceCredentialsPoller.cancel(true);
+		if(deviceCredentialsPoller != null) {
+			deviceCredentialsPoller.cancel(true);
+		}
 	}
 
 	private DeviceCredentialsRepresentation pollDeviceCredentials() {
