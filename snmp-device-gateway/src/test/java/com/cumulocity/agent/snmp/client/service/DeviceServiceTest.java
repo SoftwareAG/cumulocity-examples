@@ -296,7 +296,7 @@ public class DeviceServiceTest {
 
 	@After
 	public void tearDown() {
-		deviceService.stop();
+		ReflectionTestUtils.invokeMethod(deviceService,"stop");
 
 		SecurityModels.getInstance().removeSecurityModel(modeID);
 
