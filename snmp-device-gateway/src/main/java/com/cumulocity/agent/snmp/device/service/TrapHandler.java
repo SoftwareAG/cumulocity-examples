@@ -114,7 +114,7 @@ public class TrapHandler implements CommandResponder {
 		alarmPublisher.publish(alarmMapping, dataProvider.getGatewayDevice().getManagedObject());
 	}
 
-	private void processDevicePdu(String deviceIp, PDU pdu) {
+	protected void processDevicePdu(String deviceIp, PDU pdu) {
 		if (pdu.getVariableBindings() == null || pdu.getVariableBindings().size() == 0) {
 			log.debug("No OID found in the received trap");
 			return;

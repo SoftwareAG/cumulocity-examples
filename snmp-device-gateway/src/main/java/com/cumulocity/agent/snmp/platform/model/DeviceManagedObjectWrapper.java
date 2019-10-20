@@ -48,10 +48,16 @@ public class DeviceManagedObjectWrapper extends AbstractManagedObjectWrapper {
 		private String port;
 
 		private String type;
+		
+		private String protocol;
 
 		private String ipAddress;
 
 		private DeviceAuthentication auth;
+		
+		public boolean isTcp() {
+			return "TCP".equalsIgnoreCase(protocol);
+		}
 	}
 
 	@Getter

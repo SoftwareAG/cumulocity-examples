@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.snmp4j.smi.OID;
+import org.snmp4j.smi.VariableBinding;
+
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -18,6 +21,8 @@ public class DeviceProtocolManagedObjectWrapper extends AbstractManagedObjectWra
 	public static final String C8Y_REGISTERS = "c8y_Registers";
 
 	Map<String, Register> oidMap = new ConcurrentHashMap<>();
+
+	List<VariableBinding> measurementVariableBindingList = new ArrayList<>();
 
 	public DeviceProtocolManagedObjectWrapper(ManagedObjectRepresentation deviceProtocolMO) {
 		super(deviceProtocolMO);
@@ -33,6 +38,12 @@ public class DeviceProtocolManagedObjectWrapper extends AbstractManagedObjectWra
 					mapper.getTypeFactory().constructCollectionType(ArrayList.class, Register.class));
 			for (Register register : registers) {
 				oidMap.put(register.getOid().toLowerCase(), register);
+
+				if (register.getMeasurementMapping() != null) {
+					OID oid = new OID(register.getOid());
+					VariableBinding variableBinding = new VariableBinding(oid);
+					measurementVariableBindingList.add(variableBinding);
+				}
 			}
 		} else {
 			log.info("Did not find {} fragment in the received gateway managed object {}", C8Y_REGISTERS,
