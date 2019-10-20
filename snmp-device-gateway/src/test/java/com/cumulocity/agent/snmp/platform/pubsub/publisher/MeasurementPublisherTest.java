@@ -1,11 +1,9 @@
 package com.cumulocity.agent.snmp.platform.pubsub.publisher;
 
-import com.cumulocity.agent.snmp.platform.model.MeasurementMapping;
-import com.cumulocity.agent.snmp.platform.pubsub.service.MeasurementPubSub;
-import com.cumulocity.model.idtype.GId;
-import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
-import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
-import com.google.common.collect.Maps;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeUtils;
 import org.junit.After;
@@ -17,9 +15,12 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import com.cumulocity.agent.snmp.platform.model.MeasurementMapping;
+import com.cumulocity.agent.snmp.platform.pubsub.service.MeasurementPubSub;
+import com.cumulocity.model.idtype.GId;
+import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
+import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
+import com.google.common.collect.Maps;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MeasurementPublisherTest {

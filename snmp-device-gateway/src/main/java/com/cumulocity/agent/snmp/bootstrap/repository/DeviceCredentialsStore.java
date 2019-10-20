@@ -1,12 +1,13 @@
 package com.cumulocity.agent.snmp.bootstrap.repository;
 
-import com.cumulocity.agent.snmp.bootstrap.model.DeviceCredentialsKey;
-import com.cumulocity.agent.snmp.config.GatewayProperties;
-import com.cumulocity.agent.snmp.persistence.AbstractMap;
+import java.nio.file.Paths;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import java.nio.file.Paths;
+import com.cumulocity.agent.snmp.bootstrap.model.DeviceCredentialsKey;
+import com.cumulocity.agent.snmp.config.GatewayProperties;
+import com.cumulocity.agent.snmp.persistence.AbstractMap;
 
 @Repository
 public class DeviceCredentialsStore extends AbstractMap<DeviceCredentialsKey, String> {

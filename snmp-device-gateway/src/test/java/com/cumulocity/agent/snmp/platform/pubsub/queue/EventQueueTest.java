@@ -1,6 +1,13 @@
 package com.cumulocity.agent.snmp.platform.pubsub.queue;
 
-import com.cumulocity.agent.snmp.config.GatewayProperties;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -9,13 +16,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import com.cumulocity.agent.snmp.config.GatewayProperties;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EventQueueTest {

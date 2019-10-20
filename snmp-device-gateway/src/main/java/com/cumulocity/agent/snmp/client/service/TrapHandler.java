@@ -1,24 +1,42 @@
 package com.cumulocity.agent.snmp.client.service;
 
-import com.cumulocity.agent.snmp.platform.model.*;
-import com.cumulocity.agent.snmp.platform.pubsub.publisher.AlarmPublisher;
-import com.cumulocity.agent.snmp.platform.pubsub.publisher.EventPublisher;
-import com.cumulocity.agent.snmp.platform.pubsub.publisher.MeasurementPublisher;
-import com.cumulocity.agent.snmp.platform.service.GatewayDataProvider;
-import com.cumulocity.agent.snmp.util.IpAddressUtil;
-import lombok.extern.slf4j.Slf4j;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.Map;
+
 import org.snmp4j.CommandResponder;
 import org.snmp4j.CommandResponderEvent;
 import org.snmp4j.PDU;
 import org.snmp4j.asn1.BER;
 import org.snmp4j.asn1.BERInputStream;
-import org.snmp4j.smi.*;
+import org.snmp4j.smi.AbstractVariable;
+import org.snmp4j.smi.Address;
+import org.snmp4j.smi.Counter64;
+import org.snmp4j.smi.Integer32;
+import org.snmp4j.smi.IpAddress;
+import org.snmp4j.smi.Null;
+import org.snmp4j.smi.OID;
+import org.snmp4j.smi.OctetString;
+import org.snmp4j.smi.Opaque;
+import org.snmp4j.smi.TimeTicks;
+import org.snmp4j.smi.UnsignedInteger32;
+import org.snmp4j.smi.Variable;
+import org.snmp4j.smi.VariableBinding;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.Map;
+import com.cumulocity.agent.snmp.platform.model.AlarmMapping;
+import com.cumulocity.agent.snmp.platform.model.AlarmSeverity;
+import com.cumulocity.agent.snmp.platform.model.DeviceManagedObjectWrapper;
+import com.cumulocity.agent.snmp.platform.model.DeviceProtocolManagedObjectWrapper;
+import com.cumulocity.agent.snmp.platform.model.Register;
+import com.cumulocity.agent.snmp.platform.pubsub.publisher.AlarmPublisher;
+import com.cumulocity.agent.snmp.platform.pubsub.publisher.EventPublisher;
+import com.cumulocity.agent.snmp.platform.pubsub.publisher.MeasurementPublisher;
+import com.cumulocity.agent.snmp.platform.service.GatewayDataProvider;
+import com.cumulocity.agent.snmp.util.IpAddressUtil;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component

@@ -1,16 +1,20 @@
 package com.cumulocity.agent.snmp.client.service;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.read.ListAppender;
-import com.cumulocity.agent.snmp.platform.model.*;
-import com.cumulocity.agent.snmp.platform.pubsub.publisher.AlarmPublisher;
-import com.cumulocity.agent.snmp.platform.pubsub.publisher.EventPublisher;
-import com.cumulocity.agent.snmp.platform.pubsub.publisher.MeasurementPublisher;
-import com.cumulocity.agent.snmp.platform.service.GatewayDataProvider;
-import com.cumulocity.model.idtype.GId;
-import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Vector;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,17 +27,32 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.LoggerFactory;
 import org.snmp4j.CommandResponderEvent;
 import org.snmp4j.PDU;
-import org.snmp4j.smi.*;
+import org.snmp4j.smi.Address;
+import org.snmp4j.smi.Integer32;
+import org.snmp4j.smi.OID;
+import org.snmp4j.smi.UdpAddress;
+import org.snmp4j.smi.Variable;
+import org.snmp4j.smi.VariableBinding;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Vector;
-import java.util.concurrent.atomic.AtomicBoolean;
+import com.cumulocity.agent.snmp.platform.model.AlarmMapping;
+import com.cumulocity.agent.snmp.platform.model.AlarmSeverity;
+import com.cumulocity.agent.snmp.platform.model.DeviceManagedObjectWrapper;
+import com.cumulocity.agent.snmp.platform.model.DeviceProtocolManagedObjectWrapper;
+import com.cumulocity.agent.snmp.platform.model.EventMapping;
+import com.cumulocity.agent.snmp.platform.model.GatewayManagedObjectWrapper;
+import com.cumulocity.agent.snmp.platform.model.MeasurementMapping;
+import com.cumulocity.agent.snmp.platform.model.Register;
+import com.cumulocity.agent.snmp.platform.pubsub.publisher.AlarmPublisher;
+import com.cumulocity.agent.snmp.platform.pubsub.publisher.EventPublisher;
+import com.cumulocity.agent.snmp.platform.pubsub.publisher.MeasurementPublisher;
+import com.cumulocity.agent.snmp.platform.service.GatewayDataProvider;
+import com.cumulocity.model.idtype.GId;
+import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.*;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TrapHandlerTest {
@@ -282,7 +301,6 @@ public class TrapHandlerTest {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
 	public void shouldPublishMeasurementForValidTrapAndOidMeasurementMapping() {
 		register.setMeasurementMapping(measurementMapping);
 
@@ -323,7 +341,6 @@ public class TrapHandlerTest {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
 	public void shouldPublishMeasurementWithStaticFragmentsForValidTrapAndOidMeasurementMapping() {
 		register.setMeasurementMapping(measurementMapping);
 		

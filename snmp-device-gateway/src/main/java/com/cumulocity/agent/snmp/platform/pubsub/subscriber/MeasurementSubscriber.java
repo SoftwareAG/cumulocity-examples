@@ -1,11 +1,12 @@
 package com.cumulocity.agent.snmp.platform.pubsub.subscriber;
 
-import com.cumulocity.agent.snmp.platform.pubsub.service.MeasurementPubSub;
-import com.cumulocity.sdk.client.measurement.MeasurementApi;
+import java.util.Collection;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Collection;
+import com.cumulocity.agent.snmp.platform.pubsub.service.MeasurementPubSub;
+import com.cumulocity.sdk.client.measurement.MeasurementApi;
 
 @Component
 public class MeasurementSubscriber extends Subscriber<MeasurementPubSub> {

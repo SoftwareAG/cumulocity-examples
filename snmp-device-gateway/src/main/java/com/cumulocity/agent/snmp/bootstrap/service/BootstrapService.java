@@ -1,6 +1,21 @@
 package com.cumulocity.agent.snmp.bootstrap.service;
 
-import c8y.*;
+import static java.util.Optional.empty;
+import static java.util.Optional.ofNullable;
+
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.ScheduledFuture;
+
+import org.apache.commons.httpclient.HttpStatus;
+import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.stereotype.Service;
+
 import com.cumulocity.agent.snmp.bootstrap.model.BootstrapReadyEvent;
 import com.cumulocity.agent.snmp.bootstrap.model.CredentialsAvailableEvent;
 import com.cumulocity.agent.snmp.config.GatewayProperties;
@@ -17,23 +32,14 @@ import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.identity.IdentityApi;
 import com.cumulocity.sdk.client.inventory.InventoryApi;
+
+import c8y.Hardware;
+import c8y.IsDevice;
+import c8y.Mobile;
+import c8y.RequiredAvailability;
+import c8y.SupportedOperations;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.httpclient.HttpStatus;
-import org.springframework.beans.factory.BeanCreationException;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.event.EventListener;
-import org.springframework.scheduling.TaskScheduler;
-import org.springframework.stereotype.Service;
-
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.ScheduledFuture;
-
-import static java.util.Optional.empty;
-import static java.util.Optional.ofNullable;
 
 @Slf4j
 @Service

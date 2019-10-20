@@ -1,11 +1,11 @@
 package com.cumulocity.agent.snmp.bootstrap.model;
 
+import java.io.Serializable;
+
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
-
-import java.io.Serializable;
 
 @Getter
 @EqualsAndHashCode

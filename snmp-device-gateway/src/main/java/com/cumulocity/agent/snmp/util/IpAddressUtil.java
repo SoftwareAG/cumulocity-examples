@@ -1,8 +1,8 @@
 package com.cumulocity.agent.snmp.util;
 
-import com.google.common.net.InetAddresses;
-
 import java.net.InetAddress;
+
+import com.google.common.net.InetAddresses;
 
 public class IpAddressUtil {
     public static InetAddress forString(String ipAddress) throws IllegalArgumentException {

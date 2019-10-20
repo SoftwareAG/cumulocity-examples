@@ -1,9 +1,7 @@
 package com.cumulocity.agent.snmp.platform.pubsub.service.subscription;
 
-import com.cumulocity.agent.snmp.persistence.Queue;
-import com.cumulocity.agent.snmp.platform.pubsub.subscriber.Subscriber;
-import com.cumulocity.agent.snmp.platform.pubsub.subscriber.SubscriberException;
-import com.cumulocity.sdk.client.SDKException;
+import static org.junit.Assert.fail;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -11,7 +9,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.junit.Assert.fail;
+import com.cumulocity.agent.snmp.persistence.Queue;
+import com.cumulocity.agent.snmp.platform.pubsub.subscriber.Subscriber;
+import com.cumulocity.agent.snmp.platform.pubsub.subscriber.SubscriberException;
+import com.cumulocity.sdk.client.SDKException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SingleMessageSubscriptionTest {

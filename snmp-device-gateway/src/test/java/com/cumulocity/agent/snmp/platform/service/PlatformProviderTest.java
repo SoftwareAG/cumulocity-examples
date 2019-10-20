@@ -1,14 +1,19 @@
 package com.cumulocity.agent.snmp.platform.service;
 
-import com.cumulocity.agent.snmp.bootstrap.model.CredentialsAvailableEvent;
-import com.cumulocity.agent.snmp.config.GatewayProperties;
-import com.cumulocity.agent.snmp.platform.model.PlatformConnectionReadyEvent;
-import com.cumulocity.agent.snmp.platform.pubsub.subscriber.MeasurementSubscriber;
-import com.cumulocity.rest.representation.devicebootstrap.DeviceCredentialsRepresentation;
-import com.cumulocity.sdk.client.HttpClientConfig;
-import com.cumulocity.sdk.client.Platform;
-import com.cumulocity.sdk.client.PlatformParameters;
-import com.cumulocity.sdk.client.measurement.MeasurementApi;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
+
+import java.time.Duration;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -20,10 +25,15 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.time.Duration;
-
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import com.cumulocity.agent.snmp.bootstrap.model.CredentialsAvailableEvent;
+import com.cumulocity.agent.snmp.config.GatewayProperties;
+import com.cumulocity.agent.snmp.platform.model.PlatformConnectionReadyEvent;
+import com.cumulocity.agent.snmp.platform.pubsub.subscriber.MeasurementSubscriber;
+import com.cumulocity.rest.representation.devicebootstrap.DeviceCredentialsRepresentation;
+import com.cumulocity.sdk.client.HttpClientConfig;
+import com.cumulocity.sdk.client.Platform;
+import com.cumulocity.sdk.client.PlatformParameters;
+import com.cumulocity.sdk.client.measurement.MeasurementApi;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PlatformProviderTest {

@@ -1,16 +1,18 @@
 package com.cumulocity.agent.snmp.platform.pubsub.service;
 
+import java.time.Duration;
+import java.util.concurrent.ScheduledFuture;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.TaskScheduler;
+
 import com.cumulocity.agent.snmp.persistence.Queue;
 import com.cumulocity.agent.snmp.platform.pubsub.service.subscription.BatchMessagesSubscription;
 import com.cumulocity.agent.snmp.platform.pubsub.service.subscription.SingleMessageSubscription;
 import com.cumulocity.agent.snmp.platform.pubsub.service.subscription.Subscription;
 import com.cumulocity.agent.snmp.platform.pubsub.subscriber.Subscriber;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.TaskScheduler;
 
-import java.time.Duration;
-import java.util.concurrent.ScheduledFuture;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * A PubSub service which is used by publisher to publish message to a queue

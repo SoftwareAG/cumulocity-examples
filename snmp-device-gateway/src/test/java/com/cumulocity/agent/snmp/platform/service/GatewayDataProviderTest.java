@@ -1,14 +1,22 @@
 package com.cumulocity.agent.snmp.platform.service;
 
-import com.cumulocity.agent.snmp.config.GatewayProperties;
-import com.cumulocity.agent.snmp.platform.model.DeviceManagedObjectWrapper;
-import com.cumulocity.agent.snmp.platform.model.GatewayDataRefreshedEvent;
-import com.cumulocity.model.idtype.GId;
-import com.cumulocity.rest.representation.inventory.ManagedObjectReferenceCollectionRepresentation;
-import com.cumulocity.rest.representation.inventory.ManagedObjectReferenceRepresentation;
-import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
-import com.cumulocity.sdk.client.SDKException;
-import com.cumulocity.sdk.client.inventory.InventoryApi;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+
 import org.apache.commons.httpclient.HttpStatus;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,17 +29,15 @@ import org.mockito.stubbing.Answer;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-
-import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import com.cumulocity.agent.snmp.config.GatewayProperties;
+import com.cumulocity.agent.snmp.platform.model.DeviceManagedObjectWrapper;
+import com.cumulocity.agent.snmp.platform.model.GatewayDataRefreshedEvent;
+import com.cumulocity.model.idtype.GId;
+import com.cumulocity.rest.representation.inventory.ManagedObjectReferenceCollectionRepresentation;
+import com.cumulocity.rest.representation.inventory.ManagedObjectReferenceRepresentation;
+import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
+import com.cumulocity.sdk.client.SDKException;
+import com.cumulocity.sdk.client.inventory.InventoryApi;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GatewayDataProviderTest {

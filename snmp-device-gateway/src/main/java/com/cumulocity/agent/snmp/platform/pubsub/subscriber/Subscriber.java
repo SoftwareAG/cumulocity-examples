@@ -1,5 +1,13 @@
 package com.cumulocity.agent.snmp.platform.pubsub.subscriber;
 
+import java.util.Collection;
+
+import javax.annotation.PreDestroy;
+
+import org.apache.commons.httpclient.HttpStatus;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.EventListener;
+
 import com.cumulocity.agent.snmp.bootstrap.model.BootstrapReadyEvent;
 import com.cumulocity.agent.snmp.config.ConcurrencyConfiguration;
 import com.cumulocity.agent.snmp.platform.model.GatewayDataRefreshedEvent;
@@ -7,13 +15,8 @@ import com.cumulocity.agent.snmp.platform.pubsub.service.PubSub;
 import com.cumulocity.agent.snmp.platform.service.GatewayDataProvider;
 import com.cumulocity.agent.snmp.platform.service.PlatformProvider;
 import com.cumulocity.sdk.client.SDKException;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.httpclient.HttpStatus;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.EventListener;
 
-import javax.annotation.PreDestroy;
-import java.util.Collection;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Subscriber to handle messages,

@@ -1,12 +1,10 @@
 package com.cumulocity.agent.snmp.platform.pubsub.subscriber;
 
-import com.cumulocity.agent.snmp.config.ConcurrencyConfiguration;
-import com.cumulocity.agent.snmp.platform.model.GatewayManagedObjectWrapper;
-import com.cumulocity.agent.snmp.platform.pubsub.service.AlarmPubSub;
-import com.cumulocity.agent.snmp.platform.service.GatewayDataProvider;
-import com.cumulocity.agent.snmp.platform.service.PlatformProvider;
-import com.cumulocity.sdk.client.SDKException;
-import com.cumulocity.sdk.client.alarm.AlarmApi;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -15,7 +13,13 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.junit.Assert.*;
+import com.cumulocity.agent.snmp.config.ConcurrencyConfiguration;
+import com.cumulocity.agent.snmp.platform.model.GatewayManagedObjectWrapper;
+import com.cumulocity.agent.snmp.platform.pubsub.service.AlarmPubSub;
+import com.cumulocity.agent.snmp.platform.service.GatewayDataProvider;
+import com.cumulocity.agent.snmp.platform.service.PlatformProvider;
+import com.cumulocity.sdk.client.SDKException;
+import com.cumulocity.sdk.client.alarm.AlarmApi;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AlarmSubscriberTest {

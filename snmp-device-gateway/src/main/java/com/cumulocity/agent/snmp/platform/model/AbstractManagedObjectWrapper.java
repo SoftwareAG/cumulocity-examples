@@ -1,10 +1,11 @@
 package com.cumulocity.agent.snmp.platform.model;
 
+import java.util.Map;
+
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
-import lombok.Getter;
 
-import java.util.Map;
+import lombok.Getter;
 
 @Getter
 public abstract class AbstractManagedObjectWrapper {

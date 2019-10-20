@@ -1,14 +1,15 @@
 package com.cumulocity.agent.snmp.platform.pubsub.publisher;
 
+import java.util.Map;
+
+import org.joda.time.DateTime;
+import org.springframework.stereotype.Service;
+
 import com.cumulocity.agent.snmp.platform.model.MeasurementMapping;
 import com.cumulocity.agent.snmp.platform.pubsub.service.MeasurementPubSub;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
 import com.google.common.collect.Maps;
-import org.joda.time.DateTime;
-import org.springframework.stereotype.Service;
-
-import java.util.Map;
 
 @Service
 public class MeasurementPublisher extends Publisher<MeasurementPubSub> {

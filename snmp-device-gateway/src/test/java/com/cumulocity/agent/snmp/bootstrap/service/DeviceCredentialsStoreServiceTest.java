@@ -1,9 +1,8 @@
 package com.cumulocity.agent.snmp.bootstrap.service;
 
-import com.cumulocity.agent.snmp.bootstrap.model.DeviceCredentialsKey;
-import com.cumulocity.agent.snmp.bootstrap.repository.DeviceCredentialsStore;
-import com.cumulocity.agent.snmp.config.GatewayProperties;
-import com.cumulocity.rest.representation.devicebootstrap.DeviceCredentialsRepresentation;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,8 +11,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import com.cumulocity.agent.snmp.bootstrap.model.DeviceCredentialsKey;
+import com.cumulocity.agent.snmp.bootstrap.repository.DeviceCredentialsStore;
+import com.cumulocity.agent.snmp.config.GatewayProperties;
+import com.cumulocity.rest.representation.devicebootstrap.DeviceCredentialsRepresentation;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DeviceCredentialsStoreServiceTest {

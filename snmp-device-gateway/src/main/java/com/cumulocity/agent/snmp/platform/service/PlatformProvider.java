@@ -1,14 +1,9 @@
 package com.cumulocity.agent.snmp.platform.service;
 
-import com.cumulocity.agent.snmp.bootstrap.model.CredentialsAvailableEvent;
-import com.cumulocity.agent.snmp.config.GatewayProperties;
-import com.cumulocity.agent.snmp.platform.model.PlatformConnectionReadyEvent;
-import com.cumulocity.model.authentication.CumulocityBasicCredentials;
-import com.cumulocity.rest.representation.BaseResourceRepresentation;
-import com.cumulocity.rest.representation.devicebootstrap.DeviceCredentialsRepresentation;
-import com.cumulocity.sdk.client.*;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.io.InputStream;
+import java.time.Duration;
+import java.util.Objects;
+
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -16,9 +11,22 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
 
-import java.io.InputStream;
-import java.time.Duration;
-import java.util.Objects;
+import com.cumulocity.agent.snmp.bootstrap.model.CredentialsAvailableEvent;
+import com.cumulocity.agent.snmp.config.GatewayProperties;
+import com.cumulocity.agent.snmp.platform.model.PlatformConnectionReadyEvent;
+import com.cumulocity.model.authentication.CumulocityBasicCredentials;
+import com.cumulocity.rest.representation.BaseResourceRepresentation;
+import com.cumulocity.rest.representation.devicebootstrap.DeviceCredentialsRepresentation;
+import com.cumulocity.sdk.client.ConnectionPoolConfig;
+import com.cumulocity.sdk.client.HttpClientConfig;
+import com.cumulocity.sdk.client.Platform;
+import com.cumulocity.sdk.client.PlatformBuilder;
+import com.cumulocity.sdk.client.PlatformImpl;
+import com.cumulocity.sdk.client.PlatformParameters;
+import com.cumulocity.sdk.client.ResponseMapper;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component

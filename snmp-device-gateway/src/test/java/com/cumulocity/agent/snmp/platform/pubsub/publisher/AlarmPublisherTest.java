@@ -1,12 +1,5 @@
 package com.cumulocity.agent.snmp.platform.pubsub.publisher;
 
-import com.cumulocity.agent.snmp.platform.model.AlarmMapping;
-import com.cumulocity.agent.snmp.platform.model.AlarmSeverity;
-import com.cumulocity.agent.snmp.platform.pubsub.service.AlarmPubSub;
-import com.cumulocity.model.event.CumulocitySeverities;
-import com.cumulocity.model.idtype.GId;
-import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
-import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeUtils;
 import org.junit.After;
@@ -17,6 +10,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+
+import com.cumulocity.agent.snmp.platform.model.AlarmMapping;
+import com.cumulocity.agent.snmp.platform.model.AlarmSeverity;
+import com.cumulocity.agent.snmp.platform.pubsub.service.AlarmPubSub;
+import com.cumulocity.model.event.CumulocitySeverities;
+import com.cumulocity.model.idtype.GId;
+import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
+import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AlarmPublisherTest {

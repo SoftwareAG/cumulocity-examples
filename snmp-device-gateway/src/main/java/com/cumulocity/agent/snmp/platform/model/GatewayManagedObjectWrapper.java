@@ -1,14 +1,16 @@
 package com.cumulocity.agent.snmp.platform.model;
 
+import java.util.List;
+import java.util.Map;
+
+import javax.ws.rs.core.UriBuilder;
+
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-
-import javax.ws.rs.core.UriBuilder;
-import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Getter

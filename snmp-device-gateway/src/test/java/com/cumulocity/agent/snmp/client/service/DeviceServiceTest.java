@@ -1,14 +1,20 @@
 package com.cumulocity.agent.snmp.client.service;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.read.ListAppender;
-import com.cumulocity.agent.snmp.config.GatewayProperties;
-import com.cumulocity.agent.snmp.platform.model.DeviceManagedObjectWrapper;
-import com.cumulocity.agent.snmp.platform.service.GatewayDataProvider;
-import com.cumulocity.model.idtype.GId;
-import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,23 +24,28 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.LoggerFactory;
 import org.snmp4j.TransportMapping;
-import org.snmp4j.security.*;
+import org.snmp4j.security.AuthMD5;
+import org.snmp4j.security.PrivDES;
+import org.snmp4j.security.SecurityModel;
+import org.snmp4j.security.SecurityModels;
+import org.snmp4j.security.USM;
+import org.snmp4j.security.UsmUser;
 import org.snmp4j.smi.Integer32;
 import org.snmp4j.smi.OctetString;
 import org.snmp4j.transport.DefaultTcpTransportMapping;
 import org.snmp4j.transport.DefaultUdpTransportMapping;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.io.IOException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
+import com.cumulocity.agent.snmp.config.GatewayProperties;
+import com.cumulocity.agent.snmp.platform.model.DeviceManagedObjectWrapper;
+import com.cumulocity.agent.snmp.platform.service.GatewayDataProvider;
+import com.cumulocity.model.idtype.GId;
+import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.when;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DeviceServiceTest {

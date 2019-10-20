@@ -1,21 +1,26 @@
 package com.cumulocity.agent.snmp.platform.pubsub.service;
 
-import com.cumulocity.agent.snmp.persistence.Queue;
-import com.cumulocity.agent.snmp.platform.pubsub.service.subscription.Subscription;
-import com.cumulocity.agent.snmp.platform.pubsub.subscriber.Subscriber;
-import com.cumulocity.agent.snmp.platform.service.PlatformProvider;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.*;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.scheduling.TaskScheduler;
-import org.springframework.test.util.ReflectionTestUtils;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.time.Duration;
 import java.util.concurrent.ScheduledFuture;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.test.util.ReflectionTestUtils;
+
+import com.cumulocity.agent.snmp.persistence.Queue;
+import com.cumulocity.agent.snmp.platform.pubsub.service.subscription.Subscription;
+import com.cumulocity.agent.snmp.platform.pubsub.subscriber.Subscriber;
+import com.cumulocity.agent.snmp.platform.service.PlatformProvider;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PubSubTest {

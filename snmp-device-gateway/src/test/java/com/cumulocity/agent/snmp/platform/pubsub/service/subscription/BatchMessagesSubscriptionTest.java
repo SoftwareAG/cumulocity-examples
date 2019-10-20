@@ -1,9 +1,10 @@
 package com.cumulocity.agent.snmp.platform.pubsub.service.subscription;
 
-import com.cumulocity.agent.snmp.persistence.Queue;
-import com.cumulocity.agent.snmp.platform.pubsub.subscriber.Subscriber;
-import com.cumulocity.agent.snmp.platform.pubsub.subscriber.SubscriberException;
-import com.cumulocity.sdk.client.SDKException;
+import static org.junit.Assert.fail;
+
+import java.util.Arrays;
+import java.util.List;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -13,10 +14,10 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
-import java.util.Arrays;
-import java.util.List;
-
-import static org.junit.Assert.fail;
+import com.cumulocity.agent.snmp.persistence.Queue;
+import com.cumulocity.agent.snmp.platform.pubsub.subscriber.Subscriber;
+import com.cumulocity.agent.snmp.platform.pubsub.subscriber.SubscriberException;
+import com.cumulocity.sdk.client.SDKException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BatchMessagesSubscriptionTest {

@@ -1,5 +1,15 @@
 package com.cumulocity.agent.snmp.platform.service;
 
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.commons.httpclient.HttpStatus;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.stereotype.Service;
+
 import com.cumulocity.agent.snmp.config.GatewayProperties;
 import com.cumulocity.agent.snmp.platform.model.DeviceManagedObjectWrapper;
 import com.cumulocity.agent.snmp.platform.model.DeviceProtocolManagedObjectWrapper;
@@ -11,17 +21,9 @@ import com.cumulocity.rest.representation.inventory.ManagedObjectReferenceCollec
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.inventory.InventoryApi;
+
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.httpclient.HttpStatus;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.scheduling.TaskScheduler;
-import org.springframework.stereotype.Service;
-
-import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
 
 @Slf4j
 @Service

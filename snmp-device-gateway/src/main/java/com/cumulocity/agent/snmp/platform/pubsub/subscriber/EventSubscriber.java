@@ -1,9 +1,10 @@
 package com.cumulocity.agent.snmp.platform.pubsub.subscriber;
 
-import com.cumulocity.agent.snmp.platform.pubsub.service.EventPubSub;
-import com.cumulocity.sdk.client.event.EventApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import com.cumulocity.agent.snmp.platform.pubsub.service.EventPubSub;
+import com.cumulocity.sdk.client.event.EventApi;
 
 @Component
 public class EventSubscriber extends Subscriber<EventPubSub> {

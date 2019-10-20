@@ -1,15 +1,17 @@
 package com.cumulocity.agent.snmp.bootstrap.service;
 
+import javax.annotation.PreDestroy;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.cumulocity.agent.snmp.bootstrap.model.DeviceCredentialsKey;
 import com.cumulocity.agent.snmp.bootstrap.repository.DeviceCredentialsStore;
 import com.cumulocity.agent.snmp.config.GatewayProperties;
 import com.cumulocity.model.JSONBase;
 import com.cumulocity.rest.representation.devicebootstrap.DeviceCredentialsRepresentation;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-import javax.annotation.PreDestroy;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
