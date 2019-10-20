@@ -11,12 +11,16 @@ public abstract class AbstractManagedObjectWrapper {
 
 	protected ManagedObjectRepresentation managedObject;
 
-	public AbstractManagedObjectWrapper(ManagedObjectRepresentation managedObject) {
+	AbstractManagedObjectWrapper(ManagedObjectRepresentation managedObject) {
 		this.managedObject = managedObject;
 	}
 
 	public GId getId() {
 		return managedObject.getId();
+	}
+
+	public String getName() {
+		return managedObject.getName();
 	}
 
 	public Object getAttributeValue(String fragmentName, String attributeKey) {

@@ -7,8 +7,12 @@ import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.inventory.ManagedObjectReferenceCollectionRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectReferenceRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
+import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
+import com.cumulocity.sdk.client.devicecontrol.DeviceControlApi;
+import com.cumulocity.sdk.client.devicecontrol.notification.OperationNotificationSubscriber;
 import com.cumulocity.sdk.client.inventory.InventoryApi;
+import com.cumulocity.sdk.client.notification.SubscriptionListener;
 import org.apache.commons.httpclient.HttpStatus;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
@@ -38,6 +43,12 @@ public class GatewayDataProviderTest {
 
 	@Mock
 	private InventoryApi inventoryApi;
+
+	@Mock
+	private DeviceControlApi deviceControlApi;
+
+	@Mock
+	private OperationNotificationSubscriber operationNotificationSubscriber;
 
 	@Mock
 	private GatewayProperties properties;
@@ -69,11 +80,13 @@ public class GatewayDataProviderTest {
 
 		when(properties.getGatewayObjectRefreshIntervalInMinutes()).thenReturn(2);
 		when(inventoryApi.get(any())).thenReturn(gatewayDeviceMo);
+		when(deviceControlApi.getNotificationsSubscriber()).thenReturn(operationNotificationSubscriber);
 
 		gatewayDataProvider.updateGatewayObjects(gatewayDeviceMo);
 
 		verify(gatewayDataProvider, times(1)).scheduleGatewayDataRefresh();
 		verify(taskScheduler).scheduleWithFixedDelay(any(Runnable.class), eq(Duration.ofMinutes(2)));
+		verify(operationNotificationSubscriber).subscribe(eq(gatewayDataProvider.getGatewayDevice().getId()), any(SubscriptionListener.class));
 	}
 
 	@Test
@@ -109,6 +122,7 @@ public class GatewayDataProviderTest {
 		when(inventoryApi.get(new GId("child-device"))).thenReturn(childDeviceMo);
 		when(inventoryApi.get(new GId("device-protocol"))).thenReturn(deviceProtocolMo);
 		when(properties.getGatewayObjectRefreshIntervalInMinutes()).thenReturn(1);
+		when(deviceControlApi.getNotificationsSubscriber()).thenReturn(operationNotificationSubscriber);
 
 		assertNull(gatewayDataProvider.getGatewayDevice());
 		assertEquals(gatewayDataProvider.getDeviceProtocolMap().size(), 0);
@@ -117,6 +131,7 @@ public class GatewayDataProviderTest {
 
 		assertNotNull(gatewayDataProvider.getGatewayDevice());
 		assertEquals(gatewayDataProvider.getDeviceProtocolMap().size(), 1);
+		verify(operationNotificationSubscriber).subscribe(eq(gatewayDataProvider.getGatewayDevice().getId()), any(SubscriptionListener.class));
 	}
 
 	@Test
@@ -150,6 +165,7 @@ public class GatewayDataProviderTest {
 		when(inventoryApi.get(new GId("device-protocol")))
 				.thenThrow(new SDKException(HttpStatus.SC_NOT_FOUND, "Object Not found"));
 		when(properties.getGatewayObjectRefreshIntervalInMinutes()).thenReturn(1);
+		when(deviceControlApi.getNotificationsSubscriber()).thenReturn(operationNotificationSubscriber);
 
 		assertNull(gatewayDataProvider.getGatewayDevice());
 		assertEquals(gatewayDataProvider.getDeviceProtocolMap().size(), 0);
@@ -158,6 +174,7 @@ public class GatewayDataProviderTest {
 
 		assertEquals(1, gatewayDataProvider.getDeviceProtocolMap().size());
 		assertNull(gatewayDataProvider.getProtocolMap().get("device-protocol"));
+		verify(operationNotificationSubscriber).subscribe(eq(gatewayDataProvider.getGatewayDevice().getId()), any(SubscriptionListener.class));
 	}
 
 	@Test(timeout = 5000L)

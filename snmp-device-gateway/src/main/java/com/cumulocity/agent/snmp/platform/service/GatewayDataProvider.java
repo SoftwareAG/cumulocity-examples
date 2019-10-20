@@ -1,16 +1,18 @@
 package com.cumulocity.agent.snmp.platform.service;
 
 import com.cumulocity.agent.snmp.config.GatewayProperties;
-import com.cumulocity.agent.snmp.platform.model.DeviceManagedObjectWrapper;
-import com.cumulocity.agent.snmp.platform.model.DeviceProtocolManagedObjectWrapper;
-import com.cumulocity.agent.snmp.platform.model.GatewayDataRefreshedEvent;
-import com.cumulocity.agent.snmp.platform.model.GatewayManagedObjectWrapper;
+import com.cumulocity.agent.snmp.platform.model.*;
 import com.cumulocity.agent.snmp.util.IpAddressUtil;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.inventory.ManagedObjectReferenceCollectionRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
+import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
+import com.cumulocity.sdk.client.devicecontrol.DeviceControlApi;
 import com.cumulocity.sdk.client.inventory.InventoryApi;
+import com.cumulocity.sdk.client.notification.Subscriber;
+import com.cumulocity.sdk.client.notification.Subscription;
+import com.cumulocity.sdk.client.notification.SubscriptionListener;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.httpclient.HttpStatus;
@@ -29,6 +31,9 @@ public class GatewayDataProvider {
 
 	@Autowired
 	private InventoryApi inventoryApi;
+
+	@Autowired
+	private DeviceControlApi deviceControlApi;
 
 	@Autowired
 	private TaskScheduler taskScheduler;
@@ -51,6 +56,8 @@ public class GatewayDataProvider {
 	@Getter
 	private Map<String, DeviceProtocolManagedObjectWrapper> protocolMap = new HashMap<>();
 
+	private Subscriber<GId, OperationRepresentation> subscriberForOperationsOnGateway;
+
 	public void updateGatewayObjects(ManagedObjectRepresentation gatewayManagedObject) {
 		gatewayDevice = new GatewayManagedObjectWrapper(gatewayManagedObject);
 
@@ -60,7 +67,7 @@ public class GatewayDataProvider {
 		scheduleGatewayDataRefresh();
 	}
 
-	protected void refreshGatewayObjects() {
+	void refreshGatewayObjects() {
 		Map<String, DeviceManagedObjectWrapper> newDeviceProtocolMap = new HashMap<>();
 		Map<String, DeviceProtocolManagedObjectWrapper> newProtocolMap = new HashMap<>();
 
@@ -91,9 +98,12 @@ public class GatewayDataProvider {
 			deviceProtocolMap = newDeviceProtocolMap;
 			protocolMap = newProtocolMap;
 		}
+
+		// Subscribe for Operations on Gateway Device
+		subscribeForOperationsOnGateway();
 	}
 
-	protected void scheduleGatewayDataRefresh() {
+	void scheduleGatewayDataRefresh() {
 		taskScheduler.scheduleWithFixedDelay(() -> {
 			if (platformProvider.isPlatformAvailable()) {
 				try {
@@ -119,7 +129,7 @@ public class GatewayDataProvider {
 			Map<String, DeviceProtocolManagedObjectWrapper> newProtocolMap, ManagedObjectRepresentation childDeviceMo) {
 
 		DeviceManagedObjectWrapper childDeviceWrapper = new DeviceManagedObjectWrapper(childDeviceMo);
-		String deviceIp = null;
+		String deviceIp;
 		try {
 			deviceIp = IpAddressUtil.sanitizeIpAddress(childDeviceWrapper.getProperties().getIpAddress());
 		} catch(IllegalArgumentException iae) {
@@ -139,14 +149,12 @@ public class GatewayDataProvider {
 		}
 	}
 
-	private DeviceProtocolManagedObjectWrapper updateProtocolMap(String protocolName,
+	private void updateProtocolMap(String protocolName,
 			Map<String, DeviceProtocolManagedObjectWrapper> newProtocolMap) {
 
-		DeviceProtocolManagedObjectWrapper deviceProtocolWrapper = null;
+		DeviceProtocolManagedObjectWrapper deviceProtocolWrapper;
 
-		if (newProtocolMap.containsKey(protocolName)) {
-			deviceProtocolWrapper = newProtocolMap.get(protocolName);
-		} else {
+		if (!newProtocolMap.containsKey(protocolName)) {
 			try {
 				GId deviceProtocolId = new GId(protocolName);
 				ManagedObjectRepresentation deviceProtocolMo = inventoryApi.get(deviceProtocolId);
@@ -154,14 +162,42 @@ public class GatewayDataProvider {
 				newProtocolMap.put(protocolName, deviceProtocolWrapper);
 			} catch (SDKException sdk) {
 				if (sdk.getHttpStatus() == HttpStatus.SC_NOT_FOUND) {
-					log.error("{} device procotol managed object not found in the platform "
+					log.error("{} device protocol managed object not found in the platform "
 							+ "but configured in the device.", protocolName, sdk);
 				} else {
+					log.error(sdk.getMessage(), sdk);
 					throw sdk;
 				}
 			}
 		}
+	}
 
-		return deviceProtocolWrapper;
+	/**
+	 * This subscription is renewed, every time the Gateway data is refreshed.
+	 *
+	 */
+	private void subscribeForOperationsOnGateway() {
+		if(subscriberForOperationsOnGateway != null) {
+			subscriberForOperationsOnGateway.disconnect();
+			subscriberForOperationsOnGateway = null;
+		}
+
+		subscriberForOperationsOnGateway = deviceControlApi.getNotificationsSubscriber();
+		subscriberForOperationsOnGateway.subscribe(gatewayDevice.getId(), new SubscriptionListener<GId, OperationRepresentation>() {
+			@Override
+			public void onNotification(Subscription<GId> subscription, OperationRepresentation operation) {
+				if(gatewayDevice.getId().equals(subscription.getObject())) {
+					eventPublisher.publishEvent(new OperationExecutedOnGatewayEvent(gatewayDevice.getId(), gatewayDevice.getName(), operation));
+				}
+				else {
+					log.debug("Agent {}, with device id {}, received a notification which is meant for device id {}", gatewayDevice.getName(), gatewayDevice.getId().getValue(), subscription.getObject().getValue());
+				}
+			}
+
+			@Override
+			public void onError(Subscription<GId> subscription, Throwable throwable) {
+				log.error("Error occurred while listening to Operations on the device with name: {} and ID: {}", gatewayDevice.getName(), gatewayDevice.getId().getValue(), throwable);
+			}
+		});
 	}
 }

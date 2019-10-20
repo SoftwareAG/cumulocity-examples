@@ -29,6 +29,10 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<cumulocity.core.version>${project.version}</cumulocity.core.version>
 		<c8y.microservice.version>${c8y.microservice-new.version}</c8y.microservice.version>
+		<cometd.version>3.0.0</cometd.version>
+		<jetty.version>9.0.0.v20130308</jetty.version>
+		<chronicle.queue.version>5.17.21</chronicle.queue.version>
+		<chronicle.map.version>3.17.4</chronicle.map.version>
 	</properties>
 
 	<dependencies>
@@ -74,12 +78,14 @@
 			<dependency>
 				<groupId>net.openhft</groupId>
 				<artifactId>chronicle-queue</artifactId>
-				<version>5.17.21</version>
+				<version>${chronicle.queue.version}</version>
 			</dependency>
+
+			<!-- Chronicle-Map -->
 			<dependency>
 				<groupId>net.openhft</groupId>
 				<artifactId>chronicle-map</artifactId>
-				<version>3.17.4</version>
+				<version>${chronicle.map.version}</version>
 			</dependency>
 
 			<!--SNMP4J -->
@@ -141,6 +147,42 @@
 				<groupId>com.nsn.cumulocity.dependencies.osgi</groupId>
 				<artifactId>svenson</artifactId>
 				<version>${svenson.version}-${c8y.core.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.cometd.java</groupId>
+				<artifactId>cometd-java-common</artifactId>
+				<version>${cometd.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.eclipse.jetty</groupId>
+						<artifactId>jetty-util-ajax</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<dependency>
+				<groupId>org.cometd.java</groupId>
+				<artifactId>cometd-java-client</artifactId>
+				<version>${cometd.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.cometd.java</groupId>
+				<artifactId>bayeux-api</artifactId>
+				<version>${cometd.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-util</artifactId>
+				<version>${jetty.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-util-ajax</artifactId>
+				<version>${jetty.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

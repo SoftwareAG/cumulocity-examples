@@ -1,0 +1,94 @@
+package com.cumulocity.agent.snmp.util;
+
+import com.google.common.net.InetAddresses;
+import org.junit.Test;
+
+import java.net.InetAddress;
+
+import static org.junit.Assert.*;
+
+public class IpAddressUtilTest {
+
+    @Test
+    public void forStringShouldReturnNullForNullOrEmptyString() {
+        assertNull(IpAddressUtil.forString(null, false));
+        assertNull(IpAddressUtil.forString(null));
+        assertEquals(InetAddress.getLoopbackAddress(), IpAddressUtil.forString(null, true));
+
+        assertNull(IpAddressUtil.forString("", false));
+        assertNull(IpAddressUtil.forString(""));
+        assertEquals(InetAddress.getLoopbackAddress(), IpAddressUtil.forString("", true));
+    }
+
+    @Test
+    public void forStringShouldReturnInetAddressForIPV4String() {
+        assertEquals(InetAddresses.forString("192.168.1.16"), IpAddressUtil.forString("192.168.1.16", false));
+        assertEquals(InetAddresses.forString("192.168.1.16"), IpAddressUtil.forString("192.168.1.16"));
+        assertEquals(InetAddresses.forString("192.168.1.16"), IpAddressUtil.forString("192.168.1.16", true));
+
+        assertEquals(InetAddress.getLoopbackAddress(), IpAddressUtil.forString("127.0.0.1"));
+        assertEquals(InetAddress.getLoopbackAddress(), IpAddressUtil.forString("127.0.0.1/8"));
+
+        assertEquals(InetAddresses.forString("192.168.1.16"), IpAddressUtil.forString("192.168.1.16/28", false));
+        assertEquals(InetAddresses.forString("192.168.1.16"), IpAddressUtil.forString("192.168.1.16/28"));
+        assertEquals(InetAddresses.forString("192.168.1.16"), IpAddressUtil.forString("192.168.1.16/28", true));
+    }
+
+    @Test
+    public void forStringShouldReturnInetAddressForIPV6String() {
+        assertEquals(InetAddresses.forString("ee90::caca:afff:aaaa:9a04"), IpAddressUtil.forString("ee90::caca:afff:aaaa:9a04", false));
+        assertEquals(InetAddresses.forString("ee90::caca:afff:aaaa:9a04"), IpAddressUtil.forString("ee90::caca:afff:aaaa:9a04"));
+        assertEquals(InetAddresses.forString("ee90::caca:afff:aaaa:9a04"), IpAddressUtil.forString("ee90::caca:afff:aaaa:9a04".toUpperCase())); // UPPER CASE
+        assertEquals(InetAddresses.forString("ee90::caca:afff:aaaa:9a04"), IpAddressUtil.forString("ee90::caca:afff:aaaa:9a04", true));
+
+        assertEquals(InetAddresses.forString("0:0:0:0:0:0:0:1"), IpAddressUtil.forString("::1"));
+        assertEquals(InetAddresses.forString("0:0:0:0:0:0:0:1"), IpAddressUtil.forString("::1/128"));
+
+        assertEquals(InetAddresses.forString("ee90::caca:afff:aaaa:9a04"), IpAddressUtil.forString("ee90::caca:afff:aaaa:9a04%18", false));
+        assertEquals(InetAddresses.forString("ee90::caca:afff:aaaa:9a04"), IpAddressUtil.forString("ee90::caca:afff:aaaa:9a04%18"));
+        assertEquals(InetAddresses.forString("ee90::caca:afff:aaaa:9a04"), IpAddressUtil.forString("ee90::caca:afff:aaaa:9a04%18".toUpperCase())); // UPPER CASE
+        assertEquals(InetAddresses.forString("ee90::caca:afff:aaaa:9a04"), IpAddressUtil.forString("ee90::caca:afff:aaaa:9a04%18", true));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void forStringShouldThrowIllegalArgumentExceptionForInvalidIPAddress() {
+        IpAddressUtil.forString("aaa");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void forStringShouldThrowIllegalArgumentExceptionForLocalhost() {
+        IpAddressUtil.forString("localhost");
+    }
+
+    @Test
+    public void sanitizeShouldReturnNullForNullOrEmptyString() {
+        assertNull(IpAddressUtil.sanitizeIpAddress(null, false));
+        assertNull(IpAddressUtil.sanitizeIpAddress(null));
+        assertEquals(InetAddress.getLoopbackAddress().getHostAddress(), IpAddressUtil.sanitizeIpAddress(null, true));
+
+        assertNull(IpAddressUtil.sanitizeIpAddress("", false));
+        assertNull(IpAddressUtil.sanitizeIpAddress(""));
+        assertEquals(InetAddress.getLoopbackAddress().getHostAddress(), IpAddressUtil.sanitizeIpAddress("", true));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void sanitizaShouldThrowIllegalArgumentExceptionForInvalidIPAddress() {
+        IpAddressUtil.sanitizeIpAddress("aaa");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void sanitizaShouldThrowIllegalArgumentExceptionForLocalhost() {
+        IpAddressUtil.sanitizeIpAddress("localhost");
+    }
+
+    @Test
+    public void shouldSanitizeIPAddress() {
+        assertEquals(InetAddresses.forString("ee90::caca:afff:aaaa:9a04").getHostAddress(), IpAddressUtil.sanitizeIpAddress("ee90::caca:afff:aaaa:9a04".toUpperCase(), false)); // UPPER CASE
+        assertEquals(InetAddresses.forString("ee90::caca:afff:aaaa:9a04").getHostAddress(), IpAddressUtil.sanitizeIpAddress("ee90::caca:afff:aaaa:9a04".toUpperCase())); // UPPER CASE
+        assertEquals(InetAddresses.forString("ee90::caca:afff:aaaa:9a04").getHostAddress(), IpAddressUtil.sanitizeIpAddress("ee90::caca:afff:aaaa:9a04".toUpperCase(), true)); // UPPER CASE
+
+        assertEquals(InetAddresses.forString("ee90::caca:afff:aaaa:9a04").getHostAddress(), IpAddressUtil.sanitizeIpAddress("ee90::caca:afff:aaaa:9a04%18".toUpperCase(), false)); // UPPER CASE
+        assertEquals(InetAddresses.forString("ee90::caca:afff:aaaa:9a04").getHostAddress(), IpAddressUtil.sanitizeIpAddress("ee90::caca:afff:aaaa:9a04%18".toUpperCase())); // UPPER CASE
+        assertEquals(InetAddresses.forString("ee90::caca:afff:aaaa:9a04").getHostAddress(), IpAddressUtil.sanitizeIpAddress("ee90::caca:afff:aaaa:9a04%18".toUpperCase(), true)); // UPPER CASE
+    }
+}
