@@ -33,6 +33,9 @@ public class PlatformProviderTest {
     private GatewayProperties gatewayProperties;
 
     @Mock
+    private GatewayProperties.SnmpProperties snmpProperties;
+
+    @Mock
     private TaskScheduler taskScheduler;
 
     @Mock
@@ -100,16 +103,14 @@ public class PlatformProviderTest {
 
         when(gatewayProperties.getBaseUrl()).thenReturn("http://baseurl.cumulocity.com");
         when(gatewayProperties.isForceInitialHost()).thenReturn(Boolean.TRUE);
-        when(gatewayProperties.getPlatformConnectionPoolMax()).thenReturn(Integer.valueOf(25));
-        when(gatewayProperties.getPlatformConnectionPoolPerHost()).thenReturn(Integer.valueOf(15));
+        when(snmpProperties.getTrapListenerThreadPoolSize()).thenReturn(Integer.valueOf(25));
         when(gatewayProperties.getBootstrapFixedDelay()).thenReturn(Integer.valueOf(1001));
 
         platformProvider.onCredentialsAvailable(new CredentialsAvailableEvent(credentials));
 
         verify(gatewayProperties).getBaseUrl();
         verify(gatewayProperties).isForceInitialHost();
-        verify(gatewayProperties).getPlatformConnectionPoolMax();
-        verify(gatewayProperties).getPlatformConnectionPoolPerHost();
+        verify(snmpProperties).getTrapListenerThreadPoolSize();
 
         assertNotNull(platformProvider.getPlatform());
 

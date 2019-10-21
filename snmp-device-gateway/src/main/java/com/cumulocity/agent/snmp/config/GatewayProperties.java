@@ -45,12 +45,6 @@ public class GatewayProperties {
 	@Value("#{'${C8Y.forceInitialHost:true}'.trim()}")
 	private boolean forceInitialHost;
 
-	@Value("#{'${gateway.platform.connectionPool.max:25}'.trim()}")
-	private Integer platformConnectionPoolMax;
-
-	@Value("#{'${gateway.platform.connectionPool.perHost:15}'.trim()}")
-	private Integer platformConnectionPoolPerHost;
-
 	@Configuration
 	@Data
 	@ToString(exclude = "password")
@@ -92,7 +86,7 @@ public class GatewayProperties {
 		@Value("#{'${snmp.autodiscovery.devicePingTimeoutPeriod:3}'.trim()}")
 		private int autoDiscoveryDevicePingTimeoutPeriod;
 
-		@Value("#{'${snmp.trapListener.threadPoolSize:10}'.trim()}")
+		@Value("#{'${snmp.trapListener.threadPoolSize:30}'.trim()}")
 		private int trapListenerThreadPoolSize;
 
 

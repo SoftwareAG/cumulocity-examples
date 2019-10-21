@@ -27,6 +27,8 @@ public class PlatformProvider implements InitializingBean {
 
 	private final GatewayProperties gatewayProperties;
 
+	private final GatewayProperties.SnmpProperties snmpProperties;
+
     private final TaskScheduler taskScheduler;
 
     private final ApplicationEventPublisher eventPublisher;
@@ -141,8 +143,7 @@ public class PlatformProvider implements InitializingBean {
         );
 
         platform.setHttpClientConfig(HttpClientConfig.httpConfig()
-				.pool(ConnectionPoolConfig.connectionPool().enabled(true).max(gatewayProperties.getPlatformConnectionPoolMax())
-						.perHost(gatewayProperties.getPlatformConnectionPoolPerHost()).build())
-				.build());
+                .pool(ConnectionPoolConfig.connectionPool().enabled(true).max(snmpProperties.getTrapListenerPort()).perHost(snmpProperties.getTrapListenerPort()).build())
+                .build());
 	}
 }

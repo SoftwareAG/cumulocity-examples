@@ -1,6 +1,6 @@
 package com.cumulocity.agent.snmp.config;
 
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -8,17 +8,13 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 @Configuration
 public class ConcurrencyConfiguration {
 
-	@Value("#{'${gateway.scheduler.threadpool.size:10}'.trim()}")
-	private Integer schedulerPoolSize;
-
-	public int getSchedulerPoolSize() {
-		return schedulerPoolSize;
-	}
+	@Autowired
+	private GatewayProperties.SnmpProperties snmpProperties;
 
 	@Bean("taskScheduler")
 	public ThreadPoolTaskScheduler threadPoolTaskScheduler() {
 		ThreadPoolTaskScheduler threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
-		threadPoolTaskScheduler.setPoolSize(schedulerPoolSize);
+		threadPoolTaskScheduler.setPoolSize(snmpProperties.getTrapListenerThreadPoolSize());
 		threadPoolTaskScheduler.setThreadNamePrefix("scheduler-");
 		return threadPoolTaskScheduler;
 	}
