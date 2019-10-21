@@ -5,12 +5,12 @@ import com.cumulocity.rest.representation.BaseResourceRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 
 
-public abstract class Publisher<PS extends PubSub<?>> {
+public abstract class Publisher<PS extends PubSub<?>, R extends BaseResourceRepresentation> {
 
     @Autowired
     private PS pubSub;
 
-    protected void publish(BaseResourceRepresentation resource) {
+    public void publish(R resource) {
         pubSub.publish(resource.toJSON());
     }
 }

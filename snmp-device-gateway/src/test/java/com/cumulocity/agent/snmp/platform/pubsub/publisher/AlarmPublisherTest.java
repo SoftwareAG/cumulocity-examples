@@ -63,7 +63,7 @@ public class AlarmPublisherTest {
         mapping.setType(AlarmMapping.c8y_TRAPReceivedFromUnknownDevice);
         mapping.setText("ALARM TEXT");
 
-        alarmPublisher.publish(mapping, source);
+        alarmPublisher.publish(mapping.buildAlarmRepresentation(source));
 
         AlarmRepresentation alarm = new AlarmRepresentation();
         alarm.setSource(source);

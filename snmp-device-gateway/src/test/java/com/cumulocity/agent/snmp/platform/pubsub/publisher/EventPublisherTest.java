@@ -37,7 +37,7 @@ public class EventPublisherTest {
     }
 
     @Test
-    public void shouldPublishAlarm() {
+    public void shouldPublishEvent() {
         ManagedObjectRepresentation source = new ManagedObjectRepresentation();
         source.setId(GId.asGId(1));
 
@@ -60,7 +60,7 @@ public class EventPublisherTest {
         mapping.setType(AlarmMapping.c8y_TRAPReceivedFromUnknownDevice);
         mapping.setText("EVENT TEXT");
 
-        eventPublisher.publish(mapping, source);
+        eventPublisher.publish(mapping.buildEventRepresentation(source));
 
         EventRepresentation event = new EventRepresentation();
         event.setSource(source);

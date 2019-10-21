@@ -41,7 +41,7 @@ public class MeasurementPublisherTest {
     }
 
     @Test
-    public void shouldPublishAlarm() {
+    public void shouldPublishMeasurement() {
         MeasurementRepresentation measurement = new MeasurementRepresentation();
         ManagedObjectRepresentation source = new ManagedObjectRepresentation();
         source.setId(GId.asGId(1));
@@ -69,7 +69,7 @@ public class MeasurementPublisherTest {
         staticFragments.put("fragment_2", Collections.EMPTY_MAP);
         mapping.setStaticFragmentsMap(staticFragments);
 
-        measurementPublisher.publish(mapping, source, Integer.valueOf(100), "CENTI");
+        measurementPublisher.publish(mapping.buildMeasurementRepresentation(source, 100, "CENTI"));
 
 
         MeasurementRepresentation measurement = new MeasurementRepresentation();
@@ -79,7 +79,7 @@ public class MeasurementPublisherTest {
 
 
         Map<String, Object> seriesMap = Maps.newHashMap();
-        seriesMap.put("value", Integer.valueOf(100));
+        seriesMap.put("value", 100);
         seriesMap.put("unit", "CENTI");
 
         Map<String, Object> typeMap = Maps.newHashMap();

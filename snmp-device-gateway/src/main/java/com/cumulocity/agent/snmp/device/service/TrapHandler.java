@@ -1,4 +1,4 @@
-package com.cumulocity.agent.snmp.client.service;
+package com.cumulocity.agent.snmp.device.service;
 
 import com.cumulocity.agent.snmp.platform.model.*;
 import com.cumulocity.agent.snmp.platform.pubsub.publisher.AlarmPublisher;
@@ -93,10 +93,10 @@ public class TrapHandler implements CommandResponder {
 		alarmMapping.setType(AlarmMapping.c8y_TRAPReceivedFromUnknownDevice);
 		alarmMapping.setText("Trap received from an unknown device with IP address : " + deviceIp);
 
-		alarmPublisher.publish(alarmMapping, dataProvider.getGatewayDevice().getManagedObject());
+		alarmPublisher.publish(alarmMapping.buildAlarmRepresentation(dataProvider.getGatewayDevice().getManagedObject()));
 	}
 
-	private void processDevicePdu(String deviceIp, PDU pdu) {
+	protected void processDevicePdu(String deviceIp, PDU pdu) {
 		if (pdu.getVariableBindings() == null || pdu.getVariableBindings().size() == 0) {
 			log.debug("No OID found in the received trap");
 			return;
@@ -122,15 +122,15 @@ public class TrapHandler implements CommandResponder {
 				Register register = oidMap.get(oid);
 
 				if(register.getAlarmMapping() != null) {
-					alarmPublisher.publish(register.getAlarmMapping(), deviceMo.getManagedObject());
+					alarmPublisher.publish(register.getAlarmMapping().buildAlarmRepresentation(deviceMo.getManagedObject()));
 				}
 
 				if(register.getEventMapping() != null) {
-					eventPublisher.publish(register.getEventMapping(), deviceMo.getManagedObject());
+					eventPublisher.publish(register.getEventMapping().buildEventRepresentation(deviceMo.getManagedObject()));
 				}
 
 				if(register.getMeasurementMapping() != null) {
-					measurementPublisher.publish(register.getMeasurementMapping(), deviceMo.getManagedObject(), parse(binding.getVariable()), register.getUnit());
+					measurementPublisher.publish(register.getMeasurementMapping().buildMeasurementRepresentation(deviceMo.getManagedObject(), parse(binding.getVariable()), register.getUnit()));
 				}
 
 				isMappingFound = true;
@@ -144,7 +144,7 @@ public class TrapHandler implements CommandResponder {
 		}
 	}
 
-	Object parse(Variable valueAsVar) {
+	private Object parse(Variable valueAsVar) {
 		Object retvalue = null;
 
 		if (valueAsVar != null) {
@@ -190,7 +190,7 @@ public class TrapHandler implements CommandResponder {
 		return retvalue;
 	}
 
-	Object resolveOpaque(Opaque var) {
+	private Object resolveOpaque(Opaque var) {
 		// If not resolved, we will return the data as an array of bytes
 		Object value = var.getValue();
 

@@ -47,10 +47,16 @@ public class DeviceManagedObjectWrapper extends AbstractManagedObjectWrapper {
 		private String port;
 
 		private String type;
+		
+		private String protocol;
 
 		private String ipAddress;
 
 		private DeviceAuthentication auth;
+		
+		public boolean isTcp() {
+			return "TCP".equalsIgnoreCase(protocol);
+		}
 	}
 
 	@Getter
@@ -74,7 +80,6 @@ public class DeviceManagedObjectWrapper extends AbstractManagedObjectWrapper {
 
 	public String getDeviceProtocol() {
 		String[] data = properties.getType().trim().split("/");
-		String deviceProtocol = data[data.length - 1];
-		return deviceProtocol;
+		return data[data.length - 1];
 	}
 }

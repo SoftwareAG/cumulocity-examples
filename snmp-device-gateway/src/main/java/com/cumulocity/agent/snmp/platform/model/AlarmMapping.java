@@ -1,7 +1,10 @@
 package com.cumulocity.agent.snmp.platform.model;
 
+import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
+import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
+import org.joda.time.DateTime;
 
 import javax.validation.constraints.NotNull;
 
@@ -21,4 +24,15 @@ public class AlarmMapping {
 
 	@NotNull
 	private String severity;
+
+	public AlarmRepresentation buildAlarmRepresentation(ManagedObjectRepresentation source) {
+		AlarmRepresentation newAlarm = new AlarmRepresentation();
+		newAlarm.setSource(source);
+		newAlarm.setDateTime(DateTime.now());
+		newAlarm.setType(this.getType());
+		newAlarm.setText(this.getText());
+		newAlarm.setSeverity(this.getSeverity());
+
+		return newAlarm;
+	}
 }

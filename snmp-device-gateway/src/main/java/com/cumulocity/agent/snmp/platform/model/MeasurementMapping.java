@@ -1,8 +1,12 @@
 package com.cumulocity.agent.snmp.platform.model;
 
+import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
+import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import com.google.common.collect.Maps;
 import lombok.Data;
+import org.joda.time.DateTime;
 
 import javax.validation.constraints.NotNull;
 import java.util.Collections;
@@ -49,4 +53,29 @@ public class MeasurementMapping {
 		}
 	}
 
+	public MeasurementRepresentation buildMeasurementRepresentation(ManagedObjectRepresentation source, Object value, String unit) {
+		Map<String, Object> series = Maps.newHashMap();
+		if(value != null) {
+			series.put("value", value);
+		}
+		if(unit != null && !unit.isEmpty()) {
+			series.put("unit", unit);
+		}
+
+		Map<String, Object> typeMap = Maps.newHashMap();
+		typeMap.put(this.getSeries(), series);
+
+		MeasurementRepresentation newMeasurement = new MeasurementRepresentation();
+		newMeasurement.setSource(source);
+		newMeasurement.setDateTime(DateTime.now());
+		newMeasurement.setType(this.getType());
+		newMeasurement.setProperty(this.getType(), typeMap);
+
+		Map<String, Map<?, ?>> staticFragmentsMap = this.getStaticFragmentsMap();
+		if (staticFragmentsMap != null && !staticFragmentsMap.isEmpty()) {
+			newMeasurement.getAttrs().putAll(staticFragmentsMap);
+		}
+
+		return newMeasurement;
+	}
 }

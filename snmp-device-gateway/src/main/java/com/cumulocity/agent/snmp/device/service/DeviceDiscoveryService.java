@@ -1,4 +1,4 @@
-package com.cumulocity.agent.snmp.client.service;
+package com.cumulocity.agent.snmp.device.service;
 
 import c8y.RequiredAvailability;
 import com.cumulocity.agent.snmp.bootstrap.model.BootstrapReadyEvent;
@@ -304,6 +304,6 @@ public class DeviceDiscoveryService {
         alarmMapping.setType(type);
         alarmMapping.setText(text);
 
-        alarmPublisher.publish(alarmMapping, gatewayDataProvider.getGatewayDevice().getManagedObject());
+        alarmPublisher.publish(alarmMapping.buildAlarmRepresentation(gatewayDataProvider.getGatewayDevice().getManagedObject()));
     }
 }
