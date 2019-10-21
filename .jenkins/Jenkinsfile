@@ -138,6 +138,20 @@ pipeline {
                         }
                     }
                 }
+                stage('Scan third party dependencies') {
+                    when {
+                        anyOf {
+                            equals expected: 'RELEASE', actual: params.build_type;
+                            equals expected: 'HOTFIX', actual: params.build_type
+                        }
+                    }
+                    steps {
+                        echo "executing scan of third party dependencies"
+                        withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
+                            sh "chmod +x .jenkins/scripts/scan_dependencies.sh && .jenkins/scripts/scan_dependencies.sh"
+                        }
+                    }
+                }
                 stage('Finish release') {
                     when {
                         equals expected: 'RELEASE', actual: params.build_type
@@ -156,6 +170,14 @@ pipeline {
                                     sh "chmod +x .jenkins/scripts/update_develop.sh && .jenkins/scripts/update_develop.sh ${params.hotfix_version} ${params.development_version}"
                                 }
                             }
+                        }
+                    }
+                }
+                stage('Scan third party dependencies') {
+                    steps {
+                        echo "executing scan of third party dependencies"
+                        withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
+                            sh "chmod +x .jenkins/scripts/scan_dependencies.sh && .jenkins/scripts/scan_dependencies.sh ${params.release_version}"
                         }
                     }
                 }
