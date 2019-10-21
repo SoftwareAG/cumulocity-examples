@@ -142,8 +142,9 @@ public class PlatformProvider implements InitializingBean {
                 }
         );
 
+        int trapListenerThreadPoolSize = snmpProperties.getTrapListenerThreadPoolSize();
         platform.setHttpClientConfig(HttpClientConfig.httpConfig()
-                .pool(ConnectionPoolConfig.connectionPool().enabled(true).max(snmpProperties.getTrapListenerPort()).perHost(snmpProperties.getTrapListenerPort()).build())
+                .pool(ConnectionPoolConfig.connectionPool().enabled(true).max(trapListenerThreadPoolSize).perHost(trapListenerThreadPoolSize).build())
                 .build());
 	}
 }

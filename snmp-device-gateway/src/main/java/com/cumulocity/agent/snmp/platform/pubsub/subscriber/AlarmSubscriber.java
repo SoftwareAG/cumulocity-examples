@@ -1,5 +1,6 @@
 package com.cumulocity.agent.snmp.platform.pubsub.subscriber;
 
+import com.cumulocity.agent.snmp.config.GatewayProperties;
 import com.cumulocity.agent.snmp.platform.pubsub.service.AlarmPubSub;
 import com.cumulocity.sdk.client.alarm.AlarmApi;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,12 +10,15 @@ import org.springframework.stereotype.Component;
 public class AlarmSubscriber extends Subscriber<AlarmPubSub> {
 
     @Autowired
+    private GatewayProperties.SnmpProperties snmpProperties;
+
+    @Autowired
     private AlarmApi alarmApi;
 
     @Override
     public int getConcurrentSubscriptionsCount() {
         // 10% of the total threads available for scheduler
-        int count = concurrencyConfiguration.getSchedulerPoolSize() * 10 / 100;
+        int count = snmpProperties.getTrapListenerThreadPoolSize() * 10 / 100;
 
         return (count <= 0)? 1 : count;
     }

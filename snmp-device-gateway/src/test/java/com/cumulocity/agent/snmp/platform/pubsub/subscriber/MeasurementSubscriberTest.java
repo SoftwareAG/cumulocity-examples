@@ -1,6 +1,6 @@
 package com.cumulocity.agent.snmp.platform.pubsub.subscriber;
 
-import com.cumulocity.agent.snmp.config.ConcurrencyConfiguration;
+import com.cumulocity.agent.snmp.config.GatewayProperties;
 import com.cumulocity.agent.snmp.platform.model.GatewayManagedObjectWrapper;
 import com.cumulocity.agent.snmp.platform.pubsub.service.MeasurementPubSub;
 import com.cumulocity.agent.snmp.platform.service.GatewayDataProvider;
@@ -26,7 +26,7 @@ public class MeasurementSubscriberTest {
     private static final List<String> JSON_STRINGS = Arrays.asList("Message 1", "Message 2");
 
     @Mock
-    private ConcurrencyConfiguration concurrencyConfiguration;
+    private GatewayProperties.SnmpProperties snmpProperties;
 
     @Mock
     private GatewayDataProvider gatewayDataProvider;
@@ -61,11 +61,21 @@ public class MeasurementSubscriberTest {
     }
 
     @Test
+    public void shouldGetConcurrentSubscriptionsCountAs_30Percent_OfSchedulerPoolSize_1() {
+
+        int schedularPoolSize = 1;
+
+        Mockito.when(snmpProperties.getTrapListenerThreadPoolSize()).thenReturn(schedularPoolSize);
+
+        assertEquals(3, measurementSubscriber.getConcurrentSubscriptionsCount());
+    }
+
+    @Test
     public void shouldGetConcurrentSubscriptionsCountAs_30Percent_OfSchedulerPoolSize_10() {
 
         int schedularPoolSize = 10;
 
-        Mockito.when(concurrencyConfiguration.getSchedulerPoolSize()).thenReturn(schedularPoolSize);
+        Mockito.when(snmpProperties.getTrapListenerThreadPoolSize()).thenReturn(schedularPoolSize);
 
         assertEquals((schedularPoolSize * 30/100), measurementSubscriber.getConcurrentSubscriptionsCount());
     }
@@ -75,7 +85,7 @@ public class MeasurementSubscriberTest {
 
         int schedularPoolSize = 101;
 
-        Mockito.when(concurrencyConfiguration.getSchedulerPoolSize()).thenReturn(schedularPoolSize);
+        Mockito.when(snmpProperties.getTrapListenerThreadPoolSize()).thenReturn(schedularPoolSize);
 
         assertEquals((schedularPoolSize * 30/100), measurementSubscriber.getConcurrentSubscriptionsCount());
     }

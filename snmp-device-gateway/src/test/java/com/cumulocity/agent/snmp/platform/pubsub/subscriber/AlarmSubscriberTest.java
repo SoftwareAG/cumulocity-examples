@@ -1,6 +1,6 @@
 package com.cumulocity.agent.snmp.platform.pubsub.subscriber;
 
-import com.cumulocity.agent.snmp.config.ConcurrencyConfiguration;
+import com.cumulocity.agent.snmp.config.GatewayProperties;
 import com.cumulocity.agent.snmp.platform.model.GatewayManagedObjectWrapper;
 import com.cumulocity.agent.snmp.platform.pubsub.service.AlarmPubSub;
 import com.cumulocity.agent.snmp.platform.service.GatewayDataProvider;
@@ -21,7 +21,7 @@ import static org.junit.Assert.*;
 public class AlarmSubscriberTest {
 
     @Mock
-    private ConcurrencyConfiguration concurrencyConfiguration;
+    private GatewayProperties.SnmpProperties snmpProperties;
 
     @Mock
     private GatewayDataProvider gatewayDataProvider;
@@ -56,11 +56,21 @@ public class AlarmSubscriberTest {
     }
 
     @Test
+    public void shouldGetConcurrentSubscriptionsCountAs_10Percent_OfSchedulerPoolSize_1() {
+
+        int schedularPoolSize = 1;
+
+        Mockito.when(snmpProperties.getTrapListenerThreadPoolSize()).thenReturn(schedularPoolSize);
+
+        assertEquals(1, alarmSubscriber.getConcurrentSubscriptionsCount());
+    }
+
+    @Test
     public void shouldGetConcurrentSubscriptionsCountAs_10Percent_OfSchedulerPoolSize_10() {
 
         int schedularPoolSize = 10;
 
-        Mockito.when(concurrencyConfiguration.getSchedulerPoolSize()).thenReturn(schedularPoolSize);
+        Mockito.when(snmpProperties.getTrapListenerThreadPoolSize()).thenReturn(schedularPoolSize);
 
         assertEquals((schedularPoolSize * 10/100), alarmSubscriber.getConcurrentSubscriptionsCount());
     }
@@ -70,7 +80,7 @@ public class AlarmSubscriberTest {
 
         int schedularPoolSize = 101;
 
-        Mockito.when(concurrencyConfiguration.getSchedulerPoolSize()).thenReturn(schedularPoolSize);
+        Mockito.when(snmpProperties.getTrapListenerThreadPoolSize()).thenReturn(schedularPoolSize);
 
         assertEquals((schedularPoolSize * 10/100), alarmSubscriber.getConcurrentSubscriptionsCount());
     }

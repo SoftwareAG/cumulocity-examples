@@ -131,7 +131,7 @@ public class PlatformProviderTest {
 
         HttpClientConfig httpClientConfig = platformParameters.getHttpClientConfig();
         assertEquals(httpClientConfig.getPool().getMax(), 25);
-        assertEquals(httpClientConfig.getPool().getPerHost(), 15);
+        assertEquals(httpClientConfig.getPool().getPerHost(), 25);
 
         verify(eventPublisher).publishEvent(platformConnectionReadyEventCaptor.capture());
         assertEquals("USERNAME", platformConnectionReadyEventCaptor.getValue().getCurrentUser());

@@ -1,5 +1,6 @@
 package com.cumulocity.agent.snmp.platform.pubsub.subscriber;
 
+import com.cumulocity.agent.snmp.config.GatewayProperties;
 import com.cumulocity.agent.snmp.platform.pubsub.service.MeasurementPubSub;
 import com.cumulocity.sdk.client.measurement.MeasurementApi;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,9 @@ import java.util.Collection;
 
 @Component
 public class MeasurementSubscriber extends Subscriber<MeasurementPubSub> {
+
+    @Autowired
+    private GatewayProperties.SnmpProperties snmpProperties;
 
     @Autowired
     private MeasurementApi measurementApi;
@@ -21,9 +25,9 @@ public class MeasurementSubscriber extends Subscriber<MeasurementPubSub> {
     @Override
     public int getConcurrentSubscriptionsCount() {
         // 30% of the total threads available for scheduler
-        int count = concurrencyConfiguration.getSchedulerPoolSize() * 30 / 100;
+        int count = snmpProperties.getTrapListenerThreadPoolSize() * 30 / 100;
 
-        return (count <= 0)? 1 : count;
+        return (count <= 0)? 3 : count;
     }
 
     @Override

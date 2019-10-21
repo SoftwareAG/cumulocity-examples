@@ -1,7 +1,6 @@
 package com.cumulocity.agent.snmp.platform.pubsub.subscriber;
 
 import com.cumulocity.agent.snmp.bootstrap.model.BootstrapReadyEvent;
-import com.cumulocity.agent.snmp.config.ConcurrencyConfiguration;
 import com.cumulocity.agent.snmp.platform.model.GatewayDataRefreshedEvent;
 import com.cumulocity.agent.snmp.platform.pubsub.service.PubSub;
 import com.cumulocity.agent.snmp.platform.service.GatewayDataProvider;
@@ -25,9 +24,6 @@ import java.util.Collection;
  */
 @Slf4j
 public abstract class Subscriber<PS extends PubSub<?>> {
-
-    @Autowired
-    ConcurrencyConfiguration concurrencyConfiguration;
 
     @Autowired
     private GatewayDataProvider gatewayDataProvider;
