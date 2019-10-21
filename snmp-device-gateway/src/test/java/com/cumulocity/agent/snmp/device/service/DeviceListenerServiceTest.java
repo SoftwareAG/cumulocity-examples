@@ -6,6 +6,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import com.cumulocity.agent.snmp.config.GatewayProperties;
 import com.cumulocity.agent.snmp.platform.model.DeviceManagedObjectWrapper;
+import com.cumulocity.agent.snmp.platform.model.GatewayManagedObjectWrapper;
 import com.cumulocity.agent.snmp.platform.service.GatewayDataProvider;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
@@ -23,6 +24,7 @@ import org.snmp4j.smi.Integer32;
 import org.snmp4j.smi.OctetString;
 import org.snmp4j.transport.DefaultTcpTransportMapping;
 import org.snmp4j.transport.DefaultUdpTransportMapping;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.IOException;
@@ -38,7 +40,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class DeviceListeningServiceTest {
+public class DeviceListenerServiceTest {
 
 	@Mock
 	TrapHandler trapHandler;
@@ -49,8 +51,17 @@ public class DeviceListeningServiceTest {
 	@Mock
 	GatewayProperties.SnmpProperties snmpProperties;
 
+	@Mock
+	TaskScheduler taskScheduler;
+
+	@Mock
+	GatewayManagedObjectWrapper gatewayDeviceWrapper;
+
+	@Mock
+	GatewayManagedObjectWrapper.SnmpCommunicationProperties snmpCommunicationProperties;
+
 	@InjectMocks
-	DeviceListeningService deviceListeningService;
+	DeviceListenerService deviceListenerService;
 
 	private Logger logger;
 
@@ -112,9 +123,12 @@ public class DeviceListeningServiceTest {
 		when(snmpProperties.getTrapListenerThreadPoolSize()).thenReturn(1);
 		when(snmpProperties.getTrapListenerAddress()).thenReturn("127.0.0.1");
 		when(snmpProperties.getTrapListenerPort()).thenReturn(161);
+		when(snmpProperties.getTrapListenerProtocol()).thenReturn("UDP");
 		when(gatewayDataProvider.getDeviceProtocolMap()).thenReturn(Collections.emptyMap());
-
-		System.setSecurityManager(new NoExitSecurityManager());
+		when(gatewayDataProvider.getGatewayDevice()).thenReturn(gatewayDeviceWrapper);
+		when(gatewayDeviceWrapper.getSnmpCommunicationProperties()).thenReturn(snmpCommunicationProperties);
+		when(snmpCommunicationProperties.getPollingRateInMinutes()).thenReturn(1L);
+System.setSecurityManager(new NoExitSecurityManager());
 	}
 
 	@Test
@@ -125,7 +139,7 @@ public class DeviceListeningServiceTest {
 		assertNull(securityModel);
 
 		// Action
-		ReflectionTestUtils.invokeMethod(deviceListeningService, "createSnmpDeviceListener");
+		ReflectionTestUtils.invokeMethod(deviceListenerService, "createSnmpDeviceListener");
 
 		securityModel = SecurityModels.getInstance().getSecurityModel(modeID);
 		assertNotNull(securityModel);
@@ -141,7 +155,7 @@ public class DeviceListeningServiceTest {
 		assertNull(securityModel);
 
 		// Action
-		ReflectionTestUtils.invokeMethod(deviceListeningService, "createSnmpDeviceListener");
+		ReflectionTestUtils.invokeMethod(deviceListenerService, "createSnmpDeviceListener");
 
 		securityModel = SecurityModels.getInstance().getSecurityModel(modeID);
 		assertNotNull(securityModel);
@@ -164,11 +178,11 @@ public class DeviceListeningServiceTest {
 		when(snmpProperties.getTrapListenerPort()).thenReturn(162);
 
 		// Action
-		ReflectionTestUtils.invokeMethod(deviceListeningService, "createSnmpDeviceListener");
+		ReflectionTestUtils.invokeMethod(deviceListenerService, "createSnmpDeviceListener");
 
 		// Trying to listen on same port again
 		try {
-			ReflectionTestUtils.invokeMethod(deviceListeningService, "createSnmpDeviceListener");
+			ReflectionTestUtils.invokeMethod(deviceListenerService, "createSnmpDeviceListener");
 		} catch(ExitException ee) {
 			checkLogExist("Failed to start listening to traps. Port 127.0.0.1/162 is already in use.");
 			checkLogExist("Update the 'snmp.trapListener.port' and 'snmp.trapListener.address' properties and restart the agent. Shutting down the agent...");
@@ -184,7 +198,7 @@ public class DeviceListeningServiceTest {
 
 		// Action
 		try {
-			ReflectionTestUtils.invokeMethod(deviceListeningService, "createSnmpDeviceListener");
+			ReflectionTestUtils.invokeMethod(deviceListenerService, "createSnmpDeviceListener");
 		} catch(ExitException ee) {
 			checkLogExist("Failed to start listening to traps on port 127.0.0.1/162.");
 			checkLogExist("Update the 'snmp.trapListener.port' and 'snmp.trapListener.address' properties and restart the agent. Shutting down the agent...");
@@ -204,7 +218,7 @@ public class DeviceListeningServiceTest {
 		gatewayDataProvider.getDeviceProtocolMap().put("snmp-device", deviceMoWrapper);
 
 		// Action
-		ReflectionTestUtils.invokeMethod(deviceListeningService, "refreshCredentials");
+		ReflectionTestUtils.invokeMethod(deviceListenerService, "refreshCredentials");
 
 		SecurityModel securityModel = SecurityModels.getInstance().getSecurityModel(modeID);
 		assertNotNull(securityModel);
@@ -228,7 +242,7 @@ public class DeviceListeningServiceTest {
 		assertNull(securityModel);
 
 		// Action
-		ReflectionTestUtils.invokeMethod(deviceListeningService, "configureUserSecurityModel");
+		ReflectionTestUtils.invokeMethod(deviceListenerService, "configureUserSecurityModel");
 
 		securityModel = SecurityModels.getInstance().getSecurityModel(modeID);
 		assertNotNull(securityModel);
@@ -242,14 +256,15 @@ public class DeviceListeningServiceTest {
 	public void shouldConfigureTcpTransportMappingForTcp() {
 		when(snmpProperties.getTrapListenerProtocol()).thenReturn("tcp");
 
-		assertNull(deviceListeningService.snmp);
+		assertNull(deviceListenerService.snmp);
 
 		// Action
-		ReflectionTestUtils.invokeMethod(deviceListeningService, "createSnmpDeviceListener");
+		ReflectionTestUtils.invokeMethod(deviceListenerService, "createSnmpDeviceListener");
 
-		assertNotNull(deviceListeningService.snmp);
+		assertNotNull(deviceListenerService.snmp);
 
-		Collection<TransportMapping> mappings = deviceListeningService.snmp.getMessageDispatcher().getTransportMappings();
+		Collection<TransportMapping> mappings = deviceListenerService.snmp.getMessageDispatcher()
+				.getTransportMappings();
 		assertNotNull(mappings);
 		assertEquals(1, mappings.size());
 
@@ -263,14 +278,15 @@ public class DeviceListeningServiceTest {
 	public void shouldConfigureUdpTransportMappingForUdp() {
 		when(snmpProperties.getTrapListenerProtocol()).thenReturn("udp");
 
-		assertNull(deviceListeningService.snmp);
+		assertNull(deviceListenerService.snmp);
 
 		// Action
-		ReflectionTestUtils.invokeMethod(deviceListeningService, "createSnmpDeviceListener");
+		ReflectionTestUtils.invokeMethod(deviceListenerService, "createSnmpDeviceListener");
 
-		assertNotNull(deviceListeningService.snmp);
+		assertNotNull(deviceListenerService.snmp);
 
-		Collection<TransportMapping> mappings = deviceListeningService.snmp.getMessageDispatcher().getTransportMappings();
+		Collection<TransportMapping> mappings = deviceListenerService.snmp.getMessageDispatcher()
+				.getTransportMappings();
 		assertNotNull(mappings);
 		assertEquals(1, mappings.size());
 
@@ -285,9 +301,9 @@ public class DeviceListeningServiceTest {
 
 		// Action
 		try {
-			deviceListeningService.createTransportMapping("", 1010, "localhost");
+			deviceListenerService.createTransportMapping("", 1010, "localhost");
 		} catch (IOException e) {
-			assertNull(deviceListeningService.snmp);
+			assertNull(deviceListenerService.snmp);
 			assertTrue(checkLogExist(errorMsg));
 
 			throw e;
@@ -296,7 +312,7 @@ public class DeviceListeningServiceTest {
 
 	@After
 	public void tearDown() {
-		ReflectionTestUtils.invokeMethod(deviceListeningService,"stop");
+		ReflectionTestUtils.invokeMethod(deviceListenerService, "stop");
 
 		SecurityModels.getInstance().removeSecurityModel(modeID);
 
