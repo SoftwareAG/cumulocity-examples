@@ -77,13 +77,28 @@ public class DeviceListenerService {
 	private TrapHandler trapHandler;
 
 	Snmp snmp = null;
-	
+
 	private ScheduledFuture<?> snmpDevicePoller;
 
 	private long pollingRateInMinutes = -1;
 
 	@EventListener(BootstrapReadyEvent.class)
-	private void createSnmpDeviceListener() {
+	private void onBootstrapReady() {
+		createSnmpDeviceListener();
+
+		createSnmpDevicePoller();
+	}
+
+	@EventListener(GatewayDataRefreshedEvent.class)
+	private void onGatewayDataRefresh() {
+		// Re-Configure user security model
+		configureUserSecurityModel();
+
+		// Re-schedule poller (only if configuration changed
+		createSnmpDevicePoller();
+	}
+
+	protected void createSnmpDeviceListener() {
 		try {
 			configureUserSecurityModel();
 
@@ -97,11 +112,11 @@ public class DeviceListenerService {
 			dispatcher.addMessageProcessingModel(new MPv2c());
 			dispatcher.addMessageProcessingModel(new MPv3());
 
-			String trapListenerBindingAddress = IpAddressUtil.sanitizeIpAddress(snmpProperties.getTrapListenerAddress(), true);
-			TransportMapping<? extends Address> transportMapping =
-					createTransportMapping( snmpProperties.getTrapListenerProtocol(),
-											snmpProperties.getTrapListenerPort(),
-											trapListenerBindingAddress);
+			String trapListenerBindingAddress = IpAddressUtil.sanitizeIpAddress(snmpProperties.getTrapListenerAddress(),
+					true);
+			TransportMapping<? extends Address> transportMapping = createTransportMapping(
+					snmpProperties.getTrapListenerProtocol(), snmpProperties.getTrapListenerPort(),
+					trapListenerBindingAddress);
 
 			snmp = new Snmp(dispatcher, transportMapping);
 			snmp.addCommandResponder(trapHandler);
@@ -111,27 +126,21 @@ public class DeviceListenerService {
 		} catch (BindException be) {
 			log.error("Failed to start listening to traps. Port {}/{} is already in use.\n"
 					+ "Update the 'snmp.trapListener.port' and 'snmp.trapListener.address' properties and restart the agent. "
-					+ "Shutting down the agent...", snmpProperties.getTrapListenerAddress(), snmpProperties.getTrapListenerPort(), be);
+					+ "Shutting down the agent...", snmpProperties.getTrapListenerAddress(),
+					snmpProperties.getTrapListenerPort(), be);
 			System.exit(0);
 		} catch (IOException | IllegalArgumentException t) {
 			log.error("Failed to start listening to traps on port {}/{}.\n"
 					+ "Update the 'snmp.trapListener.port' and 'snmp.trapListener.address' properties and restart the agent. "
-					+ "Shutting down the agent...", snmpProperties.getTrapListenerAddress(), snmpProperties.getTrapListenerPort(), t);
+					+ "Shutting down the agent...", snmpProperties.getTrapListenerAddress(),
+					snmpProperties.getTrapListenerPort(), t);
 			System.exit(0);
 		}
-		
-		createSnmpDevicePoller();
 	}
 
-	@EventListener(GatewayDataRefreshedEvent.class)
-	private void refreshCredentials() {
-		configureUserSecurityModel();
-
-		createSnmpDevicePoller();
-	}
-	
-	private void createSnmpDevicePoller() {
-		long newPollingRateInMinutes = gatewayDataProvider.getGatewayDevice().getSnmpCommunicationProperties().getPollingRateInMinutes();
+	protected void createSnmpDevicePoller() {
+		long newPollingRateInMinutes = gatewayDataProvider.getGatewayDevice().getSnmpCommunicationProperties()
+				.getPollingRateInMinutes();
 
 		if (snmpDevicePoller != null && !snmpDevicePoller.isDone() && pollingRateInMinutes == newPollingRateInMinutes) {
 			return;
@@ -140,65 +149,69 @@ public class DeviceListenerService {
 		if (snmpDevicePoller != null) {
 			snmpDevicePoller.cancel(true);
 		}
-		
+
 		pollingRateInMinutes = newPollingRateInMinutes;
 
 		snmpDevicePoller = taskScheduler.scheduleWithFixedDelay(() -> {
-            try {
-            	Map<String, DeviceManagedObjectWrapper> deviceProtocolMap = gatewayDataProvider.getDeviceProtocolMap();
-            	Map<String, DeviceProtocolManagedObjectWrapper> protocolMap = gatewayDataProvider.getProtocolMap();
+			try {
+				Map<String, DeviceManagedObjectWrapper> deviceProtocolMap = gatewayDataProvider.getDeviceProtocolMap();
+				Map<String, DeviceProtocolManagedObjectWrapper> protocolMap = gatewayDataProvider.getProtocolMap();
 
-            	deviceProtocolMap.forEach((deviceIp, deviceWrapper) -> {
-            		String deviceProtocolName = deviceWrapper.getDeviceProtocol();
+				deviceProtocolMap.forEach((deviceIp, deviceWrapper) -> {
+					String deviceProtocolName = deviceWrapper.getDeviceProtocol();
 
-            		if (protocolMap.containsKey(deviceProtocolName)) {
-            			DeviceProtocolManagedObjectWrapper deviceProtocolWrapper = protocolMap.get(deviceProtocolName);
-            			List<VariableBinding> varibleBindingList = deviceProtocolWrapper.getMeasurementVariableBindingList();
+					if (protocolMap.containsKey(deviceProtocolName)) {
+						DeviceProtocolManagedObjectWrapper deviceProtocolWrapper = protocolMap.get(deviceProtocolName);
+						List<VariableBinding> varibleBindingList = deviceProtocolWrapper
+								.getMeasurementVariableBindingList();
 
-            			if (varibleBindingList.size() > 0) {
+						if (varibleBindingList.size() > 0) {
 
-	            			taskScheduler.schedule(() -> {
-	            				SnmpDevicePoller devicePoller = null;
+							taskScheduler.schedule(() -> {
+								SnmpDevicePoller devicePoller = null;
 
 								try {
-		            				devicePoller = new SnmpDevicePoller(snmpProperties, deviceWrapper, varibleBindingList);
-		            				ResponseEvent responseEvent = devicePoller.poll();
+									devicePoller = new SnmpDevicePoller(snmpProperties, deviceWrapper,
+											varibleBindingList);
+									ResponseEvent responseEvent = devicePoller.poll();
 
-		            				PDU responsePDU = responseEvent.getResponse();
-		            				if (responsePDU == null) {
-		            		            log.error("Empty response was received while polling for device {} OIDs : {}",
-		            		                    deviceIp, responseEvent.getRequest());
-		            		        } else if (responsePDU.getErrorStatus() == PDU.noError) {
-		            		            if (responsePDU.getVariableBindings().size() == 0) {
-		            		                log.error("No data found after successful device polling");
-		            		                return;
-		            		            }
-		            		            
-		            		            trapHandler.processDevicePdu(deviceIp, responsePDU);
-		            		        }  else {
-		            		            log.error("Error while polling device {} OIDs.\n"
-		            		            		+ "Error index {} | Error status {} | Error text {} ", deviceIp, responsePDU.getErrorIndex(), 
-		            		            		responsePDU.getErrorStatus(), responsePDU.getErrorStatusText());
-		            		        }
+									PDU responsePDU = responseEvent.getResponse();
+									if (responsePDU == null) {
+										log.error("Empty response was received while polling for device {} OIDs : {}",
+												deviceIp, responseEvent.getRequest());
+									} else if (responsePDU.getErrorStatus() == PDU.noError) {
+										if (responsePDU.getVariableBindings().size() == 0) {
+											log.error("No data found after successful device polling");
+											return;
+										}
+
+										trapHandler.processDevicePdu(deviceIp, responsePDU);
+									} else {
+										log.error(
+												"Error while polling device {} OIDs.\n"
+														+ "Error index {} | Error status {} | Error text {} ",
+												deviceIp, responsePDU.getErrorIndex(), responsePDU.getErrorStatus(),
+												responsePDU.getErrorStatusText());
+									}
 
 								} catch (IOException e) {
-									log.error("Failed while polling variables for the device {} with {} protocol", deviceIp, 
-											deviceWrapper.getDeviceProtocol(), e);
+									log.error("Failed while polling variables for the device {} with {} protocol",
+											deviceIp, deviceWrapper.getDeviceProtocol(), e);
 								} finally {
 									if (devicePoller != null) {
 										devicePoller.close();
 									}
 								}
-	                    	}, Instant.now());
+							}, Instant.now());
 
-            			}
-            		} else {
-            			log.debug("{} device is not configured with device protocol", deviceIp);
-            		}
-            	});
-            } catch(Throwable t) {
-                log.error("Error while polling SNMP devices.", t);
-            }
+						}
+					} else {
+						log.debug("{} device is not configured with device protocol", deviceIp);
+					}
+				});
+			} catch (Throwable t) {
+				log.error("Error while polling SNMP devices.", t);
+			}
 		}, Duration.ofMinutes(pollingRateInMinutes));
 	}
 
@@ -297,7 +310,8 @@ public class DeviceListenerService {
 		}
 	}
 
-	TransportMapping<? extends Address> createTransportMapping(String protocol, int port, String bindingAddress) throws IOException {
+	TransportMapping<? extends Address> createTransportMapping(String protocol, int port, String bindingAddress)
+			throws IOException {
 		Address snmpListeningAddress = GenericAddress.parse(protocol + ":" + bindingAddress + "/" + port);
 
 		if (snmpListeningAddress instanceof TcpAddress) {
@@ -305,8 +319,8 @@ public class DeviceListenerService {
 		} else if (snmpListeningAddress instanceof UdpAddress) {
 			return new DefaultUdpTransportMapping((UdpAddress) snmpListeningAddress);
 		} else {
-			String msg = "Unable to service snmp devices. Unsupported " + protocol
-					+ " protocol selected. " + "Currently supported protocols are TCP and UDP.";
+			String msg = "Unable to service snmp devices. Unsupported " + protocol + " protocol selected. "
+					+ "Currently supported protocols are TCP and UDP.";
 			log.error(msg);
 
 			throw new ProtocolException(msg);
