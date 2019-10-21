@@ -16,6 +16,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.LoggerFactory;
 import org.snmp4j.TransportMapping;
@@ -29,15 +30,19 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.IOException;
 import java.security.Permission;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DeviceListenerServiceTest {
@@ -59,7 +64,11 @@ public class DeviceListenerServiceTest {
 
 	@Mock
 	GatewayManagedObjectWrapper.SnmpCommunicationProperties snmpCommunicationProperties;
+	
+	@Mock
+	ScheduledFuture<?> snmpDevicePoller;
 
+	@Spy
 	@InjectMocks
 	DeviceListenerService deviceListenerService;
 
@@ -88,7 +97,7 @@ public class DeviceListenerServiceTest {
 	@Before
 	public void setup() {
 		listAppender = new ListAppender<>();
-		logger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+		logger = (Logger)LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
 		logger.addAppender(listAppender);
 		listAppender.start();
 
@@ -218,7 +227,7 @@ System.setSecurityManager(new NoExitSecurityManager());
 		gatewayDataProvider.getDeviceProtocolMap().put("snmp-device", deviceMoWrapper);
 
 		// Action
-		ReflectionTestUtils.invokeMethod(deviceListenerService, "refreshCredentials");
+		ReflectionTestUtils.invokeMethod(deviceListenerService, "onGatewayDataRefresh");
 
 		SecurityModel securityModel = SecurityModels.getInstance().getSecurityModel(modeID);
 		assertNotNull(securityModel);
@@ -308,6 +317,48 @@ System.setSecurityManager(new NoExitSecurityManager());
 
 			throw e;
 		}
+	}
+
+	@Test
+	public void shouldStartTrapListeningWhileHandlingBootstrapReadyEvent() {
+		// Action
+		ReflectionTestUtils.invokeMethod(deviceListenerService, "onBootstrapReady");
+
+		verify(deviceListenerService, times(1)).createSnmpDeviceListener();
+	}
+
+	@Test
+	public void shouldInitiateDevicePollingWhileHandlingBootstrapReadyEvent() {
+		// Action
+		ReflectionTestUtils.invokeMethod(deviceListenerService, "onBootstrapReady");
+
+		verify(deviceListenerService, times(1)).createSnmpDevicePoller();
+	}
+
+	@Test
+	public void shouldReconfigurePollingScheduledJobIfIntervalChanges() {
+		ReflectionTestUtils.setField(deviceListenerService, "pollingRateInMinutes", 1L);
+		when(snmpCommunicationProperties.getPollingRateInMinutes()).thenReturn(123L);
+
+		// Action
+		ReflectionTestUtils.invokeMethod(deviceListenerService, "onGatewayDataRefresh");
+
+		verify(deviceListenerService, times(1)).createSnmpDevicePoller();
+		verify(taskScheduler).scheduleWithFixedDelay(any(Runnable.class), eq(Duration.ofMinutes(123L)));
+	}
+
+	@Test
+	public void shouldNotReconfigurePollingScheduledJobIfIntervalIsSame() {
+		ReflectionTestUtils.setField(deviceListenerService, "snmpDevicePoller", snmpDevicePoller);
+		ReflectionTestUtils.setField(deviceListenerService, "pollingRateInMinutes", 1L);
+		when(snmpCommunicationProperties.getPollingRateInMinutes()).thenReturn(1L);
+		when(snmpDevicePoller.isDone()).thenReturn(false);
+
+		// Action
+		ReflectionTestUtils.invokeMethod(deviceListenerService, "onGatewayDataRefresh");
+
+		verify(deviceListenerService, times(1)).createSnmpDevicePoller();
+		verify(taskScheduler, times(0)).scheduleWithFixedDelay(any(Runnable.class), eq(Duration.ofMinutes(1L)));
 	}
 
 	@After
