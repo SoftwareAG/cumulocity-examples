@@ -129,6 +129,9 @@ public class DeviceListenerService {
 
 		pollingRateInMinutes = newPollingRateInMinutes;
 
+		if(pollingRateInMinutes <= 0) {
+			return;
+		}
 		snmpDevicePoller = taskScheduler.scheduleWithFixedDelay(() -> {
 			try {
 				Map<String, DeviceManagedObjectWrapper> deviceProtocolMap = gatewayDataProvider.getDeviceProtocolMap();

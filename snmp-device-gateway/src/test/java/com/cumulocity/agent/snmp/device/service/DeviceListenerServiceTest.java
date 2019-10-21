@@ -137,7 +137,8 @@ public class DeviceListenerServiceTest {
 		when(gatewayDataProvider.getGatewayDevice()).thenReturn(gatewayDeviceWrapper);
 		when(gatewayDeviceWrapper.getSnmpCommunicationProperties()).thenReturn(snmpCommunicationProperties);
 		when(snmpCommunicationProperties.getPollingRateInMinutes()).thenReturn(1L);
-System.setSecurityManager(new NoExitSecurityManager());
+
+		System.setSecurityManager(new NoExitSecurityManager());
 	}
 
 	@Test
