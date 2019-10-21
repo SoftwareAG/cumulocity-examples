@@ -34,10 +34,12 @@ import org.snmp4j.smi.Integer32;
 import org.snmp4j.smi.OctetString;
 import org.snmp4j.transport.DefaultTcpTransportMapping;
 import org.snmp4j.transport.DefaultUdpTransportMapping;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.cumulocity.agent.snmp.config.GatewayProperties;
 import com.cumulocity.agent.snmp.platform.model.DeviceManagedObjectWrapper;
+import com.cumulocity.agent.snmp.platform.model.GatewayManagedObjectWrapper;
 import com.cumulocity.agent.snmp.platform.service.GatewayDataProvider;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
@@ -58,6 +60,15 @@ public class DeviceListenerServiceTest {
 
 	@Mock
 	GatewayProperties.SnmpProperties snmpProperties;
+
+	@Mock
+	TaskScheduler taskScheduler;
+
+	@Mock
+	GatewayManagedObjectWrapper gatewayDeviceWrapper;
+
+	@Mock
+	GatewayManagedObjectWrapper.SnmpCommunicationProperties snmpCommunicationProperties;
 
 	@InjectMocks
 	DeviceListenerService deviceListenerService;
@@ -122,7 +133,11 @@ public class DeviceListenerServiceTest {
 		when(snmpProperties.getTrapListenerThreadPoolSize()).thenReturn(1);
 		when(snmpProperties.getTrapListenerAddress()).thenReturn("127.0.0.1");
 		when(snmpProperties.getTrapListenerPort()).thenReturn(161);
+		when(snmpProperties.getTrapListenerProtocol()).thenReturn("UDP");
 		when(gatewayDataProvider.getDeviceProtocolMap()).thenReturn(Collections.emptyMap());
+		when(gatewayDataProvider.getGatewayDevice()).thenReturn(gatewayDeviceWrapper);
+		when(gatewayDeviceWrapper.getSnmpCommunicationProperties()).thenReturn(snmpCommunicationProperties);
+		when(snmpCommunicationProperties.getPollingRateInMinutes()).thenReturn(1L);
 	}
 
 	@Test
@@ -220,7 +235,8 @@ public class DeviceListenerServiceTest {
 
 		assertNotNull(deviceListenerService.snmp);
 
-		Collection<TransportMapping> mappings = deviceListenerService.snmp.getMessageDispatcher().getTransportMappings();
+		Collection<TransportMapping> mappings = deviceListenerService.snmp.getMessageDispatcher()
+				.getTransportMappings();
 		assertNotNull(mappings);
 		assertEquals(1, mappings.size());
 
@@ -241,7 +257,8 @@ public class DeviceListenerServiceTest {
 
 		assertNotNull(deviceListenerService.snmp);
 
-		Collection<TransportMapping> mappings = deviceListenerService.snmp.getMessageDispatcher().getTransportMappings();
+		Collection<TransportMapping> mappings = deviceListenerService.snmp.getMessageDispatcher()
+				.getTransportMappings();
 		assertNotNull(mappings);
 		assertEquals(1, mappings.size());
 
