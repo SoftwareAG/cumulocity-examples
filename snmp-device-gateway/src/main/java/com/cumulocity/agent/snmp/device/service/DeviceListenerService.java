@@ -62,7 +62,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-public class DeviceListeningService {
+public class DeviceListenerService {
 
 	@Autowired
 	private GatewayProperties.SnmpProperties snmpProperties;

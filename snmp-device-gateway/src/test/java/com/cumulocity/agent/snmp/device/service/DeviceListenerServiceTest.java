@@ -48,7 +48,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 
 @RunWith(MockitoJUnitRunner.class)
-public class DeviceListeningServiceTest {
+public class DeviceListenerServiceTest {
 
 	@Mock
 	TrapHandler trapHandler;
@@ -60,7 +60,7 @@ public class DeviceListeningServiceTest {
 	GatewayProperties.SnmpProperties snmpProperties;
 
 	@InjectMocks
-	DeviceListeningService deviceListeningService;
+	DeviceListenerService deviceListenerService;
 
 	private Logger logger;
 
@@ -133,7 +133,7 @@ public class DeviceListeningServiceTest {
 		assertNull(securityModel);
 
 		// Action
-		ReflectionTestUtils.invokeMethod(deviceListeningService, "createSnmpDeviceListener");
+		ReflectionTestUtils.invokeMethod(deviceListenerService, "createSnmpDeviceListener");
 
 		securityModel = SecurityModels.getInstance().getSecurityModel(modeID);
 		assertNotNull(securityModel);
@@ -149,7 +149,7 @@ public class DeviceListeningServiceTest {
 		assertNull(securityModel);
 
 		// Action
-		ReflectionTestUtils.invokeMethod(deviceListeningService, "createSnmpDeviceListener");
+		ReflectionTestUtils.invokeMethod(deviceListenerService, "createSnmpDeviceListener");
 
 		securityModel = SecurityModels.getInstance().getSecurityModel(modeID);
 		assertNotNull(securityModel);
@@ -175,7 +175,7 @@ public class DeviceListeningServiceTest {
 		gatewayDataProvider.getDeviceProtocolMap().put("snmp-device", deviceMoWrapper);
 
 		// Action
-		ReflectionTestUtils.invokeMethod(deviceListeningService, "refreshCredentials");
+		ReflectionTestUtils.invokeMethod(deviceListenerService, "refreshCredentials");
 
 		SecurityModel securityModel = SecurityModels.getInstance().getSecurityModel(modeID);
 		assertNotNull(securityModel);
@@ -199,7 +199,7 @@ public class DeviceListeningServiceTest {
 		assertNull(securityModel);
 
 		// Action
-		ReflectionTestUtils.invokeMethod(deviceListeningService, "configureUserSecurityModel");
+		ReflectionTestUtils.invokeMethod(deviceListenerService, "configureUserSecurityModel");
 
 		securityModel = SecurityModels.getInstance().getSecurityModel(modeID);
 		assertNotNull(securityModel);
@@ -213,14 +213,14 @@ public class DeviceListeningServiceTest {
 	public void shouldConfigureTcpTransportMappingForTcp() {
 		when(snmpProperties.getTrapListenerProtocol()).thenReturn("tcp");
 
-		assertNull(deviceListeningService.snmp);
+		assertNull(deviceListenerService.snmp);
 
 		// Action
-		ReflectionTestUtils.invokeMethod(deviceListeningService, "createSnmpDeviceListener");
+		ReflectionTestUtils.invokeMethod(deviceListenerService, "createSnmpDeviceListener");
 
-		assertNotNull(deviceListeningService.snmp);
+		assertNotNull(deviceListenerService.snmp);
 
-		Collection<TransportMapping> mappings = deviceListeningService.snmp.getMessageDispatcher().getTransportMappings();
+		Collection<TransportMapping> mappings = deviceListenerService.snmp.getMessageDispatcher().getTransportMappings();
 		assertNotNull(mappings);
 		assertEquals(1, mappings.size());
 
@@ -234,14 +234,14 @@ public class DeviceListeningServiceTest {
 	public void shouldConfigureUdpTransportMappingForUdp() {
 		when(snmpProperties.getTrapListenerProtocol()).thenReturn("udp");
 
-		assertNull(deviceListeningService.snmp);
+		assertNull(deviceListenerService.snmp);
 
 		// Action
-		ReflectionTestUtils.invokeMethod(deviceListeningService, "createSnmpDeviceListener");
+		ReflectionTestUtils.invokeMethod(deviceListenerService, "createSnmpDeviceListener");
 
-		assertNotNull(deviceListeningService.snmp);
+		assertNotNull(deviceListenerService.snmp);
 
-		Collection<TransportMapping> mappings = deviceListeningService.snmp.getMessageDispatcher().getTransportMappings();
+		Collection<TransportMapping> mappings = deviceListenerService.snmp.getMessageDispatcher().getTransportMappings();
 		assertNotNull(mappings);
 		assertEquals(1, mappings.size());
 
@@ -256,9 +256,9 @@ public class DeviceListeningServiceTest {
 
 		// Action
 		try {
-			deviceListeningService.createTransportMapping("", 1010, "localhost");
+			deviceListenerService.createTransportMapping("", 1010, "localhost");
 		} catch (IOException e) {
-			assertNull(deviceListeningService.snmp);
+			assertNull(deviceListenerService.snmp);
 			assertTrue(checkLogExist(errorMsg));
 
 			throw e;
@@ -267,7 +267,7 @@ public class DeviceListeningServiceTest {
 
 	@After
 	public void tearDown() {
-		deviceListeningService.stop();
+		deviceListenerService.stop();
 
 		SecurityModels.getInstance().removeSecurityModel(modeID);
 

@@ -142,7 +142,7 @@ public class SnmpDevicePoller {
 			ScopedPDU scopedPDU = new ScopedPDU();
 
 			// By now, security model and user configuration is done in
-			// DeviceListeningService while handling BootstrapReadyEvent
+			// DeviceListenerService while handling BootstrapReadyEvent
 
 			if (deviceWrapper.getProperties().getAuth().getEngineId() != null) {
 				OctetString engineId = new OctetString(deviceWrapper.getProperties().getAuth().getEngineId());
