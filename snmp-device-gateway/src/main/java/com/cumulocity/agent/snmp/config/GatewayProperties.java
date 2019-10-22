@@ -8,8 +8,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 
-import javax.validation.constraints.Pattern;
-
 @Data
 @Configuration
 @PropertySources(value = {
@@ -39,7 +37,6 @@ public class GatewayProperties {
 	private boolean forcedBootstrap;
 
 	@Value("#{'${C8Y.baseURL:http://developers.cumulocity.com}'.trim()}")
-	@Pattern(regexp = "https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)")
 	private String baseUrl;
 
 	@Value("#{'${C8Y.forceInitialHost:true}'.trim()}")
@@ -88,7 +85,6 @@ public class GatewayProperties {
 
 		@Value("#{'${snmp.trapListener.threadPoolSize:30}'.trim()}")
 		private int trapListenerThreadPoolSize;
-
 
 		public boolean isTrapListenerProtocolUdp() {
 			return "UDP".equalsIgnoreCase(trapListenerProtocol);
