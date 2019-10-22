@@ -1,6 +1,6 @@
 #!flask/bin/python
 from flask import Flask, jsonify, request
-from hello_service import *
+from c8y_hservice import *
 
 app = Flask(__name__)
 
@@ -47,4 +47,3 @@ def get_authorization():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=80, debug=True)
-

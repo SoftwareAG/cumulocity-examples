@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!
 
 if ! command -v microservice ; then
     wget http://resources.cumulocity.com/examples/microservice
