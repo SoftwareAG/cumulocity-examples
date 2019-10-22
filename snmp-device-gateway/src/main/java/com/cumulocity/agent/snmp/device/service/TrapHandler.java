@@ -114,10 +114,10 @@ public class TrapHandler implements CommandResponder {
 		}
 
 		boolean isMappingFound = false;
-		Map<String, Register> oidMap = deviceProtocolWrapper.getOidMap();
+		Map<OID, Register> oidMap = deviceProtocolWrapper.getOidMap();
 
 		for (VariableBinding binding : pdu.getVariableBindings()) {
-			String oid = binding.getOid().toString();
+			OID oid = binding.getOid();
 			if (oidMap.containsKey(oid)) {
 				Register register = oidMap.get(oid);
 

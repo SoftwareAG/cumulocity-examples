@@ -117,7 +117,7 @@ public class DeviceListenerService {
 
 	protected void createSnmpDevicePoller() {
 		long newPollingRateInMinutes = gatewayDataProvider.getGatewayDevice().getSnmpCommunicationProperties()
-				.getPollingRateInMinutes();
+				.getPollingRate();
 
 		if (snmpDevicePoller != null && !snmpDevicePoller.isDone() && pollingRateInMinutes == newPollingRateInMinutes) {
 			return;

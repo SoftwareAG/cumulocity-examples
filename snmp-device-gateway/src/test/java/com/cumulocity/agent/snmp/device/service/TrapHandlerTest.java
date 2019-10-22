@@ -98,7 +98,7 @@ public class TrapHandlerTest {
 	
 	private Register register;
 	
-	private Map<String, Register> oidMap;
+	private Map<OID, Register> oidMap;
 	
 	private Map<String, DeviceProtocolManagedObjectWrapper> protocolMap;
 	
@@ -158,7 +158,7 @@ public class TrapHandlerTest {
 		register.setUnit("cm");
 
 		oidMap = new HashMap<>();
-		oidMap.put("1.3.6.1.4.868.2.4.1.1", register);
+		oidMap.put(new OID("1.3.6.1.4.868.2.4.1.1"), register);
 
 		Mockito.doReturn(variableBindings).when(pdu).getVariableBindings();
 

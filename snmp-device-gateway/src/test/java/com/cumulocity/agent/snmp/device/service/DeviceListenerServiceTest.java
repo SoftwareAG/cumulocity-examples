@@ -136,7 +136,7 @@ public class DeviceListenerServiceTest {
 		when(gatewayDataProvider.getDeviceProtocolMap()).thenReturn(Collections.emptyMap());
 		when(gatewayDataProvider.getGatewayDevice()).thenReturn(gatewayDeviceWrapper);
 		when(gatewayDeviceWrapper.getSnmpCommunicationProperties()).thenReturn(snmpCommunicationProperties);
-		when(snmpCommunicationProperties.getPollingRateInMinutes()).thenReturn(1L);
+		when(snmpCommunicationProperties.getPollingRate()).thenReturn(1L);
 
 		System.setSecurityManager(new NoExitSecurityManager());
 	}
@@ -339,7 +339,7 @@ public class DeviceListenerServiceTest {
 	@Test
 	public void shouldReconfigurePollingScheduledJobIfIntervalChanges() {
 		ReflectionTestUtils.setField(deviceListenerService, "pollingRateInMinutes", 1L);
-		when(snmpCommunicationProperties.getPollingRateInMinutes()).thenReturn(123L);
+		when(snmpCommunicationProperties.getPollingRate()).thenReturn(123L);
 
 		// Action
 		ReflectionTestUtils.invokeMethod(deviceListenerService, "onGatewayDataRefresh");
@@ -352,7 +352,7 @@ public class DeviceListenerServiceTest {
 	public void shouldNotReconfigurePollingScheduledJobIfIntervalIsSame() {
 		ReflectionTestUtils.setField(deviceListenerService, "snmpDevicePoller", snmpDevicePoller);
 		ReflectionTestUtils.setField(deviceListenerService, "pollingRateInMinutes", 1L);
-		when(snmpCommunicationProperties.getPollingRateInMinutes()).thenReturn(1L);
+		when(snmpCommunicationProperties.getPollingRate()).thenReturn(1L);
 		when(snmpDevicePoller.isDone()).thenReturn(false);
 
 		// Action

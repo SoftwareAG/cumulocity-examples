@@ -92,9 +92,9 @@ public class SnmpDevicePoller {
 	}
 
 	private String getProtocol() {
-		String protocol = "UDP";
-		if (deviceWrapper.getProperties().isTcp() || snmpProperties.isTrapListenerProtocolTcp()) {
-			protocol = deviceWrapper.getProperties().getProtocol().toUpperCase();
+		String protocol = DeviceManagedObjectWrapper.SnmpDeviceProperties.PROTOCOL_UDP;
+		if (deviceWrapper.getProperties().isProtocolTcp() || snmpProperties.isTrapListenerProtocolTcp()) {
+			protocol = DeviceManagedObjectWrapper.SnmpDeviceProperties.PROTOCOL_TCP;
 		}
 
 		return protocol;
