@@ -19,10 +19,12 @@
 
 package c8y.example.decoders.hex.util;
 
+import c8y.Position;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
+import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 
 @Getter
@@ -60,6 +62,13 @@ public class Message {
         batteryVoltage = byteBuffer.getShort();
         RSSI = ByteBuffer.wrap(new byte[]{0, msgBytes[12]}).getShort()*-1;
         SNR = ByteBuffer.wrap(new byte[]{0, msgBytes[13]}).getShort();
+    }
+
+    public Position getPosition(){
+        Position p = new Position();
+        p.setLat(BigDecimal.valueOf(latitude));
+        p.setLng(BigDecimal.valueOf(longtitude));
+        return p;
     }
 
      static byte[] toByteArray(String hexString){

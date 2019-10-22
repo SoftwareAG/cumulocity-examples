@@ -67,62 +67,69 @@ public class HexDecoderService implements DecoderService {
             return decoderResult.setAsFailed(e.getMessage());
         }
 
-        // Accelerometer Alarm
-        if (msg.isAccelerometerTriggered()) {
-            AlarmRepresentation accelerometerAlarm = new AlarmRepresentation();
-            accelerometerAlarm.setSource(ManagedObjects.asManagedObject(sourceDeviceId));
-            accelerometerAlarm.setType("c8y_AccelerometerAlarm");
-            accelerometerAlarm.setText("Transmission was triggered by accelerometer");
-            accelerometerAlarm.setSeverity(CumulocitySeverities.MAJOR.toString());
-            accelerometerAlarm.setDateTime(new DateTime());
-            decoderResult.addAlarm(accelerometerAlarm, false);
-        }
+        if (msg.isAccelerometerTriggered())
+            decoderResult.addAlarm(accelerometerAlarm(sourceDeviceId), false);
 
-        // Button Event
-        if (msg.isButtonPressed()) {
-            EventRepresentation buttonEvent = new EventRepresentation();
-            buttonEvent.setSource(ManagedObjects.asManagedObject(sourceDeviceId));
-            buttonEvent.setType("c8y_ButtonEvent");
-            buttonEvent.setText("Transmission was triggered by button press");
-            buttonEvent.setDateTime(new DateTime());
-            decoderResult.addEvent(buttonEvent, false);
-        }
+        if (msg.isButtonPressed())
+            decoderResult.addEvent(buttonEvent(sourceDeviceId), false);
 
+        Position pos = msg.getPosition();
+        decoderResult.addEvent(locationUpdateEvent(sourceDeviceId, pos), false);
+        inventoryApi.update(positionUpdate(sourceDeviceId, pos));
 
+        measurementApi.create(createMeasurement(sourceDeviceId, msg));
 
-        // Position Fragment
-        Position pos = new Position();
-        pos.setLat(BigDecimal.valueOf(msg.getLatitude()));
-        pos.setLng(BigDecimal.valueOf(msg.getLongtitude()));
+        log.debug("Finished decoding byte values");
+        return decoderResult;
 
-        // Location Update Event
+    }
+
+    private AlarmRepresentation accelerometerAlarm(GId sourceId){
+        AlarmRepresentation accelerometerAlarm = new AlarmRepresentation();
+        accelerometerAlarm.setSource(ManagedObjects.asManagedObject(sourceId));
+        accelerometerAlarm.setType("c8y_AccelerometerAlarm");
+        accelerometerAlarm.setText("Transmission was triggered by accelerometer");
+        accelerometerAlarm.setSeverity(CumulocitySeverities.MAJOR.toString());
+        accelerometerAlarm.setDateTime(new DateTime());
+        return accelerometerAlarm;
+    }
+
+    private EventRepresentation buttonEvent(GId sourceId) {
+        EventRepresentation buttonEvent = new EventRepresentation();
+        buttonEvent.setSource(ManagedObjects.asManagedObject(sourceId));
+        buttonEvent.setType("c8y_ButtonEvent");
+        buttonEvent.setText("Transmission was triggered by button press");
+        buttonEvent.setDateTime(new DateTime());
+        return buttonEvent;
+    }
+
+    private EventRepresentation locationUpdateEvent(GId sourceId, Position position) {
         EventRepresentation locationUpdateEvent = new EventRepresentation();
-        locationUpdateEvent.setSource(ManagedObjects.asManagedObject(sourceDeviceId));
+        locationUpdateEvent.setSource(ManagedObjects.asManagedObject(sourceId));
         locationUpdateEvent.setType("c8y_LocationUpdate");
         locationUpdateEvent.setText("Location updated");
         locationUpdateEvent.setDateTime(new DateTime());
-        locationUpdateEvent.set(pos);
-        decoderResult.addEvent(locationUpdateEvent, false);
+        locationUpdateEvent.set(position);
+        return locationUpdateEvent;
+    }
 
-        // Update Device Position
+    private ManagedObjectRepresentation positionUpdate(GId sourceId, Position position) {
         ManagedObjectRepresentation mo = new ManagedObjectRepresentation();
-        mo.setId(sourceDeviceId);
-        mo.set(pos);
-        inventoryApi.update(mo);
+        mo.setId(sourceId);
+        mo.set(position);
+        return mo;
+    }
 
-        // Send measurement
+    private Measurement createMeasurement(GId sourceId, Message msg) {
         Measurement m = new Measurement();
-        m.setSource(ManagedObjects.asManagedObject(sourceDeviceId));
+        m.setSource(ManagedObjects.asManagedObject(sourceId));
         m.setType("c8y_LoraDemonstratorTelemetry");
         m.setDateTime(new DateTime()); //1970-01-01T01:00:00.000+01:00
         m.set("c8y_Temperature.T.value", msg.getTemperature());
         m.set("c8y_Battery.voltage.value", msg.getBatteryVoltage());
         m.set("c8y_SignalStrength.RSSI.value", msg.getRSSI());
         m.set("c8y_SignalStrength.SNR.value", msg.getSNR());
-        measurementApi.create(m);
-
-        log.debug("Finished decoding byte values");
-        return decoderResult;
-
+        return m;
     }
+
 }
