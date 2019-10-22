@@ -1,4 +1,3 @@
-
 import urllib.request, json, base64
 import os
 from datetime import datetime, date, time

@@ -1,20 +1,21 @@
-### Building application
+### Build the application
 
-Building requires installed and running docker.
+Building requires a local Docker installation.
 
-To build .zip package simply run:
+To build a ZIP package simply execute:
     
-    ./build.sh
-    
-This will use our ["microservice"](https://www.cumulocity.com/guides/reference/microservice-package/) script to create docker image, add manifest file `cumulocity.json`, and pack them together as microservice application "hello-microservice.zip", which is ready to upload into cumulocity platform. 
+```shell
+$ ./build.sh
+```
+  
+This will use our [microservice script](https://www.cumulocity.com/guides/reference/microservice-package/) to create a Docker image, add the manifest file *cumulocity.json* and pack them together as a microservice application "sample-microservice.zip", which is ready to be uploaded to the Cumulocity platform. 
 
-### Deploying application
+### Deploy the application
 
-To deploy packed microservice from console on running platform, use following command for "microservice" script:
+To deploy a packed microservice from employing the CLI, use the following command:
 
-    microservice deploy subscribe -n sample-microservice -d {url} -u {username} -p {password} -te {tenant}
+```shell
+$ microservice deploy subscribe -n sample-microservice -d <URL> -u <USERNAME> -p <PASSWORD> -te <TENANT_ID>
+```
 
-where `{url}` is base address of the platform, and `{username}` has form `{tenant}/{user}` (eg. `management/admin`). 
-
-Deploy can be also done manually using installed cumulocity UI.
-
+where `<URL>` is your tenant domain and the rest are your Cumulocity credentials.

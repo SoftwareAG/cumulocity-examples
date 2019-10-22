@@ -2,6 +2,7 @@ FROM python:alpine3.6
 
 COPY . /app
 WORKDIR /app
-RUN pip install -r requirements
+RUN pip install flask==0.10.1
+
 ENTRYPOINT ["python"]
 CMD ["application.py"]
