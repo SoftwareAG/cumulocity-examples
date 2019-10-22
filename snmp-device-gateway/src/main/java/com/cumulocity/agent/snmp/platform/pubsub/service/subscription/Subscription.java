@@ -46,7 +46,7 @@ public abstract class Subscription implements Runnable {
             }
         } catch(Throwable t) {
             // Throwable is caught to ensure that the scheduled subscription continues. This logged and ignored.
-            log.error("Unexpected error occurred while delivering messages from '{}' Queue to the '{}' Subscriber.", this.getClass().getSimpleName(), queue.getName(), t);
+            log.error("Unexpected error occurred while delivering messages from '{}' Queue to the '{}' Subscriber. Delivery will be retried.", this.getClass().getSimpleName(), queue.getName(), t);
         }
     }
 
