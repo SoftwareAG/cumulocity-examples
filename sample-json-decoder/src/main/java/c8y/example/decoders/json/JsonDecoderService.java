@@ -45,7 +45,7 @@ import java.util.Map;
 @Slf4j
 public class JsonDecoderService implements DecoderService {
 
-    private final static HashMap<String, String> mapping = new HashMap<>();
+    public final static HashMap<String, String> mapping = new HashMap<>();
     static {
         mapping.put("totalActiveEnergy",            "c8y_TotalEnergy.Active.value");
         mapping.put("totalForwardActiveEnergy",     "c8y_TotalEnergy.forwardActive.value");
@@ -111,9 +111,7 @@ public class JsonDecoderService implements DecoderService {
             m.set(entry.getValue(), values.get(entry.getKey()));
         measurementApi.create(m);
 
-
         log.debug("Finished decoding byte values");
         return decoderResult;
-
     }
 }

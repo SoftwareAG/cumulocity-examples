@@ -36,8 +36,13 @@ import org.springframework.web.bind.annotation.*;
 public class JsonDecoder {
 
 
+
+    private final JsonDecoderService jsonDecoderService;
+
     @Autowired
-    JsonDecoderService jsonDecoderService;
+    public JsonDecoder(JsonDecoderService jsonDecoderService){
+        this.jsonDecoderService = jsonDecoderService;
+    }
 
     public static void main(String[] args) {
         SpringApplication.run(JsonDecoder.class,args);
@@ -46,7 +51,7 @@ public class JsonDecoder {
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public DecoderResult decodeWithJSONInput(@RequestBody DecoderInputData inputData) throws DecoderServiceException {
+    public DecoderResult decodeWithJSONInput(@RequestBody DecoderInputData inputData) {
         return jsonDecoderService.decode(inputData.getValue(), GId.asGId(inputData.getSourceDeviceId()), inputData.getArgs());
     }
 

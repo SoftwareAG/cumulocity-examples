@@ -48,4 +48,16 @@ public class Measurement extends MeasurementRepresentation {
         level.put(segments[segments.length-1], value);
     }
 
+    public Object get(String path) {
+        String[] segments = path.split("\\.");
+        Object level = super.get(segments[0]);
+
+        for (int i = 1; i < segments.length; i++) {
+            level = ((HashMap<String, Object>) level).get(segments[i]);
+            if (level == null)
+                return null;
+        }
+        return level;
+    }
+
 }
