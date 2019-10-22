@@ -178,26 +178,39 @@ public class GatewayDataProvider {
 	 */
 	private void subscribeForOperationsOnGateway() {
 		if(subscriberForOperationsOnGateway != null) {
-			subscriberForOperationsOnGateway.disconnect();
-			subscriberForOperationsOnGateway = null;
+			return;
 		}
 
-		subscriberForOperationsOnGateway = deviceControlApi.getNotificationsSubscriber();
-		subscriberForOperationsOnGateway.subscribe(gatewayDevice.getId(), new SubscriptionListener<GId, OperationRepresentation>() {
-			@Override
-			public void onNotification(Subscription<GId> subscription, OperationRepresentation operation) {
-				if(gatewayDevice.getId().equals(subscription.getObject())) {
-					eventPublisher.publishEvent(new OperationExecutedOnGatewayEvent(gatewayDevice.getId(), gatewayDevice.getName(), operation));
-				}
-				else {
-					log.debug("Agent {}, with device id {}, received a notification which is meant for device id {}", gatewayDevice.getName(), gatewayDevice.getId().getValue(), subscription.getObject().getValue());
-				}
-			}
+		try {
+			subscriberForOperationsOnGateway = deviceControlApi.getNotificationsSubscriber();
+			subscriberForOperationsOnGateway.subscribe(gatewayDevice.getId(), new SubscriptionListener<GId, OperationRepresentation>() {
+				@Override
+				public void onNotification(Subscription<GId> subscription, OperationRepresentation operation) {
+					if(gatewayDevice.getId().equals(subscription.getObject())) {
+						log.debug("Device '{}', with id '{}', received notification.",
+								gatewayDevice.getName(), gatewayDevice.getId().getValue(), subscription.getObject().getValue());
 
-			@Override
-			public void onError(Subscription<GId> subscription, Throwable throwable) {
-				log.error("Error occurred while listening to Operations on the device with name: {} and ID: {}", gatewayDevice.getName(), gatewayDevice.getId().getValue(), throwable);
-			}
-		});
+						eventPublisher.publishEvent(new OperationExecutedOnGatewayEvent(gatewayDevice.getId(), gatewayDevice.getName(), operation));
+					}
+					else {
+						log.debug("Device '{}', with id '{}', received a notification which is meant for device with id '{}'.",
+								gatewayDevice.getName(), gatewayDevice.getId().getValue(), subscription.getObject().getValue());
+					}
+				}
+
+				@Override
+				public void onError(Subscription<GId> subscription, Throwable throwable) {
+					log.error("Error occurred while listening to operations on the device with name '{}' and id '{}'.",
+							gatewayDevice.getName(), gatewayDevice.getId().getValue(), throwable);
+				}
+			});
+		} catch(Throwable t) {
+			subscriberForOperationsOnGateway = null;
+
+			// Ignore this exception and continue as the subscription will be retired when the Gateway data is refreshed next time.
+			log.warn("Couldn't enable the subscription for listening to operations on the device with name '{}' and id '{}'." +
+					" This subscription will be retired later.", gatewayDevice.getName(), gatewayDevice.getId().getValue());
+			log.debug(t.getMessage(), t);
+		}
 	}
 }

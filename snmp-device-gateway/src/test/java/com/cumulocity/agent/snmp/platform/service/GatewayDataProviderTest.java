@@ -78,13 +78,12 @@ public class GatewayDataProviderTest {
 
 		when(properties.getGatewayObjectRefreshIntervalInMinutes()).thenReturn(2);
 		when(inventoryApi.get(any())).thenReturn(gatewayDeviceMo);
-		when(deviceControlApi.getNotificationsSubscriber()).thenReturn(operationNotificationSubscriber);
 
 		gatewayDataProvider.updateGatewayObjects(gatewayDeviceMo);
 
 		verify(gatewayDataProvider, times(1)).scheduleGatewayDataRefresh();
 		verify(taskScheduler).scheduleWithFixedDelay(any(Runnable.class), eq(Duration.ofMinutes(2)));
-		verify(operationNotificationSubscriber).subscribe(eq(gatewayDataProvider.getGatewayDevice().getId()), any(SubscriptionListener.class));
+		verify(operationNotificationSubscriber, times(0)).subscribe(eq(gatewayDataProvider.getGatewayDevice().getId()), any(SubscriptionListener.class));
 	}
 
 	@Test
@@ -120,7 +119,6 @@ public class GatewayDataProviderTest {
 		when(inventoryApi.get(new GId("child-device"))).thenReturn(childDeviceMo);
 		when(inventoryApi.get(new GId("device-protocol"))).thenReturn(deviceProtocolMo);
 		when(properties.getGatewayObjectRefreshIntervalInMinutes()).thenReturn(1);
-		when(deviceControlApi.getNotificationsSubscriber()).thenReturn(operationNotificationSubscriber);
 
 		assertNull(gatewayDataProvider.getGatewayDevice());
 		assertEquals(gatewayDataProvider.getDeviceProtocolMap().size(), 0);
@@ -129,7 +127,7 @@ public class GatewayDataProviderTest {
 
 		assertNotNull(gatewayDataProvider.getGatewayDevice());
 		assertEquals(gatewayDataProvider.getDeviceProtocolMap().size(), 1);
-		verify(operationNotificationSubscriber).subscribe(eq(gatewayDataProvider.getGatewayDevice().getId()), any(SubscriptionListener.class));
+		verify(operationNotificationSubscriber, times(0)).subscribe(eq(gatewayDataProvider.getGatewayDevice().getId()), any(SubscriptionListener.class));
 	}
 
 	@Test
@@ -163,7 +161,6 @@ public class GatewayDataProviderTest {
 		when(inventoryApi.get(new GId("device-protocol")))
 				.thenThrow(new SDKException(HttpStatus.SC_NOT_FOUND, "Object Not found"));
 		when(properties.getGatewayObjectRefreshIntervalInMinutes()).thenReturn(1);
-		when(deviceControlApi.getNotificationsSubscriber()).thenReturn(operationNotificationSubscriber);
 
 		assertNull(gatewayDataProvider.getGatewayDevice());
 		assertEquals(gatewayDataProvider.getDeviceProtocolMap().size(), 0);
@@ -172,7 +169,7 @@ public class GatewayDataProviderTest {
 
 		assertEquals(1, gatewayDataProvider.getDeviceProtocolMap().size());
 		assertNull(gatewayDataProvider.getProtocolMap().get("device-protocol"));
-		verify(operationNotificationSubscriber).subscribe(eq(gatewayDataProvider.getGatewayDevice().getId()), any(SubscriptionListener.class));
+		verify(operationNotificationSubscriber, times(0)).subscribe(eq(gatewayDataProvider.getGatewayDevice().getId()), any(SubscriptionListener.class));
 	}
 
 	@Test(timeout = 5000L)
