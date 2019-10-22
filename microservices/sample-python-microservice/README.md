@@ -16,6 +16,6 @@ To deploy a packed microservice from employing the CLI, use the following comman
 
 ```shell
 $ microservice deploy subscribe -n sample-microservice -d <URL> -u <USERNAME> -p <PASSWORD> -te <TENANT_ID>
-````
+```
 
 where `<URL>` is your tenant domain and the rest are your Cumulocity credentials.
