@@ -135,12 +135,12 @@ public class GatewayDataProviderTest {
 		when(deviceControlApi.getNotificationsSubscriber()).thenReturn(operationNotificationSubscriberMock);
 
 		assertNull(gatewayDataProvider.getGatewayDevice());
-		assertEquals(gatewayDataProvider.getDeviceProtocolMap().size(), 0);
+		assertEquals(gatewayDataProvider.getSnmpDeviceMap().size(), 0);
 
 		gatewayDataProvider.updateGatewayObjects(gatewayDeviceMo);
 
 		assertNotNull(gatewayDataProvider.getGatewayDevice());
-		assertEquals(gatewayDataProvider.getDeviceProtocolMap().size(), 1);
+		assertEquals(gatewayDataProvider.getSnmpDeviceMap().size(), 1);
 
 		verify(operationNotificationSubscriberMock, times(1)).subscribe(eq(gatewayDataProvider.getGatewayDevice().getId()), any(SubscriptionListener.class));
 		assertNotNull(ReflectionTestUtils.getField(gatewayDataProvider, "subscriberForOperationsOnGateway"));
@@ -182,11 +182,11 @@ public class GatewayDataProviderTest {
 		when(deviceControlApi.getNotificationsSubscriber()).thenReturn(operationNotificationSubscriberMock);
 
 		assertNull(gatewayDataProvider.getGatewayDevice());
-		assertEquals(gatewayDataProvider.getDeviceProtocolMap().size(), 0);
+		assertEquals(gatewayDataProvider.getSnmpDeviceMap().size(), 0);
 
 		gatewayDataProvider.updateGatewayObjects(gatewayDeviceMo);
 
-		assertEquals(1, gatewayDataProvider.getDeviceProtocolMap().size());
+		assertEquals(1, gatewayDataProvider.getSnmpDeviceMap().size());
 		assertNull(gatewayDataProvider.getProtocolMap().get("device-protocol"));
 		verify(operationNotificationSubscriberMock, times(1)).subscribe(eq(gatewayDataProvider.getGatewayDevice().getId()), any(SubscriptionListener.class));
 		assertNotNull(ReflectionTestUtils.getField(gatewayDataProvider, "subscriberForOperationsOnGateway"));

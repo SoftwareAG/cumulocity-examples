@@ -9,13 +9,16 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 public class ConcurrencyConfiguration {
 
 	@Autowired
-	private GatewayProperties.SnmpProperties snmpProperties;
+	private GatewayProperties gatewayProperties;
 
 	@Bean("taskScheduler")
 	public ThreadPoolTaskScheduler threadPoolTaskScheduler() {
+		int poolSize = gatewayProperties.getThreadPoolSizeForScheduledTasks();
+
 		ThreadPoolTaskScheduler threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
-		threadPoolTaskScheduler.setPoolSize(snmpProperties.getTrapListenerThreadPoolSize());
-		threadPoolTaskScheduler.setThreadNamePrefix("scheduler-");
+		threadPoolTaskScheduler.setPoolSize(poolSize);
+		threadPoolTaskScheduler.setThreadNamePrefix("snmp-scheduler-");
+
 		return threadPoolTaskScheduler;
 	}
 }

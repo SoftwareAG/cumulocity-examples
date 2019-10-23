@@ -10,6 +10,7 @@ import com.cumulocity.agent.snmp.platform.model.GatewayManagedObjectWrapper;
 import com.cumulocity.agent.snmp.platform.service.GatewayDataProvider;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
+import lombok.Getter;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,10 +49,13 @@ import static org.mockito.Mockito.*;
 public class DeviceListenerServiceTest {
 
 	@Mock
-	TrapHandler trapHandler;
+	DeviceDataHandler deviceDataHandler;
 
 	@Mock
 	GatewayDataProvider gatewayDataProvider;
+
+	@Mock
+	GatewayProperties gatewayProperties;
 
 	@Mock
 	GatewayProperties.SnmpProperties snmpProperties;
@@ -64,7 +68,7 @@ public class DeviceListenerServiceTest {
 
 	@Mock
 	GatewayManagedObjectWrapper.SnmpCommunicationProperties snmpCommunicationProperties;
-	
+
 	@Mock
 	ScheduledFuture<?> snmpDevicePoller;
 
@@ -97,7 +101,7 @@ public class DeviceListenerServiceTest {
 	@Before
 	public void setup() {
 		listAppender = new ListAppender<>();
-		logger = (Logger)LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+		logger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
 		logger.addAppender(listAppender);
 		listAppender.start();
 
@@ -129,11 +133,10 @@ public class DeviceListenerServiceTest {
 		DeviceManagedObjectWrapper deviceMoWrapper = new DeviceManagedObjectWrapper(snmpDeviceMo);
 		deviceProtocolMap.put("snmp-device", deviceMoWrapper);
 
-		when(snmpProperties.getTrapListenerThreadPoolSize()).thenReturn(1);
 		when(snmpProperties.getTrapListenerAddress()).thenReturn("127.0.0.1");
 		when(snmpProperties.getTrapListenerPort()).thenReturn(161);
 		when(snmpProperties.getTrapListenerProtocol()).thenReturn("UDP");
-		when(gatewayDataProvider.getDeviceProtocolMap()).thenReturn(Collections.emptyMap());
+		when(gatewayDataProvider.getSnmpDeviceMap()).thenReturn(Collections.emptyMap());
 		when(gatewayDataProvider.getGatewayDevice()).thenReturn(gatewayDeviceWrapper);
 		when(gatewayDeviceWrapper.getSnmpCommunicationProperties()).thenReturn(snmpCommunicationProperties);
 		when(snmpCommunicationProperties.getPollingRate()).thenReturn(1L);
@@ -159,7 +162,7 @@ public class DeviceListenerServiceTest {
 	@Test
 	public void shouldAddUserToUSMForTheDevicesWithSnmpV3Version() {
 		when(snmpProperties.getTrapListenerProtocol()).thenReturn("udp");
-		when(gatewayDataProvider.getDeviceProtocolMap()).thenReturn(deviceProtocolMap);
+		when(gatewayDataProvider.getSnmpDeviceMap()).thenReturn(deviceProtocolMap);
 
 		SecurityModel securityModel = SecurityModels.getInstance().getSecurityModel(modeID);
 		assertNull(securityModel);
@@ -182,8 +185,6 @@ public class DeviceListenerServiceTest {
 
 	@Test(expected = ExitException.class)
 	public void shouldCreateSnmpDeviceListenerFailIfPortIsAlreadyInUse() {
-		when(snmpProperties.getTrapListenerThreadPoolSize()).thenReturn(1);
-		when(snmpProperties.getTrapListenerProtocol()).thenReturn("TCP");
 		when(snmpProperties.getTrapListenerAddress()).thenReturn("127.0.0.1");
 		when(snmpProperties.getTrapListenerPort()).thenReturn(162);
 
@@ -193,9 +194,10 @@ public class DeviceListenerServiceTest {
 		// Trying to listen on same port again
 		try {
 			ReflectionTestUtils.invokeMethod(deviceListenerService, "createSnmpDeviceListener");
-		} catch(ExitException ee) {
+		} catch (ExitException ee) {
 			checkLogExist("Failed to start listening to traps. Port 127.0.0.1/162 is already in use.");
-			checkLogExist("Update the 'snmp.trapListener.port' and 'snmp.trapListener.address' properties and restart the agent. Shutting down the agent...");
+			checkLogExist(
+					"Update the 'snmp.trapListener.port' and 'snmp.trapListener.address' properties and restart the agent. Shutting down the agent...");
 
 			throw ee;
 		}
@@ -203,15 +205,15 @@ public class DeviceListenerServiceTest {
 
 	@Test(expected = ExitException.class)
 	public void shouldCreateSnmpDeviceListenerFailIfBindingAddressIsInvalid() {
-		when(snmpProperties.getTrapListenerThreadPoolSize()).thenReturn(1);
 		when(snmpProperties.getTrapListenerAddress()).thenReturn("localhost");
 
 		// Action
 		try {
 			ReflectionTestUtils.invokeMethod(deviceListenerService, "createSnmpDeviceListener");
-		} catch(ExitException ee) {
+		} catch (ExitException ee) {
 			checkLogExist("Failed to start listening to traps on port 127.0.0.1/162.");
-			checkLogExist("Update the 'snmp.trapListener.port' and 'snmp.trapListener.address' properties and restart the agent. Shutting down the agent...");
+			checkLogExist(
+					"Update the 'snmp.trapListener.port' and 'snmp.trapListener.address' properties and restart the agent. Shutting down the agent...");
 
 			throw ee;
 		}
@@ -225,7 +227,7 @@ public class DeviceListenerServiceTest {
 		// Changing SNMP version to 1 for the same device
 		SnmpDeviceProperties.put("version", 1);
 		DeviceManagedObjectWrapper deviceMoWrapper = new DeviceManagedObjectWrapper(snmpDeviceMo);
-		gatewayDataProvider.getDeviceProtocolMap().put("snmp-device", deviceMoWrapper);
+		gatewayDataProvider.getSnmpDeviceMap().put("snmp-device", deviceMoWrapper);
 
 		// Action
 		ReflectionTestUtils.invokeMethod(deviceListenerService, "onGatewayDataRefresh");
@@ -246,7 +248,7 @@ public class DeviceListenerServiceTest {
 		DeviceManagedObjectWrapper deviceMoWrapper = new DeviceManagedObjectWrapper(snmpDeviceMo);
 		deviceProtocolMap.put("snmp-device", deviceMoWrapper);
 
-		when(gatewayDataProvider.getDeviceProtocolMap()).thenReturn(deviceProtocolMap);
+		when(gatewayDataProvider.getSnmpDeviceMap()).thenReturn(deviceProtocolMap);
 
 		SecurityModel securityModel = SecurityModels.getInstance().getSecurityModel(modeID);
 		assertNull(securityModel);
@@ -388,6 +390,9 @@ public class DeviceListenerServiceTest {
 	}
 
 	private static class ExitException extends SecurityException {
+		private static final long serialVersionUID = 1L;
+
+		@Getter
 		final int status;
 
 		ExitException(int status) {

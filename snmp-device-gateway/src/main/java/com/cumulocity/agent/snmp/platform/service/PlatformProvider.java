@@ -27,8 +27,6 @@ public class PlatformProvider implements InitializingBean {
 
 	private final GatewayProperties gatewayProperties;
 
-	private final GatewayProperties.SnmpProperties snmpProperties;
-
     private final TaskScheduler taskScheduler;
 
     private final ApplicationEventPublisher eventPublisher;
@@ -56,7 +54,8 @@ public class PlatformProvider implements InitializingBean {
 		CumulocityBasicCredentials credentials = CumulocityBasicCredentials.builder()
 				.tenantId(gatewayProperties.getBootstrapProperties().getTenantId())
 				.username(gatewayProperties.getBootstrapProperties().getUsername())
-				.password(gatewayProperties.getBootstrapProperties().getPassword()).build();
+				.password(gatewayProperties.getBootstrapProperties().getPassword())
+				.build();
 		bootstrapPlatform = createPlatform(credentials);
 	}
 
@@ -115,8 +114,11 @@ public class PlatformProvider implements InitializingBean {
     }
 
     private Platform createPlatform(CumulocityBasicCredentials credentials) {
-		return PlatformBuilder.platform().withBaseUrl(gatewayProperties.getBaseUrl())
-				.withForceInitialHost(gatewayProperties.isForceInitialHost()).withCredentials(credentials).build();
+		return PlatformBuilder.platform()
+				.withBaseUrl(gatewayProperties.getBaseUrl())
+				.withForceInitialHost(gatewayProperties.isForceInitialHost())
+				.withCredentials(credentials)
+				.build();
 	}
 
 	private void configurePlatform(PlatformImpl platform) {
@@ -142,9 +144,13 @@ public class PlatformProvider implements InitializingBean {
                 }
         );
 
-        int trapListenerThreadPoolSize = snmpProperties.getTrapListenerThreadPoolSize();
-        platform.setHttpClientConfig(HttpClientConfig.httpConfig()
-                .pool(ConnectionPoolConfig.connectionPool().enabled(true).max(trapListenerThreadPoolSize).perHost(trapListenerThreadPoolSize).build())
-                .build());
+        int noOfConcurrentScheduledTasks = gatewayProperties.getThreadPoolSizeForScheduledTasks();
+        ConnectionPoolConfig connectionPool = ConnectionPoolConfig.connectionPool()
+        		.max(noOfConcurrentScheduledTasks)
+        		.perHost(noOfConcurrentScheduledTasks)
+        		.enabled(true)
+        		.build();
+        HttpClientConfig clientConfig = HttpClientConfig.httpConfig().pool(connectionPool).build();
+        platform.setHttpClientConfig(clientConfig);
 	}
 }

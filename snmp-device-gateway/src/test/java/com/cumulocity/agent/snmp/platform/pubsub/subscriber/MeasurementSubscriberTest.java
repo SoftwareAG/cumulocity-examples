@@ -26,7 +26,7 @@ public class MeasurementSubscriberTest {
     private static final List<String> JSON_STRINGS = Arrays.asList("Message 1", "Message 2");
 
     @Mock
-    private GatewayProperties.SnmpProperties snmpProperties;
+    private GatewayProperties gatewayProperties;
 
     @Mock
     private GatewayDataProvider gatewayDataProvider;
@@ -65,7 +65,7 @@ public class MeasurementSubscriberTest {
 
         int schedularPoolSize = 1;
 
-        Mockito.when(snmpProperties.getTrapListenerThreadPoolSize()).thenReturn(schedularPoolSize);
+        Mockito.when(gatewayProperties.getGatewayThreadPoolSize()).thenReturn(schedularPoolSize);
 
         assertEquals(3, measurementSubscriber.getConcurrentSubscriptionsCount());
     }
@@ -75,7 +75,7 @@ public class MeasurementSubscriberTest {
 
         int schedularPoolSize = 10;
 
-        Mockito.when(snmpProperties.getTrapListenerThreadPoolSize()).thenReturn(schedularPoolSize);
+        Mockito.when(gatewayProperties.getGatewayThreadPoolSize()).thenReturn(schedularPoolSize);
 
         assertEquals((schedularPoolSize * 30/100), measurementSubscriber.getConcurrentSubscriptionsCount());
     }
@@ -85,7 +85,7 @@ public class MeasurementSubscriberTest {
 
         int schedularPoolSize = 101;
 
-        Mockito.when(snmpProperties.getTrapListenerThreadPoolSize()).thenReturn(schedularPoolSize);
+        Mockito.when(gatewayProperties.getGatewayThreadPoolSize()).thenReturn(schedularPoolSize);
 
         assertEquals((schedularPoolSize * 30/100), measurementSubscriber.getConcurrentSubscriptionsCount());
     }

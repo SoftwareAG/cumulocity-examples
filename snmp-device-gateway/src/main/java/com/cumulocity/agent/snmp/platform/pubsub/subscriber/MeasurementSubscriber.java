@@ -12,7 +12,7 @@ import java.util.Collection;
 public class MeasurementSubscriber extends Subscriber<MeasurementPubSub> {
 
     @Autowired
-    private GatewayProperties.SnmpProperties snmpProperties;
+    private GatewayProperties gatewayProperties;
 
     @Autowired
     private MeasurementApi measurementApi;
@@ -24,8 +24,8 @@ public class MeasurementSubscriber extends Subscriber<MeasurementPubSub> {
 
     @Override
     public int getConcurrentSubscriptionsCount() {
-        // 30% of the total threads available for scheduler
-        int count = snmpProperties.getTrapListenerThreadPoolSize() * 30 / 100;
+        // 30% of the total threads available for gateway
+        int count = gatewayProperties.getGatewayThreadPoolSize() * 30 / 100;
 
         return (count <= 0)? 3 : count;
     }

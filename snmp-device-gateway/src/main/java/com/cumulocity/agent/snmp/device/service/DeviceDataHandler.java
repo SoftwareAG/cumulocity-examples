@@ -22,7 +22,7 @@ import java.util.Map;
 
 @Slf4j
 @Component
-public class TrapHandler implements CommandResponder {
+public class DeviceDataHandler implements CommandResponder {
 
 	/**
 	 * SNMP constants used during resolving Opaque variable
@@ -61,7 +61,7 @@ public class TrapHandler implements CommandResponder {
 			return;
 		}
 
-		if (!dataProvider.getDeviceProtocolMap().containsKey(deviceIp)) {
+		if (!dataProvider.getSnmpDeviceMap().containsKey(deviceIp)) {
 			log.error("Trap received from an unknown device with IP address : {}", deviceIp);
 			handleUnknownDevice(deviceIp);
 			return;
@@ -102,7 +102,7 @@ public class TrapHandler implements CommandResponder {
 			return;
 		}
 
-		Map<String, DeviceManagedObjectWrapper> deviceProtocolMap = dataProvider.getDeviceProtocolMap();
+		Map<String, DeviceManagedObjectWrapper> deviceProtocolMap = dataProvider.getSnmpDeviceMap();
 		DeviceManagedObjectWrapper deviceMo = deviceProtocolMap.get(deviceIp);
 		String deviceProtocol = deviceMo.getDeviceProtocol();
 		DeviceProtocolManagedObjectWrapper deviceProtocolWrapper = dataProvider.getProtocolMap().get(deviceProtocol);
