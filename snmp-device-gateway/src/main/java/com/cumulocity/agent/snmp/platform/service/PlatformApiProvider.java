@@ -11,10 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
-import org.springframework.context.annotation.ScopedProxyMode;
-
-import static org.springframework.beans.factory.config.BeanDefinition.SCOPE_PROTOTYPE;
 
 @Configuration
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -23,43 +19,36 @@ public class PlatformApiProvider {
 	private final PlatformProvider platformProvider;
 
 	@Bean
-	@Scope(scopeName = SCOPE_PROTOTYPE, proxyMode = ScopedProxyMode.TARGET_CLASS)
 	public IdentityApi identityApi() {
 		return platformProvider.getPlatform().getIdentityApi();
 	}
 
 	@Bean
-	@Scope(scopeName = SCOPE_PROTOTYPE, proxyMode = ScopedProxyMode.TARGET_CLASS)
 	public InventoryApi inventoryApi() {
 		return platformProvider.getPlatform().getInventoryApi();
 	}
 
 	@Bean
-	@Scope(scopeName = SCOPE_PROTOTYPE, proxyMode = ScopedProxyMode.TARGET_CLASS)
 	public DeviceControlApi deviceControlApi() {
 		return platformProvider.getPlatform().getDeviceControlApi();
 	}
 
 	@Bean
-	@Scope(scopeName = SCOPE_PROTOTYPE, proxyMode = ScopedProxyMode.TARGET_CLASS)
 	public RestOperations restOperations() {
 		return platformProvider.getPlatform().rest();
 	}
 
 	@Bean
-	@Scope(scopeName = SCOPE_PROTOTYPE, proxyMode = ScopedProxyMode.TARGET_CLASS)
 	public AlarmApi alarmApi() {
 		return platformProvider.getPlatform().getAlarmApi();
 	}
 
 	@Bean
-	@Scope(scopeName = SCOPE_PROTOTYPE, proxyMode = ScopedProxyMode.TARGET_CLASS)
 	public EventApi eventApi() {
 		return platformProvider.getPlatform().getEventApi();
 	}
 
 	@Bean
-	@Scope(scopeName = SCOPE_PROTOTYPE, proxyMode = ScopedProxyMode.TARGET_CLASS)
 	public MeasurementApi measurementApi() {
 		return platformProvider.getPlatform().getMeasurementApi();
 	}
