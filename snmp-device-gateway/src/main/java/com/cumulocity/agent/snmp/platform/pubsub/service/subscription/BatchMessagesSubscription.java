@@ -1,5 +1,6 @@
 package com.cumulocity.agent.snmp.platform.pubsub.service.subscription;
 
+import com.cumulocity.agent.snmp.exception.BatchNotSupportedException;
 import com.cumulocity.agent.snmp.persistence.Queue;
 import com.cumulocity.agent.snmp.platform.pubsub.subscriber.Subscriber;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +19,13 @@ public class BatchMessagesSubscription extends Subscription {
     protected boolean deliver() {
         boolean continueDelivering = false;
 
-        int batchSize = getSubscriber().getBatchSize();
+        int batchSize;
+		try {
+			batchSize = getSubscriber().getBatchSize();
+		} catch (BatchNotSupportedException e) {
+			log.error("Batching is not supported for {}", getSubscriber().getClass().getSimpleName(), e);
+			return false;
+		}
 
         Collection<String> messagesFromQueue = new ArrayList<>(batchSize);
         int size = getQueue().drainTo(messagesFromQueue, batchSize);

@@ -1,21 +1,30 @@
 package com.cumulocity.agent.snmp.platform.pubsub.subscriber;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+
 import com.cumulocity.agent.snmp.config.GatewayProperties;
+import com.cumulocity.agent.snmp.exception.BatchNotSupportedException;
 import com.cumulocity.agent.snmp.platform.model.GatewayManagedObjectWrapper;
 import com.cumulocity.agent.snmp.platform.pubsub.service.EventPubSub;
 import com.cumulocity.agent.snmp.platform.service.GatewayDataProvider;
 import com.cumulocity.agent.snmp.platform.service.PlatformProvider;
 import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.event.EventApi;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
-
-import static org.junit.Assert.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EventSubscriberTest {
@@ -44,14 +53,20 @@ public class EventSubscriberTest {
     @InjectMocks
     private EventSubscriber eventSubscriber;
 
+    private ArgumentCaptor<EventSubscriber.EventRepresentation> eventRepresentationCaptor;
+
+    @Before
+    public void setup() {
+    	eventRepresentationCaptor = ArgumentCaptor.forClass(EventSubscriber.EventRepresentation.class);
+    }
 
     @Test
     public void shouldGetBatchingSupportedAsFalse() {
         assertFalse(eventSubscriber.isBatchingSupported());
     }
 
-    @Test
-    public void shouldGetDefaultBatchSize() {
+    @Test(expected = BatchNotSupportedException.class)
+    public void shouldFailWithAnExceptionIfBatchingIsTriedForEvents() throws BatchNotSupportedException {
         assertEquals(200, eventSubscriber.getBatchSize());
     }
 
@@ -60,7 +75,7 @@ public class EventSubscriberTest {
 
         int gatewayThreadPoolSize = 1;
 
-        Mockito.when(gatewayProperties.getGatewayThreadPoolSize()).thenReturn(gatewayThreadPoolSize);
+        when(gatewayProperties.getGatewayThreadPoolSize()).thenReturn(gatewayThreadPoolSize);
 
         assertEquals(1, eventSubscriber.getConcurrentSubscriptionsCount());
     }
@@ -70,7 +85,7 @@ public class EventSubscriberTest {
 
         int gatewayThreadPoolSize = 10;
 
-        Mockito.when(gatewayProperties.getGatewayThreadPoolSize()).thenReturn(gatewayThreadPoolSize);
+        when(gatewayProperties.getGatewayThreadPoolSize()).thenReturn(gatewayThreadPoolSize);
 
         assertEquals((gatewayThreadPoolSize * 10/100), eventSubscriber.getConcurrentSubscriptionsCount());
     }
@@ -80,20 +95,18 @@ public class EventSubscriberTest {
 
         int schedularPoolSize = 101;
 
-        Mockito.when(gatewayProperties.getGatewayThreadPoolSize()).thenReturn(schedularPoolSize);
+        when(gatewayProperties.getGatewayThreadPoolSize()).thenReturn(schedularPoolSize);
 
         assertEquals((schedularPoolSize * 10/100), eventSubscriber.getConcurrentSubscriptionsCount());
     }
 
     @Test
     public void shouldHandleMessageSuccessfully() {
-        ArgumentCaptor<EventSubscriber.EventRepresentation> eventRepresentationCaptor = ArgumentCaptor.forClass(EventSubscriber.EventRepresentation.class);
-
-        Mockito.when(eventApi.create(Mockito.any(EventSubscriber.EventRepresentation.class))).thenReturn(null);
+        when(eventApi.create(any(EventSubscriber.EventRepresentation.class))).thenReturn(null);
 
         eventSubscriber.handleMessage("SOME STRING");
 
-        Mockito.verify(eventApi).create(eventRepresentationCaptor.capture());
+        verify(eventApi).create(eventRepresentationCaptor.capture());
 
         assertEquals("SOME STRING", eventRepresentationCaptor.getValue().toJSON());
     }
@@ -101,7 +114,8 @@ public class EventSubscriberTest {
     @Test(expected = SDKException.class)
     public void should_HandleMessage_RethrowSDKException_whenEventApiThrowsSDKException() {
         SDKException sdkException = new SDKException(500, "SOME ERROR MESSAGE");
-        Mockito.when(eventApi.create(Mockito.any(EventSubscriber.EventRepresentation.class))).thenThrow(sdkException);
+        
+        when(eventApi.create(any(EventSubscriber.EventRepresentation.class))).thenThrow(sdkException);
 
         eventSubscriber.handleMessage("SOME STRING");
     }
@@ -113,9 +127,7 @@ public class EventSubscriberTest {
 
     @Test
     public void should_onMessage_Successfully() {
-        ArgumentCaptor<EventSubscriber.EventRepresentation> eventRepresentationCaptor = ArgumentCaptor.forClass(EventSubscriber.EventRepresentation.class);
-
-        Mockito.when(eventApi.create(Mockito.any(EventSubscriber.EventRepresentation.class))).thenReturn(null);
+        when(eventApi.create(any(EventSubscriber.EventRepresentation.class))).thenReturn(null);
 
         try {
             eventSubscriber.onMessage("SOME STRING");
@@ -124,30 +136,29 @@ public class EventSubscriberTest {
             fail(e.getMessage());
         }
 
-        Mockito.verify(eventApi).create(eventRepresentationCaptor.capture());
-
+        verify(eventApi).create(eventRepresentationCaptor.capture());
         assertEquals("SOME STRING", eventRepresentationCaptor.getValue().toJSON());
     }
 
     @Test(expected = SubscriberException.class)
     public void should_onMessage_whenEventApiThrowsSDKException() throws SubscriberException {
         SDKException sdkException = new SDKException(500, "SOME ERROR MESSAGE");
-        Mockito.when(eventApi.create(Mockito.any(EventSubscriber.EventRepresentation.class))).thenThrow(sdkException);
+
+        when(eventApi.create(any(EventSubscriber.EventRepresentation.class))).thenThrow(sdkException);
 
         try {
             eventSubscriber.onMessage("SOME STRING");
         } catch (SubscriberException ppe) {
-            Mockito.verify(platformProvider).markPlatfromAsUnavailable();
+            verify(platformProvider).markPlatfromAsUnavailable();
             throw ppe;
         }
     }
 
     @Test
     public void should_onMessage_whenEventApiThrowsSDKException_with_HTTPStatus_400() {
-        ArgumentCaptor<EventSubscriber.EventRepresentation> eventRepresentationCaptor = ArgumentCaptor.forClass(EventSubscriber.EventRepresentation.class);
-
         SDKException sdkException = new SDKException(400, "SOME ERROR MESSAGE");
-        Mockito.when(eventApi.create(Mockito.any(EventSubscriber.EventRepresentation.class))).thenThrow(sdkException);
+
+        when(eventApi.create(any(EventSubscriber.EventRepresentation.class))).thenThrow(sdkException);
 
         try {
             eventSubscriber.onMessage("SOME STRING");
@@ -156,17 +167,15 @@ public class EventSubscriberTest {
             fail(e.getMessage());
         }
 
-        Mockito.verify(eventApi).create(eventRepresentationCaptor.capture());
-
+        verify(eventApi).create(eventRepresentationCaptor.capture());
         assertEquals("SOME STRING", eventRepresentationCaptor.getValue().toJSON());
     }
 
     @Test
     public void should_onMessage_whenEventApiThrowsSDKException_with_HTTPStatus_404() {
-        ArgumentCaptor<EventSubscriber.EventRepresentation> eventRepresentationCaptor = ArgumentCaptor.forClass(EventSubscriber.EventRepresentation.class);
-
         SDKException sdkException = new SDKException(404, "SOME ERROR MESSAGE");
-        Mockito.when(eventApi.create(Mockito.any(EventSubscriber.EventRepresentation.class))).thenThrow(sdkException);
+
+        when(eventApi.create(any(EventSubscriber.EventRepresentation.class))).thenThrow(sdkException);
 
         try {
             eventSubscriber.onMessage("SOME STRING");
@@ -175,20 +184,20 @@ public class EventSubscriberTest {
             fail(e.getMessage());
         }
 
-        Mockito.verify(eventApi).create(eventRepresentationCaptor.capture());
-
+        verify(eventApi).create(eventRepresentationCaptor.capture());
         assertEquals("SOME STRING", eventRepresentationCaptor.getValue().toJSON());
     }
 
     @Test(expected = SubscriberException.class)
     public void should_onMessage_whenEventApiThrowsSDKException_with_HTTPStatus_401() throws SubscriberException {
         SDKException sdkException = new SDKException(401, "SOME ERROR MESSAGE");
-        Mockito.when(eventApi.create(Mockito.any(EventSubscriber.EventRepresentation.class))).thenThrow(sdkException);
+        
+        when(eventApi.create(any(EventSubscriber.EventRepresentation.class))).thenThrow(sdkException);
 
         try {
             eventSubscriber.onMessage("SOME STRING");
         } catch (SubscriberException ppe) {
-            Mockito.verify(platformProvider).markPlatfromAsUnavailable();
+            verify(platformProvider).markPlatfromAsUnavailable();
             throw ppe;
         }
     }
@@ -196,12 +205,13 @@ public class EventSubscriberTest {
     @Test(expected = SubscriberException.class)
     public void should_onMessage_whenEventApiThrowsSDKException_with_HTTPStatus_402() throws SubscriberException {
         SDKException sdkException = new SDKException(402, "SOME ERROR MESSAGE");
-        Mockito.when(eventApi.create(Mockito.any(EventSubscriber.EventRepresentation.class))).thenThrow(sdkException);
+
+        when(eventApi.create(any(EventSubscriber.EventRepresentation.class))).thenThrow(sdkException);
 
         try {
             eventSubscriber.onMessage("SOME STRING");
         } catch (SubscriberException ppe) {
-            Mockito.verify(platformProvider).markPlatfromAsUnavailable();
+            verify(platformProvider).markPlatfromAsUnavailable();
             throw ppe;
         }
     }
@@ -209,12 +219,13 @@ public class EventSubscriberTest {
     @Test(expected = SubscriberException.class)
     public void should_onMessage_whenEventApiThrowsSDKException_with_HTTPStatus_408() throws SubscriberException {
         SDKException sdkException = new SDKException(408, "SOME ERROR MESSAGE");
-        Mockito.when(eventApi.create(Mockito.any(EventSubscriber.EventRepresentation.class))).thenThrow(sdkException);
+
+        when(eventApi.create(any(EventSubscriber.EventRepresentation.class))).thenThrow(sdkException);
 
         try {
             eventSubscriber.onMessage("SOME STRING");
         } catch (SubscriberException ppe) {
-            Mockito.verify(platformProvider).markPlatfromAsUnavailable();
+            verify(platformProvider).markPlatfromAsUnavailable();
             throw ppe;
         }
     }
@@ -222,12 +233,13 @@ public class EventSubscriberTest {
     @Test(expected = SubscriberException.class)
     public void should_onMessage_whenEventApiThrowsSDKException_with_HTTPStatus_500() throws SubscriberException {
         SDKException sdkException = new SDKException(500, "SOME ERROR MESSAGE");
-        Mockito.when(eventApi.create(Mockito.any(EventSubscriber.EventRepresentation.class))).thenThrow(sdkException);
+
+        when(eventApi.create(any(EventSubscriber.EventRepresentation.class))).thenThrow(sdkException);
 
         try {
             eventSubscriber.onMessage("SOME STRING");
         } catch (SubscriberException ppe) {
-            Mockito.verify(platformProvider).markPlatfromAsUnavailable();
+            verify(platformProvider).markPlatfromAsUnavailable();
             throw ppe;
         }
     }
@@ -239,17 +251,18 @@ public class EventSubscriberTest {
 
     @Test
     public void should_subscribe_successfully() {
+        long expectedTransmitRate = 10L;
+
+        when(gatewayDataProvider.getGatewayDevice()).thenReturn(gatewayManagedObjectWrapper);
+        when(gatewayManagedObjectWrapper.getSnmpCommunicationProperties()).thenReturn(snmpCommunicationProperties);
+        when(snmpCommunicationProperties.getTransmitRate()).thenReturn(expectedTransmitRate);
+
         // Transmit rate is initialized with -1
         assertEquals(-1, eventSubscriber.getTransmitRateInSeconds());
 
-        long expectedTransmitRate = 10L;
-        Mockito.when(gatewayDataProvider.getGatewayDevice()).thenReturn(gatewayManagedObjectWrapper);
-        Mockito.when(gatewayManagedObjectWrapper.getSnmpCommunicationProperties()).thenReturn(snmpCommunicationProperties);
-        Mockito.when(snmpCommunicationProperties.getTransmitRate()).thenReturn(expectedTransmitRate);
-
         eventSubscriber.subscribe();
 
-        Mockito.verify(eventPubSub).subscribe(eventSubscriber);
+        verify(eventPubSub).subscribe(eventSubscriber);
         assertEquals(expectedTransmitRate, eventSubscriber.getTransmitRateInSeconds());
     }
 
@@ -260,7 +273,7 @@ public class EventSubscriberTest {
 
         eventSubscriber.unsubscribe();
 
-        Mockito.verify(eventPubSub).unsubscribe(eventSubscriber);
+        verify(eventPubSub).unsubscribe(eventSubscriber);
     }
 
     @Test
@@ -270,21 +283,20 @@ public class EventSubscriberTest {
 
         eventSubscriber.refreshSubscription();
 
-        Mockito.verifyZeroInteractions(gatewayDataProvider);
-        Mockito.verifyZeroInteractions(gatewayManagedObjectWrapper);
-        Mockito.verifyZeroInteractions(snmpCommunicationProperties);
-
-        Mockito.verifyZeroInteractions(eventPubSub);
+        verifyZeroInteractions(gatewayDataProvider);
+        verifyZeroInteractions(gatewayManagedObjectWrapper);
+        verifyZeroInteractions(snmpCommunicationProperties);
+        verifyZeroInteractions(eventPubSub);
 
         assertEquals(-1, eventSubscriber.getTransmitRateInSeconds());
     }
 
     @Test
     public void isReady_should_invoke_isPlatformAvailable() {
-        Mockito.when(platformProvider.isPlatformAvailable()).thenReturn(Boolean.TRUE);
+        when(platformProvider.isPlatformAvailable()).thenReturn(Boolean.TRUE);
 
         assertTrue(eventSubscriber.isReadyToAcceptMessages());
 
-        Mockito.verify(platformProvider).isPlatformAvailable();
+        verify(platformProvider).isPlatformAvailable();
     }
 }

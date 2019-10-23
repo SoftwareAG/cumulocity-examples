@@ -1,5 +1,6 @@
 package com.cumulocity.agent.snmp.platform.pubsub.service.subscription;
 
+import com.cumulocity.agent.snmp.exception.BatchNotSupportedException;
 import com.cumulocity.agent.snmp.persistence.Queue;
 import com.cumulocity.agent.snmp.platform.pubsub.subscriber.Subscriber;
 import com.cumulocity.agent.snmp.platform.pubsub.subscriber.SubscriberException;
@@ -42,7 +43,7 @@ public class BatchMessagesSubscriptionTest {
     }
 
     @Test
-    public void shouldProcessMessagesUntilNoneFound() {
+    public void shouldProcessMessagesUntilNoneFound() throws BatchNotSupportedException {
         Mockito.when(subscriber.isReadyToAcceptMessages()).thenReturn(Boolean.TRUE);
 
         int batchSize = 10;
@@ -61,7 +62,7 @@ public class BatchMessagesSubscriptionTest {
     }
 
     @Test
-    public void shouldRollbackMessagesWhenProcessThrowsSubscriberException() throws SubscriberException {
+    public void shouldRollbackMessagesWhenProcessThrowsSubscriberException() throws SubscriberException, BatchNotSupportedException {
         Mockito.when(subscriber.isReadyToAcceptMessages()).thenReturn(Boolean.TRUE);
 
         int batchSize = 10;
@@ -91,7 +92,7 @@ public class BatchMessagesSubscriptionTest {
     }
 
     @Test
-    public void shouldRollbackMessagesWhenProcessThrowsSubscriberException_1() throws SubscriberException {
+    public void shouldRollbackMessagesWhenProcessThrowsSubscriberException_1() throws SubscriberException, BatchNotSupportedException {
         Mockito.when(subscriber.isReadyToAcceptMessages()).thenReturn(Boolean.TRUE);
 
         int batchSize = 10;
@@ -123,7 +124,7 @@ public class BatchMessagesSubscriptionTest {
     }
 
     @Test
-    public void shouldCatchThrowableAndReturnGracefully() throws SubscriberException {
+    public void shouldCatchThrowableAndReturnGracefully() throws SubscriberException, BatchNotSupportedException {
         Mockito.when(subscriber.isReadyToAcceptMessages()).thenReturn(Boolean.TRUE);
 
         int batchSize = 10;

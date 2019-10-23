@@ -1,6 +1,7 @@
 package com.cumulocity.agent.snmp.platform.pubsub.subscriber;
 
 import com.cumulocity.agent.snmp.bootstrap.model.BootstrapReadyEvent;
+import com.cumulocity.agent.snmp.exception.BatchNotSupportedException;
 import com.cumulocity.agent.snmp.platform.model.GatewayDataRefreshedEvent;
 import com.cumulocity.agent.snmp.platform.pubsub.service.PubSub;
 import com.cumulocity.agent.snmp.platform.service.GatewayDataProvider;
@@ -46,15 +47,9 @@ public abstract class Subscriber<PS extends PubSub<?>> {
         return platformProvider.isPlatformAvailable();
     }
 
-    public boolean isBatchingSupported() {
-        return false;
-    }
+    public abstract boolean isBatchingSupported();
 
-    public int getBatchSize() {
-        // 200 is the default value, which should suffice.
-        // This can be made configurable if required.
-        return 200;
-    }
+    public abstract int getBatchSize() throws BatchNotSupportedException;
 
     public abstract int getConcurrentSubscriptionsCount();
 
@@ -161,9 +156,8 @@ public abstract class Subscriber<PS extends PubSub<?>> {
         int httpStatus = sdke.getHttpStatus();
         return     httpStatus >= HttpStatus.SC_BAD_REQUEST
                 && httpStatus < HttpStatus.SC_INTERNAL_SERVER_ERROR
-                && !(   httpStatus == HttpStatus.SC_UNAUTHORIZED
+                && !(httpStatus == HttpStatus.SC_UNAUTHORIZED
                      || httpStatus == HttpStatus.SC_PAYMENT_REQUIRED
-                     || httpStatus == HttpStatus.SC_REQUEST_TIMEOUT
-                    );
+                     || httpStatus == HttpStatus.SC_REQUEST_TIMEOUT);
     }
 }

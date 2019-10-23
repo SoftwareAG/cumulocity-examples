@@ -7,6 +7,8 @@ import com.cumulocity.agent.snmp.platform.service.GatewayDataProvider;
 import com.cumulocity.agent.snmp.platform.service.PlatformProvider;
 import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.measurement.MeasurementApi;
+
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -19,6 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MeasurementSubscriberTest {
@@ -49,6 +52,15 @@ public class MeasurementSubscriberTest {
     @InjectMocks
     private MeasurementSubscriber measurementSubscriber;
 
+    private ArgumentCaptor<MeasurementSubscriber.MeasurementRepresentation> measurementRepresentationCaptor;
+    
+    private ArgumentCaptor<MeasurementSubscriber.MeasurementCollectionRepresentation> measurementCollectionRepresentationCaptor;
+
+    @Before
+    public void setup() {
+    	measurementRepresentationCaptor = ArgumentCaptor.forClass(MeasurementSubscriber.MeasurementRepresentation.class);
+    	measurementCollectionRepresentationCaptor = ArgumentCaptor.forClass(MeasurementSubscriber.MeasurementCollectionRepresentation.class);
+    }
 
     @Test
     public void shouldGetBatchingSupportedAsFalse() {
@@ -57,6 +69,8 @@ public class MeasurementSubscriberTest {
 
     @Test
     public void shouldGetDefaultBatchSize() {
+    	when(gatewayProperties.getGatewayMaxBatchSize()).thenReturn(200);
+
         assertEquals(200, measurementSubscriber.getBatchSize());
     }
 
@@ -92,8 +106,6 @@ public class MeasurementSubscriberTest {
 
     @Test
     public void shouldHandleMessageSuccessfully() {
-        ArgumentCaptor<MeasurementSubscriber.MeasurementRepresentation> measurementRepresentationCaptor = ArgumentCaptor.forClass(MeasurementSubscriber.MeasurementRepresentation.class);
-
         Mockito.when(measurementApi.create(Mockito.any(MeasurementSubscriber.MeasurementRepresentation.class))).thenReturn(null);
 
         measurementSubscriber.handleMessage("SOME STRING");
@@ -113,17 +125,15 @@ public class MeasurementSubscriberTest {
 
     @Test
     public void shouldHandleMessagesSuccessfully() {
-        ArgumentCaptor<MeasurementSubscriber.MeasurementCollectionRepresentation> measurementCollectionRepresentation = ArgumentCaptor.forClass(MeasurementSubscriber.MeasurementCollectionRepresentation.class);
-
         Mockito.when(measurementApi.createBulk(Mockito.any(MeasurementSubscriber.MeasurementCollectionRepresentation.class))).thenReturn(null);
 
         measurementSubscriber.handleMessages(JSON_STRINGS);
 
-        Mockito.verify(measurementApi).createBulk(measurementCollectionRepresentation.capture());
+        Mockito.verify(measurementApi).createBulk(measurementCollectionRepresentationCaptor.capture());
 
         assertEquals("{\"measurements\":["
                 + String.join(",", JSON_STRINGS)
-                + "]}", measurementCollectionRepresentation.getValue().toJSON());
+                + "]}", measurementCollectionRepresentationCaptor.getValue().toJSON());
     }
 
     @Test(expected = SDKException.class)
@@ -137,8 +147,6 @@ public class MeasurementSubscriberTest {
 
     @Test
     public void should_onMessage_Successfully() {
-        ArgumentCaptor<MeasurementSubscriber.MeasurementRepresentation> measurementRepresentationCaptor = ArgumentCaptor.forClass(MeasurementSubscriber.MeasurementRepresentation.class);
-
         Mockito.when(measurementApi.create(Mockito.any(MeasurementSubscriber.MeasurementRepresentation.class))).thenReturn(null);
 
         try {
@@ -168,8 +176,6 @@ public class MeasurementSubscriberTest {
 
     @Test
     public void should_onMessage_whenMeasurementApiThrowsSDKException_with_HTTPStatus_400() {
-        ArgumentCaptor<MeasurementSubscriber.MeasurementRepresentation> measurementRepresentationCaptor = ArgumentCaptor.forClass(MeasurementSubscriber.MeasurementRepresentation.class);
-
         SDKException sdkException = new SDKException(400, "SOME ERROR MESSAGE");
         Mockito.when(measurementApi.create(Mockito.any(MeasurementSubscriber.MeasurementRepresentation.class))).thenThrow(sdkException);
 
@@ -187,8 +193,6 @@ public class MeasurementSubscriberTest {
 
     @Test
     public void should_onMessage_whenMeasurementApiThrowsSDKException_with_HTTPStatus_404() {
-        ArgumentCaptor<MeasurementSubscriber.MeasurementRepresentation> measurementRepresentationCaptor = ArgumentCaptor.forClass(MeasurementSubscriber.MeasurementRepresentation.class);
-
         SDKException sdkException = new SDKException(404, "SOME ERROR MESSAGE");
         Mockito.when(measurementApi.create(Mockito.any(MeasurementSubscriber.MeasurementRepresentation.class))).thenThrow(sdkException);
 
@@ -258,8 +262,6 @@ public class MeasurementSubscriberTest {
 
     @Test
     public void should_onMessages_Successfully() {
-        ArgumentCaptor<MeasurementSubscriber.MeasurementCollectionRepresentation> measurementCollectionRepresentationCaptor = ArgumentCaptor.forClass(MeasurementSubscriber.MeasurementCollectionRepresentation.class);
-
         Mockito.when(measurementApi.createBulk(Mockito.any(MeasurementSubscriber.MeasurementCollectionRepresentation.class))).thenReturn(null);
 
         List<String> jsonStrings = Arrays.asList("Message 1", "Message 2");
@@ -293,8 +295,6 @@ public class MeasurementSubscriberTest {
 
     @Test
     public void should_onMessages_whenMeasurementApiThrowsSDKException_with_HTTPStatus_400() {
-        ArgumentCaptor<MeasurementSubscriber.MeasurementCollectionRepresentation> measurementCollectionRepresentationCaptor = ArgumentCaptor.forClass(MeasurementSubscriber.MeasurementCollectionRepresentation.class);
-
         SDKException sdkException = new SDKException(400, "SOME ERROR MESSAGE");
         Mockito.when(measurementApi.createBulk(Mockito.any(MeasurementSubscriber.MeasurementCollectionRepresentation.class))).thenThrow(sdkException);
 
@@ -315,8 +315,6 @@ public class MeasurementSubscriberTest {
 
     @Test
     public void should_onMessages_whenMeasurementApiThrowsSDKException_with_HTTPStatus_404() {
-        ArgumentCaptor<MeasurementSubscriber.MeasurementCollectionRepresentation> measurementCollectionRepresentationCaptor = ArgumentCaptor.forClass(MeasurementSubscriber.MeasurementCollectionRepresentation.class);
-
         SDKException sdkException = new SDKException(404, "SOME ERROR MESSAGE");
         Mockito.when(measurementApi.createBulk(Mockito.any(MeasurementSubscriber.MeasurementCollectionRepresentation.class))).thenThrow(sdkException);
 
@@ -393,13 +391,14 @@ public class MeasurementSubscriberTest {
 
     @Test
     public void should_subscribe_successfully() {
-        // Transmit rate is initialized with -1
-        assertEquals(-1, measurementSubscriber.getTransmitRateInSeconds());
-
         long expectedTransmitRate = 10L;
+
         Mockito.when(gatewayDataProvider.getGatewayDevice()).thenReturn(gatewayManagedObjectWrapper);
         Mockito.when(gatewayManagedObjectWrapper.getSnmpCommunicationProperties()).thenReturn(snmpCommunicationProperties);
         Mockito.when(snmpCommunicationProperties.getTransmitRate()).thenReturn(expectedTransmitRate);
+
+        // Transmit rate is initialized with -1
+        assertEquals(-1, measurementSubscriber.getTransmitRateInSeconds());
 
         measurementSubscriber.subscribe();
 
@@ -419,13 +418,14 @@ public class MeasurementSubscriberTest {
 
     @Test
     public void should_RefreshSubscription_successfully() {
-        // Transmit rate is initialized with -1
-        assertEquals(-1, measurementSubscriber.getTransmitRateInSeconds());
-
         long expectedTransmitRate = 10L;
+
         Mockito.when(gatewayDataProvider.getGatewayDevice()).thenReturn(gatewayManagedObjectWrapper);
         Mockito.when(gatewayManagedObjectWrapper.getSnmpCommunicationProperties()).thenReturn(snmpCommunicationProperties);
         Mockito.when(snmpCommunicationProperties.getTransmitRate()).thenReturn(expectedTransmitRate);
+
+        // Transmit rate is initialized with -1
+        assertEquals(-1, measurementSubscriber.getTransmitRateInSeconds());
 
         measurementSubscriber.refreshSubscription();
 
@@ -437,13 +437,14 @@ public class MeasurementSubscriberTest {
 
     @Test
     public void should_skipRefreshSubscription_when_transmitRateDoesNotChange() {
-        // Transmit rate is initialized with -1
-        assertEquals(-1, measurementSubscriber.getTransmitRateInSeconds());
-
         long expectedTransmitRate = -1;
+
         Mockito.when(gatewayDataProvider.getGatewayDevice()).thenReturn(gatewayManagedObjectWrapper);
         Mockito.when(gatewayManagedObjectWrapper.getSnmpCommunicationProperties()).thenReturn(snmpCommunicationProperties);
         Mockito.when(snmpCommunicationProperties.getTransmitRate()).thenReturn(expectedTransmitRate);
+
+        // Transmit rate is initialized with -1
+        assertEquals(-1, measurementSubscriber.getTransmitRateInSeconds());
 
         measurementSubscriber.refreshSubscription();
 
