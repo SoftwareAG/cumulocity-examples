@@ -5,32 +5,32 @@
     <parent>
         <artifactId>c8y-examples</artifactId>
         <groupId>c8y.example</groupId>
-        <version>1005.6.0-SNAPSHOT</version>
+        <version>1005.2.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>sample-lwm2m-custom-decoder</artifactId>
-    <name>Cumulocity :: Examples :: Custom LWM2M Decoder (Binary Value Decoder)</name>
-
     <properties>
-        <maven.compiler.source>1.7</maven.compiler.source>
-        <maven.compiler.target>1.7</maven.compiler.target>
         <spring-boot-dependencies.version>1.5.16.RELEASE</spring-boot-dependencies.version>
-        <main.class>c8y.example.bytesequencedecoder.ByteSequenceDecoder
-        </main.class>
+        <main.class>c8y.example.decoders.json.JsonDecoder</main.class>
     </properties>
 
+    <artifactId>sample-json-decoder</artifactId>
+    <name>Cumulocity :: Examples :: Sample JSON Decoder</name>
+    <version>${project.parent.version}</version>
+
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>manual</distribution>
+        </license>
+    </licenses>
 
     <dependencies>
         <dependency>
             <groupId>com.nsn.cumulocity.clients-java</groupId>
             <artifactId>custom-decoders</artifactId>
             <version>${project.parent.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>20.0</version>
         </dependency>
         <dependency>
             <groupId>com.nsn.cumulocity.clients-java</groupId>
@@ -55,7 +55,29 @@
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-joda</artifactId>
-            <version>2.9.7</version>
+            <version>2.9.9</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>20.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.googlecode.json-simple</groupId>
+            <artifactId>json-simple</artifactId>
+            <version>1.1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <version>1.9.5</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -88,8 +110,8 @@
                             <goal>package</goal>
                         </goals>
                         <configuration>
-                            <name>byte-sequence-decoder</name>
-                            <image>byte-sequence-decoder</image>
+                            <name>${project.artifactId}</name>
+                            <image>${project.artifactId}</image>
                             <encoding>UTF-8</encoding>
                             <rpmSkip>true</rpmSkip>
                         </configuration>
@@ -98,5 +120,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>
