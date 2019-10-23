@@ -90,6 +90,38 @@ public class DeviceDiscoveryService {
     private long autoDiscoveryScheduleInterval;
 
 
+    @EventListener(BootstrapReadyEvent.class)
+    private void scheduleAutoDiscoveryProcess() {
+        GatewayManagedObjectWrapper.SnmpCommunicationProperties snmpCommunicationPropertiesFromPlatform = gatewayDataProvider.getGatewayDevice().getSnmpCommunicationProperties();
+        autoDiscoveryIpRanges = snmpCommunicationPropertiesFromPlatform.getIpRange();
+        autoDiscoveryScheduleInterval = snmpCommunicationPropertiesFromPlatform.getAutoDiscoveryInterval();
+
+        if(!Strings.isNullOrEmpty(autoDiscoveryIpRanges) && autoDiscoveryScheduleInterval > 0) {
+            try {
+                autoDiscoveryIpRangesList = parseIpRanges(autoDiscoveryIpRanges);
+                autoDiscoverySchedule = taskScheduler.scheduleWithFixedDelay(() -> scanForSnmpDevicesAndCreateChildDevices(autoDiscoveryIpRangesList),
+                        Duration.ofMinutes(gatewayDataProvider.getGatewayDevice().getSnmpCommunicationProperties().getAutoDiscoveryInterval()));
+            } catch(IllegalArgumentException iae) {
+                log.error("Error while parsing the provided <{}> IP ranges. Not scheduling the auto-discovery device scan.", autoDiscoveryIpRanges, iae);
+            }
+        }
+    }
+
+    @EventListener(GatewayDataRefreshedEvent.class)
+    private void refreshAutoDiscoverySchedule() {
+        GatewayManagedObjectWrapper.SnmpCommunicationProperties snmpCommunicationProperties = gatewayDataProvider.getGatewayDevice().getSnmpCommunicationProperties();
+        String newAutoDiscoveryIpRanges = snmpCommunicationProperties.getIpRange();
+        long newAutoDiscoveryInterval = snmpCommunicationProperties.getAutoDiscoveryInterval();
+        if(!StringUtils.equalsIgnoreCase(autoDiscoveryIpRanges, newAutoDiscoveryIpRanges) || autoDiscoveryScheduleInterval != newAutoDiscoveryInterval) {
+            if(autoDiscoverySchedule != null) {
+                autoDiscoverySchedule.cancel(true);
+                autoDiscoverySchedule = null;
+            }
+
+            scheduleAutoDiscoveryProcess();
+        }
+    }
+
     @EventListener(OperationExecutedOnGatewayEvent.class)
     private void executeOperation(OperationExecutedOnGatewayEvent operationEvent) {
 
@@ -128,38 +160,6 @@ public class DeviceDiscoveryService {
 
             // Update the Platform with the operation status as Successful or Failed
             deviceControlApi.update(operation);
-        }
-    }
-
-    @EventListener(BootstrapReadyEvent.class)
-    private void scheduleAutoDiscoveryProcess() {
-        GatewayManagedObjectWrapper.SnmpCommunicationProperties snmpCommunicationPropertiesFromPlatform = gatewayDataProvider.getGatewayDevice().getSnmpCommunicationProperties();
-        autoDiscoveryIpRanges = snmpCommunicationPropertiesFromPlatform.getIpRange();
-        autoDiscoveryScheduleInterval = snmpCommunicationPropertiesFromPlatform.getAutoDiscoveryInterval();
-
-        if(!Strings.isNullOrEmpty(autoDiscoveryIpRanges) && autoDiscoveryScheduleInterval > 0) {
-            try {
-                autoDiscoveryIpRangesList = parseIpRanges(autoDiscoveryIpRanges);
-                autoDiscoverySchedule = taskScheduler.scheduleWithFixedDelay(() -> scanForSnmpDevicesAndCreateChildDevices(autoDiscoveryIpRangesList),
-                        Duration.ofMinutes(gatewayDataProvider.getGatewayDevice().getSnmpCommunicationProperties().getAutoDiscoveryInterval()));
-            } catch(IllegalArgumentException iae) {
-                log.error("Error while parsing the provided <{}> IP ranges. Not scheduling the auto-discovery device scan.", autoDiscoveryIpRanges, iae);
-            }
-        }
-    }
-
-    @EventListener(GatewayDataRefreshedEvent.class)
-    private void refreshAutoDiscoverySchedule() {
-        GatewayManagedObjectWrapper.SnmpCommunicationProperties snmpCommunicationProperties = gatewayDataProvider.getGatewayDevice().getSnmpCommunicationProperties();
-        String newAutoDiscoveryIpRanges = snmpCommunicationProperties.getIpRange();
-        long newAutoDiscoveryInterval = snmpCommunicationProperties.getAutoDiscoveryInterval();
-        if(!StringUtils.equalsIgnoreCase(autoDiscoveryIpRanges, newAutoDiscoveryIpRanges) || autoDiscoveryScheduleInterval != newAutoDiscoveryInterval) {
-            if(autoDiscoverySchedule != null) {
-                autoDiscoverySchedule.cancel(true);
-                autoDiscoverySchedule = null;
-            }
-
-            scheduleAutoDiscoveryProcess();
         }
     }
 

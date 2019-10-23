@@ -23,7 +23,7 @@ public class PlatformApiProviderTest {
     private PlatformApiProvider platformApiProvider;
 
     @Before
-    public void setup() {
+    public void serUp() {
         when(platformProvider.getPlatform()).thenReturn(platform);
     }
 
