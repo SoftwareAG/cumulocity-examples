@@ -21,7 +21,7 @@ import static org.junit.Assert.*;
 public class EventSubscriberTest {
 
     @Mock
-    private GatewayProperties.SnmpProperties snmpProperties;
+    private GatewayProperties gatewayProperties;
 
     @Mock
     private GatewayDataProvider gatewayDataProvider;
@@ -58,9 +58,9 @@ public class EventSubscriberTest {
     @Test
     public void shouldGetConcurrentSubscriptionsCountAs_10Percent_OfSchedulerPoolSize_1() {
 
-        int schedularPoolSize = 1;
+        int gatewayThreadPoolSize = 1;
 
-        Mockito.when(snmpProperties.getTrapListenerThreadPoolSize()).thenReturn(schedularPoolSize);
+        Mockito.when(gatewayProperties.getGatewayThreadPoolSize()).thenReturn(gatewayThreadPoolSize);
 
         assertEquals(1, eventSubscriber.getConcurrentSubscriptionsCount());
     }
@@ -68,11 +68,11 @@ public class EventSubscriberTest {
     @Test
     public void shouldGetConcurrentSubscriptionsCountAs_10Percent_OfSchedulerPoolSize_10() {
 
-        int schedularPoolSize = 10;
+        int gatewayThreadPoolSize = 10;
 
-        Mockito.when(snmpProperties.getTrapListenerThreadPoolSize()).thenReturn(schedularPoolSize);
+        Mockito.when(gatewayProperties.getGatewayThreadPoolSize()).thenReturn(gatewayThreadPoolSize);
 
-        assertEquals((schedularPoolSize * 10/100), eventSubscriber.getConcurrentSubscriptionsCount());
+        assertEquals((gatewayThreadPoolSize * 10/100), eventSubscriber.getConcurrentSubscriptionsCount());
     }
 
     @Test
@@ -80,7 +80,7 @@ public class EventSubscriberTest {
 
         int schedularPoolSize = 101;
 
-        Mockito.when(snmpProperties.getTrapListenerThreadPoolSize()).thenReturn(schedularPoolSize);
+        Mockito.when(gatewayProperties.getGatewayThreadPoolSize()).thenReturn(schedularPoolSize);
 
         assertEquals((schedularPoolSize * 10/100), eventSubscriber.getConcurrentSubscriptionsCount());
     }

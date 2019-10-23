@@ -42,6 +42,9 @@ import java.util.concurrent.ScheduledFuture;
 public class DeviceListenerService {
 
 	@Autowired
+	private GatewayProperties gatewayProperties;
+
+	@Autowired
 	private GatewayProperties.SnmpProperties snmpProperties;
 
 	@Autowired
@@ -51,7 +54,7 @@ public class DeviceListenerService {
 	private TaskScheduler taskScheduler;
 
 	@Autowired
-	private TrapHandler trapHandler;
+	private DeviceDataHandler deviceDataHandler;
 
 	Snmp snmp = null;
 
@@ -79,7 +82,7 @@ public class DeviceListenerService {
 		try {
 			configureUserSecurityModel();
 
-			int poolSize = snmpProperties.getTrapListenerThreadPoolSize();
+			int poolSize = gatewayProperties.getThreadPoolSizeForTrapProcessing();
 			ThreadPool threadPool = ThreadPool.create("snmp-dispatcher-thread", poolSize);
 			MessageDispatcher messageDispatcher = new MessageDispatcherImpl();
 
@@ -96,7 +99,7 @@ public class DeviceListenerService {
 					trapListenerBindingAddress);
 
 			snmp = new Snmp(dispatcher, transportMapping);
-			snmp.addCommandResponder(trapHandler);
+			snmp.addCommandResponder(deviceDataHandler);
 			snmp.listen();
 
 			log.info("Started listening to traps at {}", transportMapping.getListenAddress().toString());
@@ -129,15 +132,15 @@ public class DeviceListenerService {
 
 		pollingRateInMinutes = newPollingRateInMinutes;
 
-		if(pollingRateInMinutes <= 0) {
+		if (pollingRateInMinutes <= 0) {
 			return;
 		}
 		snmpDevicePoller = taskScheduler.scheduleWithFixedDelay(() -> {
 			try {
-				Map<String, DeviceManagedObjectWrapper> deviceProtocolMap = gatewayDataProvider.getDeviceProtocolMap();
+				Map<String, DeviceManagedObjectWrapper> snmpDeviceMap = gatewayDataProvider.getSnmpDeviceMap();
 				Map<String, DeviceProtocolManagedObjectWrapper> protocolMap = gatewayDataProvider.getProtocolMap();
 
-				deviceProtocolMap.forEach((deviceIp, deviceWrapper) -> {
+				snmpDeviceMap.forEach((deviceIp, deviceWrapper) -> {
 					String deviceProtocolName = deviceWrapper.getDeviceProtocol();
 
 					if (protocolMap.containsKey(deviceProtocolName)) {
@@ -165,7 +168,7 @@ public class DeviceListenerService {
 											return;
 										}
 
-										trapHandler.processDevicePdu(deviceIp, responsePDU);
+										deviceDataHandler.processDevicePdu(deviceIp, responsePDU);
 									} else {
 										log.error(
 												"Error while polling device {} OIDs.\n"
@@ -217,8 +220,8 @@ public class DeviceListenerService {
 	}
 
 	private void addCredentials(USM usm) {
-		Map<String, DeviceManagedObjectWrapper> deviceProtocolMap = gatewayDataProvider.getDeviceProtocolMap();
-		deviceProtocolMap.forEach((deviceIP, managedObject) -> {
+		Map<String, DeviceManagedObjectWrapper> snmpDeviceMap = gatewayDataProvider.getSnmpDeviceMap();
+		snmpDeviceMap.forEach((deviceIP, managedObject) -> {
 			SnmpDeviceProperties properties = managedObject.getProperties();
 
 			if (properties.getVersion() == SnmpConstants.version3) {

@@ -39,7 +39,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
-public class TrapHandlerTest {
+public class DeviceDataHandlerTest {
 	@Mock
 	private PDU pdu;
 
@@ -68,7 +68,7 @@ public class TrapHandlerTest {
 	private DeviceProtocolManagedObjectWrapper protocolMoWrapper;
 	
 	@InjectMocks
-	private TrapHandler trapHandler;
+	private DeviceDataHandler deviceDataHandler;
 
 	private Logger logger;
 
@@ -79,8 +79,6 @@ public class TrapHandlerTest {
 	private ArgumentCaptor<EventRepresentation> eventCaptor;
 
 	private ArgumentCaptor<MeasurementRepresentation> measurementCaptor;
-
-	private ArgumentCaptor<ManagedObjectRepresentation> gatewayDeviceMoCaptor;
 
 	private Address address;
 
@@ -115,7 +113,6 @@ public class TrapHandlerTest {
 		alarmCaptor = ArgumentCaptor.forClass(AlarmRepresentation.class);
 		eventCaptor = ArgumentCaptor.forClass(EventRepresentation.class);
 		measurementCaptor = ArgumentCaptor.forClass(MeasurementRepresentation.class);
-		gatewayDeviceMoCaptor = ArgumentCaptor.forClass(ManagedObjectRepresentation.class);
 
 		address = new UdpAddress("10.0.0.1/65214");
 
@@ -169,7 +166,7 @@ public class TrapHandlerTest {
 		when(device1MoWrapper.getDeviceProtocol()).thenReturn("device-protocol");
 		when(device1MoWrapper.getManagedObject()).thenReturn(device1Mo);
 		when(gatewayDataProvider.getProtocolMap()).thenReturn(protocolMap);
-		when(gatewayDataProvider.getDeviceProtocolMap()).thenReturn(deviceMap);
+		when(gatewayDataProvider.getSnmpDeviceMap()).thenReturn(deviceMap);
 	}
 
 	@Test
@@ -179,7 +176,7 @@ public class TrapHandlerTest {
 		when(event.getPDU()).thenReturn(null);
 
 		// Action
-		trapHandler.processPdu(event);
+		deviceDataHandler.processPdu(event);
 
 		assertTrue(checkLogExist(Level.ERROR, errorMsg));
 	}
@@ -191,7 +188,7 @@ public class TrapHandlerTest {
 		when(event.getPeerAddress()).thenReturn(null);
 
 		// Action
-		trapHandler.processPdu(event);
+		deviceDataHandler.processPdu(event);
 
 		assertTrue(checkLogExist(Level.ERROR, errorMsg));
 	}
@@ -200,23 +197,23 @@ public class TrapHandlerTest {
 	public void shouldNotProcessTrapFromAnUnknownDevice() {
 		String errorMsg = "Trap received from an unknown device with IP address : 10.0.0.1";
 
-		when(gatewayDataProvider.getDeviceProtocolMap()).thenReturn(Collections.emptyMap());
+		when(gatewayDataProvider.getSnmpDeviceMap()).thenReturn(Collections.emptyMap());
 
 		// Action
-		trapHandler.processPdu(event);
+		deviceDataHandler.processPdu(event);
 
 		assertTrue(checkLogExist(Level.ERROR, errorMsg));
 	}
 
 	@Test
 	public void shouldRaiseAlarmForTrapFromAnUnknownDevice() {
-		when(gatewayDataProvider.getDeviceProtocolMap()).thenReturn(Collections.emptyMap());
+		when(gatewayDataProvider.getSnmpDeviceMap()).thenReturn(Collections.emptyMap());
 
 		// Action
 		ManagedObjectRepresentation source = new ManagedObjectRepresentation();
 		source.setId(GId.asGId(1));
 
-		trapHandler.processPdu(event);
+		deviceDataHandler.processPdu(event);
 		verify(alarmPublisher).publish(alarmCaptor.capture());
 
 		AlarmRepresentation alarm = alarmCaptor.getValue();
@@ -232,7 +229,7 @@ public class TrapHandlerTest {
 		when(pdu.getVariableBindings()).thenReturn(null);
 
 		// Action
-		trapHandler.processPdu(event);
+		deviceDataHandler.processPdu(event);
 
 		assertTrue(checkLogExist(Level.DEBUG, errorMsg));
 	}
@@ -244,7 +241,7 @@ public class TrapHandlerTest {
 		protocolMap.put("device-protocol", null);
 
 		// Action
-		trapHandler.processPdu(event);
+		deviceDataHandler.processPdu(event);
 
 		assertTrue(checkLogExist(Level.ERROR, errorMsg));
 	}
@@ -254,7 +251,7 @@ public class TrapHandlerTest {
 		register.setAlarmMapping(alarmMapping);
 
 		// Action
-		trapHandler.processPdu(event);
+		deviceDataHandler.processPdu(event);
 
 		verify(alarmPublisher, times(1)).publish(alarmCaptor.capture());
 		verify(eventPublisher, times(0)).publish(eventCaptor.capture());
@@ -272,7 +269,7 @@ public class TrapHandlerTest {
 		register.setEventMapping(eventMapping);
 
 		// Action
-		trapHandler.processPdu(event);
+		deviceDataHandler.processPdu(event);
 
 		verify(alarmPublisher, times(0)).publish(alarmCaptor.capture());
 		verify(eventPublisher, times(1)).publish(eventCaptor.capture());
@@ -290,7 +287,7 @@ public class TrapHandlerTest {
 		register.setMeasurementMapping(measurementMapping);
 
 		// Action
-		trapHandler.processPdu(event);
+		deviceDataHandler.processPdu(event);
 
 		verify(alarmPublisher, times(0)).publish(alarmCaptor.capture());
 		verify(eventPublisher, times(0)).publish(eventCaptor.capture());
@@ -316,7 +313,7 @@ public class TrapHandlerTest {
 		register.setEventMapping(eventMapping);
 
 		// Action
-		trapHandler.processPdu(event);
+		deviceDataHandler.processPdu(event);
 
 		verify(alarmPublisher, times(1)).publish(alarmCaptor.capture());
 		verify(eventPublisher, times(1)).publish(eventCaptor.capture());
@@ -344,7 +341,7 @@ public class TrapHandlerTest {
 		measurementMapping.setStaticFragmentsMap(staticFragmentsMap);
 		
 		// Action
-		trapHandler.processPdu(event);
+		deviceDataHandler.processPdu(event);
 
 		verify(alarmPublisher, times(0)).publish(alarmCaptor.capture());
 		verify(eventPublisher, times(0)).publish(eventCaptor.capture());

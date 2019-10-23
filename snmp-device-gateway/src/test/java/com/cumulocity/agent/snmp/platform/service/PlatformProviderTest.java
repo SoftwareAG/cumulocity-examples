@@ -103,14 +103,14 @@ public class PlatformProviderTest {
 
         when(gatewayProperties.getBaseUrl()).thenReturn("http://baseurl.cumulocity.com");
         when(gatewayProperties.isForceInitialHost()).thenReturn(Boolean.TRUE);
-        when(snmpProperties.getTrapListenerThreadPoolSize()).thenReturn(Integer.valueOf(25));
+        when(gatewayProperties.getThreadPoolSizeForScheduledTasks()).thenReturn((25 * 80 / 100));
         when(gatewayProperties.getBootstrapFixedDelay()).thenReturn(Integer.valueOf(1001));
 
         platformProvider.onCredentialsAvailable(new CredentialsAvailableEvent(credentials));
 
         verify(gatewayProperties).getBaseUrl();
         verify(gatewayProperties).isForceInitialHost();
-        verify(snmpProperties).getTrapListenerThreadPoolSize();
+        verify(gatewayProperties).getThreadPoolSizeForScheduledTasks();
 
         assertNotNull(platformProvider.getPlatform());
 
@@ -130,8 +130,8 @@ public class PlatformProviderTest {
         assertNull(platformParameters.getResponseMapper().read(null, null));
 
         HttpClientConfig httpClientConfig = platformParameters.getHttpClientConfig();
-        assertEquals(httpClientConfig.getPool().getMax(), 25);
-        assertEquals(httpClientConfig.getPool().getPerHost(), 25);
+        assertEquals(20, httpClientConfig.getPool().getMax());
+        assertEquals(20, httpClientConfig.getPool().getPerHost());
 
         verify(eventPublisher).publishEvent(platformConnectionReadyEventCaptor.capture());
         assertEquals("USERNAME", platformConnectionReadyEventCaptor.getValue().getCurrentUser());

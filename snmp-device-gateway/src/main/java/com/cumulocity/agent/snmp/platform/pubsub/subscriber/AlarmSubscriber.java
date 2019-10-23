@@ -9,39 +9,39 @@ import org.springframework.stereotype.Component;
 @Component
 public class AlarmSubscriber extends Subscriber<AlarmPubSub> {
 
-    @Autowired
-    private GatewayProperties.SnmpProperties snmpProperties;
+	@Autowired
+	private GatewayProperties gatewayProperties;
 
-    @Autowired
-    private AlarmApi alarmApi;
+	@Autowired
+	private AlarmApi alarmApi;
 
-    @Override
-    public int getConcurrentSubscriptionsCount() {
-        // 10% of the total threads available for scheduler
-        int count = snmpProperties.getTrapListenerThreadPoolSize() * 10 / 100;
+	@Override
+	public int getConcurrentSubscriptionsCount() {
+		// 10% of the total threads available for gateway
+		int count = gatewayProperties.getGatewayThreadPoolSize() * 10 / 100;
 
-        return (count <= 0)? 1 : count;
-    }
+		return (count <= 0) ? 1 : count;
+	}
 
-    @Override
-    public void handleMessage(String message) {
-        alarmApi.create(new AlarmRepresentation(message));
-    }
+	@Override
+	public void handleMessage(String message) {
+		alarmApi.create(new AlarmRepresentation(message));
+	}
 
-    public static class AlarmRepresentation extends com.cumulocity.rest.representation.alarm.AlarmRepresentation {
+	public static class AlarmRepresentation extends com.cumulocity.rest.representation.alarm.AlarmRepresentation {
 
-        private String jsonString;
+		private String jsonString;
 
-        public AlarmRepresentation() {
-        }
+		public AlarmRepresentation() {
+		}
 
-        AlarmRepresentation(String jsonString) {
-            this.jsonString = jsonString;
-        }
+		AlarmRepresentation(String jsonString) {
+			this.jsonString = jsonString;
+		}
 
-        @Override
-        public String toJSON() {
-            return jsonString;
-        }
-    }
+		@Override
+		public String toJSON() {
+			return jsonString;
+		}
+	}
 }

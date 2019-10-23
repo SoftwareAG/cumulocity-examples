@@ -37,6 +37,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
+@SuppressWarnings("unchecked")
 public class GatewayDataProviderTest {
 
 	@Mock
@@ -83,7 +84,8 @@ public class GatewayDataProviderTest {
 
 		verify(gatewayDataProvider, times(1)).scheduleGatewayDataRefresh();
 		verify(taskScheduler).scheduleWithFixedDelay(any(Runnable.class), eq(Duration.ofMinutes(2)));
-		verify(operationNotificationSubscriber, times(0)).subscribe(eq(gatewayDataProvider.getGatewayDevice().getId()), any(SubscriptionListener.class));
+		verify(operationNotificationSubscriber, times(0)).subscribe(eq(gatewayDataProvider.getGatewayDevice().getId()),
+				any(SubscriptionListener.class));
 	}
 
 	@Test
@@ -121,13 +123,14 @@ public class GatewayDataProviderTest {
 		when(properties.getGatewayObjectRefreshIntervalInMinutes()).thenReturn(1);
 
 		assertNull(gatewayDataProvider.getGatewayDevice());
-		assertEquals(gatewayDataProvider.getDeviceProtocolMap().size(), 0);
+		assertEquals(gatewayDataProvider.getSnmpDeviceMap().size(), 0);
 
 		gatewayDataProvider.updateGatewayObjects(gatewayDeviceMo);
 
 		assertNotNull(gatewayDataProvider.getGatewayDevice());
-		assertEquals(gatewayDataProvider.getDeviceProtocolMap().size(), 1);
-		verify(operationNotificationSubscriber, times(0)).subscribe(eq(gatewayDataProvider.getGatewayDevice().getId()), any(SubscriptionListener.class));
+		assertEquals(gatewayDataProvider.getSnmpDeviceMap().size(), 1);
+		verify(operationNotificationSubscriber, times(0)).subscribe(eq(gatewayDataProvider.getGatewayDevice().getId()),
+				any(SubscriptionListener.class));
 	}
 
 	@Test
@@ -163,13 +166,14 @@ public class GatewayDataProviderTest {
 		when(properties.getGatewayObjectRefreshIntervalInMinutes()).thenReturn(1);
 
 		assertNull(gatewayDataProvider.getGatewayDevice());
-		assertEquals(gatewayDataProvider.getDeviceProtocolMap().size(), 0);
+		assertEquals(gatewayDataProvider.getSnmpDeviceMap().size(), 0);
 
 		gatewayDataProvider.updateGatewayObjects(gatewayDeviceMo);
 
-		assertEquals(1, gatewayDataProvider.getDeviceProtocolMap().size());
+		assertEquals(1, gatewayDataProvider.getSnmpDeviceMap().size());
 		assertNull(gatewayDataProvider.getProtocolMap().get("device-protocol"));
-		verify(operationNotificationSubscriber, times(0)).subscribe(eq(gatewayDataProvider.getGatewayDevice().getId()), any(SubscriptionListener.class));
+		verify(operationNotificationSubscriber, times(0)).subscribe(eq(gatewayDataProvider.getGatewayDevice().getId()),
+				any(SubscriptionListener.class));
 	}
 
 	@Test(timeout = 5000L)

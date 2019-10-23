@@ -51,7 +51,7 @@ public class GatewayDataProvider {
 	private GatewayManagedObjectWrapper gatewayDevice;
 
 	@Getter
-	private Map<String, DeviceManagedObjectWrapper> deviceProtocolMap = new HashMap<>();
+	private Map<String, DeviceManagedObjectWrapper> snmpDeviceMap = new HashMap<>();
 
 	@Getter
 	private Map<String, DeviceProtocolManagedObjectWrapper> protocolMap = new HashMap<>();
@@ -68,7 +68,7 @@ public class GatewayDataProvider {
 	}
 
 	void refreshGatewayObjects() {
-		Map<String, DeviceManagedObjectWrapper> newDeviceProtocolMap = new HashMap<>();
+		Map<String, DeviceManagedObjectWrapper> newSnmpDeviceMap = new HashMap<>();
 		Map<String, DeviceProtocolManagedObjectWrapper> newProtocolMap = new HashMap<>();
 
 		GId id = gatewayDevice.getId();
@@ -80,7 +80,7 @@ public class GatewayDataProvider {
 			try {
 				ManagedObjectRepresentation childDeviceMo = inventoryApi.get(childDeviceRep.getManagedObject().getId());
 				if (childDeviceMo.hasProperty(DeviceManagedObjectWrapper.C8Y_SNMP_DEVICE)) {
-					updateDeviceProtocol(newDeviceProtocolMap, newProtocolMap, childDeviceMo);
+					updateDeviceProtocol(newSnmpDeviceMap, newProtocolMap, childDeviceMo);
 				}
 			} catch (SDKException sdkException) {
 				if (sdkException.getHttpStatus() == HttpStatus.SC_NOT_FOUND) {
@@ -95,7 +95,7 @@ public class GatewayDataProvider {
 
 		synchronized (gatewayDevice) {
 			gatewayDevice = newGatewatDeviceWrapper;
-			deviceProtocolMap = newDeviceProtocolMap;
+			snmpDeviceMap = newSnmpDeviceMap;
 			protocolMap = newProtocolMap;
 		}
 
@@ -125,32 +125,31 @@ public class GatewayDataProvider {
 		}, Duration.ofMinutes(gatewayProperties.getGatewayObjectRefreshIntervalInMinutes()));
 	}
 
-	private void updateDeviceProtocol(Map<String, DeviceManagedObjectWrapper> newDeviceProtocolMap,
-			Map<String, DeviceProtocolManagedObjectWrapper> newProtocolMap, ManagedObjectRepresentation childDeviceMo) {
+	private void updateDeviceProtocol(Map<String, DeviceManagedObjectWrapper> newSnmpDeviceMap,
+			Map<String, DeviceProtocolManagedObjectWrapper> newProtocolMap, ManagedObjectRepresentation snmpDeviceMo) {
 
-		DeviceManagedObjectWrapper childDeviceWrapper = new DeviceManagedObjectWrapper(childDeviceMo);
+		DeviceManagedObjectWrapper childDeviceWrapper = new DeviceManagedObjectWrapper(snmpDeviceMo);
 		String deviceIp;
 		try {
 			deviceIp = IpAddressUtil.sanitizeIpAddress(childDeviceWrapper.getProperties().getIpAddress());
 		} catch(IllegalArgumentException iae) {
 			log.error("Invalid IP Address <{}> specified in the SNMP device named {}.",
 					childDeviceWrapper.getProperties().getIpAddress(),
-					childDeviceMo.getName(), iae);
+					snmpDeviceMo.getName(), iae);
 
 			deviceIp = childDeviceWrapper.getProperties().getIpAddress();
 		}
-		newDeviceProtocolMap.put(deviceIp, childDeviceWrapper);
+		newSnmpDeviceMap.put(deviceIp, childDeviceWrapper);
 
 		String protocolName = childDeviceWrapper.getDeviceProtocol();
 		if (protocolName != null && !protocolName.isEmpty()) {
 			updateProtocolMap(protocolName, newProtocolMap);
 		} else {
-			log.error("Missing device protocol configuration for the SNMP device {}", childDeviceMo.getName());
+			log.error("Missing device protocol configuration for the SNMP device {}", snmpDeviceMo.getName());
 		}
 	}
 
-	private void updateProtocolMap(String protocolName,
-			Map<String, DeviceProtocolManagedObjectWrapper> newProtocolMap) {
+	private void updateProtocolMap(String protocolName, Map<String, DeviceProtocolManagedObjectWrapper> newProtocolMap) {
 
 		DeviceProtocolManagedObjectWrapper deviceProtocolWrapper;
 

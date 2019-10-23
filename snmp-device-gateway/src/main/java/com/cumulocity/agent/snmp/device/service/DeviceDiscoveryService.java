@@ -101,7 +101,8 @@ public class DeviceDiscoveryService {
 
         String failureReason = null;
         try {
-            Map<String, String> autoDiscoveryFragment = (Map<String, String>)operation.getAttrs().get(C8Y_SNMP_AUTO_DISCOVERY_FRAGMENT_KEY);
+            @SuppressWarnings("unchecked")
+			Map<String, String> autoDiscoveryFragment = (Map<String, String>)operation.getAttrs().get(C8Y_SNMP_AUTO_DISCOVERY_FRAGMENT_KEY);
             if(autoDiscoveryFragment != null && !Strings.isNullOrEmpty(autoDiscoveryFragment.get(IP_RANGE_KEY))) {
                 String ipRanges = autoDiscoveryFragment.get(IP_RANGE_KEY);
                 try {
@@ -164,7 +165,7 @@ public class DeviceDiscoveryService {
     }
 
     private synchronized void scanForSnmpDevicesAndCreateChildDevices(List<InetAddress[]> ipRangesList) {
-        Map<String, DeviceManagedObjectWrapper> childDevicesMap = gatewayDataProvider.getDeviceProtocolMap();
+        Map<String, DeviceManagedObjectWrapper> snmpDeviceMap = gatewayDataProvider.getSnmpDeviceMap();
 
         int timeoutInMilliseconds = snmpProperties.getAutoDiscoveryDevicePingTimeoutPeriod() * 1000;
         for(InetAddress[] oneIpRange : ipRangesList) {
@@ -177,7 +178,7 @@ public class DeviceDiscoveryService {
 
                     if (currentIp.isReachable(timeoutInMilliseconds)) {
                         boolean isDeviceSnmpEnabled = isDeviceSnmpEnabled(currentIp, snmpProperties.getPollingPort(), snmpProperties.isTrapListenerProtocolUdp());
-                        if (isDeviceSnmpEnabled && !childDevicesMap.containsKey(currentIpString)) {
+                        if (isDeviceSnmpEnabled && !snmpDeviceMap.containsKey(currentIpString)) {
                             log.debug("A new SNMP enabled device is found with IP Address {} by auto-discovery device scan.", currentIpString);
 
                             // Create a new Child Device
@@ -186,7 +187,7 @@ public class DeviceDiscoveryService {
                             handleNoResponseFromDevice("A device with IP Address <" + currentIpString + ">, which is not SNMP enabled, found during auto-discovery device scan.", AlarmMapping.c8y_DeviceSnmpNotEnabled + currentIpString);
                         }
                     } else {
-                        if (childDevicesMap.containsKey(currentIpString)) {
+                        if (snmpDeviceMap.containsKey(currentIpString)) {
                             handleNoResponseFromDevice("Existing SNMP device with IP Address <" + currentIpString + "> didn't respond during auto-discovery device scan.", AlarmMapping.c8y_DeviceNotResponding + currentIpString);
                         } else {
                             log.debug("No device is found at IP Address <{}> during auto-discovery device scan.", currentIpString);

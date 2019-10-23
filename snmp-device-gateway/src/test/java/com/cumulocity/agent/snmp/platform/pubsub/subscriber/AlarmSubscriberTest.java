@@ -21,7 +21,7 @@ import static org.junit.Assert.*;
 public class AlarmSubscriberTest {
 
     @Mock
-    private GatewayProperties.SnmpProperties snmpProperties;
+    private GatewayProperties gatewayProperties;
 
     @Mock
     private GatewayDataProvider gatewayDataProvider;
@@ -60,7 +60,7 @@ public class AlarmSubscriberTest {
 
         int schedularPoolSize = 1;
 
-        Mockito.when(snmpProperties.getTrapListenerThreadPoolSize()).thenReturn(schedularPoolSize);
+        Mockito.when(gatewayProperties.getGatewayThreadPoolSize()).thenReturn(schedularPoolSize);
 
         assertEquals(1, alarmSubscriber.getConcurrentSubscriptionsCount());
     }
@@ -70,7 +70,7 @@ public class AlarmSubscriberTest {
 
         int schedularPoolSize = 10;
 
-        Mockito.when(snmpProperties.getTrapListenerThreadPoolSize()).thenReturn(schedularPoolSize);
+        Mockito.when(gatewayProperties.getGatewayThreadPoolSize()).thenReturn(schedularPoolSize);
 
         assertEquals((schedularPoolSize * 10/100), alarmSubscriber.getConcurrentSubscriptionsCount());
     }
@@ -80,7 +80,7 @@ public class AlarmSubscriberTest {
 
         int schedularPoolSize = 101;
 
-        Mockito.when(snmpProperties.getTrapListenerThreadPoolSize()).thenReturn(schedularPoolSize);
+        Mockito.when(gatewayProperties.getGatewayThreadPoolSize()).thenReturn(schedularPoolSize);
 
         assertEquals((schedularPoolSize * 10/100), alarmSubscriber.getConcurrentSubscriptionsCount());
     }

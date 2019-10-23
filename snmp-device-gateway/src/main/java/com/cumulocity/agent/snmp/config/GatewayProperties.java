@@ -33,6 +33,9 @@ public class GatewayProperties {
 	@Value("#{'${gateway.objects.refresh.interval:1}'.trim()}")
 	private int gatewayObjectRefreshIntervalInMinutes;
 
+	@Value("#{'${gateway.threadPool.size:30}'.trim()}")
+	private int gatewayThreadPoolSize;
+
 	@Value("#{'${gateway.bootstrap.force:false}'.trim()}")
 	private boolean forcedBootstrap;
 
@@ -41,6 +44,21 @@ public class GatewayProperties {
 
 	@Value("#{'${C8Y.forceInitialHost:true}'.trim()}")
 	private boolean forceInitialHost;
+
+	public int getThreadPoolSizeForTrapProcessing() {
+		// Using 20% of the total threads configured for gateway to Trap listening
+		int poolSize = getGatewayThreadPoolSize() * 20 / 100;
+		return (poolSize <= 0) ? 2 : poolSize;
+	}
+
+	public int getThreadPoolSizeForScheduledTasks() {
+		/*
+		 * Using 80% of the total threads configured for gateway to internal
+		 * publish/subscribe service, polling and auto-discovery
+		 */
+		int poolSize = getGatewayThreadPoolSize() * 80 / 100;
+		return (poolSize <= 0) ? 8 : poolSize;
+	}
 
 	@Configuration
 	@Data
@@ -65,7 +83,7 @@ public class GatewayProperties {
 		@Value("#{'${snmp.trapListener.protocol:UDP}'.trim()}")
 		private String trapListenerProtocol;
 
-		@Value("#{'${snmp.trapListener.port:162}'.trim()}")
+		@Value("#{'${snmp.trapListener.port:6671}'.trim()}")
 		private int trapListenerPort;
 
 		@Value("#{'${snmp.trapListener.address:}'.trim()}")
@@ -82,9 +100,6 @@ public class GatewayProperties {
 
 		@Value("#{'${snmp.autodiscovery.devicePingTimeoutPeriod:3}'.trim()}")
 		private int autoDiscoveryDevicePingTimeoutPeriod;
-
-		@Value("#{'${snmp.trapListener.threadPoolSize:30}'.trim()}")
-		private int trapListenerThreadPoolSize;
 
 		public boolean isTrapListenerProtocolUdp() {
 			return "UDP".equalsIgnoreCase(trapListenerProtocol);
