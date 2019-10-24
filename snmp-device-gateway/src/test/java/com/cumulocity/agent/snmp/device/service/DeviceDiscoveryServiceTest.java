@@ -5,7 +5,7 @@ import com.cumulocity.agent.snmp.config.GatewayProperties;
 import com.cumulocity.agent.snmp.platform.model.AlarmSeverity;
 import com.cumulocity.agent.snmp.platform.model.DeviceManagedObjectWrapper;
 import com.cumulocity.agent.snmp.platform.model.GatewayManagedObjectWrapper;
-import com.cumulocity.agent.snmp.platform.model.OperationExecutedOnGatewayEvent;
+import com.cumulocity.agent.snmp.platform.model.ReceivedOperationForGatewayEvent;
 import com.cumulocity.agent.snmp.platform.pubsub.publisher.AlarmPublisher;
 import com.cumulocity.agent.snmp.platform.service.GatewayDataProvider;
 import com.cumulocity.agent.snmp.util.IpAddressUtil;
@@ -36,8 +36,8 @@ import java.util.concurrent.ScheduledFuture;
 import static com.cumulocity.agent.snmp.platform.model.AlarmMapping.c8y_DeviceNotResponding;
 import static com.cumulocity.agent.snmp.platform.model.AlarmMapping.c8y_DeviceSnmpNotEnabled;
 import static com.cumulocity.agent.snmp.platform.model.DeviceManagedObjectWrapper.*;
-import static com.cumulocity.agent.snmp.platform.model.OperationExecutedOnGatewayEvent.C8Y_SNMP_AUTO_DISCOVERY_FRAGMENT_KEY;
-import static com.cumulocity.agent.snmp.platform.model.OperationExecutedOnGatewayEvent.IP_RANGE_KEY;
+import static com.cumulocity.agent.snmp.platform.model.ReceivedOperationForGatewayEvent.C8Y_SNMP_AUTO_DISCOVERY_FRAGMENT_KEY;
+import static com.cumulocity.agent.snmp.platform.model.ReceivedOperationForGatewayEvent.IP_RANGE_KEY;
 import static com.cumulocity.model.operation.OperationStatus.*;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -385,7 +385,7 @@ public class DeviceDiscoveryServiceTest {
         autoDiscoveryFragment.put(IP_RANGE_KEY, givenIpRange);
         operation.set(autoDiscoveryFragment, C8Y_SNMP_AUTO_DISCOVERY_FRAGMENT_KEY);
 
-        OperationExecutedOnGatewayEvent operationEvent = new OperationExecutedOnGatewayEvent(operationId, "snmp-agent-test", operation);
+        ReceivedOperationForGatewayEvent operationEvent = new ReceivedOperationForGatewayEvent(operationId, "snmp-agent-test", operation);
 
         when(snmpProperties.getPollingPort()).thenReturn(port);
         when(snmpProperties.isTrapListenerProtocolUdp()).thenReturn(isProtocolUdp);
@@ -429,7 +429,7 @@ public class DeviceDiscoveryServiceTest {
         autoDiscoveryFragment.put(IP_RANGE_KEY, givenIpRange);
         operation.set(autoDiscoveryFragment, C8Y_SNMP_AUTO_DISCOVERY_FRAGMENT_KEY);
 
-        OperationExecutedOnGatewayEvent operationEvent = new OperationExecutedOnGatewayEvent(operationId, "snmp-agent-test", operation);
+        ReceivedOperationForGatewayEvent operationEvent = new ReceivedOperationForGatewayEvent(operationId, "snmp-agent-test", operation);
 
         when(snmpProperties.getPollingPort()).thenReturn(port);
         when(snmpProperties.isTrapListenerProtocolUdp()).thenReturn(isProtocolUdp);
@@ -468,7 +468,7 @@ public class DeviceDiscoveryServiceTest {
         autoDiscoveryFragment.put(IP_RANGE_KEY, givenIpRange);
         operation.set(autoDiscoveryFragment, C8Y_SNMP_AUTO_DISCOVERY_FRAGMENT_KEY);
 
-        OperationExecutedOnGatewayEvent operationEvent = new OperationExecutedOnGatewayEvent(operationId, "snmp-agent-test", operation);
+        ReceivedOperationForGatewayEvent operationEvent = new ReceivedOperationForGatewayEvent(operationId, "snmp-agent-test", operation);
 
         // when
         deviceDiscoveryService.executeOperation(operationEvent);
@@ -491,7 +491,7 @@ public class DeviceDiscoveryServiceTest {
         autoDiscoveryFragment.put(IP_RANGE_KEY, givenIpRange);
         operation.set(autoDiscoveryFragment, C8Y_SNMP_AUTO_DISCOVERY_FRAGMENT_KEY);
 
-        OperationExecutedOnGatewayEvent operationEvent = new OperationExecutedOnGatewayEvent(operationId, "snmp-agent-test", operation);
+        ReceivedOperationForGatewayEvent operationEvent = new ReceivedOperationForGatewayEvent(operationId, "snmp-agent-test", operation);
 
         // when
         deviceDiscoveryService.executeOperation(operationEvent);

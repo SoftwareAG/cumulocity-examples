@@ -100,7 +100,7 @@ public class GatewayDataProvider {
 		}
 
 		// Subscribe for Operations on Gateway Device
-		subscribeForOperationsOnGateway();
+		subscribeForOperationsForGatewayDevice();
 	}
 
 	void scheduleGatewayDataRefresh() {
@@ -175,7 +175,7 @@ public class GatewayDataProvider {
 	 * This subscription is renewed, every time the Gateway data is refreshed.
 	 *
 	 */
-	private void subscribeForOperationsOnGateway() {
+	private void subscribeForOperationsForGatewayDevice() {
 		if(subscriberForOperationsOnGateway != null) {
 			return;
 		}
@@ -189,7 +189,7 @@ public class GatewayDataProvider {
 						log.debug("Device '{}', with id '{}', received notification.",
 								gatewayDevice.getName(), gatewayDevice.getId().getValue(), subscription.getObject().getValue());
 
-						eventPublisher.publishEvent(new OperationExecutedOnGatewayEvent(gatewayDevice.getId(), gatewayDevice.getName(), operation));
+						eventPublisher.publishEvent(new ReceivedOperationForGatewayEvent(gatewayDevice.getId(), gatewayDevice.getName(), operation));
 					}
 					else {
 						log.debug("Device '{}', with id '{}', received a notification which is meant for device with id '{}'.",
@@ -199,15 +199,18 @@ public class GatewayDataProvider {
 
 				@Override
 				public void onError(Subscription<GId> subscription, Throwable throwable) {
-					log.error("Error occurred while listening to operations on the device with name '{}' and id '{}'.",
+					log.error("Error occurred while listening to operations for the device with name '{}' and id '{}'.",
 							gatewayDevice.getName(), gatewayDevice.getId().getValue(), throwable);
 				}
 			});
+
+			log.info("Enabled the subscription for listening to operations for the device with name '{}' and id '{}'.",
+					gatewayDevice.getName(), gatewayDevice.getId().getValue());
 		} catch(Throwable t) {
 			subscriberForOperationsOnGateway = null;
 
 			// Ignore this exception and continue as the subscription will be retired when the Gateway data is refreshed next time.
-			log.warn("Couldn't enable the subscription for listening to operations on the device with name '{}' and id '{}'." +
+			log.warn("Couldn't enable the subscription for listening to operations for the device with name '{}' and id '{}'." +
 					" This subscription will be retired later.", gatewayDevice.getName(), gatewayDevice.getId().getValue());
 			log.debug(t.getMessage(), t);
 		}

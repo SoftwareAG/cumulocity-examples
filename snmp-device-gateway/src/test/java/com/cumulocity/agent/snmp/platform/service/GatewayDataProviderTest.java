@@ -4,7 +4,7 @@ import com.cumulocity.agent.snmp.config.GatewayProperties;
 import com.cumulocity.agent.snmp.platform.model.DeviceManagedObjectWrapper;
 import com.cumulocity.agent.snmp.platform.model.GatewayDataRefreshedEvent;
 import com.cumulocity.agent.snmp.platform.model.GatewayManagedObjectWrapper;
-import com.cumulocity.agent.snmp.platform.model.OperationExecutedOnGatewayEvent;
+import com.cumulocity.agent.snmp.platform.model.ReceivedOperationForGatewayEvent;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.inventory.ManagedObjectReferenceCollectionRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectReferenceRepresentation;
@@ -52,7 +52,7 @@ public class GatewayDataProviderTest {
 	private ArgumentCaptor<SubscriptionListener<GId, OperationRepresentation>> subscriptionListenerCaptor;
 
 	@Captor
-	private ArgumentCaptor<OperationExecutedOnGatewayEvent> operationExecutedOnGatewayEventCaptor;
+	private ArgumentCaptor<ReceivedOperationForGatewayEvent> receivedOperationForGatewayEventCaptor;
 
 	@Mock
 	private GatewayProperties properties;
@@ -224,7 +224,7 @@ public class GatewayDataProviderTest {
 	}
 
 	@Test
-	public void shouldPublishOperationExecutedOnGatewayEventWhenDeviceIDsMatch() {
+	public void shouldPublishReceivedOperationForGatewayEventWhenDeviceIDsMatch() {
 		final GId gatewayDeviceId = GId.asGId("111");
 		String gatewayDeviceName = "snmp-agent-test";
 
@@ -238,7 +238,7 @@ public class GatewayDataProviderTest {
 		ReflectionTestUtils.setField(gatewayDataProvider, "gatewayDevice", gatewayDeviceMock);
 
 		// when
-		ReflectionTestUtils.invokeMethod(gatewayDataProvider, "subscribeForOperationsOnGateway");
+		ReflectionTestUtils.invokeMethod(gatewayDataProvider, "subscribeForOperationsForGatewayDevice");
 
 		verify(operationNotificationSubscriberMock, times(1)).subscribe(eq(gatewayDeviceId), subscriptionListenerCaptor.capture());
 		assertNotNull(ReflectionTestUtils.getField(gatewayDataProvider, "subscriberForOperationsOnGateway"));
@@ -257,15 +257,15 @@ public class GatewayDataProviderTest {
 		}, operationRepresentation);
 
 
-		verify(eventPublisher, times(1)).publishEvent(operationExecutedOnGatewayEventCaptor.capture());
+		verify(eventPublisher, times(1)).publishEvent(receivedOperationForGatewayEventCaptor.capture());
 
-		assertEquals(gatewayDeviceId, operationExecutedOnGatewayEventCaptor.getValue().getDeviceId());
-		assertEquals(gatewayDeviceName, operationExecutedOnGatewayEventCaptor.getValue().getDeviceName());
-		assertEquals(operationRepresentation, operationExecutedOnGatewayEventCaptor.getValue().getOperationRepresentation());
+		assertEquals(gatewayDeviceId, receivedOperationForGatewayEventCaptor.getValue().getDeviceId());
+		assertEquals(gatewayDeviceName, receivedOperationForGatewayEventCaptor.getValue().getDeviceName());
+		assertEquals(operationRepresentation, receivedOperationForGatewayEventCaptor.getValue().getOperationRepresentation());
 	}
 
 	@Test
-	public void shouldNotPublishOperationExecutedOnGatewayEventWhenDeviceIDsDoNotMatch() {
+	public void shouldNotPublishReceivedOperationForGatewayEventWhenDeviceIDsDoNotMatch() {
 		final GId gatewayDeviceId = GId.asGId("111");
 		String gatewayDeviceName = "snmp-agent-test";
 
@@ -279,7 +279,7 @@ public class GatewayDataProviderTest {
 		ReflectionTestUtils.setField(gatewayDataProvider, "gatewayDevice", gatewayDeviceMock);
 
 		// when
-		ReflectionTestUtils.invokeMethod(gatewayDataProvider, "subscribeForOperationsOnGateway");
+		ReflectionTestUtils.invokeMethod(gatewayDataProvider, "subscribeForOperationsForGatewayDevice");
 
 		verify(operationNotificationSubscriberMock, times(1)).subscribe(eq(gatewayDeviceId), subscriptionListenerCaptor.capture());
 		assertNotNull(ReflectionTestUtils.getField(gatewayDataProvider, "subscriberForOperationsOnGateway"));
@@ -316,20 +316,20 @@ public class GatewayDataProviderTest {
 	}
 
 	@Test
-	public void shouldNotSubscribeForOperationsOnGatewaySecondTime() {
+	public void shouldNotSubscribeForOperationsForGatewayDeviceSecondTime() {
 		OperationNotificationSubscriber operationNotificationSubscriberMock = mock(OperationNotificationSubscriber.class);
 
 		ReflectionTestUtils.setField(gatewayDataProvider, "subscriberForOperationsOnGateway", operationNotificationSubscriberMock);
 
 		// When
-		ReflectionTestUtils.invokeMethod(gatewayDataProvider, "subscribeForOperationsOnGateway");
+		ReflectionTestUtils.invokeMethod(gatewayDataProvider, "subscribeForOperationsForGatewayDevice");
 
 		verifyZeroInteractions(operationNotificationSubscriberMock);
 		assertNotNull(ReflectionTestUtils.getField(gatewayDataProvider, "subscriberForOperationsOnGateway"));
 	}
 
 	@Test
-	public void shouldKeepSubscriberForOperationsOnGatewayWhenSubscribeThrowsException() {
+	public void shouldKeepSubscriberForOperationsForGatewayDeviceWhenSubscribeThrowsException() {
 		final GId gatewayDeviceId = GId.asGId("111");
 		String gatewayDeviceName = "snmp-agent-test";
 
@@ -345,7 +345,7 @@ public class GatewayDataProviderTest {
 		when(operationNotificationSubscriberMock.subscribe(eq(gatewayDeviceId), any(SubscriptionListener.class))).thenThrow(new SDKException("SOME ERROR"));
 
 		// when
-		ReflectionTestUtils.invokeMethod(gatewayDataProvider, "subscribeForOperationsOnGateway");
+		ReflectionTestUtils.invokeMethod(gatewayDataProvider, "subscribeForOperationsForGatewayDevice");
 
 		verify(operationNotificationSubscriberMock, times(1)).subscribe(eq(gatewayDeviceId), subscriptionListenerCaptor.capture());
 		assertNull(ReflectionTestUtils.getField(gatewayDataProvider, "subscriberForOperationsOnGateway"));

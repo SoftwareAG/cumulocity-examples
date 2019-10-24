@@ -17,7 +17,7 @@ public class ConcurrencyConfiguration {
 
 		ThreadPoolTaskScheduler threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
 		threadPoolTaskScheduler.setPoolSize(poolSize);
-		threadPoolTaskScheduler.setThreadNamePrefix("snmp-scheduler-");
+		threadPoolTaskScheduler.setThreadNamePrefix("scheduler-");
 
 		return threadPoolTaskScheduler;
 	}
