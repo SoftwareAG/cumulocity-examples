@@ -36,6 +36,9 @@ public class GatewayProperties {
 	@Value("#{'${gateway.threadPool.size:30}'.trim()}")
 	private int gatewayThreadPoolSize;
 
+	@Value("#{'${gateway.maxBatch.size:200}'.trim()}")
+	private int gatewayMaxBatchSize;
+
 	@Value("#{'${gateway.bootstrap.force:false}'.trim()}")
 	private boolean forcedBootstrap;
 

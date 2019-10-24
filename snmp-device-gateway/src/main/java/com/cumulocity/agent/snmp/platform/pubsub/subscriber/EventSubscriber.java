@@ -1,6 +1,7 @@
 package com.cumulocity.agent.snmp.platform.pubsub.subscriber;
 
 import com.cumulocity.agent.snmp.config.GatewayProperties;
+import com.cumulocity.agent.snmp.exception.BatchNotSupportedException;
 import com.cumulocity.agent.snmp.platform.pubsub.service.EventPubSub;
 import com.cumulocity.sdk.client.event.EventApi;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,16 @@ public class EventSubscriber extends Subscriber<EventPubSub> {
 		int count = gatewayProperties.getGatewayThreadPoolSize() * 10 / 100;
 
 		return (count <= 0) ? 1 : count;
+	}
+
+	@Override
+	public boolean isBatchingSupported() {
+		return false;
+	}
+
+	@Override
+	public int getBatchSize() throws BatchNotSupportedException {
+		throw new BatchNotSupportedException("Batching is not supported for Events");
 	}
 
 	@Override

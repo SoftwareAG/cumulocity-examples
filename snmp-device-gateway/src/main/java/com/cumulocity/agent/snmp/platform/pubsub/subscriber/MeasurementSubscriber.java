@@ -22,6 +22,11 @@ public class MeasurementSubscriber extends Subscriber<MeasurementPubSub> {
         return true;
     }
 
+	@Override
+	public int getBatchSize() {
+		return gatewayProperties.getGatewayMaxBatchSize();
+	}
+
     @Override
     public int getConcurrentSubscriptionsCount() {
         // 30% of the total threads available for gateway
