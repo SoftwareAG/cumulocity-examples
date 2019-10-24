@@ -7,15 +7,6 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 
-import org.joda.time.DateTime;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.SpringApplication;
-import org.springframework.context.event.EventListener;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestTemplate;
-
 import com.cumulocity.microservice.autoconfigure.MicroserviceApplication;
 import com.cumulocity.microservice.context.ContextService;
 import com.cumulocity.microservice.context.credentials.MicroserviceCredentials;
@@ -27,6 +18,15 @@ import com.cumulocity.rest.representation.event.EventRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.Platform;
 import com.cumulocity.sdk.client.event.EventFilter;
+
+import org.joda.time.DateTime;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.SpringApplication;
+import org.springframework.context.event.EventListener;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 
 import net.minidev.json.JSONObject;
 
@@ -77,7 +77,6 @@ public class App {
 	
 	/**
 	 * Create a warning alarm on microservice subscription
-	 * 
 	 */
 	@EventListener(MicroserviceSubscriptionAddedEvent.class)
 	public void createAlarm (MicroserviceSubscriptionAddedEvent event) {
@@ -159,7 +158,7 @@ public class App {
 		return c8yEnv;
 	}
 
-	// Track client's approximate location
+	// Track the client's approximate location
 	@RequestMapping("location/track")
 	public String trackLocation (HttpServletRequest request) {
 		// Get the public IP address and create the event
@@ -169,8 +168,8 @@ public class App {
 	// Get the tracked IPs and locations
 	@RequestMapping("location/locations")
 	public ArrayList<Object> getLocations (@RequestParam(value = "max", defaultValue = "5") int max) {
-		var locations = new ArrayList<Object>();
 		var filter = new EventFilter().byType("c8y_LocationUpdate");
+		var locations = new ArrayList<Object>();
 		var eventCollection = platform.getEventApi().getEventsByFilter(filter).get(max);
 
 		eventCollection.getEvents().forEach((event) -> {
