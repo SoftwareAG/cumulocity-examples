@@ -5,11 +5,14 @@ import com.cumulocity.agent.snmp.persistence.Queue;
 import com.cumulocity.agent.snmp.platform.pubsub.subscriber.Subscriber;
 import com.cumulocity.agent.snmp.platform.pubsub.subscriber.SubscriberException;
 import com.cumulocity.sdk.client.SDKException;
+
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
@@ -28,6 +31,7 @@ public class BatchMessagesSubscriptionTest {
     @Mock
     private Subscriber<?> subscriber;
 
+    @Spy
     @InjectMocks
     private BatchMessagesSubscription subscripton;
 
@@ -40,6 +44,20 @@ public class BatchMessagesSubscriptionTest {
 
         Mockito.verify(queue, Mockito.times(1)).getName();
         Mockito.verify(queue, Mockito.times(0)).dequeue();
+    }
+
+    @Test
+    public void shouldNotProcessIfBatchingNotSupported() throws BatchNotSupportedException, SubscriberException {
+    	ResultCaptor<Boolean> resultCaptor = new ResultCaptor<>();
+    	
+        Mockito.when(subscriber.isReadyToAcceptMessages()).thenReturn(Boolean.TRUE);
+        Mockito.doThrow(new BatchNotSupportedException("TestException")).when(subscriber).getBatchSize();
+        Mockito.doAnswer(resultCaptor).when(subscripton).deliver();
+
+        subscripton.run();
+
+        Mockito.verify(subscriber, Mockito.times(0)).onMessages(Mockito.anyCollection());
+        Assert.assertFalse(resultCaptor.getResult());
     }
 
     @Test
@@ -149,5 +167,19 @@ public class BatchMessagesSubscriptionTest {
 
         Mockito.verify(queue, Mockito.times(1)).drainTo(Mockito.anyCollection(), Mockito.eq(batchSize));
         Mockito.verify(subscriber, Mockito.times(1)).onMessages(Mockito.anyCollection());
+    }
+    
+    public class ResultCaptor<T> implements Answer<T> {
+        private T result = null;
+        public T getResult() {
+            return result;
+        }
+
+		@Override
+		@SuppressWarnings("unchecked")
+        public T answer(InvocationOnMock invocationOnMock) throws Throwable {
+            result = (T) invocationOnMock.callRealMethod();
+            return result;
+        }
     }
 }
