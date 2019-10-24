@@ -6,13 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.context.annotation.PropertySources;
 
 @Data
 @Configuration
-@PropertySources(value = {
-		@PropertySource(value = "file:${user.home}/.snmp/snmp-agent-gateway.properties", ignoreResourceNotFound = true),
-		@PropertySource(value = "file:${user.home}/.snmp/snmp-agent-gateway-${spring.profiles.active}.properties", ignoreResourceNotFound = true) })
+@PropertySource(value = "file:${user.home}/.snmp/snmp-agent-gateway${spring.profiles.active:}.properties", ignoreResourceNotFound = true)
 public class GatewayProperties {
 
 	@Autowired

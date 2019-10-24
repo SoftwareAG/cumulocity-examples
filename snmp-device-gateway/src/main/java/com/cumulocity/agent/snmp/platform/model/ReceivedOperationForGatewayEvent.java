@@ -7,7 +7,7 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public class OperationExecutedOnGatewayEvent {
+public class ReceivedOperationForGatewayEvent {
 
     public static final String C8Y_SNMP_AUTO_DISCOVERY_FRAGMENT_KEY = "c8y_SnmpAutoDiscovery";
     public static final String IP_RANGE_KEY = "ipRange";

@@ -48,8 +48,8 @@ import static com.cumulocity.agent.snmp.platform.model.AlarmMapping.c8y_DeviceNo
 import static com.cumulocity.agent.snmp.platform.model.AlarmMapping.c8y_DeviceSnmpNotEnabled;
 import static com.cumulocity.agent.snmp.platform.model.AlarmSeverity.MAJOR;
 import static com.cumulocity.agent.snmp.platform.model.DeviceManagedObjectWrapper.*;
-import static com.cumulocity.agent.snmp.platform.model.OperationExecutedOnGatewayEvent.C8Y_SNMP_AUTO_DISCOVERY_FRAGMENT_KEY;
-import static com.cumulocity.agent.snmp.platform.model.OperationExecutedOnGatewayEvent.IP_RANGE_KEY;
+import static com.cumulocity.agent.snmp.platform.model.ReceivedOperationForGatewayEvent.C8Y_SNMP_AUTO_DISCOVERY_FRAGMENT_KEY;
+import static com.cumulocity.agent.snmp.platform.model.ReceivedOperationForGatewayEvent.IP_RANGE_KEY;
 import static com.cumulocity.model.operation.OperationStatus.*;
 import static com.cumulocity.rest.representation.inventory.InventoryMediaType.MANAGED_OBJECT_REFERENCE;
 
@@ -133,8 +133,8 @@ public class DeviceDiscoveryService {
         }
     }
 
-    @EventListener(OperationExecutedOnGatewayEvent.class)
-    void executeOperation(OperationExecutedOnGatewayEvent operationEvent) {
+    @EventListener(ReceivedOperationForGatewayEvent.class)
+    void executeOperation(ReceivedOperationForGatewayEvent operationEvent) {
 
         OperationRepresentation operation = operationEvent.getOperationRepresentation();
 
