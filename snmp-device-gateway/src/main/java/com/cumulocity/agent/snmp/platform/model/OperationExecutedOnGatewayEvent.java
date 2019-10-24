@@ -9,6 +9,10 @@ import lombok.Getter;
 @Getter
 public class OperationExecutedOnGatewayEvent {
 
+    public static final String C8Y_SNMP_AUTO_DISCOVERY_FRAGMENT_KEY = "c8y_SnmpAutoDiscovery";
+    public static final String IP_RANGE_KEY = "ipRange";
+
+
     private final GId deviceId;
 
     private final String deviceName;

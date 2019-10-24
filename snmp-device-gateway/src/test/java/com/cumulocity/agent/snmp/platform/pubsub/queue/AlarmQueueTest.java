@@ -42,7 +42,7 @@ public class AlarmQueueTest {
 
         clearParentFolder();
 
-        alarmQueue = Mockito.spy(new AlarmQueue(gatewayProperties));
+        alarmQueue = new AlarmQueue(gatewayProperties);
     }
 
     @After

@@ -79,7 +79,6 @@ public class GatewayProperties {
 	@Data
 	@ToString
 	public class SnmpProperties {
-
 		@Value("#{'${snmp.trapListener.protocol:UDP}'.trim()}")
 		private String trapListenerProtocol;
 

@@ -6,13 +6,17 @@ import com.cumulocity.agent.snmp.util.IpAddressUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.snmp4j.*;
 import org.snmp4j.event.ResponseEvent;
-import org.snmp4j.mp.SnmpConstants;
 import org.snmp4j.smi.*;
 import org.snmp4j.transport.DefaultTcpTransportMapping;
 import org.snmp4j.transport.DefaultUdpTransportMapping;
 
 import java.io.IOException;
 import java.util.List;
+
+import static com.cumulocity.agent.snmp.platform.model.DeviceManagedObjectWrapper.PROTOCOL_TCP;
+import static com.cumulocity.agent.snmp.platform.model.DeviceManagedObjectWrapper.PROTOCOL_UDP;
+import static org.snmp4j.PDU.GET;
+import static org.snmp4j.mp.SnmpConstants.version3;
 
 @Slf4j
 public class SnmpDevicePoller {
@@ -44,10 +48,9 @@ public class SnmpDevicePoller {
 		String trapListenerBindingAddress = IpAddressUtil
 				.sanitizeIpAddress(deviceWrapper.getProperties().getIpAddress(), true);
 		String addressString = trapListenerBindingAddress + "/" + deviceWrapper.getProperties().getPort();
-		String protocol = getProtocol();
 
 		TransportIpAddress address;
-		if ("TCP".equalsIgnoreCase(protocol)) {
+		if (snmpProperties.isTrapListenerProtocolTcp()) {
 			address = new TcpAddress(addressString);
 			transport = new DefaultTcpTransportMapping();
 		} else {
@@ -59,14 +62,17 @@ public class SnmpDevicePoller {
 		target = getTarget(address);
 		this.pdu = getPDU();
 
+		String protocol = snmpProperties.isTrapListenerProtocolTcp()? PROTOCOL_TCP : PROTOCOL_UDP;
 		log.debug("Starting OID poller on {} using {} protocol", addressString, protocol);
+
 		this.transport.listen();
-		log.info("Started OID poller on {} using {} protocol", addressString, protocol);
+
+		log.debug("Started OID poller on {} using {} protocol", addressString, protocol);
 	}
 
 	public ResponseEvent poll() throws IOException {
 		pdu.clear();
-		pdu.setType(PDU.GET);
+		pdu.setType(GET);
 
 		variableBindingList.forEach(pdu::add);
 
@@ -91,17 +97,8 @@ public class SnmpDevicePoller {
 		}
 	}
 
-	private String getProtocol() {
-		String protocol = DeviceManagedObjectWrapper.SnmpDeviceProperties.PROTOCOL_UDP;
-		if (deviceWrapper.getProperties().isProtocolTcp() || snmpProperties.isTrapListenerProtocolTcp()) {
-			protocol = DeviceManagedObjectWrapper.SnmpDeviceProperties.PROTOCOL_TCP;
-		}
-
-		return protocol;
-	}
-
 	private Target getTarget(TransportIpAddress address) {
-		if (SnmpConstants.version3 == deviceWrapper.getProperties().getVersion()) {
+		if (version3 == deviceWrapper.getProperties().getVersion()) {
 			UserTarget userTarget = new UserTarget();
 			userTarget.setVersion(deviceWrapper.getProperties().getVersion());
 			userTarget.setSecurityLevel(deviceWrapper.getProperties().getAuth().getSecurityLevel());
@@ -124,7 +121,7 @@ public class SnmpDevicePoller {
 	}
 
 	private PDU getPDU() {
-		if (SnmpConstants.version3 == deviceWrapper.getProperties().getVersion()) {
+		if (version3 == deviceWrapper.getProperties().getVersion()) {
 			ScopedPDU scopedPDU = new ScopedPDU();
 
 			// By now, security model and user configuration is done in

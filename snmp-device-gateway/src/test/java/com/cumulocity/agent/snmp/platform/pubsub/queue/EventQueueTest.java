@@ -42,7 +42,7 @@ public class EventQueueTest {
 
         clearParentFolder();
 
-        eventQueue = Mockito.spy(new EventQueue(gatewayProperties));
+        eventQueue = new EventQueue(gatewayProperties);
     }
 
     @After

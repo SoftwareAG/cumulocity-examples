@@ -3,7 +3,6 @@ package com.cumulocity.agent.snmp.platform.model;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Strings;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -12,7 +11,13 @@ import lombok.extern.slf4j.Slf4j;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DeviceManagedObjectWrapper extends AbstractManagedObjectWrapper {
 
+	public static final String PROTOCOL_UDP = "UDP";
+	public static final String PROTOCOL_TCP = "TCP";
+
 	public static final String C8Y_SNMP_DEVICE = "c8y_SNMPDevice";
+	public static final String SNMP_DEVICE_PORT = "port";
+	public static final String SNMP_DEVICE_IP = "ipAddress";
+	public static final String SNMP_DEVICE_PROTOCOL = "protocol";
 
 	private SnmpDeviceProperties properties;
 
@@ -37,17 +42,12 @@ public class DeviceManagedObjectWrapper extends AbstractManagedObjectWrapper {
 	@Getter
 	@JsonIgnoreProperties(ignoreUnknown = true)
 	public static class SnmpDeviceProperties {
-		public static final String PROTOCOL_UDP = "UDP";
-		public static final String PROTOCOL_TCP = "TCP";
-
 		private int version;
 
 		private String port;
 
 		private String type;
 		
-		private String protocol;
-
 		private String ipAddress;
 
 		private DeviceAuthentication auth;
@@ -58,14 +58,6 @@ public class DeviceManagedObjectWrapper extends AbstractManagedObjectWrapper {
 			}
 
 			return auth;
-		}
-
-		public boolean isProtocolUdp() {
-			return Strings.isNullOrEmpty(protocol) || PROTOCOL_UDP.equalsIgnoreCase(protocol);
-		}
-
-		public boolean isProtocolTcp() {
-			return PROTOCOL_TCP.equalsIgnoreCase(protocol);
 		}
 	}
 

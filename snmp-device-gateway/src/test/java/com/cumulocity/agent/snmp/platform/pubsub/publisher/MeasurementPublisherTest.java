@@ -17,8 +17,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -64,10 +62,7 @@ public class MeasurementPublisherTest {
         mapping.setType("c8y_Temperature");
         mapping.setSeries("T");
 
-        Map<String, Map<?,?>> staticFragments = new HashMap<>(2);
-        staticFragments.put("fragment_1", Collections.EMPTY_MAP);
-        staticFragments.put("fragment_2", Collections.EMPTY_MAP);
-        mapping.setStaticFragmentsMap(staticFragments);
+        mapping.setStaticFragments(new String[] {"fragment_1", "fragment_2"});
 
         measurementPublisher.publish(mapping.buildMeasurementRepresentation(source, 100, "CENTI"));
 

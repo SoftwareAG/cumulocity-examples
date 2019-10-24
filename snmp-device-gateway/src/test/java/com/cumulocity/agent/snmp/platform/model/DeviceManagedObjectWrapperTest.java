@@ -4,13 +4,14 @@ import com.cumulocity.model.JSONBase;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class DeviceManagedObjectWrapperTest {
 
     @Test
     public void shouldCreateDeviceManagedObjectWrapperSuccessfully() {
-        ManagedObjectRepresentation deviceMo = JSONBase.fromJSON("{\"id\":\"1000\",\"name\":\"child-device-1\",\"type\":\"some-device-type\",\"c8y_SNMPDevice\":{\"port\":\"161\",\"auth\":{\"securityLevel\":3,\"privPassword\":\"priv-password\",\"privProtocol\":2,\"authPassword\":\"auth-password\",\"authProtocol\":1,\"username\":\"user-1\",\"engineId\":\"engine-id-1\"},\"ipAddress\":\"198.162.0.1\",\"protocol\":\"UDP\", \"type\":\"/inventory/managedObjects/900\",\"version\":3}}", ManagedObjectRepresentation.class);
+        ManagedObjectRepresentation deviceMo = JSONBase.fromJSON("{\"id\":\"1000\",\"name\":\"child-device-1\",\"type\":\"some-device-type\",\"c8y_SNMPDevice\":{\"port\":\"161\",\"auth\":{\"securityLevel\":3,\"privPassword\":\"priv-password\",\"privProtocol\":2,\"authPassword\":\"auth-password\",\"authProtocol\":1,\"username\":\"user-1\",\"engineId\":\"engine-id-1\"},\"ipAddress\":\"198.162.0.1\",\"type\":\"/inventory/managedObjects/900\",\"version\":3}}", ManagedObjectRepresentation.class);
 
         DeviceManagedObjectWrapper deviceWrapper = new DeviceManagedObjectWrapper(deviceMo);
 
@@ -24,10 +25,6 @@ public class DeviceManagedObjectWrapperTest {
         assertEquals("161", deviceProperties.getPort());
         assertEquals("/inventory/managedObjects/900", deviceProperties.getType());
         assertEquals("198.162.0.1", deviceProperties.getIpAddress());
-        assertEquals("UDP", deviceProperties.getProtocol());
-        assertTrue(deviceProperties.isProtocolUdp());
-        assertFalse(deviceProperties.isProtocolTcp());
-
 
 
         DeviceManagedObjectWrapper.DeviceAuthentication devicePropertiesAuth = deviceProperties.getAuth();
@@ -43,7 +40,7 @@ public class DeviceManagedObjectWrapperTest {
 
     @Test
     public void shouldCreateDeviceManagedObjectWrapperWithEmptyAuthProperties() {
-        ManagedObjectRepresentation deviceMo = JSONBase.fromJSON("{\"id\":\"1000\",\"name\":\"child-device-1\",\"type\":\"some-device-type\",\"c8y_SNMPDevice\":{\"port\":\"161\",\"auth\":{},\"ipAddress\":\"198.162.0.1\",\"protocol\":\"UDP\", \"type\":\"/inventory/managedObjects/900\",\"version\":3}}", ManagedObjectRepresentation.class);
+        ManagedObjectRepresentation deviceMo = JSONBase.fromJSON("{\"id\":\"1000\",\"name\":\"child-device-1\",\"type\":\"some-device-type\",\"c8y_SNMPDevice\":{\"port\":\"161\",\"auth\":{},\"ipAddress\":\"198.162.0.1\",\"type\":\"/inventory/managedObjects/900\",\"version\":3}}", ManagedObjectRepresentation.class);
 
         DeviceManagedObjectWrapper deviceWrapper = new DeviceManagedObjectWrapper(deviceMo);
 
@@ -57,10 +54,6 @@ public class DeviceManagedObjectWrapperTest {
         assertEquals("161", deviceProperties.getPort());
         assertEquals("/inventory/managedObjects/900", deviceProperties.getType());
         assertEquals("198.162.0.1", deviceProperties.getIpAddress());
-        assertEquals("UDP", deviceProperties.getProtocol());
-        assertTrue(deviceProperties.isProtocolUdp());
-        assertFalse(deviceProperties.isProtocolTcp());
-
 
 
         DeviceManagedObjectWrapper.DeviceAuthentication devicePropertiesAuth = deviceProperties.getAuth();
@@ -76,7 +69,7 @@ public class DeviceManagedObjectWrapperTest {
 
     @Test
     public void shouldCreateDeviceManagedObjectWrapperWithNoAuthProperties() {
-        ManagedObjectRepresentation deviceMo = JSONBase.fromJSON("{\"id\":\"1000\",\"name\":\"child-device-1\",\"type\":\"some-device-type\",\"c8y_SNMPDevice\":{\"port\":\"161\",\"ipAddress\":\"198.162.0.1\",\"protocol\":\"UDP\", \"type\":\"/inventory/managedObjects/900\",\"version\":3}}", ManagedObjectRepresentation.class);
+        ManagedObjectRepresentation deviceMo = JSONBase.fromJSON("{\"id\":\"1000\",\"name\":\"child-device-1\",\"type\":\"some-device-type\",\"c8y_SNMPDevice\":{\"port\":\"161\",\"ipAddress\":\"198.162.0.1\",\"type\":\"/inventory/managedObjects/900\",\"version\":3}}", ManagedObjectRepresentation.class);
 
         DeviceManagedObjectWrapper deviceWrapper = new DeviceManagedObjectWrapper(deviceMo);
 
@@ -90,10 +83,6 @@ public class DeviceManagedObjectWrapperTest {
         assertEquals("161", deviceProperties.getPort());
         assertEquals("/inventory/managedObjects/900", deviceProperties.getType());
         assertEquals("198.162.0.1", deviceProperties.getIpAddress());
-        assertEquals("UDP", deviceProperties.getProtocol());
-        assertTrue(deviceProperties.isProtocolUdp());
-        assertFalse(deviceProperties.isProtocolTcp());
-
 
 
         DeviceManagedObjectWrapper.DeviceAuthentication devicePropertiesAuth = deviceProperties.getAuth();
@@ -123,10 +112,6 @@ public class DeviceManagedObjectWrapperTest {
         assertEquals(null, deviceProperties.getPort());
         assertEquals(null, deviceProperties.getType());
         assertEquals(null, deviceProperties.getIpAddress());
-        assertEquals(null, deviceProperties.getProtocol());
-        assertTrue(deviceProperties.isProtocolUdp());
-        assertFalse(deviceProperties.isProtocolTcp());
-
 
 
         DeviceManagedObjectWrapper.DeviceAuthentication devicePropertiesAuth = deviceProperties.getAuth();
@@ -156,10 +141,6 @@ public class DeviceManagedObjectWrapperTest {
         assertEquals(null, deviceProperties.getPort());
         assertEquals(null, deviceProperties.getType());
         assertEquals(null, deviceProperties.getIpAddress());
-        assertEquals(null, deviceProperties.getProtocol());
-        assertTrue(deviceProperties.isProtocolUdp());
-        assertFalse(deviceProperties.isProtocolTcp());
-
 
 
         DeviceManagedObjectWrapper.DeviceAuthentication devicePropertiesAuth = deviceProperties.getAuth();

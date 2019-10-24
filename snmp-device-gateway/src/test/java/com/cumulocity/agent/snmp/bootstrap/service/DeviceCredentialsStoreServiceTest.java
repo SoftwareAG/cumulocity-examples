@@ -32,7 +32,7 @@ public class DeviceCredentialsStoreServiceTest {
 
     @Before
     public void setUp() throws Exception {
-        deviceCredentialsStoreService = Mockito.spy(new DeviceCredentialsStoreService(gatewayProperties, deviceCredentialsStore));
+        deviceCredentialsStoreService = new DeviceCredentialsStoreService(gatewayProperties, deviceCredentialsStore);
     }
 
     @After

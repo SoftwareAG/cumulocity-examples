@@ -39,7 +39,7 @@ public class DeviceCredentialsStoreTest {
                 "device-credentials-store.dat");
 
         Mockito.when(gatewayProperties.getGatewayIdentifier()).thenReturn(this.getClass().getSimpleName());
-        deviceCredentialsStore = Mockito.spy(new DeviceCredentialsStore(gatewayProperties));
+        deviceCredentialsStore = new DeviceCredentialsStore(gatewayProperties);
     }
 
     @After

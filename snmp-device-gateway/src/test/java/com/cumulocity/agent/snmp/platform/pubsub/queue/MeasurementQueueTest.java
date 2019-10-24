@@ -42,7 +42,7 @@ public class MeasurementQueueTest {
 
         clearParentFolder();
 
-        measurementQueue = Mockito.spy(new MeasurementQueue(gatewayProperties));
+        measurementQueue = new MeasurementQueue(gatewayProperties);
     }
 
     @After

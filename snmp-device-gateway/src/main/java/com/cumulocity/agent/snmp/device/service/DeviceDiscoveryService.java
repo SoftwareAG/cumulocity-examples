@@ -7,8 +7,6 @@ import com.cumulocity.agent.snmp.platform.model.*;
 import com.cumulocity.agent.snmp.platform.pubsub.publisher.AlarmPublisher;
 import com.cumulocity.agent.snmp.platform.service.GatewayDataProvider;
 import com.cumulocity.agent.snmp.util.IpAddressUtil;
-import com.cumulocity.model.operation.OperationStatus;
-import com.cumulocity.rest.representation.inventory.InventoryMediaType;
 import com.cumulocity.rest.representation.inventory.ManagedObjectReferenceRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
@@ -46,6 +44,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 
+import static com.cumulocity.agent.snmp.platform.model.AlarmMapping.c8y_DeviceNotResponding;
+import static com.cumulocity.agent.snmp.platform.model.AlarmMapping.c8y_DeviceSnmpNotEnabled;
+import static com.cumulocity.agent.snmp.platform.model.AlarmSeverity.MAJOR;
+import static com.cumulocity.agent.snmp.platform.model.DeviceManagedObjectWrapper.*;
+import static com.cumulocity.agent.snmp.platform.model.OperationExecutedOnGatewayEvent.C8Y_SNMP_AUTO_DISCOVERY_FRAGMENT_KEY;
+import static com.cumulocity.agent.snmp.platform.model.OperationExecutedOnGatewayEvent.IP_RANGE_KEY;
+import static com.cumulocity.model.operation.OperationStatus.*;
+import static com.cumulocity.rest.representation.inventory.InventoryMediaType.MANAGED_OBJECT_REFERENCE;
+
 /**
  * SNMP Device auto-discovery service
  */
@@ -54,11 +61,7 @@ import java.util.concurrent.ScheduledFuture;
 @Service
 public class DeviceDiscoveryService {
 
-    private static final String C8Y_SNMP_AUTO_DISCOVERY_FRAGMENT_KEY = "c8y_SnmpAutoDiscovery";
-
-    private static final String IP_RANGE_KEY = "ipRange";
-
-    private static final short DEFAULT_CONNECTION_INTERVAL_IN_MINUTES = 10;
+    private static final int DEFAULT_CONNECTION_INTERVAL_IN_MINUTES = 10;
 
     @Autowired
     private GatewayProperties.SnmpProperties snmpProperties;
@@ -91,16 +94,24 @@ public class DeviceDiscoveryService {
 
 
     @EventListener(BootstrapReadyEvent.class)
-    private void scheduleAutoDiscoveryProcess() {
+    void scheduleAutoDiscoveryProcess() {
         GatewayManagedObjectWrapper.SnmpCommunicationProperties snmpCommunicationPropertiesFromPlatform = gatewayDataProvider.getGatewayDevice().getSnmpCommunicationProperties();
         autoDiscoveryIpRanges = snmpCommunicationPropertiesFromPlatform.getIpRange();
         autoDiscoveryScheduleInterval = snmpCommunicationPropertiesFromPlatform.getAutoDiscoveryInterval();
 
-        if(!Strings.isNullOrEmpty(autoDiscoveryIpRanges) && autoDiscoveryScheduleInterval > 0) {
+        if(autoDiscoveryIpRanges != null && autoDiscoveryIpRanges.trim().length() > 0 && autoDiscoveryScheduleInterval > 0) {
             try {
                 autoDiscoveryIpRangesList = parseIpRanges(autoDiscoveryIpRanges);
-                autoDiscoverySchedule = taskScheduler.scheduleWithFixedDelay(() -> scanForSnmpDevicesAndCreateChildDevices(autoDiscoveryIpRangesList),
-                        Duration.ofMinutes(gatewayDataProvider.getGatewayDevice().getSnmpCommunicationProperties().getAutoDiscoveryInterval()));
+                autoDiscoverySchedule = taskScheduler.scheduleWithFixedDelay(() ->
+                                scanForSnmpDevicesAndCreateChildDevices(
+                                        autoDiscoveryIpRangesList,
+                                        snmpProperties.getPollingPort(),
+                                        snmpProperties.isTrapListenerProtocolUdp(),
+                                        snmpProperties.getAutoDiscoveryDevicePingTimeoutPeriod(),
+                                        snmpProperties.getCommunityTarget(),
+                                        gatewayDataProvider.getSnmpDeviceMap()),
+
+                        Duration.ofMinutes(autoDiscoveryScheduleInterval));
             } catch(IllegalArgumentException iae) {
                 log.error("Error while parsing the provided <{}> IP ranges. Not scheduling the auto-discovery device scan.", autoDiscoveryIpRanges, iae);
             }
@@ -108,7 +119,7 @@ public class DeviceDiscoveryService {
     }
 
     @EventListener(GatewayDataRefreshedEvent.class)
-    private void refreshAutoDiscoverySchedule() {
+    void refreshAutoDiscoverySchedule() {
         GatewayManagedObjectWrapper.SnmpCommunicationProperties snmpCommunicationProperties = gatewayDataProvider.getGatewayDevice().getSnmpCommunicationProperties();
         String newAutoDiscoveryIpRanges = snmpCommunicationProperties.getIpRange();
         long newAutoDiscoveryInterval = snmpCommunicationProperties.getAutoDiscoveryInterval();
@@ -123,12 +134,12 @@ public class DeviceDiscoveryService {
     }
 
     @EventListener(OperationExecutedOnGatewayEvent.class)
-    private void executeOperation(OperationExecutedOnGatewayEvent operationEvent) {
+    void executeOperation(OperationExecutedOnGatewayEvent operationEvent) {
 
         OperationRepresentation operation = operationEvent.getOperationRepresentation();
 
         // Update the Platform with the operation status as Executing
-        operation.setStatus(OperationStatus.EXECUTING.name());
+        operation.setStatus(EXECUTING.name());
         deviceControlApi.update(operation);
 
         String failureReason = null;
@@ -138,7 +149,15 @@ public class DeviceDiscoveryService {
             if(autoDiscoveryFragment != null && !Strings.isNullOrEmpty(autoDiscoveryFragment.get(IP_RANGE_KEY))) {
                 String ipRanges = autoDiscoveryFragment.get(IP_RANGE_KEY);
                 try {
-                    scanForSnmpDevicesAndCreateChildDevices(parseIpRanges(ipRanges));
+                    if(ipRanges != null && ipRanges.trim().length() > 0) {
+                        scanForSnmpDevicesAndCreateChildDevices(
+                                parseIpRanges(ipRanges),
+                                snmpProperties.getPollingPort(),
+                                snmpProperties.isTrapListenerProtocolUdp(),
+                                snmpProperties.getAutoDiscoveryDevicePingTimeoutPeriod(),
+                                snmpProperties.getCommunityTarget(),
+                                gatewayDataProvider.getSnmpDeviceMap());
+                    }
                 } catch(IllegalArgumentException iae) {
                     failureReason = "Error while parsing the provided " + ipRanges + " IP Address ranges to scan for devices.";
                     log.error(failureReason, iae);
@@ -152,11 +171,11 @@ public class DeviceDiscoveryService {
             log.error(failureReason, t);
         } finally {
             if(failureReason != null) {
-                operation.setStatus(OperationStatus.FAILED.name());
+                operation.setStatus(FAILED.name());
                 operation.setFailureReason(failureReason);
             }
             else {
-                operation.setStatus(OperationStatus.SUCCESSFUL.name());
+                operation.setStatus(SUCCESSFUL.name());
             }
 
             // Update the Platform with the operation status as Successful or Failed
@@ -164,10 +183,8 @@ public class DeviceDiscoveryService {
         }
     }
 
-    private synchronized void scanForSnmpDevicesAndCreateChildDevices(List<InetAddress[]> ipRangesList) {
-        Map<String, DeviceManagedObjectWrapper> snmpDeviceMap = gatewayDataProvider.getSnmpDeviceMap();
-
-        int timeoutInMilliseconds = snmpProperties.getAutoDiscoveryDevicePingTimeoutPeriod() * 1000;
+    synchronized void scanForSnmpDevicesAndCreateChildDevices(List<InetAddress[]> ipRangesList, int port, boolean isProtocolUdp, int pingTimeoutInSeconds, String communityTarget, Map<String, DeviceManagedObjectWrapper> existingDeviceMap) {
+        int timeoutInMilliseconds = pingTimeoutInSeconds * 1000;
         for(InetAddress[] oneIpRange : ipRangesList) {
             InetAddress currentIp = oneIpRange[0];
             String currentIpString = currentIp.getHostAddress();
@@ -177,40 +194,41 @@ public class DeviceDiscoveryService {
                     log.debug("Trying to find an SNMP device at IP Address <{}> during auto-discovery device scan.", currentIpString);
 
                     if (currentIp.isReachable(timeoutInMilliseconds)) {
-                        boolean isDeviceSnmpEnabled = isDeviceSnmpEnabled(currentIp, snmpProperties.getPollingPort(), snmpProperties.isTrapListenerProtocolUdp());
-                        if (isDeviceSnmpEnabled && !snmpDeviceMap.containsKey(currentIpString)) {
+                        boolean isDeviceSnmpEnabled = isDeviceSnmpEnabled(currentIp, port, isProtocolUdp, communityTarget);
+                        if (isDeviceSnmpEnabled && !existingDeviceMap.containsKey(currentIpString)) {
                             log.debug("A new SNMP enabled device is found with IP Address {} by auto-discovery device scan.", currentIpString);
 
                             // Create a new Child Device
-                            createAndRegisterAChildDevice(currentIpString);
+                            createAndRegisterAChildDevice(currentIpString, port);
                         } else if (!isDeviceSnmpEnabled) {
-                            handleNoResponseFromDevice("A device with IP Address <" + currentIpString + ">, which is not SNMP enabled, found during auto-discovery device scan.", AlarmMapping.c8y_DeviceSnmpNotEnabled + currentIpString);
+                            handleNoResponseFromDevice("A device with IP Address <" + currentIpString + ">, which is not SNMP enabled, found during auto-discovery device scan.", c8y_DeviceSnmpNotEnabled + currentIpString);
                         }
                     } else {
-                        if (snmpDeviceMap.containsKey(currentIpString)) {
-                            handleNoResponseFromDevice("Existing SNMP device with IP Address <" + currentIpString + "> didn't respond during auto-discovery device scan.", AlarmMapping.c8y_DeviceNotResponding + currentIpString);
+                        if (existingDeviceMap.containsKey(currentIpString)) {
+                            handleNoResponseFromDevice("Existing SNMP device with IP Address <" + currentIpString + "> didn't respond during auto-discovery device scan.", c8y_DeviceNotResponding + currentIpString);
                         } else {
                             log.debug("No device is found at IP Address <{}> during auto-discovery device scan.", currentIpString);
                         }
                     }
                 } catch (IOException e) {
                     // Ignore this exception and continue
-                    log.info(e.getMessage(), e);
+                    log.info("Unexpected error while pinging the IP Address {}.", currentIpString, e);
                 }
 
                 currentIp = InetAddresses.increment(currentIp);
+                currentIpString = currentIp.getHostAddress();
             }
         }
     }
 
-    private boolean isDeviceSnmpEnabled(InetAddress ipAddress, int pollingPort, boolean isTrapListenerProtocolUdp) {
+    boolean isDeviceSnmpEnabled(InetAddress ipAddress, int port, boolean isProtocolUdp, String communityTarget) {
 
         try {
             TransportMapping<?> transport;
             TransportIpAddress transportIpAddress;
 
-            String url = ipAddress.getHostAddress() + "/" + String.valueOf(pollingPort);
-            if(isTrapListenerProtocolUdp) {
+            String url = ipAddress.getHostAddress() + "/" + String.valueOf(port);
+            if(isProtocolUdp) {
                 transportIpAddress = new UdpAddress(url);
 
                 transport = new DefaultUdpTransportMapping();
@@ -224,7 +242,7 @@ public class DeviceDiscoveryService {
             pdu.setType(PDU.GET);
 
             CommunityTarget target = new CommunityTarget();
-            target.setCommunity(new OctetString("public"));
+            target.setCommunity(new OctetString(communityTarget));
             target.setVersion(SnmpConstants.version1);
             target.setAddress(transportIpAddress);
 
@@ -241,12 +259,16 @@ public class DeviceDiscoveryService {
         return false;
     }
 
-    private List<InetAddress[]> parseIpRanges(String ipRanges) throws IllegalArgumentException {
-        String[] ipRangesSplitArray = ipRanges.split(",");
+    List<InetAddress[]> parseIpRanges(String ipRanges) throws IllegalArgumentException {
+        String[] ipRangesSplitArray = ipRanges.trim().split(",");
 
         List<InetAddress[]> ipRangesList = new ArrayList<>(ipRangesSplitArray.length);
         for(String oneIpRange : ipRangesSplitArray) {
-            String[] oneIpRangeArray = oneIpRange.split("-");
+            if(oneIpRange == null || oneIpRange.trim().length() == 0) {
+                continue;
+            }
+
+            String[] oneIpRangeArray = oneIpRange.trim().split("-");
             if(oneIpRangeArray.length == 2) {
                 try {
                     InetAddress[] addresses = new InetAddress[] {
@@ -266,19 +288,19 @@ public class DeviceDiscoveryService {
         return ipRangesList;
     }
 
-    private void createAndRegisterAChildDevice(String deviceIpAddress) {
-        log.error("Creating an SNMP child device with ID {}", "Device-" + deviceIpAddress);
+    void createAndRegisterAChildDevice(String deviceIpAddress, int port) {
+        log.debug("Creating an SNMP child device with ID {}", "Device-" + deviceIpAddress);
 
         ManagedObjectRepresentation childDevice = new ManagedObjectRepresentation();
         try {
             // Create Child Device
             Map<String, String> deviceIpMap = new HashMap<>();
-            deviceIpMap.put("deviceIpAddress", deviceIpAddress);
-            deviceIpMap.put("port", String.valueOf(snmpProperties.getPollingPort()));
+            deviceIpMap.put(SNMP_DEVICE_IP, deviceIpAddress);
+            deviceIpMap.put(SNMP_DEVICE_PORT, String.valueOf(port));
 
             childDevice.setName("Device-" + deviceIpAddress);
             childDevice.set(new RequiredAvailability(DEFAULT_CONNECTION_INTERVAL_IN_MINUTES));
-            childDevice.setProperty(DeviceManagedObjectWrapper.C8Y_SNMP_DEVICE, deviceIpMap);
+            childDevice.setProperty(C8Y_SNMP_DEVICE, deviceIpMap);
 
             childDevice = inventoryApi.create(childDevice);
 
@@ -288,7 +310,7 @@ public class DeviceDiscoveryService {
             childMO.setId(childDevice.getId());
             childReference.setManagedObject(childMO);
 
-            restOperations.post(gatewayDataProvider.getGatewayDevice().getChildDevicesPath(), InventoryMediaType.MANAGED_OBJECT_REFERENCE, childReference);
+            restOperations.post(gatewayDataProvider.getGatewayDevice().getChildDevicesPath(), MANAGED_OBJECT_REFERENCE, childReference);
         } catch(SDKException sdke) {
             // Ignore and continue with the next IP, may be platform is unavailable
             // in which case this will be automatically resolved when the auto discovery runs next time.
@@ -297,11 +319,11 @@ public class DeviceDiscoveryService {
         }
     }
 
-    private void handleNoResponseFromDevice(String type, String text) {
+    void handleNoResponseFromDevice(String type, String text) {
         log.debug(text + " An alarm published to the Platform.");
 
         AlarmMapping alarmMapping = new AlarmMapping();
-        alarmMapping.setSeverity(AlarmSeverity.MAJOR.name());
+        alarmMapping.setSeverity(MAJOR.name());
         alarmMapping.setType(type);
         alarmMapping.setText(text);
 
