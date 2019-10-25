@@ -134,7 +134,7 @@ public class DeviceListenerServiceTest {
 		deviceProtocolMap.put("snmp-device", deviceMoWrapper);
 
 		when(snmpProperties.getTrapListenerAddress()).thenReturn("127.0.0.1");
-		when(snmpProperties.getTrapListenerPort()).thenReturn(161);
+		when(snmpProperties.getTrapListenerPort()).thenReturn(6671);
 		when(snmpProperties.getTrapListenerProtocol()).thenReturn("UDP");
 		when(gatewayDataProvider.getSnmpDeviceMap()).thenReturn(Collections.emptyMap());
 		when(gatewayDataProvider.getGatewayDevice()).thenReturn(gatewayDeviceWrapper);
@@ -185,8 +185,6 @@ public class DeviceListenerServiceTest {
 
 	@Test(expected = ExitException.class)
 	public void shouldCreateSnmpDeviceListenerFailIfPortIsAlreadyInUse() {
-		when(snmpProperties.getTrapListenerAddress()).thenReturn("127.0.0.1");
-		when(snmpProperties.getTrapListenerPort()).thenReturn(162);
 
 		// Action
 		ReflectionTestUtils.invokeMethod(deviceListenerService, "createSnmpDeviceListener");
@@ -195,7 +193,7 @@ public class DeviceListenerServiceTest {
 		try {
 			ReflectionTestUtils.invokeMethod(deviceListenerService, "createSnmpDeviceListener");
 		} catch (ExitException ee) {
-			checkLogExist("Failed to start listening to traps. Port 127.0.0.1/162 is already in use.");
+			checkLogExist("Failed to start listening to traps. Port 127.0.0.1/6671 is already in use.");
 			checkLogExist(
 					"Update the 'snmp.trapListener.port' and 'snmp.trapListener.address' properties and restart the agent. Shutting down the agent...");
 

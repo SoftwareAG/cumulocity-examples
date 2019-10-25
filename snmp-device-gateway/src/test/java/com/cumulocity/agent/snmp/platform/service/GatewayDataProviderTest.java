@@ -193,7 +193,7 @@ public class GatewayDataProviderTest {
 		assertNotNull(ReflectionTestUtils.getField(gatewayDataProvider, "subscriberForOperationsOnGateway"));
 	}
 
-	@Test(timeout = 5000L)
+	@Test(timeout = 10000L)
 	public void shouldGenerateGatewayDataRefreshedEventOnRefreshGatewayObjects() throws InterruptedException {
 		ManagedObjectRepresentation gatewayDeviceMo = new ManagedObjectRepresentation();
 		gatewayDeviceMo.setId(new GId("snmp-agent"));
@@ -212,7 +212,7 @@ public class GatewayDataProviderTest {
 		when(platformProvider.isPlatformAvailable()).thenReturn(true);
 
 		doAnswer((Answer<Void>) invocation -> {
-			Thread.sleep(4000);
+			Thread.sleep(9000);
 			latch.countDown();
 			return null;
 		}).when(gatewayDataProvider).refreshGatewayObjects();
