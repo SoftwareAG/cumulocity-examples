@@ -279,7 +279,7 @@ public abstract class AbstractQueue implements Queue {
             log.trace("'{}' Queue, released the store file '{}' for cycle '{}'", queueName, releasedFile.getPath(), cycle);
 
             try {
-                final FileTime releasedFileLastAccessTime = Files.readAttributes(releasedFile.toPath(), BasicFileAttributes.class).lastAccessTime();
+                final FileTime creationTimeOfReleasedFile = Files.readAttributes(releasedFile.toPath(), BasicFileAttributes.class).creationTime();
 
                 Files.list(releasedFile.getParentFile().toPath())
                         // Filter out folders and the metadata files. Basically select only files with '.cq4' extension
@@ -289,10 +289,10 @@ public abstract class AbstractQueue implements Queue {
                             return fileInTheFolder.toFile().isFile() && !fileName.startsWith("metadata") && fileName.endsWith(".cq4");
                         })
 
-                        // Select the files which were last accessed/modified earlier than the creation time of the file which is being released now
+                        // Select the files which were created earlier than the creation time of the file which is being released now
                         .filter(fileInTheFolder -> {
                                     try {
-                                        return (Files.readAttributes(fileInTheFolder, BasicFileAttributes.class).lastAccessTime().compareTo(releasedFileLastAccessTime) < 0);
+                                        return (Files.readAttributes(fileInTheFolder, BasicFileAttributes.class).creationTime().compareTo(creationTimeOfReleasedFile) < 0);
                                     } catch (IOException ioe) {
                                         log.error("Unexpected error while cleaning up old store files of the '{}' Queue", queueName, ioe);
                                         return false;
