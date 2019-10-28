@@ -1,5 +1,6 @@
 package com.cumulocity.agent.snmp.persistence;
 
+import net.openhft.chronicle.queue.impl.single.QueueFileShrinkManager;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -61,6 +62,7 @@ public class AbstractQueueTest {
     @Test
     public void shouldCreateMapWithCorrectName() {
         assertEquals(AbstractQueueImplForTest.class.getSimpleName(), abstractQueueImplForTest.getName());
+        assertTrue(QueueFileShrinkManager.DISABLE_QUEUE_FILE_SHRINKING);
     }
 
     @Test(expected = NullPointerException.class)

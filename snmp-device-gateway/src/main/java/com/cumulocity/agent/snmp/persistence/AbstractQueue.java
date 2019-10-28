@@ -1,10 +1,12 @@
 package com.cumulocity.agent.snmp.persistence;
 
 import lombok.extern.slf4j.Slf4j;
+import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.queue.ChronicleQueue;
 import net.openhft.chronicle.queue.ExcerptTailer;
 import net.openhft.chronicle.queue.RollCycles;
 import net.openhft.chronicle.queue.impl.StoreFileListener;
+import net.openhft.chronicle.queue.impl.single.QueueFileShrinkManager;
 import net.openhft.chronicle.queue.impl.single.SingleChronicleQueueBuilder;
 import net.openhft.chronicle.threads.Pauser;
 import net.openhft.chronicle.wire.DocumentContext;
@@ -55,6 +57,13 @@ public abstract class AbstractQueue implements Queue {
         this.persistenceFolder = persistenceFolder;
 
         log.info("Creating/Loading '{}' Queue, backed by the folder '{}'", this.name, persistenceFolder.getPath());
+
+        // Since the rolling cycle is set to minutely and we also delete the old files periodically,
+        // we are fine with not shrinking the data files.
+        // Hence we disable the data file shrinking, unless it is explicitly requested by setting the
+        // system property "chronicle.queue.disableFileShrinking"
+        QueueFileShrinkManager.DISABLE_QUEUE_FILE_SHRINKING = Boolean.parseBoolean(
+                System.getProperty("chronicle.queue.disableFileShrinking", Boolean.TRUE.toString()));
 
         // Create producer queue
         this.producerQueue = SingleChronicleQueueBuilder
