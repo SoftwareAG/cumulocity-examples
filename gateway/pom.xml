@@ -20,7 +20,6 @@
         <java.version>1.7</java.version>
         <jackson-datatype-joda>2.4.0</jackson-datatype-joda>
         <jackson-datatype-guava>2.8.4</jackson-datatype-guava>
-        <c8y.microservice.version>${c8y.microservice-new.version}</c8y.microservice.version>
         <jetty.version>9.0.0.v20130308</jetty.version>
         <cometd.version>3.0.0</cometd.version>
         <aspectj.version>1.8.7</aspectj.version>
