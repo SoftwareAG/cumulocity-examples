@@ -9,7 +9,7 @@
   <url>http://maven.apache.org</url>
 
   <properties>
-    <java.version>12</java.version>
+    <java.version>13</java.version>
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
     <spring-boot-dependencies.version>2.1.4.RELEASE</spring-boot-dependencies.version>
@@ -68,6 +68,9 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
         <version>${spring-boot-dependencies.version}</version>
+        <configuration>
+          <mainClass>c8y.example.App</mainClass>
+        </configuration>
         <executions>
           <execution>
             <goals>
