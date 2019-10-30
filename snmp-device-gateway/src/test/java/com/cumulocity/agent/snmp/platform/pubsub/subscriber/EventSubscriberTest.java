@@ -1,14 +1,12 @@
 package com.cumulocity.agent.snmp.platform.pubsub.subscriber;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
-
+import com.cumulocity.agent.snmp.config.GatewayProperties;
+import com.cumulocity.agent.snmp.platform.model.GatewayManagedObjectWrapper;
+import com.cumulocity.agent.snmp.platform.pubsub.service.EventPubSub;
+import com.cumulocity.agent.snmp.platform.service.GatewayDataProvider;
+import com.cumulocity.agent.snmp.platform.service.PlatformProvider;
+import com.cumulocity.sdk.client.SDKException;
+import com.cumulocity.sdk.client.event.EventApi;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,14 +15,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.cumulocity.agent.snmp.config.GatewayProperties;
-import com.cumulocity.agent.snmp.exception.BatchNotSupportedException;
-import com.cumulocity.agent.snmp.platform.model.GatewayManagedObjectWrapper;
-import com.cumulocity.agent.snmp.platform.pubsub.service.EventPubSub;
-import com.cumulocity.agent.snmp.platform.service.GatewayDataProvider;
-import com.cumulocity.agent.snmp.platform.service.PlatformProvider;
-import com.cumulocity.sdk.client.SDKException;
-import com.cumulocity.sdk.client.event.EventApi;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EventSubscriberTest {
@@ -65,8 +57,8 @@ public class EventSubscriberTest {
         assertFalse(eventSubscriber.isBatchingSupported());
     }
 
-    @Test(expected = BatchNotSupportedException.class)
-    public void shouldFailWithAnExceptionIfBatchingIsTriedForEvents() throws BatchNotSupportedException {
+    @Test(expected = UnsupportedOperationException.class)
+    public void shouldFailWithAnExceptionIfBatchingIsTriedForEvents() {
         assertEquals(200, eventSubscriber.getBatchSize());
     }
 
@@ -141,21 +133,7 @@ public class EventSubscriberTest {
     }
 
     @Test(expected = SubscriberException.class)
-    public void should_onMessage_whenEventApiThrowsSDKException() throws SubscriberException {
-        SDKException sdkException = new SDKException(500, "SOME ERROR MESSAGE");
-
-        when(eventApi.create(any(EventSubscriber.EventRepresentation.class))).thenThrow(sdkException);
-
-        try {
-            eventSubscriber.onMessage("SOME STRING");
-        } catch (SubscriberException ppe) {
-            verify(platformProvider).markPlatfromAsUnavailable();
-            throw ppe;
-        }
-    }
-
-    @Test
-    public void should_onMessage_whenEventApiThrowsSDKException_with_HTTPStatus_400() {
+    public void should_onMessage_whenEventApiThrowsSDKException_with_HTTPStatus_400() throws SubscriberException {
         SDKException sdkException = new SDKException(400, "SOME ERROR MESSAGE");
 
         when(eventApi.create(any(EventSubscriber.EventRepresentation.class))).thenThrow(sdkException);
@@ -163,16 +141,16 @@ public class EventSubscriberTest {
         try {
             eventSubscriber.onMessage("SOME STRING");
         } catch (SubscriberException e) {
-            e.printStackTrace();
-            fail(e.getMessage());
-        }
+            verifyZeroInteractions(platformProvider);
+            verify(eventApi).create(eventRepresentationCaptor.capture());
+            assertEquals("SOME STRING", eventRepresentationCaptor.getValue().toJSON());
 
-        verify(eventApi).create(eventRepresentationCaptor.capture());
-        assertEquals("SOME STRING", eventRepresentationCaptor.getValue().toJSON());
+            throw e;
+        }
     }
 
-    @Test
-    public void should_onMessage_whenEventApiThrowsSDKException_with_HTTPStatus_404() {
+    @Test(expected = SubscriberException.class)
+    public void should_onMessage_whenEventApiThrowsSDKException_with_HTTPStatus_404() throws SubscriberException {
         SDKException sdkException = new SDKException(404, "SOME ERROR MESSAGE");
 
         when(eventApi.create(any(EventSubscriber.EventRepresentation.class))).thenThrow(sdkException);
@@ -180,53 +158,11 @@ public class EventSubscriberTest {
         try {
             eventSubscriber.onMessage("SOME STRING");
         } catch (SubscriberException e) {
-            e.printStackTrace();
-            fail(e.getMessage());
-        }
+            verifyZeroInteractions(platformProvider);
+            verify(eventApi).create(eventRepresentationCaptor.capture());
+            assertEquals("SOME STRING", eventRepresentationCaptor.getValue().toJSON());
 
-        verify(eventApi).create(eventRepresentationCaptor.capture());
-        assertEquals("SOME STRING", eventRepresentationCaptor.getValue().toJSON());
-    }
-
-    @Test(expected = SubscriberException.class)
-    public void should_onMessage_whenEventApiThrowsSDKException_with_HTTPStatus_401() throws SubscriberException {
-        SDKException sdkException = new SDKException(401, "SOME ERROR MESSAGE");
-        
-        when(eventApi.create(any(EventSubscriber.EventRepresentation.class))).thenThrow(sdkException);
-
-        try {
-            eventSubscriber.onMessage("SOME STRING");
-        } catch (SubscriberException ppe) {
-            verify(platformProvider).markPlatfromAsUnavailable();
-            throw ppe;
-        }
-    }
-
-    @Test(expected = SubscriberException.class)
-    public void should_onMessage_whenEventApiThrowsSDKException_with_HTTPStatus_402() throws SubscriberException {
-        SDKException sdkException = new SDKException(402, "SOME ERROR MESSAGE");
-
-        when(eventApi.create(any(EventSubscriber.EventRepresentation.class))).thenThrow(sdkException);
-
-        try {
-            eventSubscriber.onMessage("SOME STRING");
-        } catch (SubscriberException ppe) {
-            verify(platformProvider).markPlatfromAsUnavailable();
-            throw ppe;
-        }
-    }
-
-    @Test(expected = SubscriberException.class)
-    public void should_onMessage_whenEventApiThrowsSDKException_with_HTTPStatus_408() throws SubscriberException {
-        SDKException sdkException = new SDKException(408, "SOME ERROR MESSAGE");
-
-        when(eventApi.create(any(EventSubscriber.EventRepresentation.class))).thenThrow(sdkException);
-
-        try {
-            eventSubscriber.onMessage("SOME STRING");
-        } catch (SubscriberException ppe) {
-            verify(platformProvider).markPlatfromAsUnavailable();
-            throw ppe;
+            throw e;
         }
     }
 
@@ -240,6 +176,9 @@ public class EventSubscriberTest {
             eventSubscriber.onMessage("SOME STRING");
         } catch (SubscriberException ppe) {
             verify(platformProvider).markPlatfromAsUnavailable();
+            verify(eventApi).create(eventRepresentationCaptor.capture());
+            assertEquals("SOME STRING", eventRepresentationCaptor.getValue().toJSON());
+
             throw ppe;
         }
     }

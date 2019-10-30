@@ -1,7 +1,6 @@
 package com.cumulocity.agent.snmp.platform.pubsub.subscriber;
 
 import com.cumulocity.agent.snmp.config.GatewayProperties;
-import com.cumulocity.agent.snmp.exception.BatchNotSupportedException;
 import com.cumulocity.agent.snmp.platform.pubsub.service.AlarmPubSub;
 import com.cumulocity.sdk.client.alarm.AlarmApi;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,8 +29,8 @@ public class AlarmSubscriber extends Subscriber<AlarmPubSub> {
 	}
 
 	@Override
-	public int getBatchSize() throws BatchNotSupportedException {
-		throw new BatchNotSupportedException("Batching is not supported for Alarms");
+	public int getBatchSize() {
+		throw new UnsupportedOperationException("Batching is not supported for Alarms");
 	}
 
 	@Override

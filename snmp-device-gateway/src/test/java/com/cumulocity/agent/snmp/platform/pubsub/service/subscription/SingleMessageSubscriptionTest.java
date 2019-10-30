@@ -1,17 +1,25 @@
 package com.cumulocity.agent.snmp.platform.pubsub.service.subscription;
 
+import com.cumulocity.agent.snmp.persistence.Message;
 import com.cumulocity.agent.snmp.persistence.Queue;
 import com.cumulocity.agent.snmp.platform.pubsub.subscriber.Subscriber;
 import com.cumulocity.agent.snmp.platform.pubsub.subscriber.SubscriberException;
 import com.cumulocity.sdk.client.SDKException;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.startsWith;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SingleMessageSubscriptionTest {
@@ -22,31 +30,37 @@ public class SingleMessageSubscriptionTest {
     @Mock
     private Subscriber<?> subscriber;
 
-    @InjectMocks
+    @Captor
+    private ArgumentCaptor<Message> messageCaptor;
+
     private SingleMessageSubscription subscription;
 
+    @Before
+    public void setUp() {
+        subscription = new SingleMessageSubscription(queue, subscriber, (short)5);
+    }
 
     @Test
     public void shouldNotProcessIfSubscriberNotReady() {
-        Mockito.when(subscriber.isReadyToAcceptMessages()).thenReturn(Boolean.FALSE);
+        when(subscriber.isReadyToAcceptMessages()).thenReturn(Boolean.FALSE);
 
         subscription.run();
 
-        Mockito.verify(queue, Mockito.times(1)).getName();
-        Mockito.verify(queue, Mockito.times(0)).dequeue();
+        verify(queue, times(1)).getName();
+        verify(queue, times(0)).dequeue();
     }
 
     @Test
     public void shouldProcessMessagesUntilNoneFound() {
-        Mockito.when(subscriber.isReadyToAcceptMessages()).thenReturn(Boolean.TRUE);
+        when(subscriber.isReadyToAcceptMessages()).thenReturn(Boolean.TRUE);
 
-        Mockito.when(queue.dequeue()).thenReturn("MESSAGE 1").thenReturn("MESSAGE 2").thenReturn(null);
+        when(queue.dequeue()).thenReturn(new Message("MESSAGE 1")).thenReturn(new Message("MESSAGE 2")).thenReturn(null);
 
         subscription.run();
 
-        Mockito.verify(queue, Mockito.times(3)).dequeue();
+        verify(queue, times(3)).dequeue();
         try {
-            Mockito.verify(subscriber, Mockito.times(2)).onMessage(Mockito.startsWith("MESSAGE "));
+            verify(subscriber, times(2)).onMessage(startsWith("MESSAGE "));
         } catch (SubscriberException e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -54,53 +68,120 @@ public class SingleMessageSubscriptionTest {
     }
 
     @Test
-    public void shouldRollbackMessagesWhenProcessThrowsPlatformPublishException() throws SubscriberException {
-        Mockito.when(subscriber.isReadyToAcceptMessages()).thenReturn(Boolean.TRUE);
+    public void shouldRollbackMessagesWhenOnMessageThrowsSubscriberException() throws SubscriberException {
+        when(subscriber.isReadyToAcceptMessages()).thenReturn(Boolean.TRUE);
 
-        Mockito.when(queue.dequeue()).thenReturn("MESSAGE 1").thenReturn("MESSAGE 2").thenReturn(null);
+        when(queue.getName()).thenReturn("ALARM");
+        when(queue.dequeue()).thenReturn(new Message("MESSAGE 1")).thenReturn(new Message("MESSAGE 2")).thenReturn(null);
 
-        Mockito.doThrow(new SubscriberException(new SDKException("Error processing messages.")))
-                    .when(subscriber).onMessage(Mockito.eq("MESSAGE 2"));
+        doThrow(new SubscriberException(new SDKException("Error processing messages.")))
+                    .when(subscriber).onMessage(eq("MESSAGE 2"));
 
         subscription.run();
 
-        Mockito.verify(queue, Mockito.times(1)).enqueue(Mockito.startsWith("MESSAGE 2"));
+        verify(queue, times(1)).backout(messageCaptor.capture());
+        assertTrue(messageCaptor.getValue().getPayload().startsWith("MESSAGE 2"));
 
-        Mockito.verify(queue, Mockito.times(2)).dequeue();
-        Mockito.verify(subscriber, Mockito.times(2)).onMessage(Mockito.startsWith("MESSAGE "));
+        verify(queue, times(2)).dequeue();
+        verify(subscriber, times(2)).onMessage(startsWith("MESSAGE "));
+    }
+
+    @Test
+    public void shouldNotRollbackMessagesWhenOnMessageThrowsSubscriberException_and_backoutCountOfMessage_exceededRetryLimit() throws SubscriberException {
+        when(subscriber.isReadyToAcceptMessages()).thenReturn(Boolean.TRUE);
+
+        when(queue.getName()).thenReturn("ALARM");
+        when(queue.dequeue()).thenReturn(new Message("MESSAGE 1")).thenReturn(new Message("MESSAGE 2", (short)5)).thenReturn(null);
+
+        doThrow(new SubscriberException(new SDKException("Error processing messages.")))
+                .when(subscriber).onMessage(eq("MESSAGE 2"));
+
+        subscription.run();
+
+        verify(queue, times(0)).backout(any(Message.class));
+
+        verify(queue, times(2)).dequeue();
+        verify(subscriber, times(2)).onMessage(startsWith("MESSAGE "));
     }
 
 
     @Test
-    public void shouldRollbackMessagesWhenProcessThrowsPlatformPublishException_2() throws SubscriberException {
-        Mockito.when(subscriber.isReadyToAcceptMessages()).thenReturn(Boolean.TRUE);
+    public void shouldRollbackMessagesWhenOnMessageThrowsSubscriberException_2() throws SubscriberException {
+        when(subscriber.isReadyToAcceptMessages()).thenReturn(Boolean.TRUE);
 
-        Mockito.when(queue.dequeue()).thenReturn("MESSAGE 1").thenReturn("MESSAGE 2").thenReturn(null);
+        when(queue.getName()).thenReturn("ALARM");
+        when(queue.dequeue()).thenReturn(new Message("MESSAGE 1")).thenReturn(new Message("MESSAGE 2")).thenReturn(null);
 
-        Mockito.doThrow(new SubscriberException(new SDKException("Error processing messages.")))
-                .when(subscriber).onMessage(Mockito.eq("MESSAGE 2"));
+        doThrow(new SubscriberException(new SDKException("Error processing messages.")))
+                .when(subscriber).onMessage(eq("MESSAGE 2"));
 
-        Mockito.doThrow(new NullPointerException()).when(queue).enqueue(Mockito.eq("MESSAGE 2"));
+        doThrow(new NullPointerException()).when(queue).backout(eq(new Message("MESSAGE 2")));
 
         subscription.run();
 
-        Mockito.verify(queue, Mockito.times(1)).enqueue(Mockito.startsWith("MESSAGE "));
+        verify(queue, times(1)).backout(messageCaptor.capture());
+        assertTrue(messageCaptor.getValue().getPayload().startsWith("MESSAGE "));
 
-        Mockito.verify(queue, Mockito.times(2)).dequeue();
-        Mockito.verify(subscriber, Mockito.times(2)).onMessage(Mockito.startsWith("MESSAGE "));
+        verify(queue, times(2)).dequeue();
+        verify(subscriber, times(2)).onMessage(startsWith("MESSAGE "));
     }
 
     @Test
     public void shouldCatchThrowableAndReturnGracefully() throws SubscriberException {
-        Mockito.when(subscriber.isReadyToAcceptMessages()).thenReturn(Boolean.TRUE);
+        when(subscriber.isReadyToAcceptMessages()).thenReturn(Boolean.TRUE);
 
-        Mockito.when(queue.dequeue()).thenReturn("MESSAGE 1").thenReturn("MESSAGE 2").thenReturn(null);
+        when(queue.getName()).thenReturn("ALARM");
+        when(queue.dequeue()).thenReturn(new Message("MESSAGE 1")).thenReturn(new Message("MESSAGE 2")).thenReturn(null);
 
-        Mockito.doThrow(new NullPointerException()).when(subscriber).onMessage(Mockito.eq("MESSAGE 2"));
+        doThrow(new NullPointerException()).when(subscriber).onMessage(eq("MESSAGE 2"));
 
         subscription.run();
 
-        Mockito.verify(queue, Mockito.times(2)).dequeue();
-        Mockito.verify(subscriber, Mockito.times(2)).onMessage(Mockito.startsWith("MESSAGE "));
+        verify(queue, times(2)).dequeue();
+        verify(subscriber, times(2)).onMessage(startsWith("MESSAGE "));
+    }
+
+    @Test
+    public void shouldRollbackMessageSuccessfully() {
+        // given
+        Message message = new Message("SOME MESSAGE");
+        when(queue.getName()).thenReturn("ALARM");
+
+        // when
+        subscription.rollbackMessageToQueue(message, new SubscriberException(new NullPointerException()));
+
+        // then
+        verify(queue).backout(message);
+        verify(queue).getName();
+    }
+
+    @Test
+    public void shouldNot_RollbackMessage_whenBackoutCountExceedsRetryLimit() {
+        // given
+        Message message = new Message("SOME MESSAGE", (short)5);
+        when(queue.getName()).thenReturn("ALARM");
+
+        // when
+        subscription.rollbackMessageToQueue(message, new SubscriberException(new NullPointerException()));
+
+        // then
+        verify(queue, times(0)).backout(message);
+        verify(queue).getName();
+    }
+
+    @Test
+    public void should_handle_exceptionsWhileRollingBackTheMessage() {
+        // given
+        Message message = new Message("SOME MESSAGE", (short)0);
+        when(queue.getName()).thenReturn("ALARM");
+
+        doThrow(new NullPointerException()).when(queue).backout(message);
+
+        // when
+        subscription.rollbackMessageToQueue(message, new SubscriberException(new NullPointerException()));
+
+        // then
+        verify(queue, times(1)).backout(message);
+        verify(queue, times(2)).getName();
     }
 }

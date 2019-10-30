@@ -1,14 +1,12 @@
 package com.cumulocity.agent.snmp.platform.pubsub.subscriber;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
-
+import com.cumulocity.agent.snmp.config.GatewayProperties;
+import com.cumulocity.agent.snmp.platform.model.GatewayManagedObjectWrapper;
+import com.cumulocity.agent.snmp.platform.pubsub.service.AlarmPubSub;
+import com.cumulocity.agent.snmp.platform.service.GatewayDataProvider;
+import com.cumulocity.agent.snmp.platform.service.PlatformProvider;
+import com.cumulocity.sdk.client.SDKException;
+import com.cumulocity.sdk.client.alarm.AlarmApi;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,14 +15,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.cumulocity.agent.snmp.config.GatewayProperties;
-import com.cumulocity.agent.snmp.exception.BatchNotSupportedException;
-import com.cumulocity.agent.snmp.platform.model.GatewayManagedObjectWrapper;
-import com.cumulocity.agent.snmp.platform.pubsub.service.AlarmPubSub;
-import com.cumulocity.agent.snmp.platform.service.GatewayDataProvider;
-import com.cumulocity.agent.snmp.platform.service.PlatformProvider;
-import com.cumulocity.sdk.client.SDKException;
-import com.cumulocity.sdk.client.alarm.AlarmApi;
+import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AlarmSubscriberTest {
@@ -65,8 +58,8 @@ public class AlarmSubscriberTest {
 		assertFalse(alarmSubscriber.isBatchingSupported());
 	}
 
-	@Test(expected = BatchNotSupportedException.class)
-	public void shouldFailWithAnExceptionIfBatchingIsTriedForAlarms() throws BatchNotSupportedException {
+	@Test(expected = UnsupportedOperationException.class)
+	public void shouldFailWithAnExceptionIfBatchingIsTriedForAlarms() {
 		assertEquals(200, alarmSubscriber.getBatchSize());
 	}
 
@@ -141,21 +134,7 @@ public class AlarmSubscriberTest {
 	}
 
 	@Test(expected = SubscriberException.class)
-	public void should_onMessage_whenAlarmApiThrowsSDKException() throws SubscriberException {
-		SDKException sdkException = new SDKException(500, "SOME ERROR MESSAGE");
-
-		when(alarmApi.create(any(AlarmSubscriber.AlarmRepresentation.class))).thenThrow(sdkException);
-
-		try {
-			alarmSubscriber.onMessage("SOME STRING");
-		} catch (SubscriberException ppe) {
-			verify(platformProvider).markPlatfromAsUnavailable();
-			throw ppe;
-		}
-	}
-
-	@Test
-	public void should_onMessage_whenAlarmApiThrowsSDKException_with_HTTPStatus_400() {
+	public void should_onMessage_whenAlarmApiThrowsSDKException_with_HTTPStatus_400() throws SubscriberException {
 		SDKException sdkException = new SDKException(400, "SOME ERROR MESSAGE");
 
 		when(alarmApi.create(any(AlarmSubscriber.AlarmRepresentation.class))).thenThrow(sdkException);
@@ -163,16 +142,16 @@ public class AlarmSubscriberTest {
 		try {
 			alarmSubscriber.onMessage("SOME STRING");
 		} catch (SubscriberException e) {
-			fail(e.getMessage());
+			verifyZeroInteractions(platformProvider);
+			verify(alarmApi).create(alarmRepresentationCaptor.capture());
+			assertEquals("SOME STRING", alarmRepresentationCaptor.getValue().toJSON());
+
+			throw e;
 		}
-
-		verify(alarmApi).create(alarmRepresentationCaptor.capture());
-
-		assertEquals("SOME STRING", alarmRepresentationCaptor.getValue().toJSON());
 	}
 
-	@Test
-	public void should_onMessage_whenAlarmApiThrowsSDKException_with_HTTPStatus_404() {
+	@Test(expected = SubscriberException.class)
+	public void should_onMessage_whenAlarmApiThrowsSDKException_with_HTTPStatus_404() throws SubscriberException {
 		SDKException sdkException = new SDKException(404, "SOME ERROR MESSAGE");
 
 		when(alarmApi.create(any(AlarmSubscriber.AlarmRepresentation.class))).thenThrow(sdkException);
@@ -180,53 +159,11 @@ public class AlarmSubscriberTest {
 		try {
 			alarmSubscriber.onMessage("SOME STRING");
 		} catch (SubscriberException e) {
-			fail(e.getMessage());
-		}
+			verifyZeroInteractions(platformProvider);
+			verify(alarmApi).create(alarmRepresentationCaptor.capture());
+			assertEquals("SOME STRING", alarmRepresentationCaptor.getValue().toJSON());
 
-		verify(alarmApi).create(alarmRepresentationCaptor.capture());
-
-		assertEquals("SOME STRING", alarmRepresentationCaptor.getValue().toJSON());
-	}
-
-	@Test(expected = SubscriberException.class)
-	public void should_onMessage_whenAlarmApiThrowsSDKException_with_HTTPStatus_401() throws SubscriberException {
-		SDKException sdkException = new SDKException(401, "SOME ERROR MESSAGE");
-
-		when(alarmApi.create(any(AlarmSubscriber.AlarmRepresentation.class))).thenThrow(sdkException);
-
-		try {
-			alarmSubscriber.onMessage("SOME STRING");
-		} catch (SubscriberException ppe) {
-			verify(platformProvider).markPlatfromAsUnavailable();
-			throw ppe;
-		}
-	}
-
-	@Test(expected = SubscriberException.class)
-	public void should_onMessage_whenAlarmApiThrowsSDKException_with_HTTPStatus_402() throws SubscriberException {
-		SDKException sdkException = new SDKException(402, "SOME ERROR MESSAGE");
-
-		when(alarmApi.create(any(AlarmSubscriber.AlarmRepresentation.class))).thenThrow(sdkException);
-
-		try {
-			alarmSubscriber.onMessage("SOME STRING");
-		} catch (SubscriberException ppe) {
-			verify(platformProvider).markPlatfromAsUnavailable();
-			throw ppe;
-		}
-	}
-
-	@Test(expected = SubscriberException.class)
-	public void should_onMessage_whenAlarmApiThrowsSDKException_with_HTTPStatus_408() throws SubscriberException {
-		SDKException sdkException = new SDKException(408, "SOME ERROR MESSAGE");
-
-		when(alarmApi.create(any(AlarmSubscriber.AlarmRepresentation.class))).thenThrow(sdkException);
-
-		try {
-			alarmSubscriber.onMessage("SOME STRING");
-		} catch (SubscriberException ppe) {
-			verify(platformProvider).markPlatfromAsUnavailable();
-			throw ppe;
+			throw e;
 		}
 	}
 
@@ -240,6 +177,9 @@ public class AlarmSubscriberTest {
 			alarmSubscriber.onMessage("SOME STRING");
 		} catch (SubscriberException ppe) {
 			verify(platformProvider).markPlatfromAsUnavailable();
+			verify(alarmApi).create(alarmRepresentationCaptor.capture());
+			assertEquals("SOME STRING", alarmRepresentationCaptor.getValue().toJSON());
+
 			throw ppe;
 		}
 	}

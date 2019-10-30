@@ -199,7 +199,7 @@ public class GatewayDataProvider {
 
 				@Override
 				public void onError(Subscription<GId> subscription, Throwable throwable) {
-					log.error("Error occurred while listening to operations for the device with name '{}' and id '{}'.",
+					log.debug("Error occurred while listening to operations for the device with name '{}' and id '{}'.",
 							gatewayDevice.getName(), gatewayDevice.getId().getValue(), throwable);
 				}
 			});
@@ -209,9 +209,9 @@ public class GatewayDataProvider {
 		} catch(Throwable t) {
 			subscriberForOperationsOnGateway = null;
 
-			// Ignore this exception and continue as the subscription will be retired when the Gateway data is refreshed next time.
+			// Ignore this exception and continue as the subscription will be retried when the Gateway data is refreshed next time.
 			log.warn("Couldn't enable the subscription for listening to operations for the device with name '{}' and id '{}'." +
-					" This subscription will be retired later.", gatewayDevice.getName(), gatewayDevice.getId().getValue());
+					" This subscription will be retried later.", gatewayDevice.getName(), gatewayDevice.getId().getValue());
 			log.debug(t.getMessage(), t);
 		}
 	}

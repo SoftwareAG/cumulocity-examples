@@ -196,23 +196,23 @@ public class DeviceDiscoveryService {
                     if (currentIp.isReachable(timeoutInMilliseconds)) {
                         boolean isDeviceSnmpEnabled = isDeviceSnmpEnabled(currentIp, port, isProtocolUdp, communityTarget);
                         if (isDeviceSnmpEnabled && !existingDeviceMap.containsKey(currentIpString)) {
-                            log.debug("A new SNMP enabled device is found with IP Address {} by auto-discovery device scan.", currentIpString);
+                            log.info("A new SNMP enabled device is found with IP Address {} by auto-discovery device scan.", currentIpString);
 
                             // Create a new Child Device
                             createAndRegisterAChildDevice(currentIpString, port);
                         } else if (!isDeviceSnmpEnabled) {
-                            handleNoResponseFromDevice("A device with IP Address <" + currentIpString + ">, which is not SNMP enabled, found during auto-discovery device scan.", c8y_DeviceSnmpNotEnabled + currentIpString);
+                            handleNoResponseFromDevice("A device with IP Address <" + currentIpString + ">, which is not SNMP enabled is found during auto-discovery device scan.", c8y_DeviceSnmpNotEnabled + currentIpString);
                         }
                     } else {
                         if (existingDeviceMap.containsKey(currentIpString)) {
                             handleNoResponseFromDevice("Existing SNMP device with IP Address <" + currentIpString + "> didn't respond during auto-discovery device scan.", c8y_DeviceNotResponding + currentIpString);
                         } else {
-                            log.debug("No device is found at IP Address <{}> during auto-discovery device scan.", currentIpString);
+                            log.info("No device is found at IP Address <{}> during auto-discovery device scan.", currentIpString);
                         }
                     }
                 } catch (IOException e) {
                     // Ignore this exception and continue
-                    log.info("Unexpected error while pinging the IP Address {}.", currentIpString, e);
+                    log.warn("Unexpected error while pinging the IP Address {}.", currentIpString, e);
                 }
 
                 currentIp = InetAddresses.increment(currentIp);
@@ -320,7 +320,7 @@ public class DeviceDiscoveryService {
     }
 
     void handleNoResponseFromDevice(String type, String text) {
-        log.debug(text + " An alarm published to the Platform.");
+        log.warn(text + " An alarm is published to the Platform.");
 
         AlarmMapping alarmMapping = new AlarmMapping();
         alarmMapping.setSeverity(MAJOR.name());

@@ -1,11 +1,10 @@
 package com.cumulocity.agent.snmp.platform.pubsub.service.subscription;
 
+import com.cumulocity.agent.snmp.persistence.Message;
 import com.cumulocity.agent.snmp.persistence.Queue;
 import com.cumulocity.agent.snmp.platform.pubsub.subscriber.Subscriber;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.Collection;
 
 /**
  * Drains the queue and delivers the messages to the subscriber.
@@ -26,10 +25,14 @@ public abstract class Subscription implements Runnable {
     @Getter
     private final Subscriber<?> subscriber;
 
+    @Getter
+    private final short retryLimit;
 
-    Subscription(Queue queue, Subscriber<?> subscriber) {
+
+    Subscription(Queue queue, Subscriber<?> subscriber, short retryLimit) {
         this.queue = queue;
         this.subscriber = subscriber;
+        this.retryLimit = retryLimit;
     }
 
     @Override
@@ -46,23 +49,26 @@ public abstract class Subscription implements Runnable {
             }
         } catch(Throwable t) {
             // Throwable is caught to ensure that the scheduled subscription continues. This logged and ignored.
-            log.error("Unexpected error occurred while delivering messages from '{}' Queue to the '{}' Subscriber. Delivery will be retried.", this.getClass().getSimpleName(), queue.getName(), t);
+            log.error("Unexpected error occurred while publishing the {} to the Platform.", queue.getName().toLowerCase(), t);
         }
     }
 
     protected abstract boolean deliver();
 
-    void rollbackMessagesToQueue(Collection<String> messages) {
-        if(messages == null || messages.isEmpty()) {
-            return;
+    void rollbackMessageToQueue(Message message, Throwable throwable) {
+        if(message.getBackoutCount() + 1 > getRetryLimit()) {
+            log.error("Skipped publishing the following {} to the Platform, as the failure count for publishing it has exceeded the configured retry limit.\n{}", getQueue().getName().toLowerCase(), message.getPayload(), throwable);
         }
-
-        for(String oneMessage : messages) {
+        else {
+            if(message.getBackoutCount() == 0) {
+                // Log only the first time
+                log.warn("Failed to publish the following {} to the Platform, will retry again.\n{}", getQueue().getName().toLowerCase(), message.getPayload(), throwable);
+            }
             try {
-                queue.enqueue(oneMessage);
+                queue.backout(message);
             } catch(Throwable t) {
                 // Log this message string and the exception as we can't do much and continue to execute the loop
-                log.error("Skipped delivering the following message to the '{}' Subscriber as an error occurred while placing the message back in the '{}' Queue.\n{}", queue.getName(), this.subscriber.getClass().getSimpleName(), oneMessage, t);
+                log.error("Unexpected error occurred while storing the following {} for a retry, hence it will not be retried.\n{}", getQueue().getName().toLowerCase(), message.getPayload(), t);
             }
         }
     }

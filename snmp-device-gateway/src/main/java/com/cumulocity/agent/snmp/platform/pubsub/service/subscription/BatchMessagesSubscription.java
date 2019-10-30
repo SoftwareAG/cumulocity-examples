@@ -1,45 +1,52 @@
 package com.cumulocity.agent.snmp.platform.pubsub.service.subscription;
 
-import com.cumulocity.agent.snmp.exception.BatchNotSupportedException;
+import com.cumulocity.agent.snmp.persistence.Message;
 import com.cumulocity.agent.snmp.persistence.Queue;
 import com.cumulocity.agent.snmp.platform.pubsub.subscriber.Subscriber;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class BatchMessagesSubscription extends Subscription {
 
-    public BatchMessagesSubscription(Queue queue, Subscriber<?> subscriber) {
-        super(queue, subscriber);
+    public BatchMessagesSubscription(Queue queue, Subscriber<?> subscriber, short retryLimit) {
+        super(queue, subscriber, retryLimit);
     }
 
     @Override
     protected boolean deliver() {
         boolean continueDelivering = false;
 
-        int batchSize;
-		try {
-			batchSize = getSubscriber().getBatchSize();
-		} catch (BatchNotSupportedException e) {
-			log.error("Batching is not supported for {}", getSubscriber().getClass().getSimpleName(), e);
-			return false;
-		}
+        int batchSize = getSubscriber().getBatchSize();
 
-        Collection<String> messagesFromQueue = new ArrayList<>(batchSize);
+        Collection<Message> messagesFromQueue = new ArrayList<>(batchSize);
         int size = getQueue().drainTo(messagesFromQueue, batchSize);
         if(size > 0) {
             try {
-                getSubscriber().onMessages(messagesFromQueue);
+                List<String> messageStringsFromQueue = messagesFromQueue.parallelStream().map(Message::getPayload).collect(Collectors.toList());
+                getSubscriber().onMessages(messageStringsFromQueue);
 
                 if(size >= batchSize) {
                     continueDelivering = true;
                 }
             } catch(Throwable t) {
-                // Throwable is caught to ensure that the messages are not lost on any condition
-                log.error("Failed to deliver the messages from '{}' Queue to the '{}' Subscriber. Messages are put back in the queue for retry.", getQueue().getName(), getSubscriber().getClass().getSimpleName(), t);
-                rollbackMessagesToQueue(messagesFromQueue);
+                // Try to publish them individually, to isolate and rollback only the bad one from the batch
+                messagesFromQueue.forEach((oneMessageFromQueue) -> {
+                    if(getSubscriber().isReadyToAcceptMessages()) {
+                        try {
+                            getSubscriber().onMessage(oneMessageFromQueue.getPayload());
+                        } catch (Throwable t2) {
+                            rollbackMessageToQueue(oneMessageFromQueue, t2);
+                        }
+                    }
+                    else {
+                        rollbackMessageToQueue(oneMessageFromQueue, t);
+                    }
+                });
             }
         }
 

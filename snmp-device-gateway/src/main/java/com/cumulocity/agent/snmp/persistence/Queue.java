@@ -5,11 +5,13 @@ import java.util.Collection;
 public interface Queue extends AutoCloseable {
     String getName();
 
-    void enqueue(String message);
+    void enqueue(Message message);
 
-    String peek();
+    void backout(Message message);
 
-    String dequeue();
+    Message peek();
 
-    int drainTo(Collection<String> collection, int maxElements);
+    Message dequeue();
+
+    int drainTo(Collection<Message> collection, int maxElements);
 }

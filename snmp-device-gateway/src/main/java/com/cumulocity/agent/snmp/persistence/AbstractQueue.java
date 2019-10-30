@@ -1,7 +1,6 @@
 package com.cumulocity.agent.snmp.persistence;
 
 import lombok.extern.slf4j.Slf4j;
-import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.queue.ChronicleQueue;
 import net.openhft.chronicle.queue.ExcerptTailer;
 import net.openhft.chronicle.queue.RollCycles;
@@ -92,7 +91,7 @@ public abstract class AbstractQueue implements Queue {
     }
 
     @Override
-    public void enqueue(String message) {
+    public void enqueue(Message message) {
         if (message == null) {
             throw new NullPointerException("message");
         }
@@ -103,7 +102,8 @@ public abstract class AbstractQueue implements Queue {
 
         LOCK_TO_ENSURE_NO_ONE_IS_ACCESSING_THE_QUEUE.readLock().lock();
         try {
-            producerQueue.acquireAppender().writeText(message);
+            producerQueue.acquireAppender().writeDocument(message);
+
             pauser.unpause();
         } catch(Throwable t) {
             log.error("Enqueue to the '{}' Queue, resulted in a timeout.", this.name, t);
@@ -114,12 +114,25 @@ public abstract class AbstractQueue implements Queue {
     }
 
     @Override
-    public synchronized String peek() {
+    public void backout(Message message) {
+        if (message == null) {
+            throw new NullPointerException("message");
+        }
+
+        message.incrementBackoutCount();
+
+        // Since Chronicle Queue doesn't support inserting message at the beginning
+        // of the queue, we just enqueue the message at the end of the queue.
+        enqueue(message);
+    }
+
+    @Override
+    public synchronized Message peek() {
         if(isClosed) {
             throw new IllegalStateException("Cannot peek as the '" + this.name + "' Queue is closed.");
         }
 
-        String returnValue = null;
+        Message returnValue = null;
 
         LOCK_TO_ENSURE_NO_ONE_IS_ACCESSING_THE_QUEUE.readLock().lock();
 
@@ -129,7 +142,7 @@ public abstract class AbstractQueue implements Queue {
             if(documentContext.isPresent()) {
                 pauser.reset();
 
-                returnValue = documentContext.wire().read().text();
+                returnValue = new Message(documentContext.wire());
             }
             else {
                 pauser.pause();
@@ -151,12 +164,12 @@ public abstract class AbstractQueue implements Queue {
     }
 
     @Override
-    public synchronized String dequeue() {
+    public synchronized Message dequeue() {
         if(isClosed) {
             throw new IllegalStateException("Cannot call dequeue as the '" + this.name + "' Queue is closed.");
         }
 
-        String returnValue = null;
+        Message returnValue = null;
 
         LOCK_TO_ENSURE_NO_ONE_IS_ACCESSING_THE_QUEUE.readLock().lock();
 
@@ -166,7 +179,7 @@ public abstract class AbstractQueue implements Queue {
             if(documentContext.isPresent()) {
                 pauser.reset();
 
-                returnValue = documentContext.wire().read().text();
+                returnValue = new Message(documentContext.wire());
             }
             else {
                 pauser.pause();
@@ -190,7 +203,7 @@ public abstract class AbstractQueue implements Queue {
     }
 
     @Override
-    public synchronized int drainTo(Collection<String> collection, int maxElements) {
+    public synchronized int drainTo(Collection<Message> collection, int maxElements) {
         if(isClosed) {
             throw new IllegalStateException("Cannot call drainTo as the '" + this.name + "' Queue is closed.");
         }
@@ -212,7 +225,7 @@ public abstract class AbstractQueue implements Queue {
                 pauser.reset();
 
                 while(documentContext.isPresent()) {
-                    collection.add(documentContext.wire().read().text());
+                    collection.add(new Message(documentContext.wire()));
                     ++elementCount;
 
                     documentContext.close();

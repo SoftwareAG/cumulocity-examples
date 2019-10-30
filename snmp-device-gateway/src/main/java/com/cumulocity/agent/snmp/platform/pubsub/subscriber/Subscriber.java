@@ -1,7 +1,6 @@
 package com.cumulocity.agent.snmp.platform.pubsub.subscriber;
 
 import com.cumulocity.agent.snmp.bootstrap.model.BootstrapReadyEvent;
-import com.cumulocity.agent.snmp.exception.BatchNotSupportedException;
 import com.cumulocity.agent.snmp.platform.model.GatewayDataRefreshedEvent;
 import com.cumulocity.agent.snmp.platform.pubsub.service.PubSub;
 import com.cumulocity.agent.snmp.platform.service.GatewayDataProvider;
@@ -49,7 +48,7 @@ public abstract class Subscriber<PS extends PubSub<?>> {
 
     public abstract boolean isBatchingSupported();
 
-    public abstract int getBatchSize() throws BatchNotSupportedException;
+    public abstract int getBatchSize();
 
     public abstract int getConcurrentSubscriptionsCount();
 
@@ -57,24 +56,13 @@ public abstract class Subscriber<PS extends PubSub<?>> {
         try {
             handleMessage(message);
         } catch(SDKException sdke) {
-            if (isExceptionDueToInvalidMessage(sdke)) {
-                // If the error is caused by an invalid message which is being processed, we will not be able to do much here.
-                // Just log the message with the exception details and continue.
-                // Log the message and return
-                log.error("'{}' Subscriber skipped publishing the following invalid message to the Platform.\n{}", this.getClass().getSimpleName(), message, sdke);
-            }
-            else {
-                log.error("'{}' Subscriber failed to publish message to the Platform. May be Platform is unavailable." +
-                        "\nThrowing exception so the failed message is put back in the Queue. " +
-                        "Will be published when Platform is back online again.", this.getClass().getSimpleName(), sdke);
-
-                // Unable to publish as the platform is unavailable,
-                // so mark the platform as unavailable and put the message(s) already read, back into the queue.
+            if(sdke.getHttpStatus() >= HttpStatus.SC_INTERNAL_SERVER_ERROR) {
+                // Unable to publish as the platform is unavailable
                 platformProvider.markPlatfromAsUnavailable();
                 log.debug("'{}' Subscriber has marked the platform as unavailable.", this.getClass().getSimpleName());
-
-                throw new SubscriberException(sdke);
             }
+
+            throw new SubscriberException(sdke);
         }
     }
 
@@ -82,26 +70,13 @@ public abstract class Subscriber<PS extends PubSub<?>> {
         try {
             handleMessages(messageCollection);
         } catch(SDKException sdke) {
-            if (isExceptionDueToInvalidMessage(sdke)) {
-                // If the error is caused by an invalid message which is being processed, we will not be able to do much here.
-                // Just log the message with the exception details and continue.
-                // Log the messages and return
-                for(String oneMessage : messageCollection) {
-                    log.error("'{}' Subscriber skipped publishing the following invalid message to the Platform.\n{}", this.getClass().getSimpleName(), oneMessage, sdke);
-                }
-            }
-            else {
-                log.error("'{}' Subscriber failed to publish messages to the Platform. May be Platform is unavailable." +
-                        "\nThrowing exception so the failed messages are put back in the Queue. " +
-                        "Will be published when Platform is back online again.", this.getClass().getSimpleName(), sdke);
-
-                // Unable to publish as the platform is unavailable,
-                // so mark the platform as unavailable and put the message(s) already read, back into the queue.
+            if(sdke.getHttpStatus() >= HttpStatus.SC_INTERNAL_SERVER_ERROR) {
+                // Unable to publish as the platform is unavailable
                 platformProvider.markPlatfromAsUnavailable();
                 log.debug("'{}' Subscriber has marked the platform as unavailable.", this.getClass().getSimpleName());
-
-                throw new SubscriberException(sdke);
             }
+
+            throw new SubscriberException(sdke);
         }
     }
 
@@ -150,14 +125,5 @@ public abstract class Subscriber<PS extends PubSub<?>> {
 
     private long fetchTransmitRateFromGatewayDevice() {
         return gatewayDataProvider.getGatewayDevice().getSnmpCommunicationProperties().getTransmitRate();
-    }
-
-    private boolean isExceptionDueToInvalidMessage(SDKException sdke) {
-        int httpStatus = sdke.getHttpStatus();
-        return     httpStatus >= HttpStatus.SC_BAD_REQUEST
-                && httpStatus < HttpStatus.SC_INTERNAL_SERVER_ERROR
-                && !(httpStatus == HttpStatus.SC_UNAUTHORIZED
-                     || httpStatus == HttpStatus.SC_PAYMENT_REQUIRED
-                     || httpStatus == HttpStatus.SC_REQUEST_TIMEOUT);
     }
 }

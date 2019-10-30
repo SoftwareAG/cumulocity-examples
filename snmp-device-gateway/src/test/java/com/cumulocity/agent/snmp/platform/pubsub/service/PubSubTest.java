@@ -1,9 +1,10 @@
 package com.cumulocity.agent.snmp.platform.pubsub.service;
 
+import com.cumulocity.agent.snmp.config.GatewayProperties;
+import com.cumulocity.agent.snmp.persistence.Message;
 import com.cumulocity.agent.snmp.persistence.Queue;
 import com.cumulocity.agent.snmp.platform.pubsub.service.subscription.Subscription;
 import com.cumulocity.agent.snmp.platform.pubsub.subscriber.Subscriber;
-import com.cumulocity.agent.snmp.platform.service.PlatformProvider;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.*;
@@ -24,10 +25,13 @@ public class PubSubTest {
     private TaskScheduler taskScheduler;
 
     @Mock
-    private PlatformProvider platformProvider;
+    private GatewayProperties gatewayProperties;
 
     @Mock
     private Queue queue;
+
+    @Captor
+    private ArgumentCaptor<Message> messageCaptor;
 
     @Mock
     private Subscriber<?> subscriber;
@@ -43,7 +47,8 @@ public class PubSubTest {
         String message = "MESSAGE STRING";
         pubSub.publish(message);
 
-        Mockito.verify(queue).enqueue(message);
+        Mockito.verify(queue).enqueue(messageCaptor.capture());
+        assertEquals(message, messageCaptor.getValue().getPayload());
     }
 
     @Test(expected = NullPointerException.class)
@@ -54,6 +59,7 @@ public class PubSubTest {
     @Test
     public void shouldSubscribeWhenBatchingIsNotSupported() {
         Mockito.when(subscriber.isBatchingSupported()).thenReturn(Boolean.FALSE);
+        Mockito.when(gatewayProperties.getGatewayPublishRetryLimit()).thenReturn((short)2);
 
         int concurrentSubscriptionsCount = 3;
         Mockito.when(subscriber.getConcurrentSubscriptionsCount()).thenReturn(Integer.valueOf(concurrentSubscriptionsCount));
@@ -86,6 +92,7 @@ public class PubSubTest {
     @Test
     public void shouldSubscribeWhenBatchingIsSupported() {
         Mockito.when(subscriber.isBatchingSupported()).thenReturn(Boolean.TRUE);
+        Mockito.when(gatewayProperties.getGatewayPublishRetryLimit()).thenReturn((short)2);
 
         long transmitRateInSeconds = 10;
         Mockito.when(subscriber.getTransmitRateInSeconds()).thenReturn(Long.valueOf(transmitRateInSeconds));
@@ -105,6 +112,7 @@ public class PubSubTest {
     public void shouldSubscribeWhenBatchingIsSupported_withZeroTransmitRateInSeconds() {
         Mockito.when(subscriber.isBatchingSupported()).thenReturn(Boolean.TRUE);
         Mockito.when(subscriber.getTransmitRateInSeconds()).thenReturn(Long.valueOf(0));
+        Mockito.when(gatewayProperties.getGatewayPublishRetryLimit()).thenReturn((short)2);
 
         int concurrentSubscriptionsCount = 3;
         Mockito.when(subscriber.getConcurrentSubscriptionsCount()).thenReturn(Integer.valueOf(concurrentSubscriptionsCount));
@@ -123,6 +131,7 @@ public class PubSubTest {
     @Test(expected = IllegalStateException.class)
     public void shouldThrowIllegalStateExceptionIfAlreadySubscribed() {
         Mockito.when(subscriber.isBatchingSupported()).thenReturn(Boolean.FALSE);
+        Mockito.when(gatewayProperties.getGatewayPublishRetryLimit()).thenReturn((short)2);
 
         int concurrentSubscriptionsCount = 2;
         Mockito.when(subscriber.getConcurrentSubscriptionsCount()).thenReturn(Integer.valueOf(concurrentSubscriptionsCount));

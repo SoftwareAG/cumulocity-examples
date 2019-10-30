@@ -79,15 +79,15 @@ public class AbstractQueueTest {
 
     @Test
     public void shouldEnqueueSuccessfully() {
-        abstractQueueImplForTest.enqueue("TEST MESSAGE 1");
+        abstractQueueImplForTest.enqueue(new Message("TEST MESSAGE 1"));
 
-        assertEquals("TEST MESSAGE 1", abstractQueueImplForTest.peek());
+        assertEquals("TEST MESSAGE 1", abstractQueueImplForTest.peek().getPayload());
     }
 
     @Test(expected = IllegalStateException.class)
     public void shouldThrowExceptionForEnqueueIfQueueIsClosed() {
         abstractQueueImplForTest.close();
-        abstractQueueImplForTest.enqueue("TEST MESSAGE 1");
+        abstractQueueImplForTest.enqueue(new Message("TEST MESSAGE 1"));
     }
 
     @Test(expected = NullPointerException.class)
@@ -99,21 +99,21 @@ public class AbstractQueueTest {
     public void shouldDequeueSuccessfully() {
         assertNull(abstractQueueImplForTest.dequeue());
 
-        abstractQueueImplForTest.enqueue("TEST MESSAGE 1");
-        assertEquals("TEST MESSAGE 1", abstractQueueImplForTest.dequeue());
+        abstractQueueImplForTest.enqueue(new Message("TEST MESSAGE 1"));
+        assertEquals("TEST MESSAGE 1", abstractQueueImplForTest.dequeue().getPayload());
 
-        abstractQueueImplForTest.enqueue("TEST MESSAGE 2");
-        assertEquals("TEST MESSAGE 2", abstractQueueImplForTest.dequeue());
+        abstractQueueImplForTest.enqueue(new Message("TEST MESSAGE 2"));
+        assertEquals("TEST MESSAGE 2", abstractQueueImplForTest.dequeue().getPayload());
 
         assertNull(abstractQueueImplForTest.dequeue());
         assertNull(abstractQueueImplForTest.dequeue());
 
-        abstractQueueImplForTest.enqueue("TEST MESSAGE 3");
-        abstractQueueImplForTest.enqueue("TEST MESSAGE 4");
-        abstractQueueImplForTest.enqueue("TEST MESSAGE 5");
-        assertEquals("TEST MESSAGE 3", abstractQueueImplForTest.dequeue());
-        assertEquals("TEST MESSAGE 4", abstractQueueImplForTest.dequeue());
-        assertEquals("TEST MESSAGE 5", abstractQueueImplForTest.dequeue());
+        abstractQueueImplForTest.enqueue(new Message("TEST MESSAGE 3"));
+        abstractQueueImplForTest.enqueue(new Message("TEST MESSAGE 4"));
+        abstractQueueImplForTest.enqueue(new Message("TEST MESSAGE 5"));
+        assertEquals("TEST MESSAGE 3", abstractQueueImplForTest.dequeue().getPayload());
+        assertEquals("TEST MESSAGE 4", abstractQueueImplForTest.dequeue().getPayload());
+        assertEquals("TEST MESSAGE 5", abstractQueueImplForTest.dequeue().getPayload());
         assertNull(abstractQueueImplForTest.dequeue());
     }
 
@@ -124,28 +124,43 @@ public class AbstractQueueTest {
     }
 
     @Test
+    public void shouldBackoutSuccessfully() {
+        Message originalMessage = new Message("TEST MESSAGE 1", (short) 0);
+        abstractQueueImplForTest.backout(originalMessage);
+
+        Message dequeuedMessage = abstractQueueImplForTest.dequeue();
+        assertEquals(originalMessage.getPayload(), dequeuedMessage.getPayload());
+        assertEquals(1, dequeuedMessage.getBackoutCount());
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void should_FailIfMessageIsNull() {
+        abstractQueueImplForTest.backout(null);
+    }
+
+    @Test
     public void shouldPeekSuccessfully() {
         assertNull(abstractQueueImplForTest.peek());
 
-        abstractQueueImplForTest.enqueue("TEST MESSAGE 1");
-        assertEquals("TEST MESSAGE 1", abstractQueueImplForTest.peek());
+        abstractQueueImplForTest.enqueue(new Message("TEST MESSAGE 1"));
+        assertEquals("TEST MESSAGE 1", abstractQueueImplForTest.peek().getPayload());
 
-        abstractQueueImplForTest.enqueue("TEST MESSAGE 2");
-        assertEquals("TEST MESSAGE 1", abstractQueueImplForTest.peek());
+        abstractQueueImplForTest.enqueue(new Message("TEST MESSAGE 2"));
+        assertEquals("TEST MESSAGE 1", abstractQueueImplForTest.peek().getPayload());
 
-        abstractQueueImplForTest.enqueue("TEST MESSAGE 3");
-        abstractQueueImplForTest.enqueue("TEST MESSAGE 4");
-        abstractQueueImplForTest.enqueue("TEST MESSAGE 5");
-        assertEquals("TEST MESSAGE 1", abstractQueueImplForTest.peek());
-        assertEquals("TEST MESSAGE 1", abstractQueueImplForTest.peek());
-        assertEquals("TEST MESSAGE 1", abstractQueueImplForTest.peek());
+        abstractQueueImplForTest.enqueue(new Message("TEST MESSAGE 3"));
+        abstractQueueImplForTest.enqueue(new Message("TEST MESSAGE 4"));
+        abstractQueueImplForTest.enqueue(new Message("TEST MESSAGE 5"));
+        assertEquals("TEST MESSAGE 1", abstractQueueImplForTest.peek().getPayload());
+        assertEquals("TEST MESSAGE 1", abstractQueueImplForTest.peek().getPayload());
+        assertEquals("TEST MESSAGE 1", abstractQueueImplForTest.peek().getPayload());
 
 
-        assertEquals("TEST MESSAGE 1", abstractQueueImplForTest.dequeue());
-        assertEquals("TEST MESSAGE 2", abstractQueueImplForTest.dequeue());
-        assertEquals("TEST MESSAGE 3", abstractQueueImplForTest.dequeue());
-        assertEquals("TEST MESSAGE 4", abstractQueueImplForTest.dequeue());
-        assertEquals("TEST MESSAGE 5", abstractQueueImplForTest.dequeue());
+        assertEquals("TEST MESSAGE 1", abstractQueueImplForTest.dequeue().getPayload());
+        assertEquals("TEST MESSAGE 2", abstractQueueImplForTest.dequeue().getPayload());
+        assertEquals("TEST MESSAGE 3", abstractQueueImplForTest.dequeue().getPayload());
+        assertEquals("TEST MESSAGE 4", abstractQueueImplForTest.dequeue().getPayload());
+        assertEquals("TEST MESSAGE 5", abstractQueueImplForTest.dequeue().getPayload());
         assertNull(abstractQueueImplForTest.dequeue());
     }
 
@@ -159,7 +174,7 @@ public class AbstractQueueTest {
     public void shouldThrowExceptionForDrainToIfQueueIsClosed() {
         abstractQueueImplForTest.close();
         // DRAIN TO
-        List<String> collectionToDrainTo = Collections.emptyList();
+        List<Message> collectionToDrainTo = Collections.emptyList();
         abstractQueueImplForTest.drainTo(collectionToDrainTo, 10);
     }
 
@@ -171,7 +186,7 @@ public class AbstractQueueTest {
 
     @Test
     public void shouldReturnZeroWhenTheMaxElementsPassedIsEqualOrLessThanZero() {
-        List<String> collectionToDrainTo = Collections.emptyList();
+        List<Message> collectionToDrainTo = Collections.emptyList();
 
         // DRAIN TO 0
         assertEquals(0, abstractQueueImplForTest.drainTo(collectionToDrainTo, 0));
@@ -190,7 +205,7 @@ public class AbstractQueueTest {
         enqueue(queueSize);
 
         // DRAIN maxElements TO
-        List<String> collectionToDrainTo = new ArrayList<>();
+        List<Message> collectionToDrainTo = new ArrayList<>();
         abstractQueueImplForTest.drainTo(collectionToDrainTo, maxElements);
 
         assertEquals(maxElements, collectionToDrainTo.size());
@@ -212,7 +227,7 @@ public class AbstractQueueTest {
         enqueue(queueSize);
 
         // DRAIN TO
-        List<String> collectionToDrainTo = new ArrayList<>();
+        List<Message> collectionToDrainTo = new ArrayList<>();
         abstractQueueImplForTest.drainTo(collectionToDrainTo, maxElements);
 
         assertEquals(maxElements, collectionToDrainTo.size());
@@ -227,22 +242,24 @@ public class AbstractQueueTest {
         enqueue(queueSize);
 
         // DRAIN TO
-        List<String> collectionToDrainTo = new ArrayList<>();
+        List<Message> collectionToDrainTo = new ArrayList<>();
         abstractQueueImplForTest.drainTo(collectionToDrainTo, maxElements);
 
         assertEquals(queueSize, collectionToDrainTo.size());
         assertMessages(0, queueSize, collectionToDrainTo);
     }
 
-    private void assertMessages(int startIndex, int count, List<String> messages) {
+
+
+    private void assertMessages(int startIndex, int count, List<Message> messages) {
         for(int i=0; i<count; i++) {
-            assertEquals("TEST MESSAGE " + (startIndex + i), messages.get(i));
+            assertEquals("TEST MESSAGE " + (startIndex + i), messages.get(i).getPayload());
         }
     }
 
     private void enqueue(int count) {
         for(int i=0; i<count; i++) {
-            abstractQueueImplForTest.enqueue("TEST MESSAGE " + i);
+            abstractQueueImplForTest.enqueue(new Message("TEST MESSAGE " + i));
         }
     }
 

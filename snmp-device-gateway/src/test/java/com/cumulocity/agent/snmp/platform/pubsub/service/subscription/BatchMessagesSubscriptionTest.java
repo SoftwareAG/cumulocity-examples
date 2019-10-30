@@ -1,24 +1,24 @@
 package com.cumulocity.agent.snmp.platform.pubsub.service.subscription;
 
-import com.cumulocity.agent.snmp.exception.BatchNotSupportedException;
+import com.cumulocity.agent.snmp.persistence.Message;
 import com.cumulocity.agent.snmp.persistence.Queue;
 import com.cumulocity.agent.snmp.platform.pubsub.subscriber.Subscriber;
 import com.cumulocity.agent.snmp.platform.pubsub.subscriber.SubscriberException;
 import com.cumulocity.sdk.client.SDKException;
-
-import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.Spy;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.fail;
 
@@ -31,44 +31,50 @@ public class BatchMessagesSubscriptionTest {
     @Mock
     private Subscriber<?> subscriber;
 
-    @Spy
-    @InjectMocks
-    private BatchMessagesSubscription subscripton;
+    @Captor
+    private ArgumentCaptor<Message> messageCaptor;
 
+    private BatchMessagesSubscription subscription;
+
+    @Before
+    public void setUp() {
+        subscription = Mockito.spy(new BatchMessagesSubscription(queue, subscriber, (short)5));
+    }
 
     @Test
     public void shouldNotProcessIfSubscriberNotReady() {
         Mockito.when(subscriber.isReadyToAcceptMessages()).thenReturn(Boolean.FALSE);
 
-        subscripton.run();
+        subscription.run();
 
         Mockito.verify(queue, Mockito.times(1)).getName();
         Mockito.verify(queue, Mockito.times(0)).dequeue();
     }
 
     @Test
-    public void shouldNotProcessIfBatchingNotSupported() throws BatchNotSupportedException, SubscriberException {
+    public void shouldNotProcessIfBatchingNotSupported() throws UnsupportedOperationException, SubscriberException {
     	ResultCaptor<Boolean> resultCaptor = new ResultCaptor<>();
-    	
+
+        Mockito.when(queue.getName()).thenReturn("ALARM");
+
         Mockito.when(subscriber.isReadyToAcceptMessages()).thenReturn(Boolean.TRUE);
-        Mockito.doThrow(new BatchNotSupportedException("TestException")).when(subscriber).getBatchSize();
-        Mockito.doAnswer(resultCaptor).when(subscripton).deliver();
+        Mockito.doThrow(new UnsupportedOperationException("TestException")).when(subscriber).getBatchSize();
 
-        subscripton.run();
+        subscription.run();
 
+        Mockito.verify(queue, Mockito.times(0)).drainTo(Mockito.anyCollection(), Mockito.anyInt());
         Mockito.verify(subscriber, Mockito.times(0)).onMessages(Mockito.anyCollection());
-        Assert.assertFalse(resultCaptor.getResult());
     }
 
     @Test
-    public void shouldProcessMessagesUntilNoneFound() throws BatchNotSupportedException {
+    public void shouldProcessMessagesUntilNoneFound() throws UnsupportedOperationException {
         Mockito.when(subscriber.isReadyToAcceptMessages()).thenReturn(Boolean.TRUE);
 
         int batchSize = 10;
         Mockito.when(subscriber.getBatchSize()).thenReturn(Integer.valueOf(batchSize));
         Mockito.when(queue.drainTo(Mockito.anyCollection(), Mockito.eq(batchSize))).thenReturn(Integer.valueOf(batchSize)).thenReturn(Integer.valueOf(batchSize-1));
 
-        subscripton.run();
+        subscription.run();
 
         Mockito.verify(queue, Mockito.times(2)).drainTo(Mockito.anyCollection(), Mockito.eq(batchSize));
         try {
@@ -80,7 +86,7 @@ public class BatchMessagesSubscriptionTest {
     }
 
     @Test
-    public void shouldRollbackMessagesWhenProcessThrowsSubscriberException() throws SubscriberException, BatchNotSupportedException {
+    public void shouldRetryAndRollbackOnlyFailingMessages_when_OnMessages_ThrowsSubscriberException() throws SubscriberException {
         Mockito.when(subscriber.isReadyToAcceptMessages()).thenReturn(Boolean.TRUE);
 
         int batchSize = 10;
@@ -91,27 +97,38 @@ public class BatchMessagesSubscriptionTest {
             @Override
             @SuppressWarnings("unchecked")
             public Integer answer(InvocationOnMock invocationOnMock) throws Throwable {
-                List<String> messagesFromQueue = (List<String>) invocationOnMock.getArguments()[0];
-                messagesFromQueue.addAll(failedMessages);
+                List<Message> messagesFromQueue = (List<Message>) invocationOnMock.getArguments()[0];
+                messagesFromQueue.addAll(failedMessages.stream().map(m -> new Message(m)).collect(Collectors.toList()));
 
                 return Integer.valueOf(messagesFromQueue.size());
             }
         }).when(queue).drainTo(Mockito.anyCollection(), Mockito.eq(batchSize));
+        Mockito.when(queue.getName()).thenReturn("MEASUREMENT");
 
         Mockito.doThrow(new SubscriberException(new SDKException("Error processing messages.")))
                     .when(subscriber).onMessages(Mockito.anyCollection());
 
-        subscripton.run();
+        Mockito.doThrow(new SubscriberException(new SDKException("Error processing one Message.")))
+                .when(subscriber).onMessage(failedMessages.get(1));
 
-        Mockito.verify(queue, Mockito.times(failedMessages.size())).enqueue(Mockito.startsWith("MESSAGE "));
+        subscription.run();
+
+        Mockito.verify(subscriber, Mockito.times(1)).onMessage(Mockito.eq(failedMessages.get(0)));
+        Mockito.verify(queue, Mockito.times(0)).backout(new Message(failedMessages.get(0)));
+
+        Mockito.verify(subscriber, Mockito.times(1)).onMessage(Mockito.eq(failedMessages.get(1)));
+        Mockito.verify(queue, Mockito.times(1)).backout(new Message(failedMessages.get(1)));
+
+        Mockito.verify(subscriber, Mockito.times(1)).onMessage(Mockito.eq(failedMessages.get(2)));
+        Mockito.verify(queue, Mockito.times(0)).backout(new Message(failedMessages.get(2)));
 
         Mockito.verify(queue, Mockito.times(1)).drainTo(Mockito.anyCollection(), Mockito.eq(batchSize));
         Mockito.verify(subscriber, Mockito.times(1)).onMessages(Mockito.anyCollection());
     }
 
     @Test
-    public void shouldRollbackMessagesWhenProcessThrowsSubscriberException_1() throws SubscriberException, BatchNotSupportedException {
-        Mockito.when(subscriber.isReadyToAcceptMessages()).thenReturn(Boolean.TRUE);
+    public void shouldRetryOnlyWhenSubscriberIsReady_when_OnMessages_ThrowsSubscriberException() throws SubscriberException {
+        Mockito.when(subscriber.isReadyToAcceptMessages()).thenReturn(Boolean.TRUE).thenReturn(Boolean.FALSE);
 
         int batchSize = 10;
         Mockito.when(subscriber.getBatchSize()).thenReturn(Integer.valueOf(batchSize));
@@ -121,28 +138,31 @@ public class BatchMessagesSubscriptionTest {
             @Override
             @SuppressWarnings("unchecked")
             public Integer answer(InvocationOnMock invocationOnMock) throws Throwable {
-                List<String> messagesFromQueue = (List<String>) invocationOnMock.getArguments()[0];
-                messagesFromQueue.addAll(failedMessages);
+                List<Message> messagesFromQueue = (List<Message>) invocationOnMock.getArguments()[0];
+                messagesFromQueue.addAll(failedMessages.stream().map(m -> new Message(m)).collect(Collectors.toList()));
 
                 return Integer.valueOf(messagesFromQueue.size());
             }
         }).when(queue).drainTo(Mockito.anyCollection(), Mockito.eq(batchSize));
+        Mockito.when(queue.getName()).thenReturn("MEASUREMENT");
 
         Mockito.doThrow(new SubscriberException(new SDKException("Error processing messages.")))
                 .when(subscriber).onMessages(Mockito.anyCollection());
 
-        Mockito.doThrow(new NullPointerException()).when(queue).enqueue(Mockito.eq("MESSAGE 2"));
+        subscription.run();
 
-        subscripton.run();
+        Mockito.verify(queue, Mockito.times(1)).backout(new Message(failedMessages.get(0)));
 
-        Mockito.verify(queue, Mockito.times(failedMessages.size())).enqueue(Mockito.startsWith("MESSAGE "));
+        Mockito.verify(queue, Mockito.times(1)).backout(new Message(failedMessages.get(1)));
+
+        Mockito.verify(queue, Mockito.times(1)).backout(new Message(failedMessages.get(2)));
 
         Mockito.verify(queue, Mockito.times(1)).drainTo(Mockito.anyCollection(), Mockito.eq(batchSize));
         Mockito.verify(subscriber, Mockito.times(1)).onMessages(Mockito.anyCollection());
     }
 
     @Test
-    public void shouldCatchThrowableAndReturnGracefully() throws SubscriberException, BatchNotSupportedException {
+    public void shouldCatchThrowableAndReturnGracefully() throws SubscriberException {
         Mockito.when(subscriber.isReadyToAcceptMessages()).thenReturn(Boolean.TRUE);
 
         int batchSize = 10;
@@ -153,8 +173,8 @@ public class BatchMessagesSubscriptionTest {
             @Override
             @SuppressWarnings("unchecked")
             public Integer answer(InvocationOnMock invocationOnMock) throws Throwable {
-                List<String> messagesFromQueue = (List<String>) invocationOnMock.getArguments()[0];
-                messagesFromQueue.addAll(failedMessages);
+                List<Message> messagesFromQueue = (List<Message>) invocationOnMock.getArguments()[0];
+                messagesFromQueue.addAll(failedMessages.stream().map(m -> new Message(m)).collect(Collectors.toList()));
 
                 return Integer.valueOf(messagesFromQueue.size());
             }
@@ -163,12 +183,12 @@ public class BatchMessagesSubscriptionTest {
         Mockito.doThrow(new NullPointerException())
                 .when(subscriber).onMessages(Mockito.anyCollection());
 
-        subscripton.run();
+        subscription.run();
 
         Mockito.verify(queue, Mockito.times(1)).drainTo(Mockito.anyCollection(), Mockito.eq(batchSize));
         Mockito.verify(subscriber, Mockito.times(1)).onMessages(Mockito.anyCollection());
     }
-    
+
     public class ResultCaptor<T> implements Answer<T> {
         private T result = null;
         public T getResult() {

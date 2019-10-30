@@ -1,5 +1,7 @@
 package com.cumulocity.agent.snmp.platform.pubsub.service;
 
+import com.cumulocity.agent.snmp.config.GatewayProperties;
+import com.cumulocity.agent.snmp.persistence.Message;
 import com.cumulocity.agent.snmp.persistence.Queue;
 import com.cumulocity.agent.snmp.platform.pubsub.service.subscription.BatchMessagesSubscription;
 import com.cumulocity.agent.snmp.platform.pubsub.service.subscription.SingleMessageSubscription;
@@ -26,6 +28,9 @@ public abstract class PubSub<Q extends Queue> {
     private TaskScheduler taskScheduler;
 
     @Autowired
+    private GatewayProperties gatewayProperties;
+
+    @Autowired
     private Q queue;
 
     private ScheduledFuture<?>[] subscriptions;
@@ -36,7 +41,7 @@ public abstract class PubSub<Q extends Queue> {
             throw new NullPointerException("message");
         }
 
-        queue.enqueue(message);
+        queue.enqueue(new Message(message));
     }
 
     public <PS extends PubSub<?>> void subscribe(Subscriber<PS> subscriber) {
@@ -46,14 +51,14 @@ public abstract class PubSub<Q extends Queue> {
 
         if(subscriber.isBatchingSupported() && subscriber.getTransmitRateInSeconds() > 0) {
             subscriptions = new ScheduledFuture[1];
-            Subscription newSubscription = new BatchMessagesSubscription(queue, subscriber);
+            Subscription newSubscription = new BatchMessagesSubscription(queue, subscriber, gatewayProperties.getGatewayPublishRetryLimit());
             subscriptions[0] = taskScheduler.scheduleWithFixedDelay(newSubscription, Duration.ofSeconds(subscriber.getTransmitRateInSeconds()));
         }
         else {
             int concurrentSubscriptionsCount = subscriber.getConcurrentSubscriptionsCount();
             if(concurrentSubscriptionsCount > 0) {
                 subscriptions = new ScheduledFuture[concurrentSubscriptionsCount];
-                Subscription newSubscription = new SingleMessageSubscription(queue, subscriber);
+                Subscription newSubscription = new SingleMessageSubscription(queue, subscriber, gatewayProperties.getGatewayPublishRetryLimit());
                 for(int i = 0; i< concurrentSubscriptionsCount; i++) {
                     subscriptions[i] = taskScheduler.scheduleWithFixedDelay(newSubscription, Duration.ofMillis(1));
                 }

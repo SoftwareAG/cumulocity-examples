@@ -36,6 +36,9 @@ public class GatewayProperties {
 	@Value("#{'${gateway.maxBatch.size:200}'.trim()}")
 	private int gatewayMaxBatchSize;
 
+	@Value("#{'${gateway.publish.retryLimit:5}'.trim()}")
+	private short gatewayPublishRetryLimit;
+
 	@Value("#{'${gateway.bootstrap.force:false}'.trim()}")
 	private boolean forcedBootstrap;
 
