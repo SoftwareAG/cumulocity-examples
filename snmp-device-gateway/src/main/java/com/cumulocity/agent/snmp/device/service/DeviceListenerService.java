@@ -60,7 +60,7 @@ public class DeviceListenerService {
 
 	private ScheduledFuture<?> snmpDevicePoller;
 
-	private long pollingRateInMinutes = -1;
+	private long pollingRateInSeconds = -1;
 
 	@EventListener(BootstrapReadyEvent.class)
 	private void onBootstrapReady() {
@@ -119,10 +119,10 @@ public class DeviceListenerService {
 	}
 
 	protected void createSnmpDevicePoller() {
-		long newPollingRateInMinutes = gatewayDataProvider.getGatewayDevice().getSnmpCommunicationProperties()
+		long newPollingRateInSeconds = gatewayDataProvider.getGatewayDevice().getSnmpCommunicationProperties()
 				.getPollingRate();
 
-		if (snmpDevicePoller != null && !snmpDevicePoller.isDone() && pollingRateInMinutes == newPollingRateInMinutes) {
+		if (snmpDevicePoller != null && !snmpDevicePoller.isDone() && pollingRateInSeconds == newPollingRateInSeconds) {
 			return;
 		}
 
@@ -130,9 +130,9 @@ public class DeviceListenerService {
 			snmpDevicePoller.cancel(true);
 		}
 
-		pollingRateInMinutes = newPollingRateInMinutes;
+		pollingRateInSeconds = newPollingRateInSeconds;
 
-		if (pollingRateInMinutes <= 0) {
+		if (pollingRateInSeconds <= 0) {
 			return;
 		}
 		snmpDevicePoller = taskScheduler.scheduleWithFixedDelay(() -> {
@@ -195,7 +195,7 @@ public class DeviceListenerService {
 			} catch (Throwable t) {
 				log.error("Error while polling SNMP devices.", t);
 			}
-		}, Duration.ofMinutes(pollingRateInMinutes));
+		}, Duration.ofSeconds(pollingRateInSeconds));
 	}
 
 	@PreDestroy

@@ -338,20 +338,20 @@ public class DeviceListenerServiceTest {
 
 	@Test
 	public void shouldReconfigurePollingScheduledJobIfIntervalChanges() {
-		ReflectionTestUtils.setField(deviceListenerService, "pollingRateInMinutes", 1L);
+		ReflectionTestUtils.setField(deviceListenerService, "pollingRateInSeconds", 1L);
 		when(snmpCommunicationProperties.getPollingRate()).thenReturn(123L);
 
 		// Action
 		ReflectionTestUtils.invokeMethod(deviceListenerService, "onGatewayDataRefresh");
 
 		verify(deviceListenerService, times(1)).createSnmpDevicePoller();
-		verify(taskScheduler).scheduleWithFixedDelay(any(Runnable.class), eq(Duration.ofMinutes(123L)));
+		verify(taskScheduler).scheduleWithFixedDelay(any(Runnable.class), eq(Duration.ofSeconds(123L)));
 	}
 
 	@Test
 	public void shouldNotReconfigurePollingScheduledJobIfIntervalIsSame() {
 		ReflectionTestUtils.setField(deviceListenerService, "snmpDevicePoller", snmpDevicePoller);
-		ReflectionTestUtils.setField(deviceListenerService, "pollingRateInMinutes", 1L);
+		ReflectionTestUtils.setField(deviceListenerService, "pollingRateInSeconds", 1L);
 		when(snmpCommunicationProperties.getPollingRate()).thenReturn(1L);
 		when(snmpDevicePoller.isDone()).thenReturn(false);
 
