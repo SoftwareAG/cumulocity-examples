@@ -42,7 +42,7 @@ public class GatewayProperties {
 	@Value("#{'${gateway.bootstrap.force:false}'.trim()}")
 	private boolean forcedBootstrap;
 
-	@Value("#{'${C8Y.baseURL:http://developers.cumulocity.com}'.trim()}")
+	@Value("#{'${C8Y.baseURL:https://developers.cumulocity.com}'.trim()}")
 	private String baseUrl;
 
 	@Value("#{'${C8Y.forceInitialHost:true}'.trim()}")
