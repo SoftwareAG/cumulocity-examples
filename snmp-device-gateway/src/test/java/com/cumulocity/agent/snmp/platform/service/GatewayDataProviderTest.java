@@ -1,5 +1,38 @@
 package com.cumulocity.agent.snmp.platform.service;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
+
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.httpclient.HttpStatus;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.test.util.ReflectionTestUtils;
+
 import com.cumulocity.agent.snmp.config.GatewayProperties;
 import com.cumulocity.agent.snmp.platform.model.DeviceManagedObjectWrapper;
 import com.cumulocity.agent.snmp.platform.model.GatewayDataRefreshedEvent;
@@ -16,28 +49,6 @@ import com.cumulocity.sdk.client.devicecontrol.notification.OperationNotificatio
 import com.cumulocity.sdk.client.inventory.InventoryApi;
 import com.cumulocity.sdk.client.notification.Subscription;
 import com.cumulocity.sdk.client.notification.SubscriptionListener;
-import org.apache.commons.httpclient.HttpStatus;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.*;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.mockito.stubbing.Answer;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.test.util.ReflectionTestUtils;
-
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-
-import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 @SuppressWarnings("unchecked")
@@ -193,7 +204,7 @@ public class GatewayDataProviderTest {
 		assertNotNull(ReflectionTestUtils.getField(gatewayDataProvider, "subscriberForOperationsOnGateway"));
 	}
 
-	@Test(timeout = 10000L)
+	@Test
 	public void shouldGenerateGatewayDataRefreshedEventOnRefreshGatewayObjects() throws InterruptedException {
 		ManagedObjectRepresentation gatewayDeviceMo = new ManagedObjectRepresentation();
 		gatewayDeviceMo.setId(new GId("snmp-agent"));
@@ -206,19 +217,15 @@ public class GatewayDataProviderTest {
 		childDeviceRef.setManagedObject(childDeviceMo);
 		gatewayDeviceMo.setChildDevices(childDevices);
 
-		final CountDownLatch latch = new CountDownLatch(1);
-
 		when(properties.getGatewayObjectRefreshIntervalInMinutes()).thenReturn(1);
 		when(platformProvider.isPlatformAvailable()).thenReturn(true);
 
 		doAnswer((Answer<Void>) invocation -> {
-			Thread.sleep(9000);
-			latch.countDown();
 			return null;
 		}).when(gatewayDataProvider).refreshGatewayObjects();
 
 		gatewayDataProvider.scheduleGatewayDataRefresh();
-		latch.await();
+		Thread.sleep(1000);
 
 		verify(gatewayDataProvider).refreshGatewayObjects();
 		verify(eventPublisher).publishEvent(any(GatewayDataRefreshedEvent.class));
