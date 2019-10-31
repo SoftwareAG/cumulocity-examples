@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>c8y.agents</groupId>
 		<artifactId>snmp-agent</artifactId>
-		<version>1005.2.0-SNAPSHOT</version>
+		<version>1005.6.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>snmp-integration-test</artifactId>
@@ -15,6 +15,7 @@
 	<description>SNMP integration tests</description>
 
 	<properties>
+		<skip.tests>true</skip.tests>
 		<cucumber.version>4.2.0</cucumber.version>
 	</properties>
 
@@ -59,4 +60,16 @@
 			<optional>true</optional>
 		</dependency>
 	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<skipTests>${skip.tests}</skipTests>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>
