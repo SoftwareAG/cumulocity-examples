@@ -1,6 +1,7 @@
 package com.cumulocity.agent.snmp.util;
 
 import com.google.common.net.InetAddresses;
+import com.google.common.primitives.UnsignedBytes;
 
 import java.net.InetAddress;
 
@@ -19,7 +20,7 @@ public class IpAddressUtil {
             }
         }
 
-        return InetAddresses.forString(ipAddress.split("[/%]", 2)[0].toLowerCase());
+        return InetAddresses.forString(ipAddress.trim().split("[/%]", 2)[0].toLowerCase());
     }
 
     public static String sanitizeIpAddress(String ipAddress) throws IllegalArgumentException {
@@ -33,5 +34,9 @@ public class IpAddressUtil {
         }
 
         return inetAddress.getHostAddress();
+    }
+
+    public static int compare(InetAddress firstAddress, InetAddress secondAddress) {
+        return UnsignedBytes.lexicographicalComparator().compare(firstAddress.getAddress(), secondAddress.getAddress());
     }
 }

@@ -238,28 +238,120 @@ public class DeviceDiscoveryServiceTest {
         assertTrue(parsedIpList.isEmpty());
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void parseIpRangesFailForInvalidIPRanges_1() {
+    @Test
+    public void parseIpRangesPassForIpRangesWithSingleIP() {
         // given
-        String givenIpRange = "---" + "-" + "192.168.0.2";
+        String givenIpRange =
+                        "192.168.0.1"
+                        + ","
+                        + "192.168.0.2-"
+                        + ","
+                        + "-192.168.0.3"
+                        + ","
+                        + "-192.168.0.4-"
+                        + ","
+                        + "----192.168.0.5"
+                        + ","
+                        + "192.168.0.6----"
+                        + ","
+                        + "192.168.0.7----192.168.0.8"
+                        + ","
+                        + "192.168.0.9-192.168.0.10-  "
+                        + ","
+                        + "2001:0db8:85a3:0000:0000:8a2e:0370:7334" + "-" + "2001:0db8:85a3:0000:0000:8a2e:0370:7337"
+                        + ","
+                        + "2001:0db8:85a3:0000:0000:8a2e:0370:7334" + "----" + "2001:0db8:85a3:0000:0000:8a2e:0370:7337";
+
 
         // when
         List<InetAddress[]> parsedIpList = deviceDiscoveryService.parseIpRanges(givenIpRange);
+
+        // then
+        assertEquals(10, parsedIpList.size());
+
+        InetAddress[] oneIpRange = parsedIpList.get(0);
+        assertEquals(IpAddressUtil.forString("192.168.0.1"), oneIpRange[0]);
+        assertEquals(IpAddressUtil.forString("192.168.0.1"), oneIpRange[1]);
+
+        oneIpRange = parsedIpList.get(1);
+        assertEquals(IpAddressUtil.forString("192.168.0.2"), oneIpRange[0]);
+        assertEquals(IpAddressUtil.forString("192.168.0.2"), oneIpRange[1]);
+
+        oneIpRange = parsedIpList.get(2);
+        assertEquals(IpAddressUtil.forString("192.168.0.3"), oneIpRange[0]);
+        assertEquals(IpAddressUtil.forString("192.168.0.3"), oneIpRange[1]);
+
+        oneIpRange = parsedIpList.get(3);
+        assertEquals(IpAddressUtil.forString("192.168.0.4"), oneIpRange[0]);
+        assertEquals(IpAddressUtil.forString("192.168.0.4"), oneIpRange[1]);
+
+        oneIpRange = parsedIpList.get(4);
+        assertEquals(IpAddressUtil.forString("192.168.0.5"), oneIpRange[0]);
+        assertEquals(IpAddressUtil.forString("192.168.0.5"), oneIpRange[1]);
+
+        oneIpRange = parsedIpList.get(5);
+        assertEquals(IpAddressUtil.forString("192.168.0.6"), oneIpRange[0]);
+        assertEquals(IpAddressUtil.forString("192.168.0.6"), oneIpRange[1]);
+
+        oneIpRange = parsedIpList.get(6);
+        assertEquals(IpAddressUtil.forString("192.168.0.7"), oneIpRange[0]);
+        assertEquals(IpAddressUtil.forString("192.168.0.8"), oneIpRange[1]);
+
+        oneIpRange = parsedIpList.get(7);
+        assertEquals(IpAddressUtil.forString("192.168.0.9"), oneIpRange[0]);
+        assertEquals(IpAddressUtil.forString("192.168.0.10"), oneIpRange[1]);
+
+        oneIpRange = parsedIpList.get(8);
+        assertEquals(IpAddressUtil.forString("2001:0db8:85a3:0000:0000:8a2e:0370:7334"), oneIpRange[0]);
+        assertEquals(IpAddressUtil.forString("2001:0db8:85a3:0000:0000:8a2e:0370:7337"), oneIpRange[1]);
+
+        oneIpRange = parsedIpList.get(9);
+        assertEquals(IpAddressUtil.forString("2001:0db8:85a3:0000:0000:8a2e:0370:7334"), oneIpRange[0]);
+        assertEquals(IpAddressUtil.forString("2001:0db8:85a3:0000:0000:8a2e:0370:7337"), oneIpRange[1]);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void parseIpRangesFailForInvalidIPRanges_2() {
+    public void parseIpRangesFailForInvalidIpRanges_1() {
         // given
-        String givenIpRange =
-                "192.168.0.1" + "-" + "192.168.0.2"
-                        + ","
-                        + "192.168.0.4"
-                        + ","
-                        + "2001:0db8:85a3:0000:0000:8a2e:0370:7334" + "-" + "2001:0db8:85a3:0000:0000:8a2e:0370:7337";
-
+        String givenIpRange = "192.168.0.1-192.168.0.2-192.168.0.3";
 
         // when
         List<InetAddress[]> parsedIpList = deviceDiscoveryService.parseIpRanges(givenIpRange);
+
+        // then throws IllegalArgumentException;
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void parseIpRangesFailForInvalidIpRanges_2() {
+        // given
+        String givenIpRange = "192.168.0.1- -192.168.0.3";
+
+        // when
+        List<InetAddress[]> parsedIpList = deviceDiscoveryService.parseIpRanges(givenIpRange);
+
+        // then throws IllegalArgumentException;
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void parseIpRangesFailForInvalidIpRanges_3() {
+        // given
+        String givenIpRange = "localhost-192.168.0.3";
+
+        // when
+        List<InetAddress[]> parsedIpList = deviceDiscoveryService.parseIpRanges(givenIpRange);
+
+        // then throws IllegalArgumentException;
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void parseIpRangesFailForInvalidIpRanges_StartIPGreaterThanEndIP() {
+        // given
+        String givenIpRange = "192.168.0.4-192.168.0.3";
+
+        // when
+        List<InetAddress[]> parsedIpList = deviceDiscoveryService.parseIpRanges(givenIpRange);
+
+        // then throws IllegalArgumentException;
     }
 
     @Test
@@ -276,7 +368,6 @@ public class DeviceDiscoveryServiceTest {
         // then
         assertFalse(isEnabled);
     }
-
 
     @Test
     public void shouldScanForSnmpDevicesAndCreateChildDevices_successfully() {
@@ -317,6 +408,60 @@ public class DeviceDiscoveryServiceTest {
         // then
         verify(deviceDiscoveryService, times(1)).createAndRegisterAChildDevice(eq(startIpAddress), eq(port));
         verify(deviceDiscoveryService, times(0)).createAndRegisterAChildDevice(eq(endIpAddress), eq(port));
+        verify(gatewayDataProvider, times(1)).refreshGatewayObjects();
+    }
+
+    @Test
+    public void shouldSkipIPAddressesWhichAreAlreadyScanned() {
+        // given
+        int port = 162;
+        boolean isProtocolUdp = true;
+        int pingTimeoutInSeconds = 1;
+        String communityTarget = "public";
+
+        String oneStartIpAddress = "192.168.0.1"; // is reachable
+        String oneEndIpAddress = "192.168.0.2";   // is not reachable as the second one's isReachable is not mocked
+        String twoStartIpAddress = "192.168.0.0"; // is not reachable as the isReachable is not mocked
+        String twoEndIpAddress = "192.168.0.1";   // is reachable, but already scanned
+
+        List<InetAddress[]> ipRangesList = new ArrayList<>();
+        InetAddress[] oneRange = new InetAddress[2];
+        oneRange[0] = mock(InetAddress.class); // InetAddresses.forString("192.168.0.1")
+        oneRange[1] = mock(InetAddress.class); // InetAddresses.forString("192.168.0.2")
+
+        InetAddress[] twoRange = new InetAddress[2];
+        twoRange[0] = mock(InetAddress.class); // InetAddresses.forString("192.168.0.0")
+        twoRange[1] = mock(InetAddress.class); // InetAddresses.forString("192.168.0.1")
+        try {
+            doReturn(oneStartIpAddress).when(oneRange[0]).getHostAddress();
+            doReturn(InetAddresses.forString(oneStartIpAddress).getAddress()).when(oneRange[0]).getAddress();
+            doReturn(true).when(oneRange[0]).isReachable(pingTimeoutInSeconds * 1000);
+
+            // doReturn(oneEndIpAddress).when(oneRange[1]).getHostAddress();
+            doReturn(InetAddresses.forString(oneEndIpAddress).getAddress()).when(oneRange[1]).getAddress();
+
+            doReturn(InetAddresses.forString(twoEndIpAddress).getAddress()).when(twoRange[1]).getAddress();
+
+            // doReturn(twoStartIpAddress).when(oneRange[0]).getHostAddress();
+            doReturn(InetAddresses.forString(twoStartIpAddress).getAddress()).when(twoRange[0]).getAddress();
+        } catch (IOException e) {
+            fail(e.getMessage());
+        }
+        ipRangesList.add(oneRange);
+        ipRangesList.add(twoRange);
+
+        Map<String, DeviceManagedObjectWrapper> existingDeviceMap = new HashMap<>();
+//        existingDeviceMap.put(oneRange[0].getHostAddress(), null);
+
+        doReturn(true).when(deviceDiscoveryService).isDeviceSnmpEnabled(oneRange[0], port, isProtocolUdp, communityTarget);
+        doNothing().when(deviceDiscoveryService).createAndRegisterAChildDevice(oneStartIpAddress, port);
+
+        // when
+        deviceDiscoveryService.scanForSnmpDevicesAndCreateChildDevices(ipRangesList, port, isProtocolUdp, pingTimeoutInSeconds, communityTarget, existingDeviceMap);
+
+        // then
+        verify(deviceDiscoveryService, times(1)).createAndRegisterAChildDevice(eq(oneStartIpAddress), eq(port));
+        verify(deviceDiscoveryService, times(0)).createAndRegisterAChildDevice(eq(oneEndIpAddress), eq(port));
         verify(gatewayDataProvider, times(1)).refreshGatewayObjects();
     }
 
@@ -455,12 +600,7 @@ public class DeviceDiscoveryServiceTest {
     @Test
     public void shouldExecuteOperation_failureWithInvalidIPRange() {
         // given
-        String givenIpRange =
-                "192.168.0.1" + "-" + "192.168.0.2"
-                        + ","
-                        + "192.168.0.4"
-                        + ","
-                        + "2001:0db8:85a3:0000:0000:8a2e:0370:7334" + "-" + "2001:0db8:85a3:0000:0000:8a2e:0370:7337";
+        String givenIpRange = "aaa-bbb";
         GId operationId = GId.asGId("111");
 
 
@@ -588,12 +728,7 @@ public class DeviceDiscoveryServiceTest {
     @Test
     public void shouldNotScheduleAutoDiscoveryProcess_withInvalidIpRange() {
         // given
-        String givenIpRange =
-                "192.168.0.1" + "-" + "192.168.0.2"
-                        + ","
-                        + "192.168.0.4"
-                        + ","
-                        + "2001:0db8:85a3:0000:0000:8a2e:0370:7334" + "-" + "2001:0db8:85a3:0000:0000:8a2e:0370:7337";
+        String givenIpRange = "aaa-bbb";
         long autoDiscoveryInterval = 10;
 
         when(gatewayDataProvider.getGatewayDevice()).thenReturn(gatewayManagedObjectWrapper);
@@ -615,7 +750,6 @@ public class DeviceDiscoveryServiceTest {
 
     @Test
     public void shouldRefreshAutoDiscoverySchedule_successfully() {
-        // given
         // given
         String givenIpRange =
                 "192.168.0.1" + "-" + "192.168.0.2"

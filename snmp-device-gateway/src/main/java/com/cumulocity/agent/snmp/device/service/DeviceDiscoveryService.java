@@ -38,10 +38,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ScheduledFuture;
 
 import static com.cumulocity.agent.snmp.platform.model.AlarmMapping.c8y_DeviceNotResponding;
@@ -184,7 +181,8 @@ public class DeviceDiscoveryService {
     }
 
     synchronized void scanForSnmpDevicesAndCreateChildDevices(List<InetAddress[]> ipRangesList, int port, boolean isProtocolUdp, int pingTimeoutInSeconds, String communityTarget, Map<String, DeviceManagedObjectWrapper> existingDeviceMap) {
-        boolean newDeviceFound = false;
+        Set<String> ipAlreadyScannedInThisRun = new HashSet<>();
+        boolean newDeviceFoundInThisRun = false;
 
         int timeoutInMilliseconds = pingTimeoutInSeconds * 1000;
         for(InetAddress[] oneIpRange : ipRangesList) {
@@ -193,24 +191,28 @@ public class DeviceDiscoveryService {
             InetAddress endIp = InetAddresses.increment(oneIpRange[1]);
             while(!currentIp.equals(endIp)) {
                 try {
-                    log.debug("Trying to find an SNMP device at IP Address <{}> during auto-discovery device scan.", currentIpString);
+                    if(!ipAlreadyScannedInThisRun.contains(currentIpString)) { // Skip the IP Addresses which are already scanned in this run
+                        ipAlreadyScannedInThisRun.add(currentIpString);
 
-                    if (currentIp.isReachable(timeoutInMilliseconds)) {
-                        boolean isDeviceSnmpEnabled = isDeviceSnmpEnabled(currentIp, port, isProtocolUdp, communityTarget);
-                        if (isDeviceSnmpEnabled && !existingDeviceMap.containsKey(currentIpString)) {
-                            log.info("A new SNMP enabled device is found with IP Address {} by auto-discovery device scan.", currentIpString);
+                        log.debug("Trying to find an SNMP device at IP Address <{}> during auto-discovery device scan.", currentIpString);
 
-                            // Create a new Child Device
-                            createAndRegisterAChildDevice(currentIpString, port);
-                            newDeviceFound = true;
-                        } else if (!isDeviceSnmpEnabled) {
-                            handleNoResponseFromDevice("A device with IP Address <" + currentIpString + ">, which is not SNMP enabled is found during auto-discovery device scan.", c8y_DeviceSnmpNotEnabled + currentIpString);
-                        }
-                    } else {
-                        if (existingDeviceMap.containsKey(currentIpString)) {
-                            handleNoResponseFromDevice("Existing SNMP device with IP Address <" + currentIpString + "> didn't respond during auto-discovery device scan.", c8y_DeviceNotResponding + currentIpString);
+                        if (currentIp.isReachable(timeoutInMilliseconds)) {
+                            boolean isDeviceSnmpEnabled = isDeviceSnmpEnabled(currentIp, port, isProtocolUdp, communityTarget);
+                            if (isDeviceSnmpEnabled && !existingDeviceMap.containsKey(currentIpString)) {
+                                log.info("A new SNMP enabled device is found with IP Address {} by auto-discovery device scan.", currentIpString);
+
+                                // Create a new Child Device
+                                createAndRegisterAChildDevice(currentIpString, port);
+                                newDeviceFoundInThisRun = true;
+                            } else if (!isDeviceSnmpEnabled) {
+                                handleNoResponseFromDevice("A device with IP Address <" + currentIpString + ">, which is not SNMP enabled is found during auto-discovery device scan.", c8y_DeviceSnmpNotEnabled + currentIpString);
+                            }
                         } else {
-                            log.info("No device is found at IP Address <{}> during auto-discovery device scan.", currentIpString);
+                            if (existingDeviceMap.containsKey(currentIpString)) {
+                                handleNoResponseFromDevice("Existing SNMP device with IP Address <" + currentIpString + "> didn't respond during auto-discovery device scan.", c8y_DeviceNotResponding + currentIpString);
+                            } else {
+                                log.debug("No device is found at IP Address <{}> during auto-discovery device scan.", currentIpString);
+                            }
                         }
                     }
                 } catch (IOException e) {
@@ -223,7 +225,7 @@ public class DeviceDiscoveryService {
             }
         }
 
-        if(newDeviceFound) {
+        if(newDeviceFoundInThisRun) {
             // Refresh the locally maintained Gateway Objects when
             // a new child device is found and created
             gatewayDataProvider.refreshGatewayObjects();
@@ -277,16 +279,34 @@ public class DeviceDiscoveryService {
                 continue;
             }
 
-            String[] oneIpRangeArray = oneIpRange.trim().split("-");
-            if(oneIpRangeArray.length == 2) {
+            StringTokenizer oneIpRangeTokens = new StringTokenizer(oneIpRange.trim(), "-");
+            int oneIpRangeTokenCount = oneIpRangeTokens.countTokens();
+            if(oneIpRangeTokenCount > 0 && oneIpRangeTokenCount <= 2) {
                 try {
-                    InetAddress[] addresses = new InetAddress[] {
-                            IpAddressUtil.forString(oneIpRangeArray[0]),
-                            IpAddressUtil.forString(oneIpRangeArray[1])
-                    };
-                    ipRangesList.add(addresses);
+                    InetAddress[] addresses;
+                    if(oneIpRangeTokenCount == 1) {
+                        String token = oneIpRangeTokens.nextToken();
+                        addresses = new InetAddress[] {
+                                IpAddressUtil.forString(token),
+                                IpAddressUtil.forString(token)
+                        };
+                    }
+                    else {
+                        addresses = new InetAddress[] {
+                                IpAddressUtil.forString(oneIpRangeTokens.nextToken()),
+                                IpAddressUtil.forString(oneIpRangeTokens.nextToken())
+                        };
+                    }
+
+                    if(IpAddressUtil.compare(addresses[0], addresses[1]) <= 0) {
+                        ipRangesList.add(addresses);
+                    }
+                    else {
+                        throw new IllegalArgumentException("Start IP Address <" + addresses[0] + "> should be less than or equal to the end IP Address <" + addresses[1] + ">.");
+                    }
+
                 } catch(IllegalArgumentException iae) {
-                    throw new IllegalArgumentException("Invalid range <" + oneIpRange + "> in the <" + ipRanges + "> IP ranges.", iae);
+                    throw new IllegalArgumentException("Invalid range <" + oneIpRange + "> in the <" + ipRanges + "> IP ranges. " + iae.getMessage(), iae);
                 }
             }
             else {

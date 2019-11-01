@@ -5,8 +5,7 @@ import org.junit.Test;
 
 import java.net.InetAddress;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 public class IpAddressUtilTest {
 
@@ -91,5 +90,43 @@ public class IpAddressUtilTest {
         assertEquals(InetAddresses.forString("ee90::caca:afff:aaaa:9a04").getHostAddress(), IpAddressUtil.sanitizeIpAddress("ee90::caca:afff:aaaa:9a04%18".toUpperCase(), false)); // UPPER CASE
         assertEquals(InetAddresses.forString("ee90::caca:afff:aaaa:9a04").getHostAddress(), IpAddressUtil.sanitizeIpAddress("ee90::caca:afff:aaaa:9a04%18".toUpperCase())); // UPPER CASE
         assertEquals(InetAddresses.forString("ee90::caca:afff:aaaa:9a04").getHostAddress(), IpAddressUtil.sanitizeIpAddress("ee90::caca:afff:aaaa:9a04%18".toUpperCase(), true)); // UPPER CASE
+    }
+
+    @Test
+    public void shouldCompareIPAddresses() {
+        assertTrue(0 == IpAddressUtil.compare(InetAddresses.forString("192.168.1.1"), InetAddresses.forString("192.168.1.1")));
+        assertTrue(-1 >= IpAddressUtil.compare(InetAddresses.forString("192.168.1.0"), InetAddresses.forString("192.168.1.1")));
+        assertTrue(-1 >= IpAddressUtil.compare(InetAddresses.forString("192.168.0.1"), InetAddresses.forString("192.168.1.1")));
+        assertTrue(-1 >= IpAddressUtil.compare(InetAddresses.forString("192.167.1.1"), InetAddresses.forString("192.168.1.1")));
+        assertTrue(-1 >= IpAddressUtil.compare(InetAddresses.forString("190.168.1.1"), InetAddresses.forString("192.168.1.1")));
+        assertTrue(-1 >= IpAddressUtil.compare(InetAddresses.forString("255.255.255.0"), InetAddresses.forString("255.255.255.255")));
+        assertTrue(-1 >= IpAddressUtil.compare(InetAddresses.forString("255.255.0.255"), InetAddresses.forString("255.255.255.255")));
+        assertTrue(-1 >= IpAddressUtil.compare(InetAddresses.forString("255.0.255.255"), InetAddresses.forString("255.255.255.255")));
+        assertTrue(-1 >= IpAddressUtil.compare(InetAddresses.forString("0.255.255.255"), InetAddresses.forString("255.255.255.255")));
+
+        assertTrue(0 == IpAddressUtil.compare(InetAddresses.forString("0:0:0:0:0:0:0:1"), InetAddresses.forString("0:0:0:0:0:0:0:1")));
+        assertTrue(-1 >= IpAddressUtil.compare(InetAddresses.forString("0:0:0:0:0:0:0:0"), InetAddresses.forString("1:0:0:0:0:0:0:0")));
+        assertTrue(-1 >= IpAddressUtil.compare(InetAddresses.forString("0:0:0:0:0:0:0:1"), InetAddresses.forString("1:0:0:0:0:0:0:0")));
+        assertTrue(-1 >= IpAddressUtil.compare(InetAddresses.forString("0:0:0:0:0:0:1:0"), InetAddresses.forString("1:0:0:0:0:0:0:0")));
+        assertTrue(-1 >= IpAddressUtil.compare(InetAddresses.forString("0:0:0:0:0:1:0:0"), InetAddresses.forString("1:0:0:0:0:0:0:0")));
+        assertTrue(-1 >= IpAddressUtil.compare(InetAddresses.forString("0:0:0:0:1:0:0:0"), InetAddresses.forString("1:0:0:0:0:0:0:0")));
+        assertTrue(-1 >= IpAddressUtil.compare(InetAddresses.forString("0:0:0:1:0:0:0:0"), InetAddresses.forString("1:0:0:0:0:0:0:0")));
+        assertTrue(-1 >= IpAddressUtil.compare(InetAddresses.forString("0:0:1:0:0:0:0:0"), InetAddresses.forString("1:0:0:0:0:0:0:0")));
+        assertTrue(-1 >= IpAddressUtil.compare(InetAddresses.forString("0:1:0:0:0:0:0:0"), InetAddresses.forString("1:0:0:0:0:0:0:0")));
+        assertTrue(0 == IpAddressUtil.compare(InetAddresses.forString("1:0:0:0:0:0:0:0"), InetAddresses.forString("1:0:0:0:0:0:0:0")));
+
+        assertTrue(0 == IpAddressUtil.compare(InetAddresses.forString("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"), InetAddresses.forString("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff")));
+        assertTrue(-1 >= IpAddressUtil.compare(InetAddresses.forString("ffff:ffff:ffff:ffff:ffff:ffff:ffff:fffe"), InetAddresses.forString("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff")));
+        assertTrue(-1 >= IpAddressUtil.compare(InetAddresses.forString("ffff:ffff:ffff:ffff:ffff:ffff:fffe:ffff"), InetAddresses.forString("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff")));
+        assertTrue(-1 >= IpAddressUtil.compare(InetAddresses.forString("ffff:ffff:ffff:ffff:ffff:fffe:ffff:ffff"), InetAddresses.forString("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff")));
+        assertTrue(-1 >= IpAddressUtil.compare(InetAddresses.forString("ffff:ffff:ffff:ffff:fffe:ffff:ffff:ffff"), InetAddresses.forString("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff")));
+        assertTrue(-1 >= IpAddressUtil.compare(InetAddresses.forString("ffff:ffff:ffff:fffe:ffff:ffff:ffff:ffff"), InetAddresses.forString("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff")));
+        assertTrue(-1 >= IpAddressUtil.compare(InetAddresses.forString("ffff:ffff:fffe:ffff:ffff:ffff:ffff:ffff"), InetAddresses.forString("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff")));
+        assertTrue(-1 >= IpAddressUtil.compare(InetAddresses.forString("ffff:fffe:ffff:ffff:ffff:ffff:ffff:ffff"), InetAddresses.forString("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff")));
+        assertTrue(-1 >= IpAddressUtil.compare(InetAddresses.forString("fffe:ffff:ffff:ffff:ffff:ffff:ffff:ffff"), InetAddresses.forString("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff")));
+        assertTrue(-1 >= IpAddressUtil.compare(InetAddresses.forString("ee90::caca:afff:aaaa:9a04"), InetAddresses.forString("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff")));
+        assertTrue(-1 >= IpAddressUtil.compare(InetAddresses.forString("ffff::caca:afff:aaaa:9a04"), InetAddresses.forString("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff")));
+        assertTrue(-1 >= IpAddressUtil.compare(InetAddresses.forString("ffff::caca:afff:aaaa:9a04"), InetAddresses.forString("ffff:ffff:ffff:ffff:ffff:ffff::ffff")));
+        assertTrue(-1 >= IpAddressUtil.compare(InetAddresses.forString("ffff::caca:afff:aaaa:9a04"), InetAddresses.forString("ffff:ffff:ffff:ffff:ffff::ffff:ffff")));
     }
 }
