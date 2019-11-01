@@ -105,10 +105,10 @@ public class BatchMessagesSubscriptionTest {
         }).when(queue).drainTo(Mockito.anyCollection(), Mockito.eq(batchSize));
         Mockito.when(queue.getName()).thenReturn("MEASUREMENT");
 
-        Mockito.doThrow(new SubscriberException(new SDKException("Error processing messages.")))
+        Mockito.doThrow(new SubscriberException("", new SDKException("Error processing messages.")))
                     .when(subscriber).onMessages(Mockito.anyCollection());
 
-        Mockito.doThrow(new SubscriberException(new SDKException("Error processing one Message.")))
+        Mockito.doThrow(new SubscriberException("", new SDKException("Error processing one Message.")))
                 .when(subscriber).onMessage(failedMessages.get(1));
 
         subscription.run();
@@ -146,7 +146,7 @@ public class BatchMessagesSubscriptionTest {
         }).when(queue).drainTo(Mockito.anyCollection(), Mockito.eq(batchSize));
         Mockito.when(queue.getName()).thenReturn("MEASUREMENT");
 
-        Mockito.doThrow(new SubscriberException(new SDKException("Error processing messages.")))
+        Mockito.doThrow(new SubscriberException("", new SDKException("Error processing messages.")))
                 .when(subscriber).onMessages(Mockito.anyCollection());
 
         subscription.run();

@@ -160,7 +160,7 @@ public class DeviceListenerService {
 
 									PDU responsePDU = responseEvent.getResponse();
 									if (responsePDU == null) {
-										log.error("Empty response was received while polling for device {} OIDs : {}",
+										log.error("Empty response was received while polling for device with IP Address {} and OIDs {}",
 												deviceIp, responseEvent.getRequest());
 									} else if (responsePDU.getErrorStatus() == PDU.noError) {
 										if (responsePDU.getVariableBindings().size() == 0) {
@@ -178,7 +178,7 @@ public class DeviceListenerService {
 									}
 
 								} catch (IOException e) {
-									log.error("Failed while polling variables for the device {} with {} protocol",
+									log.error("Failed while polling variables for the device with IP Address {} and {} protocol",
 											deviceIp, deviceWrapper.getDeviceProtocol(), e);
 								} finally {
 									if (devicePoller != null) {
@@ -257,7 +257,7 @@ public class DeviceListenerService {
 			return new UsmUser(userName, authProtocolOid, authPassword, privacyProtocolOid, privacyPassword);
 
 		default:
-			log.error("Unsupported {} Security level found in {} user configured for device having {} as engine id",
+			log.error("Unsupported {} Security level found in {} user, configured for device having {} as engine id",
 					authDetails.getSecurityLevel(), userName, authDetails.getEngineId());
 			return null;
 		}

@@ -11,7 +11,6 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.junit.Assert.assertTrue;
@@ -74,7 +73,7 @@ public class SingleMessageSubscriptionTest {
         when(queue.getName()).thenReturn("ALARM");
         when(queue.dequeue()).thenReturn(new Message("MESSAGE 1")).thenReturn(new Message("MESSAGE 2")).thenReturn(null);
 
-        doThrow(new SubscriberException(new SDKException("Error processing messages.")))
+        doThrow(new SubscriberException("", new SDKException("Error processing messages.")))
                     .when(subscriber).onMessage(eq("MESSAGE 2"));
 
         subscription.run();
@@ -93,7 +92,7 @@ public class SingleMessageSubscriptionTest {
         when(queue.getName()).thenReturn("ALARM");
         when(queue.dequeue()).thenReturn(new Message("MESSAGE 1")).thenReturn(new Message("MESSAGE 2", (short)5)).thenReturn(null);
 
-        doThrow(new SubscriberException(new SDKException("Error processing messages.")))
+        doThrow(new SubscriberException("", new SDKException("Error processing messages.")))
                 .when(subscriber).onMessage(eq("MESSAGE 2"));
 
         subscription.run();
@@ -112,7 +111,7 @@ public class SingleMessageSubscriptionTest {
         when(queue.getName()).thenReturn("ALARM");
         when(queue.dequeue()).thenReturn(new Message("MESSAGE 1")).thenReturn(new Message("MESSAGE 2")).thenReturn(null);
 
-        doThrow(new SubscriberException(new SDKException("Error processing messages.")))
+        doThrow(new SubscriberException("", new SDKException("Error processing messages.")))
                 .when(subscriber).onMessage(eq("MESSAGE 2"));
 
         doThrow(new NullPointerException()).when(queue).backout(eq(new Message("MESSAGE 2")));
@@ -148,7 +147,7 @@ public class SingleMessageSubscriptionTest {
         when(queue.getName()).thenReturn("ALARM");
 
         // when
-        subscription.rollbackMessageToQueue(message, new SubscriberException(new NullPointerException()));
+        subscription.rollbackMessageToQueue(message, new SubscriberException("", new NullPointerException()));
 
         // then
         verify(queue).backout(message);
@@ -162,7 +161,7 @@ public class SingleMessageSubscriptionTest {
         when(queue.getName()).thenReturn("ALARM");
 
         // when
-        subscription.rollbackMessageToQueue(message, new SubscriberException(new NullPointerException()));
+        subscription.rollbackMessageToQueue(message, new SubscriberException("", new NullPointerException()));
 
         // then
         verify(queue, times(0)).backout(message);
@@ -178,7 +177,7 @@ public class SingleMessageSubscriptionTest {
         doThrow(new NullPointerException()).when(queue).backout(message);
 
         // when
-        subscription.rollbackMessageToQueue(message, new SubscriberException(new NullPointerException()));
+        subscription.rollbackMessageToQueue(message, new SubscriberException("", new NullPointerException()));
 
         // then
         verify(queue, times(1)).backout(message);

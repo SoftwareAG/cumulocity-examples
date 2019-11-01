@@ -62,12 +62,12 @@ public class DeviceDataHandler implements CommandResponder {
 		}
 
 		if (!dataProvider.getSnmpDeviceMap().containsKey(deviceIp)) {
-			log.error("Trap received from an unknown device with IP address : {}", deviceIp);
+			log.error("Trap received from an unknown device with IP Address {}", deviceIp);
 			handleUnknownDevice(deviceIp);
 			return;
 		}
 
-		log.debug("Processing received trap from {} device : {}", deviceIp, pdu);
+		log.debug("Processing received trap from {} device.\n{}", deviceIp, pdu);
 		processDevicePdu(deviceIp, pdu);
 
 		event.setProcessed(true);
@@ -108,7 +108,7 @@ public class DeviceDataHandler implements CommandResponder {
 		DeviceProtocolManagedObjectWrapper deviceProtocolWrapper = dataProvider.getProtocolMap().get(deviceProtocol);
 
 		if (deviceProtocolWrapper == null) {
-			log.error("{} device procotol object not found at the gateway for the device with IP address {}",
+			log.error("{} device protocol object not found at the gateway for the device with IP Address {}",
 					deviceProtocol, deviceIp);
 			return;
 		}

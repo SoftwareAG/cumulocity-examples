@@ -195,7 +195,7 @@ public class DeviceDataHandlerTest {
 
 	@Test
 	public void shouldNotProcessTrapFromAnUnknownDevice() {
-		String errorMsg = "Trap received from an unknown device with IP address : 10.0.0.1";
+		String errorMsg = "Trap received from an unknown device with IP Address 10.0.0.1";
 
 		when(gatewayDataProvider.getSnmpDeviceMap()).thenReturn(Collections.emptyMap());
 
@@ -236,7 +236,7 @@ public class DeviceDataHandlerTest {
 
 	@Test
 	public void shouldNotProceedProcessingTrapIfProtocolObjectIsMissing() {
-		String errorMsg = "device-protocol device procotol object not found at the gateway for the device with IP address 10.0.0.1";
+		String errorMsg = "device-protocol device protocol object not found at the gateway for the device with IP Address 10.0.0.1";
 		
 		protocolMap.put("device-protocol", null);
 

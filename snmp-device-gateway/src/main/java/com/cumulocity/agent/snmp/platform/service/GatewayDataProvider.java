@@ -210,7 +210,7 @@ public class GatewayDataProvider {
 			subscriberForOperationsOnGateway = null;
 
 			// Ignore this exception and continue as the subscription will be retried when the Gateway data is refreshed next time.
-			log.warn("Couldn't enable the subscription for listening to operations for the device with name '{}' and id '{}'." +
+			log.warn("Could not enable the subscription for listening to operations for the device with name '{}' and id '{}'." +
 					" This subscription will be retried later.", gatewayDevice.getName(), gatewayDevice.getId().getValue());
 			log.debug(t.getMessage(), t);
 		}

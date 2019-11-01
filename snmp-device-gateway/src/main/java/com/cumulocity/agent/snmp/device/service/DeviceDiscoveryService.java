@@ -315,7 +315,8 @@ public class DeviceDiscoveryService {
             // Ignore and continue with the next IP, may be platform is unavailable
             // in which case this will be automatically resolved when the auto discovery runs next time.
 
-            log.error("Error while creating the SNMP child device with ID {}", childDevice.getName(), sdke);
+            log.error("Error while creating the SNMP child device with ID {}. Error message: {}", childDevice.getName(), sdke.getMessage());
+            log.debug(sdke.getMessage(), sdke);
         }
     }
 

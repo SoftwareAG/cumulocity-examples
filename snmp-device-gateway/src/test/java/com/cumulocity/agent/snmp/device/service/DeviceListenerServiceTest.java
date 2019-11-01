@@ -240,7 +240,7 @@ public class DeviceListenerServiceTest {
 	public void shouldNotAddUserIfSecurityLevelIsInvalid() {
 		int invalidSecurityLevel = -1;
 		String errorMsg = "Unsupported " + invalidSecurityLevel + " Security level found in " + userName.toString()
-				+ " user configured for device having " + engineID.toString() + " as engine id";
+				+ " user, configured for device having " + engineID.toString() + " as engine id";
 
 		deviceAuthMap.put("securityLevel", invalidSecurityLevel);
 		DeviceManagedObjectWrapper deviceMoWrapper = new DeviceManagedObjectWrapper(snmpDeviceMo);

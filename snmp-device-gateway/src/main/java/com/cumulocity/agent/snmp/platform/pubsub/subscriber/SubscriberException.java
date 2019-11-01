@@ -4,7 +4,7 @@ public class SubscriberException extends Exception {
 
 	private static final long serialVersionUID = 1L;
 
-	public SubscriberException(Throwable cause) {
-        super(cause);
+    public SubscriberException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

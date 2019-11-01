@@ -165,13 +165,15 @@ public class BootstrapService implements InitializingBean {
 			deviceCredentialsStoreService.store(deviceCredentials);
 		} catch (SDKException e) {
 			if (e.getHttpStatus() == HttpStatus.SC_NOT_FOUND) {
-				log.warn("A device with id {} is either not registerd or not accepted. "
+				log.warn("A device with id {} is either not registered or not accepted. "
 						+ "Register or accept a device with id {}, using Device Management user interface.", gatewayProperties.getGatewayIdentifier(), gatewayProperties.getGatewayIdentifier());
 			} else if(e.getHttpStatus() == HttpStatus.SC_UNAUTHORIZED) {
-				log.error("Unable to connect to the platform as incorrect bootstrap credentials were provided. Update the credentials in file:${user.home}/.snmp/snmp-agent-gateway.properties and restart the agent. \nShutting down the agent...", e);
+				log.error("Unable to connect to the platform as incorrect bootstrap credentials were provided. Update the credentials in file:${user.home}/.snmp/snmp-agent-gateway.properties and restart the agent.\n{}\nShutting down the agent...", e.getMessage());
+				log.debug(e.getMessage(), e);
 				throw e;
 			} else {
-				log.error("Unable to connect to the platform, correct the issue and restart the agent. \nShutting down the agent...", e);
+				log.error("Unable to connect to the platform, correct the issue and restart the agent.\n{}\nShutting down the agent...", e.getMessage());
+				log.debug(e.getMessage(), e);
 				throw e;
 			}
 		}

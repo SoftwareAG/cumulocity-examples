@@ -62,7 +62,7 @@ public abstract class Subscriber<PS extends PubSub<?>> {
                 log.debug("'{}' Subscriber has marked the platform as unavailable.", this.getClass().getSimpleName());
             }
 
-            throw new SubscriberException(sdke);
+            throw new SubscriberException(sdke.getMessage(), sdke);
         }
     }
 
@@ -76,7 +76,7 @@ public abstract class Subscriber<PS extends PubSub<?>> {
                 log.debug("'{}' Subscriber has marked the platform as unavailable.", this.getClass().getSimpleName());
             }
 
-            throw new SubscriberException(sdke);
+            throw new SubscriberException(sdke.getMessage(), sdke);
         }
     }
 

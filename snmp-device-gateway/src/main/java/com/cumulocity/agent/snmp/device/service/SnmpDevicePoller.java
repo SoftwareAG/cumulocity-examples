@@ -84,7 +84,7 @@ public class SnmpDevicePoller {
 			try {
 				transport.close();
 			} catch (IOException e) {
-				log.error("IOException while closing TransportMapping ", e);
+				log.error("Error occurred while closing TransportMapping ", e);
 			}
 		}
 
@@ -92,7 +92,7 @@ public class SnmpDevicePoller {
 			try {
 				snmp.close();
 			} catch (IOException e) {
-				log.error("IOException while closing SNMP connection ", e);
+				log.error("Error occurred while closing SNMP connection ", e);
 			}
 		}
 	}

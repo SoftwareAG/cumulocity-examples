@@ -57,12 +57,14 @@ public abstract class Subscription implements Runnable {
 
     void rollbackMessageToQueue(Message message, Throwable throwable) {
         if(message.getBackoutCount() + 1 > getRetryLimit()) {
-            log.error("Skipped publishing the following {} to the Platform, as the failure count for publishing it has exceeded the configured retry limit.\n{}", getQueue().getName().toLowerCase(), message.getPayload(), throwable);
+            log.error("Skipped publishing the following {} to the Platform, as the failure count for publishing it has exceeded the configured retry limit. Error message: {}.\n{}", getQueue().getName().toLowerCase(), throwable.getMessage(), message.getPayload());
+            log.debug(throwable.getMessage(), throwable);
         }
         else {
             if(message.getBackoutCount() == 0) {
                 // Log only the first time
-                log.warn("Failed to publish the following {} to the Platform, will retry again.\n{}", getQueue().getName().toLowerCase(), message.getPayload(), throwable);
+                log.warn("Failed to publish the following {} to the Platform, will retry again. Error message: {}.\n{}", getQueue().getName().toLowerCase(), throwable.getMessage(), message.getPayload());
+                log.debug(throwable.getMessage(), throwable);
             }
             try {
                 queue.backout(message);
