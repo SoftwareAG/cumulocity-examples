@@ -184,6 +184,8 @@ public class DeviceDiscoveryService {
     }
 
     synchronized void scanForSnmpDevicesAndCreateChildDevices(List<InetAddress[]> ipRangesList, int port, boolean isProtocolUdp, int pingTimeoutInSeconds, String communityTarget, Map<String, DeviceManagedObjectWrapper> existingDeviceMap) {
+        boolean newDeviceFound = false;
+
         int timeoutInMilliseconds = pingTimeoutInSeconds * 1000;
         for(InetAddress[] oneIpRange : ipRangesList) {
             InetAddress currentIp = oneIpRange[0];
@@ -200,6 +202,7 @@ public class DeviceDiscoveryService {
 
                             // Create a new Child Device
                             createAndRegisterAChildDevice(currentIpString, port);
+                            newDeviceFound = true;
                         } else if (!isDeviceSnmpEnabled) {
                             handleNoResponseFromDevice("A device with IP Address <" + currentIpString + ">, which is not SNMP enabled is found during auto-discovery device scan.", c8y_DeviceSnmpNotEnabled + currentIpString);
                         }
@@ -218,6 +221,12 @@ public class DeviceDiscoveryService {
                 currentIp = InetAddresses.increment(currentIp);
                 currentIpString = currentIp.getHostAddress();
             }
+        }
+
+        if(newDeviceFound) {
+            // Refresh the locally maintained Gateway Objects when
+            // a new child device is found and created
+            gatewayDataProvider.refreshGatewayObjects();
         }
     }
 

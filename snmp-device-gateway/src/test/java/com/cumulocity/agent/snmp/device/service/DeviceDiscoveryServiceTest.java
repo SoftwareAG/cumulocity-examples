@@ -317,6 +317,7 @@ public class DeviceDiscoveryServiceTest {
         // then
         verify(deviceDiscoveryService, times(1)).createAndRegisterAChildDevice(eq(startIpAddress), eq(port));
         verify(deviceDiscoveryService, times(0)).createAndRegisterAChildDevice(eq(endIpAddress), eq(port));
+        verify(gatewayDataProvider, times(1)).refreshGatewayObjects();
     }
 
     @Test

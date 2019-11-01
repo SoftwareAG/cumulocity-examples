@@ -67,14 +67,14 @@ public class GatewayDataProvider {
 		scheduleGatewayDataRefresh();
 	}
 
-	void refreshGatewayObjects() {
+	public synchronized void refreshGatewayObjects() {
 		Map<String, DeviceManagedObjectWrapper> newSnmpDeviceMap = new HashMap<>();
 		Map<String, DeviceProtocolManagedObjectWrapper> newProtocolMap = new HashMap<>();
 
 		GId id = gatewayDevice.getId();
-		ManagedObjectRepresentation newGatewatDevice = inventoryApi.get(id);
-		ManagedObjectReferenceCollectionRepresentation deviceCollections = newGatewatDevice.getChildDevices();
-		GatewayManagedObjectWrapper newGatewatDeviceWrapper = new GatewayManagedObjectWrapper(newGatewatDevice);
+		ManagedObjectRepresentation newGatewayDevice = inventoryApi.get(id);
+		ManagedObjectReferenceCollectionRepresentation deviceCollections = newGatewayDevice.getChildDevices();
+		GatewayManagedObjectWrapper newGatewayDeviceWrapper = new GatewayManagedObjectWrapper(newGatewayDevice);
 
 		deviceCollections.forEach(childDeviceRep -> {
 			try {
@@ -93,11 +93,9 @@ public class GatewayDataProvider {
 			}
 		});
 
-		synchronized (gatewayDevice) {
-			gatewayDevice = newGatewatDeviceWrapper;
-			snmpDeviceMap = newSnmpDeviceMap;
-			protocolMap = newProtocolMap;
-		}
+		gatewayDevice = newGatewayDeviceWrapper;
+		snmpDeviceMap = newSnmpDeviceMap;
+		protocolMap = newProtocolMap;
 
 		// Subscribe for Operations on Gateway Device
 		subscribeForOperationsForGatewayDevice();
