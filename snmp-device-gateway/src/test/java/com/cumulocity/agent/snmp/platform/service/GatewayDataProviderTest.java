@@ -3,7 +3,6 @@ package com.cumulocity.agent.snmp.platform.service;
 import com.cumulocity.agent.snmp.config.GatewayProperties;
 import com.cumulocity.agent.snmp.platform.model.DeviceManagedObjectWrapper;
 import com.cumulocity.agent.snmp.platform.model.GatewayDataRefreshedEvent;
-import com.cumulocity.agent.snmp.platform.model.GatewayManagedObjectWrapper;
 import com.cumulocity.agent.snmp.platform.model.ReceivedOperationForGatewayEvent;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.inventory.ManagedObjectReferenceCollectionRepresentation;
@@ -12,9 +11,7 @@ import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.devicecontrol.DeviceControlApi;
-import com.cumulocity.sdk.client.devicecontrol.notification.OperationNotificationSubscriber;
 import com.cumulocity.sdk.client.inventory.InventoryApi;
-import com.cumulocity.sdk.client.notification.Subscription;
 import com.cumulocity.sdk.client.notification.SubscriptionListener;
 import org.apache.commons.httpclient.HttpStatus;
 import org.junit.Before;
@@ -25,8 +22,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.test.util.ReflectionTestUtils;
-
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,7 +34,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
-@SuppressWarnings("unchecked")
 public class GatewayDataProviderTest {
 
 	@Mock
@@ -85,16 +79,11 @@ public class GatewayDataProviderTest {
 		when(properties.getGatewayObjectRefreshIntervalInMinutes()).thenReturn(2);
 		when(inventoryApi.get(any())).thenReturn(gatewayDeviceMo);
 
-		OperationNotificationSubscriber operationNotificationSubscriberMock = mock(OperationNotificationSubscriber.class);
-		when(deviceControlApi.getNotificationsSubscriber()).thenReturn(operationNotificationSubscriberMock);
-
+		// Action
 		gatewayDataProvider.updateGatewayObjects(gatewayDeviceMo);
 
 		verify(gatewayDataProvider, times(1)).scheduleGatewayDataRefresh();
 		verify(taskScheduler).scheduleWithFixedDelay(any(Runnable.class), eq(Duration.ofMinutes(2)));
-
-		verify(operationNotificationSubscriberMock, times(1)).subscribe(eq(gatewayDataProvider.getGatewayDevice().getId()), any(SubscriptionListener.class));
-		assertNotNull(ReflectionTestUtils.getField(gatewayDataProvider, "subscriberForOperationsOnGateway"));
 	}
 
 	@Test
@@ -131,19 +120,14 @@ public class GatewayDataProviderTest {
 		when(inventoryApi.get(new GId("device-protocol"))).thenReturn(deviceProtocolMo);
 		when(properties.getGatewayObjectRefreshIntervalInMinutes()).thenReturn(1);
 
-		OperationNotificationSubscriber operationNotificationSubscriberMock = mock(OperationNotificationSubscriber.class);
-		when(deviceControlApi.getNotificationsSubscriber()).thenReturn(operationNotificationSubscriberMock);
-
 		assertNull(gatewayDataProvider.getGatewayDevice());
 		assertEquals(gatewayDataProvider.getSnmpDeviceMap().size(), 0);
 
+		// Action
 		gatewayDataProvider.updateGatewayObjects(gatewayDeviceMo);
 
 		assertNotNull(gatewayDataProvider.getGatewayDevice());
 		assertEquals(gatewayDataProvider.getSnmpDeviceMap().size(), 1);
-
-		verify(operationNotificationSubscriberMock, times(1)).subscribe(eq(gatewayDataProvider.getGatewayDevice().getId()), any(SubscriptionListener.class));
-		assertNotNull(ReflectionTestUtils.getField(gatewayDataProvider, "subscriberForOperationsOnGateway"));
 	}
 
 	@Test
@@ -178,18 +162,14 @@ public class GatewayDataProviderTest {
 				.thenThrow(new SDKException(HttpStatus.SC_NOT_FOUND, "Object Not found"));
 		when(properties.getGatewayObjectRefreshIntervalInMinutes()).thenReturn(1);
 
-		OperationNotificationSubscriber operationNotificationSubscriberMock = mock(OperationNotificationSubscriber.class);
-		when(deviceControlApi.getNotificationsSubscriber()).thenReturn(operationNotificationSubscriberMock);
-
 		assertNull(gatewayDataProvider.getGatewayDevice());
 		assertEquals(gatewayDataProvider.getSnmpDeviceMap().size(), 0);
 
+		// Action
 		gatewayDataProvider.updateGatewayObjects(gatewayDeviceMo);
 
 		assertEquals(1, gatewayDataProvider.getSnmpDeviceMap().size());
 		assertNull(gatewayDataProvider.getProtocolMap().get("device-protocol"));
-		verify(operationNotificationSubscriberMock, times(1)).subscribe(eq(gatewayDataProvider.getGatewayDevice().getId()), any(SubscriptionListener.class));
-		assertNotNull(ReflectionTestUtils.getField(gatewayDataProvider, "subscriberForOperationsOnGateway"));
 	}
 
 	@Test
@@ -212,138 +192,11 @@ public class GatewayDataProviderTest {
 			return null;
 		}).when(gatewayDataProvider).refreshGatewayObjects();
 
+		// Action
 		gatewayDataProvider.scheduleGatewayDataRefresh();
 		Thread.sleep(1000);
 
 		verify(gatewayDataProvider).refreshGatewayObjects();
 		verify(eventPublisher).publishEvent(any(GatewayDataRefreshedEvent.class));
-	}
-
-	@Test
-	public void shouldPublishReceivedOperationForGatewayEventWhenDeviceIDsMatch() {
-		final GId gatewayDeviceId = GId.asGId("111");
-		String gatewayDeviceName = "snmp-agent-test";
-
-		OperationNotificationSubscriber operationNotificationSubscriberMock = mock(OperationNotificationSubscriber.class);
-		when(deviceControlApi.getNotificationsSubscriber()).thenReturn(operationNotificationSubscriberMock);
-
-		// Inject the gatewayDevice mock
-		GatewayManagedObjectWrapper gatewayDeviceMock = mock(GatewayManagedObjectWrapper.class);
-		when(gatewayDeviceMock.getId()).thenReturn(gatewayDeviceId);
-		when(gatewayDeviceMock.getName()).thenReturn(gatewayDeviceName);
-		ReflectionTestUtils.setField(gatewayDataProvider, "gatewayDevice", gatewayDeviceMock);
-
-		// when
-		ReflectionTestUtils.invokeMethod(gatewayDataProvider, "subscribeForOperationsForGatewayDevice");
-
-		verify(operationNotificationSubscriberMock, times(1)).subscribe(eq(gatewayDeviceId), subscriptionListenerCaptor.capture());
-		assertNotNull(ReflectionTestUtils.getField(gatewayDataProvider, "subscriberForOperationsOnGateway"));
-
-		// when onNotification
-		OperationRepresentation operationRepresentation = new OperationRepresentation();
-		subscriptionListenerCaptor.getValue().onNotification(new Subscription<GId>() {
-			@Override
-			public GId getObject() {
-				return gatewayDeviceId;
-			}
-
-			@Override
-			public void unsubscribe() {
-			}
-		}, operationRepresentation);
-
-
-		verify(eventPublisher, times(1)).publishEvent(receivedOperationForGatewayEventCaptor.capture());
-
-		assertEquals(gatewayDeviceId, receivedOperationForGatewayEventCaptor.getValue().getDeviceId());
-		assertEquals(gatewayDeviceName, receivedOperationForGatewayEventCaptor.getValue().getDeviceName());
-		assertEquals(operationRepresentation, receivedOperationForGatewayEventCaptor.getValue().getOperationRepresentation());
-	}
-
-	@Test
-	public void shouldNotPublishReceivedOperationForGatewayEventWhenDeviceIDsDoNotMatch() {
-		final GId gatewayDeviceId = GId.asGId("111");
-		String gatewayDeviceName = "snmp-agent-test";
-
-		OperationNotificationSubscriber operationNotificationSubscriberMock = mock(OperationNotificationSubscriber.class);
-		when(deviceControlApi.getNotificationsSubscriber()).thenReturn(operationNotificationSubscriberMock);
-
-		// Inject the gatewayDevice mock
-		GatewayManagedObjectWrapper gatewayDeviceMock = mock(GatewayManagedObjectWrapper.class);
-		when(gatewayDeviceMock.getId()).thenReturn(gatewayDeviceId);
-		when(gatewayDeviceMock.getName()).thenReturn(gatewayDeviceName);
-		ReflectionTestUtils.setField(gatewayDataProvider, "gatewayDevice", gatewayDeviceMock);
-
-		// when
-		ReflectionTestUtils.invokeMethod(gatewayDataProvider, "subscribeForOperationsForGatewayDevice");
-
-		verify(operationNotificationSubscriberMock, times(1)).subscribe(eq(gatewayDeviceId), subscriptionListenerCaptor.capture());
-		assertNotNull(ReflectionTestUtils.getField(gatewayDataProvider, "subscriberForOperationsOnGateway"));
-
-		// when onNotification
-		OperationRepresentation operationRepresentation = new OperationRepresentation();
-		subscriptionListenerCaptor.getValue().onNotification(new Subscription<GId>() {
-			@Override
-			public GId getObject() {
-				return GId.asGId("222"); // Different ID
-			}
-
-			@Override
-			public void unsubscribe() {
-			}
-		}, operationRepresentation);
-
-
-		verifyZeroInteractions(eventPublisher);
-
-		// when onError
-		subscriptionListenerCaptor.getValue().onError(new Subscription<GId>() {
-			@Override
-			public GId getObject() {
-				return GId.asGId("222"); // Different ID
-			}
-
-			@Override
-			public void unsubscribe() {
-			}
-		}, new Exception("SOME EXCEPTION"));
-
-		verifyZeroInteractions(eventPublisher);
-	}
-
-	@Test
-	public void shouldNotSubscribeForOperationsForGatewayDeviceSecondTime() {
-		OperationNotificationSubscriber operationNotificationSubscriberMock = mock(OperationNotificationSubscriber.class);
-
-		ReflectionTestUtils.setField(gatewayDataProvider, "subscriberForOperationsOnGateway", operationNotificationSubscriberMock);
-
-		// When
-		ReflectionTestUtils.invokeMethod(gatewayDataProvider, "subscribeForOperationsForGatewayDevice");
-
-		verifyZeroInteractions(operationNotificationSubscriberMock);
-		assertNotNull(ReflectionTestUtils.getField(gatewayDataProvider, "subscriberForOperationsOnGateway"));
-	}
-
-	@Test
-	public void shouldKeepSubscriberForOperationsForGatewayDeviceWhenSubscribeThrowsException() {
-		final GId gatewayDeviceId = GId.asGId("111");
-		String gatewayDeviceName = "snmp-agent-test";
-
-		OperationNotificationSubscriber operationNotificationSubscriberMock = mock(OperationNotificationSubscriber.class);
-		when(deviceControlApi.getNotificationsSubscriber()).thenReturn(operationNotificationSubscriberMock);
-
-		// Inject the gatewayDevice mock
-		GatewayManagedObjectWrapper gatewayDeviceMock = mock(GatewayManagedObjectWrapper.class);
-		when(gatewayDeviceMock.getId()).thenReturn(gatewayDeviceId);
-		when(gatewayDeviceMock.getName()).thenReturn(gatewayDeviceName);
-		ReflectionTestUtils.setField(gatewayDataProvider, "gatewayDevice", gatewayDeviceMock);
-
-		when(operationNotificationSubscriberMock.subscribe(eq(gatewayDeviceId), any(SubscriptionListener.class))).thenThrow(new SDKException("SOME ERROR"));
-
-		// when
-		ReflectionTestUtils.invokeMethod(gatewayDataProvider, "subscribeForOperationsForGatewayDevice");
-
-		verify(operationNotificationSubscriberMock, times(1)).subscribe(eq(gatewayDeviceId), subscriptionListenerCaptor.capture());
-		assertNull(ReflectionTestUtils.getField(gatewayDataProvider, "subscriberForOperationsOnGateway"));
 	}
 }
