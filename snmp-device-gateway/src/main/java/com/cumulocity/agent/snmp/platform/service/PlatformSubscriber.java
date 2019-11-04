@@ -74,9 +74,9 @@ public class PlatformSubscriber {
 									SDKException sdkException = (SDKException) throwable;
 									if (sdkException.getHttpStatus() == HttpStatus.SC_UNAUTHORIZED) {
 										log.error("Invalid gateway device credentials detected. "
-												+ "It could be that the gateway device was removed."
-												+ "Please bootstrap the gateway device again."
-												+ "\nShutting the gateway process.");
+												+ "It could be that the gateway device was removed. "
+												+ "Please bootstrap the gateway device again. "
+												+ "\nShutting down the gateway process.");
 										System.exit(0);
 									}
 								}

@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -102,6 +103,14 @@ public class GatewayDataProvider {
 				} catch (Throwable t) {
 					// Forcefully catching throwable, as we do not want to stop the scheduler on exception.
 					log.error("Unable to refresh gateway managed objects", t);
+					
+					if (isExceptionDueToInvalidCredentials(t)) {
+						log.error("Invalid gateway device credentials detected. "
+								+ "It could be that the gateway device was removed. "
+								+ "Please bootstrap the gateway device again."
+								+ "\nShutting down the gateway process.");
+						System.exit(0);
+					}
 				}
 			} else {
 				log.debug("Platform is unavailable. Waiting for {} minutes before retrying gateway data refresh.",
@@ -154,5 +163,20 @@ public class GatewayDataProvider {
 				}
 			}
 		}
+	}
+	
+	private boolean isExceptionDueToInvalidCredentials(Throwable cause) {
+		while (!Objects.isNull(cause)) {
+			if (cause instanceof SDKException) {
+				SDKException sdkException = (SDKException) cause;
+				if (sdkException.getHttpStatus() == HttpStatus.SC_UNAUTHORIZED) {
+					return true;
+				}
+			}
+
+			cause = cause.getCause();
+		}
+
+		return false;
 	}
 }
