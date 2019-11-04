@@ -399,11 +399,12 @@ public class DeviceDiscoveryServiceTest {
         Map<String, DeviceManagedObjectWrapper> existingDeviceMap = new HashMap<>();
 //        existingDeviceMap.put(oneRange[0].getHostAddress(), null);
 
+        doReturn(existingDeviceMap).when(gatewayDataProvider).getSnmpDeviceMap();
         doReturn(true).when(deviceDiscoveryService).isDeviceSnmpEnabled(oneRange[0], port, isProtocolUdp, communityTarget);
         doNothing().when(deviceDiscoveryService).createAndRegisterAChildDevice(startIpAddress, port);
 
         // when
-        deviceDiscoveryService.scanForSnmpDevicesAndCreateChildDevices(ipRangesList, port, isProtocolUdp, pingTimeoutInSeconds, communityTarget, existingDeviceMap);
+        deviceDiscoveryService.scanForSnmpDevicesAndCreateChildDevices(ipRangesList, port, isProtocolUdp, pingTimeoutInSeconds, communityTarget);
 
         // then
         verify(deviceDiscoveryService, times(1)).createAndRegisterAChildDevice(eq(startIpAddress), eq(port));
@@ -453,11 +454,12 @@ public class DeviceDiscoveryServiceTest {
         Map<String, DeviceManagedObjectWrapper> existingDeviceMap = new HashMap<>();
 //        existingDeviceMap.put(oneRange[0].getHostAddress(), null);
 
+        doReturn(existingDeviceMap).when(gatewayDataProvider).getSnmpDeviceMap();
         doReturn(true).when(deviceDiscoveryService).isDeviceSnmpEnabled(oneRange[0], port, isProtocolUdp, communityTarget);
         doNothing().when(deviceDiscoveryService).createAndRegisterAChildDevice(oneStartIpAddress, port);
 
         // when
-        deviceDiscoveryService.scanForSnmpDevicesAndCreateChildDevices(ipRangesList, port, isProtocolUdp, pingTimeoutInSeconds, communityTarget, existingDeviceMap);
+        deviceDiscoveryService.scanForSnmpDevicesAndCreateChildDevices(ipRangesList, port, isProtocolUdp, pingTimeoutInSeconds, communityTarget);
 
         // then
         verify(deviceDiscoveryService, times(1)).createAndRegisterAChildDevice(eq(oneStartIpAddress), eq(port));
@@ -496,13 +498,14 @@ public class DeviceDiscoveryServiceTest {
 //        existingDeviceMap.put(oneRange[0].getHostAddress(), null);
         existingDeviceMap.put(oneRange[1].getHostAddress(), null);
 
-        doReturn(false).when(deviceDiscoveryService).isDeviceSnmpEnabled(oneRange[0], port, isProtocolUdp, communityTarget);
+        doReturn(existingDeviceMap).when(gatewayDataProvider).getSnmpDeviceMap();
 
+        doReturn(false).when(deviceDiscoveryService).isDeviceSnmpEnabled(oneRange[0], port, isProtocolUdp, communityTarget);
         doNothing().when(deviceDiscoveryService).handleNoResponseFromDevice(any(String.class), eq(c8y_DeviceSnmpNotEnabled + startIpAddress));
         doNothing().when(deviceDiscoveryService).handleNoResponseFromDevice(any(String.class), eq(c8y_DeviceNotResponding + endIpAddress));
 
         // when
-        deviceDiscoveryService.scanForSnmpDevicesAndCreateChildDevices(ipRangesList, port, isProtocolUdp, pingTimeoutInSeconds, communityTarget, existingDeviceMap);
+        deviceDiscoveryService.scanForSnmpDevicesAndCreateChildDevices(ipRangesList, port, isProtocolUdp, pingTimeoutInSeconds, communityTarget);
 
         // then
         verify(deviceDiscoveryService, times(1)).handleNoResponseFromDevice(any(String.class), eq(c8y_DeviceSnmpNotEnabled + startIpAddress));
@@ -538,17 +541,15 @@ public class DeviceDiscoveryServiceTest {
         when(snmpProperties.getAutoDiscoveryDevicePingTimeoutPeriod()).thenReturn(pingTimeoutInSeconds);
         when(snmpProperties.getCommunityTarget()).thenReturn(communityTarget);
 
-        when(gatewayDataProvider.getSnmpDeviceMap()).thenReturn(snmpDeviceMap);
-
         doNothing().when(deviceDiscoveryService).scanForSnmpDevicesAndCreateChildDevices(any(List.class),
-                eq(port), eq(isProtocolUdp), eq(pingTimeoutInSeconds), eq(communityTarget), eq(snmpDeviceMap));
+                eq(port), eq(isProtocolUdp), eq(pingTimeoutInSeconds), eq(communityTarget));
 
         // when
         deviceDiscoveryService.executeOperation(operationEvent);
 
         // then
         verify(deviceDiscoveryService, times(1)).scanForSnmpDevicesAndCreateChildDevices(any(List.class),
-                eq(port), eq(isProtocolUdp), eq(pingTimeoutInSeconds), eq(communityTarget), eq(snmpDeviceMap));
+                eq(port), eq(isProtocolUdp), eq(pingTimeoutInSeconds), eq(communityTarget));
 
         verify(deviceControlApi, times(2)).update(eq(new TestOperationRepresentation(operationId, SUCCESSFUL.name(), null)));
     }
@@ -582,17 +583,15 @@ public class DeviceDiscoveryServiceTest {
         when(snmpProperties.getAutoDiscoveryDevicePingTimeoutPeriod()).thenReturn(pingTimeoutInSeconds);
         when(snmpProperties.getCommunityTarget()).thenReturn(communityTarget);
 
-        when(gatewayDataProvider.getSnmpDeviceMap()).thenReturn(snmpDeviceMap);
-
         doThrow(new NullPointerException("SOME EXCEPTION")).when(deviceDiscoveryService).scanForSnmpDevicesAndCreateChildDevices(any(List.class),
-                eq(port), eq(isProtocolUdp), eq(pingTimeoutInSeconds), eq(communityTarget), eq(snmpDeviceMap));
+                eq(port), eq(isProtocolUdp), eq(pingTimeoutInSeconds), eq(communityTarget));
 
         // when
         deviceDiscoveryService.executeOperation(operationEvent);
 
         // then
         verify(deviceDiscoveryService, times(1)).scanForSnmpDevicesAndCreateChildDevices(any(List.class),
-                eq(port), eq(isProtocolUdp), eq(pingTimeoutInSeconds), eq(communityTarget), eq(snmpDeviceMap));
+                eq(port), eq(isProtocolUdp), eq(pingTimeoutInSeconds), eq(communityTarget));
 
         verify(deviceControlApi, times(2)).update(eq(new TestOperationRepresentation(operationId, FAILED.name(), "Unexpected error occurred while scanning the network for SNMP devices.")));
     }
@@ -616,7 +615,7 @@ public class DeviceDiscoveryServiceTest {
 
         // then
         verify(deviceDiscoveryService, times(0)).scanForSnmpDevicesAndCreateChildDevices(any(List.class),
-                anyInt(), anyBoolean(), anyInt(), anyString(), anyMap());
+                anyInt(), anyBoolean(), anyInt(), anyString());
         verify(deviceControlApi, times(2)).update(eq(new TestOperationRepresentation(operationId, FAILED.name(), "Error while parsing the provided " + givenIpRange + " IP Address ranges to scan for devices.")));
     }
 
@@ -639,7 +638,7 @@ public class DeviceDiscoveryServiceTest {
 
         // then
         verify(deviceDiscoveryService, times(0)).scanForSnmpDevicesAndCreateChildDevices(any(List.class),
-                anyInt(), anyBoolean(), anyInt(), anyString(), anyMap());
+                anyInt(), anyBoolean(), anyInt(), anyString());
         verify(deviceControlApi, times(2)).update(eq(new TestOperationRepresentation(operationId, FAILED.name(), "Didn't provide the IP Address ranges to scan for devices.")));
     }
 

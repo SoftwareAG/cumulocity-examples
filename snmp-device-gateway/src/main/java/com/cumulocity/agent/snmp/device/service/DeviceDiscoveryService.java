@@ -105,8 +105,7 @@ public class DeviceDiscoveryService {
                                         snmpProperties.getPollingPort(),
                                         snmpProperties.isTrapListenerProtocolUdp(),
                                         snmpProperties.getAutoDiscoveryDevicePingTimeoutPeriod(),
-                                        snmpProperties.getCommunityTarget(),
-                                        gatewayDataProvider.getSnmpDeviceMap()),
+                                        snmpProperties.getCommunityTarget()),
 
                         Duration.ofMinutes(autoDiscoveryScheduleInterval));
             } catch(IllegalArgumentException iae) {
@@ -152,8 +151,7 @@ public class DeviceDiscoveryService {
                                 snmpProperties.getPollingPort(),
                                 snmpProperties.isTrapListenerProtocolUdp(),
                                 snmpProperties.getAutoDiscoveryDevicePingTimeoutPeriod(),
-                                snmpProperties.getCommunityTarget(),
-                                gatewayDataProvider.getSnmpDeviceMap());
+                                snmpProperties.getCommunityTarget());
                     }
                 } catch(IllegalArgumentException iae) {
                     failureReason = "Error while parsing the provided " + ipRanges + " IP Address ranges to scan for devices.";
@@ -180,7 +178,8 @@ public class DeviceDiscoveryService {
         }
     }
 
-    synchronized void scanForSnmpDevicesAndCreateChildDevices(List<InetAddress[]> ipRangesList, int port, boolean isProtocolUdp, int pingTimeoutInSeconds, String communityTarget, Map<String, DeviceManagedObjectWrapper> existingDeviceMap) {
+    synchronized void scanForSnmpDevicesAndCreateChildDevices(List<InetAddress[]> ipRangesList, int port, boolean isProtocolUdp, int pingTimeoutInSeconds, String communityTarget) {
+        Map<String, DeviceManagedObjectWrapper> existingDeviceMap = gatewayDataProvider.getSnmpDeviceMap();
         Set<String> ipAlreadyScannedInThisRun = new HashSet<>();
         boolean newDeviceFoundInThisRun = false;
 
