@@ -27,7 +27,8 @@ public class GatewayProperties {
 	@Value("#{'${gateway.availability.interval:10}'.trim()}")
 	private int gatewayAvailabilityInterval;
 
-	// This value is not added in the property file and defaulting to 1minute 
+	// This property is not exposed to the end user, hence not present
+	// in the snmp-agent-gateway.properties file and is also not documented. 
 	@Value("#{'${gateway.objects.refresh.interval:1}'.trim()}")
 	private int gatewayObjectRefreshIntervalInMinutes;
 
