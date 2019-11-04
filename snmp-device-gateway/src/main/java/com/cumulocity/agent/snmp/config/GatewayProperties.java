@@ -27,6 +27,7 @@ public class GatewayProperties {
 	@Value("#{'${gateway.availability.interval:10}'.trim()}")
 	private int gatewayAvailabilityInterval;
 
+	// This value is not added in the property file and defaulting to 1minute 
 	@Value("#{'${gateway.objects.refresh.interval:1}'.trim()}")
 	private int gatewayObjectRefreshIntervalInMinutes;
 
