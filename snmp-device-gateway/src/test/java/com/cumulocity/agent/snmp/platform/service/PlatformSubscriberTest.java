@@ -50,7 +50,7 @@ public class PlatformSubscriberTest {
 
 	@Mock
 	private PlatformProvider platformProvider;
-	
+
 	@Mock
 	private ApplicationEventPublisher eventPublisher;
 
@@ -60,7 +60,7 @@ public class PlatformSubscriberTest {
 	@Spy
 	@InjectMocks
 	PlatformSubscriber platformSubscriber;
-	
+
 	@Spy
 	private ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
 
@@ -194,6 +194,16 @@ public class PlatformSubscriberTest {
 		verify(operationNotificationSubscriberMock, times(1)).subscribe(eq(gatewayDeviceId),
 				subscriptionListenerCaptor.capture());
 		assertNull(ReflectionTestUtils.getField(platformSubscriber, "subscriberForOperationsOnGateway"));
+	}
+
+	@Test
+	public void shouldNotSubscribeForGatewayInventoryNotificationSecondTime() {
+		ReflectionTestUtils.setField(platformSubscriber, "isGatewayInventorySubscribed", true);
+
+		// Action
+		ReflectionTestUtils.invokeMethod(platformSubscriber, "subscribeGatewayInventoryNotification");
+
+		verifyZeroInteractions(gatewayDataProvider);
 	}
 
 	@Test
