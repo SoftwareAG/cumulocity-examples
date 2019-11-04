@@ -49,11 +49,11 @@ public class PlatformSubscriber {
 
 	@EventListener({ BootstrapReadyEvent.class, GatewayDataRefreshedEvent.class })
 	public void subscribe() {
-		subscribeGatewayInventory();
-		subscribeOperationsForGatewayDevice();
+		subscribeGatewayInventoryNotification();
+		subscribeGatewayDeviceOperation();
 	}
 
-	private void subscribeGatewayInventory() {
+	private void subscribeGatewayInventoryNotification() {
 		if (!isGatewayInventorySubscribed) {
 			String id = gatewayDataProvider.getGatewayDevice().getId().getValue();
 			PlatformParameters platformParameters = (PlatformParameters) platformProvider.getPlatform();
@@ -89,7 +89,7 @@ public class PlatformSubscriber {
 		}
 	}
 
-	private void subscribeOperationsForGatewayDevice() {
+	private void subscribeGatewayDeviceOperation() {
 		if (subscriberForOperationsOnGateway != null) {
 			return;
 		}
