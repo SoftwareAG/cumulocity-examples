@@ -75,9 +75,8 @@ public class PlatformSubscriber {
 							if (throwable instanceof SDKException) {
 								SDKException sdkException = (SDKException) throwable;
 								if (sdkException.getHttpStatus() == HttpStatus.SC_UNAUTHORIZED) {
-									log.error("Invalid device credentials detected for the "
-											+ "device with name '{}' and id '{}'. "
-											+ "Restart the agent and register to fix the problem. "
+									log.error("Device with name '{}' and id '{}' is deleted. "
+											+ "Restart the agent and register a new device. "
 											+ "\nShutting down agent...", gatewayDevice.getName(), 
 											gatewayDevice.getId().getValue());
 									System.exit(0);
@@ -88,6 +87,8 @@ public class PlatformSubscriber {
 		} catch (SDKException ex) {
 			gatewayNotificationSubscriber = null;
 
+			// Ignore this exception and continue as the subscription will be retried when
+			// the Gateway data is refreshed next time.
 			log.warn("Couldn't enable the subscription for inventory changes for the gateway device with name '{}' and id '{}'. "
 					+ "This subscription will be retried later.", gatewayDevice.getName(), gatewayDevice.getId().getValue());
 			log.debug(ex.getMessage(), ex);
