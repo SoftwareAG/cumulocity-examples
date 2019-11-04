@@ -30,6 +30,7 @@ import com.cumulocity.agent.snmp.platform.model.ReceivedOperationForGatewayEvent
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.SDKException;
+import com.cumulocity.sdk.client.cep.notification.InventoryRealtimeDeleteAwareNotificationsSubscriber;
 import com.cumulocity.sdk.client.devicecontrol.DeviceControlApi;
 import com.cumulocity.sdk.client.devicecontrol.notification.OperationNotificationSubscriber;
 import com.cumulocity.sdk.client.inventory.InventoryApi;
@@ -198,7 +199,9 @@ public class PlatformSubscriberTest {
 
 	@Test
 	public void shouldNotSubscribeForGatewayInventoryNotificationSecondTime() {
-		ReflectionTestUtils.setField(platformSubscriber, "isGatewayInventorySubscribed", true);
+		InventoryRealtimeDeleteAwareNotificationsSubscriber subscriberMock = mock(
+				InventoryRealtimeDeleteAwareNotificationsSubscriber.class);
+		ReflectionTestUtils.setField(platformSubscriber, "gatewayNotificationSubscriber", subscriberMock);
 
 		// Action
 		ReflectionTestUtils.invokeMethod(platformSubscriber, "subscribeGatewayInventoryNotification");

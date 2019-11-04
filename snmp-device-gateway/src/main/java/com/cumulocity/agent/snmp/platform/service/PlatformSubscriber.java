@@ -41,9 +41,7 @@ public class PlatformSubscriber {
 	@Autowired
 	private ApplicationEventPublisher eventPublisher;
 
-	private boolean isGatewayInventorySubscribed = false;
-
-	private InventoryRealtimeDeleteAwareNotificationsSubscriber notificationSubscriber;
+	private InventoryRealtimeDeleteAwareNotificationsSubscriber gatewayNotificationSubscriber;
 
 	private Subscriber<GId, OperationRepresentation> subscriberForOperationsOnGateway;
 
@@ -54,38 +52,41 @@ public class PlatformSubscriber {
 	}
 
 	private void subscribeGatewayInventoryNotification() {
-		if (!isGatewayInventorySubscribed) {
-			String id = gatewayDataProvider.getGatewayDevice().getId().getValue();
-			PlatformParameters platformParameters = (PlatformParameters) platformProvider.getPlatform();
+		if (gatewayNotificationSubscriber != null) {
+			return;
+		}
 
-			try {
-				notificationSubscriber = new InventoryRealtimeDeleteAwareNotificationsSubscriber(platformParameters);
-				notificationSubscriber.subscribe(id, new SubscriptionListener<String, ManagedObjectDeleteAwareNotification>() {
-							@Override
-							public void onNotification(Subscription<String> subscription,
-									ManagedObjectDeleteAwareNotification notification) {
-								// Nothing to do here.
-								// The gateway object refresh will take care of updating gateway device
-							}
+		String id = gatewayDataProvider.getGatewayDevice().getId().getValue();
+		PlatformParameters platformParameters = (PlatformParameters) platformProvider.getPlatform();
 
-							@Override
-							public void onError(Subscription<String> subscription, Throwable throwable) {
-								if (throwable instanceof SDKException) {
-									SDKException sdkException = (SDKException) throwable;
-									if (sdkException.getHttpStatus() == HttpStatus.SC_UNAUTHORIZED) {
-										log.error("Invalid gateway device credentials detected. "
-												+ "It could be that the gateway device was removed. "
-												+ "Please bootstrap the gateway device again. "
-												+ "\nShutting down the gateway process.");
-										System.exit(0);
-									}
+		try {
+			gatewayNotificationSubscriber = new InventoryRealtimeDeleteAwareNotificationsSubscriber(platformParameters);
+			gatewayNotificationSubscriber.subscribe(id,
+					new SubscriptionListener<String, ManagedObjectDeleteAwareNotification>() {
+						@Override
+						public void onNotification(Subscription<String> subscription,
+								ManagedObjectDeleteAwareNotification notification) {
+							// Nothing to do here.
+							// The gateway object refresh will take care of updating gateway device
+						}
+
+						@Override
+						public void onError(Subscription<String> subscription, Throwable throwable) {
+							if (throwable instanceof SDKException) {
+								SDKException sdkException = (SDKException) throwable;
+								if (sdkException.getHttpStatus() == HttpStatus.SC_UNAUTHORIZED) {
+									log.error("Invalid gateway device credentials detected. "
+											+ "It could be that the gateway device was removed. "
+											+ "Please bootstrap the gateway device again. "
+											+ "\nShutting down the gateway process.");
+									System.exit(0);
 								}
 							}
-						});
-				isGatewayInventorySubscribed = true;
-			} catch (SDKException ex) {
-				log.error("Failed while subscribing for gateway device notification.", ex);
-			}
+						}
+					});
+		} catch (SDKException ex) {
+			log.warn("Failed while subscribing for {} gateway device notification. "
+					+ "This subscription will be retried later.", id);
 		}
 	}
 
@@ -110,7 +111,8 @@ public class PlatformSubscriber {
 								eventPublisher.publishEvent(new ReceivedOperationForGatewayEvent(gatewayDevice.getId(),
 										gatewayDevice.getName(), operation));
 							} else {
-								log.debug("Device '{}', with id '{}', received a notification which is meant for device with id '{}'.",
+								log.debug(
+										"Device '{}', with id '{}', received a notification which is meant for device with id '{}'.",
 										gatewayDevice.getName(), gatewayDevice.getId().getValue(),
 										subscription.getObject().getValue());
 							}
@@ -141,7 +143,12 @@ public class PlatformSubscriber {
 
 	@PreDestroy
 	public void unsubscribe() {
-		notificationSubscriber.disconnect();
-		subscriberForOperationsOnGateway.disconnect();
+		if (gatewayNotificationSubscriber != null) {
+			gatewayNotificationSubscriber.disconnect();
+		}
+
+		if (subscriberForOperationsOnGateway != null) {
+			subscriberForOperationsOnGateway.disconnect();
+		}
 	}
 }
