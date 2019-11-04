@@ -56,12 +56,12 @@ public class PlatformSubscriber {
 			return;
 		}
 
-		String id = gatewayDataProvider.getGatewayDevice().getId().getValue();
+		GatewayManagedObjectWrapper gatewayDevice = gatewayDataProvider.getGatewayDevice();
 		PlatformParameters platformParameters = (PlatformParameters) platformProvider.getPlatform();
 
 		try {
 			gatewayNotificationSubscriber = new InventoryRealtimeDeleteAwareNotificationsSubscriber(platformParameters);
-			gatewayNotificationSubscriber.subscribe(id,
+			gatewayNotificationSubscriber.subscribe(gatewayDevice.getId().getValue(),
 					new SubscriptionListener<String, ManagedObjectDeleteAwareNotification>() {
 						@Override
 						public void onNotification(Subscription<String> subscription,
@@ -75,18 +75,22 @@ public class PlatformSubscriber {
 							if (throwable instanceof SDKException) {
 								SDKException sdkException = (SDKException) throwable;
 								if (sdkException.getHttpStatus() == HttpStatus.SC_UNAUTHORIZED) {
-									log.error("Invalid gateway device credentials detected. "
-											+ "It could be that the gateway device was removed. "
-											+ "Start the gateway process and register the gateway device again. "
-											+ "\nShutting down the gateway process.");
+									log.error("Invalid device credentials detected for the "
+											+ "device with name '{}' and id '{}'. "
+											+ "Restart the agent and register to fix the problem. "
+											+ "\nShutting down agent...", gatewayDevice.getName(), 
+											gatewayDevice.getId().getValue());
 									System.exit(0);
 								}
 							}
 						}
 					});
 		} catch (SDKException ex) {
-			log.warn("Failed while subscribing for {} gateway device notification. "
-					+ "This subscription will be retried later.", id);
+			gatewayNotificationSubscriber = null;
+
+			log.warn("Couldn't enable the subscription for inventory changes for the gateway device with name '{}' and id '{}'. "
+					+ "This subscription will be retried later.", gatewayDevice.getName(), gatewayDevice.getId().getValue());
+			log.debug(ex.getMessage(), ex);
 		}
 	}
 
@@ -120,8 +124,7 @@ public class PlatformSubscriber {
 
 						@Override
 						public void onError(Subscription<GId> subscription, Throwable throwable) {
-							log.debug(
-									"Error occurred while listening to operations for the device with name '{}' and id '{}'.",
+							log.debug("Error occurred while listening to operations for the device with name '{}' and id '{}'.",
 									gatewayDevice.getName(), gatewayDevice.getId().getValue(), throwable);
 						}
 					});
@@ -133,10 +136,8 @@ public class PlatformSubscriber {
 
 			// Ignore this exception and continue as the subscription will be retried when
 			// the Gateway data is refreshed next time.
-			log.warn(
-					"Couldn't enable the subscription for listening to operations for the gateway device with name '{}' and id '{}'. "
-							+ "This subscription will be retried later.",
-					gatewayDevice.getName(), gatewayDevice.getId().getValue());
+			log.warn("Couldn't enable the subscription for listening to operations for the gateway device with name '{}' and id '{}'. "
+					+ "This subscription will be retried later.", gatewayDevice.getName(), gatewayDevice.getId().getValue());
 			log.debug(t.getMessage(), t);
 		}
 	}
