@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>c8y.agents</groupId>
 		<artifactId>snmp-agent</artifactId>
-		<version>1005.6.0</version>
+		<version>1005.6.1-SNAPSHOT</version>
 	</parent>
 
 	<name>Cumulocity :: Agents :: SNMP Agent :: Gateway</name>
