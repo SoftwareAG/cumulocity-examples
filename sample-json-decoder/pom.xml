@@ -10,7 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <properties>
-        <spring-boot-dependencies.version>1.5.16.RELEASE</spring-boot-dependencies.version>
+        <spring-boot-dependencies.version>1.5.22.RELEASE</spring-boot-dependencies.version>
         <main.class>c8y.example.decoders.json.JsonDecoder</main.class>
     </properties>
 
@@ -26,26 +26,42 @@
         </license>
     </licenses>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.nsn.cumulocity.clients-java</groupId>
+                <artifactId>microservice-dependencies</artifactId>
+                <version>${c8y.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>2.10.1</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <dependency>
             <groupId>com.nsn.cumulocity.clients-java</groupId>
             <artifactId>custom-decoders</artifactId>
-            <version>${project.parent.version}</version>
+            <version>${c8y.version}</version>
         </dependency>
         <dependency>
             <groupId>com.nsn.cumulocity.clients-java</groupId>
             <artifactId>microservice-autoconfigure</artifactId>
-            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-            <version>${spring-boot-dependencies.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
-            <version>${spring-boot-dependencies.version}</version>
         </dependency>
         <dependency>
             <groupId>org.glassfish.jersey.core</groupId>
@@ -55,7 +71,6 @@
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-joda</artifactId>
-            <version>2.9.9</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
