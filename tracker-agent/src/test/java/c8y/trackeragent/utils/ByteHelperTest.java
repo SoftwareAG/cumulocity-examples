@@ -3,7 +3,7 @@ package c8y.trackeragent.utils;
 import static c8y.trackeragent.utils.ByteHelper.getBytes;
 import static c8y.trackeragent.utils.ByteHelper.getString;
 import static c8y.trackeragent.utils.ByteHelper.stripHead;
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.Test;
 

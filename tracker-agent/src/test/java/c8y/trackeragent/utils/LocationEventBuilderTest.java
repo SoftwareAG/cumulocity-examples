@@ -2,7 +2,7 @@ package c8y.trackeragent.utils;
 
 import static c8y.trackeragent.utils.LocationEventBuilder.aLocationEvent;
 import static java.util.Arrays.asList;
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
 import java.util.List;

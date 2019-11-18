@@ -1,7 +1,7 @@
 package c8y.trackeragent.tracker;
 
 import static c8y.trackeragent.utils.ByteHelper.getBytes;
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.Test;
 

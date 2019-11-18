@@ -84,11 +84,7 @@ public class TrackerServer implements Runnable {
 
             // And queue the data we want written
             synchronized (this.pendingData) {
-                List<ByteBuffer> queue = this.pendingData.get(socket);
-                if (queue == null) {
-                    queue = new ArrayList<ByteBuffer>();
-                    this.pendingData.put(socket, queue);
-                }
+                List<ByteBuffer> queue = this.pendingData.computeIfAbsent(socket, k -> new ArrayList<>());
                 queue.add(ByteBuffer.wrap(data));
             }
         }

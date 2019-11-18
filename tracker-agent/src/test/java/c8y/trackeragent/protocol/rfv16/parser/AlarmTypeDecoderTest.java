@@ -1,10 +1,10 @@
 package c8y.trackeragent.protocol.rfv16.parser;
 
-import static org.fest.assertions.Assertions.assertThat;
-
 import java.util.Collection;
 
 import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class AlarmTypeDecoderTest {
     
@@ -19,7 +19,7 @@ public class AlarmTypeDecoderTest {
     
     private void doShouldParseAlarmStatus(String status, RFV16AlarmType... expectedAlarmTypes) {
         Collection<RFV16AlarmType> actual = AlarmTypeDecoder.getAlarmTypes(status);
-        assertThat(actual).containsOnly((Object[]) expectedAlarmTypes);
+        assertThat(actual).containsOnly(expectedAlarmTypes);
     }
 
 }

@@ -2,7 +2,7 @@ package c8y.trackeragent.utils;
 
 import static c8y.trackeragent.utils.SignedLocation.latitude;
 import static c8y.trackeragent.utils.SignedLocation.longitude;
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
 

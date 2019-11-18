@@ -2,7 +2,7 @@ package c8y.trackeragent.server;
 
 import static c8y.trackeragent.utils.ByteHelper.getString;
 import static java.lang.Thread.sleep;
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -38,9 +38,7 @@ public class TrackerServerTest extends TrackerServerTestSupport {
         
         waitForReports();
 
-        assertThatReportsHandled("#ABC");
-        assertThatReportsHandled("$123");
-        assertThatReportsHandled("abcd");
+        assertThatReportsHandled("#ABC", "$123", "abcd");
     }
 
     @Test

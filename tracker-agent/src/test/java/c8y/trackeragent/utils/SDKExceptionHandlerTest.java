@@ -5,7 +5,7 @@ import com.google.common.base.Optional;
 import org.junit.Test;
 
 import static c8y.trackeragent.utils.SDKExceptionHandler.findException;
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class SDKExceptionHandlerTest {
     @Test
