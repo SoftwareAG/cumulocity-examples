@@ -2,13 +2,15 @@ package c8y.trackeragent.server;
 
 import static c8y.trackeragent.utils.ByteHelper.getString;
 import static java.util.Arrays.asList;
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.junit.After;
 import org.junit.Before;
@@ -53,12 +55,13 @@ public abstract class TrackerServerTestSupport {
     }
     
     protected void assertThatReportsHandled(String... reports) {
-        Object[] expected = new Object[reports.length];
-        for (int index = 0; index < reports.length; index++) {
-            expected[index] = new TestConnectedTrackerImpl(reports[index]);
-        }
+        List<TestConnectedTrackerImpl> expected = Stream.of(reports)
+                .map(TestConnectedTrackerImpl::new)
+                .collect(Collectors.toList());
+
         List<TestConnectedTrackerImpl> executors = getExecutors();
-        assertThat(executors).contains(expected);
+
+        assertThat(executors).containsExactlyInAnyOrderElementsOf(expected);
     }
 
     protected List<TestConnectedTrackerImpl> getExecutors() {

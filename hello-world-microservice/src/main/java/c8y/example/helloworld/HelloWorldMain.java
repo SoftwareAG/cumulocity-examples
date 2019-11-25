@@ -18,4 +18,5 @@ public class HelloWorldMain {
     public String greeting(@RequestParam(value = "who", defaultValue = "world") String who) {
         return "hello " + who + "!";
     }
+
 }

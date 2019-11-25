@@ -10,28 +10,36 @@
     <version>1005.8.0-SNAPSHOT</version>
 
     <properties>
-        <maven.compiler.source>1.7</maven.compiler.source>
-        <maven.compiler.target>1.7</maven.compiler.target>
-        <spring-boot-dependencies.version>1.5.16.RELEASE</spring-boot-dependencies.version>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <spring-boot-dependencies.version>1.5.22.RELEASE</spring-boot-dependencies.version>
         <main.class>c8y.example.helloworld.HelloWorldMain</main.class>
         <c8y.version>1005.8.0-SNAPSHOT</c8y.version>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.fasterxml.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>2.10.1</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+            <dependency>
+                <groupId>com.nsn.cumulocity.clients-java</groupId>
+                <artifactId>microservice-dependencies</artifactId>
+                <version>${c8y.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>
             <groupId>com.nsn.cumulocity.clients-java</groupId>
             <artifactId>microservice-autoconfigure</artifactId>
-            <version>${c8y.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-            <version>${spring-boot-dependencies.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-security</artifactId>
-            <version>${spring-boot-dependencies.version}</version>
         </dependency>
     </dependencies>
 

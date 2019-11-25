@@ -1,7 +1,7 @@
 package c8y.trackeragent.utils;
 
 import static java.util.Arrays.asList;
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.io.IOException;

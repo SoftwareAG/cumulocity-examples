@@ -23,7 +23,7 @@ package c8y.trackeragent.tracker;
 import static c8y.trackeragent.utils.ByteHelper.getBytes;
 import static c8y.trackeragent.utils.Devices.IMEI_1;
 import static java.util.Arrays.asList;
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;

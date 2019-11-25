@@ -1,6 +1,6 @@
 package c8y.trackeragent.protocol.rfv16.message;
 
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeUtils;

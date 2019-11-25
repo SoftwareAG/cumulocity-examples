@@ -1,6 +1,7 @@
 package c8y.trackeragent_it;
 
-import org.fest.assertions.Assertions;
+import org.assertj.core.api.Assertions;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -24,7 +25,7 @@ public class TelicReportIT extends TrackerITSupport {
     }
     
     @Before
-    public void init() throws Exception {
+    public void init() {
         imei = Devices.randomImei();
     }
 
@@ -41,6 +42,5 @@ public class TelicReportIT extends TrackerITSupport {
         Assertions.assertThat(deviceMO).isNotNull();
         Positions.assertEqual(deviceMO.get(Position.class), Positions.SAMPLE_4);
     }
-
 
 }

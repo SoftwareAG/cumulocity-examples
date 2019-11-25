@@ -1,7 +1,7 @@
 package c8y.trackeragent.protocol.coban.device;
 
 import static c8y.trackeragent.protocol.coban.device.CobanDeviceFactory.formatLocationReportInterval;
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.Test;
 
