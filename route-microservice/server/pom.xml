@@ -4,7 +4,7 @@
     <parent>
         <groupId>c8y.agents</groupId>
         <artifactId>route-microservice</artifactId>
-        <version>1005.8.1-SNAPSHOT-SNAPSHOT</version>
+        <version>1005.9.0-SNAPSHOT-SNAPSHOT</version>
     </parent>
 
     <groupId>c8y-agents</groupId>
