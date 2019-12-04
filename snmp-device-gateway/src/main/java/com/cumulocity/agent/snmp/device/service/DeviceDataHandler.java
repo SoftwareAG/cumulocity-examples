@@ -1,5 +1,6 @@
 package com.cumulocity.agent.snmp.device.service;
 
+import com.cumulocity.agent.snmp.config.GatewayProperties;
 import com.cumulocity.agent.snmp.platform.model.*;
 import com.cumulocity.agent.snmp.platform.pubsub.publisher.AlarmPublisher;
 import com.cumulocity.agent.snmp.platform.pubsub.publisher.EventPublisher;
@@ -12,6 +13,7 @@ import org.snmp4j.CommandResponderEvent;
 import org.snmp4j.PDU;
 import org.snmp4j.asn1.BER;
 import org.snmp4j.asn1.BERInputStream;
+import org.snmp4j.security.SecurityModel;
 import org.snmp4j.smi.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -33,6 +35,8 @@ public class DeviceDataHandler implements CommandResponder {
 
 	private static final byte TAG_DOUBLE = (byte) 0x79;
 
+	@Autowired
+	private GatewayProperties.SnmpProperties snmpProperties;
 
 	@Autowired
 	private GatewayDataProvider dataProvider;
@@ -46,9 +50,17 @@ public class DeviceDataHandler implements CommandResponder {
 	@Autowired
 	private MeasurementPublisher measurementPublisher;
 
-	
 	@Override
 	public void processPdu(CommandResponderEvent event) {
+		String community = new String(event.getSecurityName());
+		if ((event.getSecurityModel() == SecurityModel.SECURITY_MODEL_SNMPv1
+				|| event.getSecurityModel() == SecurityModel.SECURITY_MODEL_SNMPv2c)
+				&& !community.equals(snmpProperties.getCommunityTarget())) {
+			log.error("Invalid community {} (vs {}) received from {}.", community, snmpProperties.getCommunityTarget(),
+					event.getPeerAddress());
+			return;
+		}
+		
 		PDU pdu = event.getPDU();
 		if (pdu == null) {
 			log.error("No data present in the received trap");

@@ -4,6 +4,8 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
+
+import com.cumulocity.agent.snmp.config.GatewayProperties;
 import com.cumulocity.agent.snmp.platform.model.*;
 import com.cumulocity.agent.snmp.platform.pubsub.publisher.AlarmPublisher;
 import com.cumulocity.agent.snmp.platform.pubsub.publisher.EventPublisher;
@@ -26,6 +28,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.LoggerFactory;
 import org.snmp4j.CommandResponderEvent;
 import org.snmp4j.PDU;
+import org.snmp4j.security.SecurityModel;
 import org.snmp4j.smi.*;
 
 import java.util.Collections;
@@ -40,6 +43,9 @@ import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DeviceDataHandlerTest {
+	@Mock
+	private GatewayProperties.SnmpProperties snmpProperties;
+
 	@Mock
 	private PDU pdu;
 
@@ -159,14 +165,29 @@ public class DeviceDataHandlerTest {
 
 		Mockito.doReturn(variableBindings).when(pdu).getVariableBindings();
 
+		when(snmpProperties.getCommunityTarget()).thenReturn("public");
 		when(event.getPDU()).thenReturn(pdu);
 		when(event.getPeerAddress()).thenReturn(address);
+		when(event.getSecurityModel()).thenReturn(SecurityModel.SECURITY_MODEL_SNMPv1);
+		when(event.getSecurityName()).thenReturn("public".getBytes());
 		when(protocolMoWrapper.getOidMap()).thenReturn(oidMap);
 		when(gatewayDataProvider.getGatewayDevice()).thenReturn(gatewayWrapper);
 		when(device1MoWrapper.getDeviceProtocol()).thenReturn("device-protocol");
 		when(device1MoWrapper.getManagedObject()).thenReturn(device1Mo);
 		when(gatewayDataProvider.getProtocolMap()).thenReturn(protocolMap);
 		when(gatewayDataProvider.getSnmpDeviceMap()).thenReturn(deviceMap);
+	}
+
+	@Test
+	public void shouldNotProcessTrapIfCommunityTargetIsIncorrect() {
+		String errorMsg = "Invalid community public (vs secret) received from 10.0.0.1/65214.";
+
+		when(snmpProperties.getCommunityTarget()).thenReturn("secret");
+
+		// Action
+		deviceDataHandler.processPdu(event);
+
+		assertTrue(checkLogExist(Level.ERROR, errorMsg));
 	}
 
 	@Test
