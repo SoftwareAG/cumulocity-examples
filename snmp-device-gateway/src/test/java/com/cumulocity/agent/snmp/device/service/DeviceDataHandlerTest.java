@@ -179,9 +179,22 @@ public class DeviceDataHandlerTest {
 	}
 
 	@Test
-	public void shouldNotProcessTrapIfCommunityTargetIsIncorrect() {
+	public void shouldNotProcessTrapIfCommunityTargetIsIncorrectForV1() {
 		String errorMsg = "Invalid community public (vs secret) received from 10.0.0.1/65214.";
 
+		when(snmpProperties.getCommunityTarget()).thenReturn("secret");
+
+		// Action
+		deviceDataHandler.processPdu(event);
+
+		assertTrue(checkLogExist(Level.ERROR, errorMsg));
+	}
+
+	@Test
+	public void shouldNotProcessTrapIfCommunityTargetIsIncorrectForV2() {
+		String errorMsg = "Invalid community public (vs secret) received from 10.0.0.1/65214.";
+
+		when(event.getSecurityModel()).thenReturn(SecurityModel.SECURITY_MODEL_SNMPv2c);
 		when(snmpProperties.getCommunityTarget()).thenReturn("secret");
 
 		// Action
