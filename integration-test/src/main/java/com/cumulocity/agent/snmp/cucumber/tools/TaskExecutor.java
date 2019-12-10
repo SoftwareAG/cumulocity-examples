@@ -9,7 +9,7 @@ public class TaskExecutor {
 		return run(task, 60);
 	}
 
-	private static boolean run(Task task, int timeoutSeconds) {
+	public static boolean run(Task task, int timeoutSeconds) {
 		log.info("Starting task with " + timeoutSeconds + " seconds timeout");
 		long timeout = System.currentTimeMillis() + (1000 * timeoutSeconds);
 		boolean successful = false;

@@ -5,6 +5,7 @@ import com.cumulocity.agent.snmp.cucumber.config.GatewayIntegrationTestPropertie
 import com.cumulocity.agent.snmp.cucumber.config.PlatformProvider;
 import com.cumulocity.agent.snmp.cucumber.config.TenantProvider;
 import com.cumulocity.agent.snmp.cucumber.tools.GatewayLogger;
+import com.cumulocity.agent.snmp.cucumber.tools.ProcessInstance;
 import com.cumulocity.agent.snmp.cucumber.tools.TaskExecutor;
 import com.cumulocity.model.Agent;
 import com.cumulocity.model.ID;
@@ -46,7 +47,7 @@ public class GatewayRegistration {
 	@Autowired
 	private GatewayIntegrationTestProperties properties;
 
-	private Process gatewayProcess = null;
+	private ProcessInstance gatewayProcess = null;
 
 	@Getter
 	private ManagedObjectRepresentation gatewayDevice;
@@ -75,9 +76,9 @@ public class GatewayRegistration {
 
 		log.info("Starting gateway process: {} {} {} {}", java, profile, jar, properties.getGatewayJarLocation());
 		ProcessBuilder ps = new ProcessBuilder(java, profile, jar, properties.getGatewayJarLocation());
-		ps.redirectErrorStream(true);
-		gatewayProcess = ps.start();
-		gatewayLogger.attachToProcess(gatewayProcess);
+		gatewayProcess = new ProcessInstance();
+		gatewayProcess.start(ps);
+		gatewayLogger.attachToProcess(gatewayProcess.get());
 
 		log.info("Gateway process successfully started!");
 	}
@@ -180,25 +181,7 @@ public class GatewayRegistration {
 	@And("^I stop gateway process$")
 	public void stopGatewayProcess() throws InterruptedException {
 		log.info("Shutting down gateway process...");
-		if (gatewayProcess == null || !gatewayProcess.isAlive()) {
-			log.info("Gatawey process is already stopped");
-			return;
-		}
-
-		gatewayProcess.destroy();
-		long timeout = System.currentTimeMillis() + 5000;
-		while (gatewayProcess.isAlive() && System.currentTimeMillis() < timeout) {
-			Thread.sleep(500);
-		}
-		if (gatewayProcess.isAlive()) {
-			log.info("Graceful gateway shutdown failed. Killing process...");
-			gatewayProcess.destroyForcibly();
-			if (gatewayProcess.isAlive()) {
-				throw new RuntimeException("Couldn't kill gateway process!");
-			}
-		} else {
-			log.info("Gateway process finished");
-		}
+		gatewayProcess.stop();
 	}
 
 	@Then("Gateway device should be created")
@@ -214,12 +197,12 @@ public class GatewayRegistration {
 	@Then("Gateway process should stop")
 	public void checkGatewayProcessStop() throws InterruptedException {
 		long timeout = System.currentTimeMillis() + 25000;
-		while (gatewayProcess.isAlive() && System.currentTimeMillis() < timeout) {
+		while (gatewayProcess.get().isAlive() && System.currentTimeMillis() < timeout) {
 			Thread.sleep(500);
 		}
 
-		log.info(gatewayProcess.isAlive() + "");
-		assertFalse(gatewayProcess.isAlive());
+		log.info(gatewayProcess.get().isAlive() + "");
+		assertFalse(gatewayProcess.get().isAlive());
 	}
 
 	private boolean isGatewayDeviceExist() {
@@ -245,7 +228,7 @@ public class GatewayRegistration {
 
 	private String getDeviceCredentialsFilePath() {
 		return Paths.get(System.getProperty("user.home"), ".snmp", "snmp-agent", "chronicle", "maps",
-				"device-credenials-store.dat").toString();
+				"device-credentials-store.dat").toString();
 	}
 
 	public void deleteGatewayConfiguration() throws IOException {
