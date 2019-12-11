@@ -29,7 +29,8 @@ public class InventorySteps {
         ManagedObjectRepresentation gatewayDevice = platformProvider.getTestPlatform().getInventoryApi()
                 .get(gatewayRegistration.getGatewayDevice().getId());
         List<ManagedObjectReferenceRepresentation> childrenDevices = gatewayDevice.getChildDevices().getReferences();
-        boolean matchingFound = childrenDevices.stream().anyMatch(childRef -> snmpDevice.getId().equals(childRef.getManagedObject().getId()));
+        boolean matchingFound = childrenDevices.stream()
+                .anyMatch(childRef -> snmpDevice.getId().equals(childRef.getManagedObject().getId()));
         assertThat(matchingFound).isTrue();
     }
 
