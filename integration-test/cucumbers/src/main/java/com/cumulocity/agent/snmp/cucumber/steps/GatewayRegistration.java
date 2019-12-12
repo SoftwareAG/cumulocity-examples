@@ -52,6 +52,15 @@ public class GatewayRegistration {
     @Getter
     private ManagedObjectRepresentation gatewayDevice;
 
+    @Given("^I start and register gateway with polling port (.+) and (.+) protocol$")
+    public void setupGatewayWithConfig(Integer pollingPort, String trapListenerProtocol) throws IOException {
+        createGatewayConfigurationFile(pollingPort, trapListenerProtocol);
+        startGatewayProcess();
+        createGatewayDevice();
+        acceptGatewayDeviceRequest();
+        gatewayDeviceShouldExist();
+    }
+
     @Given("^There are no existing device credentials available locally$")
     public void deleteDeviceCredentials() throws IOException {
         log.info("Deleting device credentials if available");
@@ -85,14 +94,13 @@ public class GatewayRegistration {
 
     @And("^I create gateway configuration$")
     public void createGatewayConfigurationFile() throws IOException {
-        createGatewayConfigurationFile(null);
+        createGatewayConfigurationFile(161, "UDP");
     }
 
-    @And("^I create gateway configuration with polling port (.+)$")
-    public void createGatewayConfigurationFile(Integer pollingPort) throws IOException {
+    private void createGatewayConfigurationFile(Integer pollingPort, String trapListenerProtocol) throws IOException {
         log.info("Generating configuration for gateway... ");
 
-        String config = replaceConfigurationParams(pollingPort);
+        String config = replaceConfigurationParams(pollingPort, trapListenerProtocol);
 
         log.info("New configuration: \n{}", config);
 
@@ -105,13 +113,14 @@ public class GatewayRegistration {
         log.info("Gateway configuration saved to {}", configFilePath);
     }
 
-    private String replaceConfigurationParams(Integer pollingPort) throws IOException {
+    private String replaceConfigurationParams(Integer pollingPort, String trapListenerProtocol) throws IOException {
         String config = IOUtils.toString(getClass().getResourceAsStream("/snmp-agent-gateway-template.properties"));
-        config = config.replaceAll("\\{\\{C8Y.baseURL}}", properties.getBaseUrl());
-        config = config.replaceAll("\\{\\{test.tenant}}", tenantProvider.getTestTenant().getId());
-        config = config.replaceAll("\\{\\{C8Y.forceInitialHost}}", Boolean.toString(properties.isForceInitialHost()));
-        config = config.replaceAll("\\{\\{snmp.polling.port}}", 
-                (pollingPort == null)? "161" : Integer.toString(pollingPort));
+        config = config.replaceAll("\\{\\{C8Y.baseURL}}", properties.getBaseUrl())
+                .replaceAll("\\{\\{test.tenant}}", tenantProvider.getTestTenant().getId())
+                .replaceAll("\\{\\{C8Y.forceInitialHost}}", Boolean.toString(properties.isForceInitialHost()))
+                .replaceAll("\\{\\{gateway.identifier}}", getSnmpGatewayDeviceName())
+                .replaceAll("\\{\\{snmp.polling.port}}", Integer.toString(pollingPort))
+                .replaceAll("\\{\\{snmp.trapListener.protocol}}", trapListenerProtocol);
         return config;
     }
 
@@ -127,7 +136,7 @@ public class GatewayRegistration {
         log.info("Registering new device...");
 
         Platform platform = platformProvider.createIntegrationTestPlatform(tenantProvider.getTestTenantCredentials());
-        NewDeviceRequestRepresentation gatewayDeviceRequest = platform.getDeviceCredentialsApi().register("snmp-agent");
+        NewDeviceRequestRepresentation gatewayDeviceRequest = platform.getDeviceCredentialsApi().register(getSnmpGatewayDeviceName());
 
         log.info("New gateway device registered with ID: {}", gatewayDeviceRequest.getId());
     }
@@ -221,7 +230,7 @@ public class GatewayRegistration {
         Platform testPlatform = platformProvider.createIntegrationTestPlatform(tenantProvider.getTestTenantCredentials());
 
         return TaskExecutor.run(() -> {
-            ID id = new ID("c8y_Serial", "snmp-agent");
+            ID id = new ID("c8y_Serial", getSnmpGatewayDeviceName());
             ExternalIDRepresentation externalId = testPlatform.getIdentityApi().getExternalId(id);
             if (externalId != null) {
                 gatewayDevice = externalId.getManagedObject();
@@ -232,7 +241,7 @@ public class GatewayRegistration {
     }
 
     private String getConfigFilePath() {
-        String propertyFileName = "snmp-agent-gateway-" + tenantProvider.getTestTenant().getId() + ".properties";
+        String propertyFileName = "snmp-agent-gateway" + tenantProvider.getTestTenant().getId() + ".properties";
         return Paths.get(System.getProperty("user.home"), ".snmp", propertyFileName).toString();
     }
 
@@ -249,5 +258,9 @@ public class GatewayRegistration {
         FileUtils.forceDelete(new File(configFilePath));
         assertFalse(new File(configFilePath).exists());
         log.info("Gateway configuration deleted");
+    }
+
+    private String getSnmpGatewayDeviceName() {
+        return "snmp-agent-" + tenantProvider.getTestTenant().getId();
     }
 }

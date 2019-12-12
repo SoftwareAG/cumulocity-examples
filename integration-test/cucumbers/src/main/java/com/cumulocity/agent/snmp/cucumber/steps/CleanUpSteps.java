@@ -38,11 +38,5 @@ public class CleanUpSteps {
         } catch (Exception e) {
             log.warn(e.getMessage(), e);
         }
-
-        try {
-            snmpDeviceSteps.stopSnmpSimulation();
-        } catch (Exception e) {
-            log.warn(e.getMessage(), e);
-        }
     }
 }

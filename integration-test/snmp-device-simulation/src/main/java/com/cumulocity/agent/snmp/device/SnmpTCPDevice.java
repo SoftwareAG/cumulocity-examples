@@ -14,21 +14,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class SnmpDevice extends BaseAgent {
+public class SnmpTCPDevice extends BaseAgent {
 	private static final OID sysDescr = new OID("1.3.6.1.2.1.1.1.0");
 	private static int incidents;
 	private static MOScalar<OctetString> descriptionMO;
 	private static MOScalar<Counter32> incidentCountMO;
 	private static MOScalar<Counter32> cpuIntegerMO;
-	private static SnmpDevice device;
+	private static SnmpTCPDevice device;
 	private String address;
 
 	public static void main(String[] args) throws Exception {
-		int port = Integer.parseInt(args[0]); // 161
+		int port = 161;//Integer.parseInt(args[0]); // 161
 		startSnmpSimulator("127.0.0.1", port, "49:U9:39:900:FJ8");
 	}
 
-	public SnmpDevice(String address, String engineId) {
+	private SnmpTCPDevice(String address, String engineId) {
 
 		/*
 		 * These files does not exist and are not used but has to be specified Read
@@ -44,7 +44,7 @@ public class SnmpDevice extends BaseAgent {
 	}
 
 	public static void startSnmpSimulator(String ipAddress, int port, String engineId) throws Exception {
-		device = new SnmpDevice(ipAddress + "/" + port, engineId);
+		device = new SnmpTCPDevice(ipAddress + "/" + port, engineId);
 		device.init();
 		device.addShutdownHook();
 		device.getServer().addContext(new OctetString("public"));
@@ -53,14 +53,6 @@ public class SnmpDevice extends BaseAgent {
 		device.sendColdStartNotification();
 		createManagedObjects(device);
 		System.out.println("SNMP Device Started");
-
-		Runtime.getRuntime().addShutdownHook(new Thread() {
-			@Override
-			public void run() {
-				System.out.println("Shutting down!");
-				device.stop();
-			}
-		});
 
 		Random random = new Random();
 		while (true) {
@@ -79,7 +71,7 @@ public class SnmpDevice extends BaseAgent {
 		device.stop();
 	}
 
-	public static void createManagedObjects(SnmpDevice agent) throws Exception {
+	public static void createManagedObjects(SnmpTCPDevice agent) throws Exception {
 		// unregister default objects created by base agent
 		agent.unregisterManagedObject(agent.getSnmpv2MIB());
 
@@ -218,7 +210,7 @@ public class SnmpDevice extends BaseAgent {
 
 	protected void initTransportMappings() {
 		transportMappings = new TransportMapping[1];
-		Address addr = GenericAddress.parse(address);
+		Address addr = GenericAddress.parse("tcp:"+address);
 		TransportMapping tm = TransportMappings.getInstance().createTransportMapping(addr);
 		transportMappings[0] = tm;
 	}
