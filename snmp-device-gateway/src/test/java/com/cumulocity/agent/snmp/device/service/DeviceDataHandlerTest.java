@@ -252,7 +252,7 @@ public class DeviceDataHandlerTest {
 
 		AlarmRepresentation alarm = alarmCaptor.getValue();
 		assertEquals("MAJOR", alarm.getSeverity());
-		assertEquals(AlarmMapping.c8y_TRAPReceivedFromUnknownDevice, alarm.getType());
+		assertEquals(AlarmMapping.c8y_TRAPReceivedFromUnknownDevice + "10.0.0.1", alarm.getType());
 		assertEquals(gatewayDeviceMo.getId(), alarm.getSource().getId());
 	}
 

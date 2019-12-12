@@ -102,7 +102,7 @@ public class DeviceDataHandler implements CommandResponder {
 	private void handleUnknownDevice(String deviceIp) {
 		AlarmMapping alarmMapping = new AlarmMapping();
 		alarmMapping.setSeverity(AlarmSeverity.MAJOR.name());
-		alarmMapping.setType(AlarmMapping.c8y_TRAPReceivedFromUnknownDevice);
+		alarmMapping.setType(AlarmMapping.c8y_TRAPReceivedFromUnknownDevice + deviceIp);
 		alarmMapping.setText("Trap received from an unknown device with IP address : " + deviceIp);
 
 		alarmPublisher.publish(alarmMapping.buildAlarmRepresentation(dataProvider.getGatewayDevice().getManagedObject()));
