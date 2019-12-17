@@ -52,9 +52,14 @@ public class GatewayRegistration {
     @Getter
     private ManagedObjectRepresentation gatewayDevice;
 
+    @Given("^I start and register gateway with (.+) protocol and polling version model Id (.+)$")
+    public void setupGatewayWithConfig(String trapListenerProtocol, int pollingVersion) throws IOException {
+        setupGatewayWithConfig(161, trapListenerProtocol, pollingVersion);
+    }
+
     @Given("^I start and register gateway with polling port (.+) and (.+) protocol$")
-    public void setupGatewayWithConfig(Integer pollingPort, String trapListenerProtocol) throws IOException {
-        createGatewayConfigurationFile(pollingPort, trapListenerProtocol);
+    public void setupGatewayWithConfig(Integer pollingPort, String trapListenerProtocol, int pollingVersion) throws IOException {
+        createGatewayConfigurationFile(pollingPort, trapListenerProtocol, pollingVersion);
         startGatewayProcess();
         createGatewayDevice();
         acceptGatewayDeviceRequest();
@@ -94,13 +99,13 @@ public class GatewayRegistration {
 
     @And("^I create gateway configuration$")
     public void createGatewayConfigurationFile() throws IOException {
-        createGatewayConfigurationFile(161, "UDP");
+        createGatewayConfigurationFile(161, "UDP", 0);
     }
 
-    private void createGatewayConfigurationFile(Integer pollingPort, String trapListenerProtocol) throws IOException {
+    private void createGatewayConfigurationFile(Integer pollingPort, String trapListenerProtocol, int pollingVersion) throws IOException {
         log.info("Generating configuration for gateway... ");
 
-        String config = replaceConfigurationParams(pollingPort, trapListenerProtocol);
+        String config = replaceConfigurationParams(pollingPort, trapListenerProtocol, pollingVersion);
 
         log.info("New configuration: \n{}", config);
 
@@ -113,14 +118,17 @@ public class GatewayRegistration {
         log.info("Gateway configuration saved to {}", configFilePath);
     }
 
-    private String replaceConfigurationParams(Integer pollingPort, String trapListenerProtocol) throws IOException {
+    private String replaceConfigurationParams(Integer pollingPort,
+            String trapListenerProtocol,
+            int pollingVersion) throws IOException {
         String config = IOUtils.toString(getClass().getResourceAsStream("/snmp-agent-gateway-template.properties"));
         config = config.replaceAll("\\{\\{C8Y.baseURL}}", properties.getBaseUrl())
                 .replaceAll("\\{\\{test.tenant}}", tenantProvider.getTestTenant().getId())
                 .replaceAll("\\{\\{C8Y.forceInitialHost}}", Boolean.toString(properties.isForceInitialHost()))
                 .replaceAll("\\{\\{gateway.identifier}}", getSnmpGatewayDeviceName())
                 .replaceAll("\\{\\{snmp.polling.port}}", Integer.toString(pollingPort))
-                .replaceAll("\\{\\{snmp.trapListener.protocol}}", trapListenerProtocol);
+                .replaceAll("\\{\\{snmp.trapListener.protocol}}", trapListenerProtocol)
+                .replaceAll("\\{\\{snmp.polling.version}}", Integer.toString(pollingVersion));
         return config;
     }
 
@@ -258,6 +266,10 @@ public class GatewayRegistration {
         FileUtils.forceDelete(new File(configFilePath));
         assertFalse(new File(configFilePath).exists());
         log.info("Gateway configuration deleted");
+    }
+
+    public String getGatewayOwner() {
+        return "device_" + getSnmpGatewayDeviceName();
     }
 
     private String getSnmpGatewayDeviceName() {

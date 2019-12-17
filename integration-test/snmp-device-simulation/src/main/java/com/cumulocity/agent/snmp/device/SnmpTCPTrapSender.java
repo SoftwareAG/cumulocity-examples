@@ -37,146 +37,161 @@ import org.snmp4j.transport.DefaultTcpTransportMapping;
 
 public class SnmpTCPTrapSender {
 
-	private static final int port = 6671;
+    private static final int port = 6671;
 
-	private static final String community = "public";
+    private static final String community = "public";
 
-	private static final String ipAddress = "127.0.0.1";
+    private static final String ipAddress = "127.0.0.1";
 
-	private static final String trapOid = "1.3.6.1.2.1.34.4.0.2";
+    private static final String trapOid = "1.3.6.1.2.1.34.4.0.2";
 
-	public static void main(String args[]) throws InterruptedException {
-		sendSnmpV1V2Trap(SnmpConstants.version1);
-		// sendSnmpV1V2Trap(SnmpConstants.version2c);
-		// sendSnmpV3Trap();
-	}
+    public static void main(String args[]) throws InterruptedException {
+        sendSnmpV1V2Trap(SnmpConstants.version1);
+        // sendSnmpV1V2Trap(SnmpConstants.version2c);
+        // sendSnmpV3Trap();
+    }
 
-	private static void sendV1orV2Trap(int snmpVersion, String community, String ipAddress, int port) {
-		try {
-			// create v1/v2 PDU
-			PDU snmpPDU = createPdu(snmpVersion);
+    private static void sendV1orV2Trap(int snmpVersion, String community, String ipAddress, int port, String trapOid) {
+        try {
+            // create v1/v2 PDU
+            PDU snmpPDU = createPdu(snmpVersion, trapOid);
 
-			// Create Transport Mapping
-			TransportMapping<?> transport = new DefaultTcpTransportMapping();
-			List<TransportMapping<?>> list = new ArrayList<TransportMapping<?>>();
-			list.add(transport);
+            // Create Transport Mapping
+            TransportMapping<?> transport = new DefaultTcpTransportMapping();
+            List<TransportMapping<?>> list = new ArrayList<TransportMapping<?>>();
+            list.add(transport);
 
-			Address targetAddress = GenericAddress.parse("tcp:" + ipAddress + "/" + port);
+            Address targetAddress = GenericAddress.parse("tcp:" + ipAddress + "/" + port);
 
-			// Create Target
-			CommunityTarget comtarget = new CommunityTarget();
-			comtarget.setCommunity(new OctetString(community));
-			comtarget.setVersion(snmpVersion);
-			comtarget.setAddress(targetAddress);
-			comtarget.setRetries(2);
-			comtarget.setTimeout(5000);
-			comtarget.setPreferredTransports(list);
+            // Create Target
+            CommunityTarget comtarget = new CommunityTarget();
+            comtarget.setCommunity(new OctetString(community));
+            comtarget.setVersion(snmpVersion);
+            comtarget.setAddress(targetAddress);
+            comtarget.setRetries(2);
+            comtarget.setTimeout(5000);
+            comtarget.setPreferredTransports(list);
 
-			// Send the PDU
-			Snmp snmp = new Snmp(transport);
-			snmp.send(snmpPDU, comtarget);
+            // Send the PDU
+            Snmp snmp = new Snmp(transport);
+            snmp.send(snmpPDU, comtarget);
 
-			Thread.sleep(1000);
-			System.out.println("Sent Trap to (IP:Port)=> " + ipAddress + ":" + port);
+            Thread.sleep(1000);
+            System.out.println("Sent Trap to (IP:Port)=> " + ipAddress + ":" + port);
 
-			snmp.close();
-		} catch (Exception e) {
-			System.err.println("Error in Sending Trap to (IP:Port)=> " + ipAddress + ":" + port);
-			System.err.println("Exception Message = " + e.getMessage());
-		}
-	}
+            snmp.close();
+        } catch (Exception e) {
+            System.err.println("Error in Sending Trap to (IP:Port)=> " + ipAddress + ":" + port);
+            System.err.println("Exception Message = " + e.getMessage());
+        }
+    }
 
-	/**
-	 * This methods sends the V1/V2 trap
-	 * 
-	 * @param version
-	 */
-	private static void sendSnmpV1V2Trap(int version) {
-		sendV1orV2Trap(version, community, ipAddress, port);
-	}
+    /**
+     * This methods sends the V1/V2 trap
+     * 
+     * @param version
+     */
+    public static void sendSnmpV1V2Trap(int version) {
+        sendV1orV2Trap(version, community, ipAddress, port, trapOid);
+    }
 
-	/**
-	 * Sends the v3 trap
-	 */
-	@SuppressWarnings("unused")
-	private static void sendSnmpV3Trap() {
-		try {
-			Address targetAddress = GenericAddress.parse("tcp:" + ipAddress + "/" + port);
-			TransportMapping<?> transport = new DefaultTcpTransportMapping();
-			Snmp snmp = new Snmp(transport);
+    /**
+     * This methods sends the V1/V2 trap
+     * @param version
+     * @param trapOid
+     */
+    public static void sendSnmpV1V2Trap(int version, String trapOid) {
+        sendV1orV2Trap(version, community, ipAddress, port, trapOid);
+    }
 
-			USM usm = new USM(SecurityProtocols.getInstance().addDefaultProtocols(),
-					new OctetString(MPv3.createLocalEngineID()), 0);
-			SecurityProtocols.getInstance().addPrivacyProtocol(new PrivAES192());
-			SecurityProtocols.getInstance().addPrivacyProtocol(new PrivAES256());
-			SecurityProtocols.getInstance().addPrivacyProtocol(new Priv3DES());
-			SecurityModels.getInstance().addSecurityModel(usm);
+    /**
+     * Sends the v3 trap
+     */
+    public static void sendSnmpV3Trap() {
+        sendSnmpV3Trap(trapOid);
+    }
 
-			String username = "username";
-			String authpassphrase = "authpassphrase";
-			String privacypassphrase = "privacypassphrase";
+    /**
+     * Sends the v3 trap
+     * @param trapOid
+     */
+    public static void sendSnmpV3Trap(String trapOid) {
+        try {
+            Address targetAddress = GenericAddress.parse("tcp:" + ipAddress + "/" + port);
+            TransportMapping<?> transport = new DefaultTcpTransportMapping();
+            Snmp snmp = new Snmp(transport);
 
-			snmp.getUSM().addUser(new OctetString(username), new UsmUser(new OctetString(username), AuthMD5.ID,
-					new OctetString(authpassphrase), PrivAES128.ID, new OctetString(privacypassphrase)));
+            USM usm = new USM(SecurityProtocols.getInstance().addDefaultProtocols(), new OctetString(MPv3.createLocalEngineID()), 0);
+            SecurityProtocols.getInstance().addPrivacyProtocol(new PrivAES192());
+            SecurityProtocols.getInstance().addPrivacyProtocol(new PrivAES256());
+            SecurityProtocols.getInstance().addPrivacyProtocol(new Priv3DES());
+            SecurityModels.getInstance().addSecurityModel(usm);
 
-			// Create Target
-			UserTarget target = new UserTarget();
-			target.setAddress(targetAddress);
-			target.setRetries(1);
-			target.setTimeout(11500);
-			target.setVersion(SnmpConstants.version3);
-			target.setSecurityLevel(SecurityLevel.AUTH_PRIV);
-			target.setSecurityName(new OctetString(username));
+            String username = "username";
+            String authpassphrase = "authpassphrase";
+            String privacypassphrase = "privacypassphrase";
 
-			// Create PDU for V3
-			ScopedPDU pdu = new ScopedPDU();
-			pdu.setType(ScopedPDU.NOTIFICATION);
-			pdu.setRequestID(new Integer32(1234));
-			pdu.add(new VariableBinding(SnmpConstants.sysUpTime));
-			pdu.add(new VariableBinding(SnmpConstants.snmpTrapOID, SnmpConstants.linkDown));
-			pdu.add(new VariableBinding(new OID(trapOid), new OctetString("Major")));
+            snmp.getUSM().addUser(new OctetString(username), new UsmUser(new OctetString(username), AuthMD5.ID,
+                    new OctetString(authpassphrase), PrivAES128.ID, new OctetString(privacypassphrase)));
 
-			// Send the PDU
-			snmp.send(pdu, target);
-			System.out.println("Sending Trap to (IP:Port)=> " + ipAddress + ":" + port);
-			snmp.addCommandResponder(new CommandResponder() {
-				public void processPdu(CommandResponderEvent arg0) {
-					System.out.println(arg0);
-				}
-			});
+            // Create Target
+            UserTarget target = new UserTarget();
+            target.setAddress(targetAddress);
+            target.setRetries(1);
+            target.setTimeout(11500);
+            target.setVersion(SnmpConstants.version3);
+            target.setSecurityLevel(SecurityLevel.AUTH_PRIV);
+            target.setSecurityName(new OctetString(username));
 
-			Thread.sleep(1000);
+            // Create PDU for V3
+            ScopedPDU pdu = new ScopedPDU();
+            pdu.setType(ScopedPDU.NOTIFICATION);
+            pdu.setRequestID(new Integer32(1234));
+            pdu.add(new VariableBinding(SnmpConstants.sysUpTime));
+            pdu.add(new VariableBinding(SnmpConstants.snmpTrapOID, SnmpConstants.linkDown));
+            pdu.add(new VariableBinding(new OID(trapOid), new OctetString("Major")));
 
-			snmp.close();
-		} catch (Exception e) {
-			System.err.println("Error in Sending Trap to (IP:Port)=> " + ipAddress + ":" + port);
-			System.err.println("Exception Message = " + e.getMessage());
-		}
-	}
+            // Send the PDU
+            snmp.send(pdu, target);
+            System.out.println("Sending Trap to (IP:Port)=> " + ipAddress + ":" + port);
+            snmp.addCommandResponder(new CommandResponder() {
+                public void processPdu(CommandResponderEvent arg0) {
+                    System.out.println(arg0);
+                }
+            });
 
-	private static PDU createPdu(int snmpVersion) {
+            Thread.sleep(1000);
 
-		PDU pdu;
-		if (snmpVersion == SnmpConstants.version1) {
+            snmp.close();
+        } catch (Exception e) {
+            System.err.println("Error in Sending Trap to (IP:Port)=> " + ipAddress + ":" + port);
+            System.err.println("Exception Message = " + e.getMessage());
+        }
+    }
 
-			PDUv1 pdu1 = new PDUv1();
-			pdu1.setType(PDU.V1TRAP);
-			pdu1.setEnterprise(new OID("1.3.6.1.2.1.34.4.0.2"));
-			pdu1.setAgentAddress(new IpAddress("127.0.0.1"));
-			pdu1.setSpecificTrap(5);
-			pdu1.setGenericTrap(23);
-			pdu = pdu1;
+    private static PDU createPdu(int snmpVersion, String trapOid) {
 
-		} else {
-			PDU pdu2 = new PDU();
-			pdu2.setType(PDU.TRAP);
-			pdu2.setRequestID(new Integer32(123));
-			pdu = pdu2;
-		}
+        PDU pdu;
+        if (snmpVersion == SnmpConstants.version1) {
 
-		Random random = new Random();
-		pdu.add(new VariableBinding(new OID(trapOid), new Counter32(random.nextInt(100))));
+            PDUv1 pdu1 = new PDUv1();
+            pdu1.setType(PDU.V1TRAP);
+            pdu1.setEnterprise(new OID("1.3.6.1.2.1.34.4.0.2"));
+            pdu1.setAgentAddress(new IpAddress("127.0.0.1"));
+            pdu1.setSpecificTrap(5);
+            pdu1.setGenericTrap(23);
+            pdu = pdu1;
 
-		return pdu;
-	}
+        } else {
+            PDU pdu2 = new PDU();
+            pdu2.setType(PDU.TRAP);
+            pdu2.setRequestID(new Integer32(123));
+            pdu = pdu2;
+        }
+
+        Random random = new Random();
+        pdu.add(new VariableBinding(new OID(trapOid), new Counter32(random.nextInt(100))));
+
+        return pdu;
+    }
 }

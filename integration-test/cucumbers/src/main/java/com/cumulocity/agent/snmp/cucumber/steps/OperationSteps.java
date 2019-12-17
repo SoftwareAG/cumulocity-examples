@@ -9,10 +9,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.cumulocity.agent.snmp.cucumber.config.PlatformProvider;
 import com.cumulocity.agent.snmp.cucumber.tools.TaskExecutor;
 import com.cumulocity.model.operation.OperationStatus;
+import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
+import com.cumulocity.sdk.client.devicecontrol.DeviceControlApi;
 
+import c8y.SNMPDevice;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
+import cucumber.api.java.en.When;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -24,6 +28,9 @@ public class OperationSteps {
     @Autowired
     private GatewayRegistration gatewayRegistration;
 
+    @Autowired
+    private SnmpDeviceSteps snmpDeviceSteps;
+
     private OperationRepresentation lastOperation = null;
 
     @Given("^I create snmp auto discovery operation on gateway with ip range (.+)$")
@@ -34,7 +41,7 @@ public class OperationSteps {
         operation.set("Autodiscovery request", "description");
         operation.set(ipRangeProperty, "c8y_SnmpAutoDiscovery");
         operation.setDeviceId(gatewayRegistration.getGatewayDevice().getId());
-        lastOperation = platformProvider.getTestPlatform().getDeviceControlApi().create(operation);
+        lastOperation = deviceControlApi().create(operation);
     }
 
     @And("^I wait until last operation is successful on gateway with timeout ([0-9]+) seconds$")
@@ -59,5 +66,9 @@ public class OperationSteps {
             throw new RuntimeException("Operation didn't complete in specified timeout!");
         }
         log.info("Operation completed!");
+    }
+
+    private DeviceControlApi deviceControlApi() {
+        return platformProvider.getTestPlatform().getDeviceControlApi();
     }
 }
