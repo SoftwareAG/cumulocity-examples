@@ -501,15 +501,15 @@ public class DeviceDiscoveryServiceTest {
         doReturn(existingDeviceMap).when(gatewayDataProvider).getSnmpDeviceMap();
 
         doReturn(false).when(deviceDiscoveryService).isDeviceSnmpEnabled(oneRange[0], port, isProtocolUdp, communityTarget);
-        doNothing().when(deviceDiscoveryService).handleNoResponseFromDevice(any(String.class), eq(c8y_DeviceSnmpNotEnabled + startIpAddress));
-        doNothing().when(deviceDiscoveryService).handleNoResponseFromDevice(any(String.class), eq(c8y_DeviceNotResponding + endIpAddress));
+        doNothing().when(deviceDiscoveryService).handleNoResponseFromDevice(eq(c8y_DeviceSnmpNotEnabled + startIpAddress), any(String.class));
+        doNothing().when(deviceDiscoveryService).handleNoResponseFromDevice(eq(c8y_DeviceNotResponding + endIpAddress), any(String.class));
 
         // when
         deviceDiscoveryService.scanForSnmpDevicesAndCreateChildDevices(ipRangesList, port, isProtocolUdp, pingTimeoutInSeconds, communityTarget);
 
         // then
-        verify(deviceDiscoveryService, times(1)).handleNoResponseFromDevice(any(String.class), eq(c8y_DeviceSnmpNotEnabled + startIpAddress));
-        verify(deviceDiscoveryService, times(1)).handleNoResponseFromDevice(any(String.class), eq(c8y_DeviceNotResponding + endIpAddress));
+        verify(deviceDiscoveryService, times(1)).handleNoResponseFromDevice(eq(c8y_DeviceSnmpNotEnabled + startIpAddress), any(String.class));
+        verify(deviceDiscoveryService, times(1)).handleNoResponseFromDevice(eq(c8y_DeviceNotResponding + endIpAddress), any(String.class));
     }
 
     @Test

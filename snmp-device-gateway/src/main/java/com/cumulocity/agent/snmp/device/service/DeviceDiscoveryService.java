@@ -204,11 +204,11 @@ public class DeviceDiscoveryService {
                                 createAndRegisterAChildDevice(currentIpString, port);
                                 newDeviceFoundInThisRun = true;
                             } else if (!isDeviceSnmpEnabled) {
-                                handleNoResponseFromDevice("A device with IP Address <" + currentIpString + ">, which is not SNMP enabled is found during auto-discovery device scan.", c8y_DeviceSnmpNotEnabled + currentIpString);
+                                handleNoResponseFromDevice(c8y_DeviceSnmpNotEnabled + currentIpString, "A device with IP Address <" + currentIpString + ">, which is not SNMP enabled is found during auto-discovery device scan.");
                             }
                         } else {
                             if (existingDeviceMap.containsKey(currentIpString)) {
-                                handleNoResponseFromDevice("Existing SNMP device with IP Address <" + currentIpString + "> didn't respond during auto-discovery device scan.", c8y_DeviceNotResponding + currentIpString);
+                                handleNoResponseFromDevice(c8y_DeviceNotResponding + currentIpString, "Existing SNMP device with IP Address <" + currentIpString + "> didn't respond during auto-discovery device scan.");
                             } else {
                                 log.debug("No device is found at IP Address <{}> during auto-discovery device scan.", currentIpString);
                             }
