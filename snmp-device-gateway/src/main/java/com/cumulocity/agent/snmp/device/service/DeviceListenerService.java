@@ -1,23 +1,41 @@
 package com.cumulocity.agent.snmp.device.service;
 
-import com.cumulocity.agent.snmp.bootstrap.model.BootstrapReadyEvent;
-import com.cumulocity.agent.snmp.config.GatewayProperties;
-import com.cumulocity.agent.snmp.platform.model.DeviceManagedObjectWrapper;
-import com.cumulocity.agent.snmp.platform.model.DeviceManagedObjectWrapper.DeviceAuthentication;
-import com.cumulocity.agent.snmp.platform.model.DeviceManagedObjectWrapper.SnmpDeviceProperties;
-import com.cumulocity.agent.snmp.platform.model.DeviceProtocolManagedObjectWrapper;
-import com.cumulocity.agent.snmp.platform.model.GatewayDataRefreshedEvent;
-import com.cumulocity.agent.snmp.platform.service.GatewayDataProvider;
-import com.cumulocity.agent.snmp.util.IpAddressUtil;
-import lombok.extern.slf4j.Slf4j;
-import org.snmp4j.*;
+import static com.cumulocity.agent.snmp.util.SnmpUtil.getAuthProtocolOid;
+import static com.cumulocity.agent.snmp.util.SnmpUtil.getPrivacyProtocolOid;
+
+import java.io.IOException;
+import java.net.BindException;
+import java.net.ProtocolException;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ScheduledFuture;
+
+import javax.annotation.PreDestroy;
+
+import org.snmp4j.MessageDispatcher;
+import org.snmp4j.MessageDispatcherImpl;
+import org.snmp4j.PDU;
+import org.snmp4j.Snmp;
+import org.snmp4j.TransportMapping;
 import org.snmp4j.event.ResponseEvent;
 import org.snmp4j.mp.MPv1;
 import org.snmp4j.mp.MPv2c;
 import org.snmp4j.mp.MPv3;
 import org.snmp4j.mp.SnmpConstants;
-import org.snmp4j.security.*;
-import org.snmp4j.smi.*;
+import org.snmp4j.security.SecurityLevel;
+import org.snmp4j.security.SecurityModels;
+import org.snmp4j.security.SecurityProtocols;
+import org.snmp4j.security.USM;
+import org.snmp4j.security.UsmUser;
+import org.snmp4j.smi.Address;
+import org.snmp4j.smi.GenericAddress;
+import org.snmp4j.smi.OID;
+import org.snmp4j.smi.OctetString;
+import org.snmp4j.smi.TcpAddress;
+import org.snmp4j.smi.UdpAddress;
+import org.snmp4j.smi.VariableBinding;
 import org.snmp4j.transport.DefaultTcpTransportMapping;
 import org.snmp4j.transport.DefaultUdpTransportMapping;
 import org.snmp4j.util.MultiThreadedMessageDispatcher;
@@ -27,15 +45,17 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PreDestroy;
-import java.io.IOException;
-import java.net.BindException;
-import java.net.ProtocolException;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ScheduledFuture;
+import com.cumulocity.agent.snmp.bootstrap.model.BootstrapReadyEvent;
+import com.cumulocity.agent.snmp.config.GatewayProperties;
+import com.cumulocity.agent.snmp.platform.model.DeviceManagedObjectWrapper;
+import com.cumulocity.agent.snmp.platform.model.DeviceManagedObjectWrapper.DeviceAuthentication;
+import com.cumulocity.agent.snmp.platform.model.DeviceManagedObjectWrapper.SnmpDeviceProperties;
+import com.cumulocity.agent.snmp.platform.model.DeviceProtocolManagedObjectWrapper;
+import com.cumulocity.agent.snmp.platform.model.GatewayDataRefreshedEvent;
+import com.cumulocity.agent.snmp.platform.service.GatewayDataProvider;
+import com.cumulocity.agent.snmp.util.IpAddressUtil;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -259,36 +279,6 @@ public class DeviceListenerService {
 		default:
 			log.error("Unsupported {} Security level found in {} user, configured for device having {} as engine id",
 					authDetails.getSecurityLevel(), userName, authDetails.getEngineId());
-			return null;
-		}
-	}
-
-	private OID getAuthProtocolOid(int id) {
-		switch (id) {
-		case 1:
-			return AuthMD5.ID;
-		case 2:
-			return AuthSHA.ID;
-		default:
-			log.error("Unsupported {} authentication protocol selected. Supported protocols are "
-					+ "usmHMACMD5AuthProtocol as MD5 and usmHMACSHAAuthProtocol as SHA", id);
-			return null;
-		}
-	}
-
-	private OID getPrivacyProtocolOid(int id) {
-		switch (id) {
-		case 1:
-			return PrivDES.ID;
-		case 2:
-			return PrivAES128.ID;
-		case 3:
-			return PrivAES192.ID;
-		case 4:
-			return PrivAES256.ID;
-		default:
-			log.error("Unsupported {} privacy protocol id found. Supported ones are "
-					+ "1 for DES, 2 for AES128, 3 for AES192 and 4 for AES256", id);
 			return null;
 		}
 	}
