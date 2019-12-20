@@ -7,6 +7,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.cumulocity.agent.snmp.cucumber.config.PlatformProvider;
+import com.cumulocity.model.event.CumulocitySeverities;
 import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
 import com.cumulocity.sdk.client.alarm.AlarmApi;
 import com.cumulocity.sdk.client.alarm.AlarmFilter;
@@ -36,14 +37,35 @@ public class AlarmSteps {
         assertThat(matchingFound).isTrue();
     }
 
+    @Then("^There should be (.+) alarm with type \"(.+)\", text \"(.+)\" and severity \"(.+)\" created for gateway$")
+    public void findAlarmForGateway(int count, String type, String text, CumulocitySeverities severity) {
+        AlarmFilter alarmFilter = new AlarmFilter()
+                .byType(type)
+                .bySource(gatewayRegistration.getGatewayDevice().getId())
+                .bySeverity(severity);
+        getAlarmsByFilterAndVerify(alarmFilter, count, text);
+    }
+
     @Then("^There should be (.+) alarm with type \"(.+)\" and text \"(.+)\" created for snmp device$")
     public void findAlarmForSnmpDevice(int count, String type, String text) {
         AlarmFilter alarmFilter = new AlarmFilter()
                 .byType(type)
                 .bySource(snmpDeviceSteps.getLastSnmpDevice().getId());
+        getAlarmsByFilterAndVerify(alarmFilter, count, text);
+    }
+
+    @Then("^There should be (.+) alarm with type \"(.+)\", text \"(.+)\" and severity \"(.+)\" created for snmp device$")
+    public void findAlarmForSnmpDevice(int count, String type, String text, CumulocitySeverities severity) {
+        AlarmFilter alarmFilter = new AlarmFilter()
+                .byType(type)
+                .bySource(snmpDeviceSteps.getLastSnmpDevice().getId())
+                .bySeverity(severity);
+        getAlarmsByFilterAndVerify(alarmFilter, count, text);
+    }
+
+    private void getAlarmsByFilterAndVerify(AlarmFilter alarmFilter, int count, String text) {
         List<AlarmRepresentation> alarms = alarmApi()
                 .getAlarmsByFilter(alarmFilter).get(2000).getAlarms();
-
         assertThat(alarms.size()).isEqualTo(count);
         boolean allMatch = alarms.stream()
                 .allMatch(alarm -> {

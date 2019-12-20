@@ -10,6 +10,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.cumulocity.agent.snmp.cucumber.config.PlatformProvider;
+import com.cumulocity.agent.snmp.cucumber.model.SnmpDeviceAuthentication;
 import com.cumulocity.rest.representation.inventory.ManagedObjectReferenceRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.inventory.InventoryApi;
@@ -21,7 +22,9 @@ import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import io.cucumber.datatable.DataTable;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class SnmpDeviceSteps {
 
     @Autowired
@@ -37,6 +40,27 @@ public class SnmpDeviceSteps {
 
     @Given("^I create a snmp device with device protocol \"(.+)\", ip \"(.+)\", port \"(.+)\" and version \"(.+)\"$")
     public void createSnmpDevice(String deviceProtocolName, String ipAddress, int port, int version) {
+        lastSnmpDevice = inventoryApi().create(
+                snmpDeviceRepresentation(deviceProtocolName, ipAddress, port, version));
+    }
+
+    @Given("^I create a snmp device with device protocol \"(.+)\", ip \"(.+)\", port \"(.+)\", version \"3\" and authentication:$")
+    public void createSnmpDeviceV3(String deviceProtocolName, String ipAddress, int port, DataTable authenticationTable) {
+        ManagedObjectRepresentation snmpDeviceMo = snmpDeviceRepresentation(deviceProtocolName, ipAddress, port, 3);
+        SnmpDeviceAuthentication auth = new SnmpDeviceAuthentication();
+        List<Map<String, String>> authenticationFields = authenticationTable.asMaps();
+        auth.setUsername(authenticationFields.get(0).get("username"));
+        auth.setAuthPassword(authenticationFields.get(0).get("authPassword"));
+        auth.setPrivPassword(authenticationFields.get(0).get("privPassword"));
+        auth.setAuthProtocol(Integer.parseInt(authenticationFields.get(0).get("authProtocol")));
+        auth.setPrivProtocol(Integer.parseInt(authenticationFields.get(0).get("privProtocol")));
+        auth.setSecurityLevel(Integer.parseInt(authenticationFields.get(0).get("securityLevel")));
+        auth.setEngineId(authenticationFields.get(0).get("engineId"));
+        snmpDeviceMo.get(SNMPDevice.class).setAuth(auth);
+        lastSnmpDevice = inventoryApi().create(snmpDeviceMo);
+    }
+
+    private ManagedObjectRepresentation snmpDeviceRepresentation(String deviceProtocolName, String ipAddress, int port, int version) {
         Optional<ManagedObjectRepresentation> deviceProtocolMo = deviceProtocolSteps.getDeviceProtocolByName(deviceProtocolName);
         assertThat(deviceProtocolMo.isPresent()).isTrue();
         SNMPDevice snmpDevice = new SNMPDevice(ipAddress,
@@ -48,13 +72,9 @@ public class SnmpDeviceSteps {
         snmpDeviceMo.setType(deviceProtocolName);
         snmpDeviceMo.setName("Snmp Device");
         snmpDeviceMo.setOwner(gatewayRegistration.getGatewayOwner());
-        lastSnmpDevice = inventoryApi().create(snmpDeviceMo);
+        return snmpDeviceMo;
     }
 
-    @Given("^I create a snmp device with device protocol \"(.+)\", ip \"(.+)\", port \"(.+)\" and version \"3\" and authentication:$")
-    public void createSnmpDeviceV3(String deviceProtocolName, String ipAddress, int port, DataTable authentication) {
-        
-    }
     @Given("^I add last snmp device as child device to the gateway$")
     public void addSnmpDeviceToGateway() {
         ManagedObject managedObjectApi = inventoryApi().getManagedObjectApi(gatewayRegistration.getGatewayDevice().getId());

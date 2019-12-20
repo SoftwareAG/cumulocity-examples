@@ -21,7 +21,7 @@ public class MeasurementSteps {
     protected SnmpDeviceSteps snmpDeviceSteps;
 
     @Then("^There should be (.+) measurement with type \"(.+)\", fragmentType \"(.+)\" and series \"(.+)\" created for snmp device$")
-    public void findMeasurementWithType(int count, String type, String fragmentType, String series) {
+    public void findDeviceMeasurementWithType(int count, String type, String fragmentType, String series) {
         MeasurementFilter filter = new MeasurementFilter()
                 .byType(type)
                 .byValueFragmentTypeAndSeries(fragmentType, series)
