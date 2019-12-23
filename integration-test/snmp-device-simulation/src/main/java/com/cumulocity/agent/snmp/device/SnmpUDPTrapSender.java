@@ -31,47 +31,27 @@ import org.snmp4j.smi.IpAddress;
 import org.snmp4j.smi.OID;
 import org.snmp4j.smi.OctetString;
 import org.snmp4j.smi.UdpAddress;
+import org.snmp4j.smi.Variable;
 import org.snmp4j.smi.VariableBinding;
 import org.snmp4j.transport.DefaultUdpTransportMapping;
 
-public class SnmpUDPTrapSender {
-
-    private static final int port = 6671;
-
-    private static final String community = "public";
-
-    private static final String ipAddress = "127.0.0.1";
-
-    private static final String trapOid = "1.3.6.1.2.1.34.4.0.2";
+public class SnmpUDPTrapSender extends SnmpTrapSender {
 
     public static void main(String args[]) {
-        //sendSnmpV1V2Trap(SnmpConstants.version1);
-        // sendSnmpV1V2Trap(SnmpConstants.version2c);
-         sendSnmpV3Trap();
+        SnmpUDPTrapSender udpTrapSender = new SnmpUDPTrapSender();
+        //udpTrapSender.sendSnmpV1V2Trap(SnmpConstants.version1);
+        //udpTrapSender.sendSnmpV1V2Trap(SnmpConstants.version2c);
+        udpTrapSender.sendSnmpV3Trap();
     }
 
-    /**
-     * This methods sends the V1/V2 trap
-     * 
-     * @param version
-     */
-    public static void sendSnmpV1V2Trap(int version) {
-        sendV1orV2Trap(version, community, ipAddress, port, trapOid);
+    public void sendSnmpV1V2Trap(int version) {
+        sendV1orV2Trap(version, community, ipAddress, port);
     }
 
-    /**
-     * This methods sends the V1/V2 trap
-     * @param version
-     * @param trapOid
-     */
-    public static void sendSnmpV1V2Trap(int version, String trapOid) {
-        sendV1orV2Trap(version, community, ipAddress, port, trapOid);
-    }
-
-    private static void sendV1orV2Trap(int snmpVersion, String community, String ipAddress, int port, String trapOid) {
+    private void sendV1orV2Trap(int snmpVersion, String community, String ipAddress, int port) {
         try {
             // create v1/v2 PDU
-            PDU snmpPDU = createPdu(snmpVersion, trapOid);
+            PDU snmpPDU = createPdu(snmpVersion);
 
             // Create Transport Mapping
             TransportMapping<?> transport = new DefaultUdpTransportMapping();
@@ -95,18 +75,7 @@ public class SnmpUDPTrapSender {
         }
     }
 
-    /**
-     * Sends the v3 trap
-     */
-    public static void sendSnmpV3Trap() {
-        sendSnmpV3Trap(trapOid);
-    }
-
-    /**
-     * Sends the v3 trap
-     * @param trapOid
-     */
-    public static void sendSnmpV3Trap(String trapOid) {
+    public void sendSnmpV3Trap() {
         try {
             Address targetAddress = GenericAddress.parse("udp:" + ipAddress + "/" + port);
             TransportMapping<?> transport = new DefaultUdpTransportMapping();
@@ -162,7 +131,7 @@ public class SnmpUDPTrapSender {
         }
     }
 
-    private static PDU createPdu(int snmpVersion, String trapOid) {
+    private PDU createPdu(int snmpVersion) {
 
         PDU pdu;
         if (snmpVersion == SnmpConstants.version1) {
@@ -182,8 +151,7 @@ public class SnmpUDPTrapSender {
             pdu = pdu2;
         }
 
-        Random random = new Random();
-        pdu.add(new VariableBinding(new OID(trapOid), new Counter32(random.nextInt(100))));
+        pdu.add(new VariableBinding(new OID(trapOid), getVariable()));
         return pdu;
     }
 

@@ -32,29 +32,23 @@ import org.snmp4j.smi.Integer32;
 import org.snmp4j.smi.IpAddress;
 import org.snmp4j.smi.OID;
 import org.snmp4j.smi.OctetString;
+import org.snmp4j.smi.Variable;
 import org.snmp4j.smi.VariableBinding;
 import org.snmp4j.transport.DefaultTcpTransportMapping;
 
-public class SnmpTCPTrapSender {
-
-    private static final int port = 6671;
-
-    private static final String community = "public";
-
-    private static final String ipAddress = "127.0.0.1";
-
-    private static final String trapOid = "1.3.6.1.2.1.34.4.0.2";
+public class SnmpTCPTrapSender extends SnmpTrapSender {
 
     public static void main(String args[]) throws InterruptedException {
-        sendSnmpV1V2Trap(SnmpConstants.version1);
-        // sendSnmpV1V2Trap(SnmpConstants.version2c);
-        // sendSnmpV3Trap();
+        SnmpTCPTrapSender tcpTrapSender = new SnmpTCPTrapSender();
+        tcpTrapSender.sendSnmpV1V2Trap(SnmpConstants.version1);
+        // tcpTrapSender.sendSnmpV1V2Trap(SnmpConstants.version2c);
+        // tcpTrapSender.sendSnmpV3Trap();
     }
 
-    private static void sendV1orV2Trap(int snmpVersion, String community, String ipAddress, int port, String trapOid) {
+    private void sendV1orV2Trap(int snmpVersion, String community, String ipAddress, int port) {
         try {
             // create v1/v2 PDU
-            PDU snmpPDU = createPdu(snmpVersion, trapOid);
+            PDU snmpPDU = createPdu(snmpVersion);
 
             // Create Transport Mapping
             TransportMapping<?> transport = new DefaultTcpTransportMapping();
@@ -86,36 +80,13 @@ public class SnmpTCPTrapSender {
         }
     }
 
-    /**
-     * This methods sends the V1/V2 trap
-     * 
-     * @param version
-     */
-    public static void sendSnmpV1V2Trap(int version) {
-        sendV1orV2Trap(version, community, ipAddress, port, trapOid);
+    @Override
+    public void sendSnmpV1V2Trap(int version) {
+        sendV1orV2Trap(version, community, ipAddress, port);
     }
 
-    /**
-     * This methods sends the V1/V2 trap
-     * @param version
-     * @param trapOid
-     */
-    public static void sendSnmpV1V2Trap(int version, String trapOid) {
-        sendV1orV2Trap(version, community, ipAddress, port, trapOid);
-    }
-
-    /**
-     * Sends the v3 trap
-     */
-    public static void sendSnmpV3Trap() {
-        sendSnmpV3Trap(trapOid);
-    }
-
-    /**
-     * Sends the v3 trap
-     * @param trapOid
-     */
-    public static void sendSnmpV3Trap(String trapOid) {
+    @Override
+    public void sendSnmpV3Trap() {
         try {
             Address targetAddress = GenericAddress.parse("tcp:" + ipAddress + "/" + port);
             TransportMapping<?> transport = new DefaultTcpTransportMapping();
@@ -169,14 +140,14 @@ public class SnmpTCPTrapSender {
         }
     }
 
-    private static PDU createPdu(int snmpVersion, String trapOid) {
+    private PDU createPdu(int snmpVersion) {
 
         PDU pdu;
         if (snmpVersion == SnmpConstants.version1) {
 
             PDUv1 pdu1 = new PDUv1();
             pdu1.setType(PDU.V1TRAP);
-            pdu1.setEnterprise(new OID("1.3.6.1.2.1.34.4.0.2"));
+            pdu1.setEnterprise(new OID(trapOid));
             pdu1.setAgentAddress(new IpAddress("127.0.0.1"));
             pdu1.setSpecificTrap(5);
             pdu1.setGenericTrap(23);
@@ -189,9 +160,9 @@ public class SnmpTCPTrapSender {
             pdu = pdu2;
         }
 
-        Random random = new Random();
-        pdu.add(new VariableBinding(new OID(trapOid), new Counter32(random.nextInt(100))));
+        pdu.add(new VariableBinding(new OID(trapOid), getVariable()));
 
         return pdu;
     }
+
 }

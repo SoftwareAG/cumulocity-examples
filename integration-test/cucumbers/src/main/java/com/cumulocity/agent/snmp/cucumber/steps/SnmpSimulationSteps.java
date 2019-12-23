@@ -1,8 +1,17 @@
 package com.cumulocity.agent.snmp.cucumber.steps;
 
+import org.snmp4j.mp.SnmpConstants;
+import org.snmp4j.smi.Counter32;
+import org.snmp4j.smi.Counter64;
+import org.snmp4j.smi.Integer32;
+import org.snmp4j.smi.OctetString;
+import org.snmp4j.smi.TimeTicks;
+import org.snmp4j.smi.Variable;
+
 import com.cumulocity.agent.snmp.device.SnmpTCPDevice;
 import com.cumulocity.agent.snmp.device.SnmpUDPDevice;
 import com.cumulocity.agent.snmp.device.SnmpTCPTrapSender;
+import com.cumulocity.agent.snmp.device.SnmpTrapSender;
 import com.cumulocity.agent.snmp.device.SnmpUDPTrapSender;
 
 import cucumber.api.java.en.Given;
@@ -44,38 +53,80 @@ public class SnmpSimulationSteps {
 
     @Given("^I send UDP trap message with trap version (.+) and OId (.+)$")
     public void sendUdpTrapMessage(String version, String trapOid) {
-        switch (version) {
-            case "1":
-                SnmpUDPTrapSender.sendSnmpV1V2Trap(0, trapOid);
-                break;
-            case "2c":
-                SnmpUDPTrapSender.sendSnmpV1V2Trap(1, trapOid);
-                break;
-            case "3":
-                SnmpUDPTrapSender.sendSnmpV3Trap(trapOid);
-                break;
-            default:
-                SnmpUDPTrapSender.sendSnmpV1V2Trap(0, trapOid);
-                break;
-        }
+        SnmpTrapSender udpTrapSender = new SnmpUDPTrapSender();
+        udpTrapSender.setTrapOid(trapOid);
+        sendTrap(udpTrapSender, version);
     }
 
     @Given("^I send TCP trap message with trap version (.+) and OId (.+)$")
     public void sendTcpTrapMessage(String version, String trapOid) {
+        SnmpTrapSender tcpTrapSender = new SnmpTCPTrapSender();
+        tcpTrapSender.setTrapOid(trapOid);
+        sendTrap(tcpTrapSender, version);
+    }
+
+    @Given("^I send UDP trap message with trap version (.+), OId (.+), variable (.+) and value (.+)$")
+    public void sendUdpTrapMessage(String version, String trapOid, String variable, String valueStr) {
+        Variable smiVariable = getVariableObject(variable, valueStr);
+        if (smiVariable != null) {
+            SnmpTrapSender udpTrapSender = new SnmpUDPTrapSender();
+            udpTrapSender.setTrapOid(trapOid);
+            udpTrapSender.setVariable(smiVariable);
+            sendTrap(udpTrapSender, version);
+        }
+    }
+
+    @Given("^I send TCP trap message with trap version (.+), OId (.+), variable (.+) and value (.+)$")
+    public void sendTcpTrapMessage(String version, String trapOid, String variable, String valueStr) {
+        Variable smiVariable = getVariableObject(variable, valueStr);
+        if (smiVariable != null) {
+            SnmpTrapSender udpTrapSender = new SnmpUDPTrapSender();
+            udpTrapSender.setTrapOid(trapOid);
+            udpTrapSender.setVariable(smiVariable);
+            sendTrap(udpTrapSender, version);
+        }
+    }
+
+    private void sendTrap(SnmpTrapSender trapSender, String version) {
         switch (version) {
             case "1":
-                SnmpTCPTrapSender.sendSnmpV1V2Trap(0, trapOid);
+                trapSender.sendSnmpV1V2Trap(SnmpConstants.version1);
                 break;
             case "2c":
-                SnmpTCPTrapSender.sendSnmpV1V2Trap(1, trapOid);
+                trapSender.sendSnmpV1V2Trap(SnmpConstants.version2c);
                 break;
             case "3":
-                SnmpTCPTrapSender.sendSnmpV3Trap(trapOid);
+                trapSender.sendSnmpV3Trap();
                 break;
             default:
-                SnmpTCPTrapSender.sendSnmpV1V2Trap(0, trapOid);
+                log.warn("Unsupported snmp version in cucumber tests.");
                 break;
         }
+    }
+
+    private Variable getVariableObject(String variable, String valueStr) {
+        Variable smiVariable = null;
+        switch (variable) {
+            case "Integer32":
+                smiVariable = new Integer32(Integer.valueOf(valueStr));
+                break;
+            case "OctetString":
+                smiVariable = new OctetString(valueStr);
+                break;
+            case "Counter32":
+                smiVariable = new Counter32(Long.valueOf(valueStr));
+                break;
+            case "Counter64":
+                smiVariable = new Counter64(Long.valueOf(valueStr));
+                break;
+            case "TimeTicks":
+                smiVariable = new TimeTicks(Long.valueOf(valueStr));
+                break;
+            default:
+                log.warn("Unsupported smi variable type in cucumber tests.");
+                break;
+        }
+        return smiVariable;
     }
 
     @Then("^I stop snmp UDP simulation device$")

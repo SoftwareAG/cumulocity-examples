@@ -28,13 +28,11 @@ public class AlarmSteps {
     @Then("^There should be an auto discovery alarm created for ip (.+) on gateway$")
     public void findAutoDiscoveryAlarmForGateway(String ipAddress) {
         AlarmFilter alarmFilter = new AlarmFilter()
-                .bySource(gatewayRegistration.getGatewayDevice().getId());
+                .bySource(gatewayRegistration.getGatewayDevice().getId())
+                .byType("c8y_DeviceSnmpNotEnabled-" + ipAddress);
         List<AlarmRepresentation> alarms = alarmApi()
                 .getAlarmsByFilter(alarmFilter).get(2000).getAlarms();
-        assertThat(alarms).isNotEmpty();
-        boolean matchingFound = alarms.stream()
-                .anyMatch(alarm -> alarm.getText().equals("c8y_DeviceSnmpNotEnabled-" + ipAddress));
-        assertThat(matchingFound).isTrue();
+        assertThat(alarms.size()).isEqualTo(1);
     }
 
     @Then("^There should be (.+) alarm with type \"(.+)\", text \"(.+)\" and severity \"(.+)\" created for gateway$")

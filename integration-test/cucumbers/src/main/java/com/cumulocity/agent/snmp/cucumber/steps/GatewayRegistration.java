@@ -53,12 +53,16 @@ public class GatewayRegistration {
     private ManagedObjectRepresentation gatewayDevice;
 
     @Given("^I start and register gateway with (.+) protocol and polling version model Id (.+)$")
-    public void setupGatewayWithConfig(String trapListenerProtocol, int pollingVersion) throws IOException {
+    public void setupGatewayWithConfig(String trapListenerProtocol, Integer pollingVersion) throws IOException {
         setupGatewayWithConfig(161, trapListenerProtocol, pollingVersion);
     }
 
     @Given("^I start and register gateway with polling port (.+) and (.+) protocol$")
-    public void setupGatewayWithConfig(Integer pollingPort, String trapListenerProtocol, int pollingVersion) throws IOException {
+    public void setupGatewayWithConfig(Integer pollingPort, String trapListenerProtocol) throws IOException {
+        setupGatewayWithConfig(pollingPort, trapListenerProtocol, 0);
+    }
+
+    private void setupGatewayWithConfig(Integer pollingPort, String trapListenerProtocol, Integer pollingVersion) throws IOException {
         createGatewayConfigurationFile(pollingPort, trapListenerProtocol, pollingVersion);
         startGatewayProcess();
         createGatewayDevice();

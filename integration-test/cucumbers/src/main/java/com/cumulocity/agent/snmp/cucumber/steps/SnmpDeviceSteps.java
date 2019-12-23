@@ -18,6 +18,7 @@ import com.cumulocity.sdk.client.inventory.InventoryFilter;
 import com.cumulocity.sdk.client.inventory.ManagedObject;
 
 import c8y.SNMPDevice;
+import c8y.SNMPGateway;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
@@ -38,13 +39,13 @@ public class SnmpDeviceSteps {
 
     private ManagedObjectRepresentation lastSnmpDevice = null;
 
-    @Given("^I create a snmp device with device protocol \"(.+)\", ip \"(.+)\", port \"(.+)\" and version \"(.+)\"$")
+    @Given("^I create a snmp device with device protocol \"(.+)\", ip \"(.+)\", port \"(.+)\" and version model Id \"(.+)\"$")
     public void createSnmpDevice(String deviceProtocolName, String ipAddress, int port, int version) {
         lastSnmpDevice = inventoryApi().create(
                 snmpDeviceRepresentation(deviceProtocolName, ipAddress, port, version));
     }
 
-    @Given("^I create a snmp device with device protocol \"(.+)\", ip \"(.+)\", port \"(.+)\", version \"3\" and authentication:$")
+    @Given("^I create a snmp device with device protocol \"(.+)\", ip \"(.+)\", port \"(.+)\", version model Id \"3\" and authentication:$")
     public void createSnmpDeviceV3(String deviceProtocolName, String ipAddress, int port, DataTable authenticationTable) {
         ManagedObjectRepresentation snmpDeviceMo = snmpDeviceRepresentation(deviceProtocolName, ipAddress, port, 3);
         SnmpDeviceAuthentication auth = new SnmpDeviceAuthentication();
@@ -83,10 +84,15 @@ public class SnmpDeviceSteps {
 
     @When("^I set snmp gateway configuration with ipRange (.+) and autoDiscoveryInterval (.+)$")
     public void setSnmpGatewayConfigurationForIpRange(String ipRange, int autoDiscoveryInterval) {
+        setSnmpGatewayConf(ipRange, autoDiscoveryInterval, 3);
+    }
+
+    @When("^I set snmp gateway configuration with ipRange (.+), autoDiscoveryInterval (.+) and polling rate (.+)")
+    public void setSnmpGatewayConf(String ipRange, int autoDiscoveryInterval, int pollingRate) {
         ManagedObjectRepresentation gatewayUpdateMo = new ManagedObjectRepresentation();
         gatewayUpdateMo.setId(gatewayRegistration.getGatewayDevice().getId());
-        Map<String, Object> gatewayConfig = setupGatewayConfig(0, 3, autoDiscoveryInterval, ipRange);
-        gatewayUpdateMo.set(gatewayConfig, "c8y_SNMPGateway");
+        SNMPGateway gatewayConfig = setupGatewayConfig(0, pollingRate, autoDiscoveryInterval, ipRange);
+        gatewayUpdateMo.set(gatewayConfig);
         inventoryApi().update(gatewayUpdateMo);
     }
 
@@ -106,12 +112,12 @@ public class SnmpDeviceSteps {
         return lastSnmpDevice;
     }
 
-    private Map<String, Object> setupGatewayConfig(int transmitRate, int pollingRate, int autoDiscoveryInterval, String ipRange) {
-        Map<String, Object> gatewayConfig = new HashMap<>();
-        gatewayConfig.put("transmitRate", transmitRate);
-        gatewayConfig.put("pollingRate", pollingRate);
-        gatewayConfig.put("autoDiscoveryInterval", autoDiscoveryInterval);
-        gatewayConfig.put("ipRange", ipRange);
+    private SNMPGateway setupGatewayConfig(int transmitRate, int pollingRate, int autoDiscoveryInterval, String ipRange) {
+        SNMPGateway gatewayConfig = new SNMPGateway();
+        gatewayConfig.setTransmitRate(transmitRate);
+        gatewayConfig.setPollingRate(pollingRate);
+        gatewayConfig.setAutoDiscoveryInterval(autoDiscoveryInterval);
+        gatewayConfig.setIpRange(ipRange);
         return gatewayConfig;
     }
 
@@ -122,14 +128,11 @@ public class SnmpDeviceSteps {
 
         ManagedObjectRepresentation matchedSnmpDevice = null;
         for (ManagedObjectRepresentation snmpDevice : snmpDevices) {
-            Map<String, String> snmpProperties = (Map<String, String>) snmpDevice.get("c8y_SNMPDevice");
-            if (snmpProperties.containsKey("ipAddress")
-                    && snmpProperties.containsKey("port")) {
-                if (ip.equals(snmpProperties.get("ipAddress"))
-                        && port.equals(snmpProperties.get("port"))) {
-                    matchedSnmpDevice = snmpDevice;
-                    break;
-                }
+            SNMPDevice snmpProperties = snmpDevice.get(SNMPDevice.class);
+            if (ip.equals(snmpProperties.getIpAddress())
+                    && port.equals(String.valueOf(snmpProperties.getPort()))) {
+                matchedSnmpDevice = snmpDevice;
+                break;
             }
         }
         return matchedSnmpDevice;
