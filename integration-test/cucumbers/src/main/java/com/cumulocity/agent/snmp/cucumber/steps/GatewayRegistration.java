@@ -62,6 +62,11 @@ public class GatewayRegistration {
         setupGatewayWithConfig(pollingPort, trapListenerProtocol, 0);
     }
 
+    @Given("^I start and register gateway with (.+) protocol, polling port (.+) and polling version model Id (.+)$")
+    public void setupGatewayWithConfig(String trapListenerProtocol, Integer pollingPort, Integer pollingVersion) throws IOException {
+        setupGatewayWithConfig(pollingPort, trapListenerProtocol, pollingVersion);
+    }
+
     private void setupGatewayWithConfig(Integer pollingPort, String trapListenerProtocol, Integer pollingVersion) throws IOException {
         createGatewayConfigurationFile(pollingPort, trapListenerProtocol, pollingVersion);
         startGatewayProcess();

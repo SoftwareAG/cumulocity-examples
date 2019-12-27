@@ -8,6 +8,7 @@ import org.snmp4j.smi.OctetString;
 import org.snmp4j.smi.TimeTicks;
 import org.snmp4j.smi.Variable;
 
+import com.cumulocity.agent.snmp.device.SnmpDevice;
 import com.cumulocity.agent.snmp.device.SnmpTCPDevice;
 import com.cumulocity.agent.snmp.device.SnmpUDPDevice;
 import com.cumulocity.agent.snmp.device.SnmpTCPTrapSender;
@@ -21,29 +22,48 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class SnmpSimulationSteps {
 
-    @Given("^I run snmp UDP simulation device with ip (.+) and port (.+)$")
+    @Given("^I run snmp UDP simulation device with ip (.+) and port ([0-9]+)$")
     public void startSnmpUdpSimulation(String ipAddress, int port) throws Exception {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    log.info("Starting snmp UDP simulation device with endpoint: {}/{}", ipAddress, port);
-                    SnmpUDPDevice.startSnmpSimulator(ipAddress, port, "cucumberSnmpSimulationDevice");
-                } catch (Exception e) {
-                    log.error("Cannot start snmp simulation device", e);
-                }
-            }
-        }).start();
+        SnmpDevice snmpUdpDevice = new SnmpUDPDevice(ipAddress, "49:U9:39:900:FJ8");
+        log.info("Starting snmp UDP simulation device with endpoint: {}/{}", ipAddress, port);
+        runSnmpDeviceInNewThread(snmpUdpDevice, port);
     }
 
-    @Given("^I run snmp TCP simulation device with ip (.+) and port (.+)$")
+    @Given("^I run snmp TCP simulation device with ip (.+) and port ([0-9]+)$")
     public void startSnmpTcpSimulation(String ipAddress, int port) throws Exception {
+        SnmpDevice snmpTcpDevice = new SnmpTCPDevice(ipAddress, "49:U9:39:900:FJ8");
+        log.info("Starting snmp TCP simulation device with endpoint: {}/{}", ipAddress, port);
+        runSnmpDeviceInNewThread(snmpTcpDevice, port);
+    }
+
+    @Given("^I run snmp UDP simulation device with ip (.+) and port ([0-9]+) that has variable (.+) with value (.+) and OId (.+)$")
+    public void startSnmpUdpSimulation(String ipAddress, int port, String variable, String valueStr, String oId) {
+        Variable smiVariable = getVariableObject(variable, valueStr);
+        if (smiVariable != null) {
+            SnmpDevice snmpUdpDevice = new SnmpUDPDevice(ipAddress, "49:U9:39:900:FJ8");
+            log.info("Starting snmp UDP simulation device with endpoint: {}/{}", ipAddress, port);
+            snmpUdpDevice.setVariable(smiVariable, oId);
+            runSnmpDeviceInNewThread(snmpUdpDevice, port);
+        }
+    }
+
+    @Given("^I run snmp TCP simulation device with ip (.+) and port ([0-9]+) that has variable (.+) with value (.+) and OId (.+)$")
+    public void startSnmpTcpSimulation(String ipAddress, int port, String variable, String valueStr, String oId) {
+        Variable smiVariable = getVariableObject(variable, valueStr);
+        if (smiVariable != null) {
+            SnmpDevice snmpTcpDevice = new SnmpTCPDevice(ipAddress, "49:U9:39:900:FJ8");
+            log.info("Starting snmp TCP simulation device with endpoint: {}/{}", ipAddress, port);
+            snmpTcpDevice.setVariable(smiVariable, oId);
+            runSnmpDeviceInNewThread(snmpTcpDevice, port);
+        }
+    }
+
+    private void runSnmpDeviceInNewThread(SnmpDevice snmpDevice, int port) {
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    log.info("Starting snmp TCP simulation device with endpoint: {}/{}", ipAddress, port);
-                    SnmpTCPDevice.startSnmpSimulator(ipAddress, port, "cucumberSnmpSimulationDevice");
+                    snmpDevice.startSnmpSimulator(snmpDevice.getAddress(), port, snmpDevice.getEngineId());
                 } catch (Exception e) {
                     log.error("Cannot start snmp simulation device", e);
                 }
@@ -129,15 +149,8 @@ public class SnmpSimulationSteps {
         return smiVariable;
     }
 
-    @Then("^I stop snmp UDP simulation device$")
-    public void stopSnmpUDPSimulation() throws InterruptedException {
-        log.info("Shutting down snmp UDP simulation device process");
-        SnmpUDPDevice.stopSnmpSimulator();
-    }
-
-    @Then("^I stop snmp TCP simulation device$")
-    public void stopSnmpTCPSimulation() throws InterruptedException {
-        log.info("Shutting down snmp TCP simulation device process");
-        SnmpTCPDevice.stopSnmpSimulator();
+    @Then("^I stop snmp simulation device$")
+    public void stopSnmpSimulation() throws InterruptedException {
+        SnmpDevice.stopSnmpSimulator();
     }
 }

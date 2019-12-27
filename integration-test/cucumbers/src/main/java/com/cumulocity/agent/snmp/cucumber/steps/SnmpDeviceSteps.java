@@ -58,6 +58,7 @@ public class SnmpDeviceSteps {
         auth.setSecurityLevel(Integer.parseInt(authenticationFields.get(0).get("securityLevel")));
         auth.setEngineId(authenticationFields.get(0).get("engineId"));
         snmpDeviceMo.get(SNMPDevice.class).setAuth(auth);
+        log.info("snmp device to create with v3: {}", snmpDeviceMo);
         lastSnmpDevice = inventoryApi().create(snmpDeviceMo);
     }
 
