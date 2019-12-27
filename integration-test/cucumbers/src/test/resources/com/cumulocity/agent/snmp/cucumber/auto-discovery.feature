@@ -1,4 +1,4 @@
-@autoDiscovery @test
+@autoDiscovery
 Feature: Auto-discovery scenarios
 
   Background:

@@ -24,26 +24,26 @@ public class SnmpSimulationSteps {
 
     @Given("^I run snmp UDP simulation device with ip (.+) and port ([0-9]+)$")
     public void startSnmpUdpSimulation(String ipAddress, int port) throws Exception {
-        SnmpDevice snmpUdpDevice = new SnmpUDPDevice(ipAddress, "49:U9:39:900:FJ8");
+        SnmpDevice snmpUdpDevice = new SnmpUDPDevice(ipAddress + "/" + port, "49:U9:39:900:FJ8");
         log.info("Starting snmp UDP simulation device with endpoint: {}/{}", ipAddress, port);
-        runSnmpDeviceInNewThread(snmpUdpDevice, port);
+        runSnmpDeviceInNewThread(snmpUdpDevice);
     }
 
     @Given("^I run snmp TCP simulation device with ip (.+) and port ([0-9]+)$")
     public void startSnmpTcpSimulation(String ipAddress, int port) throws Exception {
-        SnmpDevice snmpTcpDevice = new SnmpTCPDevice(ipAddress, "49:U9:39:900:FJ8");
+        SnmpDevice snmpTcpDevice = new SnmpTCPDevice(ipAddress + "/" + port, "49:U9:39:900:FJ8");
         log.info("Starting snmp TCP simulation device with endpoint: {}/{}", ipAddress, port);
-        runSnmpDeviceInNewThread(snmpTcpDevice, port);
+        runSnmpDeviceInNewThread(snmpTcpDevice);
     }
 
     @Given("^I run snmp UDP simulation device with ip (.+) and port ([0-9]+) that has variable (.+) with value (.+) and OId (.+)$")
     public void startSnmpUdpSimulation(String ipAddress, int port, String variable, String valueStr, String oId) {
         Variable smiVariable = getVariableObject(variable, valueStr);
         if (smiVariable != null) {
-            SnmpDevice snmpUdpDevice = new SnmpUDPDevice(ipAddress, "49:U9:39:900:FJ8");
+            SnmpDevice snmpUdpDevice = new SnmpUDPDevice(ipAddress + "/" + port, "49:U9:39:900:FJ8");
             log.info("Starting snmp UDP simulation device with endpoint: {}/{}", ipAddress, port);
             snmpUdpDevice.setVariable(smiVariable, oId);
-            runSnmpDeviceInNewThread(snmpUdpDevice, port);
+            runSnmpDeviceInNewThread(snmpUdpDevice);
         }
     }
 
@@ -51,19 +51,19 @@ public class SnmpSimulationSteps {
     public void startSnmpTcpSimulation(String ipAddress, int port, String variable, String valueStr, String oId) {
         Variable smiVariable = getVariableObject(variable, valueStr);
         if (smiVariable != null) {
-            SnmpDevice snmpTcpDevice = new SnmpTCPDevice(ipAddress, "49:U9:39:900:FJ8");
+            SnmpDevice snmpTcpDevice = new SnmpTCPDevice(ipAddress + "/" + port, "49:U9:39:900:FJ8");
             log.info("Starting snmp TCP simulation device with endpoint: {}/{}", ipAddress, port);
             snmpTcpDevice.setVariable(smiVariable, oId);
-            runSnmpDeviceInNewThread(snmpTcpDevice, port);
+            runSnmpDeviceInNewThread(snmpTcpDevice);
         }
     }
 
-    private void runSnmpDeviceInNewThread(SnmpDevice snmpDevice, int port) {
+    private void runSnmpDeviceInNewThread(SnmpDevice snmpDevice) {
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    snmpDevice.startSnmpSimulator(snmpDevice.getAddress(), port, snmpDevice.getEngineId());
+                    snmpDevice.startSnmpSimulator();
                 } catch (Exception e) {
                     log.error("Cannot start snmp simulation device", e);
                 }

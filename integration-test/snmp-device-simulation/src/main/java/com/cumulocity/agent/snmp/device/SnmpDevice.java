@@ -44,7 +44,7 @@ import org.snmp4j.smi.SMIConstants;
 import org.snmp4j.smi.Variable;
 import org.snmp4j.transport.TransportMappings;
 
-public class SnmpDevice extends BaseAgent {
+public abstract class SnmpDevice extends BaseAgent {
 
     private static final OID sysDescr = new OID("1.3.6.1.2.1.1.1.0");
     private static int incidents;
@@ -84,8 +84,8 @@ public class SnmpDevice extends BaseAgent {
         this.customVariableMO = new MOScalar<Variable>(new OID(oId), MOAccessImpl.ACCESS_READ_ONLY, variable);
     }
 
-    public void startSnmpSimulator(String ipAddress, int port, String engineId) throws Exception {
-        device = new SnmpDevice(ipAddress + "/" + port, engineId);
+    public void startSnmpSimulator() throws Exception {
+        device = this;
         device.init();
         device.addShutdownHook();
         device.getServer().addContext(new OctetString("public"));
@@ -256,12 +256,7 @@ public class SnmpDevice extends BaseAgent {
         usm.addUser(user.getSecurityName(), user);
     }
 
-    protected void initTransportMappings() {
-        transportMappings = new TransportMapping[1];
-        Address addr = GenericAddress.parse(address);
-        TransportMapping tm = TransportMappings.getInstance().createTransportMapping(addr);
-        transportMappings[0] = tm;
-    }
+    protected abstract void initTransportMappings();
 
     protected void unregisterManagedObjects() {
         // here we should unregister those objects previously registered...

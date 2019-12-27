@@ -19,9 +19,9 @@ public class SnmpUDPDevice extends SnmpDevice {
     private String address;
 
     public static void main(String[] args) throws Exception {
-        int port = 161;
-        SnmpUDPDevice snmpUdpDevice = new SnmpUDPDevice("127.0.0.1", "49:U9:39:900:FJ8");
-        snmpUdpDevice.startSnmpSimulator(snmpUdpDevice.address, port, snmpUdpDevice.getEngineId());
+        int port = 1025;
+        SnmpUDPDevice snmpUdpDevice = new SnmpUDPDevice("127.0.0.1/" + port, "49:U9:39:900:FJ8");
+        snmpUdpDevice.startSnmpSimulator();
     }
 
     public SnmpUDPDevice(String address, String engineId) {
