@@ -40,7 +40,7 @@ public class DeviceProxy {
 
     private DeviceSocketClient deviceSocket;
 
-    private String username;
+    private String tenantUsername;
 
     private String password;
 
@@ -60,7 +60,7 @@ public class DeviceProxy {
         this.websocketPort = url.getPort();
 
         CumulocityBasicCredentials cumulocityBasicCredentials = (CumulocityBasicCredentials) parameters.getCumulocityCredentials();
-        this.username = cumulocityBasicCredentials.getUsername();
+        this.tenantUsername = cumulocityBasicCredentials.getLoginWithTenant();
         this.password = cumulocityBasicCredentials.getPassword();
 
         this.deviceHost = hostname;
@@ -97,7 +97,7 @@ public class DeviceProxy {
                 websocket = new WebSocketClient(deviceSocket);
 
                 ClientEndpointConfig endpointConfig = ClientEndpointConfig.Builder.create()
-                        .configurator(new AuthHeaderConfigurator(username, password)).preferredSubprotocols(Collections.singletonList("binary"))
+                        .configurator(new AuthHeaderConfigurator(tenantUsername, password)).preferredSubprotocols(Collections.singletonList("binary"))
                         .build();
                 ContainerProvider.getWebSocketContainer().connectToServer(websocket, endpointConfig, endpoint);
             } catch (IOException | DeploymentException e) {
