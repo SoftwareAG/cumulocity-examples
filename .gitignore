@@ -1,0 +1,10 @@
+.*
+target/
+bin/
+*.iml
+*.orig
+cucumber.html
+dependency-reduced-pom.xml
+java-agent/jv-agent/cfg/
+node_modules/
+bower_components/
