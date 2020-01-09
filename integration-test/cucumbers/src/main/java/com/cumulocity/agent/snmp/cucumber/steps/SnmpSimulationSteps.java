@@ -100,10 +100,10 @@ public class SnmpSimulationSteps {
     public void sendTcpTrapMessage(String version, String trapOid, String variable, String valueStr) {
         Variable smiVariable = getVariableObject(variable, valueStr);
         if (smiVariable != null) {
-            SnmpTrapSender udpTrapSender = new SnmpUDPTrapSender();
-            udpTrapSender.setTrapOid(trapOid);
-            udpTrapSender.setVariable(smiVariable);
-            sendTrap(udpTrapSender, version);
+            SnmpTrapSender tcpTrapSender = new SnmpTCPTrapSender();
+            tcpTrapSender.setTrapOid(trapOid);
+            tcpTrapSender.setVariable(smiVariable);
+            sendTrap(tcpTrapSender, version);
         }
     }
 
