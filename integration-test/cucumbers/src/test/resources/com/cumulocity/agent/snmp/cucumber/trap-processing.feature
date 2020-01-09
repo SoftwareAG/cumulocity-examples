@@ -91,7 +91,7 @@ Feature: Trap-processing scenarios
     | protocol |
     | UDP      |
     | TCP      |
-@test
+
   Scenario Outline: Processing trap with version 3 (<protocol> protocol)
     Given I start and register gateway with <protocol> protocol and polling version model Id 3
     And I create snmp device protocol with JSON
