@@ -96,20 +96,9 @@
 				<groupId>com.nsn.cumulocity.clients-java</groupId>
 				<artifactId>microservice-package-maven-plugin</artifactId>
 				<configuration>
-					<containerSkip>true</containerSkip>
+					<rpmSkip>false</rpmSkip>
+					<containerSkip>false</containerSkip>
 				</configuration>
-				<executions>
-					<execution>
-						<id>3rd-license-generate</id>
-						<phase>package</phase>
-						<goals>
-							<goal>package</goal>
-						</goals>
-						<configuration>
-							<rpmSkip>false</rpmSkip>
-						</configuration>
-					</execution>
-				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
