@@ -5,7 +5,7 @@ Feature: Device poller scenarios
     Given Scenario tenant is created
 
   Scenario Outline: Device protocol processing by device polling (version <version> and <protocol> protocol)
-    Given I start and register gateway with <protocol> protocol, polling port 1025 and polling version model Id <version model Id>
+    Given I start and register gateway with <protocol> protocol and polling port 1025
     And I set snmp gateway configuration with ipRange 127.0.0.1, autoDiscoveryInterval 5 and polling rate 1
     And I create snmp device protocol with JSON
     """
@@ -51,7 +51,7 @@ Feature: Device poller scenarios
     | 1              | 2c      | TCP      |
 
   Scenario Outline: Device protocol processing by device polling for version 3 (<protocol> protocol)
-    Given I start and register gateway with <protocol> protocol, polling port 1025 and polling version model Id 3
+    Given I start and register gateway with <protocol> protocol and polling port 1025
     And I set snmp gateway configuration with ipRange 127.0.0.1, autoDiscoveryInterval 5 and polling rate 1
     And I create snmp device protocol with JSON
     """
@@ -97,7 +97,7 @@ Feature: Device poller scenarios
     | TCP      |
 
   Scenario Outline: Device protocol processing by device polling for different variables (version 1) (<variableType> and <protocol> protocol)
-    Given I start and register gateway with <protocol> protocol, polling port 1025 and polling version model Id 0
+    Given I start and register gateway with <protocol> protocol and polling port 1025
     And I set snmp gateway configuration with ipRange 127.0.0.1, autoDiscoveryInterval 5 and polling rate 1
     And I create snmp device protocol with JSON
     """
@@ -145,7 +145,7 @@ Feature: Device poller scenarios
     | TimeTicks    | 13          | 0.13   | TCP      |
 
   Scenario Outline: Device protocol processing by device polling for different variables (version 2c) (<variableType> and <protocol> protocol)
-    Given I start and register gateway with <protocol> protocol, polling port 1025 and polling version model Id 1
+    Given I start and register gateway with <protocol> protocol and polling port 1025
     And I set snmp gateway configuration with ipRange 127.0.0.1, autoDiscoveryInterval 5 and polling rate 1
     And I create snmp device protocol with JSON
     """
@@ -189,7 +189,7 @@ Feature: Device poller scenarios
     | Counter64    | 10          | 10     | TCP      |
 
   Scenario Outline: Device protocol processing by device polling for OctetString only processes event and alarms and not measurements (version 1 and <protocol> protocol)
-    Given I start and register gateway with <protocol> protocol, polling port 1025 and polling version model Id 0
+    Given I start and register gateway with <protocol> protocol and polling port 1025
     And I set snmp gateway configuration with ipRange 127.0.0.1, autoDiscoveryInterval 5 and polling rate 1
     And I create snmp device protocol with JSON
     """

@@ -11,7 +11,7 @@ public abstract class SnmpTrapSender {
 
     protected static final String community = "public";
 
-    protected static final String ipAddress = "127.0.0.1";
+    protected String ipAddress = "127.0.0.1";
 
     protected String trapOid = "1.3.6.1.2.1.34.4.0.2";
 
@@ -24,6 +24,10 @@ public abstract class SnmpTrapSender {
         } else {
             return variable;
         }
+    }
+
+    public void setIpAddress(String ipAddress) {
+        this.ipAddress = ipAddress;
     }
 
     public void setTrapOid(String trapOid) {

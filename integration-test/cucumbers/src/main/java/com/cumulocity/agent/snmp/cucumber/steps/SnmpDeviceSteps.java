@@ -62,6 +62,17 @@ public class SnmpDeviceSteps {
         lastSnmpDevice = inventoryApi().create(snmpDeviceMo);
     }
 
+    @Given("^I update the last snmp device with version model Id \"(.+)\"$")
+    public void updateSnmpDeviceVersion(int version) {
+        ManagedObjectRepresentation snmpDeviceMo = new ManagedObjectRepresentation();
+        SNMPDevice snmpDevice = lastSnmpDevice.get(SNMPDevice.class);
+        snmpDevice.setVersion(version);
+
+        snmpDeviceMo.setId(lastSnmpDevice.getId());
+        snmpDeviceMo.set(snmpDevice);
+        lastSnmpDevice = inventoryApi().update(snmpDeviceMo);
+    }
+
     private ManagedObjectRepresentation snmpDeviceRepresentation(String deviceProtocolName, String ipAddress, int port, int version) {
         Optional<ManagedObjectRepresentation> deviceProtocolMo = deviceProtocolSteps.getDeviceProtocolByName(deviceProtocolName);
         assertThat(deviceProtocolMo.isPresent()).isTrue();

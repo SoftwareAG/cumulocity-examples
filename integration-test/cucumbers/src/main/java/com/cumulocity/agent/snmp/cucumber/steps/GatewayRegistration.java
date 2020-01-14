@@ -14,6 +14,8 @@ import com.cumulocity.rest.representation.devicebootstrap.NewDeviceRequestRepres
 import com.cumulocity.rest.representation.identity.ExternalIDRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.Platform;
+import com.cumulocity.sdk.client.SDKException;
+
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
@@ -52,23 +54,18 @@ public class GatewayRegistration {
     @Getter
     private ManagedObjectRepresentation gatewayDevice;
 
-    @Given("^I start and register gateway with (.+) protocol and polling version model Id (.+)$")
-    public void setupGatewayWithConfig(String trapListenerProtocol, Integer pollingVersion) throws IOException {
-        setupGatewayWithConfig(161, trapListenerProtocol, pollingVersion);
+    @Given("^I start and register gateway with (.+) protocol$")
+    public void setupGatewayWithConfig(String trapListenerProtocol) throws IOException {
+        setupGatewayWithConfig(161, trapListenerProtocol);
     }
 
-    @Given("^I start and register gateway with polling port (.+) and (.+) protocol$")
-    public void setupGatewayWithConfig(Integer pollingPort, String trapListenerProtocol) throws IOException {
-        setupGatewayWithConfig(pollingPort, trapListenerProtocol, 0);
+    @Given("^I start and register gateway with (.+) protocol and polling port ([0-9]+)$")
+    public void setupGatewayWithConfig(String trapListenerProtocol, Integer pollingPort) throws IOException {
+        setupGatewayWithConfig(pollingPort, trapListenerProtocol);
     }
 
-    @Given("^I start and register gateway with (.+) protocol, polling port (.+) and polling version model Id (.+)$")
-    public void setupGatewayWithConfig(String trapListenerProtocol, Integer pollingPort, Integer pollingVersion) throws IOException {
-        setupGatewayWithConfig(pollingPort, trapListenerProtocol, pollingVersion);
-    }
-
-    private void setupGatewayWithConfig(Integer pollingPort, String trapListenerProtocol, Integer pollingVersion) throws IOException {
-        createGatewayConfigurationFile(pollingPort, trapListenerProtocol, pollingVersion);
+    private void setupGatewayWithConfig(Integer pollingPort, String trapListenerProtocol) throws IOException {
+        createGatewayConfigurationFile(pollingPort, trapListenerProtocol);
         startGatewayProcess();
         createGatewayDevice();
         acceptGatewayDeviceRequest();
@@ -108,13 +105,13 @@ public class GatewayRegistration {
 
     @And("^I create gateway configuration$")
     public void createGatewayConfigurationFile() throws IOException {
-        createGatewayConfigurationFile(161, "UDP", 0);
+        createGatewayConfigurationFile(161, "UDP");
     }
 
-    private void createGatewayConfigurationFile(Integer pollingPort, String trapListenerProtocol, int pollingVersion) throws IOException {
+    private void createGatewayConfigurationFile(Integer pollingPort, String trapListenerProtocol) throws IOException {
         log.info("Generating configuration for gateway... ");
 
-        String config = replaceConfigurationParams(pollingPort, trapListenerProtocol, pollingVersion);
+        String config = replaceConfigurationParams(pollingPort, trapListenerProtocol);
 
         log.info("New configuration: \n{}", config);
 
@@ -127,17 +124,14 @@ public class GatewayRegistration {
         log.info("Gateway configuration saved to {}", configFilePath);
     }
 
-    private String replaceConfigurationParams(Integer pollingPort,
-            String trapListenerProtocol,
-            int pollingVersion) throws IOException {
+    private String replaceConfigurationParams(Integer pollingPort, String trapListenerProtocol) throws IOException {
         String config = IOUtils.toString(getClass().getResourceAsStream("/snmp-agent-gateway-template.properties"));
         config = config.replaceAll("\\{\\{C8Y.baseURL}}", properties.getBaseUrl())
                 .replaceAll("\\{\\{test.tenant}}", tenantProvider.getTestTenant().getId())
                 .replaceAll("\\{\\{C8Y.forceInitialHost}}", Boolean.toString(properties.isForceInitialHost()))
                 .replaceAll("\\{\\{gateway.identifier}}", getSnmpGatewayDeviceName())
                 .replaceAll("\\{\\{snmp.polling.port}}", Integer.toString(pollingPort))
-                .replaceAll("\\{\\{snmp.trapListener.protocol}}", trapListenerProtocol)
-                .replaceAll("\\{\\{snmp.polling.version}}", Integer.toString(pollingVersion));
+                .replaceAll("\\{\\{snmp.trapListener.protocol}}", trapListenerProtocol);
         return config;
     }
 
@@ -248,12 +242,16 @@ public class GatewayRegistration {
 
         return TaskExecutor.run(() -> {
             ID id = new ID("c8y_Serial", getSnmpGatewayDeviceName());
-            ExternalIDRepresentation externalId = testPlatform.getIdentityApi().getExternalId(id);
-            if (externalId != null) {
-                gatewayDevice = externalId.getManagedObject();
-                return true;
+            try {
+                ExternalIDRepresentation externalId = testPlatform.getIdentityApi().getExternalId(id);
+                if (externalId != null) {
+                    gatewayDevice = externalId.getManagedObject();
+                    return true;
+                }
+                return false;
+            } catch (SDKException e) {
+                return false;
             }
-            return false;
         });
     }
 

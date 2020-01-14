@@ -59,7 +59,7 @@ public class OperationSteps {
             if (!OperationStatus.PENDING.name().equalsIgnoreCase(operation.getStatus())
                     && !OperationStatus.EXECUTING.name().equalsIgnoreCase(operation.getStatus())
                     && !operation.getStatus().equalsIgnoreCase(operationStatus.name())) {
-                throw new AssertionError(String.format("Operation execution was %s!. Failure reason: %s", operation.getStatus(), operation.getFailureReason()));
+                return false;
             }
             return operation.getStatus().equalsIgnoreCase(operationStatus.name());
         }, timeout)) {

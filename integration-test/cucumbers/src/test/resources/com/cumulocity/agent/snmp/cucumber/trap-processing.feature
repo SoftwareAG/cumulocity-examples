@@ -5,7 +5,7 @@ Feature: Trap-processing scenarios
     Given Scenario tenant is created
 
   Scenario Outline: Processing trap with version 1 (<protocol> protocol)
-    Given I start and register gateway with <protocol> protocol and polling version model Id 0
+    Given I start and register gateway with <protocol> protocol
     And I create snmp device protocol with JSON
     """
     {
@@ -49,7 +49,7 @@ Feature: Trap-processing scenarios
     | TCP      |
 
   Scenario Outline: Processing trap with version 2c (<protocol> protocol)
-    Given I start and register gateway with <protocol> protocol and polling version model Id 1
+    Given I start and register gateway with <protocol> protocol
     And I create snmp device protocol with JSON
     """
     {
@@ -93,7 +93,7 @@ Feature: Trap-processing scenarios
     | TCP      |
 
   Scenario Outline: Processing trap with version 3 (<protocol> protocol)
-    Given I start and register gateway with <protocol> protocol and polling version model Id 3
+    Given I start and register gateway with <protocol> protocol
     And I create snmp device protocol with JSON
     """
     {
@@ -139,7 +139,7 @@ Feature: Trap-processing scenarios
     | TCP      |
 
   Scenario Outline: Trap processing without given OID (<protocol> protocol)
-    Given I start and register gateway with <protocol> protocol and polling version model Id 0
+    Given I start and register gateway with <protocol> protocol
     And I create snmp device protocol with JSON
     """
     {
@@ -183,7 +183,7 @@ Feature: Trap-processing scenarios
     | TCP      |
 
   Scenario Outline: Alarm creation if the device is unknown to gateway and do not process trap (<protocol> protocol)
-    Given I start and register gateway with <protocol> protocol and polling version model Id 0
+    Given I start and register gateway with <protocol> protocol
     And I create snmp device protocol with JSON
     """
     {
@@ -226,9 +226,65 @@ Feature: Trap-processing scenarios
     | UDP      |
     | TCP      |
 
+  Scenario: Verify processing of unmatching trap version with device version and update trap version on runtime
+    Given I start and register gateway with UDP protocol
+    And I create snmp device protocol with JSON
+    """
+    {
+        "type": "c8y_ModbusDeviceType",
+        "fieldbusType": "snmp",
+        "name": "Snmp device protocol",
+        "c8y_Global": {},
+        "c8y_IsDeviceType": {},
+        "c8y_Registers": [{
+            "name": "Trap",
+            "measurementMapping": {
+                "type": "c8y_Trap",
+                "series": "T"
+            },
+            "eventMapping": {
+                "type": "c8y_Trap",
+                "text": "Trap event created"
+            },
+            "alarmMapping": {
+                "type": "c8y_Trap",
+                "text": "Trap alarm created",
+                "severity": "WARNING"
+            },
+            "oid": "1.3.6.1.2.1.34.4.0.2"
+        }]
+    }
+    """
+    And I create a snmp device with device protocol "Snmp device protocol", ip "127.0.0.1", port "1025" and version model Id "0"
+    And I add last snmp device as child device to the gateway
+    # Wait 65 seconds because refresh gateway objects job is triggered in 1 minute
+    And I wait for 65 seconds
+
+    When I send UDP trap message with trap version 1 and OId 1.3.6.1.2.1.34.4.0.2
+    And I wait for 5 seconds
+    Then There should be 1 measurement with type "c8y_Trap", fragmentType "c8y_Trap" and series "T" created for snmp device
+    And There should be 1 event with type "c8y_Trap" and text "Trap event created" created for snmp device
+    And There should be an alarm with count 1, type "c8y_Trap", text "Trap alarm created" and severity "WARNING" created for snmp device
+
+    When I update the last snmp device with version model Id "1"
+    # Wait 65 seconds because refresh gateway objects job is triggered in 1 minute
+    And I wait for 65 seconds
+    And I send UDP trap message with trap version 1 and OId 1.3.6.1.2.1.34.4.0.2
+    And I wait for 5 seconds
+    #The objects should not be incremented
+    Then There should be 1 measurement with type "c8y_Trap", fragmentType "c8y_Trap" and series "T" created for snmp device
+    And There should be 1 event with type "c8y_Trap" and text "Trap event created" created for snmp device
+    And There should be an alarm with count 1, type "c8y_Trap", text "Trap alarm created" and severity "WARNING" created for snmp device
+
+    When I send UDP trap message with trap version 2c and OId 1.3.6.1.2.1.34.4.0.2
+    And I wait for 5 seconds
+    Then There should be 2 measurement with type "c8y_Trap", fragmentType "c8y_Trap" and series "T" created for snmp device
+    And There should be 2 event with type "c8y_Trap" and text "Trap event created" created for snmp device
+    And There should be an alarm with count 2, type "c8y_Trap", text "Trap alarm created" and severity "WARNING" created for snmp device
+
   # Reference: https://tools.ietf.org/html/rfc2578#section-7.1.1
   Scenario Outline: Trap processing with different variables types (<variableType> and <protocol> protocol)
-    Given I start and register gateway with <protocol> protocol and polling version model Id 0
+    Given I start and register gateway with <protocol> protocol
     And I create snmp device protocol with JSON
     """
     {
@@ -279,7 +335,7 @@ Feature: Trap-processing scenarios
 
   # Reference: https://tools.ietf.org/html/rfc2578#section-7.1.1
   Scenario Outline: Trap processing with different variables types (v2c supported type) (<variableType> and <protocol> protocol)
-    Given I start and register gateway with <protocol> protocol and polling version model Id 1
+    Given I start and register gateway with <protocol> protocol
     And I create snmp device protocol with JSON
     """
     {
@@ -323,7 +379,7 @@ Feature: Trap-processing scenarios
     | Counter64    | 10          | 10     | TCP      |
 
   Scenario Outline: Trap processing for OctetString only processes event and alarms and not measurements (version 1 and <protocol> protocol)
-    Given I start and register gateway with <protocol> protocol and polling version model Id 0
+    Given I start and register gateway with <protocol> protocol
     And I create snmp device protocol with JSON
     """
     {

@@ -32,7 +32,7 @@ public class SnmpUDPDevice extends SnmpDevice {
     @Override
     protected void initTransportMappings() {
         transportMappings = new TransportMapping[1];
-        Address addr = GenericAddress.parse(address);
+        Address addr = GenericAddress.parse("udp:" + address);
         TransportMapping tm = TransportMappings.getInstance().createTransportMapping(addr);
         transportMappings[0] = tm;
     }
