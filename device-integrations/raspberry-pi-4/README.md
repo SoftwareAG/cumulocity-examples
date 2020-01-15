@@ -18,11 +18,11 @@ The tutorial describes how to install a Cumulocity agent with all relevant drive
 * Use the [PiFace Digital](http://www.element14.com/community/docs/DOC-52857/l/piface-digital-for-raspberry-pi) adapter board from the cloud.
 * Use [TinkerForge](/guides/images/devices/tinkerforge) sensors and controls from the cloud.
 
-> The agent is provided in open source form as-is without support or warranty. For commercial use, we recommend to use industrial hardware and/or the Cumulocity C++ SDK.
+> **Info:** The agent is provided in open source form as-is without support or warranty. For commercial use, we recommend to use industrial hardware and/or the Cumulocity C++ SDK.
 
 ### Prerequisites
 
-There’s a pre-installed OpenJDK Runtime Environment in the Raspbian distribution.  
+There's a pre-installed OpenJDK Runtime Environment in the Raspbian distribution.  
 
 To verify, type
 
@@ -42,12 +42,12 @@ The output of this command contains the serial number in a line like:
 Serial		: 1000000017b769d5
 ```
 
-Write down the number in the line "Serial". You will require this number in a later step when you register the device on the Cumulocity server. 
+Write down the number in the line "Serial". The serial number is the device ID that you will require in a later step when you register the device on the Cumulocity server. 
 
 
 ## Installation and registration
 
-### Installing the Cumulocity Agent
+### Installing the Cumulocity agent
 
 Log in to the Raspberry Pi and install the agent.
 
@@ -59,17 +59,17 @@ $ sudo dpkg -i cumulocity-rpi-agent-latest.deb
 ### Setting up the tenant URL in the cumulocity.properties file
 
 When the Cumulocity agent on the Raspberry Pi connects to the Cumulocity server, it uses the host URL that is defined in the file 
-`/usr/share/cumulocity-rpi-agent/cfg/cumulocity.properties` on the Raspberry Pi. The URL is defined in a line like:
+*/usr/share/cumulocity-rpi-agent/cfg/cumulocity.properties* on the Raspberry Pi. The URL is defined in a line like:
 
 ````shell
-host = https://<YourTenantName>.cumulocity.com"
+host = https://<YourTenantName>.cumulocity.com
 ````
 
 Ensure that you have set up the correct host URL here before proceeding. Here, `<YourTenantName>` is the name of your Cumulocity tenant on the Cumulocity server.
 
 The file is by default read-only, so you need appropriate privileges to edit it. You can, for example, perform the edit with superuser privileges.
 >
-When you have updated `cumulocity.properties`, restart the agent using:
+When you have updated *cumulocity.properties*, restart the agent using:
 
 ````shell
 $ sudo service cumulocity-agent restart
@@ -80,36 +80,32 @@ $ sudo service cumulocity-agent restart
 
 You need to activate the SPI (Serial Peripheral Interface) on the Raspberry Pi, if it is not already activated. You can do this as follows:
 
-1.	On the command line, enter this command to start the `raspi-config tool`:
+1.	On the command line, enter this command to start the raspi-config tool:
 
 ````shell
 sudo raspi-config
 ````
 
-2.	In the tool, select "Interfacing Options", then select the "SPI" option, then select the option to activate the SPI interface.
+2.	In the tool, select **Interfacing Options**, then select the **SPI** option, then select the option to activate the SPI interface.
 
 Alternatively, you can use the desktop method:
 
-1.	Select "Preferences > Raspberry Pi Configuration" from the desktop main menu.
+1.	Select **Preferences > Raspberry Pi Configuration** from the desktop main menu.
 
-2.	Open the tab "Interfaces".
+2.	Open the tab **Interfaces**.
 
-3.	Set "SPI" to "Enabled".
+3.	Set **SPI** to "Enabled".
 
 
 ### Registering the Raspberry Pi on Cumulocity
 
-Open the Cumulocity UI in a web browser. The URL must match the host URL that you defined in the `cumulocity.properties` file on the Raspberry Pi, as described above.
+Open the Cumulocity UI in a web browser. The URL must match the host URL that you defined in the *cumulocity.properties* file on the Raspberry Pi, as described above.
 
-In the UI, open the "Device Management" application and go to the "Devices > Registration" page. Click on "Register Device", and in the dialog, enter the serial number that you wrote down in a previous step. 
+To register the device, follow the general instructions for registration of devices in the section [Device Management > Connecting Devices](https://cumulocity.com/guides/users-guide/device-management/#connecting-devices) of the Cumulocity User Guide. When you follow the instructions, select the option **General device registration**, and use the Raspberry PI's serial number (as described in the [Prerequisites](#prerequisites) section above) as the device ID. 
 
-After this you should see a message saying that the connection was successful. Then, under "Devices > All devices", you should see an entry for your registered device. 
+To view the device in your Cumulocity account, click **All devices** in the **Device** menu in the navigator. By default, the device is displayed as **RaspPi \<hardware model> \<serial number>**. 
 
-If instead your connection request stays in the "pending" state, you may need to check that you have carried out all of the preceding steps correctly. Sometimes you just need to refresh or restart your web browser.
-
-Click on "All devices" to manage the Raspberry Pi. It is by default visible as "RaspPi \<hardware model> \<serial number>". You can edit the name in the "Info" tab.
-
-## Administration of the registered Raspberry Pi on the Cumulocity UI
+## Managing the Raspberry Pi in Cumulocity
 
 After the Raspberry Pi has been successfully registered, you can view the device's status in the Cumulocity UI's standard applications (Device Management, Cockpit and Administration).
 
@@ -133,25 +129,25 @@ The agent permits you to upgrade the firmware of a Raspberry Pi through the [rpi
 
 To configure a firmware version:
 
-* Open Cumulocity and click on "Firmware".
+1. Open the Cumulocity platform and click **Firmware**.
 
-* Click "Add Firmware".
+2. Click **Add Firmware**.
 
-* Enter a name for the firmware. As URL, use the Git hash of the firmware version at https://github.com/Hexxeh/rpi-firmware. To get the Git hash, click on "Commits" and select a particular version there. The hash is the seemingly random set of characters at the end of the URL.
+3. Enter a name for the firmware. As URL, use the Git hash of the firmware version at https://github.com/Hexxeh/rpi-firmware. To get the Git hash, click **Commits** and select a particular version there. The hash is the seemingly random set of characters at the end of the URL.
 
-* Save the firmware version.
+4. Save the firmware version.
 
 To roll out the firmware to a Raspberry Pi:
 
-* Click on the "Software" tab of the Raspberry Pi.
+1. Click the **Software** tab of the Raspberry Pi.
 
-* Click "Install firmware".
+2. Click **Install firmware**.
 
-* Select the firmware version to install.
+3. Select the firmware version to install.
 
-* Click "Install".
+4. Click **Install**.
 
-The Raspberry Pi will install the firmware and will reboot. Go to the "Control" tab to follow the upgrade process. At the next reboot, the firmware should be successfully installed.
+The Raspberry Pi will install the firmware and will reboot. Go to the **Control** tab to follow the upgrade process. At the next reboot, the firmware should be successfully installed.
 
 ## Troubleshooting
 
