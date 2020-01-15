@@ -1,8 +1,8 @@
-# Raspberry Pi 4 Model B
+### Raspberry Pi 4 Model B
 
 -----------------------------------
 
-## Overview
+#### Overview
 
 This tutorial describes how to register a Raspberry Pi 4 Model B device on a remote Cumulocity v10.5 server.
 
@@ -20,7 +20,7 @@ The tutorial describes how to install a Cumulocity agent with all relevant drive
 
 > **Info:** The agent is provided in open source form as-is without support or warranty. For commercial use, we recommend to use industrial hardware and/or the Cumulocity C++ SDK.
 
-### Prerequisites
+##### Prerequisites
 
 There's a pre-installed OpenJDK Runtime Environment in the Raspbian distribution.  
 
@@ -45,9 +45,9 @@ Serial		: 1000000017b769d5
 Write down the number in the line "Serial". The serial number is the device ID that you will require in a later step when you register the device on the Cumulocity server. 
 
 
-## Installation and registration
+#### Installation and registration
 
-### Installing the Cumulocity agent
+##### Installing the Cumulocity agent
 
 Log in to the Raspberry Pi and install the agent.
 
@@ -56,7 +56,7 @@ $ wget http://resources.cumulocity.com/examples/cumulocity-rpi-agent-latest.deb
 $ sudo dpkg -i cumulocity-rpi-agent-latest.deb
 ```
 
-### Setting up the tenant URL in the cumulocity.properties file
+##### Setting up the tenant URL in the cumulocity.properties file
 
 When the Cumulocity agent on the Raspberry Pi connects to the Cumulocity server, it uses the host URL that is defined in the file 
 */usr/share/cumulocity-rpi-agent/cfg/cumulocity.properties* on the Raspberry Pi. The URL is defined in a line like:
@@ -76,7 +76,7 @@ $ sudo service cumulocity-agent restart
 ````
 
 
-### Activating SPI
+##### Activating SPI
 
 You need to activate the SPI (Serial Peripheral Interface) on the Raspberry Pi, if it is not already activated. You can do this as follows:
 
@@ -97,7 +97,7 @@ Alternatively, you can use the desktop method:
 3.	Set **SPI** to "Enabled".
 
 
-### Registering the Raspberry Pi on Cumulocity
+##### Registering the Raspberry Pi on Cumulocity
 
 Open the Cumulocity UI in a web browser. The URL must match the host URL that you defined in the *cumulocity.properties* file on the Raspberry Pi, as described above.
 
@@ -105,7 +105,7 @@ To register the device, follow the general instructions for registration of devi
 
 To view the device in your Cumulocity account, click **All devices** in the **Device** menu in the navigator. By default, the device is displayed as **RaspPi \<hardware model> \<serial number>**. 
 
-## Managing the Raspberry Pi in Cumulocity
+#### Managing the Raspberry Pi in Cumulocity
 
 After the Raspberry Pi has been successfully registered, you can view the device's status in the Cumulocity UI's standard applications (Device Management, Cockpit and Administration).
 
@@ -113,17 +113,17 @@ If you have reached this part of the tutorial successfully, you have the proof-o
 
 The Raspberry Pi by itself delivers only static information, so if you want to view real-time measurements coming from the device, you generally need to attach hardware components that deliver this data, such as  components provided by the third-party suppliers Tinkerforge and PiFace Digital. See the following sections for details. 
 
-## Tinkerforge bricks and bricklets
+#### Tinkerforge bricks and bricklets
 
 The agent supports Tinkerforge devices out of the box, provided the [Tinkerforge daemon for Raspberry Pi](http://www.tinkerforge.com/de/doc/Embedded/Raspberry_Pi.html) is installed.
 
-## PiFace Digital
+#### PiFace Digital
 
 The agent includes a simple [PiFace Digital](http://www.element14.com/community/docs/DOC-52857/l/piface-digital-for-raspberry-pi) driver. The driver will create events when switches are pressed and will react to remote control commands to the relays.
 
 Before using your PiFace Digital make sure you have tested it following the instructions on the [official website](http://www.piface.org.uk/guides/Install_PiFace_Software/). You don't have to go through the whole guide. Following it up to the "Testing your PiFace" part is enough.
 
-## Remote firmware upgrade
+#### Remote firmware upgrade
 
 The agent permits you to upgrade the firmware of a Raspberry Pi through the [rpi-update](https://github.com/Hexxeh/rpi-update) tool. You might want to check from time to time if an upgrade is available.  
 
@@ -145,11 +145,11 @@ To roll out the firmware to a Raspberry Pi:
 
 3. Select the firmware version to install.
 
-4. Click **Install**.
+4.* Click **Install**.
 
 The Raspberry Pi will install the firmware and will reboot. Go to the **Control** tab to follow the upgrade process. At the next reboot, the firmware should be successfully installed.
 
-## Troubleshooting
+#### Troubleshooting
 
 The agent writes debug information to the Pi's syslog. To troubleshoot, for example, connectivity problems, use:
 
