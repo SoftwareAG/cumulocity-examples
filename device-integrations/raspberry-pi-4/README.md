@@ -145,7 +145,7 @@ To roll out the firmware to a Raspberry Pi:
 
 3. Select the firmware version to install.
 
-4.* Click **Install**.
+4. Click **Install**.
 
 The Raspberry Pi will install the firmware and will reboot. Go to the **Control** tab to follow the upgrade process. At the next reboot, the firmware should be successfully installed.
 
