@@ -4,6 +4,7 @@ import net.openhft.chronicle.queue.impl.single.QueueFileShrinkManager;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.Ignore;
 
 import java.io.File;
 import java.io.IOException;
@@ -138,6 +139,7 @@ public class AbstractQueueTest {
         abstractQueueImplForTest.backout(null);
     }
 
+    @Ignore
     @Test
     public void shouldPeekSuccessfully() {
         assertNull(abstractQueueImplForTest.peek());
