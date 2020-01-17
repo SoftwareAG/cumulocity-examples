@@ -81,8 +81,8 @@ Feature: Device poller scenarios
     }
     """
     And I create a snmp device with device protocol "Snmp device protocol", ip "127.0.0.1", port "1025", version model Id "3" and authentication:
-        | username  | privPassword      | authPassword    | authProtocol | privProtocol | securityLevel | engineId         |
-        | adminUser | DESPrivPassword   | MD5AuthPassword | 1            | 4            | 3             | 49:U9:39:900:FJ8 |
+        | username  | privProtocol | privPassword      | authProtocol | authPassword    | securityLevel | engineId         |
+        | adminUser | 1            | DESPrivPassword   | 1            | MD5AuthPassword | 3             | 49:U9:39:900:FJ8 |
     And I add last snmp device as child device to the gateway
     When I run snmp <protocol> simulation device with ip 127.0.0.1 and port 1025
     # Wait 65 seconds because the gatewayObjectRefreshIntervalInMinutes property is set to 1 minute

@@ -11,7 +11,9 @@ import com.cumulocity.sdk.client.inventory.InventoryApi;
 import com.cumulocity.sdk.client.inventory.InventoryFilter;
 
 import cucumber.api.java.en.Given;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class DeviceProtocolSteps {
 
     @Autowired
@@ -21,7 +23,8 @@ public class DeviceProtocolSteps {
     public void createDeviceProtocol(String deviceProtocolJson) {
         ManagedObjectRepresentation deviceProtocolMo = 
                 JSONBase.getJSONParser().parse(ManagedObjectRepresentation.class, deviceProtocolJson);
-        inventoryApi().create(deviceProtocolMo);
+        deviceProtocolMo = inventoryApi().create(deviceProtocolMo);
+        log.info("device protocol created: {}", deviceProtocolMo);
     }
 
     public Optional<ManagedObjectRepresentation> getDeviceProtocolByName(String deviceProtocolName) {

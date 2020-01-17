@@ -43,34 +43,32 @@ public class SnmpDeviceSteps {
     public void createSnmpDevice(String deviceProtocolName, String ipAddress, int port, int version) {
         lastSnmpDevice = inventoryApi().create(
                 snmpDeviceRepresentation(deviceProtocolName, ipAddress, port, version));
+        log.info("snmp device created: {}", lastSnmpDevice);
     }
 
     @Given("^I create a snmp device with device protocol \"(.+)\", ip \"(.+)\", port \"(.+)\", version model Id \"3\" and authentication:$")
     public void createSnmpDeviceV3(String deviceProtocolName, String ipAddress, int port, DataTable authenticationTable) {
         ManagedObjectRepresentation snmpDeviceMo = snmpDeviceRepresentation(deviceProtocolName, ipAddress, port, 3);
-        SnmpDeviceAuthentication auth = new SnmpDeviceAuthentication();
-        List<Map<String, String>> authenticationFields = authenticationTable.asMaps();
-        auth.setUsername(authenticationFields.get(0).get("username"));
-        auth.setAuthPassword(authenticationFields.get(0).get("authPassword"));
-        auth.setPrivPassword(authenticationFields.get(0).get("privPassword"));
-        auth.setAuthProtocol(Integer.parseInt(authenticationFields.get(0).get("authProtocol")));
-        auth.setPrivProtocol(Integer.parseInt(authenticationFields.get(0).get("privProtocol")));
-        auth.setSecurityLevel(Integer.parseInt(authenticationFields.get(0).get("securityLevel")));
-        auth.setEngineId(authenticationFields.get(0).get("engineId"));
+        SnmpDeviceAuthentication auth = getSnmpDeviceAuthentication(authenticationTable);
         snmpDeviceMo.get(SNMPDevice.class).setAuth(auth);
-        log.info("snmp device to create with v3: {}", snmpDeviceMo);
         lastSnmpDevice = inventoryApi().create(snmpDeviceMo);
+        log.info("snmp device created: {}", lastSnmpDevice);
     }
 
     @Given("^I update the last snmp device with version model Id \"(.+)\"$")
     public void updateSnmpDeviceVersion(int version) {
-        ManagedObjectRepresentation snmpDeviceMo = new ManagedObjectRepresentation();
-        SNMPDevice snmpDevice = lastSnmpDevice.get(SNMPDevice.class);
-        snmpDevice.setVersion(version);
-
-        snmpDeviceMo.setId(lastSnmpDevice.getId());
-        snmpDeviceMo.set(snmpDevice);
+        ManagedObjectRepresentation snmpDeviceMo = lastSnmpDeviceRepresentationUpdate(version);
         lastSnmpDevice = inventoryApi().update(snmpDeviceMo);
+        log.info("snmp device updated: {}", lastSnmpDevice);
+    }
+
+    @Given("^I update the last snmp device with version model Id \"3\" and authentication:$")
+    public void updateSnmpDeviceV3(DataTable authenticationTable) {
+        ManagedObjectRepresentation snmpDeviceMo = lastSnmpDeviceRepresentationUpdate(3);
+        SnmpDeviceAuthentication auth = getSnmpDeviceAuthentication(authenticationTable);
+        snmpDeviceMo.get(SNMPDevice.class).setAuth(auth);
+        lastSnmpDevice = inventoryApi().update(snmpDeviceMo);
+        log.info("snmp device updated: {}", lastSnmpDevice);
     }
 
     private ManagedObjectRepresentation snmpDeviceRepresentation(String deviceProtocolName, String ipAddress, int port, int version) {
@@ -86,6 +84,28 @@ public class SnmpDeviceSteps {
         snmpDeviceMo.setName("Snmp Device");
         snmpDeviceMo.setOwner(gatewayRegistration.getGatewayOwner());
         return snmpDeviceMo;
+    }
+
+    private ManagedObjectRepresentation lastSnmpDeviceRepresentationUpdate(int version) {
+        ManagedObjectRepresentation snmpDeviceMo = new ManagedObjectRepresentation();
+        SNMPDevice snmpDevice = lastSnmpDevice.get(SNMPDevice.class);
+        snmpDevice.setVersion(version);
+        snmpDeviceMo.setId(lastSnmpDevice.getId());
+        snmpDeviceMo.set(snmpDevice);
+        return snmpDeviceMo;
+    }
+
+    private SnmpDeviceAuthentication getSnmpDeviceAuthentication(DataTable authenticationTable) {
+        SnmpDeviceAuthentication auth = new SnmpDeviceAuthentication();
+        List<Map<String, String>> authenticationFields = authenticationTable.asMaps();
+        auth.setUsername(authenticationFields.get(0).get("username"));
+        auth.setAuthPassword(authenticationFields.get(0).get("authPassword"));
+        auth.setPrivPassword(authenticationFields.get(0).get("privPassword"));
+        auth.setAuthProtocol(Integer.parseInt(authenticationFields.get(0).get("authProtocol")));
+        auth.setPrivProtocol(Integer.parseInt(authenticationFields.get(0).get("privProtocol")));
+        auth.setSecurityLevel(Integer.parseInt(authenticationFields.get(0).get("securityLevel")));
+        auth.setEngineId(authenticationFields.get(0).get("engineId"));
+        return auth;
     }
 
     @Given("^I add last snmp device as child device to the gateway$")

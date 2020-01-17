@@ -122,9 +122,10 @@ Feature: Trap-processing scenarios
     }
     """
     And I create a snmp device with device protocol "Snmp device protocol", ip "127.0.0.1", port "1025", version model Id "3" and authentication:
-        | username | privPassword      | authPassword   | authProtocol | privProtocol | securityLevel | engineId         |
-        | username | privacypassphrase | authpassphrase | 1            | 4            | 3             | 49:U9:39:900:FJ8 |
+        | username | authProtocol | authPassword   | privProtocol | privPassword      | securityLevel | engineId         |
+        | username | 1            | authpassphrase | 2            | privacypassphrase | 3             | 49:U9:39:900:FJ8 |
     And I add last snmp device as child device to the gateway
+    And I set snmp gateway configuration with ipRange 127.0.0.1, autoDiscoveryInterval 5 and polling rate 120
     # Wait 65 seconds because refresh gateway objects job is triggered in 1 minute
     And I wait for 65 seconds
     And I send <protocol> trap message with trap version 3 and OId 1.3.6.1.2.1.34.4.0.2
@@ -137,6 +138,48 @@ Feature: Trap-processing scenarios
     | protocol |
     | UDP      |
     | TCP      |
+
+  Scenario: Device with version 3 and invalid authentication password setting and trap processing
+    Given I start and register gateway with UDP protocol
+    And I create snmp device protocol with JSON
+    """
+    {
+        "type": "c8y_ModbusDeviceType",
+        "fieldbusType": "snmp",
+        "name": "Snmp device protocol",
+        "c8y_Global": {},
+        "c8y_IsDeviceType": {},
+        "c8y_Registers": [{
+            "name": "Trap",
+            "measurementMapping": {
+                "type": "c8y_Trap",
+                "series": "T"
+            },
+            "eventMapping": {
+                "type": "c8y_Trap",
+                "text": "Trap event created"
+            },
+            "alarmMapping": {
+                "type": "c8y_Trap",
+                "text": "Trap alarm created",
+                "severity": "WARNING"
+            },
+            "oid": "1.3.6.1.2.1.34.4.0.2"
+        }]
+    }
+    """
+    And I create a snmp device with device protocol "Snmp device protocol", ip "127.0.0.1", port "1025", version model Id "3" and authentication:
+        | username | authProtocol | authPassword          | privProtocol | privPassword      | securityLevel | engineId         |
+        | username | 1            | authpassphraseInvalid | 2            | privacypassphrase | 3             | 49:U9:39:900:FJ8 |
+    And I add last snmp device as child device to the gateway
+    And I set snmp gateway configuration with ipRange 127.0.0.1, autoDiscoveryInterval 5 and polling rate 120
+    # Wait 65 seconds because refresh gateway objects job is triggered in 1 minute
+    And I wait for 65 seconds
+    And I send UDP trap message with trap version 3 and OId 1.3.6.1.2.1.34.4.0.2
+    And I wait for 5 seconds
+    Then There should be 0 measurement with type "c8y_Trap", fragmentType "c8y_Trap" and series "T" created for snmp device
+    And There should be 0 event with type "c8y_Trap" and text "Trap event created" created for snmp device
+    And There should be no alarm with type "c8y_Trap" and text "Trap alarm created" created for snmp device
 
   Scenario Outline: Trap processing without given OID (<protocol> protocol)
     Given I start and register gateway with <protocol> protocol
@@ -266,17 +309,20 @@ Feature: Trap-processing scenarios
     And There should be 1 event with type "c8y_Trap" and text "Trap event created" created for snmp device
     And There should be an alarm with count 1, type "c8y_Trap", text "Trap alarm created" and severity "WARNING" created for snmp device
 
-    When I update the last snmp device with version model Id "1"
+    Given I update the last snmp device with version model Id "3" and authentication:
+        | username | authProtocol | authPassword   | privProtocol | privPassword      | securityLevel | engineId         |
+        | username | 1            | authpassphrase | 2            | privacypassphrase | 3             | 49:U9:39:900:FJ8 |
+    And I set snmp gateway configuration with ipRange 127.0.0.1, autoDiscoveryInterval 5 and polling rate 120
     # Wait 65 seconds because refresh gateway objects job is triggered in 1 minute
     And I wait for 65 seconds
-    And I send UDP trap message with trap version 1 and OId 1.3.6.1.2.1.34.4.0.2
+    When I send UDP trap message with trap version 1 and OId 1.3.6.1.2.1.34.4.0.2
     And I wait for 5 seconds
-    #The objects should not be incremented
+    # The output objects count should not be incremented
     Then There should be 1 measurement with type "c8y_Trap", fragmentType "c8y_Trap" and series "T" created for snmp device
     And There should be 1 event with type "c8y_Trap" and text "Trap event created" created for snmp device
     And There should be an alarm with count 1, type "c8y_Trap", text "Trap alarm created" and severity "WARNING" created for snmp device
 
-    When I send UDP trap message with trap version 2c and OId 1.3.6.1.2.1.34.4.0.2
+    When I send UDP trap message with trap version 3 and OId 1.3.6.1.2.1.34.4.0.2
     And I wait for 5 seconds
     Then There should be 2 measurement with type "c8y_Trap", fragmentType "c8y_Trap" and series "T" created for snmp device
     And There should be 2 event with type "c8y_Trap" and text "Trap event created" created for snmp device
