@@ -309,6 +309,13 @@ Feature: Trap-processing scenarios
     And There should be 1 event with type "c8y_Trap" and text "Trap event created" created for snmp device
     And There should be an alarm with count 1, type "c8y_Trap", text "Trap alarm created" and severity "WARNING" created for snmp device
 
+    When I send UDP trap message with trap version 3 and OId 1.3.6.1.2.1.34.4.0.2
+    And I wait for 5 seconds
+    # The output objects count should not be incremented
+    Then There should be 1 measurement with type "c8y_Trap", fragmentType "c8y_Trap" and series "T" created for snmp device
+    And There should be 1 event with type "c8y_Trap" and text "Trap event created" created for snmp device
+    And There should be an alarm with count 1, type "c8y_Trap", text "Trap alarm created" and severity "WARNING" created for snmp device
+
     Given I update the last snmp device with version model Id "3" and authentication:
         | username | authProtocol | authPassword   | privProtocol | privPassword      | securityLevel | engineId         |
         | username | 1            | authpassphrase | 2            | privacypassphrase | 3             | 49:U9:39:900:FJ8 |
@@ -317,16 +324,15 @@ Feature: Trap-processing scenarios
     And I wait for 65 seconds
     When I send UDP trap message with trap version 1 and OId 1.3.6.1.2.1.34.4.0.2
     And I wait for 5 seconds
-    # The output objects count should not be incremented
-    Then There should be 1 measurement with type "c8y_Trap", fragmentType "c8y_Trap" and series "T" created for snmp device
-    And There should be 1 event with type "c8y_Trap" and text "Trap event created" created for snmp device
-    And There should be an alarm with count 1, type "c8y_Trap", text "Trap alarm created" and severity "WARNING" created for snmp device
-
-    When I send UDP trap message with trap version 3 and OId 1.3.6.1.2.1.34.4.0.2
-    And I wait for 5 seconds
     Then There should be 2 measurement with type "c8y_Trap", fragmentType "c8y_Trap" and series "T" created for snmp device
     And There should be 2 event with type "c8y_Trap" and text "Trap event created" created for snmp device
     And There should be an alarm with count 2, type "c8y_Trap", text "Trap alarm created" and severity "WARNING" created for snmp device
+
+    When I send UDP trap message with trap version 3 and OId 1.3.6.1.2.1.34.4.0.2
+    And I wait for 5 seconds
+    Then There should be 3 measurement with type "c8y_Trap", fragmentType "c8y_Trap" and series "T" created for snmp device
+    And There should be 3 event with type "c8y_Trap" and text "Trap event created" created for snmp device
+    And There should be an alarm with count 3, type "c8y_Trap", text "Trap alarm created" and severity "WARNING" created for snmp device
 
   # Reference: https://tools.ietf.org/html/rfc2578#section-7.1.1
   Scenario Outline: Trap processing with different variables types (<variableType> and <protocol> protocol)
