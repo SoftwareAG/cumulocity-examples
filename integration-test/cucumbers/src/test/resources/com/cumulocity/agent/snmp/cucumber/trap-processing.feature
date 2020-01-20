@@ -377,11 +377,9 @@ Feature: Trap-processing scenarios
   Examples:
     | variableType | variableVal | result | protocol |
     | Integer32    | 10          | 10     | UDP      |
-    | OctetString  | 1011        | 1011   | UDP      |
     | Counter32    | 12          | 12     | UDP      |
     | TimeTicks    | 13          | 0.13   | UDP      |
     | Integer32    | 10          | 10     | TCP      |
-    | OctetString  | 1011        | 1011   | TCP      |
     | Counter32    | 12          | 12     | TCP      |
     | TimeTicks    | 13          | 0.13   | TCP      |
 
