@@ -2,6 +2,9 @@
 
 Microservices applications are contained here and they are documented on the online documentation (refer to [Examples](https://cumulocity.com/guides/microservice-sdk/http/) in the Microservice SDK guide).
 
+In "scripts" directory there is also available microservice utility tool.
+Which is documented in [ms-utility-tool](https://cumulocity.com/guides/microservice-sdk/concept/#ms-utility-tool) 
+
 The current examples of microservice applications are:
 
 #### sample-python-microservice
