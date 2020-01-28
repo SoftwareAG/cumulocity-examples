@@ -6,7 +6,7 @@
     <parent>
         <groupId>c8y.agents</groupId>
         <artifactId>snmp-integration-test</artifactId>
-        <version>1005.12.0-SNAPSHOT</version>
+        <version>1005.12.0</version>
     </parent>
     <artifactId>snmp-cucumbers</artifactId>
     <name>Cumulocity :: Agents :: SNMP Agent :: Integration Tests :: Cucumbers</name>
