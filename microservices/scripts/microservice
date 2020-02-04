@@ -1,0 +1,327 @@
+#!/bin/bash
+
+WORK_DIR=$(pwd)
+IMAGE_NAME=
+TAG_NAME="latest"
+DEPLOY_ADDRESS=
+DEPLOY_TENANT=
+DEPLOY_USER=
+DEPLOY_PASSWORD=
+APPLICATION_NAME=
+APPLICATION_ID=
+
+PACK=1
+DEPLOY=1
+SUBSCRIBE=1
+HELP=1
+
+
+execute () {
+	set -e
+	readInput $@
+	cd $WORK_DIR
+	if [ "$HELP" == "0" ]
+	then
+		printHelp
+		exit
+	fi
+	if [ "$PACK" == "1" ] && [ "$DEPLOY" == "1" ] && [ "$SUBSCRIBE" == "1" ]
+	then
+		echo "[INFO] No goal set. Please set pack, deploy or subscribe"
+	fi
+	if [ "$PACK" == "0" ]
+	then 
+		echo "[INFO] Start packaging"
+		verifyPackPrerequisits
+		clearTarget
+		buildImage
+		exportImage
+		zipFile
+		echo "[INFO] End packaging"
+	fi
+	if [ "$DEPLOY" == "0" ]
+	then
+		echo "[INFO] Start deployment"
+		deploy
+		echo "[INFO] End deployment"
+	fi
+	if [ "$SUBSCRIBE" == "0" ]
+	then
+		echo "[INFO] Start subscription"
+		subscribe
+		echo "[INFO] End subscription"
+	fi
+	exit 0
+}
+
+readInput () {
+	echo "[INFO] Read input"
+	while [[ $# -gt 0 ]]
+	do
+	key="$1"
+	case $key in
+		pack)
+		PACK=0
+		shift
+		;;	
+		deploy)
+		DEPLOY=0
+		shift
+		;;
+		subscribe)
+		SUBSCRIBE=0
+		shift
+		;;
+		help | --help)
+		HELP=0
+		shift
+		;;
+		-dir | --directory)
+		WORK_DIR=$2
+		shift
+		shift
+		;;
+		-n | --name)
+		IMAGE_NAME=$2
+		shift
+		shift
+		;;
+		-t | --tag)
+		TAG_NAME=$2
+		shift
+		shift
+		;;
+		-d | --deploy)
+		DEPLOY_ADDRESS=$2
+		shift
+		shift
+		;;
+		-u | --user)
+		DEPLOY_USER=$2
+		shift
+		shift
+		;;
+		-p | --password)
+		DEPLOY_PASSWORD=$2
+		shift
+		shift
+		;;
+		-te | --tenant)
+		DEPLOY_TENANT=$2
+		shift
+		shift
+		;;
+		-a | --application)
+		APPLICATION_NAME=$2
+		shift
+		shift
+		;;
+		-id | --applicationId)
+		APPLICATION_ID=$2
+		shift
+		shift
+		;;
+		*)
+		shift
+		;;
+	esac
+	done
+	setDefaults
+}
+
+setDefaults () {
+	ZIP_NAME="$IMAGE_NAME.zip"
+	if [ "x$APPLICATION_NAME" == "x" ]
+	then 
+		APPLICATION_NAME=$IMAGE_NAME
+	fi	
+}
+
+printHelp () {
+	echo
+	echo "Following functions are available. You can specify them in single execution:"
+	echo "	pack - prepares deployable zip file. Requires following stucture:"
+	echo "		/docker/Dockerfile"
+	echo "		/docker/* - all files within the directory will be included in the docker build"
+	echo "		/cumulocity.json "
+	echo "	deploy - deploys application to specified address"
+	echo "	subscribe - subscribes tenant to specified microservice application"
+	echo "	help | --help - prints help"
+	echo 
+	echo "Following options are available:"
+	echo "	-dir | --directory 		# Working directory. Default value'$(pwd)' "
+	echo "	-n   | --name 	 		# Docker image name"
+	echo "	-t   | --tag			# Docker tag. Default value 'latest'"
+	echo "	-d   | --deploy			# Address of the platform the microservice will be uploaded to"	
+	echo "	-u   | --user			# Username used for authentication to the platform"
+	echo "	-p   | --password 		# Password used for authentication to the platform"
+	echo "	-te  | --tenant			# Tenant used"
+	echo "	-a   | --application 	# Name upon which the application will be registered on the platform. Default value from --name parameter"
+	echo "	-id  | --applicationId	# Application used for subscription purposes. Required only for solemn subscribe execution"
+}
+
+verifyPackPrerequisits () {
+	echo "[INFO] Check input"
+	result=0
+	verifyParamSet "$IMAGE_NAME" "name"
+	isPresent $(find -maxdepth 1 -name "docker" | wc -l) "[ERROR] Stopped: missing docker directory in work directory: $WORK_DIR"
+	isPresent $(find docker -maxdepth 1 -name "Dockerfile" | wc -l) "[ERROR] Stopped: missing dockerfile in work directory: $WORK_DIR"
+	isPresent $(find -maxdepth 1 -name "cumulocity.json" | wc -l) "[ERROR] Stopped: missing cumulocity.json in work directory: $WORK_DIR"
+
+	if [ "$result" == "1" ]
+	then
+		echo "[WARNING] Pack skiped"
+		exit 1
+	fi
+}
+
+isPresent () {
+	present=$1
+	if [ "$present" != "1" ]
+	then
+		echo $2
+		result=1
+	fi
+}
+
+clearTarget () {
+    set +e
+	echo "[INFO] Clear target files"
+	[ -e "image.tar" ] && rm "image.tar"
+	[ -e "$ZIP_NAME" ] && rm "$ZIP_NAME"
+    set -e
+}
+
+buildImage () {
+	cd docker
+	echo "[INFO] Build image $IMAGE_NAME:$TAG_NAME"
+	docker build -t $IMAGE_NAME:$TAG_NAME .
+	cd ..
+}
+
+exportImage () {
+	echo "[INFO] Export image"
+	docker save $IMAGE_NAME:$TAG_NAME > "image.tar"
+}
+
+zipFile () {
+	echo "[INFO] Zip file $ZIP_NAME"
+	zip $ZIP_NAME cumulocity.json "image.tar"
+}
+
+deploy (){
+	verifyDeployPrerequisits
+	push
+}
+
+verifyDeployPrerequisits () {
+	result=0
+	verifyParamSet "$IMAGE_NAME" "name"
+	verifyParamSet "$DEPLOY_ADDRESS" "address"
+	verifyParamSet "$DEPLOY_TENANT" "tenant"
+	verifyParamSet "$DEPLOY_USER" "user"
+	verifyParamSet "$DEPLOY_PASSWORD" "password"
+
+	if [ "$result" == "1" ]
+	then
+		echo "[WARNING] Deployment skipped"
+		exit 1
+	fi
+}
+
+verifyParamSet (){
+	if [ "x$1" == "x" ]
+	then
+		echo "[WARNING] Missing parameter: $2"
+		result=1
+	fi
+}
+
+push (){
+	authorization="Basic $(echo -n "$DEPLOY_USER:$DEPLOY_PASSWORD" | base64)"
+
+	getApplicationId
+	if [ "x$APPLICATION_ID" == "xnull" ]
+	then
+		echo "[INFO] Application with name $APPLICATION_NAME not found, add new application"
+		createApplication $authorization
+		getApplicationId
+		if [ "x$APPLICATION_ID" == "xnull" ]
+		then
+			echo "[ERROR] Could not create application"
+			exit 1
+		fi
+	fi
+	echo "[INFO] Application name: $APPLICATION_NAME id: $APPLICATION_ID"
+
+	uploadFile
+}
+
+readResponse() {
+    HTTP_CODE=$(echo $resp | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
+	resp=$(echo $resp | sed -e 's/HTTPSTATUS\:.*//g')
+	if [ "$1" == "ignore409" ] && [ "$HTTP_CODE" == "409" ];
+	then
+        return
+    else
+	exitOnErrorInBackendResponse
+    fi
+}
+
+getApplicationId () {
+	resp=$(curl -w "HTTPSTATUS:%{http_code}" -s -S -H "Authorization: $authorization" "$DEPLOY_ADDRESS/application/applicationsByName/$APPLICATION_NAME")
+	readResponse
+	APPLICATION_ID=$(echo $resp | jq -r .applications[0].id)
+}
+
+createApplication () {
+	body="{
+			\"name\": \"$APPLICATION_NAME\",
+			\"type\": \"MICROSERVICE\",
+			\"key\": \"$APPLICATION_NAME-microservice-key\"
+		}
+	"
+	resp=$(curl -w "HTTPSTATUS:%{http_code}" -X POST -s -S -d "$body" -H "Authorization: $authorization"  -H "Content-type: application/json" "$DEPLOY_ADDRESS/application/applications")
+	readResponse
+}
+
+
+exitOnErrorInBackendResponse() {
+	RESPONSE_ERROR=$(echo $resp | jq -r .error)
+	if [ "x$RESPONSE_ERROR" != "xnull" ] && [ "x$RESPONSE_ERROR" != "x" ]
+	then
+		echo "[ERROR] Error while communicating with platform. Error message: $(echo $resp | jq -r .message)"
+		echo "[ERROR] Full response: $resp"
+		echo "[ERROR] HTTP CODE: $HTTP_CODE"
+		exit 1
+	fi
+}
+
+uploadFile () {
+	echo "[INFO] Upload file $WORK_DIR/$ZIP_NAME"
+	resp=$(curl -w "HTTPSTATUS:%{http_code}" -F "data=@$WORK_DIR/$ZIP_NAME" -H "Authorization: $authorization"  "$DEPLOY_ADDRESS/application/applications/$APPLICATION_ID/binaries")
+	readResponse
+	echo "[INFO] File uploaded"
+}
+
+subscribe () {
+	verifySubscribePrerequisits
+	authorization="Basic $(echo -n "$DEPLOY_USER:$DEPLOY_PASSWORD" | base64)"
+
+	echo "[INFO] Tenant $DEPLOY_TENANT subscription to application $APPLICATION_NAME with id $APPLICATION_ID"
+	body="{\"application\":{\"id\": \"$APPLICATION_ID\"}}"
+	resp=$(curl -w "HTTPSTATUS:%{http_code}" -X POST -s -S -d "$body"  -H "Authorization: $authorization"  -H "Content-type: application/json" "$DEPLOY_ADDRESS/tenant/tenants/$DEPLOY_TENANT/applications")
+	readResponse ignore409
+	echo "[INFO] Tenant $DEPLOY_TENANT subscribed to application $APPLICATION_NAME"
+}
+
+verifySubscribePrerequisits () {
+	if [ "x$APPLICATION_ID" == "x" ]
+	then
+		echo "[ERROR] Subscription not possible, unknown applicationId"
+		exit 1
+	fi
+	verifyDeployPrerequisits
+}
+
+execute $@
