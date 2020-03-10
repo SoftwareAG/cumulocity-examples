@@ -7,7 +7,7 @@
     <parent>
         <groupId>c8y.agents</groupId>
         <artifactId>snmp-agent</artifactId>
-        <version>1006.2.1-SNAPSHOT</version>
+        <version>1006.3.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>snmp-integration-test</artifactId>
