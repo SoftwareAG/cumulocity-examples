@@ -84,10 +84,10 @@ pipeline {
                 }
 
             }
-            steps {
+             steps {
                 echo "wait for lock on deploy2yum.sh"
                 lock('deploy2yum') {
-                    sshagent(['jenkins-hg-key']) {
+                    sshagent(['jenkins-master-key']) {
                         withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
                             sh "chmod +x .jenkins/scripts/deploy.sh && .jenkins/scripts/deploy.sh snapshot"
                         }
@@ -114,7 +114,8 @@ pipeline {
                         equals expected: 'RELEASE', actual: params.build_type
                     }
                     steps {
-                        withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
+                        withCredentials([usernamePassword(credentialsId: 'bitbucket-m2m', passwordVariable: 'BITBUCKET_PASSWORD', usernameVariable: 'BITBUCKET_USER'),
+                                        file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
                             sh "chmod +x .jenkins/scripts/prepare_release.sh && .jenkins/scripts/prepare_release.sh ${params.release_version}"
                         }
                     }
@@ -129,10 +130,10 @@ pipeline {
                     steps {
                         echo "wait for lock on deploy2yum.sh"
                         lock('deploy2yum') {
-                            sshagent(['jenkins-hg-key']) {
+                            sshagent(['jenkins-master-key']) {
                                 withCredentials([usernamePassword(credentialsId: 'bitbucket-m2m', passwordVariable: 'BITBUCKET_PASSWORD', usernameVariable: 'BITBUCKET_USER'),
                                                  file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
-                                    sh "chmod +x .jenkins/scripts/release.sh && .jenkins/scripts/release.sh -r ${params.release_version} -d ${params.hotfix_version}"
+                                    sh "chmod +x .jenkins/scripts/release.sh && .jenkins/scripts/release.sh -r ${params.release_version} -d ${params.hotfix_version} -b ${env.BRANCH_NAME}"
                                 }
                             }
                         }
@@ -192,5 +193,17 @@ pipeline {
                 sh "chmod +x .jenkins/scripts/status.sh && .jenkins/scripts/status.sh 'FAILED' ${JOB_NAME} ${BUILD_TAG} "
             }
         }
+        cleanup {
+              /* clean up workspace */
+              deleteDir()
+               /* clean up tmp directory */
+              dir("${workspace}@tmp") {
+                  deleteDir()
+              }
+                /* clean up script directory */
+              dir("${workspace}@script") {
+                        deleteDir()
+              }
+         }
     }
 }
