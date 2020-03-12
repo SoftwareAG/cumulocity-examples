@@ -2,11 +2,20 @@
 
 release_version=$1
 
-echo "equivalent of hg flow release finish r${release_version}"
-hg pull -r develop
-hg commit --message "flow: Closed <release> ${release_version}" --close-branch
-hg update develop
-hg merge --tool internal:other release/r${release_version}
-hg commit --message "flow: Merged <release> r${release_version} to <develop> (develop)."
-hg push --new-branch -b release/r${release_version} https://${BITBUCKET_USER}:${BITBUCKET_PASSWORD}@bitbucket.org/m2m/cumulocity-examples
-hg push -b develop https://${BITBUCKET_USER}:${BITBUCKET_PASSWORD}@bitbucket.org/m2m/cumulocity-examples
+echo "equivalent of git flow release finish r${release_version}"
+
+echo "git checkout develop; git pull..."
+git checkout develop
+git pull https://${BITBUCKET_USER}:${BITBUCKET_PASSWORD}@bitbucket.org/m2m/cumulocity-examples
+
+echo "git merge"
+git merge -s recursive -Xtheirs release/r${release_version}
+
+echo "git commit merged information"
+git add -A
+git commit --allow-empty --message "flow: Merged <release> r${release_version} to <develop> (develop)."
+
+echo "git push to release/r${release_version}"
+git push https://${BITBUCKET_USER}:${BITBUCKET_PASSWORD}@bitbucket.org/m2m/cumulocity-examples release/r${release_version}
+echo "git push to develop"
+git push https://${BITBUCKET_USER}:${BITBUCKET_PASSWORD}@bitbucket.org/m2m/cumulocity-examples develop
