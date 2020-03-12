@@ -78,7 +78,7 @@ pipeline {
                 allOf {
                     equals expected: 'DEFAULT', actual: params.build_type
                     anyOf {
-                        branch 'release */**';
+                        branch 'release/**';
                         branch 'develop'
                     }
                 }
