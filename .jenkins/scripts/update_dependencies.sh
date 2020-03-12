@@ -14,7 +14,7 @@ function update-dependencies {
         update-property $property ${1}
     done
     if [ "$2" != "no-commit" ]; then
-        hg commit -m "Update dependencies to new version"
+        git commit -am "Update dependencies to new version"
     fi
 
 }
