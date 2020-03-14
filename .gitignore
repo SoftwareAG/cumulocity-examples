@@ -3,6 +3,7 @@ target/
 bin/
 *.iml
 *.orig
+*.versionsBackup
 cucumber.html
 dependency-reduced-pom.xml
 java-agent/jv-agent/cfg/

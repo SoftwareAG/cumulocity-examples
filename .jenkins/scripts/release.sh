@@ -9,6 +9,9 @@ while [ "$1" != "" ]; do
         -d | --development )    shift
                                 next_version=$1
                                 ;;
+        -b )                    shift
+                                current_branch=$1
+                                ;;
         *)                      ;;
     esac
     shift
@@ -16,20 +19,25 @@ done
 
 function tag-version {
     tag=$1
-    hg commit -m "[maven-release-plugin] prepare release ${tag}" || echo ""
-    hg tag -f -m "copy for tag ${tag}" "${tag}"
+    git commit --allow-empty -am "[maven-release-plugin] prepare release ${tag}" || echo ""
+    git tag -f -m "copy for tag ${tag}" -a "${tag}"
 }
 
 ./mvnw clean -T 4
 
-branch_name=$(hg branch)
-if [ "!develop" == "!branch_name" ]; then
-    branch_name="release/r${version}"
+echo "obtain current branch name"
+
+if [ "develop" == "${current_branch}" ]; then
+  branch_name="release/r${version}"
+else
+  branch_name=$current_branch
 fi
+
 echo "branch name: $branch_name"
+git checkout ${branch_name}
 
-hg up -C ${branch_name}
-
+echo "pull latest changes from the branch ${branch_name}"
+git pull https://${BITBUCKET_USER}:${BITBUCKET_PASSWORD}@bitbucket.org/m2m/cumulocity-examples ${branch_name}
 
 echo "Update version to ${version}"
 ./mvnw versions:set -DnewVersion=${version}
@@ -61,8 +69,8 @@ cd hello-world-microservice
 ../mvnw versions:set -DnewVersion=${next_version} -DgenerateBackupPoms=false -s $MVN_SETTINGS
 cd ..
 
-hg commit -m "[maven-release-plugin] prepare for next development iteration"
+git commit --allow-empty -am "[maven-release-plugin] prepare for next development iteration"
 
-branch_name=$(hg branch)
-hg push -r${branch_name} https://${BITBUCKET_USER}:${BITBUCKET_PASSWORD}@bitbucket.org/m2m/cumulocity-examples --new-branch
+git push https://${BITBUCKET_USER}:${BITBUCKET_PASSWORD}@bitbucket.org/m2m/cumulocity-examples ${branch_name}
+git push https://${BITBUCKET_USER}:${BITBUCKET_PASSWORD}@bitbucket.org/m2m/cumulocity-examples ${tag}
 
