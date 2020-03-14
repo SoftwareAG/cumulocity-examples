@@ -2,7 +2,7 @@
 
 
 function update-status {
-    commitId=${MERCURIAL_REVISION}
+    commitId=${GIT_COMMIT}
     status=${1}
     name=${2}
     key=$( echo $3 | rev | cut -c -40 | rev )
@@ -10,4 +10,4 @@ function update-status {
     echo $(curl -s --user ${BITBUCKET_USER}:${BITBUCKET_PASSWORD} -H "Content-Type: application/json" -X POST https://api.bitbucket.org/2.0/repositories/m2m/cumulocity-examples/commit/${commitId}/statuses/build --data "{\"state\":\"${status}\", \"name\": \"${name}\", \"key\": \"${key}\", \"url\": \"http://localhost:8081/job/cumulocity-examples/job/${BRANCH_NAME}/${BUILD_ID}/\", \"description\": \"\" }")
 }
 
-update-status $1 $2 $3 
+update-status $1 $2 $3
