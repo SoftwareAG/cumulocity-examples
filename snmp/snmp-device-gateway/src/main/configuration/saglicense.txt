@@ -1,0 +1,979 @@
+LEGAL NOTICES
+(ALLv201901)
+        
+This notice is valid for all products, product lines and associated products
+of Software AG comprising software, documentation, user manuals and other
+related materials in tangible or electronic form (the "Product").
+
+IMPORTANT: YOU SHOULD READ THE FOLLOWING TERMS AND CONDITIONS CAREFULLY BEFORE 
+INSTALLING OR USING ANY RELEVANT SOFTWARE AG SOFTWARE TO WHICH THESE TERMS AND 
+CONDITIONS APPLY ('SOFTWARE'). 
+THE INSTALLATION AND/OR USE BY YOU OF ANY SOFTWARE WILL INDICATE YOUR ACCEPTANCE 
+OF THESE TERMS AND CONDITIONS. 
+YOU HEREBY REPRESENT AND WARRANT, THAT YOU HAVE AUTHORITY TO ACT AND ENTER INTO 
+A BINDING AGREEMENT ON BEHALF OF YOUR COMPANY ('CUSTOMER') IN DEALING WITH THE 
+RELEVANT SOFTWARE AG SUBSIDIARY OR DISTRIBUTOR ('SUPPLIER'). IF YOU DO NOT AGREE 
+WITH THESE TERMS AND CONDITIONS, YOU SHOULD NOT PROCEED WITH THE INSTALLATION OF 
+THE SOFTWARE AND, INSTEAD, RETURN THE SOFTWARE AND ANY ASSOCIATED DOCUMENTATION 
+AND ALL COPIES THEREOF TO SUPPLIER.
+ 
+Table of content: 
+
+PART A: GENERAL TERMS
+PART B: ADDITIONAL TERMS COMMERCIAL LICENSE
+PART C: SOFTWARE AG LICENSE AGREEMENT FOR WEBMETHODS PARTNER SERVERS ONLY
+PART D: SOFTWARE AG EVALUATION LICENSE AGREEMENT FOR TRIAL VERSIONS OF 
+SOFTWARE AG PRODUCT ONLY
+PART E: SOFTWARE AG LIMITED USE LICENSE AGREEMENT FOR FREEMIUM VERSIONS OF
+SOFTWARE AG PRODUCTS ONLY
+PART F: SOFTWARE AG LICENSE AGREEMENT FOR PRE-DELIVERY VERSIONS OF
+SOFTWARE AG PRODUCTS ONLY
+PART G: PRODUCT SPECIFIC TERMS for Adabas, Natural and NaturalONE Community
+Editions
+PART G: PRODUCT SPECIFIC TERMS for Tamino
+PART G: PRODUCT SPECIFIC TERMS for CentraSite
+PART G: PRODUCT SPECIFIC TERMS for Universal Messaging
+PART G: PRODUCT SPECIFIC TERMS for Terracotta
+PART G: PRODUCT SPECIFIC TERMS for Apama Sample Files
+PART G: PRODUCT SPECIFIC TERMS for Apama Core Community Edition
+PART G: PRODUCT SPECIFIC TERMS for MashZone NextGen
+PART G: PRODUCT SPECIFIC TERMS for EntireX 
+Part G: PRODUCT SPECIFIC TERMS for NaturalONE and the Natural Development Server
+
+
+PART A: GENERAL TERMS
+
+You are not allowed to install or use the Product without a corresponding
+license agreement.
+
+If you have entered into a commercial license agreement with one of
+Software AG's subsidiaries or distributors ("Commercial License Agreement")
+the installation and use of the Product is subject to your acceptance of
+additional terms which are provided for you in "Part B: Additional Terms".
+
+If you have not entered into a Commercial License Agreement and you have
+been granted access to a webMethods Partner Server by a sponsoring company
+that has licensed a Software AG webMethods solution, you must execute the
+license agreement with Software AG which is provided for you in "Part C:
+Software AG License Agreement for webMethods Partner Servers Only"
+
+If you have not entered into a Commercial License Agreement and you are
+not using a webMethods Partner Server pursuant to Part C, you must execute
+the license agreement with Software AG which is provided for you in Part D
+"Software AG Evaluation License Agreement for Trial Versions of Software AG
+Products" or Part E "Software AG Limited Use License Agreement for Freemium
+Version of Software AG Products" or Part F License Agreement for Pre-
+Delivery Versions of Software AG Products.
+
+COPYRIGHT AND TRADEMARK NOTICE
+
+The name Software AG and all Software AG product names are either trademarks
+or registered trademarks of Software AG and/or Software AG USA Inc. and/or its
+subsidiaries and/or its affiliates  and/or their licensors.
+
+Other company and product names mentioned herein may be trademarks of their
+respective owners 
+
+Software AG or its subsidiaries are the sole owner of all intellectual
+property rights to the Products and accompanying user documentation or have
+the respective distribution rights. References made in or on the Products to
+the copyright and/or to the industrial property rights must not be altered,
+deleted or obliterated in any manner.
+
+No right, title or interest in any trademark or trade names of Software AG
+or its subsidiaries or its licensors is granted hereunder.
+
+(c) Copyright 2019 Software AG, Darmstadt, Germany and/or Software AG USA
+Inc., Reston, VA, USA and/or its subsidiaries and/or its affiliates and/or
+their licensors.
+
+PART B: ADDITIONAL TERMS COMMERCIAL LICENSE
+
+The Commercial License Agreement does not grant you the right to sublicense,
+rent, assign or lease the software, in whole or in part, and you may not
+decompile, disassemble, modify, decrypt, extract or otherwise reverse engineer,
+or make further copies of the software, except as explicitly permitted by
+the Commercial License Agreement.
+
+The software is designed for general office use. It is not designed or
+intended for use in air traffic control, mass transit systems, critical
+medical purposes, the operation of nuclear facilities or any other use which
+could result in a high risk of safety or property damage. You warrant that
+you will not use the software for such purposes.
+
+You may not download, get and/or provide access to or otherwise export or 
+re-export any underlyingsoftware, technology or other information from the
+Products except as stated explicitly in this notice or the Commercial License
+Agreement and in full compliance with all applicable national and international
+laws and regulations. You agree to indemnify and hold harmless and defend 
+Software AG against any and all liability arising from or relating to your
+breach of these export control undertakings.  Software AG reserves the right
+not to honor any affected parts of this notice, or the Commercial License 
+Agreement, in case any national or international export regulations or foreign
+trade legislation, or any target country / customer / usage restrictions implied
+by embargos or other sanctions prohibit the provision of export controlled goods
+(Dual-Use items) and services to be granted to you under either this notice
+or the Commercial License Agreement. Software AG may inform you if a related
+official export approval by national or international export control
+authorities is required. Provision of affected Products will then be postponed
+until all such required approvals have been granted. The provision of Products
+not restricted by the above mentioned export prohibitions will remain unaffected
+of this restriction.
+
+If applicable, you will find specific terms in addition to your commercial
+license agreement for the use of this product in PART G.
+
+
+PART C:  SOFTWARE AG LICENSE AGREEMENT FOR WEBMETHODS PARTNER SERVERS ONLY
+
+IMPORTANT:  THIS AGREEMENT APPLIES ONLY IF YOU ARE USING A WEBMETHODS PARTNER
+SERVER PROVIDED BY A SPONSORING COMPANY THAT HAS LICENSED A SOFTWARE AG
+WEBMETHODS SOLUTION.  THE TERMS OF THIS AGREEMENT DO NOT APPLY IF YOU
+HAVE ALREADY EXECUTED A COMMERCIAL LICENSE AGREEMENT FOR THE WEBMETHODS
+PARTNER SERVER WITH A SOFTWARE AG SUBSIDIARY OR DISTRIBUTOR.  PLEASE READ
+THIS AGREEMENT CAREFULLY BEFORE IN ANY WAY INSTALLING, ACCESSING, OR USING
+THE PRODUCT.
+
+SOFTWARE AG LICENSE AGREEMENT FOR WEBMETHODS PARTNER SERVERS
+By installing the Product, you, as licensee, are entering into an agreement
+with Software AG, as licensor, with GENERAL TERMS as defined in Part A,
+as well as with terms set forth below in Part C.  In case of conflicting
+terms between Part A and the Part C, the terms of this Part C shall apply.
+If you do not agree to the terms of this Agreement, you must immediately,
+and in any case before installation, destroy the Product and all copies of
+the Product in physical, electronic or other form.  By installing and/or
+using the Product, you agree to be bound by and manifest your assent to all
+the terms and conditions of this Part C.
+
+LICENSE GRANT
+Subject to the terms and conditions set forth in this Agreement, Software AG
+hereby grants to Licensee a nontransferable, non-sublicensable, nonexclusive,
+limited license during the Term to use the webMethods Partner Server and any
+other associated Software AG software program(s) made available to Licensee
+(the "Software"), in Executable Code form, together with the Documentation.
+This Agreement only grants Licensee the right to use the Software on one
+(1) designated CPU and to make one (1) copy of the Software for backup and
+archival purposes.  All use of the Software is strictly limited to Licensee's
+internal data processing in connection with the Software AG webMethods solution
+licensed to the sponsoring company and is strictly limited to bi-directional
+delivery of data between Licensee and such sponsoring company.  Any and
+all other use of the Software is strictly prohibited.  For purposes of this
+Agreement, the term (i) "Documentation" means the user manuals made available
+to Licensee in connection with the Software; and (ii) the term "Executable
+Code" means the fully compiled version of a software program that can be
+executed by a computer and used by an end user without further compilation.
+
+PROPRIETARY RIGHTS
+a.  Licensee acknowledges and agrees that the Software, Documentation, and
+all other related information and materials (collectively, the "Proprietary
+Information") provided to or made available to Licensee, and all patents,
+copyrights, trade secrets, and other United States or international
+intellectual property rights (each, an "Intellectual Property Right")
+embodied in the foregoing, are the exclusive and proprietary property of
+Software AG and/or its suppliers.  Licensee further acknowledges and agrees
+that the Software and its structure, underlying concepts, organization,
+and source code constitute valuable trade secrets of Software AG and/or its
+suppliers.  Accordingly, Licensee agrees not to (a) disassemble, reverse
+engineer, reverse compile, or otherwise attempt to derive the source code
+for the Software in whole or in part, (b) modify, adapt, alter, translate,
+or create derivative works from the Software; (c) merge the Software with
+other software; (d) sublicense, lease, rent, loan, or otherwise transfer
+the Software to any third party; or (e) except as expressly set forth in
+this Agreement, otherwise use, provide access to, or copy the Software.
+b.  Licensee shall keep the Proprietary Information in strict confidence and
+use the Property Information solely for purposes of exercising the license
+rights set forth in Section 1 of this Agreement.  Licensee shall restrict
+access to the Proprietary Information to only those authorized persons with
+a need to know in order for Licensee to exercise the license rights granted
+under Section 1 and shall ensure that all such authorized persons shall
+refrain from any disclosure, use, duplication, or reproduction prohibited by
+this Section 2.  Except as expressly set forth in this Agreement, Licensee
+shall not, directly or indirectly, use, disclose, distribute, duplicate,
+or otherwise reproduce the Proprietary Information, in whole or in part.
+Licensee agrees not to remove any copyright notice or other proprietary
+markings from the Proprietary Information or any copies thereof.
+c.  Licensee shall have no obligation to preserve the proprietary nature
+of only that portion of the Software AG's Proprietary Information that is
+or becomes generally available to the public by other than unauthorized
+disclosure.  In the event Licensee is required to disclose Proprietary
+Information by law or by any governmental agency having jurisdiction pursuant
+to an order to produce, or in the course of a legal proceeding pursuant to
+a lawful request for discovery, Licensee may disclose only that portion
+of the Proprietary Information that it is legally required to disclose;
+provided Licensee promptly notifies Software AG and reasonably cooperates
+with Software AG if Software AG's elects, at its expense, to seek to limit or
+avoid such disclosure by any lawful means and Licensee takes all reasonable
+and necessary actions to protect the confidentiality of the Proprietary
+Information disclosed.
+d.  Licensee agrees not to challenge, directly or indirectly, the right, title,
+and interest of Software AG in and to the Software or any other Proprietary
+Information, or any Intellectual Property Rights therein, nor the validity
+or enforceability of Software AG's rights under applicable law.  Licensee
+agrees not to, directly or indirectly, register, apply for registration,
+or attempt to acquire any legal protection for the Software or any other
+Proprietary Information, or any Intellectual Proprietary Rights therein,
+or to take any other action which may adversely affect Software AG's rights,
+title, or interest in or to the Software or any other Proprietary Information
+in any jurisdiction.
+e.  Licensee agrees to notify Software AG immediately and in writing of all
+circumstances surrounding the unauthorized possession or use of the Software
+or any other Proprietary Information by any person or entity.  Licensee agrees
+to cooperate fully with Software AG in any litigation relating to or arising
+from such unauthorized possession or use.
+f.  Licensee acknowledge that the Proprietary Information is unique and
+that Licensee's failure to comply with the provisions of this Section 2 may
+result in irreparable harm to Software AG and, in the event of the breach
+or threatened breach by Licensee of its obligations under this Section 2,
+Software AG shall be entitled to equitable relief in the form of specific
+performance and/or an injunction for any such actual or threatened breach,
+in addition to the exercise of any other remedies at law and in equity.
+g.  Software AG reserves all rights regarding the Software and all other
+Proprietary Information owned or licensed by Software AG to the extent such
+rights are not expressly granted to Licensee in this Agreement.
+
+TERM AND TERMINATION
+Subject to Licensee's strict compliance with the terms and conditions of this
+Agreement, the term of this Agreement ("Term") shall be coincident with the
+term of the license granted to the sponsoring company for the Software AG
+webMethods solution.  This Agreement shall remain in effect until the Term
+expires or is terminated or this Agreement is otherwise terminated by Software
+AG for Licensee's breach of any of the provisions of this Agreement.  Upon the
+termination or expiration of this Agreement for any reason, all license rights
+granted under this Agreement shall immediately cease to exist and Licensee
+shall immediately discontinue all use of the Software and shall, within ten
+(10) days after the expiration or termination, certify in writing to Software
+AG that the Software and Documentation and all copies and related materials in
+the possession of Licensee have been removed from its system and destroyed.
+Notwithstanding any other provision of this Agreement, all of Licensee's
+obligations under this Agreement shall continue perpetually and irrevocably.
+
+SUPPORT AND MAINTENANCE
+Software AG, in its sole discretion, may provide (and subsequently cease
+providing) Licensee with limited support and maintenance services for
+the Software.  Notwithstanding any decision by Software AG to exercise
+its discretion in providing Licensee with such services, in no event shall
+Licensee be deemed entitled to any support or maintenance or other similar
+services from Software AG, including but not limited to any fixes, updates,
+or new releases of the Software.
+
+DISCLAIMER OF WARRANTIES
+ALL SOFTWARE, DOCUMENTATION, INFORMATION, MATERIALS AND/OR SERVICES PROVIDED
+TO LICENSEE IN CONNECTION WITH THIS AGREEMENT ARE PROVIDED "AS IS, WITH ALL
+FAULTS." SOFTWARE AG DOES NOT WARRANT THAT SOFTWARE WILL OPERATE UNINTERRUPTED
+OR ERROR FREE, THAT THE FUNCTIONS CONTAINED IN THE SOFTWARE WILL FUNCTION
+WITH OTHER SOFTWARE, HARDWARE, OR WITHIN A SYSTEM, OR THAT THE SOFTWARE,
+DOCUMENTATION, INFORMATION, MATERIALS AND/OR SERVICES PROVIDED PURSUANT TO
+THIS AGREEMENT WILL FULFILL ANY OF LICENSEE'S PARTICULAR PURPOSES OR NEEDS.
+WITHOUT LIMITING THE GENERALITY OF THE FOREGOING, SOFTWARE AG SPECIFICALLY
+DISCLAIMS ALL WARRANTIES, EXPRESS, STATUTORY, AND IMPLIED, INCLUDING,
+BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF ACCURACY, QUIET ENJOYMENT,
+NON-INFRINGEMENT, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR PURPOSE.
+
+LIMITATIONS OF LIABILITY
+EXCEPT WHERE THERE IS A MANDATORY STATUTORY LIABILITY FOR INTENT, GROSS 
+NEGLIGENCE OR INJURY TO LIFE, BODY OR HEALTH, NEITHER SOFTWARE AG NOR ANY 
+OF ITS SUPPLIERS SHALL BE LIABLE TO LICENSEE OR ANY OTHER PARTY FOR ANY
+LOSS OR DAMAGE THAT ARISES IN CONNECTION WITH LICENSEE'S USE OF THE SOFTWARE
+OR THAT OTHERWISE ARISES FROM OR RELATES IN ANY WAY TO THIS AGREEMENT, 
+INCLUDING, BUT NOT LIMITED TO, ANY MONETARY DAMAGES OR ANY DIRECT, INDIRECT,
+SPECIAL, INCIDENTAL, PUNITIVE, OR CONSEQUENTIAL DAMAGES, REGARDLESS OF THE FORM
+OF ACTION ALLEGED, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.  
+IN NO EVENT SHALL LICENSEE BE ENTITLED TO OBTAIN SPECIFIC PERFORMANCE IN 
+CONNECTION WITH THIS AGREEMENT.  Licensee acknowledges that the limitations
+of liability and the disclaimer of warranties set forth in this Agreement
+constitute a fundamental basis of this Agreement and form the primary 
+consideration between the parties and that Software AG would not have entered
+into this Agreement nor provided Licensee with access to the Software 
+without such limitations of liability and the disclaimer of warranties.
+
+MISCELLANEOUS
+Assignment.  Licensee may not assign or transfer this Agreement, or any rights
+or obligations hereunder (including the license rights), or the Software,
+in whole or part, whether by operation of law, change of control, or in any
+other manner.  Any assignment or attempted assignment in violation of the
+foregoing shall be null and void.  Software AG may assign any or all of its
+rights and obligations under this Agreement.
+Audit.  Licensee will reasonably cooperate with Software AG and provide
+Software AG with reasonable access to Licensee's information, facilities,
+and systems to enable Software AG to ensure Licensee's compliance with the
+terms of this Agreement.
+Export.  The Licensee may not download, get and/or provide access to or 
+otherwise export or re-export any underlying software, technology or other 
+information from the Products except as stated explicitly in this notice or
+the Commercial License Agreement and in full compliance with all applicable
+national and international laws and regulations. You agree to indemnify and
+hold harmless and defend Software AG against any and all liability arising from
+or relating to your breach of these export control undertakings.  Software AG
+reserves the right not to honor any affected parts of this notice, or the 
+Commercial License Agreement, in case any national or international export
+regulations or foreign trade legislation, or any target country / customer /
+usage restrictions implied by embargos orother sanctions prohibit the provision
+of export controlled goods(Dual-Use items) and services to be granted to you 
+under either this noticeor the Commercial License Agreement. Software AG may
+inform you if a related official export approval by national or international
+export control authorities is required. Provision of affected Products will then
+be postponed until all such required approvals have been granted. The provision
+of Products not restricted by the above mentioned export prohibitions will
+remain unaffected of this restriction.
+Jurisdiction.  This Agreement will be governed by and construed in accordance
+with the substantive laws in force: (a) in the Commonwealth of Virginia,
+if a license to the Software is obtained when Licensee is in the United
+States, Canada, Mexico, or any other country not described in subsections
+(b) and (c) below; (b) in Japan, if a license to the Software is obtained
+when Licensee is in Japan, China, Korea, or other southeast Asian country
+where the official languages are written in either an ideographic script
+(e.g., hanzi, kanji, or hanja) and/or other script based upon or similar
+in structure to an ideographic script (e.g., hangul or kana); or (c) the
+United Kingdom, if a license to the Software is obtained when Licensee is
+in any European Union country.  This Agreement will not be governed by the
+conflict of law rules of any jurisdiction or the United Nations Convention
+on Contracts for the International Sale of Goods, the application of which
+are expressly excluded.
+Severability.  If any provision of this Agreement is determined by a court
+of competent jurisdiction to be or becomes unenforceable or illegal, such
+provision shall be adjusted to the minimum extent necessary to cure such
+unenforceability or illegality and the remainder of this Agreement shall
+remain in effect in accordance with its terms as modified by such adjustment.
+U.S. Government Procurement.  If the Software is being acquired by or
+on behalf of the U.S. Government by a U.S. Government prime contractor
+or subcontractor (at any tier), then the U.S. Government's rights in the
+Software and accompanying Documentation will be only as set forth in this
+Agreement; this is in accordance with 48 CFR 227.7201 through 227.7202-4
+(for Department of Defense ("DOD") acquisitions) and with 48 CFR 2.101 and
+12.212 (for non-DOD acquisitions).
+Waiver.  No waiver or retraction of a waiver under this Agreement shall be
+valid or binding unless set forth in writing and executed by a duly authorized
+representative of the party against whom such waiver is sought.  The failure
+of either party to exercise any right granted herein, or to require the
+performance by the other party of any obligation set forth herein, or the
+waiver by either party of any breach of this Agreement, will not prevent a
+subsequent exercise or enforcement of such provisions or be deemed a waiver
+of any subsequent breach of the same or any other provision of this Agreement.
+Integration.  This Agreement constitutes the entire agreement between
+the parties regarding the subject hereof and supersedes all prior and
+all contemporaneous agreements, understandings, marketing materials, and
+communications, whether written or oral.  Any modification or amendment of
+any provision of this Agreement must be in writing and bear the signature
+of the duly authorized representative of each party.  Neither the course of
+conduct between the parties nor trade usage will act to modify this Agreement.
+
+
+PART D: SOFTWARE AG EVALUATION LICENSE AGREEMENT FOR TRIAL VERSIONS OF
+SOFTWARE AG PRODUCT ONLY
+
+IMPORTANT: PLEASE READ THIS SOFTWARE AG EVALUATION LICENSE AGREEMENT CAREFULLY
+BEFORE INSTALLING THE PRODUCT! THE TERMS OF THIS EVALUATION LICENSE AGREEMENT
+APPLY ONLY IF YOU HAVE NOT ALREADY EXECUTED A COMMERCIAL LICENSE AGREEMENT FOR
+THE PRODUCT WITH A SOFTWARE AG SUBSIDIARY OR DISTRIBUTOR.
+
+EVALUATION LICENSE AGREEMENT FOR TRIAL VERSION
+By installing the Product, you, as licensee, are entering into an agreement
+with Software AG, as licensor, with GENERAL TERMS as defined in Part A, as
+well as with terms set forth below (Part D). In case of conflicting terms
+between Part A and D, the terms of this Part D shall apply ("Evaluation
+License Agreement"). If you do not agree to the terms of this agreement,
+you must immediately, and in any case before installation, destroy the
+Product and all copies of the Product in physical, electronic or other form.
+
+THE LICENSE
+With this Evaluation License Agreement, Software AG grants you - free of charge
+- a non-exclusive license to use the Product and accompanying documentation on
+a single computer, on a workstation or on a single terminal within a network
+for evaluation and testing purposes for a time period defined below (see
+section License Validity). In no event may the Product be deployed or used
+for any commercial production purpose such as developing new applications or
+testing, supporting, maintaining, or reengineering of existing applications,
+unless you acquire a commercial license from Software AG and pay the applicable
+license fees. You may not pass on copies of the Product to any third party or
+transfer the Product by electronic means to other computers via a network. For
+multi-user hardware systems or networks, a separate license is required for
+each user or each workstation. You have the right to make one copy of the
+Product solely for archival and backup purposes. You may not decompile,
+disassemble, modify, decrypt, extract or otherwise reverse engineer, or
+make further copies of the Product or parts thereof. This Evaluation License
+Agreement, with the downloaded or otherwise provided and used authorization
+key, is proof of your entering into this agreement and you must retain it. This
+Evaluation License Agreement does not grant you the right to sublicense,
+transfer, rent, assign or lease the Product, in whole or in part.
+
+THIRD PARTY LICENSE RESTRICTIONS
+The Product(s) may contain or be distributed with certain open source, free or
+commercial third party licensor's components ("Third Party Components"). These
+Third Party Components, if any, may be identified in, and may be subject to, 
+special license terms and conditions ("Third Party Terms") set forth in "*.txt"
+or "*.pdf" files in the installation directory, a license notice on installation
+or in readme or license files accompanying Third Party Components and may be 
+retrieved online for then current versions of Software at
+http://softwareag.com/licenses. Third Party Terms include important licensing and
+warranty information and disclaimers of licensors. For the avoidance of doubt the
+Third Party Terms do not restrict the rights granted under this Agreement.   
+
+LICENSE VALIDITY
+This Evaluation License Agreement is limited to a period no longer than
+ninety (90) days starting from the date of installation of the Product,
+or as defined in the license key file or in PART F below. The license might
+limit your use of the Product to certain features, platforms or restrictions
+in capacity or other limitations incorporated by default, by license key
+file or - if applicable - by definition in PART F below. You accept these
+limitations and will in no event bypass these.
+
+COPYRIGHT
+Software AG or its affiliates are the sole owner of the industrial property
+rights and copyright to the Product and accompanying user documentation or
+have the respective distribution rights. References made in or on the Product
+to the copyright or to other industrial property rights must not be altered,
+deleted or obliterated in any manner.
+
+CONFIDENTIALITY
+The Product is confidential and proprietary information of Software AG and
+its licensors, and may not be disclosed to third parties. You shall use
+such information only for the purpose of exercising the Evaluation License
+Agreement to the Product and shall disclose confidential and proprietary
+information only to your employees who require such information for the
+purpose stated above. You agree to take adequate steps to protect the Product
+from unauthorized disclosure or use.
+
+LIMITED WARRANTY
+The Product is provided "as is" without any warranty whatsoever. You
+assume full responsibility for the selection of the Product to achieve your
+intended results and for the installation, use and results obtained from
+the Product. Any kind of support for the Software AG Product is explicitly
+excluded.
+
+UPDATES AND MAINTENANCE
+This Evaluation License Agreement does not grant you any right to, license
+for or interest in any improvements, modifications, enhancements or updates
+to the Product and documentation or other support services. Such services
+are typically available under a Commercial License Agreement only. Any such
+arrangements shall be the subject of a separate written agreement.
+
+LIMITATION OF LIABILITY
+Except where there is a mandatory statutory liability for intent, gross 
+negligence or injury to life, body or health, under no circumstances shall 
+Software AG or its licensors be liable for any damages whatsoever (including,
+without limitation, damages for loss of business profits, work stoppage, loss
+of data or other financial loss) arising from the use of, or inability to use,
+this Product. In no event shall any liability of Software AG arising out of 
+this agreement exceed the amount paid, if any, by you to Software AG hereunder.
+
+TERMINATION
+This Evaluation License Agreement will terminate immediately without notice
+from Software AG if you fail to comply with any provision of this Evaluation
+License Agreement. Software AG reserves the right to terminate this agreement
+immediately for good cause, whereby good cause is understood as any gross
+breach of this agreement. Upon termination, you must immediately discontinue
+the use of the Product and destroy the Product and all copies of the Product
+in physical, electronic or other form. Upon request of Software AG licensee will 
+certify in written that use is discontinued and all copies of the Product are 
+destroyed.  
+
+EXPORT
+You may not download, get and/or provide access to or otherwise export or 
+re-export any underlying software, technology or other information from the
+Products except as stated explicitly in this notice or the Commercial License
+Agreement and in full compliance with all applicable national and international
+laws and regulations. You agree to indemnify and hold harmless and defend
+Software AG against any and all liability arising from or relating to your 
+breach of these export control undertakings.  Software AG reserves the right 
+not to honor any affected parts of this notice, or the Commercial License 
+Agreement, in case any national or international export regulations or foreign
+trade legislation, or any target country / customer / usage restrictions implied 
+by embargos or other sanctions prohibit the provision of export controlled goods
+(Dual-Use items) and services to be granted to you under either this notice
+or the Commercial License Agreement. Software AG may inform you if a related
+official export approval by national or international export control
+authorities is required. Provision of affected Products will then be postponed
+until all such required approvals have been granted. The provision of Products
+not restricted by the above mentioned export prohibitions will remain unaffected
+of this restriction.
+
+MISCELLANEOUS
+The Product is designed for general office use. It is not designed or
+intended for use in air traffic control, mass transit systems, critical
+medical purposes, the operation of nuclear facilities or any other use which
+could result in a high risk of safety or property damage. You warrant that
+you will not use the Product for such purposes.
+
+The invalidity of any provision of this agreement shall not affect any other
+part of this agreement. This agreement represents the complete and exclusive
+statement concerning this Evaluation License Agreement between the parties. No
+modification or amendment of this agreement will be binding on any party
+unless acknowledged in writing by their duly authorized representatives. This
+agreement shall be governed and construed by the laws of the Federal Republic
+of Germany.
+
+
+PART E: SOFTWARE AG LIMITED USE LICENSE AGREEMENT FOR FREEMIUM VERSIONS OF
+SOFTWARE AG PRODUCTS ONLY
+
+IMPORTANT: PLEASE READ THIS SOFTWARE AG LIMITED USE LICENSE AGREEMENT CAREFULLY
+BEFORE INSTALLING THE PRODUCT! THE TERMS OF THIS LIMITED USE LICENSE AGREEMENT
+APPLY ONLY IF YOU HAVE NOT ALREADY EXECUTED A COMMERCIAL LICENSE AGREEMENT FOR
+THE PRODUCT WITH A SOFTWARE AG SUBSIDIARY OR DISTRIBUTOR.
+
+LIMITED USE LICENSE AGREEMENT FOR FREEMIUM VERSION
+By installing the Product, you, as licensee, are entering into an agreement
+with Software AG, as licensor, with GENERAL TERMS as defined in Part A, as
+well as with terms set forth below (Part E). In case of conflicting terms
+between Part A and E, the terms of this Part E shall apply ("Limited Use
+License Agreement"). If you do not agree to the terms of this agreement,
+you must immediately, and in any case before installation, destroy the Product
+and all copies of the Product in physical, electronic or other form.
+
+THE LICENSE
+With this Limited Use License Agreement, Software AG grants you - free of charge
+- a non-exclusive license to use and copy the Product and accompanying
+documentation on the number of computers, workstations or on terminals within a
+network as specified in the respective Product documentation (please refer to the
+respective section in the Release Notes relating to use restrictions) for
+production use and for a time period defined below (see section License Validity).
+This includes use and deployment of the Product for any commercial production
+purposes such as developing new applications or testing, supporting, maintaining, or
+reengineering of existing applications.
+
+In no event may the Product be used to develop an integrated solution that
+requires for the Product to be integrated into your or any third party intellectual
+property in order to create a combined product that is provided to third parties,
+unless you acquire an OEM license from Software AG and pay the applicable license
+fees. You may not pass on or distribute copies of the Product to any third party.
+You have the right to make one copy of the Product solely for archival and backup
+purposes. You may not decompile, disassemble, modify, decrypt, extract or otherwise
+reverse engineer, or make further copies of the Product or parts thereof. This 
+Limited Use License Agreement is proof of your entering into this agreement and
+you must retain it. This Limited Use License Agreement does not grant you the right
+to sublicense, transfer, rent, assign or lease the Product, in whole or in part.
+
+THIRD PARTY LICENSE RESTRICTIONS
+The Product(s) may contain or be distributed with certain open source, free or 
+commercial third party licensor's components ("Third Party Components"). These 
+Third Party Components, if any, may be identified in, and may be subject to, special
+license terms and conditions ("Third Party Terms") set forth in "*.txt" or "*.pdf" 
+files in the installation directory, a license notice on installation or in readme
+or license files accompanying Third Party Components and may be retrieved online for
+then current versions of Software at http://softwareag.com/licenses. Third Party 
+Terms include important licensing and warranty information and disclaimers of 
+licensors. For the avoidance of doubt the Third Party Terms do not restrict the 
+rights granted under this Agreement. 
+
+LICENSE VALIDITY
+This Limited Use License Agreement grants you a license for an indefinite 
+period of time. The license will however limit your use of the Product to
+certain features, platforms or restrictions in capacity or other limitations
+incorporated by default, or - if applicable - by definition in the respective
+Product documentation or PART F below. You accept these limitations and will in
+no event bypass these.
+
+COPYRIGHT
+Software AG or its affiliates are the sole owner of the industrial property
+rights and copyright to the Product and accompanying user documentation or
+have the respective distribution rights. References made in or on the Product
+to the copyright or to other industrial property rights must not be altered,
+deleted or obliterated in any manner.
+
+CONFIDENTIALITY
+The Product is confidential and proprietary information of Software AG and
+its licensors, and may not be disclosed to third parties. You shall use
+such information only for the purpose of exercising the Limited Use License
+Agreement to the Product and shall disclose confidential and proprietary
+information only to your employees who require such information for the
+purpose stated above. You agree to take adequate steps to protect the Product
+from unauthorized disclosure or use.
+
+LIMITED WARRANTY
+The Product is provided "as is" without any warranty whatsoever. You
+assume full responsibility for the selection of the Product to achieve your
+intended results and for the installation, use and results obtained from
+the Product. Any kind of support for the Software AG Product is explicitly
+excluded.
+
+UPDATES AND MAINTENANCE
+This Limited Use License Agreement does not grant you any right to, license
+for or interest in any improvements, modifications, enhancements or updates
+to the Product and documentation or other support services. Such services
+are typically available under a Commercial License Agreement only. Any such
+arrangements shall be the subject of a separate written agreement.
+
+LIMITATION OF LIABILITY
+Except where there is a mandatory statutory liability for intent, gross 
+negligence or injury to life, body or health, under no circumstances shall 
+Software AG or its licensors be liable for any damages whatsoever (including,
+without limitation, damages for loss of business profits, work stoppage, loss
+of data or other financial loss) arising from the use of, or inability to use,
+this Product. Except where there is an unlimited mandatory statutory liability,
+in no event shall any liability of Software AG arising out of this agreement 
+exceed the amount paid, if any, by you to Software AG hereunder.
+
+TERMINATION
+This Limited Use License Agreement will terminate immediately without notice
+from Software AG if you fail to comply with any provision of this Limited
+License Agreement. Software AG reserves the right to terminate this agreement
+immediately for good cause, whereby good cause is understood as any gross
+breach of this agreement. Upon termination, you must immediately discontinue
+the use of the Product and destroy the Product and all copies of the Product
+in physical, electronic or other form. Upon request of Software AG licensee will
+certify in written that use is discontinued and all copies of the Product are 
+destroyed.  
+
+EXPORT
+You may not download, get and/or provide access to or otherwise export or 
+re-export any underlying software, technology or other information from the
+Products except as stated explicitly in this notice or the Commercial License
+Agreement and in full compliance with all applicable national and international
+laws and regulations. You agree to indemnify and hold harmless and defend 
+Software AG against any and all liability arising from or relating to your
+breach of these export control undertakings.  Software AG reserves the right
+not to honor any affected parts of this notice, or the Commercial License 
+Agreement, in case any national or international export regulations or foreign
+trade legislation, or any target country / customer / usage restrictions implied
+by embargos or other sanctions prohibit the provision of export controlled goods
+(Dual-Use items) and services to be granted to you under either this notice or
+the Commercial License Agreement.  Software AG may inform you if a related official
+export approval by national or international export control authorities is required.
+Provision of affected  Products will then be postponed until all such required 
+approvals have been granted. The provision of Products not restricted by the 
+above mentioned export prohibitions will remain unaffected of this restriction.
+
+MISCELLANEOUS
+The Product is designed for general office use. It is not designed or
+intended for use in air traffic control, mass transit systems, critical
+medical purposes, the operation of nuclear facilities or any other use which
+could result in a high risk of safety or property damage. You warrant that
+you will not use the Product for such purposes.
+
+It is a material term that you shall not use the Product for benchmarking
+or similar performance-related testing purposes without the express written
+consent of Software AG. If Software AG consents to your using the Product for
+any benchmarking or similar performance-related testing purposes, you shall not
+publish or disclose to a third party the outcomes or results of any such exercise,
+or any information derived from the outcomes or results of such exercise, without
+the additional express written consent of Software AG. 
+
+The invalidity of any provision of this agreement shall not affect any other
+part of this agreement. This agreement represents the complete and exclusive
+statement concerning this Limited Use License Agreement between the parties.
+No modification or amendment of this agreement will be binding on any party
+unless acknowledged in writing by their duly authorized representatives. This
+agreement shall be governed and construed by the laws of the Federal Republic
+of Germany.
+
+
+PART F:  SOFTWARE AG LICENSE AGREEMENT FOR PRE-DELIVERY OF SOFTWARE AG PRODUCTS 
+ONLY
+
+IMPORTANT:  THIS AGREEMENT APPLIES ONLY IF YOU ARE USING A PRE-DELIVERY VERSION 
+OF SOFTWARE AG PRODUCTS. THESE TERMS AND CONDITIONS ONLY APPLY AS LONG AND TO 
+THE EXTENT AS YOU HAVE NOT EXECUTED A WRITTEN COMMERCIAL LICENSE AGREEMENT REGARDING 
+THE SOFTWARE WITH A SOFTWARE AG SUBSIDIARY OR DISTRIBUTOR. MUTUAL EXECUTION OF A 
+SUBSEQUENT WRITTEN COMMERCIAL LICENSE AGREEMENT REGARDING THE SOFTWARE BY YOU AND 
+A SOFTWARE AG SUBSIDIARY OR DISTRIBUTOR SHALL REPLACE THE TERMS OF THIS AGREEMENT 
+WITH IMMEDIATE EFFECT.
+PLEASE READ THIS AGREEMENT CAREFULLY BEFORE IN ANY WAY INSTALLING, ACCESSING, OR 
+USING THE PRODUCT.
+
+LICENCE GRANT
+Licence Grant: Subject to the terms and conditions set forth in this Agreement, 
+the Supplier grants to the Customer a non-exclusive, non-transferable, non-
+sublicensable right to use the Software based on the licence parameters set out 
+in this Agreement and solely for the Term and subject to required emergency 
+maintenance and force majeure events. The Customer may install and use the Software 
+internally within its organization only.  
+The Software may not be transferred, sold, assigned, sublicensed or otherwise conveyed 
+(whether by operation of law or otherwise) to another party without Supplier's 
+prior written consent. For Software which is licensed together as a bundle of 
+separately listed software the relevant Software is intended only to be used as 
+part of the relevant bundle and not separately on a stand-alone basis.
+
+RESTRICTIONS
+Restrictions: Except as expressly permitted in any related documentation, the 
+Customer may not modify or adapt the Software in whole or in part (including 
+but not limited to translating or creating derivative works) or reverse engineer, 
+decompile or disassemble the Software (except to the extent applicable laws specifically 
+prohibit such a restriction). The Customer may not use the Software for timesharing, 
+rental or service bureau purposes and shall not remove any copyright notices or other 
+proprietary notices from the Software. Results of benchmark or other performance tests 
+run on the Software may not be disclosed to any third party without Supplier's prior 
+written consent which consent may be withheld at the sole discretion of the Supplier.
+
+OWNERSHIP
+Ownership: The Software is owned by Supplier, its subsidiaries or affiliates or their 
+suppliers and is protected by copyright laws and international treaty provisions. The 
+Customer acquires only the non-exclusive right to use the Software as permitted herein 
+and does not acquire any rights of ownership in the Software. The Customer agrees to 
+protect Supplier's proprietary rights in the Software and will take all steps 
+reasonably necessary to prevent the disclosure to any person other than its employees 
+or to any other legal entity of proprietary information provided by Supplier.
+
+TERMINATION
+Termination: The Customer's licence to use the Software will automatically terminate 
+as of the date set forth in this Agreement or, if not otherwise specified herein, 
+thirty (30) days after the date that the Customer receives the Software from Supplier. 
+Notwithstanding the foregoing, Supplier may immediately terminate the Agreement upon 
+written notice to the Customer.  Upon any termination (howsoever arising) or expiry, 
+the Customer shall cease using the Software and delete the Software from the 
+Customer's system. If the Customer possesses the Software in any physical form, e.g. 
+hard disk or otherwise, then the Customer shall, at the Customer's own expense, return 
+the Software in its possession (including without limitation all related documentation) 
+within ten (10) days of termination to Supplier. If requested by Supplier, the Customer 
+shall send a letter certifying that the provisions of this clause have been adhered 
+to. All disclaimers of warranties, limitations of liability and provisions for the 
+protection of Supplier's proprietary rights in the Software as set forth herein shall 
+survive any termination of the Agreement.  
+
+WARRANTY DISCLAIMER
+Warranty Disclaimer: The Customer acknowledges that the Software is provided 'as is' 
+without anywarranty whatsoever solely for the Customer's evaluation.  THE SUPPLIER 
+DISCLAIMS ALL WARRANTIES AND CONDITIONS, EXPRESS OR IMPLIED, INCLUDING WITHOUT 
+LIMITATION THE IMPLIED WARRANTIES OR CONDITIONS OF MERCHANTABLE QUALITY, AND FITNESS 
+FOR A PARTICULAR PURPOSE.
+
+LIMITATION OF LIABILITY
+To the extent permitted by law, Supplier shall not be liable for any damages caused 
+by the use of the Software.
+
+IPR INDEMNITY
+Indemnity: Supplier shall indemnify, defend, and hold Customer harmless from any 
+action brought by a third-party against Customer to the extent that it is caused by 
+an allegation that the Software licensed under this Agreement has infringed an 
+intellectual property right or trade secret registered in the country of Supplier�s 
+residence, and pay those damages or costs related to the settlement of such action 
+or finally awarded against Customer in such action, including but not limited to 
+reasonable attorneys' fees, provided that Customer:
+(a)     promptly notifies Supplier of any such action; and 
+(b)     gives Supplier full authority, information, and assistance to defend such 
+claim; and 
+(c)     gives Supplier sole control of the defense of such claim and all 
+negotiations for the compromise or settlement of such claim.
+
+Exclusions: Supplier shall have no liability under this Agreement with respect to 
+any claim based upon:
+(a)     Software that has been modified by anyone other than Supplier; 
+(b)     use of other than the then-current release of the Software, if the 
+infringement could have been avoided by use of the then-current release and such 
+current release has been made available to Customer; or
+(c)     use of the Software in conjunction with Customer data where use with such 
+data gave rise to the infringement claim.
+
+Remedy by Supplier: If Supplier determines that the Software is or is likely to be 
+the subject of a claim of infringement, Supplier shall have the right: 
+(a)     to replace Customer's copy of the Software with non-infringing software 
+that has substantially equivalent functionality; 
+(b)     to modify the Software so as to cause the Software to be free of 
+infringement; 
+(c)     to terminate the licence to use the Software and Documentation.
+
+Exclusive remedy: The provisions of this clause state the exclusive 
+liability of the Supplier and the exclusive remedy of the Customer with 
+respect to any claim of intellectual property infringement by the Software.
+
+GENERAL
+
+Data Protection: Unless stated otherwise, the obligations of the parties in 
+connection with the processing of any customer data that qualify as 
+personal data according to Art. 4 No. 1 of the General Data Protection 
+Regulation (GDPR) ('Customer Personal Data') including the applicable 
+technical and organizational measures that Supplier is required to implement 
+and maintain to protect Customer Personal Data, shall be as set out in the 
+Data Processing Agreement (if any) entered into between the Parties.
+
+Third Party Licence Restrictions: The Software may contain or be distributed 
+with certain open source, free or commercial third party licensor's 
+components ('Third Party Components'). These Third Party Components, if any, 
+may be identified in, and may be subject to, special licence terms and 
+conditions ('Third Party Terms') set forth in '*.txt' or *.pdf' files in 
+the installation directory, a licence notice on installation or in readme 
+or licence files accompanying Third Party Components and may be retrieved 
+online for then current versions of Software at http://softwareag.com/licenses. 
+Third Party Terms include important licensing and warranty information and 
+disclaimers of licensors.  For the avoidance of doubt the Third Party Terms 
+do not restrict the rights granted under this Agreement.
+
+Export Control: Customer may not download, get and/or provide access to, or 
+otherwise export or re-export any underlying software or service, technology 
+or other information from the Software or Documentation except as stated 
+explicitly in this Agreement and in full compliance with all applicable 
+national and international laws and regulations. Customer agrees to indemnify 
+and hold harmless and defend Supplier against any and all liability arising 
+from or relating to Customer's breach of this Clause. Supplier reserves the 
+right not to execute affected parts of, or the entire Agreement, in case any 
+national or international export regulations or foreign trade legislation, or 
+any target country/customer/usage restrictions implied by embargoes or other 
+sanctions prohibit the provision of export controlled goods (Dual'Use items) 
+and services to be granted to the Customer under this Agreement. Supplier will 
+inform the Customer whether a related official export approval by national or 
+international export control authorities is required. Provision of affected 
+goods and services will then be postponed until all such required approvals 
+have been granted. The provision of agreed goods or services not restricted 
+by the above mentioned export prohibitions will remain unaffected by this 
+clause.
+
+Governing Law: This Agreement and all matters relating to the interpretation 
+and effect of this Agreement are made and will be governed exclusively by 
+and construed in accordance with the laws of Germany without giving effect 
+to its conflicts-of-laws provisions and exclusion of the United Nations 
+Convention on Contracts for the International Sale of Goods (CISG). The 
+parties consent and submit to exclusive personal jurisdiction, procedure 
+and venue for legal disputes arising from or connected with this Agreement 
+shall lie with the courts of Darmstadt, Germany. Arbitration processes are 
+excluded.
+
+
+PART G: PRODUCT SPECIFIC TERMS for Adabas, Natural and NaturalONE Community
+Editions
+(ADANATCOMv201001)
+
+In paragraph "LICENSE VALIDITY" the first sentence shall be replaced by:
+
+This Evaluation License Agreement is limited to a period defined in the
+license key file, or until terminated by either party.
+
+In case of conflicting terms between this PART G and your license agreement,
+the terms of this PART G shall apply.
+
+
+PART G: PRODUCT SPECIFIC TERMS for Tamino
+(INSv200702)
+
+List of Redistributable Programs for Tamino XML Server. The product distribution
+contains programs that you may redistribute with your application. The names
+of these redistributable programs and their locations after Tamino XML Server
+has been installed are as follows ("<InstallDir>" refers to the Tamino XML
+Server installation directory):
+
+Tamino API for Java (<InstallDir>/SDK/TaminoAPI4J)
+
+Tamino API for .NET (<InstallDir>/SDK/TaminoAPI4DotNET)
+
+Tamino API for C (<InstallDir>/SDK/TaminoAPI4C)
+
+
+PART G: PRODUCT SPECIFIC TERMS for CentraSite
+(INMv200912)
+
+G1 - Usage of WebDAV
+
+Licensee of the CentraSite Community Edition may not use the CentraSite
+Repository via the WebDAV interface to store or extend data assets except
+through applications of CentraSite Community sponsors.
+
+G2 - Usage of Design GUI
+
+Licensee of any CentraSite Edition may not use the integrated Application
+Designer's UI development components other than for the intended creation
+of CentraSite plug-ins.
+
+G3 - Usage of Federation Capabilities
+
+Generating a single, logical view on distributed CentraSite
+Registries/Repositories or other UDDI registries (Federation Capabilities)
+is exclusive to CentraSite ActiveSOA Edition licensees. Community Edition
+licensees are not entitled to use the built-in Federation Capabilities,
+which might not be (technically) available with future Community Edition
+updates and/or versions.
+
+
+PART G: PRODUCT SPECIFIC TERMS for Universal Messaging
+
+G1 - Benchmarking 
+
+It is a material term that you shall not use the Software for benchmarking
+or similar performance-related testing purposes without the express written
+consent of Software AG.
+
+If Software AG consents to your using the Software for any benchmarking or
+similar performance-related testing purposes, you shall not publish or disclose
+to a third party the outcomes or results of any such exercise, or any
+information derived from the outcomes or results of such exercise, without the
+additional express written consent of Software AG. 
+
+
+PART G: PRODUCT SPECIFIC TERMS for Terracotta
+ 
+G1 - Usage of Terracotta with Integration Server, Business Process Management, 
+CloudStreams, Enterprise Gateway, Mediator, Optimize, API Gateway and OneData.
+ 
+Licensees of webMethods who have  not explicitly licensed Terracotta BigMemory 
+may use Terracotta with the following restrictions: 
+
+Clustering:   Terracotta BigMemory must be configured in Hybrid mode. Changing
+              the mode in tc-config.xml from Hybrid to anything else requires 
+              purchase of a BigMemory license. Only a single stripe with one
+              active and one mirror node is allowed in each cluster; more will
+              require additional licensing. 
+Data Storage: Custom caches must be created locally and on-heap (i.e., not 
+              off-heap or distributed). Off-heap data caching either in the 
+              local cache (Ehcache) or the distributed cache requires a 
+              BigMemory license.
+
+
+PART G: PRODUCT SPECIFIC TERMS for Apama Sample Files
+
+G1 - Permission is hereby granted, free of charge, to any person obtaining a copy
+of the Apama Sample Files, to deal in the Product without restriction, including
+without limitation the rights to use, copy, modify, merge, publish, distribute, 
+sublicense, and/or sell copies of the Product, and to permit persons to whom the
+Software is furnished to do so, subject to the following conditions:
+
+The following copyright notice: "(c) Copyright 2019 Software AG, Darmstadt, Germany
+and/or Software AG USA Inc., Reston, VA, USA and/or its subsidiaries and/or its 
+affiliates and/or their licensors" and this permission notice shall be included in all
+copies or substantial portions of the Product.
+
+
+PART G - PRODUCT SPECIFIC TERMS for Apama Core Community Edition (Apama Core CE)
+
+Notwithstanding the provisions of PART E, section "THE LICENSE", you may distribute
+- either stand-alone or integrated into your or any third party intellectual property
+as a combined product - the Apama Core CE Product to third parties, provided that 
+you do not charge any fee (including but not limited to distribution and maintenance
+fees) and you undertake to oblige any third party to further distribute the stand-alone
+or combined Product solely in accordance with the terms of this license agreement 
+(including distribution on a free of charge basis only).
+Any commercial distribution of the stand-alone or combined Product to any third party
+requires you to obtain a commercial re-selling or OEM license from Software AG.
+
+
+PART G: PRODUCT SPECIFIC TERMS for MashZone NextGen 
+ 
+G1 - Usage of MashZone NextGen with Process & Integration software
+
+Licensees of Business Process Management Suite or CloudStreams Bundle or Active Transfer
+Bundle who have not explicitly purchased a separate, full license for MashZone NextGen
+may use MashZone NextGen with the following restrictions:
+
+- Dashboards may only be viewed, dashboards cannot be created or modified without a
+  separate license for MashZone NextGen.
+
+
+PART G: PRODUCT SPECIFIC TERMS for EntireX
+
+For Customers holding a license for EntireX (EXX) or EntireX Link (EXXLI) on Windows,
+Linux and Unix, a restricted license of webMethods Integration Server (PIE) will be 
+included starting with version 10.3 of EntireX. For that license of webMethods Integration
+Server (PIE) the following usage restrictions apply:
+* PIE and the EntireX components of this license have to run on one and the same identical
+  platform/machine.
+* Usage is granted for integration scenarios created by and running via EntireX only.
+* The above integration scenarios are restricted to calling REST resources and Web services
+  on the PIE side, and integration of Natural, COBOL or PLI programs on the other side.
+* Customers also holding other licenses for webMethods Integration Server (PIE) shall not
+  be authorized to move any workload to instances of their restricted license of PIE included
+  with any EntireX release.
+
+
+Part G:  PRODUCT SPECIFIC TERMS for NaturalONE and the Natural Development Server
+
+With Natural version 9 on Mainframe, Unix and Linux, NaturalONE (with Natural Development
+Server) will become the default development environment and the green-screen (character-based)
+Natural Editor will be disabled by default. 
+With getting NaturalONE and the Natural Development Server for free, customers agree that the
+Natural editors (program editor, data editor and map editor) are disabled.
+The free NaturalONE and Natural Development Server licenses as integrated part of Natural can
+be activated with the Natural (NAT) license key. If you run EntireX components with a
+Natural (NAT) or NaturalONE (ONE) license, then EntireX shall only be used for development
+purposes and not for production. The EntireX components have to run on the same identical 
+platform/machine where NaturalONE is running.
+
+
+
+
+END OF LEGAL NOTICES     

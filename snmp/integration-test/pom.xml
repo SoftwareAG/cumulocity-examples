@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>c8y.agents</groupId>
+        <artifactId>snmp-agent</artifactId>
+        <version>1006.3.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>snmp-integration-test</artifactId>
+    <name>Cumulocity :: Agents :: SNMP Agent :: Integration Tests</name>
+    <description>SNMP integration tests</description>
+    <packaging>pom</packaging>
+
+    <properties>
+        <skip.tests>true</skip.tests>
+    </properties>
+
+    <profiles>
+        <profile>
+            <id>integration-tests</id>
+            <properties>
+                <skip.tests>false</skip.tests>
+            </properties>
+        </profile>
+    </profiles>
+
+    <modules>
+        <module>snmp-device-simulation</module>
+        <module>cucumbers</module>
+    </modules>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <skipTests>${skip.tests}</skipTests>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

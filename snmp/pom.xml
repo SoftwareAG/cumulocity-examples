@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>c8y.agents</groupId>
+		<artifactId>c8y-agents</artifactId>
+		<version>1006.3.0-SNAPSHOT</version>
+	</parent>
+
+	<name>Cumulocity :: Agents :: SNMP Agent</name>
+	<description>Cumulocity SNMP Agent</description>
+	<artifactId>snmp-agent</artifactId>
+	<packaging>pom</packaging>
+
+	<modules>
+		<module>snmp-device-gateway</module>
+		<module>integration-test</module>
+	</modules>
+
+	<properties>
+		<snmp4j.version>2.8.0</snmp4j.version>
+		<spring.boot.version>2.1.7.RELEASE</spring.boot.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<cometd.version>3.0.10</cometd.version>
+		<jetty.version>9.0.0.v20130308</jetty.version>
+		<chronicle.queue.version>5.17.28</chronicle.queue.version>
+		<chronicle.map.version>3.17.6</chronicle.map.version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.yaml</groupId>
+					<artifactId>snakeyaml</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+	</dependencies>
+
+	<dependencyManagement>
+		<dependencies>
+			<!--Spring Boot dependencies -->
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-dependencies</artifactId>
+				<version>${spring.boot.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter</artifactId>
+				<version>${spring.boot.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>jul-to-slf4j</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.apache.logging.log4j</groupId>
+						<artifactId>log4j-to-slf4j</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<!-- Cumulocity Dependencies -->
+			<dependency>
+				<groupId>com.nsn.cumulocity.clients-java</groupId>
+				<artifactId>java-client</artifactId>
+				<version>${c8y.clients.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.nsn.cumulocity.shared-components</groupId>
+				<artifactId>common-notification</artifactId>
+				<version>${c8y.core.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.nsn.cumulocity.model</groupId>
+				<artifactId>device-capability-model</artifactId>
+				<version>${c8y.core.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.nsn.cumulocity.model</groupId>
+				<artifactId>core-model</artifactId>
+				<version>${c8y.core.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.nsn.cumulocity.shared-components</groupId>
+				<artifactId>common-rest</artifactId>
+				<version>${c8y.core.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.nsn.cumulocity.dependencies.osgi</groupId>
+				<artifactId>svenson</artifactId>
+				<version>${svenson.version}-${c8y.core.version}</version>
+			</dependency>
+
+			<!-- Cometd -->
+			<dependency>
+				<groupId>org.cometd.java</groupId>
+				<artifactId>cometd-java-client</artifactId>
+				<version>${cometd.version}</version>
+				<exclusions>
+					<exclusion>
+						<artifactId>jetty-client</artifactId>
+						<groupId>org.eclipse.jetty</groupId>
+					</exclusion>
+					<exclusion>
+						<artifactId>jetty-io</artifactId>
+						<groupId>org.eclipse.jetty</groupId>
+					</exclusion>
+					<exclusion>
+						<artifactId>jetty-http</artifactId>
+						<groupId>org.eclipse.jetty</groupId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>org.cometd.java</groupId>
+				<artifactId>cometd-java-common</artifactId>
+				<version>${cometd.version}</version>
+			</dependency>
+
+			<!-- Jetty -->
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-util</artifactId>
+				<version>${jetty.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-continuation</artifactId>
+				<version>${jetty.version}</version>
+			</dependency>
+
+			<!-- Chronicle -->
+			<dependency>
+				<groupId>net.openhft</groupId>
+				<artifactId>chronicle-queue</artifactId>
+				<version>${chronicle.queue.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.openhft</groupId>
+				<artifactId>chronicle-map</artifactId>
+				<version>${chronicle.map.version}</version>
+			</dependency>
+
+			<!--SNMP4J -->
+			<dependency>
+				<groupId>org.snmp4j</groupId>
+				<artifactId>snmp4j</artifactId>
+				<version>${snmp4j.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+</project>

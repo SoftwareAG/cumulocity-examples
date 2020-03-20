@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<include
+		resource="org/springframework/boot/logging/logback/base.xml" />
+
+	<appender name="ROLLING-FILE"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${user.home}/.snmp/log/snmp-agent-gateway-server.log</file>
+
+		<encoder>
+			<pattern>${FILE_LOG_PATTERN}</pattern>
+		</encoder>
+
+		<rollingPolicy
+			class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+			<fileNamePattern>${user.home}/.snmp/log/snmp-agent-gateway-server-%d.%i.log</fileNamePattern>
+			<maxFileSize>50MB</maxFileSize>
+		</rollingPolicy>
+	</appender>
+
+	<logger name="org.springframework" level="INFO" />
+	<logger name="com.cumulocity.snmp" level="DEBUG" />
+
+	<root level="INFO">
+		<appender-ref ref="ROLLING-FILE" />
+	</root>
+</configuration>
