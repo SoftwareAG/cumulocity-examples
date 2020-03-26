@@ -1,3 +1,5 @@
+The Java agent in this repository is obsolete. For devices, please use SmartREST 2 [https://cumulocity.com/guides/device-sdk/mqtt/]. For microservices, please use the Microservices SDK [https://cumulocity.com/guides/microservice-sdk/introduction/].
+
 This repository contains an example Java Agent with support for Raspberry Pi, Linux, Windows and Mac systems. 
 It consists of the following modules: 
 
