@@ -4,7 +4,7 @@ set -e
 #/var/lib/jenkins/bin/deploy2yum.sh -p $(find ./ -name *.rpm)
 if [ "!$1" = "!release" ]
 then
-/var/jenkins_home/bin/deploy2yum.sh -p $(find ./ -name *.rpm)
+/var/jenkins_home/bin/deploy2yum.sh -p $(find ./ -name *.rpm| grep -v SNAPSHOT)
 fi
 if [ "!$1" = "!snapshot" ]
 then
