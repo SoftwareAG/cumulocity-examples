@@ -8,7 +8,7 @@
     <parent>
         <groupId>c8y.example</groupId>
         <artifactId>snmp</artifactId>
-        <version>1006.3.0</version>
+        <version>1006.3.0-SNAPSHOT</version>
     </parent>
 
     <name>Cumulocity :: Examples :: SNMP :: Agent Gateway</name>
@@ -91,13 +91,34 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring.boot.version}</version>
+            </plugin>
+            <plugin>
                 <groupId>com.nsn.cumulocity.clients-java</groupId>
                 <artifactId>microservice-package-maven-plugin</artifactId>
                 <version>${project.version}</version>
-                <configuration>
-                    <rpmSkip>false</rpmSkip>
-                    <containerSkip>true</containerSkip>
-                </configuration>
+                <executions>
+                    <execution>
+                        <id>package</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>package</goal>
+                        </goals>
+                        <configuration>
+                            <rpmSkip>false</rpmSkip>
+                            <containerSkip>true</containerSkip>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>push</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>push</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
