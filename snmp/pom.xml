@@ -6,22 +6,33 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>c8y.agents</groupId>
-		<artifactId>c8y-agents</artifactId>
-		<version>1006.3.0-SNAPSHOT</version>
+		<groupId>c8y.example</groupId>
+		<artifactId>c8y-examples</artifactId>
+		<version>1006.3.0</version>
 	</parent>
 
-	<name>Cumulocity :: Agents :: SNMP Agent</name>
-	<description>Cumulocity SNMP Agent</description>
-	<artifactId>snmp-agent</artifactId>
+	<name>Cumulocity :: Examples :: SNMP</name>
+	<description>Cumulocity SNMP</description>
+
+	<artifactId>snmp</artifactId>
 	<packaging>pom</packaging>
 
 	<modules>
 		<module>snmp-device-gateway</module>
 		<module>integration-test</module>
+		<module>mib-parser</module>
 	</modules>
 
 	<properties>
+		<java.version>1.8</java.version>
+		<maven.compiler.target>${java.version}</maven.compiler.target>
+		<argLine>-Duser.language=en</argLine>
+
+		<c8y.core.version>${project.version}</c8y.core.version>
+		<c8y.microservice.version>${project.version}</c8y.microservice.version>
+		<c8y.clients.version>${project.version}</c8y.clients.version>
+
+		<svenson.version>1.5.8</svenson.version>
 		<snmp4j.version>2.8.0</snmp4j.version>
 		<spring.boot.version>2.1.7.RELEASE</spring.boot.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

@@ -20,34 +20,30 @@
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>1.5.19.RELEASE</version>
-        <relativePath />
-    </parent>
-    <groupId>c8y-mib-parser</groupId>
-    <artifactId>c8y-mib-parser</artifactId>
-    <version>1006.0.0-SNAPSHOT</version>
-    <name>Cumulocity MIB Parser Microservice</name>
-    <description>Cumulocity SNMP Agent :: MIB File Parser</description>
 
-    <scm>
-        <connection>scm:hg:ssh://hg@bitbucket.org/m2m/c8y-mib-parser</connection>
-        <tag>release/r1006.0.0</tag>
-    </scm>
+    <parent>
+        <groupId>c8y.example</groupId>
+        <artifactId>snmp</artifactId>
+        <version>1006.3.0</version>
+    </parent>
+
+    <name>Cumulocity :: Examples :: SNMP :: MIB Parser Microservice</name>
+    <description>Microservice for MIB File Parsing </description>
+
+    <!--<groupId>c8y-mib-parser</groupId>-->
+    <artifactId>snmp-mib-parser</artifactId>
 
     <properties>
-        <nexus.url>http://localhost:8080</nexus.url>
         <package.name>mibparser</package.name>
         <package.directory>mibparser</package.directory>
         <start-class>com.cumulocity.mibparser.MibParserApplication</start-class>
-        <java.version>1.7</java.version>
+        <java.version>1.8</java.version>
         <maven-compiler-plugin>3.1</maven-compiler-plugin>
         <mibble.version>2.10.1</mibble.version>
         <mibble.grammatica.version>1.6</mibble.grammatica.version>
         <lombok.version>1.18.4</lombok.version>
         <jackson.version>2.9.9</jackson.version>
+        <spring.boot.version>1.5.19.RELEASE</spring.boot.version>
     </properties>
 
     <dependencies>
@@ -124,10 +120,18 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring.boot.version}</version>
                 <configuration>
                     <includeSystemScope>true</includeSystemScope>
                     <executable>true</executable>
                 </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
 
             <!-- Set a JDK compiler level -->
@@ -145,6 +149,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
+                <version>3.2.3</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -154,9 +159,11 @@
                     </execution>
                 </executions>
             </plugin>
+
             <plugin>
                 <groupId>com.nsn.cumulocity.dependencies</groupId>
                 <artifactId>3rd-license-maven-plugin</artifactId>
+                <version>${project.version}</version>
                 <executions>
                     <execution>
                         <id>3rd-license-generate</id>
@@ -171,12 +178,14 @@
                     </execution>
                 </executions>
             </plugin>
+
             <plugin>
                 <groupId>com.nsn.cumulocity.clients-java</groupId>
                 <artifactId>microservice-package-maven-plugin</artifactId>
+                <version>${project.version}</version>
                 <executions>
                     <execution>
-                        <id>3rd-license-generate</id>
+                        <id>package</id>
                         <phase>package</phase>
                         <goals>
                             <goal>package</goal>
@@ -185,19 +194,23 @@
                             <rpmSkip>false</rpmSkip>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>push</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>push</goal>
+                        </goals>
+                    </execution>
                 </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <forkCount>2</forkCount>
+                </configuration>
             </plugin>
         </plugins>
     </build>
-
-    <distributionManagement>
-        <snapshotRepository>
-            <id>snapshot</id>
-            <url>${nexus.url}/nexus/content/repositories/snapshots/</url>
-        </snapshotRepository>
-        <repository>
-            <id>release</id>
-            <url>${nexus.url}/nexus/content/repositories/releases/</url>
-        </repository>
-    </distributionManagement>
 </project>
