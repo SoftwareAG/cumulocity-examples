@@ -43,7 +43,6 @@
         <mibble.grammatica.version>1.6</mibble.grammatica.version>
         <lombok.version>1.18.4</lombok.version>
         <jackson.version>2.9.9</jackson.version>
-        <spring.boot.version>1.5.19.RELEASE</spring.boot.version>
     </properties>
 
     <dependencies>
@@ -79,7 +78,7 @@
             <artifactId>grammatica</artifactId>
             <version>${mibble.grammatica.version}</version>
             <scope>system</scope>
-            <systemPath>${basedir}/src/main/resources/lib/grammatica-${mibble.grammatica.version}.jar</systemPath>
+            <systemPath>${project.basedir}/src/main/resources/lib/grammatica-${mibble.grammatica.version}.jar</systemPath>
         </dependency>
 
         <dependency>
@@ -87,7 +86,7 @@
             <artifactId>mibble</artifactId>
             <version>${mibble.version}</version>
             <scope>system</scope>
-            <systemPath>${basedir}/src/main/resources/lib/mibble-parser-${mibble.version}.jar</systemPath>
+            <systemPath>${project.basedir}/src/main/resources/lib/mibble-parser-${mibble.version}.jar</systemPath>
         </dependency>
 
         <dependency>
