@@ -93,13 +93,13 @@
         <dependency>
             <groupId>com.nsn.cumulocity.clients-java</groupId>
             <artifactId>microservice-autoconfigure</artifactId>
-            <version>1006.0.0</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.nsn.cumulocity.clients-java</groupId>
             <artifactId>microservice-subscription</artifactId>
-            <version>1006.0.0</version>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 
@@ -191,7 +191,8 @@
                             <goal>package</goal>
                         </goals>
                         <configuration>
-                            <rpmSkip>false</rpmSkip>
+                            <rpmSkip>true</rpmSkip>
+                            <containerSkip>false</containerSkip>
                         </configuration>
                     </execution>
                     <execution>
