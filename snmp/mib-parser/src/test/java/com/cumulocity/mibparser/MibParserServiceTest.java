@@ -23,6 +23,7 @@ import com.cumulocity.mibparser.service.impl.MibParserServiceImpl;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.TestPropertySource;
@@ -35,10 +36,9 @@ import java.io.IOException;
 
 import static org.mockito.Mockito.mock;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
+@RunWith(MockitoJUnitRunner.class)
 @TestPropertySource(value = "/mibparser.properties", properties = {"logging.config="})
-public class MibParserServiceTests {
+public class MibParserServiceTest {
 
     @InjectMocks
     private MibParserServiceImpl mibParserService;
