@@ -1,40 +1,39 @@
-## Cumulocity MIB Parser Java ##
+## Cumulocity IoT SNMP MIB Parser ##
+
+This module consists of [Cumulocity IoT][1] based java microservice. Cumulocity IoT SNMP MIB Parser microservice helps in converting a Managed Information Base (MIB) file to a JSON representation which is then used to create a device protocol. 
+
+This microservice accepts a ZIP file which contains the top-level MIB file along with dependent MIB files and an index file named mib-index which contains the name of the top level MIB file. It exposes the REST endpoint `{{url}}/service/mibparser/mib/uploadzip`
+
+For more information on the usage of this microservice, refer to [SNMP Agent][2] section of the Cumulocity IoT user guide.
 
 
-This repository contains [Cumulocity][1] based java microservice. This service will accept zip file, extracts SNMP Trap information based on SMIv2 and converts it to Cumulocity based JSON.
+### Building ###
+Clone/download this repository and build using `mvn clean install`
 
-### How do I get set up? ###
+### How to deploy? ###
 
-* This microservice accepts zip file and REST endpoint will be `{{url}}/service/mibparser/mib/uploadzip`
-* Following items are expected inside the zip file
-	1. One or more main MIB files along with its dependent MIB files.
-	2. A text file named `mib-index.txt` should be added inside zip file which holds name of all main MIB files from which TRAP information should be extracted.
-	3. In `mib-index.txt` file, name of each main MIB file should be added in new line. 
-	    (Note: Comma seprated values not allowed)
-* Build project (Command: `mvn clean install`).
+#### Hosted deployment
+* After successfully building, you can find `Mibparser-<version>.zip` file in the build `target` folder.
+* Upload this zip file.
+* Refer to [Managing Applications][3] section of the Cumulocity IoT user guide for details on how to upload microservice into Cumulocity.
 
-### As uploading Microservice zip file
-* Clone/download this project and build.
-* After building successfully you can find `Mibparser-<version>.zip` file under `target` folder inside project folder.
-* Upload this zip file as it is. While uploading, select subscribe application once uploaded.
-* Refer this [link][2] on how to upload microservice into Cumulocity.
+#### External/legacy deployment (Execute as a Java process)
 
-### As Jar Execution
+##### Installation
+* You can find snmp-mib-parser RPM package in the build `target/rpm/c8y-mib-parser/RPMS/noarch/` folder.
+* Install the snmp-mib-parser RPM package. 
+  
+  Not required if you want to directly run the snmp-mib-parser jar file found in the build `target` folder. 
 * Create `.mibparser` folder in user home directory i.e. `${user.home}/.mibparser`.
 * Copy the `mibparer.properties` file from configuration folder to `.mibparser` folder.
-* Update details like `C8Y.baseURL` where it should point to and `server.port` on which port this service should run. 
-* For e.g `C8Y.baseURL=https://developers.cumulocity.com` and `server.port=6690`
-* Execute jar which is in target folder (Command: `java -jar <file-name>.jar`).
-* For further steps, go to `Post Jar/RPM Installation`
+* Update the properties, `C8Y.baseURL` to point to the Cumulocity instance and `server.port` to port on which this service should run.
 
-### As RPM Execution
-* Clone/download this project and build.
-* You can find rpm in `target/rpm/c8y-mib-parser/RPMS/noarch/` which can be installed.
-* For further steps, go to `Post Jar/RPM Installation`
-
-### Post Jar/RPM Installation
-* For standalone (jar/rpm) installations, one more step required. That is adding a tenant option for management tenant.
-* This can be done by sending a `POST` request on the Cumulocity platform.
+  For e.g `C8Y.baseURL=https://developers.cumulocity.com` and `server.port=6690`
+* Start the MIB Parser service using `java -jar <file-name>.jar`
+    
+##### Post Installation
+* For External/Legacy type deployments, one more step of adding a tenant option for management tenant is required.
+* This can be achieved by sending a `POST` request to the Cumulocity platform.
   
   POST `{{url}}/tenant/options`
   
@@ -51,10 +50,13 @@ This repository contains [Cumulocity][1] based java microservice. This service w
        "key": "microservice.url",
        "value": "https://developers.cumulocity.com:6690"
    }`
-* This microservice will be listed in the `Own application` under `Administration` tab.
-* User should subscribe this misroservice in order to use it. More information on how to subscribe application for the given user using REST interface can be found [here][3].
-* Above step can be achieved via user interface as well. `Administration` -> `Tenants` -> `Subtenants` -> `Select user` -> Click on `Application tab` -> Click `subscribe` on mouse hover `Mibparser` from the list of applications.
 
-[1]: http://www.cumulocity.com
-[2]: https://cumulocity.com/guides/users-guide/administration/#managing-applications
-[3]: https://cumulocity.com/guides/microservice-sdk/rest/
+
+Once the deployment is complete, the MIB Parser microservice will be listed as an `Own application` under `Administration` tab. Now you should subscribe your tenant to this misroservice in order to use the service. More information on how to subscribe application for the given tenant using REST interface can be found at [Microservice SDK][4] section of the Cumulocity IoT user guide. Subscription can also be achieved using the user interface. `Administration` -> `Tenants` -> `Subtenants` -> `Select user` -> Click on `Application tab` -> Click `subscribe` on mouse hover `Mibparser` from the list of applications.
+For more details, refer to [Managing Applications][3] section of the Cumulocity IoT user guide.
+
+[1]: https://www.softwareag.cloud/site/product/cumulocity-iot.html#/
+[2]: https://cumulocity.com/guides/users-guide/optional-services/#snmp
+[3]: https://cumulocity.com/guides/users-guide/administration/#managing-applications
+[4]: https://cumulocity.com/guides/microservice-sdk/rest/
+
