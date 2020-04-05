@@ -188,7 +188,7 @@
                             <goal>package</goal>
                         </goals>
                         <configuration>
-                            <rpmSkip>true</rpmSkip>
+                            <rpmSkip>false</rpmSkip>
                             <containerSkip>false</containerSkip>
                         </configuration>
                     </execution>
