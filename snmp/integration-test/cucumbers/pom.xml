@@ -78,7 +78,6 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.8</version>
-            <!--<optional>true</optional>-->
         </dependency>
         <dependency>
             <groupId>org.assertj</groupId>
