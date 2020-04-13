@@ -28,12 +28,9 @@
     <name>Cumulocity :: Examples :: SNMP :: MIB Parser Microservice</name>
     <description>Microservice for MIB File Parsing </description>
 
-    <!--<groupId>c8y-mib-parser</groupId>-->
     <artifactId>snmp-mib-parser</artifactId>
 
     <properties>
-        <package.name>mibparser</package.name>
-        <package.directory>mibparser</package.directory>
         <start-class>com.cumulocity.mibparser.MibParserApplication</start-class>
         <java.version>1.8</java.version>
         <maven-compiler-plugin>3.1</maven-compiler-plugin>
