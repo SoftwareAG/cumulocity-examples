@@ -13,17 +13,17 @@ Clone/download this repository and build using `mvn clean install`
 ### How to deploy? ###
 
 #### Hosted deployment
-* After successfully building, you can find `Mibparser-<version>.zip` file in the build `target` folder.
+* After successfully building, you can find `snmp-mib-parser-<version>.zip` file in the build `target` folder.
 * Upload this zip file.
 * Refer to [Managing Applications][3] section of the Cumulocity IoT user guide for details on how to upload microservice into Cumulocity.
 
 #### External/legacy deployment (Execute as a Java process)
 
 ##### Installation
-* You can find snmp-mib-parser RPM package in the build `target/rpm/c8y-mib-parser/RPMS/noarch/` folder.
+* You can find snmp-mib-parser-<version>-1.noarch.rpm RPM package in the build `target/rpm/c8y-mib-parser/RPMS/noarch/` folder.
 * Install the snmp-mib-parser RPM package. 
   
-  Not required if you want to directly run the snmp-mib-parser jar file found in the build `target` folder. 
+  Not required if you want to directly run the snmp-mib-parser-<version>.jar file found in the build `target` folder. 
 * Create `.mibparser` folder in user home directory i.e. `${user.home}/.mibparser`.
 * Copy the `mibparer.properties` file from configuration folder to `.mibparser` folder.
 * Update the properties, `C8Y.baseURL` to point to the Cumulocity instance and `server.port` to port on which this service should run.
