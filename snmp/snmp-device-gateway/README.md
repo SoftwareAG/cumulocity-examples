@@ -4,7 +4,7 @@ The SNMP agent is a stand-alone Java program that communicates with the SNMP ena
 
 ### Building ###
 Clone/download this repository and build using `mvn clean install`
-snmp-agent-gateway RPM package is generated under the build `target/rpm/c8y-mib-parser/RPMS/noarch/` folder.
+snmp-agent-gateway-<version>-1.noarch.rpm RPM package is generated under the `target/rpm/c8y-mib-parser/RPMS/noarch/` folder.
 
 For installation and usage details of the SNMP Agent Gateway, please reger to [SNMP][1] section of the Cumulocity IoT user guide.
 

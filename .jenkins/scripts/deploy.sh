@@ -24,6 +24,6 @@ then
     # Copy snmp-agent-gateway RPM and snmp-mib-parser's zip files to examples/snmp folder
     # Copy only the released files not the SNAPSHOT files
     YUM_DEST_DIR=/var/www/resources/examples/snmp
-    deploy $(find ./ -regextype egrep   -regex ".*snmp-agent-gateway-[0-9]+\.[0-9]+\.[0-9]+\.rpm")
+    deploy $(find ./ -regextype egrep   -regex ".*snmp-agent-gateway-[0-9]+\.[0-9]+\.[0-9]+-1\.noarch\.rpm")
     deploy $(find ./ -regextype egrep   -regex ".*snmp-mib-parser-[0-9]+\.[0-9]+\.[0-9]+\.zip")
 fi
