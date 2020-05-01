@@ -29,10 +29,6 @@ import net.openhft.chronicle.wire.DocumentContext;
 import net.openhft.chronicle.wire.NoDocumentContext;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.nio.file.attribute.FileTime;
 import java.util.Collection;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -44,11 +40,13 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 @Slf4j
 public abstract class AbstractQueue implements Queue {
 
+    private static final int ENQUEUE_RETRY_LIMIT = 3;
+
     private final String name;
     private final File persistenceFolder;
 
-    private final ChronicleQueue producerQueue;
-    private final ChronicleQueue consumerQueue;
+    private final ChronicleQueue chronicleQueue;
+
     private final ExcerptTailer tailer;
 
     private final ReadWriteLock LOCK_TO_ENSURE_NO_ONE_IS_ACCESSING_THE_QUEUE = new ReentrantReadWriteLock(true);
@@ -81,22 +79,19 @@ public abstract class AbstractQueue implements Queue {
         QueueFileShrinkManager.DISABLE_QUEUE_FILE_SHRINKING = Boolean.parseBoolean(
                 System.getProperty("chronicle.queue.disableFileShrinking", Boolean.TRUE.toString()));
 
-        // Create producer queue
-        this.producerQueue = SingleChronicleQueueBuilder
+        // Create producer/consumer queue
+        StoreFileListenerForDeletion storeFileListenerForDeletionOfReleasedFiles = new StoreFileListenerForDeletion(this.name);
+        this.chronicleQueue = SingleChronicleQueueBuilder
                 .single(persistenceFolder)
                 .rollCycle(RollCycles.MINUTELY)
+                .storeFileListener(storeFileListenerForDeletionOfReleasedFiles)
                 .build();
 
+        // Create a Tailer for the queue and later
+        // Queue Appenders are also acquired over the same
+        this.tailer = this.chronicleQueue.createTailer(this.name);
 
-        // Create reader queue
-        this.consumerQueue = SingleChronicleQueueBuilder
-                .single(persistenceFolder)
-                .rollCycle(RollCycles.MINUTELY)
-                .storeFileListener(new StoreFileListenerForDeletion(this.name))
-                .build();
-
-        // Create tailer
-        this.tailer = this.consumerQueue.createTailer(this.name);
+        storeFileListenerForDeletionOfReleasedFiles.setTailer(this.tailer);
     }
 
     public String getName() {
@@ -118,13 +113,33 @@ public abstract class AbstractQueue implements Queue {
         }
 
         LOCK_TO_ENSURE_NO_ONE_IS_ACCESSING_THE_QUEUE.readLock().lock();
-        try {
-            producerQueue.acquireAppender().writeDocument(message);
 
-            pauser.unpause();
-        } catch(Throwable t) {
-            log.error("Enqueue to the '{}' Queue, resulted in a timeout.", this.name, t);
-            throw t;
+        try {
+
+            // Retry the enqueue operation, in case of errors, usually due to
+            // the timeout errors thrown by Chronicle Queue implementation
+            // while acquiring some lock internally.
+            boolean retry = false;
+            int retryCount = 0;
+            do {
+                try {
+                    chronicleQueue.acquireAppender().writeDocument(message);
+                    retry = false;
+                } catch(Throwable t) {
+                    if(++retryCount < ENQUEUE_RETRY_LIMIT) {
+                        log.info("Enqueue to the '{}' Queue, resulted in a timeout. Retrying the enqueue operation, retry count {}.", this.name, retryCount);
+                        log.debug("Stacktrace:", t);
+                        retry = true;
+                    }
+                    else {
+                        log.error("Enqueue to the '{}' Queue, resulted in a timeout.", this.name, t);
+                        throw t;
+                    }
+                }
+
+                pauser.unpause();
+
+            } while(retry);
         } finally {
             LOCK_TO_ENSURE_NO_ONE_IS_ACCESSING_THE_QUEUE.readLock().unlock();
         }
@@ -279,8 +294,7 @@ public abstract class AbstractQueue implements Queue {
             try {
                 isClosed = true;
 
-                producerQueue.close();
-                consumerQueue.close();
+                chronicleQueue.close();
             } finally {
                 LOCK_TO_ENSURE_NO_ONE_IS_ACCESSING_THE_QUEUE.writeLock().unlock();
             }
@@ -303,9 +317,14 @@ public abstract class AbstractQueue implements Queue {
     static class StoreFileListenerForDeletion implements StoreFileListener {
 
         private final String queueName;
+        private ExcerptTailer tailer;
 
         StoreFileListenerForDeletion(String queueName) {
             this.queueName = queueName;
+        }
+
+        public void setTailer(ExcerptTailer tailer) {
+            this.tailer = tailer;
         }
 
         @Override
@@ -317,42 +336,37 @@ public abstract class AbstractQueue implements Queue {
         public void onReleased(int cycle, final File releasedFile) {
             log.trace("'{}' Queue, released the store file '{}' for cycle '{}'", queueName, releasedFile.getPath(), cycle);
 
-            try {
-                final FileTime creationTimeOfReleasedFile = Files.readAttributes(releasedFile.toPath(), BasicFileAttributes.class).creationTime();
+            if(cycle >= this.tailer.cycle()) {
+                // This means, the Tailer hasn't finished processing the file which is released.
+                // Note: This occurs when the Appender releases the current file to rollover,
+                // to write into a new file. Skip the file cleanup logic in this case.
 
-                Files.list(releasedFile.getParentFile().toPath())
-                        // Filter out folders and the metadata files. Basically select only files with '.cq4' extension
-                        .filter(fileInTheFolder -> {
-                            String fileName = fileInTheFolder.getFileName().toString().toLowerCase();
+                log.trace("File cleanup of the '{}' Queue skipped, as the Tailer is still at the cycle {}.", queueName, this.tailer.cycle());
+                return;
+            }
 
-                            return fileInTheFolder.toFile().isFile() && !fileName.startsWith("metadata") && fileName.endsWith(".cq4");
-                        })
+            final String releasedFileName = releasedFile.getName().toLowerCase();
 
-                        // Select the files which were created earlier than the creation time of the file which is being released now
-                        .filter(fileInTheFolder -> {
-                                    try {
-                                        return (Files.readAttributes(fileInTheFolder, BasicFileAttributes.class).creationTime().compareTo(creationTimeOfReleasedFile) < 0);
-                                    } catch (IOException ioe) {
-                                        log.error("Unexpected error while cleaning up old store files of the '{}' Queue", queueName, ioe);
-                                        return false;
-                                    }
-                                }
-                        )
+            File[] filesInTheFolder = releasedFile.getParentFile().listFiles((dir, name) -> {
+                File file = new File(dir, name);
+                String fileName = name.toLowerCase();
 
-                        // Delete the filtered files
-                        .forEach(fileInTheFolder -> {
-                            try {
-                                Files.delete(fileInTheFolder);
-                                log.trace("Deleted the old store file '{}' of the '{}' Queue", fileInTheFolder.toString(), queueName);
-                            } catch (IOException ioe) {
-                                // Here the exception can be ignored, as the handle to the file being deleted may still be held a Tailer.
-                                // This file will eventually be deleted in subsequent cleanup cycles.
-                                log.trace("Could not remove the old store file '{}' of the '{}' Queue", fileInTheFolder, queueName, ioe);
-                            }
-                        });
+                return file.isFile()
+                        && !fileName.startsWith("metadata") // Skip the metadata file
+                        && fileName.endsWith(".cq4")        // Skip files with extensions other than .cq4 (select only data files)
+                        && (fileName.compareTo(releasedFileName) < 0); // Select only files which are older than the file being released
+            });
 
-            } catch (IOException ioe) {
-                log.error("Unexpected error while cleaning up old store files of the '{}' Queue", queueName, ioe);
+            if(filesInTheFolder != null) {
+                for (File fileToDelete : filesInTheFolder) {
+                    if(fileToDelete.delete()) {
+                        log.trace("Deleted the old store file '{}' of the '{}' Queue", fileToDelete.toString(), queueName);
+                    }
+//                else {
+//                    // This case can be ignored, as the handle to the file being deleted may still be held by a Tailer.
+//                    // This file will eventually be deleted in subsequent cleanup cycles.
+//                }
+                }
             }
         }
     }

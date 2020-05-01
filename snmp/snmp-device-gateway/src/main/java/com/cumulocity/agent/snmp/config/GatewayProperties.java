@@ -52,7 +52,7 @@ public class GatewayProperties {
 	@Value("#{'${gateway.threadPool.size:30}'.trim()}")
 	private int gatewayThreadPoolSize;
 
-	@Value("#{'${gateway.maxBatch.size:200}'.trim()}")
+	@Value("#{'${gateway.maxBatch.size:500}'.trim()}")
 	private int gatewayMaxBatchSize;
 
 	@Value("#{'${gateway.publish.retryLimit:5}'.trim()}")

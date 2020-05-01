@@ -86,9 +86,9 @@ public class MeasurementSubscriberTest {
 
     @Test
     public void shouldGetDefaultBatchSize() {
-    	when(gatewayProperties.getGatewayMaxBatchSize()).thenReturn(200);
+    	when(gatewayProperties.getGatewayMaxBatchSize()).thenReturn(500);
 
-        assertEquals(200, measurementSubscriber.getBatchSize());
+        assertEquals(500, measurementSubscriber.getBatchSize());
     }
 
     @Test
