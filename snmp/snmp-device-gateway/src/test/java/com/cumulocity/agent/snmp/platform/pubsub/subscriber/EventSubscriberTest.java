@@ -76,7 +76,7 @@ public class EventSubscriberTest {
 
     @Test(expected = UnsupportedOperationException.class)
     public void shouldFailWithAnExceptionIfBatchingIsTriedForEvents() {
-        assertEquals(200, eventSubscriber.getBatchSize());
+        eventSubscriber.getBatchSize();
     }
 
     @Test

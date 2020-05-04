@@ -1,20 +1,3 @@
-/*
- * Copyright © 2012 - 2017 Cumulocity GmbH.
- * Copyright © 2017 - 2020 Software AG, Darmstadt, Germany and/or its licensors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.cumulocity.agent.snmp.platform.pubsub.service;
 
 import com.cumulocity.agent.snmp.config.GatewayProperties;
@@ -114,15 +97,18 @@ public class PubSubTest {
         long transmitRateInSeconds = 10;
         Mockito.when(subscriber.getTransmitRateInSeconds()).thenReturn(Long.valueOf(transmitRateInSeconds));
 
+        int concurrentSubscriptionsCount = 3;
+        Mockito.when(subscriber.getConcurrentSubscriptionsCount()).thenReturn(Integer.valueOf(concurrentSubscriptionsCount));
+
         ScheduledFuture<?> mockScheduledFuture = Mockito.mock(ScheduledFuture.class);
         Mockito.doReturn(mockScheduledFuture).when(taskScheduler).scheduleWithFixedDelay(Mockito.any(Subscription.class), Mockito.any(Duration.class));
 
         pubSub.subscribe(subscriber);
 
-        Mockito.verify(taskScheduler, Mockito.times(1)).scheduleWithFixedDelay(subscriptionArgumentCaptor.capture(), Mockito.eq(Duration.ofSeconds(transmitRateInSeconds)));
+        Mockito.verify(taskScheduler, Mockito.times(concurrentSubscriptionsCount)).scheduleWithFixedDelay(subscriptionArgumentCaptor.capture(), Mockito.eq(Duration.ofSeconds(transmitRateInSeconds)));
         assertEquals(subscriber, subscriptionArgumentCaptor.getValue().getSubscriber());
 
-        assertEquals(1, ((ScheduledFuture[])ReflectionTestUtils.getField(pubSub, "subscriptions")).length);
+        assertEquals(concurrentSubscriptionsCount, ((ScheduledFuture[])ReflectionTestUtils.getField(pubSub, "subscriptions")).length);
     }
 
     @Test

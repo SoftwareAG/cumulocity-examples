@@ -101,6 +101,9 @@ public class PlatformSubscriber {
 							}
 						}
 					});
+
+			log.info("Enabled the subscription for inventory changes for the gateway device with name '{}' and id '{}'.",
+					gatewayDevice.getName(), gatewayDevice.getId().getValue());
 		} catch (SDKException ex) {
 			gatewayNotificationSubscriber = null;
 

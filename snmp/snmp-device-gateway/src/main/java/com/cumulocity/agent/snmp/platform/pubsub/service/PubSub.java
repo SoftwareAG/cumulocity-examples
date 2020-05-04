@@ -66,19 +66,22 @@ public abstract class PubSub<Q extends Queue> {
             throw new IllegalStateException("Duplicate subscriptions.");
         }
 
+        Subscription newSubscription = null;
+        Duration delayDuration = null;
         if(subscriber.isBatchingSupported() && subscriber.getTransmitRateInSeconds() > 0) {
-            subscriptions = new ScheduledFuture[1];
-            Subscription newSubscription = new BatchMessagesSubscription(queue, subscriber, gatewayProperties.getGatewayPublishRetryLimit());
-            subscriptions[0] = taskScheduler.scheduleWithFixedDelay(newSubscription, Duration.ofSeconds(subscriber.getTransmitRateInSeconds()));
+            newSubscription = new BatchMessagesSubscription(queue, subscriber, gatewayProperties.getGatewayPublishRetryLimit());
+            delayDuration = Duration.ofSeconds(subscriber.getTransmitRateInSeconds());
         }
         else {
-            int concurrentSubscriptionsCount = subscriber.getConcurrentSubscriptionsCount();
-            if(concurrentSubscriptionsCount > 0) {
-                subscriptions = new ScheduledFuture[concurrentSubscriptionsCount];
-                Subscription newSubscription = new SingleMessageSubscription(queue, subscriber, gatewayProperties.getGatewayPublishRetryLimit());
-                for(int i = 0; i< concurrentSubscriptionsCount; i++) {
-                    subscriptions[i] = taskScheduler.scheduleWithFixedDelay(newSubscription, Duration.ofMillis(1));
-                }
+            newSubscription = new SingleMessageSubscription(queue, subscriber, gatewayProperties.getGatewayPublishRetryLimit());
+            delayDuration = Duration.ofMillis(1);
+        }
+
+        int concurrentSubscriptionsCount = subscriber.getConcurrentSubscriptionsCount();
+        if(concurrentSubscriptionsCount > 0) {
+            subscriptions = new ScheduledFuture[concurrentSubscriptionsCount];
+            for(int i = 0; i< concurrentSubscriptionsCount; i++) {
+                subscriptions[i] = taskScheduler.scheduleWithFixedDelay(newSubscription, delayDuration);
             }
         }
 

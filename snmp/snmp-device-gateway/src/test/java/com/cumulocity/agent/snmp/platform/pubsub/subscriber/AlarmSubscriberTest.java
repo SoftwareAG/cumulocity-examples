@@ -77,7 +77,7 @@ public class AlarmSubscriberTest {
 
 	@Test(expected = UnsupportedOperationException.class)
 	public void shouldFailWithAnExceptionIfBatchingIsTriedForAlarms() {
-		assertEquals(200, alarmSubscriber.getBatchSize());
+		alarmSubscriber.getBatchSize();
 	}
 
 	@Test
