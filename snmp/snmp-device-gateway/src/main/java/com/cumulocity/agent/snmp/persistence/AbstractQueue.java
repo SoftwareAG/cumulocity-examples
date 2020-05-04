@@ -41,7 +41,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 @Slf4j
 public abstract class AbstractQueue implements Queue {
 
-    private static final int ENQUEUE_RETRY_LIMIT = 3;
+    private static final int ENQUEUE_RETRY_LIMIT = 5;
 
     private final String name;
     private final File persistenceFolder;
