@@ -17,6 +17,7 @@
 
 package com.cumulocity.agent.snmp.persistence;
 
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.openhft.chronicle.queue.ChronicleQueue;
 import net.openhft.chronicle.queue.ExcerptTailer;
@@ -119,7 +120,7 @@ public abstract class AbstractQueue implements Queue {
             // Retry the enqueue operation, in case of errors, usually due to
             // the timeout errors thrown by Chronicle Queue implementation
             // while acquiring some lock internally.
-            boolean retry = false;
+            boolean retry;
             int retryCount = 0;
             do {
                 try {
@@ -317,14 +318,12 @@ public abstract class AbstractQueue implements Queue {
     static class StoreFileListenerForDeletion implements StoreFileListener {
 
         private final String queueName;
+
+        @Setter
         private ExcerptTailer tailer;
 
         StoreFileListenerForDeletion(String queueName) {
             this.queueName = queueName;
-        }
-
-        public void setTailer(ExcerptTailer tailer) {
-            this.tailer = tailer;
         }
 
         @Override
