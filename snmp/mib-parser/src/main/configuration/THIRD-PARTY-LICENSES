@@ -15,7 +15,7 @@ commons-io-2.4.jar, commons-io:commons-io:2.4, "Copyright (c) 2002-2012, The Apa
 commons-lang-2.6.jar, commons-lang:commons-lang:2.6, "Copyright (c) 2001-2011, The Apache Software Foundation", Apache License Version 2.0, UNKNOWN, -
 commons-logging-1.0.4.jar, UNKNOWN:commons-logging:1.0.4, "Copyright (c) 2003-2014, The Apache Software Foundation", Apache License Version 2.0, UNKNOWN, -
 grammatica-1.6.jar, UNKNOWN:grammatica:1.6, UNKNOWN, ==================, UNKNOWN, UNKNOWN
-guava-18.0.jar, com.google.guava:guava:18.0, Copyright (C) 2010-2017 The Guava Authors, Apache License Version 2.0, UNKNOWN, None
+guava-21.0.jar, com.google.guava:guava:21.0, Copyright (C) 2010-2018 The Guava Authors, Apache License Version 2.0, UNKNOWN, None
 hibernate-validator-6.0.18.Final.jar, org.hibernate.validator:hibernate-validator:6.0.18.Final, "Copyright 2019, Red Hat, Inc.", Apache License Version 2.0, UNKNOWN, UNKNOWN
 jackson-annotations-2.9.0.jar, com.fasterxml.jackson.core:jackson-annotations:2.9.0, Copyright (c) 2007- Tatu Saloranta, Apache License Version 2.0, UNKNOWN, -
 jackson-core-2.9.9.jar, com.fasterxml.jackson.core:jackson-core:2.9.9, Copyright (c) 2007- Tatu Saloranta, Apache License Version 2.0, UNKNOWN, -
