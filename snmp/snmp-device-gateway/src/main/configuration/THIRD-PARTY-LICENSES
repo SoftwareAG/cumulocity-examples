@@ -22,7 +22,7 @@ commons-io-2.4.jar, commons-io:commons-io:2.4, "Copyright (c) 2002-2012, The Apa
 commons-lang-2.6.jar, commons-lang:commons-lang:2.6, "Copyright (c) 2001-2011, The Apache Software Foundation", Apache License Version 2.0, UNKNOWN, -
 commons-logging-1.0.4.jar, UNKNOWN:commons-logging:1.0.4, "Copyright (c) 2003-2014, The Apache Software Foundation", Apache License Version 2.0, UNKNOWN, -
 compiler-2.3.4.jar, net.openhft:compiler:2.3.4, UNKNOWN, Apache License Version 2.0, UNKNOWN, UNKNOWN
-guava-18.0.jar, com.google.guava:guava:18.0, Copyright (C) 2010-2017 The Guava Authors, Apache License Version 2.0, UNKNOWN, None
+guava-21.0.jar, com.google.guava:guava:21.0, Copyright (C) 2010-2018 The Guava Authors, Apache License Version 2.0, UNKNOWN, None
 jackson-annotations-2.9.0.jar, com.fasterxml.jackson.core:jackson-annotations:2.9.0, Copyright (c) 2007- Tatu Saloranta, Apache License Version 2.0, UNKNOWN, -
 jackson-core-2.9.9.jar, com.fasterxml.jackson.core:jackson-core:2.9.9, Copyright (c) 2007- Tatu Saloranta, Apache License Version 2.0, UNKNOWN, -
 jackson-databind-2.9.9.jar, com.fasterxml.jackson.core:jackson-databind:2.9.9, Copyright (c) 2007- Tatu Saloranta, Apache License Version 2.0, UNKNOWN, -
