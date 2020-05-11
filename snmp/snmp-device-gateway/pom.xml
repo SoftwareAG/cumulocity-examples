@@ -19,7 +19,6 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -119,10 +118,44 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <!-- Make this jar executable -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>3.2.3</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>exploded</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>com.nsn.cumulocity.dependencies</groupId>
+                <artifactId>3rd-license-maven-plugin</artifactId>
+                <version>${c8y.version}</version>
+                <executions>
+                    <execution>
+                        <id>3rd-license-generate</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>3rd-license-generate</goal>
+                        </goals>
+                        <configuration>
+                            <thirdPartyLicenseFilePath>${project.basedir}/src/main/configuration/</thirdPartyLicenseFilePath>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
             <plugin>
                 <groupId>com.nsn.cumulocity.clients-java</groupId>
                 <artifactId>microservice-package-maven-plugin</artifactId>
-                <version>${project.version}</version>
+                <version>${c8y.version}</version>
                 <executions>
                     <execution>
                         <id>package</id>
@@ -144,6 +177,7 @@
                     </execution>
                 </executions>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>

@@ -17,15 +17,16 @@
 
 package com.cumulocity.mibparser;
 
-import com.cumulocity.mibparser.service.impl.MibParserServiceImpl;
+import com.cumulocity.mibparser.service.MibParserService;
+import com.cumulocity.mibparser.service.RegisterConversionService;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -35,13 +36,17 @@ import java.io.IOException;
 import static org.mockito.Mockito.mock;
 
 @RunWith(MockitoJUnitRunner.class)
-@TestPropertySource(value = "/mibparser.properties", properties = {"logging.config="})
+@TestPropertySource(value = "/application.properties", properties = {"logging.config="})
 public class MibParserServiceTest {
 
+    @Spy
+    private RegisterConversionService registerConversionService;
+
     @InjectMocks
-    private MibParserServiceImpl mibParserService;
+    private MibParserService mibParserService;
 
     private String tenant = "testtenant";
+
     private String username = "testusername";
 
     @Test(expected = NullPointerException.class)
