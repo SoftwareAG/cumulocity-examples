@@ -1,0 +1,72 @@
+fileName, groupId:artifactId:version, copyright, license, usOrigin, cryptography
+affinity-3.1.11.jar, net.openhft:affinity:3.1.11, UNKNOWN, Apache License Version 2.0, UNKNOWN, UNKNOWN
+annotations-12.0.jar, UNKNOWN:annotations:12.0, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN
+bayeux-api-3.0.10.jar, org.cometd.java:bayeux-api:3.0.10, "Copyright (c) 2008-2017, Dojo Foundation", Apache License Version 2.0, UNKNOWN, -
+chronicle-algorithms-2.17.0.jar, net.openhft:chronicle-algorithms:2.17.0, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN
+chronicle-bytes-2.17.40.jar, net.openhft:chronicle-bytes:2.17.40, UNKNOWN, Apache License Version 2.0, UNKNOWN, UNKNOWN
+chronicle-core-2.17.28.jar, net.openhft:chronicle-core:2.17.28, UNKNOWN, Apache License Version 2.0, UNKNOWN, UNKNOWN
+chronicle-map-3.17.6.jar, net.openhft:chronicle-map:3.17.6, UNKNOWN, Apache License Version 2.0, UNKNOWN, UNKNOWN
+chronicle-queue-5.17.28.jar, net.openhft:chronicle-queue:5.17.28, UNKNOWN, Apache License Version 2.0, UNKNOWN, UNKNOWN
+chronicle-threads-2.17.13.jar, net.openhft:chronicle-threads:2.17.13, UNKNOWN, Apache License Version 2.0, UNKNOWN, UNKNOWN
+chronicle-values-2.17.2.jar, net.openhft:chronicle-values:2.17.2, UNKNOWN, Apache License Version 2.0, UNKNOWN, UNKNOWN
+chronicle-wire-2.17.53.jar, net.openhft:chronicle-wire:2.17.53, UNKNOWN, Apache License Version 2.0, UNKNOWN, UNKNOWN
+com.springsource.javax.validation-1.0.0.GA.jar, javax.validation:validation-api:1.0.0.GA, "Copyright (c) 2007-2009 Red Hat, Inc", Apache License Version 2.0, UNKNOWN, -
+cometd-java-client-3.0.10.jar, org.cometd.java:cometd-java-client:3.0.10, "Copyright (c) 2008-2017, Dojo Foundation", Apache License Version 2.0, UNKNOWN, None
+cometd-java-common-3.0.10.jar, org.cometd.java:cometd-java-common:3.0.10, "Copyright (c) 2008-2017, Dojo Foundation", Apache License Version 2.0, UNKNOWN, -
+commons-beanutils-1.9.4.jar, commons-beanutils:commons-beanutils:1.9.4, "Copyright (c) 2000-2014, The Apache Software Foundation", Apache License Version 2.0, UNKNOWN, -
+commons-cli-1.4.jar, commons-cli:commons-cli:1.4, The Apache Software Foundation, Apache License Version 2.0, UNKNOWN, UNKNOWN
+commons-codec-1.11.jar, commons-codec:commons-codec:1.11, "Copyright (c) 2002-2017, The Apache Software Foundation", Apache License Version 2.0, UNKNOWN, None
+commons-collections-3.2.2.jar, commons-collections:commons-collections:3.2.2, "Copyright (c) 2001-2008, The Apache Software Foundation", Apache License Version 2.0, UNKNOWN, -
+commons-httpclient-3.1.jar, commons-httpclient:commons-httpclient:3.1, "Copyright (c) 1999-2007, The Apache Software Foundation", Apache License Version 2.0, UNKNOWN, Limited
+commons-io-2.4.jar, commons-io:commons-io:2.4, "Copyright (c) 2002-2012, The Apache Software Foundation", Apache License Version 2.0, UNKNOWN, None
+commons-lang-2.6.jar, commons-lang:commons-lang:2.6, "Copyright (c) 2001-2011, The Apache Software Foundation", Apache License Version 2.0, UNKNOWN, -
+commons-logging-1.0.4.jar, UNKNOWN:commons-logging:1.0.4, "Copyright (c) 2003-2014, The Apache Software Foundation", Apache License Version 2.0, UNKNOWN, -
+compiler-2.3.4.jar, net.openhft:compiler:2.3.4, UNKNOWN, Apache License Version 2.0, UNKNOWN, UNKNOWN
+guava-21.0.jar, com.google.guava:guava:21.0, Copyright (C) 2010-2018 The Guava Authors, Apache License Version 2.0, UNKNOWN, None
+jackson-annotations-2.9.0.jar, com.fasterxml.jackson.core:jackson-annotations:2.9.0, Copyright (c) 2007- Tatu Saloranta, Apache License Version 2.0, UNKNOWN, -
+jackson-core-2.9.9.jar, com.fasterxml.jackson.core:jackson-core:2.9.9, Copyright (c) 2007- Tatu Saloranta, Apache License Version 2.0, UNKNOWN, -
+jackson-databind-2.9.9.jar, com.fasterxml.jackson.core:jackson-databind:2.9.9, Copyright (c) 2007- Tatu Saloranta, Apache License Version 2.0, UNKNOWN, -
+jackson-datatype-joda-2.9.9.jar, com.fasterxml.jackson.datatype:jackson-datatype-joda:2.9.9, Copyright (c) 2007- Tatu Saloranta, Apache License Version 2.0, UNKNOWN, -
+javapoet-1.5.1.jar, com.squareup:javapoet:1.5.1, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN
+javax.annotation-api-1.3.2.jar, javax.annotation:javax.annotation-api:1.3.2, Copyright (c) 2012-2013 Oracle Corporation, 1. Definitions., UNKNOWN, -
+jcl-over-slf4j-1.7.26.jar, org.slf4j:jcl-over-slf4j:1.7.26, Copyright (c) 2004-2017 QOS.ch, MIT, UNKNOWN, -
+jersey-apache-client-1.8.jar, com.sun.jersey.contribs:jersey-apache-client:1.8, Copyright (c) 2010-2011 Oracle, Common Development and Distribution License (CDDL) 1.1, UNKNOWN, None
+jersey-client-1.8.jar, com.sun.jersey:jersey-client:1.8, Copyright (c) 2010-2011 Oracle, Common Development and Distribution License (CDDL) 1.1, UNKNOWN, None
+jersey-core-1.8.jar, com.sun.jersey:jersey-core:1.8, Copyright (c) 2010-2011 Oracle, Common Development and Distribution License (CDDL) 1.1, UNKNOWN, -
+jersey-multipart-1.8.jar, com.sun.jersey.contribs:jersey-multipart:1.8, Copyright (c) 2010-2011 Oracle, Common Development and Distribution License (CDDL) 1.1, UNKNOWN, -
+jettison-1.3.8.jar, org.codehaus.jettison:jettison:1.3.8, Copyright 2006 Envoi Solutions LLC., Apache License Version 2.0, UNKNOWN, -
+jetty-util-9.0.0.v20130308.jar, org.eclipse.jetty:jetty-util:9.0.0.v20130308, Eclipse Jetty Project, Apache License Version 2.0, UNKNOWN, -
+jetty-util-ajax-9.4.19.v20190610.jar, org.eclipse.jetty:jetty-util-ajax:9.4.19.v20190610, Eclipse Jetty Project, Apache License Version 2.0, UNKNOWN, -
+jna-4.5.2.jar, com.sun:jna:4.5.2, "Copyright (c) 2007-2012 Timothy Wall, All Rights Reserved", Apache License Version 2.0, UNKNOWN, -
+jna-platform-4.5.2.jar, com.sun.jna.platform:jna-platform:4.5.2, JNA Development Team, UNKNOWN, UNKNOWN, UNKNOWN
+joda-time-2.10.3.jar, joda-time:joda-time:2.10.3, Copyright (c) 2002-2016 Joda.org, Apache License Version 2.0, UNKNOWN, -
+json-20190722.jar, org.json:json:20190722, Copyright 2019 Douglas Crockford, The JSON License, UNKNOWN, UNKNOWN
+json-path-1.2.0.jar, com.nsn.cumulocity.dependencies.osgi:json-path:1.2.0, Copyright 2011 Jayway, The JSON License, UNKNOWN, -
+json-smart-2.1.0.jar, com.nsn.cumulocity.dependencies.osgi:json-smart:2.1.0, Copyright 2011 JSON-SMART authors, Apache License Version 2.0, UNKNOWN, -
+jsr311-api-1.1.1.jar, javax.ws.rs:jsr311-api:1.1.1, "Copyright (c) 2009 Sun Microsystems, Inc", http://www.opensource.org/licenses/cddl1.php, UNKNOWN, -
+log4j-1.2.14.jar, UNKNOWN:log4j:1.2.14, Copyright (c) 2007 The Apache Software Foundation, Apache License Version 2.0, UNKNOWN, -
+logback-classic-1.2.3.jar, ch.qos.logback:logback-classic:1.2.3, "Copyright (C) 1999-2015, QOS.ch", Eclipse Public License Version 1.0 (EPL), UNKNOWN, -
+logback-core-1.2.3.jar, ch.qos.logback:logback-core:1.2.3, "Copyright (C) 1999-2015, QOS.ch", Eclipse Public License Version 1.0 (EPL), UNKNOWN, -
+lombok-1.18.8.jar, org.projectlombok:lombok:1.18.8, Copyright (c) 2009-2019 The Project Lombok Authors, MIT, UNKNOWN, -
+mimepull-1.4.jar, org.jvnet:mimepull:1.4, "Copyright 1997-2007 Sun Microsystems, Inc.", Common Development and Distribution License (CDDL) 1.0, UNKNOWN, -
+pax-url-aether-2.4.5.jar, commons-codec:commons-codec:1.6, OPS4J - Open Participation Software for Java, Apache License Version 2.0, UNKNOWN, -
+slf4j-api-1.7.26.jar, org.slf4j:slf4j-api:1.7.26, Copyright (c) 2004-2017 QOS.ch, MIT, UNKNOWN, -
+snmp4j-2.8.0.jar, org.snmp4j:snmp4j:2.8.0, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN
+spring-aop-5.1.9.RELEASE.jar, UNKNOWN:spring-aop:5.1.9.RELEASE, "Copyright (c) 2002-2019 Pivotal, Inc.", Apache License Version 2.0, UNKNOWN, UNKNOWN
+spring-beans-5.1.9.RELEASE.jar, UNKNOWN:spring-beans:5.1.9.RELEASE, "Copyright (c) 2002-2019 Pivotal, Inc.", Apache License Version 2.0, UNKNOWN, UNKNOWN
+spring-boot-2.1.7.RELEASE.jar, UNKNOWN:spring-boot:2.1.7.RELEASE, "Copyright (c) 2002-2019 Pivotal, Inc.", Apache License Version 2.0, UNKNOWN, UNKNOWN
+spring-boot-autoconfigure-2.1.7.RELEASE.jar, UNKNOWN:spring-boot-autoconfigure:2.1.7.RELEASE, "Copyright (c) 2002-2019 Pivotal, Inc.", Apache License Version 2.0, UNKNOWN, UNKNOWN
+spring-boot-starter-2.1.7.RELEASE.jar, UNKNOWN:spring-boot-starter:2.1.7.RELEASE, "Copyright (c) 2002-2019 Pivotal, Inc", Apache License Version 2.0, UNKNOWN, UNKNOWN
+spring-boot-starter-logging-2.1.7.RELEASE.jar, UNKNOWN:spring-boot-starter-logging:2.1.7.RELEASE, "Copyright (c) 2002-2019 Pivotal, Inc.", Apache License Version 2.0, UNKNOWN, UNKNOWN
+spring-context-5.1.9.RELEASE.jar, UNKNOWN:spring-context:5.1.9.RELEASE, "Copyright (c) 2002-2019 Pivotal, Inc.", Apache License Version 2.0, UNKNOWN, UNKNOWN
+spring-core-5.1.9.RELEASE.jar, UNKNOWN:spring-core:5.1.9.RELEASE, "Copyright (c) 2002-2019 Pivotal, Inc.", Apache License Version 2.0, UNKNOWN, UNKNOWN
+spring-expression-5.1.9.RELEASE.jar, UNKNOWN:spring-expression:5.1.9.RELEASE, "Copyright (c) 2002-2019 Pivotal, Inc.", Apache License Version 2.0, UNKNOWN, UNKNOWN
+spring-jcl-5.1.9.RELEASE.jar, UNKNOWN:spring-jcl:5.1.9.RELEASE, "Pivotal, Inc.", Apache License Version 2.0, UNKNOWN, UNKNOWN
+spring-security-core-5.1.6.RELEASE.jar, UNKNOWN:spring-security-core:5.1.6.RELEASE, "Copyright (c) 2002-2019 Pivotal, Inc.", Apache License Version 2.0, UNKNOWN, UNKNOWN
+spring-security-web-5.1.6.RELEASE.jar, UNKNOWN:spring-security-web:5.1.6.RELEASE, "Copyright (c) 2002-2019 Pivotal, Inc.", Apache License Version 2.0, UNKNOWN, UNKNOWN
+spring-web-5.1.9.RELEASE.jar, UNKNOWN:spring-web:5.1.9.RELEASE, "Copyright (c) 2002-2019 Pivotal, Inc.", Apache License Version 2.0, UNKNOWN, UNKNOWN
+stax-api-1.0.1.jar, UNKNOWN:stax-api:1.0.1, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN
+svenson-1.5.8.jar, com.nsn.cumulocity.dependencies.osgi:svenson:1.5.8, "Copyright (c) 2008, Sven Helmberger", BSD 3-clause, UNKNOWN, -
+xmlpull-1.1.3.1.jar, UNKNOWN:xmlpull:1.1.3.1, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN
+xpp3_min-1.1.4c.jar, UNKNOWN:xpp3_min-1.1.4c.jar:UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN
+xstream-1.4.9.jar, com.thoughtworks.xstream:xstream:1.4.9, XStream, http://x-stream.github.io/license.html, UNKNOWN, UNKNOWN

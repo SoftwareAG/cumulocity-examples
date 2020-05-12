@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.cumulocity.mibparser.conversion;
+package com.cumulocity.mibparser.service;
 
 import com.cumulocity.mibparser.model.Register;
 import lombok.extern.slf4j.Slf4j;
@@ -26,15 +26,16 @@ import net.percederberg.mibble.snmp.SnmpObjectType;
 import net.percederberg.mibble.snmp.SnmpTrapType;
 import net.percederberg.mibble.value.ObjectIdentifierValue;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
-@Component
-public class RegisterConversionHandler {
+@Service
+public class RegisterConversionService {
 
-    public static List<Register> convertSnmpObjectToRegister(List<MibSymbol> mibSymbols) {
+    public List<Register> convertSnmpObjectToRegister(List<MibSymbol> mibSymbols) {
         List<Register> registerList = new ArrayList<>();
         MibValueSymbol mibValueSymbol;
 
@@ -56,10 +57,11 @@ public class RegisterConversionHandler {
                         "Iterating to next MibSymbol object");
             }
         }
+
         return registerList;
     }
 
-    private static Register convertSnmpObjectTypeToRegister(SnmpObjectType snmpObjectType, MibValueSymbol mibValueSymbol) {
+    private Register convertSnmpObjectTypeToRegister(SnmpObjectType snmpObjectType, MibValueSymbol mibValueSymbol) {
         return createRegister(mibValueSymbol.getName(),
                 mibValueSymbol.getOid().toString(),
                 mibValueSymbol.getParent().getOid().toString(),
@@ -68,7 +70,7 @@ public class RegisterConversionHandler {
         );
     }
 
-    private static Register convertMibTrapTypeToRegister(SnmpTrapType snmpTrapType, MibValueSymbol mibValueSymbol) {
+    private Register convertMibTrapTypeToRegister(SnmpTrapType snmpTrapType, MibValueSymbol mibValueSymbol) {
         return createRegister(
                 mibValueSymbol.getName(),
                 ((ObjectIdentifierValue) snmpTrapType.getEnterprise()).getSymbol().getOid().toString(),
@@ -79,7 +81,7 @@ public class RegisterConversionHandler {
         );
     }
 
-    private static Register convertMibNotificationTypeToRegister(MibValueSymbol mibValueSymbol) {
+    private Register convertMibNotificationTypeToRegister(MibValueSymbol mibValueSymbol) {
         return createRegister(mibValueSymbol.getName(),
                 mibValueSymbol.getOid().toString(),
                 mibValueSymbol.getParent().getOid().toString(),
@@ -89,12 +91,13 @@ public class RegisterConversionHandler {
         );
     }
 
-    private static Register createRegister(String name, String oid, String parentOid,
+    private Register createRegister(String name, String oid, String parentOid,
                                            MibValueSymbol[] childOid, String description) {
         List<String> childOids = new ArrayList<>();
         for (MibValueSymbol mibVS : childOid) {
             childOids.add(mibVS.getOid().toString());
         }
+
         return new Register(name, oid, description, parentOid, childOids);
     }
 }

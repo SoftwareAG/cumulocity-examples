@@ -33,7 +33,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.NotNull;
 
-import static com.cumulocity.mibparser.constants.Constants.REQUEST_PARAM_NAME;
+import static com.cumulocity.mibparser.utils.Constants.REQUEST_PARAM_NAME;
 
 @Slf4j
 @RestController

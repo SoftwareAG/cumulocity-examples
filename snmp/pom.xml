@@ -41,22 +41,14 @@
 	</modules>
 
 	<properties>
-		<java.version>1.8</java.version>
-		<maven.compiler.target>${java.version}</maven.compiler.target>
 		<argLine>-Duser.language=en</argLine>
-
-		<c8y.core.version>${project.version}</c8y.core.version>
-		<c8y.microservice.version>${project.version}</c8y.microservice.version>
-		<c8y.clients.version>${project.version}</c8y.clients.version>
-
-		<svenson.version>1.5.8</svenson.version>
 		<snmp4j.version>2.8.0</snmp4j.version>
-		<spring.boot.version>2.1.7.RELEASE</spring.boot.version>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<cometd.version>3.0.10</cometd.version>
+		<svenson.version>1.5.8</svenson.version>
 		<jetty.version>9.0.0.v20130308</jetty.version>
-		<chronicle.queue.version>5.17.28</chronicle.queue.version>
 		<chronicle.map.version>3.17.6</chronicle.map.version>
+		<chronicle.queue.version>5.17.28</chronicle.queue.version>
+		<spring.boot.version>2.1.7.RELEASE</spring.boot.version>
 	</properties>
 
 	<dependencies>
@@ -97,37 +89,47 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<version>${spring.boot.version}</version>
+			</dependency>
 
 			<!-- Cumulocity Dependencies -->
 			<dependency>
 				<groupId>com.nsn.cumulocity.clients-java</groupId>
+				<artifactId>microservice-dependencies</artifactId>
+				<version>${c8y.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.nsn.cumulocity.clients-java</groupId>
 				<artifactId>java-client</artifactId>
-				<version>${c8y.clients.version}</version>
+				<version>${c8y.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.nsn.cumulocity.shared-components</groupId>
 				<artifactId>common-notification</artifactId>
-				<version>${c8y.core.version}</version>
+				<version>${c8y.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.nsn.cumulocity.model</groupId>
 				<artifactId>device-capability-model</artifactId>
-				<version>${c8y.core.version}</version>
+				<version>${c8y.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.nsn.cumulocity.model</groupId>
 				<artifactId>core-model</artifactId>
-				<version>${c8y.core.version}</version>
+				<version>${c8y.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.nsn.cumulocity.shared-components</groupId>
 				<artifactId>common-rest</artifactId>
-				<version>${c8y.core.version}</version>
+				<version>${c8y.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.nsn.cumulocity.dependencies.osgi</groupId>
 				<artifactId>svenson</artifactId>
-				<version>${svenson.version}-${c8y.core.version}</version>
+				<version>${svenson.version}-${c8y.version}</version>
 			</dependency>
 
 			<!-- Cometd -->
@@ -185,6 +187,12 @@
 				<groupId>org.snmp4j</groupId>
 				<artifactId>snmp4j</artifactId>
 				<version>${snmp4j.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.google.guava</groupId>
+				<artifactId>guava</artifactId>
+				<version>21.0</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

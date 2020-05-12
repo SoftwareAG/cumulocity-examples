@@ -17,6 +17,9 @@
 
 package com.cumulocity.mibparser.utils;
 
+import static com.cumulocity.mibparser.utils.Constants.TMPDIR;
+import static com.cumulocity.mibparser.utils.Constants.TEMP_DIR_NAME;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -24,19 +27,24 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 
-import static com.cumulocity.mibparser.constants.Constants.TEMP_DIR_NAME;
-import static com.cumulocity.mibparser.constants.Constants.TMPDIR;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class MibParserUtil {
 
     public static File createTempDirectory(String dirPath) {
         File file = new File(dirPath);
-        file.mkdir();
+        boolean folderCreated = file.mkdir();
+
+        if(!folderCreated) {
+            log.error("Unable to create the directory {}", dirPath);
+        }
+
         return file;
     }
 
     public static String getTempDirectoryPath(String filename, String tenant, String username) {
-        StringBuffer buffer = new StringBuffer()
+        StringBuilder builder = new StringBuilder()
                 .append(System.getProperty(TMPDIR))
                 .append(File.separator)
                 .append(TEMP_DIR_NAME)
@@ -44,7 +52,8 @@ public class MibParserUtil {
                 .append(username).append("-")
                 .append(filename).append("-")
                 .append(System.nanoTime());
-        return buffer.toString();
+
+        return builder.toString();
     }
 
     public static List<String> readMainFile(File file) throws IOException {
