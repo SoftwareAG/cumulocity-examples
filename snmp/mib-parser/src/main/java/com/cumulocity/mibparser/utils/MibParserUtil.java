@@ -34,10 +34,10 @@ public class MibParserUtil {
 
     public static File createTempDirectory(String dirPath) {
         File file = new File(dirPath);
-        boolean fileCreated = file.mkdir();
+        boolean folderCreated = file.mkdir();
 
-        if(!fileCreated) {
-            log.error("Unable to create the file {}", dirPath);
+        if(!folderCreated) {
+            log.error("Unable to create the directory {}", dirPath);
         }
 
         return file;
