@@ -26,12 +26,12 @@ Connect complete
 payload>  
 
 Some predefined commands available:
-* **initialize** - if device connecting for the first time, the first message have to create device.
-* **subscribe** - will subscribe MQTT client on _s/ds_, _s/e_, _s/dat_
-* **upload-root** -  will upload root certificate
-* **delete-root** - will delete root certificate
-* **publish-token** - will publish empty message on topic _s/uat_, then if client is subscribed on _s/dat_ topic, after a while will receive JWT token
-* **exit**/ **quit** - if data required for HTTP requests are provided client try to delete root certificat and close connection
+* **initialize** - if device connecting for the first time, the first message have to create device.  
+* **subscribe** - will subscribe MQTT client on _s/ds_, _s/e_, _s/dat_  
+* **upload-root** -  will upload root certificate  
+* **delete-root** - will delete root certificate  
+* **publish-token** - will publish empty message on topic _s/uat_, then if client is subscribed on _s/dat_ topic, after a while will receive JWT token  
+* **exit**/ **quit** - if data required for HTTP requests are provided client try to delete root certificat and close connection    
 
 Besides, all of templates can be used eg. for create measurement type:     
 payload> 211,1  
