@@ -62,7 +62,8 @@
 		<module>sample-json-decoder</module>
 		<module>java-agent</module>
 		<module>snmp</module>
-    </modules>
+		<module>mqtt-client</module>
+	</modules>
 
 	<licenses>
 		<license>
