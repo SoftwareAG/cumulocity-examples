@@ -19,6 +19,9 @@ deploy() {
     scp -Cr -i ${YUM_USR_KEY} $1 ${YUM_USR}@${YUM_SRV}:${YUM_DEST_DIR} | true
 }
 
+YUM_DEST_DIR=/var/www/resources/kubernetes-images
+deploy $(find ./ -regextype egrep   -regex ".*snmp-mib-parser-[0-9]+\.[0-9]+\.[0-9]+(-SNAPSHOT)?\.zip")
+
 if [ "!$1" = "!release" ]
 then
     # Copy snmp-agent-gateway RPM and snmp-mib-parser's zip files to examples/snmp folder
