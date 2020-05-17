@@ -8,10 +8,9 @@ For more information on the usage of this microservice, refer to [SNMP Agent][2]
 
 
 ### Building ###
-Clone/download this repository and build using `mvn clean install`
+Refer to the readme under the snmp folder.
 
 ### How to deploy? ###
-
 #### Hosted deployment
 * After successfully building, you can find `snmp-mib-parser-<version>.zip` file in the build `target` folder.
 * Upload this zip file.
