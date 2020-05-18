@@ -6,9 +6,11 @@ This microservice accepts a ZIP file which contains the top-level MIB file along
 
 For more information on the usage of this microservice, refer to [SNMP Agent][2] section of the Cumulocity IoT user guide.
 
+### Build Prerequisites ###
+Refer to the "**Build Prerequisites**" section of the [Readme][5] under the snmp folder.
 
 ### Building ###
-Refer to the readme under the snmp folder.
+Refer to the "**Building**" section of the [Readme][5] under the snmp folder.
 
 ### How to deploy? ###
 #### Hosted deployment
@@ -58,4 +60,5 @@ For more details, refer to [Managing Applications][3] section of the Cumulocity 
 [2]: https://cumulocity.com/guides/users-guide/optional-services/#snmp
 [3]: https://cumulocity.com/guides/users-guide/administration/#managing-applications
 [4]: https://cumulocity.com/guides/microservice-sdk/rest/
+[5]: ../README.md
 

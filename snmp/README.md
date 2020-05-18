@@ -29,7 +29,7 @@ Ensure the following prerequisite packages are installed before you configure an
 * [Maven][1]
 ```
   sudo yum install -y apache-maven
-  mkdir $Home/.m2/
+  mkdir $HOME/.m2/
   copy settings.xml inside $Home/.m2
 ```
 * RPM
@@ -44,15 +44,13 @@ Ensure the following prerequisite packages are installed before you configure an
   sudo usermod -a -G docker ec2-user
 ```
 
-  **Note:** Running docker images command can result in permission error. Ensure that `/var/run/docker.sock` has required permissions for the logged in user.
-
 ### Building ###
 * Clone the repository 
 ```
   git clone https://bitbucket.org/m2m/cumulocity-examples.git
   cd cumulocity-examples
   git fetch --all –tags
-  git checkout tags/c8y-examples-1006.6.0
+  git checkout tags/c8y-examples-<version> e.g. version could be 1006.6.0
   cd snmp
 ```
 * Build
@@ -67,4 +65,5 @@ Ensure the following prerequisite packages are installed before you configure an
 
 [1]: https://docs.aws.amazon.com/neptune/latest/userguide/iam-auth-connect-prerq.html
 [2]: https://www.lewuathe.com/how-to-install-docker-in-amazon-linux.html
+
 
