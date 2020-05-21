@@ -25,11 +25,6 @@ public class C8yMqttClient {
         MyMqttClient() throws MqttException {
             mqttClient = connect();
             mqttClient.setCallback(this);
-            try {
-                Thread.sleep(200);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
         }
 
         private MqttClient connect() throws MqttException {

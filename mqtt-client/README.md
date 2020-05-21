@@ -14,7 +14,7 @@ In C8yMqttClient.java provide:
 * **TRUSTSTORE_NAME** - trust store file name (placed in resource folder)  
 * **TRUSTSTORE_PASSWORD** - trust store password  
 * **TRUSTSTORE_FORMAT** - trust store format (eg. 'jks')  
-* **CLIENT_ID** - client Id which matches the certificate  
+* **CLIENT_ID** - client Id which matches the certificate subject common name  
 * **BROKER_URL** -URL for mqtt connection, note that Cumulocity IoT expects devices to connect using SSL on port 1884  
 
 
