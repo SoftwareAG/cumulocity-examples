@@ -15,7 +15,7 @@
       "port": 80
 
     },
-    "initialDelaySeconds": 200,
+    "initialDelaySeconds": 360,
     "periodSeconds": 10
   },
   "readinessProbe":{
@@ -24,7 +24,14 @@
       "port": 80
 
     },
-    "initialDelaySeconds": 220,
+    "initialDelaySeconds": 30,
     "periodSeconds": 10
-  }
+  },
+  "settings":[
+    { "key": "sample-microservice-setting",
+      "defaultValue": "true",
+      "editable": true,
+      "valueSchema": {"type": "boolean"}
+    }
+  ]
 }
