@@ -11,6 +11,7 @@ pipeline {
         timeout(time: 4, unit: 'HOURS')
         disableConcurrentBuilds()
         lock('cumulocity-examples')
+        copyArtifactPermission('OVAS-scanner-integration');
     }
     parameters {
         choice(name: 'build_type', choices: ['DEFAULT', 'RELEASE', 'HOTFIX']);
@@ -173,6 +174,7 @@ pipeline {
     }
     post {
         always {
+            archiveArtifacts artifacts:"**"
             withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
                 sh "chmod +x .jenkins/scripts/clean.sh && .jenkins/scripts/clean.sh"
             }
