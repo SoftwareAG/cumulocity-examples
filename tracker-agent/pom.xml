@@ -57,10 +57,12 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
+            <version>29.0-jre</version>
         </dependency>
         <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.11</version>
         </dependency>
         <dependency>
 			<groupId>com.nsn.cumulocity.clients-java</groupId>
@@ -93,7 +95,7 @@
 				</exclusion>
 				<exclusion>
                     <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-tomcat</artifactId>				
+                    <artifactId>spring-boot-starter-tomcat</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
@@ -183,7 +185,7 @@
 	                </executions>
 	            </plugin>
             </plugins>
-        </pluginManagement>    
+        </pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -206,7 +208,7 @@
             <resource>
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
-            </resource>           
+            </resource>
         </resources>
     </build>
     <profiles>
@@ -228,5 +230,5 @@
                 </plugins>
             </build>
         </profile>
-    </profiles>    
+    </profiles>
 </project>
