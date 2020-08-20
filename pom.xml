@@ -63,6 +63,7 @@
 		<module>java-agent</module>
 		<module>snmp</module>
 		<module>mqtt-client</module>
+		<module>microservices</module>
 	</modules>
 
 	<licenses>
@@ -132,7 +133,7 @@
 				</plugin>
 				<plugin>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>2.16</version>
+					<version>2.22.2</version>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
