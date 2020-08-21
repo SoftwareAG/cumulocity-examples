@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2013 Cumulocity GmbH
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation the rights to use,
  * copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
@@ -29,6 +29,7 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
 
+import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,8 +46,6 @@ import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.Platform;
 
-import javax.xml.bind.DatatypeConverter;
-
 public class LinuxGenericHardwareDriver implements Driver, OperationExecutor, HardwareProvider{
 	public static final String GET_INTERFACES = "ifconfig";
 	public static final String PATTERN = "\\s+";
@@ -56,7 +55,7 @@ public class LinuxGenericHardwareDriver implements Driver, OperationExecutor, Ha
 
 	private GId gid;
 	private final Hardware hardware = new Hardware("Linux MAC", UNKNOWN, UNKNOWN);
-	
+
     @Override
     public void initialize() throws Exception {
         if(!initializeFromProcess(GET_INTERFACES)) {
@@ -115,7 +114,7 @@ public class LinuxGenericHardwareDriver implements Driver, OperationExecutor, Ha
 		if (interfaces.hasMoreElements()) {
 			NetworkInterface networkInterface = interfaces.nextElement();
 			byte[] mac = networkInterface.getHardwareAddress();
-			String address = DatatypeConverter.printHexBinary(mac);
+			String address = Hex.encodeHexString(mac);
 			hardware.setSerialNumber(address);
 		}
 	}

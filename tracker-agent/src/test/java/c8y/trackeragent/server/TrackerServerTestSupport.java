@@ -7,6 +7,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -25,35 +26,37 @@ import c8y.trackeragent.tracker.ConnectedTracker;
 import c8y.trackeragent.tracker.ConnectedTrackerFactory;
 
 public abstract class TrackerServerTestSupport {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(TrackerServerTestSupport.class);
 
-    private static final int PORT = 5100;
-    
+    private int port;
     private TrackerServer server;
     protected CountDownLatch reportExecutorLatch;
     protected final ConnectionsContainer connectionsContainer = new ConnectionsContainer();
     protected ConnectedTracker customTracker = null;
-    protected final WritersProvider writersProvider = new WritersProvider(PORT);
+    protected WritersProvider writersProvider;
     private TrackerServerEventHandler eventHandler;
-    
+
+
     @Before
     public void before() throws Exception {
+        port = new Random().nextInt(100) + 5100;
+        writersProvider = new WritersProvider(port);
         TrackerConfiguration trackerConfiguration = new TrackerConfiguration().setNumberOfReaderWorkers(10);
         eventHandler = new TrackerServerEventHandler(new TestConnectedTrackerFactoryImpl(), connectionsContainer, trackerConfiguration);
         eventHandler.init();
         server = new TrackerServer(eventHandler);
-        server.start(PORT);
+        server.start(port);
         new Thread(server).start();
     }
-    
+
     @After
-    public void after() throws IOException {
-        server.close();
+    public void after() throws IOException, InterruptedException {
         writersProvider.stop();
         eventHandler.shutdownWorkers();
+        server.close();
     }
-    
+
     protected void assertThatReportsHandled(String... reports) {
         List<TestConnectedTrackerImpl> expected = Stream.of(reports)
                 .map(TestConnectedTrackerImpl::new)
@@ -71,17 +74,17 @@ public abstract class TrackerServerTestSupport {
         }
         return executors;
     }
-    
+
     protected void setCountOfExpectedReports(int count) {
         reportExecutorLatch = new CountDownLatch(count);
     }
-    
+
     protected void waitForReports() throws InterruptedException {
         reportExecutorLatch.await(10, TimeUnit.SECONDS);
     }
-    
+
     protected class TestConnectedTrackerFactoryImpl implements ConnectedTrackerFactory {
-        
+
         @Override
         public ConnectedTracker create(ReadDataEvent readData) {
             TestConnectedTrackerImpl result = new TestConnectedTrackerImpl();
@@ -89,17 +92,17 @@ public abstract class TrackerServerTestSupport {
             return result;
         }
     }
-    
+
     protected class TestConnectedTrackerImpl extends DummyConnectedTracker {
-        
+
         private final List<String> processed;
         private ConnectionDetails connectionDetails;
-        
+
         public TestConnectedTrackerImpl(String... processed) {
             this.processed = new ArrayList<String>();
             this.processed.addAll(asList(processed));
         }
-        
+
         @Override
         public void executeReports(ConnectionDetails connectionDetails, byte[] reports) {
             this.connectionDetails = connectionDetails;
@@ -118,7 +121,7 @@ public abstract class TrackerServerTestSupport {
         public List<String> getProcessed() {
             return processed;
         }
-        
+
         public ConnectionDetails getConnectionDetails() {
             return connectionDetails;
         }
@@ -159,13 +162,13 @@ public abstract class TrackerServerTestSupport {
         @Override
         public void executeOperation(OperationContext operation) throws Exception {
             // TODO Auto-generated method stub
-            
+
         }
 
         @Override
         public void executeReports(ConnectionDetails connectionDetails, byte[] reports) {
             // TODO Auto-generated method stub
-            
+
         }
 
         @Override
@@ -178,8 +181,8 @@ public abstract class TrackerServerTestSupport {
             // TODO Auto-generated method stub
             return null;
         }
-        
+
     }
 
-    
+
 }

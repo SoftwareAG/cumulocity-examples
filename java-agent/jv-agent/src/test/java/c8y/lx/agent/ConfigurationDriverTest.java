@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2013 Cumulocity GmbH
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation the rights to use,
  * copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
@@ -20,8 +20,7 @@
 
 package c8y.lx.agent;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -32,8 +31,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import c8y.Configuration;
-import c8y.lx.agent.ConfigurationDriver;
-import c8y.lx.agent.PropUtils;
 import c8y.lx.driver.Configurable;
 
 import com.cumulocity.model.idtype.GId;
@@ -42,8 +39,10 @@ import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.Platform;
 import com.cumulocity.sdk.client.inventory.InventoryApi;
 import com.cumulocity.sdk.client.inventory.ManagedObject;
+import org.mockito.internal.matchers.Contains;
 
 public class ConfigurationDriverTest {
+
 	public static final String REFERENCE_CONFIG = "src/test/resources/configuration.txt";
 	public static final String REFERENCE_PROPSTR = "propA=valueA\npropB=valueB\n";
 
@@ -55,14 +54,14 @@ public class ConfigurationDriverTest {
 		mo.setId(gid);
 		op.setDeviceId(gid);
 		op.set(new Configuration(REFERENCE_PROPSTR));
-		
+
 		Platform platform = mock(Platform.class);
 		InventoryApi inventory = mock(InventoryApi.class);
 		moHandle = mock(ManagedObject.class);
-		
+
 		when(platform.getInventoryApi()).thenReturn(inventory);
 		when(inventory.getManagedObject(mo.getId())).thenReturn(moHandle);
-		
+
 		driver.initialize(platform);
 	}
 
@@ -77,7 +76,8 @@ public class ConfigurationDriverTest {
 		String string = PropUtils.toString(referenceProps);
 		string = string.substring(string.indexOf("\n") + 1);
 		string = string.replace("\r", "");
-		assertEquals(REFERENCE_PROPSTR, string);
+		assertThat(string, new Contains("propA=valueA"));
+		assertThat(string, new Contains("propB=valueB"));
 	}
 
 	@Test
@@ -88,12 +88,12 @@ public class ConfigurationDriverTest {
 	}
 
 	@Test
-	public void testNonExistantFile() {
+	public void testNonExistentFile() {
 		Properties props = new Properties();
 		PropUtils.fromFile("a non-existant file", props);
 		assertEquals(new Properties(), props);
 	}
-	
+
 	// TODO testToFile
 
 	@Test
@@ -103,7 +103,7 @@ public class ConfigurationDriverTest {
 		assertEquals(2, driver.getProperties().size());
 		assertEquals("valueD", driver.getProperties().getProperty("propB"));
 		assertEquals("valueC", driver.getProperties().getProperty("propC"));
-		
+
 		// Test merged
 		PropUtils.fromFile(REFERENCE_CONFIG, driver.getProperties());
 		assertEquals(3, driver.getProperties().size());
@@ -111,15 +111,15 @@ public class ConfigurationDriverTest {
 		assertEquals("valueB", driver.getProperties().getProperty("propB"));
 		assertEquals("valueC", driver.getProperties().getProperty("propC"));
 	}
-	
+
 	@Test
 	public void testNotification() throws Exception {
-		driver.discoverChildren(mo);	
+		driver.discoverChildren(mo);
 		driver.addConfigurable(cfgListener);
 		driver.execute(op, false);
 		assertTrue(cfgListener.isNotified());
 	}
-	
+
 	@Test
 	public void testInventoryUpdate() throws Exception {
 		driver.discoverChildren(mo);
@@ -131,7 +131,7 @@ public class ConfigurationDriverTest {
 		// verify(moHandle).update(mo);
 		// TODO HONK ... ManagedObjectRepresentation has no equals method.
 	}
-	
+
 	class TestConfigurationListener implements Configurable {
 		@Override
 		public void addDefaults(Properties props) {
