@@ -105,6 +105,12 @@
 				<groupId>com.nsn.cumulocity.clients-java</groupId>
 				<artifactId>java-client</artifactId>
 				<version>${c8y.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>javax.ws.rs</groupId>
+						<artifactId>javax.ws.rs-api</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>com.nsn.cumulocity.shared-components</groupId>
