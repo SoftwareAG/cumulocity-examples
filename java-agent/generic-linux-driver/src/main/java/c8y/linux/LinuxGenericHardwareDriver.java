@@ -114,7 +114,7 @@ public class LinuxGenericHardwareDriver implements Driver, OperationExecutor, Ha
 		if (interfaces.hasMoreElements()) {
 			NetworkInterface networkInterface = interfaces.nextElement();
 			byte[] mac = networkInterface.getHardwareAddress();
-			String address = Hex.encodeHexString(mac);
+			String address = Hex.encodeHexString(mac).toUpperCase();
 			hardware.setSerialNumber(address);
 		}
 	}

@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2013 Cumulocity GmbH
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation the rights to use,
  * copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
@@ -59,7 +59,7 @@ import com.sun.jersey.api.client.ClientHandlerException;
  * Working directory should be the directory with the installed jars for
  * software management to work.
  * </p>
- * 
+ *
  * @see {@link Driver}, {@link CredentialsManager}
  */
 public class Agent {
@@ -114,7 +114,9 @@ public class Agent {
         if (credentials == null) {
             throw new RuntimeException("Can't bootstrap device!");
         }
-        return new PlatformImpl(credentialsManager.getHost(), credentials);
+        PlatformImpl platform = new PlatformImpl(credentialsManager.getHost(), credentials);
+        platform.setForceInitialHost(true);
+        return platform;
     }
 
     private Hardware specifyHardware() {
