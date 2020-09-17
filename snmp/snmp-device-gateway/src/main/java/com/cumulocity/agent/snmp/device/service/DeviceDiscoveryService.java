@@ -34,7 +34,7 @@ import com.cumulocity.sdk.client.inventory.InventoryApi;
 import com.google.common.base.Strings;
 import com.google.common.net.InetAddresses;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.snmp4j.CommunityTarget;
 import org.snmp4j.PDU;
 import org.snmp4j.Snmp;
