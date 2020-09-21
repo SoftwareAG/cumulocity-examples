@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2013 Cumulocity GmbH
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation the rights to use,
  * copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
@@ -63,7 +63,7 @@ public class JavaSoftwareDriver implements Driver, OperationExecutor {
 	private BinariesApi binaries;
 
 	private GId deviceId;
-	
+
     @Override
     public void initialize() throws Exception {
         new File(SOFTWARE_PATH).listFiles(new FilenameFilter() {
@@ -72,7 +72,7 @@ public class JavaSoftwareDriver implements Driver, OperationExecutor {
                 if (file.matches(".*[.]jar$")) {
                 	file=file.substring(0,file.length()-4  	);
                 	SoftwareListEntry s = new SoftwareListEntry();
-                    s.setName(file.split("-[0-9]+[.]")[0]);
+                    s.setName(file.split("-[0-9]+[.]?")[0]);
                     s.setVersion(file.split(s.getName()+"-")[1]);
                     s.setUrl(" ");
                     if(!sftMap.containsKey(s.getName())) {
