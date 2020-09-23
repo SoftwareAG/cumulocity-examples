@@ -107,11 +107,6 @@
 				<version>${c8y.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.nsn.cumulocity.shared-components</groupId>
-				<artifactId>common-notification</artifactId>
-				<version>${c8y.version}</version>
-			</dependency>
-			<dependency>
 				<groupId>com.nsn.cumulocity.model</groupId>
 				<artifactId>device-capability-model</artifactId>
 				<version>${c8y.version}</version>
