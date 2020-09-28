@@ -19,7 +19,7 @@ deploy() {
     scp -Cr -i ${YUM_USR_KEY} $1 ${YUM_USR}@${YUM_SRV}:${YUM_DEST_DIR} | true
 }
 setLatest(){
-    ssh -i ${YUM_USR_KEY} ${YUM_USR}@${YUM_SRV} ln -sf $1 ${YUM_DEST_DIR}$2-latest.$3 
+    ssh -i ${YUM_USR_KEY} ${YUM_USR}@${YUM_SRV} ln -sf $1 $2/$3-latest.$4 
 }
 
 YUM_DEST_DIR=/var/www/resources/kubernetes-images
@@ -33,8 +33,8 @@ then
     deploy $(find ./ -regextype egrep   -regex ".*snmp-agent-gateway-[0-9]+\.[0-9]+\.[0-9]+-1\.noarch\.rpm")
     deploy $(find ./ -regextype egrep   -regex ".*snmp-mib-parser-[0-9]+\.[0-9]+\.[0-9]+\.zip")
 
-    YUM_DEST_DIR=/var/www/resources/examples/
+    YUM_DEST_DIR=/var/www/resources/examples
     target_package=$(find ./ -regextype egrep -regex ".*cumulocity-linux-agent-[0-9]+\.[0-9]+\.[0-9]+-1\.tar\.gz")
     deploy $target_package
-    setLatest $target_package "cumulocity-linux-agent" "tar.gz"
+    setLatest $target_package $YUM_DEST_DIR  "cumulocity-linux-agent" "tar.gz"
 fi
