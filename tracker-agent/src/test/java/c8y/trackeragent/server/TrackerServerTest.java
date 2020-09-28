@@ -6,11 +6,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.Ignore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import c8y.trackeragent.server.WritersProvider.Writer;
 
+@Ignore
 public class TrackerServerTest extends TrackerServerTestSupport {
 
     @SuppressWarnings("unused")
