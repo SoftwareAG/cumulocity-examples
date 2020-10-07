@@ -34,7 +34,12 @@ then
     deploy $(find ./ -regextype egrep   -regex ".*snmp-mib-parser-[0-9]+\.[0-9]+\.[0-9]+\.zip")
 
     YUM_DEST_DIR=/var/www/resources/examples
-    target_package=$(find ./ -regextype egrep -regex ".*cumulocity-linux-agent-[0-9]+\.[0-9]+\.[0-9]+-1\.tar\.gz")
-    deploy $target_package
-    setLatest $target_package $YUM_DEST_DIR  "cumulocity-linux-agent" "tar.gz"
+    target_package=$(find ./ -regextype egrep -regex ".*cumulocity-linux-agent-[0-9]+\.[0-9]+\.[0-9]+(-SNAPSHOT)?\.tar\.gz")
+        if [ -z "$target_package" ] || [ -z "$YUM_DEST_DIR" ]; then
+            echo " skipping due to cumulocity-linux-agent or destination  not find!"
+        else
+            deploy $target_package
+            setLatest $target_package $YUM_DEST_DIR  "cumulocity-linux-agent" "tar.gz"
+        fi
+   
 fi
