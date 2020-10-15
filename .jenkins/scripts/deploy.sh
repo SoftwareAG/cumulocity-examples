@@ -36,6 +36,7 @@ then
     YUM_DEST_DIR=/var/www/resources/examples
     target_package=$(find ./ -regextype egrep -regex ".*cumulocity-linux-agent-[0-9]+\.[0-9]+\.[0-9]+\.tar\.gz")
     target_package_name=$(basename $target_package)
+    
 
         if [ -z "$target_package" ] || [ -z "$YUM_DEST_DIR" ]; then
             echo "cumulocity-linux-agent or destination  not find!"
