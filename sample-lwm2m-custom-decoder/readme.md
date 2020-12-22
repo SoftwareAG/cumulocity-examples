@@ -4,11 +4,11 @@
 
 Cumulocity IoT is able to fully integrate most Lightweight M2M (LWM2M) devices out of the box, **without the need to write code.** As long as devices solely use standard LWM2M data types (String, Integer, Floats...), the [existing mapping functionalities of Cumulocity LWM2M](https://www.cumulocity.com/guides/users-guide/optional-services#lwm2m) are completely sufficient
 
-In certain cases, Lightweight M2M devices however expose proprietary data, for example binary arrays, often using the LWM2M Opaque data type. In these cases, it is impossible to defer the structure of the data from the DDF XML.  In order to enable Cumulocity IoT users to process such data,  so-called Custom Actions can be used to trigger so-called *decoder microservices.* 
+In certain cases, Lightweight M2M devices however expose proprietary data, for example binary arrays, often using the LWM2M Opaque data type. In these cases, it is impossible to defer the structure of the data from the DDF XML.  In order to enable Cumulocity IoT users to process such data,  so-called Custom Actions can be used to trigger so-called *decoder microservices.*
 
 In the following, we explain the general workflow for decoding such data using decoder microservices.  In the following, we describe the interface between the LWM2M Agent and the decoder microservice at detail.
 
-In a second step, we explain how to implement a microservice along the example in this repository - a binary series decoder, which turns a series of bytes into measurements. 
+In a second step, we explain how to implement a microservice along the example in this repository - a binary series decoder, which turns a series of bytes into measurements.
 
 ## Decoder Workflow
 
@@ -26,7 +26,7 @@ In the following, we describe the end-2-end workflow between a LWM2M device send
 
 2. The LWM2M agent receives this data. It first temporarily persists the data internally  as Cumulocity events. It then acknowledges the receipt of the data to the device. If the device sends data from a multiple instance resource, data from all resources is persisted in separate events.
 
-3. In parallel, a decoupled and continuously-running process works through the persisted internal events and pushes them to the decoder micro services via a REST call. In the  case of failure (for example the decoder being down), the LWM2M agent retries multiple times before giving up.
+3. In parallel, a decoupled and continuously-running process works through the persisted internal events and pushes them to the decoder micro services via a REST call. In the case of a failure with this REST call, for example due to the decoder being down, the LWM2M agent retries multiple times before giving up. A REST call to the decoder is considered to have failed if the it returns with an abnormal HTTP response code or if an internal exception occurs, for example a connection reset.
 
 4. Once the decoder microservice has received the payload via REST, it decodes the data using its internal logic. The decoder microservice responds with a set of events, measurements, alarms and inventory updates to be created. It does not have to deal with persisting these entities itself.
 
@@ -98,46 +98,81 @@ If the decoder microservice is able to handle the request, it has to respond wit
 "alarms": [<<Array of alarms to be created>>],
 "events": [<<Array of events to be created >>],
 "measurements": [<<Array of Measurements to be created>>],
+"dataFragments" : [Map <<LWM2MPath>,<Value>>],
 "success": true || false
 }
 ```
 
 The fragments above are used as follows:
 
-- *alarms* A list of alarms to be created by the LWM2M agent. The alarms have to be given in the ordinary [Cumulocity alarm JSON format](https://cumulocity.com/guides/reference/alarms/)
+- *alarms* A list of alarms to be created by the LWM2M agent. The alarms have to be given in the ordinary [Cumulocity alarm JSON format](https://cumulocity.com/guides/reference/alarms/). This can be an arbitrary alarm representation, for example carrying custom fields.
 
-- *events* A list of events to be created by the LWM2M agent. The alarms have to be given in the ordinary [Cumulocity event JSON format](https://cumulocity.com/guides/reference/events/)
+- *events* A list of events to be created by the LWM2M agent. The alarms have to be given in the ordinary [Cumulocity event JSON format](https://cumulocity.com/guides/reference/events/), for example carrying custom fields.  This can be an arbitrary event representation, for example carrying custom fields.
 
-- *measurements* A list of measurements to be created by the LWM2M agent. The syntax here follows an own format (see below and example source code)
+- *measurements* A list of measurements to be created by the LWM2M agent. The syntax here follows an own DTO format, like this example shows:
+  
+  ```
+  {
+    "type": "c8y_example_lwm2m_decoder_binaryValues_byteIndex_1",
+    "series": "binaryValueSeries",
+    "time": "2019-02-07T11:05:55.272Z",
+    "fragmentsToCopyFromSourceDevice": ["IMEI","IMSI"],
+    "deviceFragmentPrefix": "device!Name",
+    "includeDeviceName": false,
+    "deviceNameFragment": null,
+    "additionalProperties": {
+      "foo": "bar"
+      },
+    "values": [
+        {
+            "seriesName": "byte 1",
+            "unit": "unknown",
+            "value": 11
+        }
+    ]
+  }
+  ```
+  
+  - *type*: Type of the measurement to be created
+  - *series*: Series of the measurement to be created
+  - *time*: Measurement timestamp
+  - *fragmentsToCopyFromSourceDevice*: The LWM2M agent can copy fragments from the LWM2M device managed object into measurements being created. This field allows the external decoder to control this behavior. If used, this field needs to contain a list of device fragment names. In the example above, the agent copies over the fragments "IMSI" and "IMEI" if present in the device managed object.
+  - *deviceFragmentPrefix*: Can bused in conjunction with fragmentsToCopyFromSourceDevice. If given, the agent prefixes the copied fragment names with the deviceFragmentPrefix. The agent then only copies data from the source device if there is a fragment in the device, for which the key is a concatenation of deviceFragmentPrefix and the fragment name. The property is null in the example above, but if the prefix was "MY_", the agent would look for "MY_IMEI" or "MY_IMSI".
+  - *includeDeviceName*: Boolean flag that controls if the device name is copied to the measurement
 
-- *success* A boolean flag (true or false) that indicates if decoding by the microservice was successful
+- *success* An informative boolean flag (true or false) that indicates if decoding by the microservice was successful. Please note that this field is independent from the retry mechanism above: Consider for example a device that is sending malformed data which cannot be processed by the microservice. In this case, the decoder invocation can be executed as expected. However, the microservice could detect the malformed payload and then it could use this field to signal that the payload could not be decoded.
+
+- *dataFragments* The LWM2M agent persists all last-seen values for all LWM2M objects and their resources in the device managed object. The dataFragments field is a map that stores LWM2M resource values using LWM2M object-resource-paths as a keys. The data fragments can be used by a decoder to hand over a set of fragment updates. Our examople below shows how this could be used to insert values for two object resource paths into the device managed object.
 
 Please also note that the microservice does not need to set the source of measurements, events and alarms. The LWM2M agent always executes decoder mappings always in the scope of a device and sets the source for events, alarms and measurements when it persists these entities to disk.
 
-**Example**
+**Full Decoder Response Sample**
 
 ```
 {
 "alarms": [{
-	"source": {
-    	"id": "12345" },
+    "source": {
+        "id": null
+      },
     "type": "c8yDemoDecoderalarm",
     "text": "I am an decoder alarm",
     "severity": "MINOR",
     "status": "ACTIVE",
-    "time": "2020-03-03T12:03:23.845Z"
+    "time": "2020-03-03T12:03:23.845Z",
+    "myFragment": "my data"
 }],
 "events": [
 {
-	"source": {
-    	"id":"12345" },
+    "source": {
+        "id":"12345" },
     "type": "TestEvent 1",
     "text": "Data was decoded",
-    "time": "2020-03-03T12:03:12.845Z"
+    "time": "2020-03-03T12:03:12.845Z",
+    "myFragment": "my data"
 },
 {
-	"source": {
-    	"id":"12345" },
+    "source": {
+        "id":"12345" },
     "type": "TestEvent 2",
     "text": "More data was decoded",
     "time": "2020-03-04T12:05:27.845Z"
@@ -196,22 +231,31 @@ Please also note that the microservice does not need to set the source of measur
         ]
     }
 ],
+"dataFragments":[
+    {
+       "value":"12345]",
+       "key":"/999/433/3"
+    },
+    {
+       "value":"Hello World",
+       "key":"/45678/0/1234"
+    }
+ ],
 "success": true
 }
-
 ```
 
 ## Implementing Decoder Microservices:
 
-Decoder Microservices can be easily built on top of [Cumulocity Microservices](http://www.cumulocity.com/guides/microservice-sdk/java). 
+Decoder Microservices can be easily built on top of [Cumulocity Microservices](http://www.cumulocity.com/guides/microservice-sdk/java).
 In order to serve as a LWM2M decoder microservice, two requirements have be met
 
-1. The microservice needs to marked as decoder microservice in the microservice manifest 
+1. The microservice needs to marked as decoder microservice in the microservice manifest
 2. The microservice needs to provide a simple decoder REST endpoint (/decode), as described above
 
 ### Marking a microservice as decoder
 
-In order to enable Cumulocity IoT to discover a Decoder Microservice, it needs to be marked as decoder microservice in the `cumulocity.json` file. This can be done by adding a simple additional fragment (`isDecoder`). For example, in this example, we use 
+In order to enable Cumulocity IoT to discover a Decoder Microservice, it needs to be marked as decoder microservice in the `cumulocity.json` file. This can be done by adding a simple additional fragment (`isDecoder`). For example, in this example, we use
 
      "isDecoder": {  
         "name":"Binary Series Decoder"  
