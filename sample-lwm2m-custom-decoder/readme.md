@@ -16,7 +16,7 @@ Let us for now assume that you have a decoder microservice already available. Yo
 
 #### Configuration
 
-The first step for using the decoder microservice is obviously to deploy the microservice in Cumulocity. Once that has been done, map the LWM2M resource that carries the data to be decoded to pass the data to your decoder microservice. [See our LWM2M guide for details]([Optional services - Cumulocity IoT Guides](https://cumulocity.com/guides/users-guide/optional-services/#lwm2m)).
+The first step for using the decoder microservice is obviously to deploy the microservice in Cumulocity. Once that has been done, map the LWM2M resource that carries the data to be decoded to pass the data to your decoder microservice. [See our LWM2M guide for details](https://cumulocity.com/guides/users-guide/optional-services/#lwm2m)).
 
 #### Delivery of data & and the decoder microservice invocation
 
