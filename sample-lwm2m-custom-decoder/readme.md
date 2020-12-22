@@ -104,9 +104,9 @@ If the decoder microservice is able to handle the request, it has to respond wit
 
 The fragments above are used as follows:
 
-- *alarms* A list of alarms to be created by the LWM2M agent. The alarms have to be given in the ordinary [Cumulocity alarm JSON format.]([Alarms - Cumulocity IoT Guides](https://cumulocity.com/guides/reference/alarms/))
+- *alarms* A list of alarms to be created by the LWM2M agent. The alarms have to be given in the ordinary [Cumulocity alarm JSON format](https://cumulocity.com/guides/reference/alarms/)
 
-- *events* A list of events to be created by the LWM2M agent. The alarms have to be given in the ordinary [Cumulocity alarm JSON format.]([Alarms - Cumulocity IoT Guides](https://cumulocity.com/guides/reference/events/))
+- *events* A list of events to be created by the LWM2M agent. The alarms have to be given in the ordinary [Cumulocity event JSON format](https://cumulocity.com/guides/reference/events/)
 
 - *measurements* A list of measurements to be created by the LWM2M agent. The syntax here follows an own format (see below and example source code)
 
