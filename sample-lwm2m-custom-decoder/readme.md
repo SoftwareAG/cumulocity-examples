@@ -110,7 +110,7 @@ The fragments above are used as follows:
 - *events* A list of events to be created by the LWM2M agent. The alarms have to be given in the ordinary [Cumulocity event JSON format](https://cumulocity.com/guides/reference/events/), for example carrying custom fields.  This can be an arbitrary event representation, for example carrying custom fields.
 
 - *measurements* A list of measurements to be created by the LWM2M agent. The syntax here follows an own DTO format, like this example shows:
-  
+
   ```
   {
     "type": "c8y_example_lwm2m_decoder_binaryValues_byteIndex_1",
@@ -132,7 +132,7 @@ The fragments above are used as follows:
     ]
   }
   ```
-  
+
   - *type*: Type of the measurement to be created
   - *series*: Series of the measurement to be created
   - *time*: Measurement timestamp
