@@ -114,12 +114,31 @@ The fragments above are used as follows:
   
   
   ```
-  
+  {
+     "type":"c8y_example_lwm2m_decoder_binaryValues_byteIndex_1",
+     "series":"binaryValueSeries",
+     "time":"2019-02-07T11:05:55.272Z",
+     "fragmentsToCopyFromSourceDevice":[
+        "IMEI",
+        "IMSI"
+     ],
+     "deviceFragmentPrefix":"device!Name",
+     "includeDeviceName":false,
+     "deviceNameFragment":null,
+     "additionalProperties":{
+        "foo":"bar"
+     },
+     "values":[
+        {
+           "seriesName":"byte 1",
+           "unit":"unknown",
+           "value":11
+        }
+     ]
+  }
   ```
   
-  
-  
-  - type*: Type of the measurement to be created
+  - type: Type of the measurement to be created
   - *series*: Series of the measurement to be created
   - *time*: Measurement timestamp
   - *fragmentsToCopyFromSourceDevice*: The LWM2M agent can copy fragments from the LWM2M device managed object into measurements being created. This field allows the external decoder to control this behavior. If used, this field needs to contain a list of device fragment names. In the example above, the agent copies over the fragments "IMSI" and "IMEI" if present in the device managed object.
