@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2013 Cumulocity GmbH
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation the rights to use,
  * copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
@@ -60,7 +60,7 @@ import java.util.Date;
 import java.util.List;
 
 import static c8y.trackeragent.utils.SDKExceptionHandler.handleSDKException;
-import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 public class TrackerDevice {
 
@@ -92,13 +92,13 @@ public class TrackerDevice {
     public static final String GEOFENCE_EXIT = "c8y_GeofenceExit";
 
     public static final String POWER_ALARM_TYPE = "c8y_PowerAlarm";
-    
+
     public static final String CRASH_DETECTED_EVENT_TYPE = "c8y_CrashDetected";
-    
+
     public static final String IGNITION_ON_EVENT_TYPE = "c8y_IgnitionOnEvent";
-    
+
     public static final String IGNITION_OFF_EVENT_TYPE = "c8y_IgnitionOffEvent";
-    
+
     public static final String TOW_EVENT_TYPE = "c8y_TowEvent";
 
     private Mobile mobile;
@@ -112,13 +112,13 @@ public class TrackerDevice {
     private EventRepresentation geofenceExit = new EventRepresentation();
 
     private EventRepresentation chargerConnected = new EventRepresentation();
-    
+
     private EventRepresentation crashDetected = new EventRepresentation();
-    
+
     private EventRepresentation ignitionOnEvent = new EventRepresentation();
-    
+
     private EventRepresentation ignitionOffEvent = new EventRepresentation();
-    
+
     private EventRepresentation towEvent = new EventRepresentation();
 
     private AlarmRepresentation fenceAlarm = new AlarmRepresentation();
@@ -162,20 +162,20 @@ public class TrackerDevice {
     private String self;
 
     private UpdateIntervalProvider updateIntervalProvider;
-    
+
     private TrackingProtocol trackingProtocol;
 
     public TrackerDevice(
             // @formatter:off
-    		String tenant, 
-    		String imei, 
-    		TrackerConfiguration configuration, 
-            InventoryRepository inventoryRepository, 
-            EventApi events, 
-            AlarmApi alarms, 
-            MeasurementApi measurements, 
-            DeviceControlApi deviceControl, 
-            IdentityApi identities, 
+    		String tenant,
+    		String imei,
+    		TrackerConfiguration configuration,
+            InventoryRepository inventoryRepository,
+            EventApi events,
+            AlarmApi alarms,
+            MeasurementApi measurements,
+            DeviceControlApi deviceControl,
+            IdentityApi identities,
             InventoryApi inventory,
             UpdateIntervalProvider updateIntervalProvider) throws SDKException {
     	// @formatter:on
@@ -210,7 +210,7 @@ public class TrackerDevice {
         EventRepresentation event = aLocationUpdateEvent();
         setPosition(event, position);
     }
-    
+
     public void setPosition(Position position, DateTime dateTime) throws SDKException {
         EventRepresentation event = aLocationUpdateEvent();
         event.setDateTime(dateTime);
@@ -334,7 +334,7 @@ public class TrackerDevice {
         events.create(chargerConnected);
         logger.debug("Charger connected to {}", imei);
     }
-    
+
     public void crashDetectedEvent(Position position, DateTime dateTime) {
         String eventText = "Crash detected: " +  position.getLng() + ", " + position.getLat();
         crashDetected.setText(eventText);
@@ -350,17 +350,17 @@ public class TrackerDevice {
         events.create(crashDetected);
         logger.info(eventText);
     }
-    
+
     public void powerAlarm(boolean powerLost, boolean external) throws SDKException {
         setPowerAlarmMessage(powerLost, external);
         createOrCancelAlarm(powerLost, powerAlarm, new DateTime());
     }
-    
+
     public void powerAlarm(boolean powerLost, boolean external, DateTime dateTime) throws SDKException {
         setPowerAlarmMessage(powerLost, external);
         createOrCancelAlarm(powerLost, powerAlarm, dateTime);
     }
-    
+
     private void setPowerAlarmMessage(boolean powerLost, boolean external) {
         logger.debug("{} {}", imei, powerLost ? "lost power" : "has power again");
         String msg = external ? "Asset " : "Tracker ";
@@ -395,7 +395,7 @@ public class TrackerDevice {
         device.setId(gid);
         inventory.update(device);
     }
-    
+
     public void setMobileInfo(String mcc, String mnc, String lac, String cellId) throws SDKException {
         ManagedObjectRepresentation device = new ManagedObjectRepresentation();
         mobile = inventory.get(gid).get(Mobile.class);
@@ -503,22 +503,22 @@ public class TrackerDevice {
         chargerConnected.setSource(source);
         chargerConnected.setType(CHARGER_CONNECTED);
         chargerConnected.setText("Charger connected");
-        
+
         towEvent.setSource(source);
         towEvent.setType(TOW_EVENT_TYPE);
         towEvent.setText("Tow detected");
-        
+
         ignitionOnEvent.setSource(source);
         ignitionOnEvent.setType(IGNITION_ON_EVENT_TYPE);
         ignitionOnEvent.setText("Ignition On");
-        
+
         ignitionOffEvent.setSource(source);
         ignitionOffEvent.setType(IGNITION_OFF_EVENT_TYPE);
         ignitionOffEvent.setText("Ignition Off");
 
         crashDetected.setSource(source);
         crashDetected.setType(CRASH_DETECTED_EVENT_TYPE);
-        
+
         powerAlarm.setType(POWER_ALARM_TYPE);
         powerAlarm.setSeverity(CumulocitySeverities.MAJOR.toString());
         powerAlarm.setText("Asset lost power.");
@@ -574,7 +574,7 @@ public class TrackerDevice {
         createOrUpdate(device, extId);
         gid = device.getId();
         self = device.getSelf();
-        
+
         createOrRetrieveMobile();
     }
 
@@ -666,7 +666,7 @@ public class TrackerDevice {
     /**
      * Create a managed object if it does not exist, or update it if it exists
      * already. Optionally, link to parent managed object as child device.
-     * 
+     *
      * @param mo
      *            Representation of the managed object to create or update
      * @param parentId
@@ -682,7 +682,7 @@ public class TrackerDevice {
         }
         copyProps(returnedMo, mo);
     }
-    
+
     private void createOrRetrieveMobile() {
         ManagedObjectRepresentation mo = aDevice();
         if (inventory.get(gid) != null) {
@@ -804,28 +804,28 @@ public class TrackerDevice {
     public void setUpdateIntervalProvider(UpdateIntervalProvider updateIntervalProvider) {
         this.updateIntervalProvider = updateIntervalProvider;
     }
-    
+
     public TrackingProtocol getTrackingProtocolInfo () {
         return trackingProtocol;
     }
-    
+
     public void setTrackingProtocolInfo  (TrackingProtocol trackingProtocol) {
         this.trackingProtocol = trackingProtocol;
     }
-    
+
     public void ignitionOnEvent(DateTime dateTime) {
         ignitionOnEvent.setDateTime(dateTime);
-        events.create(ignitionOnEvent);   
+        events.create(ignitionOnEvent);
     }
 
     public void ignitionOffEvent(DateTime dateTime) {
         ignitionOffEvent.setDateTime(dateTime);
-        events.create(ignitionOffEvent);  
+        events.create(ignitionOffEvent);
     }
-    
+
     public void towEvent(DateTime dateTime) {
         towEvent.setDateTime(dateTime);
-        events.create(towEvent);  
+        events.create(towEvent);
     }
 
 }

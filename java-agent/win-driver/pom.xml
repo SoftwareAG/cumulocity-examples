@@ -5,7 +5,7 @@
     <parent>
         <groupId>c8y.example</groupId>
         <artifactId>c8y-jv</artifactId>
-        <version>1007.0.0-SNAPSHOT</version>
+        <version>1007.13.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>win-driver</artifactId>

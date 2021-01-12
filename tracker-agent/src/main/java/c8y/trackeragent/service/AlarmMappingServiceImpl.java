@@ -4,7 +4,7 @@ import java.util.Locale;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
@@ -14,18 +14,18 @@ import c8y.trackeragent.configuration.ConfigUtils;
 
 @Component
 public class AlarmMappingServiceImpl extends ReloadableResourceBundleMessageSource implements AlarmMappingService {
-    
+
     private static Logger logger = LoggerFactory.getLogger(AlarmMappingServiceImpl.class);
-    
+
     private static final Locale LOCALE = Locale.GERMANY;
     private static final int CACHE_SECONDS = 600;
-    
+
     static String ENTRY_TYPE = "type";
     static String ENTRY_TEXT = "text";
     static String ENTRY_SEVERITY = "severity";
-    
+
     private final String basename;
-    
+
     public AlarmMappingServiceImpl() {
         this.basename = "file:" + ConfigUtils.get().getConfigDir() + "/alarm-configuration";
     }
@@ -48,7 +48,7 @@ public class AlarmMappingServiceImpl extends ReloadableResourceBundleMessageSour
     public String getSeverity(String name) {
         return getMessage(name, ENTRY_SEVERITY);
     }
-    
+
     private String getMessage(String name, String keyPostfix, Object... args) {
         String code = asCode(name, keyPostfix);
         String result = getMessage(code, args, LOCALE);
@@ -58,7 +58,7 @@ public class AlarmMappingServiceImpl extends ReloadableResourceBundleMessageSour
     static String asCode(String name, String keyPostfix) {
         return name.toLowerCase().replaceAll(" ", "_") + "." + keyPostfix;
     }
-    
+
     @PostConstruct
     public void init() {
         logger.info("Load properties from {}", basename);

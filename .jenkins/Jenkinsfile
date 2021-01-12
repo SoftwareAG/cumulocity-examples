@@ -7,7 +7,7 @@ pipeline {
     }
     triggers { pollSCM('H/5 * * * *') }
     options {
-        buildDiscarder(logRotator(numToKeepStr: '10'))
+        buildDiscarder(logRotator(numToKeepStr: '3'))
         timeout(time: 4, unit: 'HOURS')
         disableConcurrentBuilds()
         lock('cumulocity-examples')
@@ -160,14 +160,14 @@ pipeline {
                         }
                     }
                 }
-                stage('Scan third party dependencies') {
+                /* stage('Scan third party dependencies') {
                     steps {
                         echo "executing scan of third party dependencies"
                         withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
                             sh "chmod +x .jenkins/scripts/scan_dependencies.sh && .jenkins/scripts/scan_dependencies.sh ${params.release_version}"
                         }
                     }
-                }
+                } */
             }
         }
     }

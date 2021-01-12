@@ -6,15 +6,15 @@
 
 	<groupId>c8y.example</groupId>
 	<artifactId>c8y-examples</artifactId>
-	<version>1007.0.0-SNAPSHOT</version>
+	<version>1007.13.0-SNAPSHOT</version>
 	<name>Cumulocity :: Examples</name>
 	<packaging>pom</packaging>
 
 	<properties>
-		<c8y.version>1007.0.0-SNAPSHOT</c8y.version>
+		<c8y.version>1007.13.0-SNAPSHOT</c8y.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.source>1.8</maven.compiler.source>
-		<maven.compiler.target>1.8</maven.compiler.target>
+		<java.version>11</java.version>
+		<maven.compiler.target>${java.version}</maven.compiler.target>
 	</properties>
 
 	<profiles>
@@ -22,14 +22,14 @@
 			<id>develop</id>
 			<properties>
 				<!-- current SNAPSHOT version of c8y-client -->
-				<!--<c8y.version>1007.0.0-SNAPSHOT</c8y.version>-->
+				<!--<c8y.version>1007.13.0-SNAPSHOT</c8y.version>-->
 			</properties>
 			<distributionManagement>
 				<snapshotRepository>
 					<id>snapshot</id>
 					<url>${nexus.url}/nexus/content/repositories/snapshots/</url>
 				</snapshotRepository>
-			</distributionManagement>			
+			</distributionManagement>
 		</profile>
 		<profile>
 			<activation>
@@ -38,7 +38,7 @@
 			<id>production</id>
 			<properties>
 				<!-- current RELEASE version of c8y-client -->
-				<!--<c8y.version>1007.0.0-SNAPSHOT</c8y.version>-->
+				<!--<c8y.version>1007.13.0-SNAPSHOT</c8y.version>-->
 			</properties>
 			<distributionManagement>
 				<!-- TODO remove snapshotRepository after release -->
@@ -50,7 +50,7 @@
 					<id>release</id>
 					<url>${nexus.url}/nexus/content/repositories/releases/</url>
 				</repository>
-			</distributionManagement>			
+			</distributionManagement>
 		</profile>
 	</profiles>
 
@@ -63,6 +63,7 @@
 		<module>java-agent</module>
 		<module>snmp</module>
 		<module>mqtt-client</module>
+		<module>microservices</module>
 	</modules>
 
 	<licenses>
@@ -72,15 +73,15 @@
 			<comments>
                     Copyright (C) 2013 Cumulocity GmbH
 
-    Permission is hereby granted, free of charge, to any person obtaining a copy of 
+    Permission is hereby granted, free of charge, to any person obtaining a copy of
     this software and associated documentation files (the "Software"),
     to deal in the Software without restriction, including without limitation the rights to use,
     copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
     and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-    
+
     The above copyright notice and this permission notice shall be
     included in all copies or substantial portions of the Software.
-    
+
     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
     EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
     OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
@@ -104,16 +105,6 @@
 				<artifactId>device-capability-model</artifactId>
 				<version>${c8y.version}</version>
 			</dependency>
-			<dependency>
-				<groupId>com.google.guava</groupId>
-				<artifactId>guava</artifactId>
-				<version>18.0</version>
-			</dependency>
-			<dependency>
-				<groupId>commons-lang</groupId>
-				<artifactId>commons-lang</artifactId>
-				<version>2.6</version>
-			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
@@ -127,6 +118,10 @@
 				<plugin>
 					<artifactId>maven-compiler-plugin</artifactId>
 					<version>3.8.1</version>
+					<configuration>
+						<source>${java.version}</source>
+						<target>${java.version}</target>
+					</configuration>
 				</plugin>
 				<plugin>
 					<artifactId>maven-deploy-plugin</artifactId>
@@ -142,7 +137,7 @@
 				</plugin>
 				<plugin>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>2.16</version>
+					<version>2.22.2</version>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>

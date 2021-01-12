@@ -5,18 +5,16 @@
     <parent>
         <artifactId>c8y-examples</artifactId>
         <groupId>c8y.example</groupId>
-        <version>1007.0.0-SNAPSHOT</version>
+        <version>1007.13.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <properties>
-        <spring-boot-dependencies.version>1.5.22.RELEASE</spring-boot-dependencies.version>
         <main.class>c8y.example.decoders.json.JsonDecoder</main.class>
     </properties>
 
     <artifactId>sample-json-decoder</artifactId>
     <name>Cumulocity :: Examples :: Sample JSON Decoder</name>
-    <version>${project.parent.version}</version>
 
     <licenses>
         <license>
@@ -28,13 +26,6 @@
 
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>com.fasterxml.jackson</groupId>
-                <artifactId>jackson-bom</artifactId>
-                <version>2.10.1</version>
-                <scope>import</scope>
-                <type>pom</type>
-            </dependency>
             <dependency>
                 <groupId>com.nsn.cumulocity.clients-java</groupId>
                 <artifactId>microservice-dependencies</artifactId>
@@ -94,6 +85,11 @@
             <version>1.9.5</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -101,7 +97,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>${spring-boot-dependencies.version}</version>
+                <version>2.3.3.RELEASE</version>
                 <executions>
                     <execution>
                         <goals>
