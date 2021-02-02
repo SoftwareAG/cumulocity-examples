@@ -4,7 +4,7 @@ import static java.math.BigDecimal.valueOf;
 
 import java.math.BigDecimal;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import c8y.Position;
 
@@ -46,7 +46,7 @@ public class TK10xCoordinatesTranslator {
         double longitude = calculate(parsedDouble.getValue());
         return HEMISPHERE_WEST.equals(hemisphereSymbol) ? -longitude : longitude;
     }
-    
+
     public static Position parse(Position arg) {
         Position result = new Position();
         result.setLat(valueOf(parseLatitude(arg.getLat().toString(), null)));
@@ -72,7 +72,7 @@ public class TK10xCoordinatesTranslator {
         double degrees = arg - (minutes * 100.0);
         return round(degrees / 60.0) + minutes;
     }
-    
+
     private static double round(double val) {
         return Math.round(val * ACCURACY) / ACCURACY;
     }

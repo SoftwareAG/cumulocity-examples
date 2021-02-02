@@ -160,14 +160,14 @@ pipeline {
                         }
                     }
                 }
-                stage('Scan third party dependencies') {
+                /* stage('Scan third party dependencies') {
                     steps {
                         echo "executing scan of third party dependencies"
                         withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
                             sh "chmod +x .jenkins/scripts/scan_dependencies.sh && .jenkins/scripts/scan_dependencies.sh ${params.release_version}"
                         }
                     }
-                }
+                } */
             }
         }
     }
