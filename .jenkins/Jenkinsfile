@@ -1,16 +1,17 @@
 pipeline {
-    agent {
-        dockerfile {
-            dir '.jenkins/build'
-            args '--network centos_default'
+     agent {
+        kubernetes {
+            inheritFrom 'jdk8'
+            defaultContainer 'default'
         }
     }
-    triggers { pollSCM('H/5 * * * *') }
+    triggers {
+         bitbucketPush()
+     }
     options {
         buildDiscarder(logRotator(numToKeepStr: '3'))
         timeout(time: 4, unit: 'HOURS')
         disableConcurrentBuilds()
-        lock('cumulocity-examples')
     }
     parameters {
         choice(name: 'build_type', choices: ['DEFAULT', 'RELEASE', 'HOTFIX']);
@@ -43,9 +44,6 @@ pipeline {
         }
         stage('Checkout') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'bitbucket-m2m', passwordVariable: 'BITBUCKET_PASSWORD', usernameVariable: 'BITBUCKET_USER')]) {
-                    sh "chmod +x .jenkins/scripts/status.sh && .jenkins/scripts/status.sh 'INPROGRESS' ${JOB_NAME} ${BUILD_TAG} "
-                }
                 withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
                     sh "chmod +x .jenkins/scripts/clean.sh && .jenkins/scripts/clean.sh"
                 }
@@ -87,7 +85,7 @@ pipeline {
              steps {
                 echo "wait for lock on deploy2yum.sh"
                 lock('deploy2yum') {
-                    sshagent(['jenkins-master-key']) {
+                    sshagent(['jenkins-master']) {
                         withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
                             sh "chmod +x .jenkins/scripts/deploy.sh && .jenkins/scripts/deploy.sh snapshot"
                         }
@@ -130,7 +128,7 @@ pipeline {
                     steps {
                         echo "wait for lock on deploy2yum.sh"
                         lock('deploy2yum') {
-                            sshagent(['jenkins-master-key']) {
+                            sshagent(['jenkins-master']) {
                                 withCredentials([usernamePassword(credentialsId: 'bitbucket-m2m', passwordVariable: 'BITBUCKET_PASSWORD', usernameVariable: 'BITBUCKET_USER'),
                                                  file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
                                     sh "chmod +x .jenkins/scripts/release.sh && .jenkins/scripts/release.sh -r ${params.release_version} -d ${params.hotfix_version} -b ${env.BRANCH_NAME}"
@@ -160,14 +158,14 @@ pipeline {
                         }
                     }
                 }
-                stage('Scan third party dependencies') {
+                /* stage('Scan third party dependencies') {
                     steps {
                         echo "executing scan of third party dependencies"
                         withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
                             sh "chmod +x .jenkins/scripts/scan_dependencies.sh && .jenkins/scripts/scan_dependencies.sh ${params.release_version}"
                         }
                     }
-                }
+                } */
             }
         }
     }
@@ -177,33 +175,13 @@ pipeline {
                 sh "chmod +x .jenkins/scripts/clean.sh && .jenkins/scripts/clean.sh"
             }
         }
-        success {
-            withCredentials([usernamePassword(credentialsId: 'bitbucket-m2m', passwordVariable: 'BITBUCKET_PASSWORD', usernameVariable: 'BITBUCKET_USER')]) {
-                sh "chmod +x .jenkins/scripts/status.sh && .jenkins/scripts/status.sh 'SUCCESSFUL' ${JOB_NAME} ${BUILD_TAG} "
-            }
-        }
+
         failure {
             script {
                 if (env.BRANCH_NAME ==~ '(develop|release/.*)') {
-                    chat 'AAAAvnc5o90'
+                    // chat 'AAAAvnc5o90'
                 }
             }
-
-            withCredentials([usernamePassword(credentialsId: 'bitbucket-m2m', passwordVariable: 'BITBUCKET_PASSWORD', usernameVariable: 'BITBUCKET_USER')]) {
-                sh "chmod +x .jenkins/scripts/status.sh && .jenkins/scripts/status.sh 'FAILED' ${JOB_NAME} ${BUILD_TAG} "
-            }
         }
-        cleanup {
-              /* clean up workspace */
-              deleteDir()
-               /* clean up tmp directory */
-              dir("${workspace}@tmp") {
-                  deleteDir()
-              }
-                /* clean up script directory */
-              dir("${workspace}@script") {
-                        deleteDir()
-              }
-         }
     }
 }
