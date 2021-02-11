@@ -23,7 +23,7 @@ function tag-version {
     git tag -f -m "copy for tag ${tag}" -a "${tag}"
 }
 
-./mvnw clean -T 4
+./mvnw -s $MVN_SETTINGS clean -T 4
 
 echo "obtain current branch name"
 
@@ -40,12 +40,12 @@ echo "pull latest changes from the branch ${branch_name}"
 git pull https://${BITBUCKET_USER}:${BITBUCKET_PASSWORD}@bitbucket.org/m2m/cumulocity-examples ${branch_name}
 
 echo "Update version to ${version}"
-./mvnw versions:set -DnewVersion=${version}
+./mvnw -s $MVN_SETTINGS versions:set -DnewVersion=${version}
 cd java-agent/assembly/
-../../mvnw versions:set -DnewVersion=${version}
+../../mvnw -s $MVN_SETTINGS versions:set -DnewVersion=${version}
 cd ../..
 cd hello-world-microservice
-../mvnw versions:set -DnewVersion=${version}
+../mvnw -s $MVN_SETTINGS versions:set -DnewVersion=${version}
 cd ..
 .jenkins/scripts/update_dependencies.sh ${version}
 
