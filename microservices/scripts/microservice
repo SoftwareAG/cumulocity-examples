@@ -238,7 +238,7 @@ verifyParamSet (){
 }
 
 push (){
-	authorization="Basic $(echo -n "$DEPLOY_USER:$DEPLOY_PASSWORD" | base64)"
+	authorization="Basic $(echo -n "$DEPLOY_USER:$DEPLOY_PASSWORD" | base64 -w 0)"
 
 	getApplicationId
 	if [ "x$APPLICATION_ID" == "xnull" ]
@@ -306,7 +306,7 @@ uploadFile () {
 
 subscribe () {
 	verifySubscribePrerequisits
-	authorization="Basic $(echo -n "$DEPLOY_USER:$DEPLOY_PASSWORD" | base64)"
+	authorization="Basic $(echo -n "$DEPLOY_USER:$DEPLOY_PASSWORD" | base64 -w 0)"
 
 	echo "[INFO] Tenant $DEPLOY_TENANT subscription to application $APPLICATION_NAME with id $APPLICATION_ID"
 	body="{\"application\":{\"id\": \"$APPLICATION_ID\"}}"
