@@ -47,12 +47,15 @@ then
     target_package_name=$(basename $target_package)
     
 
-        if [ -z "$target_package" ] || [ -z "$YUM_DEST_DIR" ]; then
+        if [ -z "$target_package" ] then || [ -z "$YUM_DEST_DIR" ]; then
             echo "cumulocity-linux-agent or destination  not find!"
             exit 1
         else
             deploy $target_package
-            setLatest  $target_package_name $YUM_DEST_DIR  "cumulocity-linux-agent" "tar.gz"
+            if [ "!$1" = "!develop" ]
+            then
+                setLatest  $target_package_name $YUM_DEST_DIR  "cumulocity-linux-agent" "tar.gz"
+            fi
         fi
    
 fi
