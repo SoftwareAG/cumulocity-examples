@@ -21,8 +21,8 @@
 package c8y.tinkerforge.bricklet;
 
 import java.math.BigDecimal;
-import java.util.Date;
 
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -138,7 +138,7 @@ public class GpsBricklet extends PollingDriver {
 				mo.setId(gpsMo.getId());
 				getPlatform().getInventoryApi().update(mo);
 
-				locationUpdate.setTime(new Date());
+				locationUpdate.setDateTime(new DateTime());
 				locationUpdate.set(position);
 				getPlatform().getEventApi().create(locationUpdate);
 			} catch (SDKException e) {

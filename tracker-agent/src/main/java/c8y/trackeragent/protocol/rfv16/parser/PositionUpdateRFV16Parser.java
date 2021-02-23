@@ -76,7 +76,7 @@ public class PositionUpdateRFV16Parser extends RFV16Parser implements Parser {
                 .withAlt(BigDecimal.ZERO)
                 .withSpeedMeasurement(speed)
                 .withAlarms(alarms)
-                .withTime(RFV16Parser.getDate(reportCtx));
+                .withDateTime(RFV16Parser.getDateTime(reportCtx));
         // @formatter:on
         device.setPosition(locationEvent.build());
         if (!reportCtx.isConnectionFlagOn(CONNECTION_PARAM_CONTROL_COMMANDS_SENT)) {
@@ -100,7 +100,7 @@ public class PositionUpdateRFV16Parser extends RFV16Parser implements Parser {
         		.withPosition(lastPosition)
         		.withAlarms(alarms)
         		.withSpeedMeasurement(speed)
-        		.withTime(RFV16Parser.getDate(reportCtx));
+        		.withDateTime(RFV16Parser.getDateTime(reportCtx));
         device.setPosition(locationEvent.build());
     }
 

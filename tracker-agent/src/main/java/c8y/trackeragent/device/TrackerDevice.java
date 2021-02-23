@@ -56,7 +56,6 @@ import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 import static c8y.trackeragent.utils.SDKExceptionHandler.handleSDKException;
@@ -645,13 +644,13 @@ public class TrackerDevice {
     }
 
     public EventRepresentation getLastLocationEvent() {
-        Date fromDate = new Date(0);
-        Date toDate = new DateTime().plusDays(1).toDate();
+        DateTime fromDate = new DateTime(0);
+        DateTime toDate = new DateTime().plusDays(1);
         // @formatter:off
         EventFilter filter = new EventFilter()
                 .bySource(getGId())
                 .byType(TrackerDevice.LU_EVENT_TYPE)
-                .byDate(fromDate, toDate);
+                .byDate(fromDate.toDate(), toDate.toDate());
         // @formatter:on
         EventCollection collection = events.getEventsByFilter(filter);
         List<EventRepresentation> events = collection.get().getEvents();
@@ -669,7 +668,7 @@ public class TrackerDevice {
      *
      * @param mo
      *            Representation of the managed object to create or update
-     * @param parentId
+     * @param extId
      *            ID of the parent to link to, or null if no link is needed.
      */
     protected void createOrUpdate(ManagedObjectRepresentation mo, ID extId) throws SDKException {

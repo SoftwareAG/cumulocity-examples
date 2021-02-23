@@ -21,9 +21,9 @@
 package c8y.tinkerforge.bricklet;
 
 
-import java.util.Date;
 import java.util.Properties;
 
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -194,7 +194,7 @@ public class IO16Bricklet implements Driver, Configurable {
 			
 			@Override
 			public void interrupt(char port, short interruptMask, short valueMask) {
-				inputChangeEvent.setTime(new Date());
+				inputChangeEvent.setDateTime(new DateTime());
 				inputChangeEvent.setProperty("port", Character.toString(port));
 				for(int i=0;i<8;i++){
 					if(interruptMask%2==1){

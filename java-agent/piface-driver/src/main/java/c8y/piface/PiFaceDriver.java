@@ -20,8 +20,7 @@
 
 package c8y.piface;
 
-import java.util.Date;
-
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -171,7 +170,7 @@ public class PiFaceDriver implements Driver, OperationExecutor {
 			if (event.getNewState() == SwitchState.ON) {
 				logger.trace("Button {} pressed, sending event", idx);
 				eventTemplate.setSource(buttonMos[idx]);
-				eventTemplate.setTime(new Date());
+				eventTemplate.setDateTime(new DateTime());
 				try {
 					platform.getEventApi().create(eventTemplate);
 				} catch (SDKException e) {
