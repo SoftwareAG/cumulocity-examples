@@ -52,7 +52,11 @@ then
             exit 1
         else
             deploy $target_package
-            setLatest  $target_package_name $YUM_DEST_DIR  "cumulocity-linux-agent" "tar.gz"
+           
+            if [ "!$1" = "!develop" ]
+            then
+                setLatest  $target_package_name $YUM_DEST_DIR  "cumulocity-linux-agent" "tar.gz"
+            fi
         fi
 
 fi
