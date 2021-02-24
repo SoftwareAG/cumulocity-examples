@@ -21,7 +21,6 @@
 package c8y.tinkerforge.bricklet;
 
 import java.math.BigDecimal;
-import java.util.Date;
 import java.util.Properties;
 
 import com.cumulocity.model.measurement.MeasurementValue;
@@ -33,6 +32,7 @@ import com.tinkerforge.Device;
 import c8y.DistanceMeasurement;
 import c8y.DistanceSensor;
 import c8y.tinkerforge.TFIds;
+import org.joda.time.DateTime;
 
 public class DistanceUSBricklet extends BaseSensorBricklet{
 
@@ -51,10 +51,10 @@ public class DistanceUSBricklet extends BaseSensorBricklet{
 	
 	private MeasurementValue measurementValue = new MeasurementValue(DISTANCE_UNIT);
 	
-	BrickletDistanceUS distanceBricklet=(BrickletDistanceUS)getDevice();
+	BrickletDistanceUS distanceBricklet = (BrickletDistanceUS)getDevice();
 	
-	private Date lastTriggered=new Date();
-	private EventRepresentation entranceEvent=new EventRepresentation();
+	private DateTime lastTriggered = new DateTime();
+	private EventRepresentation entranceEvent = new EventRepresentation();
 	
 	public DistanceUSBricklet(String id, Device device) {
 		super(id, device, TYPE, new DistanceSensor());
@@ -89,10 +89,10 @@ public class DistanceUSBricklet extends BaseSensorBricklet{
 			double distancePercentage = (double)100*distanceBricklet.getDistanceValue()/4095;
 			
 			if(distancePercentage<actualEventTreshold){
-				Date currentTime = new Date();
-				if(currentTime.getTime()>=lastTriggered.getTime()+actualSlackTime) {
+				DateTime currentTime = new DateTime();
+				if(currentTime.getMillis() >= lastTriggered.getMillis() + actualSlackTime) {
 					logger.debug("Sending distance event");
-					entranceEvent.setTime(currentTime);
+					entranceEvent.setDateTime(currentTime);
 					entranceEvent.setProperty("distance", distancePercentage);
 					try {
 						getPlatform().getEventApi().create(entranceEvent);

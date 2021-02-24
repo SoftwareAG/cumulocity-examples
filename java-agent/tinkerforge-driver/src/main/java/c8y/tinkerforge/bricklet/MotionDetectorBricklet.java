@@ -19,8 +19,7 @@
  */
 package c8y.tinkerforge.bricklet;
 
-import java.util.Date;
-
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -104,7 +103,7 @@ public class MotionDetectorBricklet implements Driver{
 			public void motionDetected() {
 				logger.debug("Motion event");
 				try{
-					eventMotion.setTime(new Date());
+					eventMotion.setDateTime(new DateTime());
 					eventMotion.setText("Motion detected.");
 					platform.getEventApi().create(eventMotion);
 				} catch (SDKException e) {
@@ -120,7 +119,7 @@ public class MotionDetectorBricklet implements Driver{
 			public void detectionCycleEnded() {
 			logger.debug("Motion event ended");
 				try{
-					eventMotion.setTime(new Date());
+					eventMotion.setDateTime(new DateTime());
 					eventMotion.setText("Motion ended.");
 					platform.getEventApi().create(eventMotion);
 				} catch (SDKException e) {

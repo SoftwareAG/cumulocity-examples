@@ -19,13 +19,12 @@
  */
 package c8y.lx.driver;
 
-import java.util.Date;
-
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
 import com.cumulocity.sdk.client.Platform;
 import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.measurement.MeasurementApi;
+import org.joda.time.DateTime;
 
 public abstract class MeasurementPollingDriver extends PollingDriver {
 
@@ -51,7 +50,7 @@ public abstract class MeasurementPollingDriver extends PollingDriver {
     protected void sendMeasurement(Object measurement) {
         try {
             measurementRep.set(measurement);
-            measurementRep.setTime(new Date());
+            measurementRep.setDateTime(new DateTime());
             measurements.create(measurementRep);
         } catch (SDKException e) {
             logger.warn("Cannot send measurement", e);

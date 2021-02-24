@@ -20,9 +20,9 @@
 
 package c8y.lx.agent;
 
-import java.util.Date;
 import java.util.Properties;
 
+import org.joda.time.DateTime;
 import org.slf4j.LoggerFactory;
 
 import c8y.lx.driver.Configurable;
@@ -102,12 +102,12 @@ public class TracelogDriver extends AppenderBase<ILoggingEvent> implements Confi
 	protected void append(ILoggingEvent entry) {
 		try {
 			if (entry.getLevel().isGreaterOrEqual(alarmLevel)) {
-				alarmTemplate.setTime(new Date());
+				alarmTemplate.setDateTime(new DateTime());
 				alarmTemplate.setText(entry.getLoggerName() + ": "
 						+ entry.getMessage());
 				alarms.create(alarmTemplate);
 			} else if (entry.getLevel().isGreaterOrEqual(eventLevel)) {
-				eventTemplate.setTime(new Date());
+				eventTemplate.setDateTime(new DateTime());
 				eventTemplate.setText(entry.getLoggerName() + ": "
 						+ entry.getMessage());
 				events.create(eventTemplate);

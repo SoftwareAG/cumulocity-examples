@@ -35,7 +35,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.util.Date;
 import java.util.List;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -112,9 +111,9 @@ public abstract class TrackerITSupport {
 
     protected EventRepresentation findLastEvent(String imei, String type) {
         GId gId = getGId(imei);
-        Date fromDate = new Date(0);
-        Date toDate = new DateTime().plusDays(1).toDate();
-        EventFilter filter = new EventFilter().bySource(gId).byType(type).byDate(fromDate, toDate);
+        DateTime fromDate = new DateTime();
+        DateTime toDate = new DateTime().plusDays(1);
+        EventFilter filter = new EventFilter().bySource(gId).byType(type).byDate(fromDate.toDate(), toDate.toDate());
         List<EventRepresentation> events = trackerPlatform.getEventApi().getEventsByFilter(filter).get().getEvents();
         return events.isEmpty() ? null : events.get(0);
     }
