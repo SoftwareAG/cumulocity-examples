@@ -4,10 +4,10 @@ import static com.cumulocity.model.event.CumulocityAlarmStatuses.ACTIVE;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 
 import javax.annotation.Nullable;
 
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,7 +64,7 @@ public class AlarmService {
         ManagedObjectRepresentation source = new ManagedObjectRepresentation();
         source.setId(device.getGId());
         alarm.setSource(source);
-        alarm.setTime(new Date());
+        alarm.setDateTime(new DateTime());
         alarm.setStatus(ACTIVE.toString());
         return alarm;
     }

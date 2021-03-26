@@ -1,7 +1,6 @@
 package c8y.kontron;
 
 import java.io.IOException;
-import java.util.Date;
 import java.util.Properties;
 
 import c8y.lx.driver.PollingDriver;
@@ -10,6 +9,7 @@ import com.cumulocity.model.event.CumulocityAlarmStatuses;
 import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.SDKException;
+import org.joda.time.DateTime;
 
 public class AccelerometerDriver extends PollingDriver {
 
@@ -74,7 +74,7 @@ public class AccelerometerDriver extends PollingDriver {
 	public void run() {
 		try {
 			if (reader.poll()) {
-				long now = new Date().getTime();
+				long now = new DateTime().getMillis();
 				if (lastAlarm == 0 || now >= lastAlarm + REARM_TIME) {
 					logger.debug("Sending motion alarm from accelerometer.");
 					getPlatform().getAlarmApi().create(motion);

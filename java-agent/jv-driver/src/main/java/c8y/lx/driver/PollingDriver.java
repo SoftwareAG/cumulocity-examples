@@ -22,12 +22,12 @@ package c8y.lx.driver;
 import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
-import java.util.Date;
 import java.util.Properties;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -127,7 +127,7 @@ public abstract class PollingDriver implements Driver, Configurable, Runnable {
             return; // already started
         }
 
-        long now = new Date().getTime();
+        long now = new DateTime().getMillis();
         long initialDelay = computeInitialDelay(now, actualPollingInterval);
 
         scheduledFuture = executorService.scheduleAtFixedRate(this, initialDelay, actualPollingInterval, MILLISECONDS);

@@ -28,8 +28,7 @@ import c8y.trackeragent.device.TrackerDevice;
 public class LocationEventBuilder {
 
     private Collection<AlarmRepresentation> alarms;
-    private Date time = new Date();
-    private DateTime dateTime;
+    private DateTime dateTime = new DateTime();
     private GId sourceId;
     private SpeedMeasurement speedMeasurement;
     private Position position = new Position();
@@ -45,7 +44,7 @@ public class LocationEventBuilder {
 
     public LocationEventBuilder withTime(Date time) {
         if (time != null) {
-            this.time = time;
+            this.dateTime = new DateTime(time);
         }
         return this;
     }
@@ -103,7 +102,7 @@ public class LocationEventBuilder {
         if (dateTime != null) {
             result.setDateTime(dateTime);
         } else {
-            result.setTime(time);
+            result.setDateTime(dateTime);
         }
         result.set(position);
         if (speedMeasurement != null) {

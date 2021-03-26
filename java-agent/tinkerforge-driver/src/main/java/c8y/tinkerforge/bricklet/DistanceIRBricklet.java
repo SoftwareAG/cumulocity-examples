@@ -21,7 +21,6 @@
 package c8y.tinkerforge.bricklet;
 
 import java.math.BigDecimal;
-import java.util.Date;
 import java.util.Properties;
 
 import c8y.DistanceMeasurement;
@@ -33,6 +32,7 @@ import com.cumulocity.rest.representation.event.EventRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 import com.tinkerforge.BrickletDistanceIR;
 import com.tinkerforge.Device;
+import org.joda.time.DateTime;
 
 public class DistanceIRBricklet extends BaseSensorBricklet {
 
@@ -51,10 +51,10 @@ public class DistanceIRBricklet extends BaseSensorBricklet {
 	
 	private MeasurementValue measurementValue = new MeasurementValue(DISTANCE_UNIT);
 	
-	BrickletDistanceIR distanceBricklet=(BrickletDistanceIR)getDevice();
+	BrickletDistanceIR distanceBricklet = (BrickletDistanceIR)getDevice();
 	
-	private Date lastTriggered=new Date();
-	private EventRepresentation entranceEvent=new EventRepresentation();
+	private DateTime lastTriggered = new DateTime();
+	private EventRepresentation entranceEvent = new EventRepresentation();
 	
 	public DistanceIRBricklet(String id, Device device) {
 		super(id, device, TYPE, new DistanceSensor());
@@ -89,10 +89,10 @@ public class DistanceIRBricklet extends BaseSensorBricklet {
 			int distanceValue = distanceBricklet.getDistance();
 			
 			if(distanceValue<actualEventTreshhold){
-				Date currentTime = new Date();
-				if(currentTime.getTime()>=lastTriggered.getTime()+actualSlackTime) {
+				DateTime currentTime = new DateTime();
+				if(currentTime.getMillis() >= lastTriggered.getMillis() + actualSlackTime) {
 					logger.debug("Sending entrance event");
-					entranceEvent.setTime(currentTime);
+					entranceEvent.setDateTime(currentTime);
 					entranceEvent.setProperty("distance", distanceValue);
 					try {
 						getPlatform().getEventApi().create(entranceEvent);

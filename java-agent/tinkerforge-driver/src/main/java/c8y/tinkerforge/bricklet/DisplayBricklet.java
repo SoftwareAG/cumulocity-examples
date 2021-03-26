@@ -20,8 +20,7 @@
 
 package c8y.tinkerforge.bricklet;
 
-import java.util.Date;
-
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -116,7 +115,7 @@ public class DisplayBricklet implements Driver {
 		display.addButtonPressedListener(new ButtonPressedListener() {
 			@Override
 			public void buttonPressed(short button) {
-				buttonEvent.setTime(new Date());
+				buttonEvent.setDateTime(new DateTime());
 				buttonEvent.setText("Button pressed: " + Short.toString(button));
 				try {
 					events.create(buttonEvent);

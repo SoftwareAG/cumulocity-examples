@@ -131,7 +131,7 @@ public class TelicLocationReport implements Parser, TelicFragment {
             if (logCodeType == LogCodeType.MOTION_SENSOR_MOTION)
                 measurementService.createShockMeasurement(reportCtx.getEntryAsNumber(MAX_SHOCK_ACCELERATION), device, dateTime);
         }
-        locationUpdateEvent.setTime(dateTime.toDate());
+        locationUpdateEvent.setDateTime(dateTime);
         position.setProperty(CommonConstants.TRACKING_PROTOCOL, TrackingProtocol.TELIC);
         String fixType = getFixType(reportCtx);
         if (fixType != null) {
