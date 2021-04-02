@@ -2,7 +2,7 @@ package c8y.trackeragent;
 
 import static com.cumulocity.rest.representation.tenant.OptionMediaType.OPTION;
 
-import org.apache.commons.httpclient.HttpStatus;
+import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +13,11 @@ import com.cumulocity.sdk.client.PlatformParameters;
 import com.cumulocity.sdk.client.ResponseParser;
 import com.cumulocity.sdk.client.RestConnector;
 import com.cumulocity.sdk.client.SDKException;
-import com.sun.jersey.api.client.ClientResponse;
 
 import c8y.inject.DeviceScope;
 import c8y.trackeragent.configuration.TrackerConfiguration;
+
+import javax.ws.rs.core.Response;
 
 @Component
 @DeviceScope
@@ -24,7 +25,7 @@ public class UpdateIntervalProvider {
 
 	private final static Logger logger = LoggerFactory.getLogger(UpdateIntervalProvider.class);
 	private final static String optionEndpoint = "tenant/system/options/device/update.interval";
-	
+
 	private final String path;
 	private final RestConnector connector;
 
@@ -67,7 +68,7 @@ public class UpdateIntervalProvider {
 
 	private static class SilentResponseParser extends ResponseParser {
 
-		protected String getErrorRepresentation(ClientResponse response) {
+		protected String getErrorRepresentation(Response response) {
 			if (isJsonResponse(response)) {
 				return super.getErrorRepresentation(response);
 			}

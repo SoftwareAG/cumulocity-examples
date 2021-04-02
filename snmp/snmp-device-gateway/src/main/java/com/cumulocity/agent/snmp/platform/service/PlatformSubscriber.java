@@ -19,7 +19,7 @@ package com.cumulocity.agent.snmp.platform.service;
 
 import javax.annotation.PreDestroy;
 
-import org.apache.commons.httpclient.HttpStatus;
+import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
@@ -94,7 +94,7 @@ public class PlatformSubscriber {
 								if (sdkException.getHttpStatus() == HttpStatus.SC_UNAUTHORIZED) {
 									log.error("Device with name '{}' and id '{}' is deleted. "
 											+ "Restart the agent and register a new device. "
-											+ "\nShutting down agent...", gatewayDevice.getName(), 
+											+ "\nShutting down agent...", gatewayDevice.getName(),
 											gatewayDevice.getId().getValue());
 									System.exit(0);
 								}
