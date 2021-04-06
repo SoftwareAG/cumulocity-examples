@@ -27,7 +27,7 @@ import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.inventory.InventoryApi;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.httpclient.HttpStatus;
+import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.TaskScheduler;
@@ -120,7 +120,7 @@ public class GatewayDataProvider {
 				} catch (Throwable t) {
 					// Forcefully catching throwable, as we do not want to stop the scheduler on exception.
 					log.error("Unable to refresh gateway managed objects", t);
-					
+
 					if (isExceptionDueToInvalidCredentials(t)) {
 						log.error("Invalid gateway device credentials detected. "
 								+ "It could be that the gateway device was removed. "
@@ -181,7 +181,7 @@ public class GatewayDataProvider {
 			}
 		}
 	}
-	
+
 	private boolean isExceptionDueToInvalidCredentials(Throwable cause) {
 		while (!Objects.isNull(cause)) {
 			if (cause instanceof SDKException) {
