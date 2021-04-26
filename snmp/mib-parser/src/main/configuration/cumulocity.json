@@ -7,6 +7,10 @@
   "provider": {
     "name": "Cumulocity GmbH"
   },
+  "resources": {
+    "cpu": "2000m",
+    "memory":"4Gi"
+  },
   "requiredRoles": [
     "ROLE_TENANT_MANAGEMENT_READ",
     "ROLE_OPTION_MANAGEMENT_READ",
