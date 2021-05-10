@@ -16,6 +16,6 @@ public class SmsConfiguration {
     @Lazy
     @Scope(proxyMode = TARGET_CLASS)
     public SmsMessagingApi smsMessagingApi(@Value("${SMS.baseURL:}") String baseUrl, OptionsAuthorizationSupplier optionsAuth) {
-        return new SmsMessagingApiImpl(baseUrl, "/smsmessaging/v1", optionsAuth);
+        return new SmsMessagingApiImpl(baseUrl, "/smsmessaging", optionsAuth);
     }
 }

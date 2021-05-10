@@ -20,7 +20,6 @@
 package c8y.example.decoders.json;
 
 import com.cumulocity.microservice.autoconfigure.MicroserviceApplication;
-import com.cumulocity.microservice.customdecoders.api.exception.DecoderServiceException;
 import com.cumulocity.microservice.customdecoders.api.model.DecoderInputData;
 import com.cumulocity.microservice.customdecoders.api.model.DecoderResult;
 import com.cumulocity.model.idtype.GId;
@@ -35,8 +34,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(value = "/decode")
 public class JsonDecoder {
 
-
-
     private final JsonDecoderService jsonDecoderService;
 
     @Autowired
@@ -48,11 +45,9 @@ public class JsonDecoder {
         SpringApplication.run(JsonDecoder.class,args);
     }
 
-
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public DecoderResult decodeWithJSONInput(@RequestBody DecoderInputData inputData) {
         return jsonDecoderService.decode(inputData.getValue(), GId.asGId(inputData.getSourceDeviceId()), inputData.getArgs());
     }
-
 }

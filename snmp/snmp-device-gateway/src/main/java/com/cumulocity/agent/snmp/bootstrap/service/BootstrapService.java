@@ -36,7 +36,7 @@ import com.cumulocity.sdk.client.identity.IdentityApi;
 import com.cumulocity.sdk.client.inventory.InventoryApi;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.httpclient.HttpStatus;
+import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,7 +60,7 @@ public class BootstrapService implements InitializingBean {
 	private final IdentityApi identityApi;
 
 	private final InventoryApi inventoryApi;
-	
+
 	private final TaskScheduler taskScheduler;
 
 	private final PlatformProvider platformProvider;
@@ -107,7 +107,7 @@ public class BootstrapService implements InitializingBean {
 			}
 
 			gatewayDataProvider.updateGatewayObjects(deviceMO);
-			
+
 			log.debug("Bootstrapping gateway device is completed.");
 
 			eventPublisher.publishEvent(new BootstrapReadyEvent());
