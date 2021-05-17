@@ -73,13 +73,6 @@
 
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>com.nsn.cumulocity.clients-java</groupId>
-                <artifactId>microservice-dependencies</artifactId>
-                <version>${c8y.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
 
             <dependency>
                 <groupId>com.fasterxml.jackson</groupId>
@@ -96,7 +89,6 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>${spring.boot.version}</version>
                 <configuration>
                     <includeSystemScope>true</includeSystemScope>
                     <mainClass>com.cumulocity.mibparser.MibParserApplication</mainClass>
