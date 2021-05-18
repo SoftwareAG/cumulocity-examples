@@ -117,6 +117,10 @@
                             <name>${project.artifactId}</name>
                             <image>${project.artifactId}</image>
                             <encoding>UTF-8</encoding>
+                            <perm>
+                                <min>64m</min>
+                                <max>128m</max>
+                            </perm>
                         </configuration>
                     </execution>
                 </executions>
