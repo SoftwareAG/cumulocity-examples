@@ -91,6 +91,7 @@ public class OperationDispatcher implements Runnable {
         		logger.trace("Ignore operation with ID {} -> device with id {} hasn't been identified yet", operation.getId(), deviceId);
         		continue; // Device hasn't been identified yet
         	}
+        	//fix use of context
         	contextService.enterContext(tenantCredentials.getTenant(), device.getImei());
         	try {
         		operationHelper.execute(operation, device);

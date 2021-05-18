@@ -1,12 +1,15 @@
 package c8y.trackeragent.service;
 
+import c8y.trackeragent.context.DeviceContext;
+import com.cumulocity.agent.server.context.DeviceContextService;
+import com.cumulocity.microservice.context.ContextService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.cumulocity.agent.server.context.DeviceContext;
-import com.cumulocity.agent.server.context.DeviceContextService;
+//import com.cumulocity.agent.server.context.DeviceContext;
+//import com.cumulocity.agent.server.context.DeviceContextService;
 
 import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.device.TrackerDeviceProvider;
@@ -18,13 +21,14 @@ import c8y.trackeragent.protocol.TrackingProtocol;
 public class TrackerDeviceContextService {
 	
 	protected static Logger logger = LoggerFactory.getLogger(TrackerDeviceContextService.class);
-	
-    private final DeviceContextService contextService;
+
+	private final ContextService<DeviceContext> contextService;
+//    private final DeviceContextService contextService;
     private final DeviceCredentialsRepository credentialsRepository;
     private final TrackerDeviceProvider trackerDeviceFactory;
     
     @Autowired
-	public TrackerDeviceContextService(DeviceContextService contextService, DeviceCredentialsRepository credentialsRepository, TrackerDeviceProvider trackerDeviceFactory) {
+	public TrackerDeviceContextService(ContextService<DeviceContext> contextService, DeviceCredentialsRepository credentialsRepository, TrackerDeviceProvider trackerDeviceFactory) {
 		this.contextService = contextService;
 		this.credentialsRepository = credentialsRepository;
 		this.trackerDeviceFactory = trackerDeviceFactory;

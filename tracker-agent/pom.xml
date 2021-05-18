@@ -63,41 +63,49 @@
             <artifactId>commons-lang3</artifactId>
             <version>3.11</version>
         </dependency>
-        <dependency>
-			<groupId>com.nsn.cumulocity.clients-java</groupId>
-			<artifactId>agent-framework-core</artifactId>
-			<version>${c8y.agent-framework.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.nsn.cumulocity.clients-java</groupId>
-			<artifactId>agent-framework-repositories</artifactId>
-			<version>${c8y.agent-framework.version}</version>
-		</dependency>
+<!--        <dependency>-->
+<!--			<groupId>com.nsn.cumulocity.clients-java</groupId>-->
+<!--			<artifactId>agent-framework-core</artifactId>-->
+<!--			<version>${c8y.agent-framework.version}</version>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>com.nsn.cumulocity.clients-java</groupId>-->
+<!--			<artifactId>agent-framework-repositories</artifactId>-->
+<!--			<version>${c8y.agent-framework.version}</version>-->
+<!--		</dependency>-->
+
 		<dependency>
 			<groupId>com.nsn.cumulocity.clients-java</groupId>
 			<artifactId>agent-framework-device-control</artifactId>
 			<version>${c8y.agent-framework.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>com.nsn.cumulocity.clients-java</groupId>
-			<artifactId>agent-framework-device-context</artifactId>
-			<version>${c8y.agent-framework.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.nsn.cumulocity.clients-java</groupId>
-			<artifactId>agent-framework-mvc</artifactId>
-			<version>${c8y.agent-framework.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>javax.validation</groupId>
-					<artifactId>com.springsource.javax.validation</artifactId>
-				</exclusion>
-				<exclusion>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-tomcat</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
+
+        <dependency>
+            <groupId>com.nsn.cumulocity.clients-java</groupId>
+            <artifactId>microservice-context</artifactId>
+            <version>1009.14.0-SNAPSHOT</version>
+        </dependency>
+
+<!--		<dependency>-->
+<!--			<groupId>com.nsn.cumulocity.clients-java</groupId>-->
+<!--			<artifactId>agent-framework-device-context</artifactId>-->
+<!--			<version>${c8y.agent-framework.version}</version>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>com.nsn.cumulocity.clients-java</groupId>-->
+<!--			<artifactId>agent-framework-mvc</artifactId>-->
+<!--			<version>${c8y.agent-framework.version}</version>-->
+<!--			<exclusions>-->
+<!--				<exclusion>-->
+<!--					<groupId>javax.validation</groupId>-->
+<!--					<artifactId>com.springsource.javax.validation</artifactId>-->
+<!--				</exclusion>-->
+<!--				<exclusion>-->
+<!--                    <groupId>org.springframework.boot</groupId>-->
+<!--                    <artifactId>spring-boot-starter-tomcat</artifactId>-->
+<!--				</exclusion>-->
+<!--			</exclusions>-->
+<!--		</dependency>-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-artemis</artifactId>
@@ -156,14 +164,14 @@
         <pluginManagement>
             <plugins>
 	            <plugin>
-	                <groupId>com.nsn.cumulocity.clients-java</groupId>
-	                <artifactId>agent-framework-package</artifactId>
-	                <version>${c8y.agent-framework.version}</version>
+                    <groupId>com.nsn.cumulocity.clients-java</groupId>
+                    <artifactId>microservice-package-maven-plugin</artifactId>
+                    <version>${project.parent.version}</version>
 	                <executions>
 	                    <execution>
 	                        <phase>package</phase>
 	                        <goals>
-	                            <goal>agent-package</goal>
+                                <goal>package</goal>
 	                        </goals>
 	                    </execution>
 	                </executions>

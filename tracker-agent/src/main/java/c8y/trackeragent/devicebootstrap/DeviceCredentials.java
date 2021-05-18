@@ -1,10 +1,24 @@
 package c8y.trackeragent.devicebootstrap;
 
+import com.cumulocity.microservice.context.credentials.MicroserviceCredentials;
 import com.cumulocity.model.idtype.GId;
 import com.google.common.base.Predicate;
 
-public class DeviceCredentials extends com.cumulocity.agent.server.context.DeviceCredentials {
+public class DeviceCredentials {
 
+	public static final int DEFAULT_PAGE_SIZE = 25;
+	public static final String AUTH_ENCODING = "ASCII";
+	public static final String AUTH_PREFIX = "BASIC ";
+	public static final String AUTH_SEPARATOR = ":";
+	public static final String LOGIN_SEPARATOR = "/";
+
+	private String tenant;
+	private String username;
+	private String password;
+	private String appKey;
+	private GId deviceId;
+	private int pageSize;
+	private String tfaToken;
 	private String imei;
 	
 	public static DeviceCredentials forDevice(String imei, String tenant) {
@@ -20,15 +34,75 @@ public class DeviceCredentials extends com.cumulocity.agent.server.context.Devic
 	}
 	
     private DeviceCredentials(String tenant, String username, String password, String imei, GId deviceId) {
-        super(tenant, username, password, null, deviceId);
+//        super(tenant, username, password, null, deviceId);
+        this.tenant = tenant;
+        this.username = username;
+        this.password = password;
+        this.deviceId = deviceId;
         this.imei = imei;
     }
 
     public DeviceCredentials duplicate() {
-        return new DeviceCredentials(super.getTenant(), super.getUsername(), super.getPassword(), imei, super.getDeviceId());
+        return new DeviceCredentials(tenant, username, password, imei, deviceId);
     }
 
-    public String getImei() {
+	public String getTenant() {
+		return tenant;
+	}
+
+	public void setTenant(String tenant) {
+		this.tenant = tenant;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public String getAppKey() {
+		return appKey;
+	}
+
+	public void setAppKey(String appKey) {
+		this.appKey = appKey;
+	}
+
+	public GId getDeviceId() {
+		return deviceId;
+	}
+
+	public void setDeviceId(GId deviceId) {
+		this.deviceId = deviceId;
+	}
+
+	public int getPageSize() {
+		return pageSize;
+	}
+
+	public void setPageSize(int pageSize) {
+		this.pageSize = pageSize;
+	}
+
+	public String getTfaToken() {
+		return tfaToken;
+	}
+
+	public void setTfaToken(String tfaToken) {
+		this.tfaToken = tfaToken;
+	}
+
+	public String getImei() {
         return imei;
     }
     
@@ -39,7 +113,7 @@ public class DeviceCredentials extends com.cumulocity.agent.server.context.Devic
 	@Override
     public String toString() {
         return String.format("DeviceCredentials [tenantId=%s, user=%s, password=%s, imei=%s]", 
-        		super.getTenant(), super.getUsername(), super.getPassword(), imei);
+        		tenant, username, password, imei);
     }
 
 	@Override
