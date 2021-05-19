@@ -5,6 +5,7 @@ import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.TrackerPlatform;
 import c8y.trackeragent.configuration.TrackerConfiguration;
 import c8y.trackeragent.device.TrackerDevice;
+import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.protocol.TrackingProtocol;
 import c8y.trackeragent.service.AlarmMappingService;
@@ -15,8 +16,7 @@ import c8y.trackeragent_it.config.TestConfiguration;
 import c8y.trackeragent_it.service.Bootstraper;
 import c8y.trackeragent_it.service.NewDeviceRequestService;
 import c8y.trackeragent_it.service.SocketWritter;
-import com.cumulocity.agent.server.context.DeviceContextService;
-import com.cumulocity.agent.server.repository.InventoryRepository;
+import com.cumulocity.microservice.context.ContextService;
 import com.cumulocity.model.ID;
 import com.cumulocity.model.authentication.CumulocityBasicCredentials;
 import com.cumulocity.model.event.CumulocityAlarmStatuses;
@@ -54,11 +54,7 @@ public abstract class TrackerITSupport {
     protected AlarmMappingService alarmMappingService;
 
     @Autowired
-    @Deprecated
-    protected DeviceContextService contextService;
-
-    @Autowired
-    protected InventoryRepository inventoryRepository;
+    protected ContextService<DeviceCredentials> contextService;
 
     @Autowired
     protected DeviceCredentialsRepository deviceCredentialsRepository;

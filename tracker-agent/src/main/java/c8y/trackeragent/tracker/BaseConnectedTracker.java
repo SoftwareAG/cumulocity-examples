@@ -143,15 +143,12 @@ public abstract class BaseConnectedTracker<F extends Fragment> implements Connec
         logger.debug("Got report from IMEI: " + imei);
         String tenant = getTenant(imei);
         checkAgentCredentials(tenant);
-        try {
-            contextService.enterContext(tenant, imei, reportContext.getTrackingProtocol());
-            reportContext.setImei(imei);
-            parser.onParsed(reportContext);
-        } catch (Exception e) {
-            logger.error("Error on parsing request", e);
-        } finally {
-            contextService.leaveContext();
-        }
+        contextService.executeWithContext(tenant, imei, reportContext.getTrackingProtocol(),
+                () -> {
+                    reportContext.setImei(imei);
+                    parser.onParsed(reportContext);
+                }
+                );
     }
 
     private String getTenant(String imei) {

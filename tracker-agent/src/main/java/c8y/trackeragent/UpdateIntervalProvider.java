@@ -14,13 +14,12 @@ import com.cumulocity.sdk.client.ResponseParser;
 import com.cumulocity.sdk.client.RestConnector;
 import com.cumulocity.sdk.client.SDKException;
 
-import c8y.inject.DeviceScope;
 import c8y.trackeragent.configuration.TrackerConfiguration;
 
 import javax.ws.rs.core.Response;
 
 @Component
-@DeviceScope
+//@DeviceScope
 public class UpdateIntervalProvider {
 
 	private final static Logger logger = LoggerFactory.getLogger(UpdateIntervalProvider.class);

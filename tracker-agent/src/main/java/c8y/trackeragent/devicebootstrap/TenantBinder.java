@@ -54,12 +54,10 @@ public class TenantBinder {
     }
     
     public void startPollerFor(DeviceCredentials tenantCredentials) {
-        contextService.enterContext(tenantCredentials.getTenant());
-        try {
-        	operationHelper.markOldExecutingOperationsFailed();
-        } finally {
-        	contextService.leaveContext();
-        }
+        contextService.executeWithContext(
+                tenantCredentials.getTenant(),
+                () -> operationHelper.markOldExecutingOperationsFailed()
+        );
         OperationDispatcher task = new OperationDispatcher(tenantCredentials, contextService, operationHelper);
         task.startPolling(operationsExecutor);
         logger.info("Started operation polling for tenant {}.", tenantCredentials);

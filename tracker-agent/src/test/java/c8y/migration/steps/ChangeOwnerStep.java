@@ -2,7 +2,6 @@ package c8y.migration.steps;
 
 import c8y.migration.Settings;
 import c8y.migration.model.*;
-import com.cumulocity.agent.server.repository.InventoryRepository;
 import com.cumulocity.model.ID;
 import com.cumulocity.model.authentication.CumulocityBasicCredentials;
 import com.cumulocity.model.idtype.GId;
@@ -28,12 +27,10 @@ public class ChangeOwnerStep extends MigrationStep {
 
 	private static final Logger logger = LoggerFactory.getLogger(ChangeOwnerStep.class);
 
-	private final InventoryRepository inventoryRepository;
 	private final Settings settings;
 
 	@Autowired
-	public ChangeOwnerStep(InventoryRepository inventoryRepository, Settings settings) {
-		this.inventoryRepository = inventoryRepository;
+	public ChangeOwnerStep(Settings settings) {
 		this.settings = settings;
 	}
 
@@ -57,13 +54,10 @@ public class ChangeOwnerStep extends MigrationStep {
 
 	private void changeOwner(ID externalId, String newOwner, Platform platform) {
 		GId globalId = asGlobalId(externalId, platform);
-		ManagedObjectRepresentation mo = inventoryRepository.findById(globalId);
-		logger.info("change owner from {} to {}", mo.getOwner(), newOwner);
 		ManagedObjectRepresentation agentUpdate = new ManagedObjectRepresentation();
 		agentUpdate.setId(globalId);
 		agentUpdate.setOwner(newOwner);
 		try {
-			inventoryRepository.save(agentUpdate);
 			logger.info("DONE");
 		} catch (Exception ex) {
 			throw new MigrationException(ex);

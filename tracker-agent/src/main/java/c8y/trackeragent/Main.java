@@ -20,25 +20,13 @@
 
 package c8y.trackeragent;
 
-import c8y.trackeragent.devicebootstrap.TenantBinder;
-import c8y.trackeragent.server.Servers;
-import com.cumulocity.agent.server.ServerBuilder;
-import com.cumulocity.agent.server.feature.ContextFeature;
-import com.cumulocity.agent.server.feature.RepositoryFeature;
-import com.cumulocity.agent.server.logging.LoggingService;
-import com.cumulocity.agent.server.repository.BinariesRepository;
-import com.cumulocity.agent.server.repository.DeviceControlRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
-import javax.annotation.PostConstruct;
-import java.io.IOException;
 
 /**
  * Main class reading the configuration and starting the server.
@@ -50,41 +38,8 @@ public class Main {
     
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
     
-    @Autowired
-    private Servers servers;
-    
-    @Autowired
-    private TenantBinder tenantBinder;
-    
     public static void main(String[] args) {
         logger.info("tracker-agent is starting.");
-        serverBuilder().run(args);
-    }
-
-    public static ServerBuilder serverBuilder() {
-        //@formatter:off
-        return ServerBuilder.on(8689)
-            .application("tracker-agent")
-            .logging("tracker-agent-server-logging")
-            .loadConfiguration("tracker-agent-server")
-            .enable(Main.class)
-            .enable(ContextFeature.class)
-            .enable(RepositoryFeature.class)
-            .useWebEnvironment(false);
-        //@formatter:on
-    }
-    
-    @PostConstruct
-    public void onStart() throws IOException {
-        servers.startAll();
-        tenantBinder.init();
-    }
-    
-    @Bean
-    @Autowired
-    public LoggingService loggingService(DeviceControlRepository deviceControl, BinariesRepository binaries, 
-            @Value("${C8Y.log.file.path}") String logfile, @Value("${C8Y.log.timestamp.format:}") String timestampFormat,
-            @Value("${C8Y.application.id}") String applicationId) {
-        return new LoggingService(deviceControl, binaries, logfile, timestampFormat, applicationId);
+        SpringApplication.run(Main.class, args);
     }
 }

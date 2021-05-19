@@ -1,24 +1,13 @@
 package c8y.trackeragent.devicebootstrap;
 
-import com.cumulocity.microservice.context.credentials.MicroserviceCredentials;
+import com.cumulocity.microservice.context.credentials.UserCredentials;
 import com.cumulocity.model.idtype.GId;
 import com.google.common.base.Predicate;
 
-public class DeviceCredentials {
+public class DeviceCredentials extends UserCredentials {
 
-	public static final int DEFAULT_PAGE_SIZE = 25;
-	public static final String AUTH_ENCODING = "ASCII";
-	public static final String AUTH_PREFIX = "BASIC ";
-	public static final String AUTH_SEPARATOR = ":";
-	public static final String LOGIN_SEPARATOR = "/";
-
-	private String tenant;
-	private String username;
-	private String password;
-	private String appKey;
 	private GId deviceId;
 	private int pageSize;
-	private String tfaToken;
 	private String imei;
 	
 	public static DeviceCredentials forDevice(String imei, String tenant) {
@@ -33,49 +22,24 @@ public class DeviceCredentials {
 		return new DeviceCredentials(tenant, username, password, null, deviceId);
 	}
 	
-    private DeviceCredentials(String tenant, String username, String password, String imei, GId deviceId) {
-//        super(tenant, username, password, null, deviceId);
-        this.tenant = tenant;
-        this.username = username;
-        this.password = password;
+    public DeviceCredentials(String tenant, String username, String password, String imei, GId deviceId) {
+        super(tenant, username, password, null, null, imei, null, null);
         this.deviceId = deviceId;
         this.imei = imei;
     }
 
     public DeviceCredentials duplicate() {
-        return new DeviceCredentials(tenant, username, password, imei, deviceId);
+        return new DeviceCredentials(getTenant(), getUsername(), getPassword(), imei, deviceId);
     }
 
-	public String getTenant() {
-		return tenant;
+	@Override
+	public String getOAuthAccessToken() {
+		return null;
 	}
 
-	public void setTenant(String tenant) {
-		this.tenant = tenant;
-	}
-
-	public String getUsername() {
-		return username;
-	}
-
-	public void setUsername(String username) {
-		this.username = username;
-	}
-
-	public String getPassword() {
-		return password;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
-	}
-
-	public String getAppKey() {
-		return appKey;
-	}
-
-	public void setAppKey(String appKey) {
-		this.appKey = appKey;
+	@Override
+	public String getXsrfToken() {
+		return null;
 	}
 
 	public GId getDeviceId() {
@@ -94,14 +58,6 @@ public class DeviceCredentials {
 		this.pageSize = pageSize;
 	}
 
-	public String getTfaToken() {
-		return tfaToken;
-	}
-
-	public void setTfaToken(String tfaToken) {
-		this.tfaToken = tfaToken;
-	}
-
 	public String getImei() {
         return imei;
     }
@@ -113,7 +69,7 @@ public class DeviceCredentials {
 	@Override
     public String toString() {
         return String.format("DeviceCredentials [tenantId=%s, user=%s, password=%s, imei=%s]", 
-        		tenant, username, password, imei);
+        		getTenant(), getUsername(), getUsername(), imei);
     }
 
 	@Override

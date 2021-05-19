@@ -72,13 +72,10 @@ public class OperationDispatcher implements Runnable {
     @Override
     public void run() {
         logger.trace("Executing queued operations");
-        try {
-            contextService.enterContext(tenantCredentials.getTenant());
-            executePendingOps();
-            contextService.leaveContext();
-        } catch (Exception x) {
-            logger.warn("Error while executing operations", x);
-        }
+        contextService.executeWithContext(
+                tenantCredentials.getTenant(),
+                () -> executePendingOps()
+        );
     }
 
     private void executePendingOps() throws SDKException {
@@ -91,13 +88,11 @@ public class OperationDispatcher implements Runnable {
         		logger.trace("Ignore operation with ID {} -> device with id {} hasn't been identified yet", operation.getId(), deviceId);
         		continue; // Device hasn't been identified yet
         	}
-        	//fix use of context
-        	contextService.enterContext(tenantCredentials.getTenant(), device.getImei());
-        	try {
-        		operationHelper.execute(operation, device);
-        	} finally {
-        		contextService.leaveContext();
-        	}
+        	contextService.executeWithContext(
+        	        tenantCredentials.getTenant(),
+                    device.getImei(),
+                    () -> operationHelper.execute(operation, device)
+            );
         }
     }
     
@@ -119,5 +114,4 @@ public class OperationDispatcher implements Runnable {
         }
         return operationsIterable;
     }
-
 }

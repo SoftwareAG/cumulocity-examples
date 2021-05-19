@@ -2,12 +2,11 @@ package c8y.trackeragent_it.config;
 
 import c8y.trackeragent.Main;
 import c8y.trackeragent.devicebootstrap.TenantBinder;
+import c8y.trackeragent.operations.BinariesRepository;
+import c8y.trackeragent.operations.DeviceControlRepository;
+import c8y.trackeragent.operations.LoggingService;
 import c8y.trackeragent.server.Servers;
-import com.cumulocity.agent.server.feature.ContextFeature;
-import com.cumulocity.agent.server.feature.RepositoryFeature;
-import com.cumulocity.agent.server.logging.LoggingService;
-import com.cumulocity.agent.server.repository.BinariesRepository;
-import com.cumulocity.agent.server.repository.DeviceControlRepository;
+import com.cumulocity.sdk.client.devicecontrol.DeviceControlApi;
 import com.cumulocity.sms.client.SmsMessagingApi;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +22,7 @@ import java.io.IOException;
 @EnableAutoConfiguration
 @ComponentScan(basePackages = { "c8y.trackeragent" }, excludeFilters = {
 		@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = Main.class) })
-@Import({RepositoryFeature.class, ContextFeature.class})
+//@Import({RepositoryFeature.class, ContextFeature.class})
 @PropertySource(value = { "file:/etc/tracker-agent/tracker-agent-server.properties" })
 public class ServerConfiguration {
 
@@ -32,13 +31,16 @@ public class ServerConfiguration {
     
     @Autowired
     TenantBinder tenantBinder;
+
+    @Autowired
+    DeviceControlApi deviceControlApi;
     
     @Bean
     @Autowired
-    public LoggingService loggingService(DeviceControlRepository deviceControl, BinariesRepository binaries, 
-            @Value("${C8Y.log.file.path}") String logfile, @Value("${C8Y.log.timestamp.format:}") String timestampFormat,
-            @Value("${C8Y.application.id}") String applicationId) {
-        return new LoggingService(deviceControl, binaries, logfile, timestampFormat, applicationId);
+    public LoggingService loggingService(DeviceControlRepository deviceControl, BinariesRepository binaries, DeviceControlApi deviceControlApi,
+                                         @Value("${C8Y.log.file.path}") String logfile, @Value("${C8Y.log.timestamp.format:}") String timestampFormat,
+                                         @Value("${C8Y.application.id}") String applicationId) {
+        return new LoggingService(deviceControl, binaries, deviceControlApi, logfile, timestampFormat, applicationId);
     }
     
     @Bean
