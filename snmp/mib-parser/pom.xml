@@ -117,10 +117,6 @@
                             <name>${project.artifactId}</name>
                             <image>${project.artifactId}</image>
                             <encoding>UTF-8</encoding>
-                            <heap>
-                                <min>342m</min>
-                                <max>342m</max>
-                            </heap>
                             <perm>
                                 <min>96m</min>
                                 <max>96m</max>
