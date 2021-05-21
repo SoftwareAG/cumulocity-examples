@@ -15,18 +15,18 @@
 
     <properties>
         <java.version>1.8</java.version>
-        <spring.boot.version>1.5.22.RELEASE</spring.boot.version>
+        <spring.boot.version>2.3.3.RELEASE</spring.boot.version>
         <package.name>tracker-agent-server</package.name>
         <package.directory>tracker-agent</package.directory>
         <agent.main.class>c8y.trackeragent.Main</agent.main.class>
-        <c8y.agent-framework.version>8.18.3</c8y.agent-framework.version>
+<!--        <c8y.agent-framework.version>8.18.3</c8y.agent-framework.version>-->
     </properties>
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-dependencies</artifactId>
-                <version>${spring.boot.version}</version>
+                <groupId>com.nsn.cumulocity.clients-java</groupId>
+                <artifactId>microservice-dependencies</artifactId>
+                <version>${c8y.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -50,6 +50,11 @@
 			</exclusions>
         </dependency>
         <dependency>
+            <groupId>com.nsn.cumulocity.clients-java</groupId>
+            <artifactId>microservice-autoconfigure</artifactId>
+            <version>${c8y.version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.nsn.cumulocity.model</groupId>
             <artifactId>device-capability-model</artifactId>
         </dependency>
@@ -68,10 +73,6 @@
             <artifactId>microservice-context</artifactId>
             <version>1009.14.0-SNAPSHOT</version>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-artemis</artifactId>
-        </dependency>
 
         <dependency>
             <groupId>javax.servlet</groupId>
@@ -83,11 +84,6 @@
             <groupId>com.google.code.findbugs</groupId>
             <artifactId>jsr305</artifactId>
             <version>3.0.2</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-tomcat</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -171,6 +167,7 @@
             <plugin>
                 <groupId>com.nsn.cumulocity.clients-java</groupId>
                 <artifactId>agent-framework-package</artifactId>
+<!--                <artifactId>microservice-package-maven-plugin</artifactId>-->
             </plugin>
         </plugins>
         <resources>

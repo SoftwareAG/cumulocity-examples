@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class DeviceControlRepository {
     private final DeviceControlApi deviceControlApi;
-    private Subscriber<GId, OperationRepresentation> subscriber;
+    private final Subscriber<GId, OperationRepresentation> subscriber;
 
     @Autowired
     public DeviceControlRepository(DeviceControlApi deviceControlApi, @Qualifier("deviceControlNotificationsSubscriber") Subscriber<GId, OperationRepresentation> subscriber) {

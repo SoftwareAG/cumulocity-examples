@@ -20,20 +20,18 @@
 
 package c8y.trackeragent;
 
+import com.cumulocity.microservice.autoconfigure.MicroserviceApplication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
 
 
 /**
  * Main class reading the configuration and starting the server.
  */
-@Configuration
-@EnableAutoConfiguration
-@ComponentScan("c8y.trackeragent")
+@ComponentScan(basePackageClasses = Main.class, value = {"c8y.trackeragent", "com.cumulocity"})
+@MicroserviceApplication
 public class Main {
     
     private static final Logger logger = LoggerFactory.getLogger(Main.class);

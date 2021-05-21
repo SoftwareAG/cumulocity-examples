@@ -2,6 +2,7 @@ package c8y.trackeragent;
 
 import static com.cumulocity.rest.representation.tenant.OptionMediaType.OPTION;
 
+import com.cumulocity.microservice.context.inject.TenantScope;
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +21,7 @@ import javax.ws.rs.core.Response;
 
 @Component
 //@DeviceScope
+@TenantScope
 public class UpdateIntervalProvider {
 
 	private final static Logger logger = LoggerFactory.getLogger(UpdateIntervalProvider.class);
