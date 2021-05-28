@@ -12,18 +12,24 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.web.reactive.error.DefaultErrorAttributes;
+import org.springframework.boot.web.reactive.error.ErrorAttributes;
 import org.springframework.context.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 
+
 @Configuration
-@EnableAutoConfiguration
-@ComponentScan(basePackages = { "c8y.trackeragent" }, excludeFilters = {
-		@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = Main.class) })
+//@EnableAutoConfiguration
+//@ComponentScan(basePackages = { "c8y.trackeragent" }, excludeFilters = {
+//		@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = Main.class) })
 //@Import({RepositoryFeature.class, ContextFeature.class})
-@PropertySource(value = { "file:/etc/tracker-agent/tracker-agent-server.properties" })
+@Import(Main.class)
+//@ComponentScan(value = { "c8y.trackeragent", "com.cumulocity" })
+@PropertySource(value = { "classpath:tracker-agent-server.properties" })
 public class ServerConfiguration {
 
     @Autowired
@@ -34,14 +40,15 @@ public class ServerConfiguration {
 
     @Autowired
     DeviceControlApi deviceControlApi;
-    
-    @Bean
-    @Autowired
-    public LoggingService loggingService(DeviceControlRepository deviceControl, BinariesRepository binaries, DeviceControlApi deviceControlApi,
-                                         @Value("${C8Y.log.file.path}") String logfile, @Value("${C8Y.log.timestamp.format:}") String timestampFormat,
-                                         @Value("${C8Y.application.id}") String applicationId) {
-        return new LoggingService(deviceControl, binaries, deviceControlApi, logfile, timestampFormat, applicationId);
-    }
+
+//    @Primary
+//    @Bean
+//    @Autowired
+//    public LoggingService loggingService(DeviceControlRepository deviceControl, BinariesRepository binaries, DeviceControlApi deviceControlApi,
+//                                         @Value("${C8Y.log.file.path}") String logfile, @Value("${C8Y.log.timestamp.format:}") String timestampFormat,
+//                                         @Value("${C8Y.application.id}") String applicationId) {
+//        return new LoggingService(deviceControl, binaries, deviceControlApi, logfile, timestampFormat, applicationId);
+//    }
     
     @Bean
     public SmsMessagingApi outgoingMessagingClient() {
@@ -53,9 +60,9 @@ public class ServerConfiguration {
         return new RestTemplate();
     }
     
-    @PostConstruct
-    public void startServer() throws IOException {
-        servers.startAll();
-        tenantBinder.init();
-    }
+//    @PostConstruct
+//    public void startServer() throws IOException {
+//        servers.startAll();
+//        tenantBinder.init();
+//    }
 }

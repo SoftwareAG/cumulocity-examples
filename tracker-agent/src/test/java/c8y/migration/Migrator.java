@@ -7,6 +7,8 @@ import javax.annotation.PostConstruct;
 
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import com.cumulocity.microservice.context.ContextService;
+import com.cumulocity.microservice.context.credentials.MicroserviceCredentials;
+import com.cumulocity.microservice.context.credentials.UserCredentials;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +26,7 @@ public class Migrator {
 	private static final Logger logger = LoggerFactory.getLogger(Migrator.class);
 
 	private final MigrationRequestService requestService;
-	private final ContextService<DeviceCredentials> contextService;
+	private final ContextService<UserCredentials> contextService;
 	private final Settings settings;
 	private final List<MigrationStep> migrationSteps;
 
@@ -32,7 +34,7 @@ public class Migrator {
 	public Migrator(
 			// @formatter:off
 			MigrationRequestService requestService,
-			ContextService<DeviceCredentials> contextService,
+			ContextService<UserCredentials> contextService,
 			Settings settings, 
 			List<MigrationStep> migrationSteps) {
 		// @formatter:on

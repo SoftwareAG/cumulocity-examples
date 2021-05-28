@@ -9,9 +9,10 @@ import org.springframework.context.annotation.PropertySource;
 import c8y.trackeragent_it.TestSettings;
 
 @Configuration
-@EnableAutoConfiguration
-@PropertySource(value = { 
-        "file:/etc/tracker-agent/test.properties" })
+//@EnableAutoConfiguration
+//@PropertySource(value = {
+//        "file:/etc/tracker-agent/test.properties" })
+@PropertySource(value = { "classpath:tracker-agent-server.properties" })
 public class TestConfiguration {
     
     @Value("${C8Y.tenant}")

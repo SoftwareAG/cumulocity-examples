@@ -17,6 +17,8 @@ import c8y.trackeragent_it.service.Bootstraper;
 import c8y.trackeragent_it.service.NewDeviceRequestService;
 import c8y.trackeragent_it.service.SocketWritter;
 import com.cumulocity.microservice.context.ContextService;
+import com.cumulocity.microservice.context.credentials.MicroserviceCredentials;
+import com.cumulocity.microservice.context.credentials.UserCredentials;
 import com.cumulocity.model.ID;
 import com.cumulocity.model.authentication.CumulocityBasicCredentials;
 import com.cumulocity.model.event.CumulocityAlarmStatuses;
@@ -32,11 +34,13 @@ import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.List;
 
+@SpringBootTest
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = { ServerConfiguration.class, TestConfiguration.class })
 public abstract class TrackerITSupport {
@@ -54,7 +58,7 @@ public abstract class TrackerITSupport {
     protected AlarmMappingService alarmMappingService;
 
     @Autowired
-    protected ContextService<DeviceCredentials> contextService;
+    protected ContextService<UserCredentials> contextService;
 
     @Autowired
     protected DeviceCredentialsRepository deviceCredentialsRepository;

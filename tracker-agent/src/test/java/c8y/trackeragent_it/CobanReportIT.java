@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
 
+import c8y.trackeragent_it.config.TestConfiguration;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -21,7 +22,9 @@ import c8y.trackeragent.utils.Devices;
 import c8y.trackeragent.utils.Positions;
 import c8y.trackeragent.utils.TK10xCoordinatesTranslator;
 import c8y.trackeragent.utils.message.TrackerMessage;
+import org.springframework.test.context.ContextConfiguration;
 
+//@ContextConfiguration(classes = { TestConfiguration.class })
 public class CobanReportIT extends TrackerITSupport {
 
 	private String imei;
@@ -32,6 +35,7 @@ public class CobanReportIT extends TrackerITSupport {
 	public void init() throws Exception {
 		imei = Devices.randomImei();
 		bootstrapDevice(imei, deviceMessages.logon(imei));
+		System.out.println("Initialization done");
 	}
 
 	@Override
@@ -79,8 +83,10 @@ public class CobanReportIT extends TrackerITSupport {
 
 	@Test
 	public void shouldProcessAlarmMessage() throws Exception {
+		System.out.println("Test started");
 		writeInNewConnection(deviceMessages.logon(imei), deviceMessages.alarm(imei, CobanAlarmType.LOW_BATTERY));
 
+		System.out.println("writeInNewConnection done");
 		Thread.sleep(1000);
 		assertThat(findAlarm(imei, CobanAlarmType.LOW_BATTERY)).isNotNull();
 	}

@@ -50,6 +50,10 @@ public class TrackerDeviceContextService {
         DeviceCredentials credWithDevice =  DeviceCredentials.forAgent(cred.getTenant(), cred.getUsername(), cred.getPassword(), device.getGId());
         executeWithContext(credWithDevice, runnable);
     }
+
+	public boolean isInContext() {
+		return contextService.isInContext();
+	}
 	
 	private void executeWithContext(DeviceCredentials credentials, Runnable r) {
     	contextService.runWithinContext(credentials, r);

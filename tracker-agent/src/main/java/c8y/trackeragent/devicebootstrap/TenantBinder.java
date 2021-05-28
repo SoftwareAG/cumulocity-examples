@@ -54,8 +54,14 @@ public class TenantBinder {
     }
     
     public void startPollerFor(DeviceCredentials tenantCredentials) {
+        System.out.println("Context: " + tenantCredentials.getUsername() + " and " + tenantCredentials.getPassword());
+//        contextService.executeWithContext(
+//                tenantCredentials.getTenant(),
+//                () -> operationHelper.markOldExecutingOperationsFailed()
+//        );
         contextService.executeWithContext(
                 tenantCredentials.getTenant(),
+                tenantCredentials.getImei(),
                 () -> operationHelper.markOldExecutingOperationsFailed()
         );
         OperationDispatcher task = new OperationDispatcher(tenantCredentials, contextService, operationHelper);

@@ -37,17 +37,17 @@ public abstract class CobanParserTestSupport {
     protected AlarmService alarmService = Mockito.mock(AlarmService.class);
     protected MeasurementService measurementService = Mockito.mock(MeasurementService.class);
     protected TestConnectionDetails connectionDetails = new TestConnectionDetails();
-    private UpdateIntervalProvider updateIntervalProvider = mock(UpdateIntervalProvider.class);
+//    private UpdateIntervalProvider updateIntervalProvider = mock(UpdateIntervalProvider.class);
     
     @Before
     public void baseInit() {
         trackerAgent = mock(TrackerAgent.class);
         deviceMock = mock(TrackerDevice.class);
         when(trackerAgent.getOrCreateTrackerDevice(anyString())).thenReturn(deviceMock);
-        when(deviceMock.getGId()).thenReturn(GId.asGId("1001"));
-        when(deviceMock.aLocationUpdateEvent()).thenReturn(new EventRepresentation());
-        when(deviceMock.getUpdateIntervalProvider()).thenReturn(updateIntervalProvider);
-        when(updateIntervalProvider.findUpdateInterval()).thenReturn(null);
+//        when(deviceMock.getGId()).thenReturn(GId.asGId("1001"));
+//        when(deviceMock.aLocationUpdateEvent()).thenReturn(new EventRepresentation());
+//        when(deviceMock.getUpdateIntervalProvider()).thenReturn(updateIntervalProvider);
+//        when(updateIntervalProvider.findUpdateInterval()).thenReturn(null);
     }
     
     
