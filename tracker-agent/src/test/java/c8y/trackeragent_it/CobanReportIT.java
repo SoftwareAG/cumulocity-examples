@@ -35,7 +35,6 @@ public class CobanReportIT extends TrackerITSupport {
 	public void init() throws Exception {
 		imei = Devices.randomImei();
 		bootstrapDevice(imei, deviceMessages.logon(imei));
-		System.out.println("Initialization done");
 	}
 
 	@Override
@@ -83,10 +82,8 @@ public class CobanReportIT extends TrackerITSupport {
 
 	@Test
 	public void shouldProcessAlarmMessage() throws Exception {
-		System.out.println("Test started");
 		writeInNewConnection(deviceMessages.logon(imei), deviceMessages.alarm(imei, CobanAlarmType.LOW_BATTERY));
 
-		System.out.println("writeInNewConnection done");
 		Thread.sleep(1000);
 		assertThat(findAlarm(imei, CobanAlarmType.LOW_BATTERY)).isNotNull();
 	}

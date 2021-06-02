@@ -1,5 +1,7 @@
 package c8y.trackeragent_it.config;
 
+import c8y.trackeragent.service.AlarmMappingService;
+import c8y.trackeragent.service.AlarmMappingServiceImpl;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -9,9 +11,6 @@ import org.springframework.context.annotation.PropertySource;
 import c8y.trackeragent_it.TestSettings;
 
 @Configuration
-//@EnableAutoConfiguration
-//@PropertySource(value = {
-//        "file:/etc/tracker-agent/test.properties" })
 @PropertySource(value = { "classpath:tracker-agent-server.properties" })
 public class TestConfiguration {
     
@@ -47,8 +46,12 @@ public class TestConfiguration {
             .setTrackerAgentHost(trackerAgentHost)
             .setBootstrapUser(bootstrapUser)
             .setBootstrapPassword(bootstrapPassword);
-        System.out.println(result);
         return result;
         //@formatter:on            
+    }
+
+    @Bean
+    public AlarmMappingService alarmMappingService() {
+        return new AlarmMappingServiceImpl("classpath:alarm-configuration");
     }
 }

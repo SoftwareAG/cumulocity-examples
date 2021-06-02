@@ -75,15 +75,8 @@ public class Main {
     }
 
     @EventListener(ApplicationReadyEvent.class)
-    public void doSomethingAfterStartup() throws IOException {
-        System.out.println("hello world, I have just started up");
+    public void onStart() throws IOException {
         servers.startAll();
         tenantBinder.init();
-//        for (String beanName : applicationContext.getBeanFactory().getBeanDefinitionNames()) {
-//
-//            BeanDefinition beanDefinition = applicationContext.getBeanFactory().getBeanDefinition(beanName);
-//            System.out.println("Bean: " + beanDefinition.getBeanClassName() + ", scope: " + beanDefinition.getScope());
-//        }
-        System.out.println("end");
     }
 }

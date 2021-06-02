@@ -145,7 +145,6 @@ public abstract class BaseConnectedTracker<F extends Fragment> implements Connec
         checkAgentCredentials(tenant);
         contextService.executeWithContext(tenant, imei, reportContext.getTrackingProtocol(),
                 () -> {
-                    System.out.println("Is in context: " + contextService.isInContext());
                     reportContext.setImei(imei);
                     parser.onParsed(reportContext);
                 }
@@ -170,7 +169,6 @@ public abstract class BaseConnectedTracker<F extends Fragment> implements Connec
     private void checkAgentCredentials(final String tenant) {
         try {
             DeviceCredentials agentCredentials = credentialsRepository.getAgentCredentials(tenant);
-            System.out.println("Device credentials: " + agentCredentials.getUsername() + " and " + agentCredentials.getPassword());
         } catch (UnknownTenantException ex) {
             logger.debug("Agent for tenant {} not yet bootstraped. Will try bootstrap the agent.", tenant);
             DeviceCredentials agentCredentials = bootstrapProcessor.tryAccessAgentCredentials(tenant);

@@ -48,12 +48,10 @@ public class TrackerDeviceProvider {
 	}
 
 	private TrackerDevice newTrackerDevice(String tenant, String imei) {
-		System.out.println("Current imei: " + imei);
 		if (contextService.isInContext()) {
 			return trackerDeviceFactory.newTrackerDevice(tenant, imei);
 		}
 		DeviceCredentials agentCredentials = credentialsRepository.getAgentCredentials(tenant);
-		System.out.println("Device context imei: " + agentCredentials.getImei() + " and tenant: " + agentCredentials.getTenant());
 		return contextService.callWithinContext(agentCredentials, () -> {
 			return trackerDeviceFactory.newTrackerDevice(tenant, imei);
 		});

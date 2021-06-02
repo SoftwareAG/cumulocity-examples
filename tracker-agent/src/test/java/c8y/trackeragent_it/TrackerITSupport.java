@@ -72,8 +72,6 @@ public abstract class TrackerITSupport {
     public void baseSetUp() throws Exception {
         trackerPlatform = trackerPlatform(testSettings);
         Thread.sleep(200);// avoid address already in use error
-        System.out.println(testSettings);
-        System.out.println(trackerAgentConfig);
         socketWriter = new SocketWritter(testSettings, trackerAgentConfig.getPort(getTrackerProtocol()));
         NewDeviceRequestService newDeviceRequestService = new NewDeviceRequestService(trackerPlatform.getPlatformParameters(), testSettings);
         bootstraper = new Bootstraper(testSettings, socketWriter, newDeviceRequestService);

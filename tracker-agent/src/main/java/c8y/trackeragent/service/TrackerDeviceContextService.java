@@ -1,7 +1,8 @@
 package c8y.trackeragent.service;
 
+import c8y.trackeragent.tracker.MicroserviceCredentialsFactory;
 import com.cumulocity.microservice.context.ContextService;
-import com.cumulocity.microservice.context.credentials.UserCredentials;
+import com.cumulocity.microservice.context.credentials.MicroserviceCredentials;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,27 +19,32 @@ public class TrackerDeviceContextService {
 
 	protected static Logger logger = LoggerFactory.getLogger(TrackerDeviceContextService.class);
 
-//	private final ContextService<DeviceCredentials> contextService;
-	private final ContextService<UserCredentials> contextService;
+	private final ContextService<MicroserviceCredentials> contextService;
+	private final MicroserviceCredentialsFactory microserviceCredentialsFactory;
     private final DeviceCredentialsRepository credentialsRepository;
     private final TrackerDeviceProvider trackerDeviceFactory;
     
     @Autowired
-	public TrackerDeviceContextService(ContextService<UserCredentials> contextService, DeviceCredentialsRepository credentialsRepository, TrackerDeviceProvider trackerDeviceFactory) {
+	public TrackerDeviceContextService(
+			ContextService<MicroserviceCredentials> contextService,
+			MicroserviceCredentialsFactory microserviceCredentialsFactory,
+			DeviceCredentialsRepository credentialsRepository,
+			TrackerDeviceProvider trackerDeviceFactory) {
 		this.contextService = contextService;
+		this.microserviceCredentialsFactory = microserviceCredentialsFactory;
 		this.credentialsRepository = credentialsRepository;
 		this.trackerDeviceFactory = trackerDeviceFactory;
 	}
     
 	public void executeWithContext(String tenant, Runnable runnable) {
-		executeWithContext(credentialsRepository.getAgentCredentials(tenant), runnable);
+		executeWithContext(microserviceCredentialsFactory.get(), runnable);
 	}
 
     public void executeWithContext(String tenant, String imei, Runnable runnable) {
 		DeviceCredentials cred = credentialsRepository.getAgentCredentials(tenant);
 		TrackerDevice device = trackerDeviceFactory.getOrCreate(tenant, imei);
-		DeviceCredentials credWithDevice =  DeviceCredentials.forAgent(cred.getTenant(), cred.getUsername(), cred.getPassword(), device.getGId());
-		executeWithContext(credWithDevice, runnable);
+//		DeviceCredentials credWithDevice =  DeviceCredentials.forAgent(cred.getTenant(), cred.getUsername(), cred.getPassword(), device.getGId());
+		executeWithContext(microserviceCredentialsFactory.get(), runnable);
 	}
     
     public void executeWithContext(String tenant, String imei, TrackingProtocol trackingProtocol, Runnable runnable) {
@@ -47,15 +53,15 @@ public class TrackerDeviceContextService {
         if (trackingProtocol != null) {
             device.setTrackingProtocolInfo(trackingProtocol);
         }
-        DeviceCredentials credWithDevice =  DeviceCredentials.forAgent(cred.getTenant(), cred.getUsername(), cred.getPassword(), device.getGId());
-        executeWithContext(credWithDevice, runnable);
+//        DeviceCredentials credWithDevice =  DeviceCredentials.forAgent(cred.getTenant(), cred.getUsername(), cred.getPassword(), device.getGId());
+        executeWithContext(microserviceCredentialsFactory.get(), runnable);
     }
 
 	public boolean isInContext() {
 		return contextService.isInContext();
 	}
 	
-	private void executeWithContext(DeviceCredentials credentials, Runnable r) {
+	private void executeWithContext(MicroserviceCredentials credentials, Runnable r) {
     	contextService.runWithinContext(credentials, r);
 	}
 }

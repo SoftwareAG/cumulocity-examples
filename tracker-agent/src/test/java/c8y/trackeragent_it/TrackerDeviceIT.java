@@ -29,7 +29,10 @@ import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.protocol.TrackingProtocol;
 import c8y.trackeragent.tracker.BaseConnectedTracker;
+import c8y.trackeragent.tracker.MicroserviceCredentialsFactory;
 import c8y.trackeragent.utils.Devices;
+import com.cumulocity.microservice.context.ContextService;
+import com.cumulocity.microservice.context.credentials.MicroserviceCredentials;
 import com.cumulocity.model.ID;
 import com.cumulocity.model.event.CumulocityAlarmStatuses;
 import com.cumulocity.model.idtype.GId;
@@ -48,6 +51,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -67,6 +71,12 @@ public class TrackerDeviceIT extends TrackerITSupport {
     public static final BigDecimal LONGITUDE = new BigDecimal(-95.677068);
     public static final BigDecimal ALTITUDE = new BigDecimal(1);
     public static final BigDecimal RADIUS = new BigDecimal(100);
+
+    @Autowired
+    private MicroserviceCredentialsFactory microserviceCredentialsFactory;
+
+    @Autowired
+    private ContextService<MicroserviceCredentials> contextService;
 
     @Before
     public void setup() throws IOException {
@@ -90,10 +100,10 @@ public class TrackerDeviceIT extends TrackerITSupport {
     @Test
     public void shouldSetTrackerData() throws SDKException {
     	deviceCredentialsRepository.saveDeviceCredentials(DeviceCredentials.forDevice(imei, trackerPlatform.getTenantId()));
-        DeviceCredentials agentCredentials = DeviceCredentials.forAgent(trackerPlatform.getTenantId(), trackerPlatform.getUser(), trackerPlatform.getPassword());
-        deviceCredentialsRepository.saveAgentCredentials(agentCredentials);
+//        DeviceCredentials agentCredentials = DeviceCredentials.forAgent(trackerPlatform.getTenantId(), trackerPlatform.getUser(), trackerPlatform.getPassword());
+//        deviceCredentialsRepository.saveAgentCredentials(agentCredentials);
     	contextService.runWithinContext(
-    	        agentCredentials,
+    	        microserviceCredentialsFactory.get(),
                 () -> {
                     saveAgentCredentials(imei);
                     try {
