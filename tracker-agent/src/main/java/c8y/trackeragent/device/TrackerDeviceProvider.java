@@ -3,6 +3,7 @@ package c8y.trackeragent.device;
 import com.cumulocity.microservice.context.ContextService;
 import com.cumulocity.microservice.context.credentials.MicroserviceCredentials;
 import com.cumulocity.microservice.context.credentials.UserCredentials;
+import com.cumulocity.microservice.context.inject.TenantScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +53,7 @@ public class TrackerDeviceProvider {
 			return trackerDeviceFactory.newTrackerDevice(tenant, imei);
 		}
 		DeviceCredentials agentCredentials = credentialsRepository.getAgentCredentials(tenant);
-		System.out.println("Device context imei: " + agentCredentials.getImei());
+		System.out.println("Device context imei: " + agentCredentials.getImei() + " and tenant: " + agentCredentials.getTenant());
 		return contextService.callWithinContext(agentCredentials, () -> {
 			return trackerDeviceFactory.newTrackerDevice(tenant, imei);
 		});

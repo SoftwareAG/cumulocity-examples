@@ -2,6 +2,8 @@ package c8y.trackeragent.device;
 
 import com.cumulocity.microservice.context.ContextService;
 import com.cumulocity.microservice.context.credentials.MicroserviceCredentials;
+import com.cumulocity.microservice.context.inject.TenantScope;
+import com.cumulocity.microservice.subscription.service.MicroserviceSubscriptionsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -15,6 +17,7 @@ import com.cumulocity.sdk.client.measurement.MeasurementApi;
 import c8y.trackeragent.UpdateIntervalProvider;
 import c8y.trackeragent.configuration.TrackerConfiguration;
 
+//@TenantScope
 @Component
 public class TrackerDeviceFactory {
 	
@@ -48,7 +51,7 @@ public class TrackerDeviceFactory {
 	 * TODO instead of device.init() - execute mo preparation here.
 	 */
 	public TrackerDevice newTrackerDevice(String tenant, String imei) {
-		TrackerDevice device = new TrackerDevice(tenant, imei, configuration, events, alarms, measurements, deviceControl, registry, inventory, updateIntervalProvider);
+		TrackerDevice device = new TrackerDevice(tenant, imei, configuration, events, alarms, measurements, deviceControl, registry, inventory, updateIntervalProvider, contextService);
 //		contextService.runWithinContext(contextService.getContext(), () -> {
 			device.init();
 //		});

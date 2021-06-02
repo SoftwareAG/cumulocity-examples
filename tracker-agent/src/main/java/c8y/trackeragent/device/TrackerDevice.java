@@ -26,6 +26,9 @@ import c8y.trackeragent.configuration.TrackerConfiguration;
 import c8y.trackeragent.protocol.TrackingProtocol;
 import c8y.trackeragent.protocol.coban.device.CobanDevice;
 import c8y.trackeragent.protocol.coban.device.CobanDeviceFactory;
+import com.cumulocity.microservice.context.ContextService;
+import com.cumulocity.microservice.context.credentials.MicroserviceCredentials;
+import com.cumulocity.microservice.subscription.service.MicroserviceSubscriptionsService;
 import com.cumulocity.model.Agent;
 import com.cumulocity.model.ID;
 import com.cumulocity.model.event.CumulocityAlarmStatuses;
@@ -52,6 +55,7 @@ import com.google.common.collect.Iterables;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -161,6 +165,8 @@ public class TrackerDevice {
 
     private TrackingProtocol trackingProtocol;
 
+    private ContextService<MicroserviceCredentials> contextService;
+
     public TrackerDevice(
             // @formatter:off
     		String tenant,
@@ -171,8 +177,9 @@ public class TrackerDevice {
             MeasurementApi measurements,
             DeviceControlApi deviceControl,
             IdentityApi identities,
-            InventoryApi inventory,
-            UpdateIntervalProvider updateIntervalProvider) throws SDKException {
+            @Qualifier("identityApi") InventoryApi inventory,
+            UpdateIntervalProvider updateIntervalProvider,
+            ContextService<MicroserviceCredentials> contextService) throws SDKException {
     	// @formatter:on
         this.tenant = tenant;
         this.imei = imei;
@@ -184,6 +191,7 @@ public class TrackerDevice {
         this.identities = identities;
         this.inventory = inventory;
         this.updateIntervalProvider = updateIntervalProvider;
+        this.contextService = contextService;
     }
 
     public void init() {
@@ -756,7 +764,17 @@ public class TrackerDevice {
     public GId tryGetBinding(ID extId) throws SDKException {
         ExternalIDRepresentation eir = null;
         try {
-            eir = identities.getExternalId(extId);
+//            String tenant = contextService.getTenant();
+////            String tenant = "t4896913";
+//            System.out.println("Tenant to execute: " + tenant);
+//            eir = contextService.callForTenant(tenant, () -> {
+//                 return identities.getExternalId(extId);
+//            });
+            eir = contextService.callWithinContext(new MicroserviceCredentials("t4896913", "mariusz", "Centrino1", null, null, null, null)
+                    , () -> {
+                return identities.getExternalId(extId);
+            });
+//            eir = identities.getExternalId(extId);
         } catch (final Exception x) {
             switch (handleSDKException(x, 401, 404)) {
                 case OTHER_STATUS:
