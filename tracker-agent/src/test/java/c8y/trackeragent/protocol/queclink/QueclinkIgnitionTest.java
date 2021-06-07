@@ -29,7 +29,7 @@ public class QueclinkIgnitionTest {
     
     @Before
     public void setup() {
-        when(trackerAgent.getOrCreateTrackerDevice(anyString())).thenReturn(device);
+        when(trackerAgent.getOrCreateTrackerDevice(nullable(String.class))).thenReturn(device);
     }
     
     @Test

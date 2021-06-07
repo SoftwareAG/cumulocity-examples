@@ -2,7 +2,6 @@ package c8y.migration.steps;
 
 import c8y.migration.Settings;
 import c8y.migration.model.*;
-import com.cumulocity.agent.server.repository.InventoryRepository;
 import com.cumulocity.model.ID;
 import com.cumulocity.model.authentication.CumulocityBasicCredentials;
 import com.cumulocity.model.idtype.GId;
@@ -32,9 +31,9 @@ public class ChangeOwnerStep extends MigrationStep {
 	private final Settings settings;
 
 	@Autowired
-	public ChangeOwnerStep(InventoryRepository inventoryRepository, Settings settings) {
-		this.inventoryRepository = inventoryRepository;
+	public ChangeOwnerStep(Settings settings, InventoryRepository inventoryRepository) {
 		this.settings = settings;
+		this.inventoryRepository = inventoryRepository;
 	}
 
 	@Override
