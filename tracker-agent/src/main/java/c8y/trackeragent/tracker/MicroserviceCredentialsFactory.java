@@ -1,26 +1,22 @@
 package c8y.trackeragent.tracker;
 
+import c8y.trackeragent.devicebootstrap.DeviceCredentials;
+import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import com.cumulocity.microservice.context.credentials.MicroserviceCredentials;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class MicroserviceCredentialsFactory {
 
-    @Value("${C8Y.username}")
-    private String username;
-
-    @Value("${C8Y.password}")
-    private String password;
-
-    @Value("${C8Y.tenant}")
-    private String tenant;
-
-    public MicroserviceCredentials get() {
-        return new MicroserviceCredentials(tenant, username, password, null, null, null, null);
-    }
+    private final DeviceCredentialsRepository credentialsRepository;
 
     public MicroserviceCredentials getForTenant(String tenant) {
-        return new MicroserviceCredentials(tenant, username, password, null, null, null, null);
+        DeviceCredentials agentCredentials = credentialsRepository.getAgentCredentials(tenant);
+        return new MicroserviceCredentials(
+                tenant, agentCredentials.getUsername(), agentCredentials.getPassword(),
+                null, null, null, null
+        );
     }
 }

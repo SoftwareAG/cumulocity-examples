@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.device.TrackerDeviceProvider;
-import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.protocol.TrackingProtocol;
 
@@ -37,29 +36,16 @@ public class TrackerDeviceContextService {
 	}
     
 	public void executeWithContext(String tenant, Runnable runnable) {
-		executeWithContext(microserviceCredentialsFactory.get(), runnable);
+		executeWithContext(microserviceCredentialsFactory.getForTenant(tenant), runnable);
 	}
 
-    public void executeWithContext(String tenant, String imei, Runnable runnable) {
-		DeviceCredentials cred = credentialsRepository.getAgentCredentials(tenant);
-		TrackerDevice device = trackerDeviceFactory.getOrCreate(tenant, imei);
-//		DeviceCredentials credWithDevice =  DeviceCredentials.forAgent(cred.getTenant(), cred.getUsername(), cred.getPassword(), device.getGId());
-		executeWithContext(microserviceCredentialsFactory.get(), runnable);
-	}
-    
     public void executeWithContext(String tenant, String imei, TrackingProtocol trackingProtocol, Runnable runnable) {
-        DeviceCredentials cred = credentialsRepository.getAgentCredentials(tenant);
         TrackerDevice device = trackerDeviceFactory.getOrCreate(tenant, imei);
         if (trackingProtocol != null) {
             device.setTrackingProtocolInfo(trackingProtocol);
         }
-//        DeviceCredentials credWithDevice =  DeviceCredentials.forAgent(cred.getTenant(), cred.getUsername(), cred.getPassword(), device.getGId());
-        executeWithContext(microserviceCredentialsFactory.get(), runnable);
+        executeWithContext(microserviceCredentialsFactory.getForTenant(tenant), runnable);
     }
-
-	public boolean isInContext() {
-		return contextService.isInContext();
-	}
 	
 	private void executeWithContext(MicroserviceCredentials credentials, Runnable r) {
     	contextService.runWithinContext(credentials, r);

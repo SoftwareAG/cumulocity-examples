@@ -55,7 +55,7 @@ public class TrackerDeviceFactory {
 		TrackerDevice device = new TrackerDevice(
 				tenant, imei, configuration, events, alarms, measurements, deviceControl, registry, inventory, updateIntervalProvider
 		);
-		contextService.runWithinContext(microserviceCredentialsFactory.get(), () -> {
+		contextService.runWithinContext(microserviceCredentialsFactory.getForTenant(tenant), () -> {
 			device.init();
 		});
 		return device;

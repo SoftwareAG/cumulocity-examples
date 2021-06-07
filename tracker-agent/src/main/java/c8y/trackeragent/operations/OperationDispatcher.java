@@ -90,7 +90,6 @@ public class OperationDispatcher implements Runnable {
         	}
         	contextService.executeWithContext(
         	        tenantCredentials.getTenant(),
-                    device.getImei(),
                     () -> operationHelper.execute(operation, device)
             );
         }

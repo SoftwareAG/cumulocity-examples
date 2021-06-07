@@ -100,10 +100,8 @@ public class TrackerDeviceIT extends TrackerITSupport {
     @Test
     public void shouldSetTrackerData() throws SDKException {
     	deviceCredentialsRepository.saveDeviceCredentials(DeviceCredentials.forDevice(imei, trackerPlatform.getTenantId()));
-//        DeviceCredentials agentCredentials = DeviceCredentials.forAgent(trackerPlatform.getTenantId(), trackerPlatform.getUser(), trackerPlatform.getPassword());
-//        deviceCredentialsRepository.saveAgentCredentials(agentCredentials);
     	contextService.runWithinContext(
-    	        microserviceCredentialsFactory.get(),
+    	        microserviceCredentialsFactory.getForTenant(trackerPlatform.getTenantId()),
                 () -> {
                     saveAgentCredentials(imei);
                     try {
