@@ -27,11 +27,13 @@ public class ChangeOwnerStep extends MigrationStep {
 
 	private static final Logger logger = LoggerFactory.getLogger(ChangeOwnerStep.class);
 
+	private final InventoryRepository inventoryRepository;
 	private final Settings settings;
 
 	@Autowired
-	public ChangeOwnerStep(Settings settings) {
+	public ChangeOwnerStep(Settings settings, InventoryRepository inventoryRepository) {
 		this.settings = settings;
+		this.inventoryRepository = inventoryRepository;
 	}
 
 	@Override
@@ -54,10 +56,13 @@ public class ChangeOwnerStep extends MigrationStep {
 
 	private void changeOwner(ID externalId, String newOwner, Platform platform) {
 		GId globalId = asGlobalId(externalId, platform);
+		ManagedObjectRepresentation mo = inventoryRepository.findById(globalId);
+		logger.info("change owner from {} to {}", mo.getOwner(), newOwner);
 		ManagedObjectRepresentation agentUpdate = new ManagedObjectRepresentation();
 		agentUpdate.setId(globalId);
 		agentUpdate.setOwner(newOwner);
 		try {
+			inventoryRepository.save(agentUpdate);
 			logger.info("DONE");
 		} catch (Exception ex) {
 			throw new MigrationException(ex);
