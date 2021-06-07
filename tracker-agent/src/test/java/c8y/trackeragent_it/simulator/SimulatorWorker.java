@@ -37,5 +37,4 @@ public class SimulatorWorker implements Runnable {
             e.printStackTrace();
         }
     }
-
 }

@@ -57,12 +57,6 @@ public class CobanConfigRefreshTranslatorTest extends CobanParserTestSupport {
 
         doAnswer(new Answer<Void>() {
             public Void answer(InvocationOnMock invocation) {
-                return null;
-            }
-        }).when(deviceMock).updateMoOfDevice(any(ManagedObjectRepresentation.class), any(GId.class));
-
-        doAnswer(new Answer<Void>() {
-            public Void answer(InvocationOnMock invocation) {
                 Object[] args = invocation.getArguments();
                 if (args != null && args.length > 0 && args[0] instanceof OperationRepresentation) {
                     OperationRepresentation operation = (OperationRepresentation) args[0];
