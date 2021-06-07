@@ -7,7 +7,6 @@ import javax.annotation.PostConstruct;
 
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import com.cumulocity.microservice.context.ContextService;
-import com.cumulocity.microservice.context.credentials.MicroserviceCredentials;
 import com.cumulocity.microservice.context.credentials.UserCredentials;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

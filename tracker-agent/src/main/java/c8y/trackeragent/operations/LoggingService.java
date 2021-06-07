@@ -7,7 +7,6 @@ import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.rest.representation.operation.Operations;
 import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.sdk.client.SDKException;
-import com.cumulocity.sdk.client.devicecontrol.DeviceControlApi;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,7 +25,6 @@ public class LoggingService {
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
     private final DeviceControlRepository deviceControl;
     private final BinariesRepository binaries;
-    private final DeviceControlApi deviceControlApi;
     private final String logfile;
     private final String timestampFormat;
     private final String applicationId;
@@ -35,15 +33,13 @@ public class LoggingService {
     public LoggingService(
             DeviceControlRepository deviceControl,
             BinariesRepository binaries,
-            DeviceControlApi deviceControlApi,
             @Value("${C8Y.log.file.path}") String logfile,
             @Value("${C8Y.log.timestamp.format:}") String timestampFormat,
             @Value("${C8Y.application.id}") String applicationId
     ) {
-        this.logfile = logfile;
         this.deviceControl = deviceControl;
         this.binaries = binaries;
-        this.deviceControlApi = deviceControlApi;
+        this.logfile = logfile;
         this.timestampFormat = timestampFormat;
         this.applicationId = applicationId;
     }
@@ -161,12 +157,4 @@ public class LoggingService {
     private void uploadLogFile(GId containerId, InputStream is) {
         this.binaries.replaceFile(containerId, "text/plain", is);
     }
-//
-//    public void save(OperationRepresentation operation) {
-//        if (operation.getId() == null) {
-//            this.deviceControlApi.create(operation);
-//        } else {
-//            this.deviceControlApi.update(operation);
-//        }
-//    }
 }

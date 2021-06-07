@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.device.TrackerDeviceProvider;
-import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.protocol.TrackingProtocol;
 
 @Component
@@ -20,18 +19,15 @@ public class TrackerDeviceContextService {
 
 	private final ContextService<MicroserviceCredentials> contextService;
 	private final MicroserviceCredentialsFactory microserviceCredentialsFactory;
-    private final DeviceCredentialsRepository credentialsRepository;
     private final TrackerDeviceProvider trackerDeviceFactory;
     
     @Autowired
 	public TrackerDeviceContextService(
 			ContextService<MicroserviceCredentials> contextService,
 			MicroserviceCredentialsFactory microserviceCredentialsFactory,
-			DeviceCredentialsRepository credentialsRepository,
 			TrackerDeviceProvider trackerDeviceFactory) {
 		this.contextService = contextService;
 		this.microserviceCredentialsFactory = microserviceCredentialsFactory;
-		this.credentialsRepository = credentialsRepository;
 		this.trackerDeviceFactory = trackerDeviceFactory;
 	}
     

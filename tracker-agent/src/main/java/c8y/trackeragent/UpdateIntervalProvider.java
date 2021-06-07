@@ -3,7 +3,6 @@ package c8y.trackeragent;
 import static com.cumulocity.rest.representation.tenant.OptionMediaType.OPTION;
 
 import com.cumulocity.microservice.context.inject.TenantScope;
-import com.cumulocity.microservice.context.inject.UserScope;
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +20,6 @@ import c8y.trackeragent.configuration.TrackerConfiguration;
 import javax.ws.rs.core.Response;
 
 @Component
-//@DeviceScope
 @TenantScope
 public class UpdateIntervalProvider {
 

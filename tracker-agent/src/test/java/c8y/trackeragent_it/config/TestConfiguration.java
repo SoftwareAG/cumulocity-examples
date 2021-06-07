@@ -3,7 +3,6 @@ package c8y.trackeragent_it.config;
 import c8y.trackeragent.service.AlarmMappingService;
 import c8y.trackeragent.service.AlarmMappingServiceImpl;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;

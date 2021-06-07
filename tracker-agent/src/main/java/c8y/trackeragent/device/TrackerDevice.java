@@ -175,7 +175,7 @@ public class TrackerDevice {
             MeasurementApi measurements,
             DeviceControlApi deviceControl,
             IdentityApi identities,
-            @Qualifier("identityApi") InventoryApi inventory,
+            InventoryApi inventory,
             UpdateIntervalProvider updateIntervalProvider) throws SDKException {
     	// @formatter:on
         this.tenant = tenant;

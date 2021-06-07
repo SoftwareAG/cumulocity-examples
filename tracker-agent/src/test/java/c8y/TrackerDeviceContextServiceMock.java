@@ -6,7 +6,7 @@ import c8y.trackeragent.service.TrackerDeviceContextService;
 public class TrackerDeviceContextServiceMock extends TrackerDeviceContextService {
 
     public TrackerDeviceContextServiceMock() {
-        super(null, null,null, null);
+        super(null, null, null);
     }
 
     @Override

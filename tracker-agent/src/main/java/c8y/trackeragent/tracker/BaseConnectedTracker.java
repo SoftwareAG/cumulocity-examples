@@ -168,7 +168,7 @@ public abstract class BaseConnectedTracker<F extends Fragment> implements Connec
 
     private void checkAgentCredentials(final String tenant) {
         try {
-            DeviceCredentials agentCredentials = credentialsRepository.getAgentCredentials(tenant);
+            credentialsRepository.getAgentCredentials(tenant);
         } catch (UnknownTenantException ex) {
             logger.debug("Agent for tenant {} not yet bootstraped. Will try bootstrap the agent.", tenant);
             DeviceCredentials agentCredentials = bootstrapProcessor.tryAccessAgentCredentials(tenant);

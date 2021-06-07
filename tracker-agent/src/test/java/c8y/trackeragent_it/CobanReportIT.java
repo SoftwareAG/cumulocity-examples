@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
 
-import c8y.trackeragent_it.config.TestConfiguration;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -22,9 +21,7 @@ import c8y.trackeragent.utils.Devices;
 import c8y.trackeragent.utils.Positions;
 import c8y.trackeragent.utils.TK10xCoordinatesTranslator;
 import c8y.trackeragent.utils.message.TrackerMessage;
-import org.springframework.test.context.ContextConfiguration;
 
-//@ContextConfiguration(classes = { TestConfiguration.class })
 public class CobanReportIT extends TrackerITSupport {
 
 	private String imei;

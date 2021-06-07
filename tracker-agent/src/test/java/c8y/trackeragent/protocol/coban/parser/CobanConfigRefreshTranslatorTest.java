@@ -5,12 +5,9 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.invocation.InvocationOnMock;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoRule;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
@@ -57,12 +54,6 @@ public class CobanConfigRefreshTranslatorTest extends CobanParserTestSupport {
         OperationRepresentation operation = new OperationRepresentation();
         operation.set(new Command("CMD"));
         OperationContext operationCtx = new OperationContext(connectionDetails, operation);
-
-//        doAnswer(new Answer<Void>() {
-//            public Void answer(InvocationOnMock invocation) {
-//                return null;
-//            }
-//        }).when(deviceMock).updateMoOfDevice(any(ManagedObjectRepresentation.class), any(GId.class));
 
         doAnswer(new Answer<Void>() {
             public Void answer(InvocationOnMock invocation) {
