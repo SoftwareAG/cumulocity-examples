@@ -1,6 +1,6 @@
 {
   "apiVersion":"1",
-  "name": "hello-world-notification-microservice",
+  "name": "notification-ms",
   "version":"@project.version@",
   "provider": {
     "name":"Cumulocity GmbH"
