@@ -30,6 +30,7 @@ public class NotificationConsumerWebSocket2 implements Closeable {
         {
             if(!client.isOpen() && !client.isClosing()) {
                 client.connectBlocking();
+                return;
             }
         }
         // TODO maybe close if idle
