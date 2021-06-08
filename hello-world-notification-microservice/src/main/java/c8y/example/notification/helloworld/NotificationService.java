@@ -1,7 +1,8 @@
 package c8y.example.notification.helloworld;
 
 import c8y.example.notification.helloworld.websocket.NotificationCallback;
-import c8y.example.notification.helloworld.websocket.NotificationConsumerWebSocket;
+// import c8y.example.notification.helloworld.websocket.NotificationConsumerWebSocket;
+import c8y.example.notification.helloworld.websocket.NotificationConsumerWebSocket2;
 import com.cumulocity.microservice.subscription.model.MicroserviceSubscriptionAddedEvent;
 import com.cumulocity.rest.representation.reliable.notification.NotificationTokenRequestRepresentation;
 import com.cumulocity.sdk.client.Platform;
@@ -42,7 +43,7 @@ public class NotificationService {
         final String webSocketUrl = "ws://localhost:8080/c8y/relnotif/consumer/?token=" + token;
         log.info("TOKEN: " + token);
 
-        NotificationConsumerWebSocket socket = new NotificationConsumerWebSocket(new NotificationCallback() {
+        NotificationConsumerWebSocket2 socket = new NotificationConsumerWebSocket2(new NotificationCallback() {
             @Override
             public void onNotification(List<String> headers, String notification) {
                 for (String header : headers) {

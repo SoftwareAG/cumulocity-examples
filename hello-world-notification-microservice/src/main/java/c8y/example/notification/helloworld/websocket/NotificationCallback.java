@@ -15,6 +15,8 @@ public interface NotificationCallback {
 
     /**
      * Called on close of the underlying web socket connection. Normally, a reconnection should be attempted.
+     *
+     * TODO: should we include websocket close-code and reason parameters
      */
     void close();
 }
