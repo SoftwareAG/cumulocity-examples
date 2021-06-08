@@ -8,9 +8,7 @@ import org.java_websocket.handshake.ServerHandshake;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.URI;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 @Slf4j
@@ -37,6 +35,7 @@ public class NotificationConsumerWebSocket2 implements Closeable {
     }
 
     // TODO is there a Spring shutdown-hook to call this
+    // TODO should we expose close(int,String)  - instead of Closeable or in addition!
     @Override
     public void close(){
         client.close(CloseFrame.NORMAL, "client closed");
