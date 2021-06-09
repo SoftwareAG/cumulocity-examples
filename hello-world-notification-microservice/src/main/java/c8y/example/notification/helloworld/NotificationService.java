@@ -1,14 +1,20 @@
 package c8y.example.notification.helloworld;
 
 import c8y.example.notification.helloworld.websocket.NotificationCallback;
-// import c8y.example.notification.helloworld.websocket.NotificationConsumerWebSocket;
-import c8y.example.notification.helloworld.websocket.NotificationConsumerWebSocket2;
+import c8y.example.notification.helloworld.websocket.NotificationConsumerWebSocket;
 import com.cumulocity.microservice.subscription.model.MicroserviceSubscriptionAddedEvent;
+import com.cumulocity.model.idtype.GId;
+import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
+import com.cumulocity.rest.representation.reliable.notification.NotificationSubscriptionFilterRepresentation;
+import com.cumulocity.rest.representation.reliable.notification.NotificationSubscriptionRepresentation;
 import com.cumulocity.rest.representation.reliable.notification.NotificationTokenRequestRepresentation;
-import com.cumulocity.sdk.client.Platform;
+import com.cumulocity.sdk.client.messaging.notifications.NotificationSubscriptionApi;
+import com.cumulocity.sdk.client.messaging.notifications.NotificationSubscriptionFilter;
+import com.cumulocity.sdk.client.messaging.notifications.TokenApi;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
@@ -26,8 +32,11 @@ import java.util.List;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class NotificationService {
 
-    // TODO TokenApi cannot be injected - investigate
-    private final Platform platform;
+    private final TokenApi tokenApi;
+    private final NotificationSubscriptionApi subscriptionApi;
+
+    @Value("${subscription.source.id}")
+    private String sourceId;
 
     @EventListener
     public void onSubscriptionAdded(MicroserviceSubscriptionAddedEvent event) throws InterruptedException, IOException, URISyntaxException {
@@ -36,14 +45,17 @@ public class NotificationService {
     }
 
     public void init() throws URISyntaxException, IOException, InterruptedException {
+        final String subscriber = "sub";
+        final String subscription = "test" + sourceId + "subscription";
+        final ManagedObjectRepresentation source = new ManagedObjectRepresentation();
+        source.setId(GId.asGId(sourceId));
 
-        final NotificationTokenRequestRepresentation representation = new NotificationTokenRequestRepresentation("sub", "testsubscription", 1440, false);
-        //final String token = "eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJzdWIiLCJ0b3BpYyI6Im1hbmFnZW1lbnQvcmVsbm90aWYvdGVzdHN1YnNjcmlwdGlvbiIsImp0aSI6ImExZGI0MjE0LWJmMmEtNGNmNy04OWJiLTliZDM3YTY1OWVjZCIsImlhdCI6MTYyMzA1MzU5OSwiZXhwIjoxNjI5MDUzNTk5fQ.CKH_Vn9IWKFKzZWkW-Gomck9QblA1pKnxjBbu6nJLIGFF6dsgrXQpSUjJM-HNu2Y3WXcglul-QWJH3oErUwh3l2hPI0pD7XPBlUjinzEfFLtg4-aiYw0Uhkmr1lURqVu3I_qckLxnk_EWR81lc676j8SM28v9Y0TLYA_CUkfwrN-47-BS6dBINTkCsPGl0NfI41VXE8tejCBxZXCEFYhgeqSjmAB6ZMzWAiAaFocpqiT81zJSSnyhIeqos1ZwuOwF_MdE3iud1LJbw2cfZJXM5Nlz1Zt-A9ctoxb1y-qo3QYxgql7ANuUPzYa6Ng2svz2iuYS70Rg9kOXRT4dkiWdA";
-        final String token = platform.getTokenApi().create(representation).getTokenString();
+        createSubscription(subscription, source);
+        final String token = createToken(subscriber, subscription);
+
         final String webSocketUrl = "ws://localhost:8080/c8y/relnotif/consumer/?token=" + token;
-        log.info("TOKEN: " + token);
 
-        NotificationConsumerWebSocket2 socket = new NotificationConsumerWebSocket2(new NotificationCallback() {
+        NotificationConsumerWebSocket socket = new NotificationConsumerWebSocket(new NotificationCallback() {
             @Override
             public void onNotification(List<String> headers, String notification) {
                 for (String header : headers) {
@@ -60,6 +72,30 @@ public class NotificationService {
 
         socket.run(new URI(webSocketUrl), 60, 0);
 
+    }
+
+    private String createToken(String subscriber, String subscription) {
+        final NotificationTokenRequestRepresentation tokenRequestRepresentation = new NotificationTokenRequestRepresentation(
+                subscriber,
+                subscription,
+                1440,
+                false);
+        return tokenApi.create(tokenRequestRepresentation).getTokenString();
+    }
+
+    private void createSubscription(String subscription, ManagedObjectRepresentation source) {
+        final NotificationSubscriptionFilterRepresentation filterRepresentation = new NotificationSubscriptionFilterRepresentation();
+        filterRepresentation.setApis(List.of("measurements"));
+        filterRepresentation.setTypeFilter("c8y_Speed");
+
+        final NotificationSubscriptionRepresentation subscriptionRepresentation = new NotificationSubscriptionRepresentation();
+        subscriptionRepresentation.setContext("mo");
+        subscriptionRepresentation.setSubscription(subscription);
+        subscriptionRepresentation.setSource(source);
+        subscriptionRepresentation.setSubscriptionFilter(filterRepresentation);
+        subscriptionRepresentation.setFragmentsToCopy(List.of("c8y_SpeedMeasurement", "c8y_MaxSpeedMeasurement"));
+
+        subscriptionApi.subscribe(subscriptionRepresentation);
     }
 
 }
