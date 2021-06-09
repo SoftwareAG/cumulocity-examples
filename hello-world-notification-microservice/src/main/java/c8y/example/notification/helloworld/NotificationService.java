@@ -9,6 +9,7 @@ import com.cumulocity.rest.representation.reliable.notification.NotificationSubs
 import com.cumulocity.rest.representation.reliable.notification.NotificationSubscriptionRepresentation;
 import com.cumulocity.rest.representation.reliable.notification.NotificationTokenRequestRepresentation;
 import com.cumulocity.sdk.client.messaging.notifications.NotificationSubscriptionApi;
+import com.cumulocity.sdk.client.messaging.notifications.NotificationSubscriptionCollection;
 import com.cumulocity.sdk.client.messaging.notifications.NotificationSubscriptionFilter;
 import com.cumulocity.sdk.client.messaging.notifications.TokenApi;
 import lombok.RequiredArgsConstructor;
@@ -84,6 +85,17 @@ public class NotificationService {
     }
 
     private void createSubscription(String subscription, ManagedObjectRepresentation source) {
+        final NotificationSubscriptionFilter filter = new NotificationSubscriptionFilter();
+        filter.bySource(source.getId());
+
+        final NotificationSubscriptionCollection subscriptions = subscriptionApi.getSubscriptionsByFilter(filter);
+
+        if (!subscriptions.get().getSubscriptions().isEmpty()) {
+            log.info("Subscription <{}> exists", subscription);
+            return;
+        }
+
+        log.info("Creating subscription ...");
         final NotificationSubscriptionFilterRepresentation filterRepresentation = new NotificationSubscriptionFilterRepresentation();
         filterRepresentation.setApis(List.of("measurements"));
         filterRepresentation.setTypeFilter("c8y_Speed");
