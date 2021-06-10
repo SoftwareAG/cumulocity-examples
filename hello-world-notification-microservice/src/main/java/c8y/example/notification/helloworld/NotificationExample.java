@@ -2,8 +2,9 @@ package c8y.example.notification.helloworld;
 
 import c8y.example.notification.helloworld.platform.SubscriptionRepository;
 import c8y.example.notification.helloworld.platform.TokenService;
+import c8y.example.notification.helloworld.websocket.ExampleWebSocketClient;
+import c8y.example.notification.helloworld.websocket.Notification;
 import c8y.example.notification.helloworld.websocket.NotificationCallback;
-import c8y.example.notification.helloworld.websocket.NotificationConsumerWebSocket2;
 import com.cumulocity.microservice.subscription.model.MicroserviceSubscriptionAddedEvent;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
@@ -16,7 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 
 /**
@@ -35,12 +38,12 @@ public class NotificationExample {
     private final Properties properties;
 
     @EventListener
-    public void onSubscriptionAdded(MicroserviceSubscriptionAddedEvent event) {
+    public void onSubscriptionAdded(MicroserviceSubscriptionAddedEvent event) throws URISyntaxException {
         log.info("Subscription added for Tenant ID: <{}> ", event.getCredentials().getTenant());
         runExample();
     }
 
-    private void runExample() {
+    private void runExample() throws URISyntaxException {
         // Create Subscription for source device
         final String subscription = createSubscription();
 
@@ -51,33 +54,68 @@ public class NotificationExample {
         connectAndReceiveNotifications(token);
     }
 
-    private void connectAndReceiveNotifications(String token) {
-        final String webSocketUrl = getWebSocketUrl(token);
+    private void connectAndReceiveNotifications(String token) throws URISyntaxException {
 
-        NotificationConsumerWebSocket2 socket = new NotificationConsumerWebSocket2(new NotificationCallback() {
+        final URI webSocketUri = getWebSocketUrl(token);
+
+        final  ExampleWebSocketClient client = new ExampleWebSocketClient(webSocketUri, new NotificationCallback() {
+
+            // TODO: probably remove (only needed for auto reconnect behaviour in onClose())
+            final long initialBackoffMillis = 1000;
+            final long maxBackoffMillis = 60 * 1000;
+            long backoffMillis = initialBackoffMillis;
+
             @Override
-            public void onNotification(List<String> headers, String notification) {
-                for (String header : headers) {
-                    log.info("header " + header);
-                }
-                log.info("notification " + notification);
+            public void onOpen(URI uri) {
+                this.backoffMillis = this.initialBackoffMillis;
+                log.info("Connected to WebSocket server "+uri);
             }
 
             @Override
-            public void close() {
-                log.info("close");
+            public void onNotification(Notification notification) {
+                // NOTE: my experiences using grep over huge (multi GiB) log files
+                //       has taught me that multi-line toString() is evil
+                //       (hence the one-line toString() or multiline alternative here).
+                log.info("Notification received:\n" + notification.toPrintString());
+                //log.info("Notification received:" + notification.toString());
+            }
+
+            @Override
+            public void onError(Exception e) {
+                log.error("We got an exception: "+e);
+            }
+
+            @Override
+            public void onClose() {
+                log.info("Connection was closed.");
+
+                //TODO: if we do this we can never close a connection (we need another
+                //      shouldBeClosed boolean to control it, somewhere)
+                // NOTE: we can't reconnect in a callback thread (in a method such as this) as
+                //       the underlying library does not allow it (it errors) -> hence the spawned thread
+                //       This makes the example untidy.
+                // NOTE2: had to declare client as instance field member in order to access here
+                //       (as at time of creation, client is not, or only partially, instantiated).
+//                log.info("Connection was closed. Reconnecting ...");
+//                new Thread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        try {
+//                            Thread.sleep(Math.min(backoffMillis, maxBackoffMillis));
+//                            backoffMillis *= 2;
+//                            NotificationExample.this.client.reconnectBlocking();
+//                        } catch (InterruptedException ignore) {
+//                        }
+//                    }
+//                }, "ReconnectWebSocketThread").start();
             }
         });
-
-        try {
-            socket.run(new URI(webSocketUrl), 60, 0);
-        } catch (Exception e) {
-            log.error("Error connecting to WebSocket URL", e);
-        }
+        // TODO: consider making client an anonymous reference (if not reconnecting)
+        client.connect();
     }
 
-    private String getWebSocketUrl(String token) {
-        return String.format(WEBSOCKET_URL, properties.getWebSocketBaseUrl(), token);
+    private URI getWebSocketUrl(String token) throws URISyntaxException{
+        return new URI(String.format(WEBSOCKET_URL, properties.getWebSocketBaseUrl(), token));
     }
 
     private String createSubscription() {
