@@ -1,5 +1,7 @@
 package c8y.example.notification.helloworld;
 
+import c8y.example.notification.helloworld.platform.SubscriptionRepository;
+import c8y.example.notification.helloworld.platform.TokenService;
 import c8y.example.notification.helloworld.websocket.NotificationCallback;
 import c8y.example.notification.helloworld.websocket.NotificationConsumerWebSocket2;
 import com.cumulocity.microservice.subscription.model.MicroserviceSubscriptionAddedEvent;
@@ -8,54 +10,49 @@ import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.reliable.notification.NotificationSubscriptionFilterRepresentation;
 import com.cumulocity.rest.representation.reliable.notification.NotificationSubscriptionRepresentation;
 import com.cumulocity.rest.representation.reliable.notification.NotificationTokenRequestRepresentation;
-import com.cumulocity.sdk.client.messaging.notifications.NotificationSubscriptionApi;
-import com.cumulocity.sdk.client.messaging.notifications.NotificationSubscriptionCollection;
-import com.cumulocity.sdk.client.messaging.notifications.NotificationSubscriptionFilter;
-import com.cumulocity.sdk.client.messaging.notifications.TokenApi;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 
 /**
- * Test class
+ * TODO
  */
 
-@Deprecated
 @Component
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class NotificationService {
+public class NotificationExample {
 
-    private final TokenApi tokenApi;
-    private final NotificationSubscriptionApi subscriptionApi;
+    private final static String WEBSOCKET_URL = "%s/c8y/relnotif/consumer/?token=%s";
 
-    @Value("${example.source.id}")
-    private String sourceId;
+    private final TokenService tokenService;
+    private final SubscriptionRepository subscriptionRepository;
+    private final Properties properties;
 
-    /*@EventListener
-    public void onSubscriptionAdded(MicroserviceSubscriptionAddedEvent event) throws InterruptedException, IOException, URISyntaxException {
+    @EventListener
+    public void onSubscriptionAdded(MicroserviceSubscriptionAddedEvent event) {
         log.info("Subscription added for Tenant ID: <{}> ", event.getCredentials().getTenant());
-        init();
-    }*/
+        runExample();
+    }
 
-    public void init() throws URISyntaxException, IOException, InterruptedException {
-        final String subscriber = "sub";
-        final String subscription = "test" + sourceId + "subscription";
-        final ManagedObjectRepresentation source = new ManagedObjectRepresentation();
-        source.setId(GId.asGId(sourceId));
+    private void runExample() {
+        // Create Subscription for source device
+        final String subscription = createSubscription();
 
-        createSubscription(subscription, source);
-        final String token = createToken(subscriber, subscription);
+        // Obtain authorization token
+        final String token = createToken(subscription);
 
-        final String webSocketUrl = "ws://localhost:8080/c8y/relnotif/consumer/?token=" + token;
+        // Connect to WebSocket server to receive notifications
+        connectAndReceiveNotifications(token);
+    }
+
+    private void connectAndReceiveNotifications(String token) {
+        final String webSocketUrl = getWebSocketUrl(token);
 
         NotificationConsumerWebSocket2 socket = new NotificationConsumerWebSocket2(new NotificationCallback() {
             @Override
@@ -72,47 +69,56 @@ public class NotificationService {
             }
         });
 
-        socket.run(new URI(webSocketUrl), 60, 0);
-        /*Thread.sleep(5000);
-        socket.send("{ \"type\": \"unsubscribe\" }");
-        socket.close();
-        Thread.sleep(20000);
-        socket.run(new URI(webSocketUrl), 60, 0);*/
+        try {
+            socket.run(new URI(webSocketUrl), 60, 0);
+        } catch (Exception e) {
+            log.error("Error connecting to WebSocket URL", e);
+        }
     }
 
-    private String createToken(String subscriber, String subscription) {
+    private String getWebSocketUrl(String token) {
+        return String.format(WEBSOCKET_URL, properties.getWebSocketBaseUrl(), token);
+    }
+
+    private String createSubscription() {
+        final NotificationSubscriptionRepresentation subscriptionRepresentation = getSampleSubscriptionRepresentation();
+
+        if (!subscriptionRepository.exists(subscriptionRepresentation.getSource().getId())) {
+            log.info("Subscription does not exist. Creating ...");
+            subscriptionRepository.create(subscriptionRepresentation);
+        }
+
+        return subscriptionRepresentation.getSubscription();
+    }
+
+    private String createToken(String subscription) {
         final NotificationTokenRequestRepresentation tokenRequestRepresentation = new NotificationTokenRequestRepresentation(
-                subscriber,
+                properties.getSubscriber(),
                 subscription,
                 1440,
                 false);
-        return tokenApi.create(tokenRequestRepresentation).getTokenString();
+
+        return tokenService.create(tokenRequestRepresentation);
     }
 
-    private void createSubscription(String subscription, ManagedObjectRepresentation source) {
-        final NotificationSubscriptionFilter filter = new NotificationSubscriptionFilter();
-        filter.bySource(source.getId());
+    private NotificationSubscriptionRepresentation getSampleSubscriptionRepresentation() {
+        final ManagedObjectRepresentation source = new ManagedObjectRepresentation();
+        source.setId(GId.asGId(properties.getSourceId()));
 
-        final NotificationSubscriptionCollection subscriptions = subscriptionApi.getSubscriptionsByFilter(filter);
+        final String subscriptionName = "test" + source.getId().getValue() + "subscription";
 
-        if (!subscriptions.get().getSubscriptions().isEmpty()) {
-            log.info("Subscription <{}> exists", subscription);
-            return;
-        }
-
-        log.info("Creating subscription ...");
         final NotificationSubscriptionFilterRepresentation filterRepresentation = new NotificationSubscriptionFilterRepresentation();
         filterRepresentation.setApis(List.of("measurements"));
         filterRepresentation.setTypeFilter("c8y_Speed");
 
         final NotificationSubscriptionRepresentation subscriptionRepresentation = new NotificationSubscriptionRepresentation();
         subscriptionRepresentation.setContext("mo");
-        subscriptionRepresentation.setSubscription(subscription);
+        subscriptionRepresentation.setSubscription(subscriptionName);
         subscriptionRepresentation.setSource(source);
         subscriptionRepresentation.setSubscriptionFilter(filterRepresentation);
         subscriptionRepresentation.setFragmentsToCopy(List.of("c8y_SpeedMeasurement", "c8y_MaxSpeedMeasurement"));
 
-        subscriptionApi.subscribe(subscriptionRepresentation);
+        return subscriptionRepresentation;
     }
 
 }

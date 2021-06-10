@@ -41,6 +41,9 @@ public class NotificationConsumerWebSocket2 implements Closeable {
         client.close(CloseFrame.NORMAL, "client closed");
     }
 
+    public void send(String message) {
+        client.send(message);
+    }
 
     private static class NotificationWebSocketClient extends WebSocketClient {
 
