@@ -7,9 +7,11 @@ import java.net.URI;
  */
 public interface NotificationCallback {
 
-    void onOpen(URI address);
-
-    void onError(Exception e);
+    /**
+     * Called when a connection to the WebSocket server is successfully established.
+     * @param serverUri the WebSocket URI that was successfully connected to.
+     */
+    void onOpen(URI serverUri);
 
     /**
      * Called on receiving a notification. The notification will be acknowledged if no exception raised.
@@ -18,7 +20,13 @@ public interface NotificationCallback {
     void onNotification(Notification notification);
 
     /**
-     * Called on close of the underlying web socket connection. Normally, a reconnection should be attempted.
+     * Called on receiving an exception from the WebSocket connection. This may be whilst actively connected or during connection/disconnection.
+     * @param e the exception thrown from the connection.
+     */
+    void onError(Exception e);
+
+    /**
+     * Called on close of the underlying WebSocket connection. Normally, a reconnection should be attempted.
      */
     void onClose();
 }
