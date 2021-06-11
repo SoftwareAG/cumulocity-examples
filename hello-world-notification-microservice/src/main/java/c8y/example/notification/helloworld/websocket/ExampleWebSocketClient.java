@@ -7,19 +7,18 @@ import org.java_websocket.handshake.ServerHandshake;
 import java.net.URI;
 
 @Slf4j
-public class ExampleWebSocketClient  extends WebSocketClient {
+public class ExampleWebSocketClient extends WebSocketClient {
 
     private final NotificationCallback callback;
 
-    public ExampleWebSocketClient(URI serverUri, NotificationCallback callback)
-    {
+    public ExampleWebSocketClient(URI serverUri, NotificationCallback callback) {
         super(serverUri);
         this.callback = callback;
     }
 
     @Override
     public void onOpen(ServerHandshake serverHandshake) {
-        log.info("WebSocket connected: " + serverHandshake.getHttpStatus()+ " " + serverHandshake.getHttpStatusMessage());
+        log.info("WebSocket connected: " + serverHandshake.getHttpStatus() + " " + serverHandshake.getHttpStatusMessage());
         this.callback.onOpen(this.uri);
     }
 
@@ -27,14 +26,13 @@ public class ExampleWebSocketClient  extends WebSocketClient {
     public void onMessage(String message) {
         Notification notification = Notification.parse(message);
         this.callback.onNotification(notification);
-        if(notification.ackHeader != null){
-            try{
-                send(notification.ackHeader); // ack message
-            } catch (Exception e){
-                log.error("Failed to ack message "+notification.ackHeader, e);
+        if (notification.getAckHeader() != null) {
+            try {
+                send(notification.getAckHeader()); // ack message
+            } catch (Exception e) {
+                log.error("Failed to ack message " + notification.getAckHeader(), e);
             }
-        }
-        else{
+        } else {
             log.warn("No message id found for ack");
         }
     }

@@ -55,24 +55,14 @@ public class NotificationExample {
 
         final ExampleWebSocketClient client = new ExampleWebSocketClient(webSocketUri, new NotificationCallback() {
 
-            // TODO: probably remove (only needed for auto reconnect behaviour in onClose())
-            final long initialBackoffMillis = 1000;
-            final long maxBackoffMillis = 60 * 1000;
-            long backoffMillis = initialBackoffMillis;
-
             @Override
             public void onOpen(URI uri) {
-                this.backoffMillis = this.initialBackoffMillis;
                 log.info("Connected to WebSocket server " + uri);
             }
 
             @Override
             public void onNotification(Notification notification) {
-                // NOTE: my experiences using grep over huge (multi GiB) log files
-                //       has taught me that multi-line toString() is evil
-                //       (hence the one-line toString() or multiline alternative here).
-                log.info("Notification received:\n" + notification.toPrintString());
-                //log.info("Notification received:" + notification.toString());
+                log.info("Notification received:\n" + notification.getMessage());
             }
 
             @Override
@@ -83,29 +73,8 @@ public class NotificationExample {
             @Override
             public void onClose() {
                 log.info("Connection was closed.");
-
-                //TODO: if we do this we can never close a connection (we need another
-                //      shouldBeClosed boolean to control it, somewhere)
-                // NOTE: we can't reconnect in a callback thread (in a method such as this) as
-                //       the underlying library does not allow it (it errors) -> hence the spawned thread
-                //       This makes the example untidy.
-                // NOTE2: had to declare client as instance field member in order to access here
-                //       (as at time of creation, client is not, or only partially, instantiated).
-//                log.info("Connection was closed. Reconnecting ...");
-//                new Thread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        try {
-//                            Thread.sleep(Math.min(backoffMillis, maxBackoffMillis));
-//                            backoffMillis *= 2;
-//                            NotificationExample.this.client.reconnectBlocking();
-//                        } catch (InterruptedException ignore) {
-//                        }
-//                    }
-//                }, "ReconnectWebSocketThread").start();
             }
         });
-        // TODO: consider making client an anonymous reference (if not reconnecting)
         client.connect();
     }
 

@@ -1,19 +1,19 @@
 package c8y.example.notification.helloworld.websocket;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+@Getter
 public class Notification {
-    public final String ackHeader;
-    public final List<String> notificationHeaders;
-    public final String message;
-
-    private Notification(String ackHeader, List<String> notificationHeaders, String message) {
-        this.ackHeader = ackHeader;
-        this.notificationHeaders = Collections.unmodifiableList(notificationHeaders);
-        this.message = message;
-    }
+    private final String ackHeader;
+    private final List<String> notificationHeaders;
+    private final String message;
 
     static Notification parse(String message) {
         ArrayList<String> headers = new ArrayList<>(8);
@@ -30,27 +30,9 @@ public class Notification {
             headers.add(header);
         }
         if (headers.isEmpty()) {
-            return new Notification(null, headers, message);
+            return new Notification(null, Collections.emptyList(), message);
         }
-        return new Notification(headers.get(0), headers.subList(1, headers.size()), message);
+        return new Notification(headers.get(0), Collections.unmodifiableList(headers.subList(1, headers.size())), message);
     }
 
-    public String toString(){
-        final StringBuilder sb = new StringBuilder();
-        sb.append("Notification{ackHeader:").append(this.ackHeader)
-          .append(", notificationHeaders:").append(this.notificationHeaders)
-          .append(", message:").append(this.message)
-          .append('}');
-        return sb.toString();
-    }
-
-    public String toPrintString() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("AckHeader: ").append(this.ackHeader).append("\nNotificationHeaders:\n");
-        for(String header: this.notificationHeaders) {
-            sb.append("    ").append(header).append('\n');
-        }
-        sb.append("Message: ").append(this.message);
-        return sb.toString();
-    }
 }
