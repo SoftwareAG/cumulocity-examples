@@ -18,7 +18,6 @@ public class ExampleWebSocketClient extends WebSocketClient {
 
     @Override
     public void onOpen(ServerHandshake serverHandshake) {
-        log.info("WebSocket connected: " + serverHandshake.getHttpStatus() + " " + serverHandshake.getHttpStatusMessage());
         this.callback.onOpen(this.uri);
     }
 

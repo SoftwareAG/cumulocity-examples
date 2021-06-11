@@ -62,7 +62,7 @@ public class NotificationExample {
 
             @Override
             public void onNotification(Notification notification) {
-                log.info("Notification received:\n" + notification.getMessage());
+                log.info("Notification received: <{}>", notification.getMessage());
             }
 
             @Override
