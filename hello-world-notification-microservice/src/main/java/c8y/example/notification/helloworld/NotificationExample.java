@@ -17,14 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
-
-/**
- * TODO
- */
 
 @Component
 @Slf4j
@@ -58,7 +53,7 @@ public class NotificationExample {
 
         final URI webSocketUri = getWebSocketUrl(token);
 
-        final  ExampleWebSocketClient client = new ExampleWebSocketClient(webSocketUri, new NotificationCallback() {
+        final ExampleWebSocketClient client = new ExampleWebSocketClient(webSocketUri, new NotificationCallback() {
 
             // TODO: probably remove (only needed for auto reconnect behaviour in onClose())
             final long initialBackoffMillis = 1000;
@@ -68,7 +63,7 @@ public class NotificationExample {
             @Override
             public void onOpen(URI uri) {
                 this.backoffMillis = this.initialBackoffMillis;
-                log.info("Connected to WebSocket server "+uri);
+                log.info("Connected to WebSocket server " + uri);
             }
 
             @Override
@@ -82,7 +77,7 @@ public class NotificationExample {
 
             @Override
             public void onError(Exception e) {
-                log.error("We got an exception: "+e);
+                log.error("We got an exception: " + e);
             }
 
             @Override
@@ -114,7 +109,7 @@ public class NotificationExample {
         client.connect();
     }
 
-    private URI getWebSocketUrl(String token) throws URISyntaxException{
+    private URI getWebSocketUrl(String token) throws URISyntaxException {
         return new URI(String.format(WEBSOCKET_URL, properties.getWebSocketBaseUrl(), token));
     }
 
