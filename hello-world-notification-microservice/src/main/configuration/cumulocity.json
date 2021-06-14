@@ -1,29 +1,28 @@
 {
-  "apiVersion":"1",
+  "apiVersion": "1",
   "name": "notification-ms",
-  "version":"@project.version@",
+  "version": "@project.version@",
   "provider": {
-    "name":"Cumulocity GmbH"
+    "name": "Cumulocity GmbH"
   },
-  "isolation":"MULTI_TENANT",
+  "isolation": "MULTI_TENANT",
   "requiredRoles": [
+    "ROLE_RELIABLE_NOTIFICATION_ADMIN"
   ],
-  "roles":[
+  "roles": [
   ],
-  "livenessProbe":{
-    "httpGet":{
+  "livenessProbe": {
+    "httpGet": {
       "path": "/health",
       "port": 80
-
     },
     "initialDelaySeconds": 360,
     "periodSeconds": 10
   },
-  "readinessProbe":{
-    "httpGet":{
+  "readinessProbe": {
+    "httpGet": {
       "path": "/health",
       "port": 80
-
     },
     "initialDelaySeconds": 30,
     "periodSeconds": 10
