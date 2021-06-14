@@ -6,7 +6,6 @@
   },
   "isolation":"MULTI_TENANT",
   "requiredRoles": [
-    "ROLE_MEASUREMENT_ADMIN"
   ],
   "roles":[
   ],
