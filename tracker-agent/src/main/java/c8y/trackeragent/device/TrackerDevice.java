@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2013 Cumulocity GmbH
+ * Copyright (c) 2012-2020 Cumulocity GmbH
+ * Copyright (c) 2021 Software AG, Darmstadt, Germany and/or Software AG USA Inc., Reston, VA, USA,
+ * and/or its subsidiaries and/or its affiliates and/or their licensors.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"),
