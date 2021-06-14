@@ -19,4 +19,12 @@ public class MicroserviceCredentialsFactory {
                 null, null, null, null
         );
     }
+
+    public MicroserviceCredentials getForTenantWithApplicationKey(String tenant, String applicationKey) {
+        DeviceCredentials agentCredentials = credentialsRepository.getAgentCredentials(tenant);
+        return new MicroserviceCredentials(
+                tenant, agentCredentials.getUsername(), agentCredentials.getPassword(),
+                null, null, null, applicationKey
+        );
+    }
 }

@@ -107,7 +107,7 @@ public abstract class TrackerITSupport {
 
     protected EventRepresentation findLastEvent(String imei, String type) {
         GId gId = getGId(imei);
-        DateTime fromDate = new DateTime();
+        DateTime fromDate = new DateTime().minusSeconds(60);
         DateTime toDate = new DateTime().plusDays(1);
         EventFilter filter = new EventFilter().bySource(gId).byType(type).byDate(fromDate.toDate(), toDate.toDate());
         List<EventRepresentation> events = trackerPlatform.getEventApi().getEventsByFilter(filter).get().getEvents();
