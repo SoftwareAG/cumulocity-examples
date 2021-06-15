@@ -28,7 +28,9 @@ import c8y.trackeragent.configuration.TrackerConfiguration;
 import c8y.trackeragent.protocol.TrackingProtocol;
 import c8y.trackeragent.protocol.coban.device.CobanDevice;
 import c8y.trackeragent.protocol.coban.device.CobanDeviceFactory;
-import com.cumulocity.agent.server.repository.InventoryRepository;
+import com.cumulocity.microservice.context.ContextService;
+import com.cumulocity.microservice.context.credentials.MicroserviceCredentials;
+import com.cumulocity.microservice.subscription.service.MicroserviceSubscriptionsService;
 import com.cumulocity.model.Agent;
 import com.cumulocity.model.ID;
 import com.cumulocity.model.event.CumulocityAlarmStatuses;
@@ -152,8 +154,6 @@ public class TrackerDevice {
 
     protected InventoryApi inventory;
 
-    protected InventoryRepository inventoryRepository;
-
     protected String tenant;
 
     private String imei;
@@ -171,7 +171,6 @@ public class TrackerDevice {
     		String tenant,
     		String imei,
     		TrackerConfiguration configuration,
-            InventoryRepository inventoryRepository,
             EventApi events,
             AlarmApi alarms,
             MeasurementApi measurements,
@@ -183,7 +182,6 @@ public class TrackerDevice {
         this.tenant = tenant;
         this.imei = imei;
         this.configuration = configuration;
-        this.inventoryRepository = inventoryRepository;
         this.events = events;
         this.alarms = alarms;
         this.measurements = measurements;

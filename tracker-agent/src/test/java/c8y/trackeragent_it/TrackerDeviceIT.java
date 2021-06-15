@@ -22,20 +22,19 @@
 
 package c8y.trackeragent_it;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.util.List;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.cumulocity.agent.server.context.DeviceContext;
+import c8y.Geofence;
+import c8y.IsDevice;
+import c8y.MotionTracking;
+import c8y.Position;
+import c8y.SupportedOperations;
+import c8y.trackeragent.device.TrackerDevice;
+import c8y.trackeragent.devicebootstrap.DeviceCredentials;
+import c8y.trackeragent.protocol.TrackingProtocol;
+import c8y.trackeragent.tracker.BaseConnectedTracker;
+import c8y.trackeragent.tracker.MicroserviceCredentialsFactory;
+import c8y.trackeragent.utils.Devices;
+import com.cumulocity.microservice.context.ContextService;
+import com.cumulocity.microservice.context.credentials.MicroserviceCredentials;
 import com.cumulocity.model.ID;
 import com.cumulocity.model.event.CumulocityAlarmStatuses;
 import com.cumulocity.model.idtype.GId;
@@ -50,17 +49,19 @@ import com.cumulocity.sdk.client.inventory.InventoryApi;
 import com.cumulocity.sdk.client.measurement.MeasurementApi;
 import com.cumulocity.sdk.client.measurement.MeasurementCollection;
 import com.cumulocity.sdk.client.measurement.MeasurementFilter;
+import org.junit.Before;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import c8y.Geofence;
-import c8y.IsDevice;
-import c8y.MotionTracking;
-import c8y.Position;
-import c8y.SupportedOperations;
-import c8y.trackeragent.device.TrackerDevice;
-import c8y.trackeragent.devicebootstrap.DeviceCredentials;
-import c8y.trackeragent.protocol.TrackingProtocol;
-import c8y.trackeragent.tracker.BaseConnectedTracker;
-import c8y.trackeragent.utils.Devices;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class TrackerDeviceIT extends TrackerITSupport {
     
@@ -72,6 +73,12 @@ public class TrackerDeviceIT extends TrackerITSupport {
     public static final BigDecimal LONGITUDE = new BigDecimal(-95.677068);
     public static final BigDecimal ALTITUDE = new BigDecimal(1);
     public static final BigDecimal RADIUS = new BigDecimal(100);
+
+    @Autowired
+    private MicroserviceCredentialsFactory microserviceCredentialsFactory;
+
+    @Autowired
+    private ContextService<MicroserviceCredentials> contextService;
 
     @Before
     public void setup() throws IOException {
@@ -93,15 +100,22 @@ public class TrackerDeviceIT extends TrackerITSupport {
     }
 
     @Test
-    public void shouldSetTrackerData() throws SDKException, InterruptedException {
+    public void shouldSetTrackerData() throws SDKException {
     	deviceCredentialsRepository.saveDeviceCredentials(DeviceCredentials.forDevice(imei, trackerPlatform.getTenantId()));
-        DeviceCredentials agentCredentials = DeviceCredentials.forAgent(trackerPlatform.getTenantId(), trackerPlatform.getUser(), trackerPlatform.getPassword());
-        deviceCredentialsRepository.saveAgentCredentials(agentCredentials);    	
-    	DeviceContext deviceContext = new DeviceContext(agentCredentials);
-    	contextService.enterContext(deviceContext);
-        saveAgentCredentials(imei);
-        GId gid = createTrackerData();
-        validateTrackerData(gid);
+    	contextService.runWithinContext(
+    	        microserviceCredentialsFactory.getForTenant(trackerPlatform.getTenantId()),
+                () -> {
+                    saveAgentCredentials(imei);
+                    try {
+                        GId gid = createTrackerData();
+                        validateTrackerData(gid);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+
+                }
+        );
+
     }
 
     private GId createTrackerData() throws SDKException, InterruptedException {

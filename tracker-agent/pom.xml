@@ -23,19 +23,17 @@
     <description>Server-side agent for tracking device based on TCP</description>
 
     <properties>
-        <java.version>1.8</java.version>
-        <spring.boot.version>1.5.22.RELEASE</spring.boot.version>
+        <spring.boot.version>2.3.3.RELEASE</spring.boot.version>
         <package.name>tracker-agent-server</package.name>
         <package.directory>tracker-agent</package.directory>
         <agent.main.class>c8y.trackeragent.Main</agent.main.class>
-        <c8y.agent-framework.version>8.18.3</c8y.agent-framework.version>
     </properties>
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-dependencies</artifactId>
-                <version>${spring.boot.version}</version>
+                <groupId>com.nsn.cumulocity.clients-java</groupId>
+                <artifactId>microservice-dependencies</artifactId>
+                <version>${c8y.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -51,6 +49,7 @@
         <dependency>
             <groupId>com.nsn.cumulocity.clients-java</groupId>
             <artifactId>java-client</artifactId>
+            <version>${c8y.version}</version>
             <exclusions>
 				<exclusion>
 					<groupId>javax.validation</groupId>
@@ -59,8 +58,19 @@
 			</exclusions>
         </dependency>
         <dependency>
+            <groupId>com.nsn.cumulocity.clients-java</groupId>
+            <artifactId>microservice-autoconfigure</artifactId>
+            <version>${c8y.version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.nsn.cumulocity.model</groupId>
             <artifactId>device-capability-model</artifactId>
+            <version>${c8y.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.nsn.cumulocity.clients-java</groupId>
+            <artifactId>microservice-context</artifactId>
+            <version>${c8y.version}</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
@@ -73,60 +83,9 @@
             <version>3.11</version>
         </dependency>
         <dependency>
-			<groupId>com.nsn.cumulocity.clients-java</groupId>
-			<artifactId>agent-framework-core</artifactId>
-			<version>${c8y.agent-framework.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.nsn.cumulocity.clients-java</groupId>
-			<artifactId>agent-framework-repositories</artifactId>
-			<version>${c8y.agent-framework.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.nsn.cumulocity.clients-java</groupId>
-			<artifactId>agent-framework-device-control</artifactId>
-			<version>${c8y.agent-framework.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.nsn.cumulocity.clients-java</groupId>
-			<artifactId>agent-framework-device-context</artifactId>
-			<version>${c8y.agent-framework.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.nsn.cumulocity.clients-java</groupId>
-			<artifactId>agent-framework-mvc</artifactId>
-			<version>${c8y.agent-framework.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>javax.validation</groupId>
-					<artifactId>com.springsource.javax.validation</artifactId>
-				</exclusion>
-				<exclusion>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-tomcat</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-artemis</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <version>3.0.1</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>com.google.code.findbugs</groupId>
             <artifactId>jsr305</artifactId>
             <version>3.0.2</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-tomcat</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -136,12 +95,6 @@
             <scope>provided</scope>
         </dependency>
 
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <version>1.9.5</version>
-            <scope>test</scope>
-        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -155,46 +108,55 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-test</artifactId>
-			<scope>test</scope>
-		</dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.vaadin.external.google</groupId>
+                    <artifactId>android-json</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
 
     </dependencies>
     <build>
-        <pluginManagement>
-            <plugins>
-	            <plugin>
-	                <groupId>com.nsn.cumulocity.clients-java</groupId>
-	                <artifactId>agent-framework-package</artifactId>
-	                <version>${c8y.agent-framework.version}</version>
-	                <executions>
-	                    <execution>
-	                        <phase>package</phase>
-	                        <goals>
-	                            <goal>agent-package</goal>
-	                        </goals>
-	                    </execution>
-	                </executions>
-	            </plugin>
-	            <plugin>
-	                <groupId>org.springframework.boot</groupId>
-	                <artifactId>spring-boot-maven-plugin</artifactId>
-	                <version>${spring.boot.version}</version>
-	                <configuration>
-	                    <mainClass>${agent.main.class}</mainClass>
-	                </configuration>
-	                <executions>
-	                    <execution>
-	                        <goals>
-	                            <goal>repackage</goal>
-	                        </goals>
-	                    </execution>
-	                </executions>
-	            </plugin>
-            </plugins>
-        </pluginManagement>
         <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>2.3.3.RELEASE</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <mainClass>${agent.main.class}</mainClass>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.nsn.cumulocity.clients-java</groupId>
+                <artifactId>microservice-package-maven-plugin</artifactId>
+                <version>${project.parent.version}</version>
+                <executions>
+                    <execution>
+                        <id>package</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>package</goal>
+                        </goals>
+                        <configuration>
+                            <name>${project.artifactId}</name>
+                            <image>${project.artifactId}</image>
+                            <encoding>UTF-8</encoding>
+                            <rpmSkip>true</rpmSkip>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>

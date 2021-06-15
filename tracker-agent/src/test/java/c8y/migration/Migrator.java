@@ -14,14 +14,13 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
+import c8y.trackeragent.devicebootstrap.DeviceCredentials;
+import com.cumulocity.microservice.context.ContextService;
+import com.cumulocity.microservice.context.credentials.UserCredentials;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import com.cumulocity.agent.server.context.DeviceContext;
-import com.cumulocity.agent.server.context.DeviceContextService;
-import com.cumulocity.agent.server.context.DeviceCredentials;
 
 import c8y.migration.model.TenantMigrationRequest;
 import c8y.migration.model.TenantMigrationResponse;
@@ -35,15 +34,15 @@ public class Migrator {
 	private static final Logger logger = LoggerFactory.getLogger(Migrator.class);
 
 	private final MigrationRequestService requestService;
-	private final DeviceContextService contextService;
+	private final ContextService<UserCredentials> contextService;
 	private final Settings settings;
 	private final List<MigrationStep> migrationSteps;
 
 	@Autowired
 	public Migrator(
 			// @formatter:off
-			MigrationRequestService requestService, 
-			DeviceContextService contextService, 
+			MigrationRequestService requestService,
+			ContextService<UserCredentials> contextService,
 			Settings settings, 
 			List<MigrationStep> migrationSteps) {
 		// @formatter:on
@@ -61,18 +60,12 @@ public class Migrator {
 		for (TenantMigrationRequest req : reqs) {
 			DeviceCredentials credentials = new DeviceCredentials(req.getTenant(), settings.getCepUser(),
 					settings.getCepPassword(), null, null);
-			DeviceContext context = new DeviceContext(credentials);
-			contextService.enterContext(context);
-			try {
+			contextService.runWithinContext(credentials, () -> {
 				logger.info("Migrate tenant: {}", req.getTenant());
 				TenantMigrationResponse response = migrateTenant(req);
 				responses.add(response);
 				logger.info("Migrate tenant: {} - DONE", req.getTenant());
-			} catch (Exception ex) {
-				logger.error("Migrate tenant: " + req.getTenant() + "- FAILED", ex);
-			} finally {
-				contextService.leaveContext();
-			}
+			});
 		}
 		new MigrationResponseSerializer("device.properties").serialize(responses);
 	}

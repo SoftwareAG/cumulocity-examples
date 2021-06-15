@@ -9,8 +9,6 @@
 
 package c8y.trackeragent.operations;
 
-import com.cumulocity.agent.server.logging.LoggingService;
-import com.cumulocity.agent.server.repository.IdentityRepository;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.devicecontrol.DeviceControlApi;
@@ -97,7 +95,4 @@ public class OperationExecutorTest {
         verify(operationSmsDelivery).deliverSms(translation, deviceId, imei);
         
     }
-    
-    
-    
 }
