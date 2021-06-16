@@ -53,33 +53,6 @@ public class NotificationExample {
         runExample();
     }
 
-    private void overrideProperties(String tenantId) {
-        final Optional<TenantProperties> tenantPropertiesOptional = contextService.callForTenant(tenantId, this::getTenantProperties);
-
-        if (tenantPropertiesOptional.isEmpty()) {
-            return;
-        }
-
-        final TenantProperties tenantProperties = tenantPropertiesOptional.get();
-        log.info("Loaded tenant properties: <{}>", tenantProperties.toString());
-
-        if (tenantProperties.getSourceId() != null) {
-            properties.setSourceId(tenantProperties.getSourceId());
-        }
-    }
-
-    private Optional<TenantProperties> getTenantProperties() {
-        if (microserviceSettingsService == null || microserviceSettingsService.getAll().isEmpty()) {
-            return Optional.empty();
-        }
-
-        final String sourceId = microserviceSettingsService.get(SOURCE_ID);
-
-        return Optional.of(TenantProperties.builder()
-                .sourceId(sourceId)
-                .build());
-    }
-
     private void runExample() throws URISyntaxException {
         // Create Subscription for source device
         final String subscription = createSubscription();
@@ -163,6 +136,33 @@ public class NotificationExample {
         subscriptionRepresentation.setFragmentsToCopy(List.of("c8y_SpeedMeasurement", "c8y_MaxSpeedMeasurement"));
 
         return subscriptionRepresentation;
+    }
+
+    private void overrideProperties(String tenantId) {
+        final Optional<TenantProperties> tenantPropertiesOptional = contextService.callForTenant(tenantId, this::getTenantProperties);
+
+        if (tenantPropertiesOptional.isEmpty()) {
+            return;
+        }
+
+        final TenantProperties tenantProperties = tenantPropertiesOptional.get();
+        log.info("Loaded tenant properties: <{}>", tenantProperties.toString());
+
+        if (tenantProperties.getSourceId() != null) {
+            properties.setSourceId(tenantProperties.getSourceId());
+        }
+    }
+
+    private Optional<TenantProperties> getTenantProperties() {
+        if (microserviceSettingsService == null || microserviceSettingsService.getAll().isEmpty()) {
+            return Optional.empty();
+        }
+
+        final String sourceId = microserviceSettingsService.get(SOURCE_ID);
+
+        return Optional.of(TenantProperties.builder()
+                .sourceId(sourceId)
+                .build());
     }
 
     @Data
