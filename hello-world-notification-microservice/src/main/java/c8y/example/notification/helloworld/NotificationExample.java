@@ -5,12 +5,16 @@ import c8y.example.notification.helloworld.platform.TokenService;
 import c8y.example.notification.helloworld.websocket.ExampleWebSocketClient;
 import c8y.example.notification.helloworld.websocket.Notification;
 import c8y.example.notification.helloworld.websocket.NotificationCallback;
+import com.cumulocity.microservice.settings.service.MicroserviceSettingsService;
 import com.cumulocity.microservice.subscription.model.MicroserviceSubscriptionAddedEvent;
+import com.cumulocity.microservice.subscription.service.MicroserviceSubscriptionsService;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.reliable.notification.NotificationSubscriptionFilterRepresentation;
 import com.cumulocity.rest.representation.reliable.notification.NotificationSubscriptionRepresentation;
 import com.cumulocity.rest.representation.reliable.notification.NotificationTokenRequestRepresentation;
+import lombok.Builder;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,22 +24,60 @@ import org.springframework.stereotype.Component;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class NotificationExample {
 
+    private static final String SOURCE_ID = "example.source.id";
     private final static String WEBSOCKET_URL = "%s/c8y/relnotif/consumer/?token=%s";
 
+    private final MicroserviceSubscriptionsService contextService;
     private final TokenService tokenService;
     private final SubscriptionRepository subscriptionRepository;
     private final Properties properties;
 
+    @Autowired(required = false)
+    private MicroserviceSettingsService microserviceSettingsService;
+
     @EventListener
     public void onSubscriptionAdded(MicroserviceSubscriptionAddedEvent event) throws URISyntaxException {
-        log.info("Subscription added for Tenant ID: <{}> ", event.getCredentials().getTenant());
+        final String tenantId = event.getCredentials().getTenant();
+        log.info("Subscription added for Tenant ID: <{}> ", tenantId);
+
+        // Override properties obtained from file with the ones obtained from tenant properties
+        overrideProperties(tenantId);
+
         runExample();
+    }
+
+    private void overrideProperties(String tenantId) {
+        final Optional<TenantProperties> tenantPropertiesOptional = contextService.callForTenant(tenantId, this::getTenantProperties);
+
+        if (tenantPropertiesOptional.isEmpty()) {
+            return;
+        }
+
+        final TenantProperties tenantProperties = tenantPropertiesOptional.get();
+        log.info("Loaded tenant properties: <{}>", tenantProperties.toString());
+
+        if (tenantProperties.getSourceId() != null) {
+            properties.setSourceId(tenantProperties.getSourceId());
+        }
+    }
+
+    private Optional<TenantProperties> getTenantProperties() {
+        if (microserviceSettingsService == null || microserviceSettingsService.getAll().isEmpty()) {
+            return Optional.empty();
+        }
+
+        final String sourceId = microserviceSettingsService.get(SOURCE_ID);
+
+        return Optional.of(TenantProperties.builder()
+                .sourceId(sourceId)
+                .build());
     }
 
     private void runExample() throws URISyntaxException {
@@ -123,4 +165,9 @@ public class NotificationExample {
         return subscriptionRepresentation;
     }
 
+    @Data
+    @Builder
+    private static class TenantProperties {
+        private String sourceId;
+    }
 }
