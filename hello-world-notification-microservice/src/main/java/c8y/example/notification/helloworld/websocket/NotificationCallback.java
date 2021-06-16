@@ -21,9 +21,9 @@ public interface NotificationCallback {
 
     /**
      * Called on receiving an exception from the WebSocket connection. This may be whilst actively connected or during connection/disconnection.
-     * @param e the exception thrown from the connection.
+     * @param t the exception thrown from the connection.
      */
-    void onError(Exception e);
+    void onError(Throwable t);
 
     /**
      * Called on close of the underlying WebSocket connection. Normally, a reconnection should be attempted.

@@ -1,5 +1,7 @@
-package c8y.example.notification.helloworld.websocket;
+package c8y.example.notification.helloworld.websocket.tootallnate;
 
+import c8y.example.notification.helloworld.websocket.Notification;
+import c8y.example.notification.helloworld.websocket.NotificationCallback;
 import lombok.extern.slf4j.Slf4j;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
@@ -7,11 +9,11 @@ import org.java_websocket.handshake.ServerHandshake;
 import java.net.URI;
 
 @Slf4j
-public class ExampleWebSocketClient extends WebSocketClient {
+public class TooTallNateWebSocketClient extends WebSocketClient {
 
     private final NotificationCallback callback;
 
-    public ExampleWebSocketClient(URI serverUri, NotificationCallback callback) {
+    public TooTallNateWebSocketClient(URI serverUri, NotificationCallback callback) {
         super(serverUri);
         this.callback = callback;
     }

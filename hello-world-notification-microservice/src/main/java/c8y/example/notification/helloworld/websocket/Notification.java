@@ -15,7 +15,7 @@ public class Notification {
     private final List<String> notificationHeaders;
     private final String message;
 
-    static Notification parse(String message) {
+    public static Notification parse(String message) {
         ArrayList<String> headers = new ArrayList<>(8);
         while (true) {
             int i = message.indexOf('\n');

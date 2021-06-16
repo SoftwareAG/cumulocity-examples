@@ -2,7 +2,8 @@ package c8y.example.notification.helloworld;
 
 import c8y.example.notification.helloworld.platform.SubscriptionRepository;
 import c8y.example.notification.helloworld.platform.TokenService;
-import c8y.example.notification.helloworld.websocket.ExampleWebSocketClient;
+import c8y.example.notification.helloworld.websocket.jetty.JettyWebSocketClient;
+import c8y.example.notification.helloworld.websocket.tootallnate.TooTallNateWebSocketClient;
 import c8y.example.notification.helloworld.websocket.Notification;
 import c8y.example.notification.helloworld.websocket.NotificationCallback;
 import com.cumulocity.microservice.settings.service.MicroserviceSettingsService;
@@ -43,7 +44,7 @@ public class NotificationExample {
     private MicroserviceSettingsService microserviceSettingsService;
 
     @EventListener
-    public void onSubscriptionAdded(MicroserviceSubscriptionAddedEvent event) throws URISyntaxException {
+    public void onSubscriptionAdded(MicroserviceSubscriptionAddedEvent event) throws Exception {
         final String tenantId = event.getCredentials().getTenant();
         log.info("Subscription added for Tenant ID: <{}> ", tenantId);
 
@@ -53,7 +54,7 @@ public class NotificationExample {
         runExample();
     }
 
-    private void runExample() throws URISyntaxException {
+    private void runExample() throws Exception {
         // Create Subscription for source device
         final String subscription = createSubscription();
 
@@ -64,11 +65,11 @@ public class NotificationExample {
         connectAndReceiveNotifications(token);
     }
 
-    private void connectAndReceiveNotifications(String token) throws URISyntaxException {
+    private void connectAndReceiveNotifications(String token) throws Exception {
 
         final URI webSocketUri = getWebSocketUrl(token);
 
-        final ExampleWebSocketClient client = new ExampleWebSocketClient(webSocketUri, new NotificationCallback() {
+        final NotificationCallback callback = new NotificationCallback() {
 
             @Override
             public void onOpen(URI uri) {
@@ -81,16 +82,26 @@ public class NotificationExample {
             }
 
             @Override
-            public void onError(Exception e) {
-                log.error("We got an exception: " + e);
+            public void onError(Throwable t) {
+                log.error("We got an exception: " + t);
             }
 
             @Override
             public void onClose() {
                 log.info("Connection was closed.");
             }
-        });
-        client.connect();
+        };
+
+        final String webSocketLibrary = properties.getWebSocketLibrary();
+        if(webSocketLibrary != null && webSocketLibrary.equalsIgnoreCase("jetty")) {
+            log.info("WebSocket library: Jetty");
+            final JettyWebSocketClient client = new JettyWebSocketClient(webSocketUri, callback);
+            client.connect();
+        } else {
+            log.info("WebSocket library: TooTallNate");
+            final TooTallNateWebSocketClient client = new TooTallNateWebSocketClient(webSocketUri, callback);
+            client.connect();
+        }
     }
 
     private URI getWebSocketUrl(String token) throws URISyntaxException {
