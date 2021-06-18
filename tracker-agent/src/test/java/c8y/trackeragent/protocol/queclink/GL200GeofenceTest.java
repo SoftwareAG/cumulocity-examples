@@ -24,7 +24,7 @@ package c8y.trackeragent.protocol.queclink;
 
 import static c8y.trackeragent.protocol.TrackingProtocol.QUECLINK;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -98,7 +98,7 @@ public class GL200GeofenceTest {
         managedObject = new ManagedObjectRepresentation();
         managedObject.setType("queclink_gl200");
         when(gl200gf.getQueclinkDevice()).thenReturn(queclinkDevice);
-        when(queclinkDevice.getManagedObjectFromGId(any(GId.class))).thenReturn(managedObject);
+        when(queclinkDevice.getManagedObjectFromGId(nullable(GId.class))).thenReturn(managedObject);
     }
 
     @Test

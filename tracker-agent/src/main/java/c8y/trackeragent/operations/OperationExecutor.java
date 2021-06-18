@@ -19,8 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import com.cumulocity.agent.server.logging.LoggingService;
-import com.cumulocity.agent.server.repository.IdentityRepository;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
@@ -170,5 +168,4 @@ public class OperationExecutor {
         logger.info("[OperationId : {}] " + "executing", operationId);
         return deviceControlApi.update(asExecutingOperation(operationId));
     }
-
 }

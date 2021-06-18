@@ -32,6 +32,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
+import c8y.TrackerDeviceContextServiceMock;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -48,7 +49,7 @@ import c8y.trackeragent.service.TrackerDeviceContextService;
 
 public class ConnectedTrackerTest {
     
-    private TrackerDeviceContextService contextService = mock(TrackerDeviceContextService.class);
+    private TrackerDeviceContextService contextService = new TrackerDeviceContextServiceMock();
     private Translator translator = mock(Translator.class);
     private Parser parser = mock(Parser.class);
     private DeviceBootstrapProcessor bootstrapProcessor = mock(DeviceBootstrapProcessor.class);

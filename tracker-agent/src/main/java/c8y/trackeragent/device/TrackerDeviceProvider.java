@@ -9,13 +9,12 @@
 
 package c8y.trackeragent.device;
 
+import com.cumulocity.microservice.context.ContextService;
+import com.cumulocity.microservice.context.credentials.UserCredentials;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import com.cumulocity.agent.server.context.DeviceContext;
-import com.cumulocity.agent.server.context.DeviceContextService;
 
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
@@ -27,11 +26,11 @@ public class TrackerDeviceProvider {
 
 	private final TrackerDeviceFactory trackerDeviceFactory;
 	private final DeviceCredentialsRepository credentialsRepository;
-	private final DeviceContextService contextService;
+	private final ContextService<UserCredentials> contextService;
 
 	@Autowired
 	public TrackerDeviceProvider(TrackerDeviceFactory trackerDeviceFactory,
-			DeviceCredentialsRepository credentialsRepository, DeviceContextService contextService) {
+			DeviceCredentialsRepository credentialsRepository, ContextService<UserCredentials> contextService) {
 		this.trackerDeviceFactory = trackerDeviceFactory;
 		this.credentialsRepository = credentialsRepository;
 		this.contextService = contextService;
@@ -59,12 +58,8 @@ public class TrackerDeviceProvider {
 			return trackerDeviceFactory.newTrackerDevice(tenant, imei);
 		}
 		DeviceCredentials agentCredentials = credentialsRepository.getAgentCredentials(tenant);
-		contextService.enterContext(new DeviceContext(agentCredentials));
-		try {
+		return contextService.callWithinContext(agentCredentials, () -> {
 			return trackerDeviceFactory.newTrackerDevice(tenant, imei);
-		} finally {
-			contextService.leaveContext();
-		}
+		});
 	}
-
 }

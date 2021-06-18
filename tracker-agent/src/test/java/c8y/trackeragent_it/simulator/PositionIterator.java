@@ -35,7 +35,4 @@ public class PositionIterator {
     public Position current() {
         return aPosition(BigDecimal.valueOf(lat), BigDecimal.valueOf(lng), BigDecimal.valueOf(0));
     }
-    
-    
-
 }
