@@ -6,6 +6,10 @@
   },
   "isolation":"MULTI_TENANT",
   "requiredRoles": [
+    "ROLE_INVENTORY_READ",
+    "ROLE_INVENTORY_ADMIN",
+    "ROLE_IDENTITY_READ",
+    "ROLE_IDENTITY_ADMIN"
   ],
   "roles":[
   ],

@@ -35,6 +35,7 @@ import c8y.trackeragent.tracker.MicroserviceCredentialsFactory;
 import c8y.trackeragent.utils.Devices;
 import com.cumulocity.microservice.context.ContextService;
 import com.cumulocity.microservice.context.credentials.MicroserviceCredentials;
+import com.cumulocity.microservice.subscription.service.MicroserviceSubscriptionsService;
 import com.cumulocity.model.ID;
 import com.cumulocity.model.event.CumulocityAlarmStatuses;
 import com.cumulocity.model.idtype.GId;
@@ -80,6 +81,9 @@ public class TrackerDeviceIT extends TrackerITSupport {
     @Autowired
     private ContextService<MicroserviceCredentials> contextService;
 
+    @Autowired
+    private MicroserviceSubscriptionsService microserviceSubscriptionsService;
+
     @Before
     public void setup() throws IOException {
         this.imei = Devices.randomImei();
@@ -102,8 +106,7 @@ public class TrackerDeviceIT extends TrackerITSupport {
     @Test
     public void shouldSetTrackerData() throws SDKException {
     	deviceCredentialsRepository.saveDeviceCredentials(DeviceCredentials.forDevice(imei, trackerPlatform.getTenantId()));
-    	contextService.runWithinContext(
-    	        microserviceCredentialsFactory.getForTenant(trackerPlatform.getTenantId()),
+        microserviceSubscriptionsService.runForTenant(trackerPlatform.getTenantId(),
                 () -> {
                     saveAgentCredentials(imei);
                     try {
