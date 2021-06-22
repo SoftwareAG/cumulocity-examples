@@ -56,20 +56,20 @@ public class TenantBinder {
     }
     
     public void bind(final String tenant) {
-    	final DeviceCredentials credentials = credentialsRepository.getAgentCredentials(tenant);
+//    	final DeviceCredentials credentials = credentialsRepository.getAgentCredentials(tenant);
     	logger.info("Bind new tenant " + tenant);
-    	startPollerFor(credentials);
+    	startPollerFor(tenant);
     	logger.info("Tenant " + tenant + " bound successfully.");
     }
     
-    public void startPollerFor(DeviceCredentials tenantCredentials) {
+    public void startPollerFor(String tenant) {
         contextService.executeWithContext(
-                tenantCredentials.getTenant(),
+                tenant,
                 () -> operationHelper.markOldExecutingOperationsFailed()
         );
-        OperationDispatcher task = new OperationDispatcher(tenantCredentials, contextService, operationHelper);
-        task.startPolling(operationsExecutor);
-        logger.info("Started operation polling for tenant {}.", tenantCredentials);
+//        OperationDispatcher task = new OperationDispatcher(tenantCredentials, contextService, operationHelper);
+//        task.startPolling(operationsExecutor);
+        logger.info("Started operation polling for tenant {}.", tenant);
     }
 
 }

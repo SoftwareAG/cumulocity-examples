@@ -14,6 +14,7 @@ import static com.cumulocity.rest.representation.operation.DeviceControlMediaTyp
 
 import java.util.List;
 
+import com.cumulocity.sdk.client.devicecontrol.DeviceCredentialsApi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,10 +32,13 @@ public class NewDeviceRequestService {
 
     private final TestSettings testSettings;
     private final RestConnector restConnector;
+    private final DeviceCredentialsApi deviceCredentialsApi;
 
-    public NewDeviceRequestService(PlatformParameters platformParameters, TestSettings testSettings) {
+    public NewDeviceRequestService(PlatformParameters platformParameters, TestSettings testSettings,
+                                   DeviceCredentialsApi deviceCredentialsApi) {
         this.testSettings = testSettings;
         this.restConnector = new RestConnector(platformParameters, new ResponseParser());
+        this.deviceCredentialsApi = deviceCredentialsApi;
     }
 
     public synchronized void create(String deviceId) {
@@ -45,6 +49,7 @@ public class NewDeviceRequestService {
         }
         NewDeviceRequestRepresentation representation = new NewDeviceRequestRepresentation();
         representation.setId(deviceId);
+//        deviceCredentialsApi.register(deviceId);
         restConnector.post(newDeviceRequestsUri(), NEW_DEVICE_REQUEST, representation);
     }
 
@@ -52,7 +57,9 @@ public class NewDeviceRequestService {
         logger.info("Accept newDeviceRequest for id: {}", deviceId);
         NewDeviceRequestRepresentation representation = new NewDeviceRequestRepresentation();
         representation.setStatus("ACCEPTED");
-        restConnector.put(newDeviceRequestUri(deviceId), NEW_DEVICE_REQUEST, representation);
+//        deviceCredentialsApi.
+        NewDeviceRequestRepresentation request = restConnector.put(newDeviceRequestUri(deviceId), NEW_DEVICE_REQUEST, representation);
+        logger.info("Get result after put: {}", request);
     }
 
     public NewDeviceRequestRepresentation get(String deviceId) {

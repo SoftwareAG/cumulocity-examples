@@ -64,7 +64,7 @@ public class DeviceBootstrapProcessor {
 
 	private DeviceCredentials onNewAgentCredentials(DeviceCredentialsRepresentation credentialsRep) {
 		DeviceCredentials credentials = DeviceCredentials.forAgent(credentialsRep.getTenantId(), credentialsRep.getUsername(), credentialsRep.getPassword());
-		credentialsRepository.saveAgentCredentials(credentials);
+//		credentialsRepository.saveAgentCredentials(credentials);
 		//platformProvider.initTenantPlatform(credentials.getTenant());
 		tenantBinder.bind(credentials.getTenant());
 		logger.info("Agent for tenant {} bootstraped. Following devices start working: {}",

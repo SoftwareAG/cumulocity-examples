@@ -15,6 +15,7 @@ import com.cumulocity.model.authentication.CumulocityBasicCredentials;
 import com.cumulocity.rest.representation.devicebootstrap.NewDeviceRequestRepresentation;
 import com.cumulocity.sdk.client.Platform;
 import com.cumulocity.sdk.client.PlatformImpl;
+import com.cumulocity.sdk.client.devicecontrol.DeviceCredentialsApi;
 import com.cumulocity.sdk.client.inventory.InventoryApi;
 import com.cumulocity.sdk.client.inventory.InventoryFilter;
 import org.slf4j.Logger;
@@ -32,6 +33,7 @@ public class Bootstraper {
     private final TestSettings testSettings;
     private final SocketWritter socketWriter;
     private final InventoryApi inventoryApi;
+    private final DeviceCredentialsApi deviceCredentialsApi;
     private final NewDeviceRequestService newDeviceRequestService;
 
     public Bootstraper(TestSettings testSettings, SocketWritter socketWriter, NewDeviceRequestService newDeviceRequestService) {
@@ -41,6 +43,7 @@ public class Bootstraper {
         this.trackerPlatform = createPlatform(testSettings.getC8yUser(), testSettings.getC8yPassword());
         this.socketWriter = socketWriter;
         this.inventoryApi = this.trackerPlatform.getInventoryApi();
+        this.deviceCredentialsApi = this.trackerPlatform.getDeviceCredentialsApi();
     }
 
     public void bootstrapDevice(String imei, TrackerMessage deviceMessage) throws Exception {
@@ -51,14 +54,14 @@ public class Bootstraper {
     }
     private void bootstrapDevice(String imei, TrackerMessage deviceMessage, boolean assureAgent) throws Exception {
         logger.info("Will bootstrap: {} with message {}", imei, deviceMessage);
-        if (assureAgent) {
-            if (isAgentBootstraped()) {
-                logger.info("Agent boostraped");
-            } else {
-                logger.info("Agent not boostraped");
-                bootstrapAgent(deviceMessage);
-            }
-        }
+//        if (assureAgent) {
+//            if (isAgentBootstraped()) {
+//                logger.info("Agent boostraped");
+//            } else {
+//                logger.info("Agent not boostraped");
+//                bootstrapAgent(deviceMessage);
+//            }
+//        }
         newDeviceRequestService.create(imei);
         Thread.sleep(1000);
         // WAITING_FOR_CONNECTION status

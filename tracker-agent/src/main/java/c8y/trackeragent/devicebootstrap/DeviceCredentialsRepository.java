@@ -101,17 +101,17 @@ public class DeviceCredentialsRepository {
         }
     }
     
-    public void saveAgentCredentials(DeviceCredentials newCredentials) {
-    	synchronized (lock) {
-    		Group group = asAgentGroup(newCredentials.getTenant(), newCredentials);
-    		if (!group.isFullyInitialized()) {
-    			throw new IllegalArgumentException("Not fully initialized credentials: " + newCredentials);
-    		}
-    		agentPropertyAccessor.write(group);
-    		tenant2AgentCredentials.put(newCredentials.getTenant(), newCredentials);
-    		logger.info("Credentials for agent of tenant {} have been written: {}.", newCredentials.getTenant(), newCredentials);
-    	}
-    }
+//    public void saveAgentCredentials(DeviceCredentials newCredentials) {
+//    	synchronized (lock) {
+//    		Group group = asAgentGroup(newCredentials.getTenant(), newCredentials);
+//    		if (!group.isFullyInitialized()) {
+//    			throw new IllegalArgumentException("Not fully initialized credentials: " + newCredentials);
+//    		}
+//    		agentPropertyAccessor.write(group);
+//    		tenant2AgentCredentials.put(newCredentials.getTenant(), newCredentials);
+//    		logger.info("Credentials for agent of tenant {} have been written: {}.", newCredentials.getTenant(), newCredentials);
+//    	}
+//    }
 
     @PostConstruct
     public void refresh() throws IOException {
@@ -151,21 +151,21 @@ public class DeviceCredentialsRepository {
         return group;
     }
     
-    private Group asAgentGroup(String tenant, DeviceCredentials credentials) {
-    	String groupName = tenantToGroupName(tenant);
-    	Group group = agentPropertyAccessor.createEmptyGroup(groupName);
-    	group.put("user", credentials.getUsername());
-    	group.put("password", credentials.getPassword());
-    	return group;
-    }
+//    private Group asAgentGroup(String tenant, DeviceCredentials credentials) {
+//    	String groupName = tenantToGroupName(tenant);
+//    	Group group = agentPropertyAccessor.createEmptyGroup(groupName);
+//    	group.put("user", credentials.getUsername());
+//    	group.put("password", credentials.getPassword());
+//    	return group;
+//    }
 	
 	public List<DeviceCredentials> getAllDeviceCredentials(String tenant) {
 		return from(getAllDeviceCredentials()).filter(DeviceCredentials.hasTenant(tenant)).toList();
 	}
 	
-    private static String tenantToGroupName(String tenant) {
-		return TENANT_ENTRY_PREFIX + tenant;
-	}
+//    private static String tenantToGroupName(String tenant) {
+//		return TENANT_ENTRY_PREFIX + tenant;
+//	}
     
     private static String groupNameToTenant(String groupName) {
     	return groupName.replaceFirst(TENANT_ENTRY_PREFIX, "");

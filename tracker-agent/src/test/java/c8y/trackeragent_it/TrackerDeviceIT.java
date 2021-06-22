@@ -207,11 +207,11 @@ public class TrackerDeviceIT extends TrackerITSupport {
         assertEquals(one.doubleValue(), two.doubleValue(), 0.01);
     }
     
-    private DeviceCredentials saveAgentCredentials(String imei) {
+    private void saveAgentCredentials(String imei) {
     	DeviceCredentials deviceCredentials = DeviceCredentials.forDevice(imei, trackerPlatform.getTenantId());
         deviceCredentialsRepository.saveDeviceCredentials(deviceCredentials);
-        DeviceCredentials agentCredentials = DeviceCredentials.forAgent(trackerPlatform.getTenantId(), trackerPlatform.getUser(), trackerPlatform.getPassword());
-        deviceCredentialsRepository.saveAgentCredentials(agentCredentials);
-        return agentCredentials;
+//        DeviceCredentials agentCredentials = DeviceCredentials.forAgent(trackerPlatform.getTenantId(), trackerPlatform.getUser(), trackerPlatform.getPassword());
+//        deviceCredentialsRepository.saveAgentCredentials(agentCredentials);
+//        return agentCredentials;
     }
 }

@@ -36,6 +36,7 @@ import com.cumulocity.rest.representation.identity.ExternalIDRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.PlatformImpl;
 import com.cumulocity.sdk.client.alarm.AlarmFilter;
+import com.cumulocity.sdk.client.devicecontrol.DeviceCredentialsApi;
 import com.cumulocity.sdk.client.event.EventFilter;
 import org.joda.time.DateTime;
 import org.junit.Before;
@@ -70,6 +71,9 @@ public abstract class TrackerITSupport {
     @Autowired
     protected DeviceCredentialsRepository deviceCredentialsRepository;
 
+//    @Autowired
+//    protected DeviceCredentialsApi deviceCredentialsApi;
+
     protected TrackerPlatform trackerPlatform;
 
     protected Bootstraper bootstraper;
@@ -80,7 +84,7 @@ public abstract class TrackerITSupport {
         trackerPlatform = trackerPlatform(testSettings);
         Thread.sleep(200);// avoid address already in use error
         socketWriter = new SocketWritter(testSettings, trackerAgentConfig.getPort(getTrackerProtocol()));
-        NewDeviceRequestService newDeviceRequestService = new NewDeviceRequestService(trackerPlatform.getPlatformParameters(), testSettings);
+        NewDeviceRequestService newDeviceRequestService = new NewDeviceRequestService(trackerPlatform.getPlatformParameters(), testSettings, trackerPlatform.getDeviceCredentialsApi());
         bootstraper = new Bootstraper(testSettings, socketWriter, newDeviceRequestService);
         bootstraper.deleteExistingAgentRequest();
     }
@@ -105,6 +109,10 @@ public abstract class TrackerITSupport {
     protected void bootstrapDevice(String imei, TrackerMessage deviceMessage) throws Exception {
         bootstraper.bootstrapDevice(imei, deviceMessage);
     }
+
+//    protected void bootstrapDevice(String imei, TrackerMessage deviceMessage, DeviceCredentialsApi deviceCredentialsApi) throws Exception {
+//        bootstraper.bootstrapDevice(imei, deviceMessage, deviceCredentialsApi);
+//    }
 
     protected AlarmRepresentation findAlarm(String imei, AlarmType alarmType) {
         GId gId = getGId(imei);

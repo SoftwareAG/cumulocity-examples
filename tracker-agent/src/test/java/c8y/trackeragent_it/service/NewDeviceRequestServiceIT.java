@@ -11,6 +11,7 @@ package c8y.trackeragent_it.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.cumulocity.sdk.client.devicecontrol.DeviceCredentialsApi;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -32,13 +33,16 @@ public class NewDeviceRequestServiceIT {
     
     @Autowired
     private TestSettings testSettings;
+
+    @Autowired
+    private DeviceCredentialsApi deviceCredentialsApi;
     
     private NewDeviceRequestService newDeviceRequestService;
     
     @Before
     public void init() {
         PlatformImpl platform = TrackerITSupport.platform(testSettings);
-        newDeviceRequestService = new NewDeviceRequestService(platform, testSettings);
+        newDeviceRequestService = new NewDeviceRequestService(platform, testSettings, deviceCredentialsApi);
         newDeviceRequestService.deleteAll();
     }
     
