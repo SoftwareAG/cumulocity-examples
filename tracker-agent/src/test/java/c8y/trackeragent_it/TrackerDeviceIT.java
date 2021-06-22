@@ -31,7 +31,6 @@ import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.protocol.TrackingProtocol;
 import c8y.trackeragent.tracker.BaseConnectedTracker;
-import c8y.trackeragent.tracker.MicroserviceCredentialsFactory;
 import c8y.trackeragent.utils.Devices;
 import com.cumulocity.microservice.context.ContextService;
 import com.cumulocity.microservice.context.credentials.MicroserviceCredentials;
@@ -74,9 +73,6 @@ public class TrackerDeviceIT extends TrackerITSupport {
     public static final BigDecimal LONGITUDE = new BigDecimal(-95.677068);
     public static final BigDecimal ALTITUDE = new BigDecimal(1);
     public static final BigDecimal RADIUS = new BigDecimal(100);
-
-    @Autowired
-    private MicroserviceCredentialsFactory microserviceCredentialsFactory;
 
     @Autowired
     private ContextService<MicroserviceCredentials> contextService;

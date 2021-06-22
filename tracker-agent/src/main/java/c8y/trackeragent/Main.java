@@ -22,7 +22,6 @@
 
 package c8y.trackeragent;
 
-import c8y.trackeragent.devicebootstrap.TenantBinder;
 import c8y.trackeragent.server.Servers;
 import com.cumulocity.microservice.autoconfigure.MicroserviceApplication;
 import org.slf4j.Logger;
@@ -47,9 +46,6 @@ public class Main {
     @Autowired
     private Servers servers;
 
-    @Autowired
-    private TenantBinder tenantBinder;
-    
     public static void main(String[] args) {
         logger.info("tracker-agent is starting.");
         SpringApplication.run(Main.class, args);
@@ -58,6 +54,5 @@ public class Main {
     @EventListener(ApplicationReadyEvent.class)
     public void onStart() throws IOException {
         servers.startAll();
-        tenantBinder.init();
     }
 }

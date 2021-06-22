@@ -9,7 +9,6 @@
 
 package c8y.trackeragent.devicebootstrap;
 
-import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
@@ -20,7 +19,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import c8y.trackeragent.exception.UnknownDeviceException;
-import c8y.trackeragent.exception.UnknownTenantException;
 
 public class DeviceCredentialsRepositoryTest {
 	
@@ -44,15 +42,7 @@ public class DeviceCredentialsRepositoryTest {
 		FileUtils.deleteQuietly(file);
 		return file;
 	}
-	
-	@Test
-	public void findAgentCredentials() throws Exception {
-		FileUtils.writeLines(file, asList("tenant-management.password=secret123", "tenant-management.user=device_tracker-agent-management"));
-		credentialsRepository.refresh();
-		
-		credentialsRepository.getAgentCredentials("management");
-	}
-	
+
 	@Test
 	public void shouldSaveAndGetDeviceCredentials() throws Exception {
 		credentialsRepository.saveDeviceCredentials(deviceCredentials);
@@ -125,12 +115,4 @@ public class DeviceCredentialsRepositoryTest {
 		
 		assertThat(deviceCredentials).isNull();
 	}
-	
-	@Test(expected = UnknownTenantException.class)
-	public void shouldThrowExceptionTenantCredentialsAbsent() throws Exception {
-		DeviceCredentials deviceCredentials = credentialsRepository.getAgentCredentials(TENANT);
-		
-		assertThat(deviceCredentials).isNull();
-	}
-
 }
