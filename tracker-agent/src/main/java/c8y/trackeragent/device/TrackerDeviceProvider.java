@@ -11,6 +11,7 @@ package c8y.trackeragent.device;
 
 import com.cumulocity.microservice.context.ContextService;
 import com.cumulocity.microservice.context.credentials.UserCredentials;
+import com.cumulocity.microservice.subscription.service.MicroserviceSubscriptionsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,15 +26,13 @@ public class TrackerDeviceProvider {
 	protected static Logger logger = LoggerFactory.getLogger(TrackerDeviceProvider.class);
 
 	private final TrackerDeviceFactory trackerDeviceFactory;
-	private final DeviceCredentialsRepository credentialsRepository;
-	private final ContextService<UserCredentials> contextService;
+	private final MicroserviceSubscriptionsService microserviceSubscriptionsService;
 
 	@Autowired
 	public TrackerDeviceProvider(TrackerDeviceFactory trackerDeviceFactory,
-			DeviceCredentialsRepository credentialsRepository, ContextService<UserCredentials> contextService) {
+								 MicroserviceSubscriptionsService microserviceSubscriptionsService) {
 		this.trackerDeviceFactory = trackerDeviceFactory;
-		this.credentialsRepository = credentialsRepository;
-		this.contextService = contextService;
+		this.microserviceSubscriptionsService = microserviceSubscriptionsService;
 	}
 
 	public TrackerDevice getOrCreate(String tenant, String imei) {
@@ -54,11 +53,7 @@ public class TrackerDeviceProvider {
 	}
 
 	private TrackerDevice newTrackerDevice(String tenant, String imei) {
-		if (contextService.isInContext()) {
-			return trackerDeviceFactory.newTrackerDevice(tenant, imei);
-		}
-		DeviceCredentials agentCredentials = credentialsRepository.getAgentCredentials(tenant);
-		return contextService.callWithinContext(agentCredentials, () -> {
+		return microserviceSubscriptionsService.callForTenant(tenant, () -> {
 			return trackerDeviceFactory.newTrackerDevice(tenant, imei);
 		});
 	}

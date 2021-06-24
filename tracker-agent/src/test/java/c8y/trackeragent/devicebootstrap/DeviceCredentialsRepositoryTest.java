@@ -9,18 +9,15 @@
 
 package c8y.trackeragent.devicebootstrap;
 
-import static java.util.Arrays.asList;
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.io.File;
-import java.io.IOException;
-
+import c8y.trackeragent.exception.UnknownDeviceException;
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
 
-import c8y.trackeragent.exception.UnknownDeviceException;
-import c8y.trackeragent.exception.UnknownTenantException;
+import java.io.File;
+import java.io.IOException;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class DeviceCredentialsRepositoryTest {
 	
@@ -29,7 +26,6 @@ public class DeviceCredentialsRepositoryTest {
 	
 	private DeviceCredentialsRepository credentialsRepository;
 	private DeviceCredentials deviceCredentials = DeviceCredentials.forDevice(IMEI, TENANT);
-	private DeviceCredentials agentCredentials = DeviceCredentials.forAgent(TENANT, "john", "secret");
 	private File file;
 	
 	@Before
@@ -44,15 +40,7 @@ public class DeviceCredentialsRepositoryTest {
 		FileUtils.deleteQuietly(file);
 		return file;
 	}
-	
-	@Test
-	public void findAgentCredentials() throws Exception {
-		FileUtils.writeLines(file, asList("tenant-management.password=secret123", "tenant-management.user=device_tracker-agent-management"));
-		credentialsRepository.refresh();
-		
-		credentialsRepository.getAgentCredentials("management");
-	}
-	
+
 	@Test
 	public void shouldSaveAndGetDeviceCredentials() throws Exception {
 		credentialsRepository.saveDeviceCredentials(deviceCredentials);
@@ -73,36 +61,13 @@ public class DeviceCredentialsRepositoryTest {
 		
 		assertThat(credentialsRepository.getAllDeviceCredentials()).containsOnly(deviceCredentials);
 	}
-	
-	@Test
-	public void shouldSaveAndGetAgentCredentials() throws Exception {
-		credentialsRepository.saveAgentCredentials(agentCredentials);
-		
-		assertThat(credentialsRepository.getAgentCredentials(TENANT)).isEqualTo(agentCredentials);
-	}
-	
-	@Test
-	public void shouldSaveAndHasAgentCredentials() throws Exception {
-		credentialsRepository.saveAgentCredentials(agentCredentials);
-		
-		assertThat(credentialsRepository.hasAgentCredentials(TENANT)).isTrue();
-	}
-	
-	@Test
-	public void shouldGetAllAgentCredentials() throws Exception {
-		credentialsRepository.saveAgentCredentials(agentCredentials);
-		
-		assertThat(credentialsRepository.getAllAgentCredentials()).containsOnly(agentCredentials);
-	}
-	
+
 	@Test
 	public void shouldRefreshDataFromFile() throws Exception {
-		credentialsRepository.saveAgentCredentials(agentCredentials);
 		credentialsRepository.saveDeviceCredentials(deviceCredentials);
 		
 		credentialsRepository.refresh();
 		
-		assertThat(credentialsRepository.getAllAgentCredentials()).containsOnly(agentCredentials);
 		assertThat(credentialsRepository.getAllDeviceCredentials()).containsOnly(deviceCredentials);
 	}
 	
@@ -125,12 +90,4 @@ public class DeviceCredentialsRepositoryTest {
 		
 		assertThat(deviceCredentials).isNull();
 	}
-	
-	@Test(expected = UnknownTenantException.class)
-	public void shouldThrowExceptionTenantCredentialsAbsent() throws Exception {
-		DeviceCredentials deviceCredentials = credentialsRepository.getAgentCredentials(TENANT);
-		
-		assertThat(deviceCredentials).isNull();
-	}
-
 }

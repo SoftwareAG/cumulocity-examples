@@ -17,6 +17,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import com.cumulocity.sdk.client.devicecontrol.DeviceCredentialsApi;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -49,6 +50,9 @@ public class LoadIT {
     @Autowired
     private TestSettings testSettings;
 
+    @Autowired
+    private DeviceCredentialsApi deviceCredentialsApi;
+
     private CobanDeviceMessages deviceMessages = new CobanDeviceMessages();
 
     private Bootstraper bootstraper;
@@ -72,7 +76,7 @@ public class LoadIT {
     @Before
     public void before() {
         PlatformImpl platform = TrackerITSupport.platform(testSettings);
-        newDeviceRequestService = new NewDeviceRequestService(platform, testSettings);
+        newDeviceRequestService = new NewDeviceRequestService(platform, testSettings, deviceCredentialsApi);
         socketWriter = newSocketWritter();
         bootstraper = new Bootstraper(testSettings, socketWriter, newDeviceRequestService);
         for (int imeiNo = IMEI_START; imeiNo <= IMEI_STOP; imeiNo++) {

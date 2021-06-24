@@ -43,7 +43,6 @@ import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.exception.NotBootstrapedException;
 import c8y.trackeragent.exception.UnknownDeviceException;
-import c8y.trackeragent.exception.UnknownTenantException;
 import c8y.trackeragent.server.ConnectionDetails;
 import c8y.trackeragent.service.TrackerDeviceContextService;
 import c8y.trackeragent.utils.ByteHelper;
@@ -144,7 +143,6 @@ public abstract class BaseConnectedTracker<F extends Fragment> implements Connec
         }
         logger.debug("Got report from IMEI: " + imei);
         String tenant = getTenant(imei);
-        checkAgentCredentials(tenant);
         contextService.executeWithContext(tenant, imei, reportContext.getTrackingProtocol(),
                 () -> {
                     reportContext.setImei(imei);
@@ -166,19 +164,6 @@ public abstract class BaseConnectedTracker<F extends Fragment> implements Connec
             logger.debug("Device with imei {} available.", imei);
         }
         return deviceCredentials.getTenant();
-    }
-
-    private void checkAgentCredentials(final String tenant) {
-        try {
-            credentialsRepository.getAgentCredentials(tenant);
-        } catch (UnknownTenantException ex) {
-            logger.debug("Agent for tenant {} not yet bootstraped. Will try bootstrap the agent.", tenant);
-            DeviceCredentials agentCredentials = bootstrapProcessor.tryAccessAgentCredentials(tenant);
-            if (agentCredentials == null) {
-                throw new NotBootstrapedException(format("Agent for tenant %s not yet available. Will skip the report.", tenant));
-            } 
-            logger.info("Agent for tenant {} bootstraped.", tenant);
-        }
     }
 
     @Override
