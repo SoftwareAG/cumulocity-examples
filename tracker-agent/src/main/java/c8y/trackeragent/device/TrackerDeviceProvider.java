@@ -26,18 +26,13 @@ public class TrackerDeviceProvider {
 	protected static Logger logger = LoggerFactory.getLogger(TrackerDeviceProvider.class);
 
 	private final TrackerDeviceFactory trackerDeviceFactory;
-//	private final DeviceCredentialsRepository credentialsRepository;
-//	private final ContextService<UserCredentials> contextService;
 	private final MicroserviceSubscriptionsService microserviceSubscriptionsService;
 
 	@Autowired
 	public TrackerDeviceProvider(TrackerDeviceFactory trackerDeviceFactory,
 								 MicroserviceSubscriptionsService microserviceSubscriptionsService) {
-//			DeviceCredentialsRepository credentialsRepository, ContextService<UserCredentials> contextService) {
 		this.trackerDeviceFactory = trackerDeviceFactory;
 		this.microserviceSubscriptionsService = microserviceSubscriptionsService;
-//		this.credentialsRepository = credentialsRepository;
-//		this.contextService = contextService;
 	}
 
 	public TrackerDevice getOrCreate(String tenant, String imei) {
@@ -58,13 +53,6 @@ public class TrackerDeviceProvider {
 	}
 
 	private TrackerDevice newTrackerDevice(String tenant, String imei) {
-//		if (contextService.isInContext()) {
-//			return trackerDeviceFactory.newTrackerDevice(tenant, imei);
-//		}
-////		DeviceCredentials agentCredentials = credentialsRepository.getAgentCredentials(tenant);
-//		return contextService.callWithinContext(agentCredentials, () -> {
-//			return trackerDeviceFactory.newTrackerDevice(tenant, imei);
-//		});
 		return microserviceSubscriptionsService.callForTenant(tenant, () -> {
 			return trackerDeviceFactory.newTrackerDevice(tenant, imei);
 		});

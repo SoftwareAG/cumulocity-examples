@@ -36,7 +36,6 @@ import com.cumulocity.rest.representation.identity.ExternalIDRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.PlatformImpl;
 import com.cumulocity.sdk.client.alarm.AlarmFilter;
-import com.cumulocity.sdk.client.devicecontrol.DeviceCredentialsApi;
 import com.cumulocity.sdk.client.event.EventFilter;
 import org.joda.time.DateTime;
 import org.junit.Before;
@@ -70,9 +69,6 @@ public abstract class TrackerITSupport {
 
     @Autowired
     protected DeviceCredentialsRepository deviceCredentialsRepository;
-
-//    @Autowired
-//    protected DeviceCredentialsApi deviceCredentialsApi;
 
     protected TrackerPlatform trackerPlatform;
 
@@ -110,10 +106,6 @@ public abstract class TrackerITSupport {
         bootstraper.bootstrapDevice(imei, deviceMessage);
     }
 
-//    protected void bootstrapDevice(String imei, TrackerMessage deviceMessage, DeviceCredentialsApi deviceCredentialsApi) throws Exception {
-//        bootstraper.bootstrapDevice(imei, deviceMessage, deviceCredentialsApi);
-//    }
-
     protected AlarmRepresentation findAlarm(String imei, AlarmType alarmType) {
         GId gId = getGId(imei);
         String type = alarmMappingService.getType(alarmType.name());
@@ -143,5 +135,4 @@ public abstract class TrackerITSupport {
                 .build();
         return new PlatformImpl(testSettings.getC8yHost(), credentials);
     }
-
 }

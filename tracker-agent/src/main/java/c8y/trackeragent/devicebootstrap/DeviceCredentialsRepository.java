@@ -15,8 +15,10 @@ import static java.util.Arrays.asList;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.PostConstruct;
@@ -38,7 +40,9 @@ public class DeviceCredentialsRepository {
 	private static final Logger logger = LoggerFactory.getLogger(DeviceCredentialsRepository.class);
 
     private final Map<String, DeviceCredentials> imei2DeviceCredentials = new ConcurrentHashMap<String, DeviceCredentials>();
+    private final Set<String> tenants = new HashSet<>();
     private final GroupPropertyAccessor devicePropertyAccessor;
+    private final GroupPropertyAccessor agentPropertyAccessor;
     private final Object lock = new Object();
 	private final String devicePropertiesPath;
 
@@ -46,6 +50,7 @@ public class DeviceCredentialsRepository {
     public DeviceCredentialsRepository(String devicePropertiesPath) {
     	this.devicePropertiesPath = devicePropertiesPath;
 		devicePropertyAccessor = new GroupPropertyAccessor(devicePropertiesPath, asList("tenantId"));
+    	agentPropertyAccessor = new GroupPropertyAccessor(devicePropertiesPath, asList("user", "password"));
     }
     public DeviceCredentialsRepository() {
     	this(ConfigUtils.get().getConfigFilePath(ConfigUtils.DEVICES_FILE_NAME));
@@ -67,6 +72,10 @@ public class DeviceCredentialsRepository {
         return new ArrayList<DeviceCredentials>(imei2DeviceCredentials.values());
     }
 
+	public Set<String> getAllTenants() {
+		return tenants;
+	}
+
 	public void saveDeviceCredentials(DeviceCredentials newCredentials) {
         synchronized (lock) {
             Group group = asDeviceGroup(newCredentials.getImei(), newCredentials);
@@ -86,11 +95,19 @@ public class DeviceCredentialsRepository {
     		deviceProperties.createNewFile();
     	}
         devicePropertyAccessor.refresh();
+        agentPropertyAccessor.refresh();
         imei2DeviceCredentials.clear();
+        tenants.clear();
         for (Group group : devicePropertyAccessor.getGroups()) {
             if (group.isFullyInitialized()) {
                 imei2DeviceCredentials.put(group.getName(), asDeviceCredentials(group));
             }
+        }
+        for (Group group : agentPropertyAccessor.getGroups()) {
+        	if (group.isFullyInitialized()) {
+        		String tenant = groupNameToTenant(group.getName());
+        		tenants.add(tenant);
+        	}
         }
     }
 
@@ -107,4 +124,8 @@ public class DeviceCredentialsRepository {
 	public List<DeviceCredentials> getAllDeviceCredentials(String tenant) {
 		return from(getAllDeviceCredentials()).filter(DeviceCredentials.hasTenant(tenant)).toList();
 	}
+
+    private static String groupNameToTenant(String groupName) {
+    	return groupName.replaceFirst(TENANT_ENTRY_PREFIX, "");
+    }
 }

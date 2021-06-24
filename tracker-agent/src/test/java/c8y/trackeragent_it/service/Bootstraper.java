@@ -54,14 +54,7 @@ public class Bootstraper {
     }
     private void bootstrapDevice(String imei, TrackerMessage deviceMessage, boolean assureAgent) throws Exception {
         logger.info("Will bootstrap: {} with message {}", imei, deviceMessage);
-//        if (assureAgent) {
-//            if (isAgentBootstraped()) {
-//                logger.info("Agent boostraped");
-//            } else {
-//                logger.info("Agent not boostraped");
-//                bootstrapAgent(deviceMessage);
-//            }
-//        }
+
         newDeviceRequestService.create(imei);
         Thread.sleep(1000);
         // WAITING_FOR_CONNECTION status

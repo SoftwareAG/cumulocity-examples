@@ -49,7 +49,6 @@ public class NewDeviceRequestService {
         }
         NewDeviceRequestRepresentation representation = new NewDeviceRequestRepresentation();
         representation.setId(deviceId);
-//        deviceCredentialsApi.register(deviceId);
         restConnector.post(newDeviceRequestsUri(), NEW_DEVICE_REQUEST, representation);
     }
 
@@ -57,7 +56,6 @@ public class NewDeviceRequestService {
         logger.info("Accept newDeviceRequest for id: {}", deviceId);
         NewDeviceRequestRepresentation representation = new NewDeviceRequestRepresentation();
         representation.setStatus("ACCEPTED");
-//        deviceCredentialsApi.
         NewDeviceRequestRepresentation request = restConnector.put(newDeviceRequestUri(deviceId), NEW_DEVICE_REQUEST, representation);
         logger.info("Get result after put: {}", request);
     }

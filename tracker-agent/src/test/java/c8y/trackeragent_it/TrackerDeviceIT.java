@@ -206,8 +206,5 @@ public class TrackerDeviceIT extends TrackerITSupport {
     private void saveAgentCredentials(String imei) {
     	DeviceCredentials deviceCredentials = DeviceCredentials.forDevice(imei, trackerPlatform.getTenantId());
         deviceCredentialsRepository.saveDeviceCredentials(deviceCredentials);
-//        DeviceCredentials agentCredentials = DeviceCredentials.forAgent(trackerPlatform.getTenantId(), trackerPlatform.getUser(), trackerPlatform.getPassword());
-//        deviceCredentialsRepository.saveAgentCredentials(agentCredentials);
-//        return agentCredentials;
     }
 }

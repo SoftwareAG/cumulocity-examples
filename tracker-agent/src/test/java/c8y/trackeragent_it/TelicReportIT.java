@@ -45,15 +45,12 @@ public class TelicReportIT extends TrackerITSupport {
 
     @Test
     public void shouldBootstrapNewDeviceAndThenChangeItsLocation() throws Exception {
-//        DeviceCredentialsApi deviceCredentialsApi = trackerPlatform.getDeviceCredentialsApi();
-//        microserviceSubscriptionsService.runForEachTenant(() -> {
-            try {
-                bootstrapDevice(imei, deviceMessages.positionUpdate(imei, Positions.ZERO));
-            } catch (Exception e) {
-                throw new RuntimeException("Error setup devices", e);
-            }
-//        });
-        
+        try {
+            bootstrapDevice(imei, deviceMessages.positionUpdate(imei, Positions.ZERO));
+        } catch (Exception e) {
+            throw new RuntimeException("Error setup devices", e);
+        }
+
         TrackerMessage positionUpdate = deviceMessages.positionUpdate(imei, Positions.SAMPLE_4);
         writeInNewConnection(positionUpdate);
         
@@ -63,5 +60,4 @@ public class TelicReportIT extends TrackerITSupport {
         Assertions.assertThat(deviceMO).isNotNull();
         Positions.assertEqual(deviceMO.get(Position.class), Positions.SAMPLE_4);
     }
-
 }
