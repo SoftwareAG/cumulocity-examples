@@ -28,11 +28,7 @@ public class TooTallNateWebSocketClient extends WebSocketClient {
         Notification notification = Notification.parse(message);
         this.callback.onNotification(notification);
         if (notification.getAckHeader() != null) {
-            try {
-                send(notification.getAckHeader()); // ack message
-            } catch (Exception e) {
-                log.error("Failed to ack message " + notification.getAckHeader(), e);
-            }
+            send(notification.getAckHeader()); // ack message
         } else {
             log.warn("No message id found for ack");
         }

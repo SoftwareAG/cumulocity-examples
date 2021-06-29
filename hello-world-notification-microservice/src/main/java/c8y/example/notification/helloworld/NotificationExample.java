@@ -114,6 +114,8 @@ public class NotificationExample {
         if (!subscriptionRepository.exists(subscriptionRepresentation.getSource().getId())) {
             log.info("Subscription does not exist. Creating ...");
             subscriptionRepository.create(subscriptionRepresentation);
+        } else {
+            log.info("Reusing existing subscription on device <{}>", subscriptionRepresentation.getSource().getId());
         }
 
         return subscriptionRepresentation.getSubscription();
