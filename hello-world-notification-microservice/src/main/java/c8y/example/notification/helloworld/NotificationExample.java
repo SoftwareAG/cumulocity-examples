@@ -2,10 +2,10 @@ package c8y.example.notification.helloworld;
 
 import c8y.example.notification.helloworld.platform.SubscriptionRepository;
 import c8y.example.notification.helloworld.platform.TokenService;
-import c8y.example.notification.helloworld.websocket.jetty.JettyWebSocketClient;
-import c8y.example.notification.helloworld.websocket.tootallnate.TooTallNateWebSocketClient;
 import c8y.example.notification.helloworld.websocket.Notification;
 import c8y.example.notification.helloworld.websocket.NotificationCallback;
+import c8y.example.notification.helloworld.websocket.jetty.JettyWebSocketClient;
+import c8y.example.notification.helloworld.websocket.tootallnate.TooTallNateWebSocketClient;
 import com.cumulocity.microservice.settings.service.MicroserviceSettingsService;
 import com.cumulocity.microservice.subscription.model.MicroserviceSubscriptionAddedEvent;
 import com.cumulocity.microservice.subscription.service.MicroserviceSubscriptionsService;
@@ -33,7 +33,7 @@ import java.util.Optional;
 public class NotificationExample {
 
     private static final String SOURCE_ID = "example.source.id";
-    private final static String WEBSOCKET_URL = "%s/c8y/relnotif/consumer/?token=%s";
+    private final static String WEBSOCKET_URL_PATTERN = "%s/c8y/relnotif/consumer/?token=%s";
 
     private final MicroserviceSubscriptionsService contextService;
     private final TokenService tokenService;
@@ -73,7 +73,7 @@ public class NotificationExample {
 
             @Override
             public void onOpen(URI uri) {
-                log.info("Connected to WebSocket server " + uri);
+                log.info("Connected to Cumulocity notification service over WebSocket " + uri);
             }
 
             @Override
@@ -93,7 +93,7 @@ public class NotificationExample {
         };
 
         final String webSocketLibrary = properties.getWebSocketLibrary();
-        if(webSocketLibrary != null && webSocketLibrary.equalsIgnoreCase("jetty")) {
+        if (webSocketLibrary != null && webSocketLibrary.equalsIgnoreCase("jetty")) {
             log.info("WebSocket library: Jetty");
             final JettyWebSocketClient client = new JettyWebSocketClient(webSocketUri, callback);
             client.connect();
@@ -105,7 +105,7 @@ public class NotificationExample {
     }
 
     private URI getWebSocketUrl(String token) throws URISyntaxException {
-        return new URI(String.format(WEBSOCKET_URL, properties.getWebSocketBaseUrl(), token));
+        return new URI(String.format(WEBSOCKET_URL_PATTERN, properties.getWebSocketBaseUrl(), token));
     }
 
     private String createSubscription() {
