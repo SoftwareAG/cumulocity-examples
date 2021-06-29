@@ -30,7 +30,7 @@ public class TooTallNateWebSocketClient extends WebSocketClient {
         if (notification.getAckHeader() != null) {
             send(notification.getAckHeader()); // ack message
         } else {
-            log.warn("No message id found for ack");
+            throw new RuntimeException("No message id found for ack");
         }
     }
 
