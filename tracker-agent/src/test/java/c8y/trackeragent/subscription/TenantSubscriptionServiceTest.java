@@ -1,4 +1,4 @@
-package c8y.trackeragent.server;
+package c8y.trackeragent.subscription;
 
 import c8y.MicroserviceSubscriptionsServiceMock;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
