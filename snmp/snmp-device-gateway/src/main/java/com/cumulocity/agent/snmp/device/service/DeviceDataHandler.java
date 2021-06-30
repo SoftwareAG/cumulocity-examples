@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2012-2020 Cumulocity GmbH
- * Copyright (c) 2021 Software AG, Darmstadt, Germany and/or Software AG USA Inc., Reston, VA, USA, 
+ * Copyright (c) 2021 Software AG, Darmstadt, Germany and/or Software AG USA Inc., Reston, VA, USA,
  * and/or its subsidiaries and/or its affiliates and/or their licensors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -78,7 +78,7 @@ public class DeviceDataHandler implements CommandResponder {
 					event.getPeerAddress());
 			return;
 		}
-		
+
 		PDU pdu = event.getPDU();
 		if (pdu == null) {
 			log.error("No data present in the received trap");
@@ -148,7 +148,7 @@ public class DeviceDataHandler implements CommandResponder {
 
 		for (VariableBinding binding : pdu.getVariableBindings()) {
 			OID oid = binding.getOid();
-			if (oidMap.containsKey(oid)) {
+			if (oidMap.containsKey(oid) && !(binding.getVariable().getSyntaxString().equals("Null"))) {
 				Register register = oidMap.get(oid);
 
 				if(register.getAlarmMapping() != null) {
