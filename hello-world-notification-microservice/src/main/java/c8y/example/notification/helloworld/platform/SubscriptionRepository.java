@@ -15,17 +15,16 @@ public class SubscriptionRepository {
 
     private final NotificationSubscriptionApi subscriptionApi;
 
-    public void create(NotificationSubscriptionRepresentation subscriptionRepresentation) {
-        subscriptionApi.subscribe(subscriptionRepresentation);
+    public NotificationSubscriptionRepresentation create(NotificationSubscriptionRepresentation subscriptionRepresentation) {
+        return subscriptionApi.subscribe(subscriptionRepresentation);
+    }
+
+    public void delete(NotificationSubscriptionRepresentation subscriptionRepresentation) {
+        subscriptionApi.delete(subscriptionRepresentation);
     }
 
     public NotificationSubscriptionCollection getByFilter(NotificationSubscriptionFilter filter) {
         return subscriptionApi.getSubscriptionsByFilter(filter);
-    }
-
-    public boolean exists(GId source) {
-        final NotificationSubscriptionFilter filter = new NotificationSubscriptionFilter().bySource(source);
-        return !getByFilter(filter).get().getSubscriptions().isEmpty();
     }
 
 }

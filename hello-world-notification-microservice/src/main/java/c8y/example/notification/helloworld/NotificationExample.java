@@ -8,12 +8,15 @@ import c8y.example.notification.helloworld.websocket.jetty.JettyWebSocketClient;
 import c8y.example.notification.helloworld.websocket.tootallnate.TooTallNateWebSocketClient;
 import com.cumulocity.microservice.settings.service.MicroserviceSettingsService;
 import com.cumulocity.microservice.subscription.model.MicroserviceSubscriptionAddedEvent;
+import com.cumulocity.microservice.subscription.model.MicroserviceSubscriptionRemovedEvent;
 import com.cumulocity.microservice.subscription.service.MicroserviceSubscriptionsService;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.reliable.notification.NotificationSubscriptionFilterRepresentation;
 import com.cumulocity.rest.representation.reliable.notification.NotificationSubscriptionRepresentation;
 import com.cumulocity.rest.representation.reliable.notification.NotificationTokenRequestRepresentation;
+import com.cumulocity.sdk.client.messaging.notifications.NotificationSubscriptionCollection;
+import com.cumulocity.sdk.client.messaging.notifications.NotificationSubscriptionFilter;
 import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +43,8 @@ public class NotificationExample {
     private final SubscriptionRepository subscriptionRepository;
     private final Properties properties;
 
+    private NotificationSubscriptionRepresentation subscriptionRepresentation = null;
+
     @Autowired(required = false)
     private MicroserviceSettingsService microserviceSettingsService;
 
@@ -56,10 +61,10 @@ public class NotificationExample {
 
     private void runExample() throws Exception {
         // Create Subscription for source device
-        final String subscription = createSubscription();
+        subscriptionRepresentation = createSubscription();
 
         // Obtain authorization token
-        final String token = createToken(subscription);
+        final String token = createToken(subscriptionRepresentation.getSubscription());
 
         // Connect to WebSocket server to receive notifications
         connectAndReceiveNotifications(token);
@@ -108,17 +113,25 @@ public class NotificationExample {
         return new URI(String.format(WEBSOCKET_URL_PATTERN, properties.getWebSocketBaseUrl(), token));
     }
 
-    private String createSubscription() {
-        final NotificationSubscriptionRepresentation subscriptionRepresentation = getSampleSubscriptionRepresentation();
+    private NotificationSubscriptionRepresentation createSubscription() {
+        final GId sourceId = GId.asGId(properties.getSourceId());
+        final String subscriptionName = "test" + sourceId.getValue() + "subscription";
 
-        if (!subscriptionRepository.exists(subscriptionRepresentation.getSource().getId())) {
-            log.info("Subscription does not exist. Creating ...");
-            subscriptionRepository.create(subscriptionRepresentation);
-        } else {
-            log.info("Reusing existing subscription on device <{}>", subscriptionRepresentation.getSource().getId());
+        final NotificationSubscriptionCollection notificationSubscriptionCollection = subscriptionRepository
+                .getByFilter(new NotificationSubscriptionFilter().bySource(sourceId));
+        final List<NotificationSubscriptionRepresentation> subscriptions = notificationSubscriptionCollection.get().getSubscriptions();
+
+        final Optional<NotificationSubscriptionRepresentation> subscriptionRepresentation = subscriptions.stream()
+                .filter(subscription -> subscription.getSubscription().equals(subscriptionName))
+                .findFirst();
+
+        if (subscriptionRepresentation.isPresent()) {
+            log.info("Reusing existing subscription <{}> on device <{}>", subscriptionName, sourceId.getValue());
+            return subscriptionRepresentation.get();
         }
 
-        return subscriptionRepresentation.getSubscription();
+        log.info("Subscription does not exist. Creating ...");
+        return subscriptionRepository.create(getSampleSubscriptionRepresentation(subscriptionName));
     }
 
     private String createToken(String subscription) {
@@ -131,11 +144,9 @@ public class NotificationExample {
         return tokenService.create(tokenRequestRepresentation);
     }
 
-    private NotificationSubscriptionRepresentation getSampleSubscriptionRepresentation() {
+    private NotificationSubscriptionRepresentation getSampleSubscriptionRepresentation(String subscriptionName) {
         final ManagedObjectRepresentation source = new ManagedObjectRepresentation();
         source.setId(GId.asGId(properties.getSourceId()));
-
-        final String subscriptionName = "test" + source.getId().getValue() + "subscription";
 
         final NotificationSubscriptionFilterRepresentation filterRepresentation = new NotificationSubscriptionFilterRepresentation();
         filterRepresentation.setApis(List.of("measurements"));
