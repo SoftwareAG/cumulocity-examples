@@ -26,7 +26,11 @@ public class MicroserviceSubscriptionsServiceMock implements MicroserviceSubscri
 
     @Override
     public <T> T callForTenant(String s, Callable<T> callable) {
-        throw new RuntimeException("Not implemented");
+        try {
+            return callable.call();
+        } catch (Exception e) {
+            throw new RuntimeException("Unknown exception", e);
+        }
     }
 
     @Override

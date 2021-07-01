@@ -9,6 +9,7 @@
 
 package c8y.trackeragent;
 
+import c8y.trackeragent.devicemapping.DeviceTenantMappingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -18,28 +19,29 @@ import com.cumulocity.sdk.client.SDKException;
 
 import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.device.TrackerDeviceProvider;
-import c8y.trackeragent.devicebootstrap.DeviceCredentials;
-import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.exception.UnknownTenantException;
 import c8y.trackeragent.utils.TrackerPlatformProvider;
 
 @Component
 public class TrackerAgent {
     
-	private final DeviceCredentialsRepository credentialsRepository;
 	private final TrackerPlatformProvider platformProvider;
 	private final TrackerDeviceProvider trackerDeviceProvider;
+	private final DeviceTenantMappingService deviceTenantMappingService;
 	
     @Autowired
-    public TrackerAgent(TrackerDeviceProvider trackerDeviceProvider, DeviceCredentialsRepository credentialsRepository,  TrackerPlatformProvider platformProvider) {
+    public TrackerAgent(TrackerDeviceProvider trackerDeviceProvider,
+                        TrackerPlatformProvider platformProvider,
+                        DeviceTenantMappingService deviceTenantMappingService
+                        ) {
 		this.trackerDeviceProvider = trackerDeviceProvider;
-		this.credentialsRepository = credentialsRepository;
 		this.platformProvider = platformProvider;
+		this.deviceTenantMappingService = deviceTenantMappingService;
     }
 
     public TrackerDevice getOrCreateTrackerDevice(String imei) throws SDKException {
-    	DeviceCredentials deviceCredentials = credentialsRepository.getDeviceCredentials(imei);
-    	return trackerDeviceProvider.getOrCreate(deviceCredentials.getTenant(), imei);
+        String tenant = deviceTenantMappingService.findTenant(imei);
+        return trackerDeviceProvider.getOrCreate(tenant, imei);
     }
     
     public void finish(String deviceImei, OperationRepresentation operation) throws UnknownTenantException {
@@ -54,7 +56,7 @@ public class TrackerAgent {
     }
         
     private TrackerPlatform getPlatform(String imei) {
-    	DeviceCredentials deviceCredentials = credentialsRepository.getDeviceCredentials(imei);
-    	return platformProvider.getTenantPlatform(deviceCredentials.getTenant());
+        String tenant = deviceTenantMappingService.findTenant(imei);
+    	return platformProvider.getTenantPlatform(tenant);
     }
 }

@@ -9,6 +9,7 @@
 
 package c8y.trackeragent.devicebootstrap;
 
+import c8y.trackeragent.devicemapping.DeviceTenantMappingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,12 +30,15 @@ public class DeviceBootstrapProcessor {
 
     private final DeviceCredentialsApi deviceCredentialsApi;
     private final DeviceCredentialsRepository credentialsRepository;
+    private final DeviceTenantMappingService deviceTenantMappingService;
 
     @Autowired
     public DeviceBootstrapProcessor(TrackerPlatformProvider trackerPlatformProvider,
-    		DeviceCredentialsRepository deviceCredentialsRepository) {
+    		                        DeviceCredentialsRepository deviceCredentialsRepository,
+                                    DeviceTenantMappingService deviceTenantMappingService) {
 		this.credentialsRepository = deviceCredentialsRepository;
         this.deviceCredentialsApi = trackerPlatformProvider.getBootstrapPlatform().getDeviceCredentialsApi();
+        this.deviceTenantMappingService = deviceTenantMappingService;
     }
     
     public DeviceCredentials tryAccessDeviceCredentials(String imei) {    
@@ -47,10 +51,10 @@ public class DeviceBootstrapProcessor {
         }
     }
 
-	private DeviceCredentials onNewDeviceCredentials(DeviceCredentialsRepresentation credentialsRep) {
+	private DeviceCredentials onNewDeviceCredentials(DeviceCredentialsRepresentation credentialsRep) { //save here addDeviceToTenant
 		DeviceCredentials credentials = DeviceCredentials.forDevice(credentialsRep.getId(), credentialsRep.getTenantId());
 		logger.info("Credentials for imei {} accessed: {}.", credentials.getImei(), credentials);
-		credentialsRepository.saveDeviceCredentials(credentials);
+		deviceTenantMappingService.addDeviceToTenant(credentialsRep.getId(), credentialsRep.getTenantId());
 		return credentials;
 	}
     

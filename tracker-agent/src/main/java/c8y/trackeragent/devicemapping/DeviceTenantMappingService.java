@@ -1,6 +1,7 @@
 package c8y.trackeragent.devicemapping;
 
 
+import c8y.trackeragent.exception.UnknownDeviceException;
 import com.cumulocity.microservice.subscription.service.MicroserviceSubscriptionsService;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +35,7 @@ public class DeviceTenantMappingService {
             if (tenantOptional.isPresent()) {
                 return tenantOptional.get();
             } else {
-                throw new RuntimeException("Device not found: " + externalDeviceId);
+                throw UnknownDeviceException.forImei(externalDeviceId);
             }
         });
     }

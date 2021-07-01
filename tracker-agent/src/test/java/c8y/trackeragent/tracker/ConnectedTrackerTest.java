@@ -33,6 +33,7 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import c8y.TrackerDeviceContextServiceMock;
+import c8y.trackeragent.devicemapping.DeviceTenantMappingService;
 import com.cumulocity.microservice.context.credentials.MicroserviceCredentials;
 import com.cumulocity.microservice.subscription.service.MicroserviceSubscriptionsService;
 import org.junit.Before;
@@ -56,7 +57,7 @@ public class ConnectedTrackerTest {
     private Translator translator = mock(Translator.class);
     private Parser parser = mock(Parser.class);
     private DeviceBootstrapProcessor bootstrapProcessor = mock(DeviceBootstrapProcessor.class);
-    private DeviceCredentialsRepository credentialsRepository = mock(DeviceCredentialsRepository.class);
+    private DeviceTenantMappingService deviceTenantMappingService = mock(DeviceTenantMappingService.class);
     private MicroserviceSubscriptionsService microserviceSubscriptionsService = mock(MicroserviceSubscriptionsService.class);
     private ConnectedTracker tracker;
     private TestConnectionDetails connectionDetails = new TestConnectionDetails(); 
@@ -68,7 +69,7 @@ public class ConnectedTrackerTest {
         tracker = new BaseConnectedTracker<Fragment>(
         		asList(translator, parser),
         		bootstrapProcessor,
-        		credentialsRepository,
+                deviceTenantMappingService,
         		contextService) {
 
                     @Override
@@ -82,7 +83,7 @@ public class ConnectedTrackerTest {
 
     @Test
     public void shouldProcessReportSucessfully() throws Exception {
-    	when(credentialsRepository.getDeviceCredentials(IMEI_1)).thenReturn(DeviceCredentials.forDevice(IMEI_1, "tenant"));
+    	when(deviceTenantMappingService.findTenant(IMEI_1)).thenReturn("tenant");
         when(microserviceSubscriptionsService.getCredentials("tenant")).thenReturn(Optional.of(
                 new MicroserviceCredentials("tenant", "user", "password", null, null, null, null))
         );
@@ -98,7 +99,7 @@ public class ConnectedTrackerTest {
     
     @Test
     public void singleIgnoreReportForUnknownImei() throws Exception {
-    	when(credentialsRepository.getDeviceCredentials(IMEI_1)).thenThrow(UnknownDeviceException.forImei(IMEI_1));
+        when(deviceTenantMappingService.findTenant(IMEI_1)).thenThrow(UnknownDeviceException.forImei(IMEI_1));
         when(microserviceSubscriptionsService.getCredentials("tenant")).thenReturn(Optional.of(
                 new MicroserviceCredentials("tenant", "user", "password", null, null, null, null))
         );
@@ -114,7 +115,7 @@ public class ConnectedTrackerTest {
 
     @Test
     public void operationExecution() throws Exception {
-    	when(credentialsRepository.getDeviceCredentials(IMEI_1)).thenThrow(UnknownDeviceException.forImei(IMEI_1));
+        when(deviceTenantMappingService.findTenant(IMEI_1)).thenThrow(UnknownDeviceException.forImei(IMEI_1));
         when(microserviceSubscriptionsService.getCredentials("tenant")).thenReturn(Optional.empty());
         String translation = "translation";
         OperationContext operationContext = new OperationContext(connectionDetails, null);

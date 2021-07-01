@@ -11,8 +11,7 @@ package c8y.trackeragent.operations;
 
 import c8y.CommunicationMode;
 import c8y.Mobile;
-import c8y.trackeragent.devicebootstrap.DeviceCredentials;
-import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
+import c8y.trackeragent.devicemapping.DeviceTenantMappingService;
 import com.cumulocity.microservice.subscription.service.MicroserviceSubscriptionsService;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.model.sms.Address;
@@ -34,18 +33,18 @@ public class OperationSmsDelivery {
     private final InventoryApi inventoryApi;
     private final SmsMessagingApi outgoingMessagingClient;
 
-    private final DeviceCredentialsRepository deviceCredentials;
+    private final DeviceTenantMappingService deviceTenantMappingService;
     private final MicroserviceSubscriptionsService microserviceSubscriptionsService;
 
     @Autowired
     public OperationSmsDelivery (
             InventoryApi inventoryApi,
             SmsMessagingApi outgoingMessagingClient,
-            DeviceCredentialsRepository deviceCredentials,
+            DeviceTenantMappingService deviceTenantMappingService,
             MicroserviceSubscriptionsService microserviceSubscriptionsService) {
         this.inventoryApi = inventoryApi;
         this.outgoingMessagingClient = outgoingMessagingClient;
-        this.deviceCredentials = deviceCredentials;
+        this.deviceTenantMappingService = deviceTenantMappingService;
         this.microserviceSubscriptionsService = microserviceSubscriptionsService;
     }
     
@@ -89,8 +88,8 @@ public class OperationSmsDelivery {
         final Address address = phoneNumber(receiver);
         final SendMessageRequest request = SendMessageRequest.builder().withReceiver(address).withSender(address).withMessage(translation).build();
 
-        final DeviceCredentials device = this.deviceCredentials.getDeviceCredentials(imei);
-        microserviceSubscriptionsService.runForTenant(device.getTenant(), () -> {
+        String tenant = deviceTenantMappingService.findTenant(imei);
+        microserviceSubscriptionsService.runForTenant(tenant, () -> {
             outgoingMessagingClient.sendMessage(request);
         });
     }
