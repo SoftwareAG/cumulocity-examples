@@ -8,7 +8,6 @@ import c8y.example.notification.helloworld.websocket.jetty.JettyWebSocketClient;
 import c8y.example.notification.helloworld.websocket.tootallnate.TooTallNateWebSocketClient;
 import com.cumulocity.microservice.settings.service.MicroserviceSettingsService;
 import com.cumulocity.microservice.subscription.model.MicroserviceSubscriptionAddedEvent;
-import com.cumulocity.microservice.subscription.model.MicroserviceSubscriptionRemovedEvent;
 import com.cumulocity.microservice.subscription.service.MicroserviceSubscriptionsService;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
@@ -43,8 +42,6 @@ public class NotificationExample {
     private final SubscriptionRepository subscriptionRepository;
     private final Properties properties;
 
-    private NotificationSubscriptionRepresentation subscriptionRepresentation = null;
-
     @Autowired(required = false)
     private MicroserviceSettingsService microserviceSettingsService;
 
@@ -61,7 +58,7 @@ public class NotificationExample {
 
     private void runExample() throws Exception {
         // Create Subscription for source device
-        subscriptionRepresentation = createSubscription();
+        final NotificationSubscriptionRepresentation subscriptionRepresentation = createSubscription();
 
         // Obtain authorization token
         final String token = createToken(subscriptionRepresentation.getSubscription());
