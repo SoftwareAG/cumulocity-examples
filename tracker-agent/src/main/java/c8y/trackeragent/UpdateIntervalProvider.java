@@ -1,7 +1,17 @@
+/*
+ * Copyright (c) 2012-2020 Cumulocity GmbH
+ * Copyright (c) 2021 Software AG, Darmstadt, Germany and/or Software AG USA Inc., Reston, VA, USA,
+ * and/or its subsidiaries and/or its affiliates and/or their licensors.
+ *
+ * Use, reproduction, transfer, publication or disclosure is prohibited except as specifically provided
+ * for in your License Agreement with Software AG.
+ */
+
 package c8y.trackeragent;
 
 import static com.cumulocity.rest.representation.tenant.OptionMediaType.OPTION;
 
+import com.cumulocity.microservice.context.inject.TenantScope;
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,13 +24,12 @@ import com.cumulocity.sdk.client.ResponseParser;
 import com.cumulocity.sdk.client.RestConnector;
 import com.cumulocity.sdk.client.SDKException;
 
-import c8y.inject.DeviceScope;
 import c8y.trackeragent.configuration.TrackerConfiguration;
 
 import javax.ws.rs.core.Response;
 
 @Component
-@DeviceScope
+@TenantScope
 public class UpdateIntervalProvider {
 
 	private final static Logger logger = LoggerFactory.getLogger(UpdateIntervalProvider.class);

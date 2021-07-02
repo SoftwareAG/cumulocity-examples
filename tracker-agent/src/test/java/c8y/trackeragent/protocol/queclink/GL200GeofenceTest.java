@@ -1,7 +1,9 @@
 /*
- * Copyright (C) 2013 Cumulocity GmbH
+ * Copyright (c) 2012-2020 Cumulocity GmbH
+ * Copyright (c) 2021 Software AG, Darmstadt, Germany and/or Software AG USA Inc., Reston, VA, USA,
+ * and/or its subsidiaries and/or its affiliates and/or their licensors.
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation the rights to use,
  * copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
@@ -22,7 +24,7 @@ package c8y.trackeragent.protocol.queclink;
 
 import static c8y.trackeragent.protocol.TrackingProtocol.QUECLINK;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -96,7 +98,7 @@ public class GL200GeofenceTest {
         managedObject = new ManagedObjectRepresentation();
         managedObject.setType("queclink_gl200");
         when(gl200gf.getQueclinkDevice()).thenReturn(queclinkDevice);
-        when(queclinkDevice.getManagedObjectFromGId(any(GId.class))).thenReturn(managedObject);
+        when(queclinkDevice.getManagedObjectFromGId(nullable(GId.class))).thenReturn(managedObject);
     }
 
     @Test

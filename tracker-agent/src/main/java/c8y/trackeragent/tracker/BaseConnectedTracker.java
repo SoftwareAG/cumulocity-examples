@@ -1,7 +1,9 @@
 /*
- * Copyright (C) 2013 Cumulocity GmbH
+ * Copyright (c) 2012-2020 Cumulocity GmbH
+ * Copyright (c) 2021 Software AG, Darmstadt, Germany and/or Software AG USA Inc., Reston, VA, USA,
+ * and/or its subsidiaries and/or its affiliates and/or their licensors.
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation the rights to use,
  * copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
@@ -143,15 +145,12 @@ public abstract class BaseConnectedTracker<F extends Fragment> implements Connec
         logger.debug("Got report from IMEI: " + imei);
         String tenant = getTenant(imei);
         checkAgentCredentials(tenant);
-        try {
-            contextService.enterContext(tenant, imei, reportContext.getTrackingProtocol());
-            reportContext.setImei(imei);
-            parser.onParsed(reportContext);
-        } catch (Exception e) {
-            logger.error("Error on parsing request", e);
-        } finally {
-            contextService.leaveContext();
-        }
+        contextService.executeWithContext(tenant, imei, reportContext.getTrackingProtocol(),
+                () -> {
+                    reportContext.setImei(imei);
+                    parser.onParsed(reportContext);
+                }
+        );
     }
 
     private String getTenant(String imei) {

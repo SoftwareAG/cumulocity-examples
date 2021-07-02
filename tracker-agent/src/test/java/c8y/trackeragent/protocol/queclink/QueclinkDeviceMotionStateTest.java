@@ -1,3 +1,12 @@
+/*
+ * Copyright (c) 2012-2020 Cumulocity GmbH
+ * Copyright (c) 2021 Software AG, Darmstadt, Germany and/or Software AG USA Inc., Reston, VA, USA,
+ * and/or its subsidiaries and/or its affiliates and/or their licensors.
+ *
+ * Use, reproduction, transfer, publication or disclosure is prohibited except as specifically provided
+ * for in your License Agreement with Software AG.
+ */
+
 package c8y.trackeragent.protocol.queclink;
 
 import org.junit.Before;
@@ -7,7 +16,7 @@ import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.nullable;
 import static c8y.trackeragent.protocol.TrackingProtocol.QUECLINK;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
@@ -18,8 +27,6 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.never;
 
 import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 
 import static org.mockito.Mockito.times;
 
@@ -101,7 +108,7 @@ public class QueclinkDeviceMotionStateTest {
     
     @Before
     public void setup() {
-        when(trackerAgent.getOrCreateTrackerDevice(anyString())).thenReturn(trackerDevice);
+        when(trackerAgent.getOrCreateTrackerDevice(nullable(String.class))).thenReturn(trackerDevice);
     }
     
     public void translate_setup() {

@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2013 Cumulocity GmbH
+ * Copyright (c) 2012-2020 Cumulocity GmbH
+ * Copyright (c) 2021 Software AG, Darmstadt, Germany and/or Software AG USA Inc., Reston, VA, USA,
+ * and/or its subsidiaries and/or its affiliates and/or their licensors.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"),
@@ -26,7 +28,6 @@ import c8y.trackeragent.configuration.TrackerConfiguration;
 import c8y.trackeragent.protocol.TrackingProtocol;
 import c8y.trackeragent.protocol.coban.device.CobanDevice;
 import c8y.trackeragent.protocol.coban.device.CobanDeviceFactory;
-import com.cumulocity.agent.server.repository.InventoryRepository;
 import com.cumulocity.model.Agent;
 import com.cumulocity.model.ID;
 import com.cumulocity.model.event.CumulocityAlarmStatuses;
@@ -150,8 +151,6 @@ public class TrackerDevice {
 
     protected InventoryApi inventory;
 
-    protected InventoryRepository inventoryRepository;
-
     protected String tenant;
 
     private String imei;
@@ -169,7 +168,6 @@ public class TrackerDevice {
     		String tenant,
     		String imei,
     		TrackerConfiguration configuration,
-            InventoryRepository inventoryRepository,
             EventApi events,
             AlarmApi alarms,
             MeasurementApi measurements,
@@ -181,7 +179,6 @@ public class TrackerDevice {
         this.tenant = tenant;
         this.imei = imei;
         this.configuration = configuration;
-        this.inventoryRepository = inventoryRepository;
         this.events = events;
         this.alarms = alarms;
         this.measurements = measurements;

@@ -1,10 +1,22 @@
+/*
+ * Copyright (c) 2012-2020 Cumulocity GmbH
+ * Copyright (c) 2021 Software AG, Darmstadt, Germany and/or Software AG USA Inc., Reston, VA, USA,
+ * and/or its subsidiaries and/or its affiliates and/or their licensors.
+ *
+ * Use, reproduction, transfer, publication or disclosure is prohibited except as specifically provided
+ * for in your License Agreement with Software AG.
+ */
+
 package c8y.trackeragent.devicebootstrap;
 
+import com.cumulocity.microservice.context.credentials.UserCredentials;
 import com.cumulocity.model.idtype.GId;
 import com.google.common.base.Predicate;
 
-public class DeviceCredentials extends com.cumulocity.agent.server.context.DeviceCredentials {
+public class DeviceCredentials extends UserCredentials {
 
+	private GId deviceId;
+	private int pageSize;
 	private String imei;
 	
 	public static DeviceCredentials forDevice(String imei, String tenant) {
@@ -19,16 +31,43 @@ public class DeviceCredentials extends com.cumulocity.agent.server.context.Devic
 		return new DeviceCredentials(tenant, username, password, null, deviceId);
 	}
 	
-    private DeviceCredentials(String tenant, String username, String password, String imei, GId deviceId) {
-        super(tenant, username, password, null, deviceId);
+    public DeviceCredentials(String tenant, String username, String password, String imei, GId deviceId) {
+        super(tenant, username, password, null, null, imei, null, null);
+        this.deviceId = deviceId;
         this.imei = imei;
     }
 
     public DeviceCredentials duplicate() {
-        return new DeviceCredentials(super.getTenant(), super.getUsername(), super.getPassword(), imei, super.getDeviceId());
+        return new DeviceCredentials(getTenant(), getUsername(), getPassword(), imei, deviceId);
     }
 
-    public String getImei() {
+	@Override
+	public String getOAuthAccessToken() {
+		return null;
+	}
+
+	@Override
+	public String getXsrfToken() {
+		return null;
+	}
+
+	public GId getDeviceId() {
+		return deviceId;
+	}
+
+	public void setDeviceId(GId deviceId) {
+		this.deviceId = deviceId;
+	}
+
+	public int getPageSize() {
+		return pageSize;
+	}
+
+	public void setPageSize(int pageSize) {
+		this.pageSize = pageSize;
+	}
+
+	public String getImei() {
         return imei;
     }
     
@@ -39,7 +78,7 @@ public class DeviceCredentials extends com.cumulocity.agent.server.context.Devic
 	@Override
     public String toString() {
         return String.format("DeviceCredentials [tenantId=%s, user=%s, password=%s, imei=%s]", 
-        		super.getTenant(), super.getUsername(), super.getPassword(), imei);
+        		getTenant(), getUsername(), getUsername(), imei);
     }
 
 	@Override

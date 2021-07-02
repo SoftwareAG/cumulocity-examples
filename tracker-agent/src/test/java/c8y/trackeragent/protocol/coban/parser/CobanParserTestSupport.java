@@ -1,3 +1,12 @@
+/*
+ * Copyright (c) 2012-2020 Cumulocity GmbH
+ * Copyright (c) 2021 Software AG, Darmstadt, Germany and/or Software AG USA Inc., Reston, VA, USA,
+ * and/or its subsidiaries and/or its affiliates and/or their licensors.
+ *
+ * Use, reproduction, transfer, publication or disclosure is prohibited except as specifically provided
+ * for in your License Agreement with Software AG.
+ */
+
 package c8y.trackeragent.protocol.coban.parser;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,19 +46,13 @@ public abstract class CobanParserTestSupport {
     protected AlarmService alarmService = Mockito.mock(AlarmService.class);
     protected MeasurementService measurementService = Mockito.mock(MeasurementService.class);
     protected TestConnectionDetails connectionDetails = new TestConnectionDetails();
-    private UpdateIntervalProvider updateIntervalProvider = mock(UpdateIntervalProvider.class);
-    
+
     @Before
     public void baseInit() {
         trackerAgent = mock(TrackerAgent.class);
         deviceMock = mock(TrackerDevice.class);
         when(trackerAgent.getOrCreateTrackerDevice(anyString())).thenReturn(deviceMock);
-        when(deviceMock.getGId()).thenReturn(GId.asGId("1001"));
-        when(deviceMock.aLocationUpdateEvent()).thenReturn(new EventRepresentation());
-        when(deviceMock.getUpdateIntervalProvider()).thenReturn(updateIntervalProvider);
-        when(updateIntervalProvider.findUpdateInterval()).thenReturn(null);
     }
-    
     
     protected void currentCobanDeviceIs(CobanDevice cobanDevice) {
         when(deviceMock.getCobanDevice()).thenReturn(cobanDevice);

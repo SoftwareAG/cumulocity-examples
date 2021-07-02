@@ -1,3 +1,12 @@
+/*
+ * Copyright (c) 2012-2020 Cumulocity GmbH
+ * Copyright (c) 2021 Software AG, Darmstadt, Germany and/or Software AG USA Inc., Reston, VA, USA,
+ * and/or its subsidiaries and/or its affiliates and/or their licensors.
+ *
+ * Use, reproduction, transfer, publication or disclosure is prohibited except as specifically provided
+ * for in your License Agreement with Software AG.
+ */
+
 package c8y.trackeragent_it;
 
 
@@ -15,8 +24,8 @@ import c8y.trackeragent_it.config.TestConfiguration;
 import c8y.trackeragent_it.service.Bootstraper;
 import c8y.trackeragent_it.service.NewDeviceRequestService;
 import c8y.trackeragent_it.service.SocketWritter;
-import com.cumulocity.agent.server.context.DeviceContextService;
-import com.cumulocity.agent.server.repository.InventoryRepository;
+import com.cumulocity.microservice.context.ContextService;
+import com.cumulocity.microservice.context.credentials.UserCredentials;
 import com.cumulocity.model.ID;
 import com.cumulocity.model.authentication.CumulocityBasicCredentials;
 import com.cumulocity.model.event.CumulocityAlarmStatuses;
@@ -32,11 +41,13 @@ import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.List;
 
+@SpringBootTest
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = { ServerConfiguration.class, TestConfiguration.class })
 public abstract class TrackerITSupport {
@@ -54,11 +65,7 @@ public abstract class TrackerITSupport {
     protected AlarmMappingService alarmMappingService;
 
     @Autowired
-    @Deprecated
-    protected DeviceContextService contextService;
-
-    @Autowired
-    protected InventoryRepository inventoryRepository;
+    protected ContextService<UserCredentials> contextService;
 
     @Autowired
     protected DeviceCredentialsRepository deviceCredentialsRepository;
@@ -72,8 +79,6 @@ public abstract class TrackerITSupport {
     public void baseSetUp() throws Exception {
         trackerPlatform = trackerPlatform(testSettings);
         Thread.sleep(200);// avoid address already in use error
-        System.out.println(testSettings);
-        System.out.println(trackerAgentConfig);
         socketWriter = new SocketWritter(testSettings, trackerAgentConfig.getPort(getTrackerProtocol()));
         NewDeviceRequestService newDeviceRequestService = new NewDeviceRequestService(trackerPlatform.getPlatformParameters(), testSettings);
         bootstraper = new Bootstraper(testSettings, socketWriter, newDeviceRequestService);
@@ -111,7 +116,7 @@ public abstract class TrackerITSupport {
 
     protected EventRepresentation findLastEvent(String imei, String type) {
         GId gId = getGId(imei);
-        DateTime fromDate = new DateTime();
+        DateTime fromDate = new DateTime().minusSeconds(30);
         DateTime toDate = new DateTime().plusDays(1);
         EventFilter filter = new EventFilter().bySource(gId).byType(type).byDate(fromDate.toDate(), toDate.toDate());
         List<EventRepresentation> events = trackerPlatform.getEventApi().getEventsByFilter(filter).get().getEvents();

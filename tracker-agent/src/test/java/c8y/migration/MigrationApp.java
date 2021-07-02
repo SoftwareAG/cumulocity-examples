@@ -1,14 +1,21 @@
+/*
+ * Copyright (c) 2012-2020 Cumulocity GmbH
+ * Copyright (c) 2021 Software AG, Darmstadt, Germany and/or Software AG USA Inc., Reston, VA, USA,
+ * and/or its subsidiaries and/or its affiliates and/or their licensors.
+ *
+ * Use, reproduction, transfer, publication or disclosure is prohibited except as specifically provided
+ * for in your License Agreement with Software AG.
+ */
+
 package c8y.migration;
 
+import c8y.trackeragent.Main;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-
-import com.cumulocity.agent.server.ServerBuilder;
-import com.cumulocity.agent.server.feature.ContextFeature;
-import com.cumulocity.agent.server.feature.RepositoryFeature;
 
 /**
  * Migration for "rid of super user" task:
@@ -38,20 +45,6 @@ public class MigrationApp {
     
     public static void main(String[] args) {
         logger.info("tracker-agent-migration is starting.");
-        serverBuilder().run(args);
+		SpringApplication.run(Main.class, args);
     }
-
-    public static ServerBuilder serverBuilder() {
-        //@formatter:off
-        return ServerBuilder.on(8689)
-            .application("tracker-agent-migration")
-            .logging("tracker-agent-server-migration-logging")
-            .loadConfiguration("tracker-agent-migration")
-            .enable(MigrationApp.class)
-            .enable(ContextFeature.class)
-            .enable(RepositoryFeature.class)
-            .useWebEnvironment(false);
-        //@formatter:on
-    }
-    
 }

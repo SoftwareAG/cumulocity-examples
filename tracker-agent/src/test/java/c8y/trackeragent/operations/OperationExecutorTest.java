@@ -1,7 +1,14 @@
+/*
+ * Copyright (c) 2012-2020 Cumulocity GmbH
+ * Copyright (c) 2021 Software AG, Darmstadt, Germany and/or Software AG USA Inc., Reston, VA, USA,
+ * and/or its subsidiaries and/or its affiliates and/or their licensors.
+ *
+ * Use, reproduction, transfer, publication or disclosure is prohibited except as specifically provided
+ * for in your License Agreement with Software AG.
+ */
+
 package c8y.trackeragent.operations;
 
-import com.cumulocity.agent.server.logging.LoggingService;
-import com.cumulocity.agent.server.repository.IdentityRepository;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.devicecontrol.DeviceControlApi;
@@ -88,7 +95,4 @@ public class OperationExecutorTest {
         verify(operationSmsDelivery).deliverSms(translation, deviceId, imei);
         
     }
-    
-    
-    
 }
