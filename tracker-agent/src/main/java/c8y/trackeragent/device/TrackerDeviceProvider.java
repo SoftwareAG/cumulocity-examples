@@ -53,8 +53,6 @@ public class TrackerDeviceProvider {
 	}
 
 	private TrackerDevice newTrackerDevice(String tenant, String imei) {
-		return microserviceSubscriptionsService.callForTenant(tenant, () -> {
-			return trackerDeviceFactory.newTrackerDevice(tenant, imei);
-		});
+		return trackerDeviceFactory.newTrackerDevice(tenant, imei);
 	}
 }

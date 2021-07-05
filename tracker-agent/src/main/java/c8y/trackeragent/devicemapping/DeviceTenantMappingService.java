@@ -62,9 +62,7 @@ public class DeviceTenantMappingService {
                 log.warn("Device {} is now assigned to tenant {}. It will be reassigned to tenant {}",
                         externalDeviceId, existingTenant, tenantToAssign);
                 deviceTenantMappingRepository.moveDeviceFromOneTenantToAnother(
-                        tenantObject,
-                        externalDeviceId,
-                        existingTenant
+                        tenantObject, externalDeviceId, existingTenant
                 );
             }
         } else {
