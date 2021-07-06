@@ -32,7 +32,8 @@ public class IncomingMessage {
                 '}';
     }
 
-    public void process(){
+    public void process() {
+        connectionDetails.resetImei();
         connectedTracker.executeReports(connectionDetails, msg);
     }
 }
