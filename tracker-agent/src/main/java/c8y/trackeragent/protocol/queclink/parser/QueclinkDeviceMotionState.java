@@ -40,7 +40,6 @@ import c8y.trackeragent.context.OperationContext;
 import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.protocol.queclink.QueclinkConstants;
-import c8y.trackeragent.protocol.queclink.device.QueclinkDevice;
 import c8y.trackeragent.tracker.Translator;
 
 /**

@@ -4,10 +4,13 @@ import com.cumulocity.microservice.context.credentials.MicroserviceCredentials;
 import com.cumulocity.microservice.subscription.service.MicroserviceSubscriptionsService;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public class MicroserviceSubscriptionsServiceMock implements MicroserviceSubscriptionsService {
+
+    private Map<String, Optional<MicroserviceCredentials>> optionalMicroserviceCredentials;
 
     @Override
     public String getTenant() {
@@ -41,11 +44,15 @@ public class MicroserviceSubscriptionsServiceMock implements MicroserviceSubscri
 
     @Override
     public Optional<MicroserviceCredentials> getCredentials(String s) {
-        throw new RuntimeException("Not implemented");
+        return optionalMicroserviceCredentials.get(s);
     }
 
     @Override
     public boolean isRegisteredSuccessfully() {
         throw new RuntimeException("Not implemented");
+    }
+
+    public void setOptionalMicroserviceCredentials(Map<String, Optional<MicroserviceCredentials>> optionalMicroserviceCredentials) {
+        this.optionalMicroserviceCredentials = optionalMicroserviceCredentials;
     }
 }

@@ -9,7 +9,6 @@
 
 package c8y.trackeragent.server;
 
-import c8y.trackeragent.utils.ByteHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

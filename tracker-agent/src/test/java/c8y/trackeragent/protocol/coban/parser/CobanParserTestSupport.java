@@ -22,13 +22,10 @@ import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
-import com.cumulocity.model.idtype.GId;
 import com.cumulocity.model.measurement.MeasurementValue;
-import com.cumulocity.rest.representation.event.EventRepresentation;
 
 import c8y.SpeedMeasurement;
 import c8y.trackeragent.TrackerAgent;
-import c8y.trackeragent.UpdateIntervalProvider;
 import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.protocol.coban.CobanDeviceMessages;
 import c8y.trackeragent.protocol.coban.device.CobanDevice;

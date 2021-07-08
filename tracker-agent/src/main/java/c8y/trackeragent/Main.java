@@ -43,7 +43,7 @@ import java.io.IOException;
 @MicroserviceApplication
 public class Main {
 
-    @Value("${C8Y.devicebootstrap.tenant}")
+    @Value("${C8Y.bootstrap.tenant}")
     private String ownerTenant;
     
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
