@@ -12,7 +12,6 @@ package c8y.trackeragent.protocol.queclink;
 import c8y.Hardware;
 import c8y.Tracking;
 import c8y.trackeragent.TrackerAgent;
-import c8y.trackeragent.context.OperationContext;
 import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.protocol.queclink.parser.QueclinkDeviceSetting;
@@ -20,19 +19,15 @@ import c8y.trackeragent.server.TestConnectionDetails;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.times;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
-import com.cumulocity.rest.representation.operation.OperationRepresentation;
 
 import c8y.trackeragent.protocol.queclink.device.QueclinkDevice;
 

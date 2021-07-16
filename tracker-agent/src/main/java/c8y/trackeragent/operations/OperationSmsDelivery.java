@@ -11,10 +11,9 @@ package c8y.trackeragent.operations;
 
 import c8y.CommunicationMode;
 import c8y.Mobile;
-import c8y.trackeragent.configuration.TrackerConfiguration;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
-import c8y.trackeragent.sms.OptionsAuthorizationSupplier;
+import c8y.trackeragent.devicebootstrap.MicroserviceSubscriptionsServiceWrapper;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.model.sms.Address;
 import com.cumulocity.model.sms.SendMessageRequest;
@@ -36,19 +35,18 @@ public class OperationSmsDelivery {
     private final SmsMessagingApi outgoingMessagingClient;
 
     private final DeviceCredentialsRepository deviceCredentials;
-    private final OptionsAuthorizationSupplier optionsAuthSupplier;
+    private final MicroserviceSubscriptionsServiceWrapper microserviceSubscriptionsServiceWrapper;
 
     @Autowired
     public OperationSmsDelivery (
             InventoryApi inventoryApi,
             SmsMessagingApi outgoingMessagingClient,
-            TrackerConfiguration config,
             DeviceCredentialsRepository deviceCredentials,
-            OptionsAuthorizationSupplier optionsAuthSupplier) {
+            MicroserviceSubscriptionsServiceWrapper microserviceSubscriptionsServiceWrapper) {
         this.inventoryApi = inventoryApi;
         this.outgoingMessagingClient = outgoingMessagingClient;
         this.deviceCredentials = deviceCredentials;
-        this.optionsAuthSupplier = optionsAuthSupplier;
+        this.microserviceSubscriptionsServiceWrapper = microserviceSubscriptionsServiceWrapper;
     }
     
     /**
@@ -77,13 +75,13 @@ public class OperationSmsDelivery {
         return false;
     }
 
-    public void deliverSms (String translation, GId deviceId, String imei) throws IllegalArgumentException {
+    public void deliverSms(String translation, GId deviceId, String imei) throws IllegalArgumentException {
         log.debug("sending sms {} {} {}", translation, deviceId, imei);
 
         ManagedObjectRepresentation deviceMo = inventoryApi.get(deviceId);
         Mobile mobile = deviceMo.get(Mobile.class);
         String receiver = mobile.getMsisdn();
-        
+
         if (receiver == null || receiver.length() == 0) {
             throw new IllegalArgumentException("MSISDN of target device cannot be null");
         }
@@ -91,13 +89,9 @@ public class OperationSmsDelivery {
         final Address address = phoneNumber(receiver);
         final SendMessageRequest request = SendMessageRequest.builder().withReceiver(address).withSender(address).withMessage(translation).build();
 
-        try {
-            final DeviceCredentials device = this.deviceCredentials.getDeviceCredentials(imei);
-            final DeviceCredentials agent = this.deviceCredentials.getAgentCredentials(device.getTenant());
-            optionsAuthSupplier.set(agent);
+        final DeviceCredentials device = this.deviceCredentials.getDeviceCredentials(imei);
+        microserviceSubscriptionsServiceWrapper.runForTenant(device.getTenant(), () -> {
             outgoingMessagingClient.sendMessage(request);
-        } finally {
-            optionsAuthSupplier.clear();
-        }
+        });
     }
 }

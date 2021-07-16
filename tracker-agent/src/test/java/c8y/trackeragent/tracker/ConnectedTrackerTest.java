@@ -33,6 +33,8 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import c8y.TrackerDeviceContextServiceMock;
+import com.cumulocity.microservice.context.credentials.MicroserviceCredentials;
+import com.cumulocity.microservice.subscription.service.MicroserviceSubscriptionsService;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -42,10 +44,11 @@ import c8y.trackeragent.devicebootstrap.DeviceBootstrapProcessor;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.exception.UnknownDeviceException;
-import c8y.trackeragent.exception.UnknownTenantException;
 import c8y.trackeragent.protocol.TrackingProtocol;
 import c8y.trackeragent.server.TestConnectionDetails;
 import c8y.trackeragent.service.TrackerDeviceContextService;
+
+import java.util.Optional;
 
 public class ConnectedTrackerTest {
     
@@ -54,6 +57,7 @@ public class ConnectedTrackerTest {
     private Parser parser = mock(Parser.class);
     private DeviceBootstrapProcessor bootstrapProcessor = mock(DeviceBootstrapProcessor.class);
     private DeviceCredentialsRepository credentialsRepository = mock(DeviceCredentialsRepository.class);
+    private MicroserviceSubscriptionsService microserviceSubscriptionsService = mock(MicroserviceSubscriptionsService.class);
     private ConnectedTracker tracker;
     private TestConnectionDetails connectionDetails = new TestConnectionDetails(); 
     private String[] dummyReport = new String[] { "dummyReport" };
@@ -79,7 +83,9 @@ public class ConnectedTrackerTest {
     @Test
     public void shouldProcessReportSucessfully() throws Exception {
     	when(credentialsRepository.getDeviceCredentials(IMEI_1)).thenReturn(DeviceCredentials.forDevice(IMEI_1, "tenant"));
-    	when(credentialsRepository.getAgentCredentials("tenant")).thenReturn(DeviceCredentials.forAgent("tenant", "user", "password"));
+        when(microserviceSubscriptionsService.getCredentials("tenant")).thenReturn(Optional.of(
+                new MicroserviceCredentials("tenant", "user", "password", null, null, null, null))
+        );
         when(parser.parse(dummyReport)).thenReturn(IMEI_1);
         when(parser.onParsed(any(ReportContext.class))).thenReturn(true);
 
@@ -93,7 +99,9 @@ public class ConnectedTrackerTest {
     @Test
     public void singleIgnoreReportForUnknownImei() throws Exception {
     	when(credentialsRepository.getDeviceCredentials(IMEI_1)).thenThrow(UnknownDeviceException.forImei(IMEI_1));
-    	when(credentialsRepository.getAgentCredentials("tenant")).thenThrow(UnknownTenantException.forTenantId("tenant"));
+        when(microserviceSubscriptionsService.getCredentials("tenant")).thenReturn(Optional.of(
+                new MicroserviceCredentials("tenant", "user", "password", null, null, null, null))
+        );
         when(parser.parse(dummyReport)).thenReturn(IMEI_1);
         when(parser.onParsed(any(ReportContext.class))).thenReturn(false);
         
@@ -107,7 +115,7 @@ public class ConnectedTrackerTest {
     @Test
     public void operationExecution() throws Exception {
     	when(credentialsRepository.getDeviceCredentials(IMEI_1)).thenThrow(UnknownDeviceException.forImei(IMEI_1));
-    	when(credentialsRepository.getAgentCredentials("tenant")).thenThrow(UnknownTenantException.forTenantId("tenant"));    	
+        when(microserviceSubscriptionsService.getCredentials("tenant")).thenReturn(Optional.empty());
         String translation = "translation";
         OperationContext operationContext = new OperationContext(connectionDetails, null);
         when(translator.translate(operationContext)).thenReturn(translation);

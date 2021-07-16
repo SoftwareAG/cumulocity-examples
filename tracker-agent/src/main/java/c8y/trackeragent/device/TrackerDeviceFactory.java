@@ -9,9 +9,7 @@
 
 package c8y.trackeragent.device;
 
-import c8y.trackeragent.tracker.MicroserviceCredentialsFactory;
-import com.cumulocity.microservice.context.ContextService;
-import com.cumulocity.microservice.context.credentials.MicroserviceCredentials;
+import c8y.trackeragent.devicebootstrap.MicroserviceSubscriptionsServiceWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -36,15 +34,13 @@ public class TrackerDeviceFactory {
     private final IdentityApi registry;
     private final InventoryApi inventory;
     private final UpdateIntervalProvider updateIntervalProvider;
-    private final ContextService<MicroserviceCredentials> contextService;
-    private final MicroserviceCredentialsFactory microserviceCredentialsFactory;
+    private final MicroserviceSubscriptionsServiceWrapper microserviceSubscriptionsServiceWrapper;
 
     @Autowired
 	public TrackerDeviceFactory(TrackerConfiguration configuration,
-			EventApi events, AlarmApi alarms, MeasurementApi measurements, DeviceControlApi deviceControl,
-			IdentityApi registry, InventoryApi inventory, UpdateIntervalProvider updateIntervalProvider,
-								ContextService<MicroserviceCredentials> contextService,
-								MicroserviceCredentialsFactory microserviceCredentialsFactory) {
+								EventApi events, AlarmApi alarms, MeasurementApi measurements, DeviceControlApi deviceControl,
+								IdentityApi registry, InventoryApi inventory, UpdateIntervalProvider updateIntervalProvider,
+								MicroserviceSubscriptionsServiceWrapper microserviceSubscriptionsServiceWrapper) {
 		this.configuration = configuration;
 		this.events = events;
 		this.alarms = alarms;
@@ -53,8 +49,7 @@ public class TrackerDeviceFactory {
 		this.registry = registry;
 		this.inventory = inventory;
 		this.updateIntervalProvider = updateIntervalProvider;
-		this.contextService = contextService;
-		this.microserviceCredentialsFactory = microserviceCredentialsFactory;
+		this.microserviceSubscriptionsServiceWrapper = microserviceSubscriptionsServiceWrapper;
 	}
 
 	/**
@@ -64,7 +59,7 @@ public class TrackerDeviceFactory {
 		TrackerDevice device = new TrackerDevice(
 				tenant, imei, configuration, events, alarms, measurements, deviceControl, registry, inventory, updateIntervalProvider
 		);
-		contextService.runWithinContext(microserviceCredentialsFactory.getForTenant(tenant), () -> {
+		microserviceSubscriptionsServiceWrapper.runForTenant(tenant, () -> {
 			device.init();
 		});
 		return device;

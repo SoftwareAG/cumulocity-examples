@@ -11,34 +11,35 @@ package c8y.trackeragent.utils;
 
 import c8y.trackeragent.TrackerPlatform;
 import c8y.trackeragent.configuration.TrackerConfiguration;
-import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
+import c8y.trackeragent.devicebootstrap.MicroserviceSubscriptionsServiceWrapper;
 import c8y.trackeragent.exception.SDKExceptions;
+import c8y.trackeragent.exception.TenantNotSubscribedException;
+import com.cumulocity.microservice.context.credentials.MicroserviceCredentials;
 import com.cumulocity.model.authentication.CumulocityBasicCredentials;
 import com.cumulocity.sdk.client.ClientConfiguration;
 import com.cumulocity.sdk.client.PlatformImpl;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
 import java.util.concurrent.Callable;
 
 @Component
 public class TrackerPlatformProvider {
 
-	private static final Logger logger = LoggerFactory.getLogger(TrackerPlatformProvider.class);
-
-    private final DeviceCredentialsRepository deviceCredentialsRepository;
     private final Cache<PlatformKey, TrackerPlatform> cache;
     private final TrackerConfiguration config;
+    private final MicroserviceSubscriptionsServiceWrapper microserviceSubscriptionsServiceWrapper;
 
     @Autowired
-    public TrackerPlatformProvider(TrackerConfiguration config, DeviceCredentialsRepository deviceCredentialsRepository) {
+    public TrackerPlatformProvider(TrackerConfiguration config,
+                                   DeviceCredentialsRepository deviceCredentialsRepository,
+                                   MicroserviceSubscriptionsServiceWrapper microserviceSubscriptionsServiceWrapper) {
         this.config = config;
-        this.deviceCredentialsRepository = deviceCredentialsRepository;
+        this.microserviceSubscriptionsServiceWrapper = microserviceSubscriptionsServiceWrapper;
         this.cache = CacheBuilder.newBuilder().build();
     }
 
@@ -88,15 +89,17 @@ public class TrackerPlatformProvider {
     }
 
     private TrackerPlatform createTenantPlatform(String tenant) {
-        DeviceCredentials agentCredentials = deviceCredentialsRepository.getAgentCredentials(tenant);
+        Optional<MicroserviceCredentials> credentialsOptional = microserviceSubscriptionsServiceWrapper.getCredentials(tenant);
+        if (credentialsOptional.isEmpty()) {
+            throw new TenantNotSubscribedException("Not found credentials for tenant: " + tenant);
+        }
         CumulocityBasicCredentials credentials = CumulocityBasicCredentials.builder()
                 .tenantId(tenant)
-                .username(agentCredentials.getUsername())
-                .password(agentCredentials.getPassword())
+                .username(credentialsOptional.get().getUsername())
+                .password(credentialsOptional.get().getPassword())
                 .build();
         PlatformImpl platform = c8yPlatform(credentials);
-        TrackerPlatform trackerPlatform = new TrackerPlatform(platform);
-        return trackerPlatform;
+        return new TrackerPlatform(platform);
     }
 
     private PlatformImpl c8yPlatform(CumulocityBasicCredentials credentials) {

@@ -54,7 +54,6 @@ import c8y.trackeragent.protocol.queclink.device.BaseQueclinkDevice;
 import c8y.trackeragent.protocol.queclink.device.GL200;
 import c8y.trackeragent.protocol.queclink.device.QueclinkDevice;
 import c8y.trackeragent.protocol.queclink.parser.QueclinkDeviceMotionState;
-import c8y.trackeragent.protocol.queclink.parser.QueclinkDeviceSetting;
 import c8y.trackeragent.protocol.queclink.parser.QueclinkIgnition;
 import c8y.trackeragent.server.TestConnectionDetails;
 
