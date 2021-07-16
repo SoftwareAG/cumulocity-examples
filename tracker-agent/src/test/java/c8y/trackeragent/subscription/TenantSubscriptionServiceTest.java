@@ -2,7 +2,9 @@ package c8y.trackeragent.subscription;
 
 import c8y.MicroserviceSubscriptionsServiceMock;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
-import com.cumulocity.microservice.subscription.service.MicroserviceSubscriptionsService;
+import c8y.trackeragent.devicebootstrap.MicroserviceSubscriptionsServiceWrapper;
+import c8y.trackeragent.exception.TenantNotSubscribedException;
+import com.cumulocity.microservice.context.credentials.MicroserviceCredentials;
 import com.cumulocity.rest.representation.application.ApplicationReferenceCollectionRepresentation;
 import com.cumulocity.rest.representation.application.ApplicationReferenceRepresentation;
 import com.cumulocity.rest.representation.application.ApplicationRepresentation;
@@ -15,23 +17,31 @@ import org.mockito.Mockito;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
 
 class TenantSubscriptionServiceTest {
 
     private static final String OWNER_TENANT = "ownerTenant";
+    private static final String NOT_SUBSCRIBED_OWNER_TENANT = "ownerTenant2";
     private static final String APPLICATION_KEY = "tracker-agent";
 
     private final DeviceCredentialsRepository deviceCredentialsRepository = Mockito.mock(DeviceCredentialsRepository.class);
     private final SubscriptionApi subscriptionApi = Mockito.mock(SubscriptionApi.class);
-    private final MicroserviceSubscriptionsService microserviceSubscriptionsService = new MicroserviceSubscriptionsServiceMock();
+    private final MicroserviceSubscriptionsServiceMock microserviceSubscriptionsService = new MicroserviceSubscriptionsServiceMock();
 
     private TenantSubscriptionService service;
 
     @BeforeEach
     void before() {
         service = new TenantSubscriptionService(
-                deviceCredentialsRepository, subscriptionApi, microserviceSubscriptionsService
+                deviceCredentialsRepository, subscriptionApi, new MicroserviceSubscriptionsServiceWrapper(microserviceSubscriptionsService)
         );
+        microserviceSubscriptionsService.setOptionalMicroserviceCredentials(Map.of(
+                OWNER_TENANT, Optional.of(new MicroserviceCredentials()),
+                NOT_SUBSCRIBED_OWNER_TENANT, Optional.empty()
+
+        ));
         Mockito.when(subscriptionApi.getApplicationKey()).thenReturn(APPLICATION_KEY);
     }
 
@@ -39,11 +49,11 @@ class TenantSubscriptionServiceTest {
     void shouldThrowExceptionIfNotFoundApplicationInOwnerTenant() {
         //given
         ApplicationReferenceCollectionRepresentation emptyRepresentation = new ApplicationReferenceCollectionRepresentation();
-        Mockito.when(subscriptionApi.getApplications(OWNER_TENANT)).thenReturn(emptyRepresentation);
+        Mockito.when(subscriptionApi.getApplications(NOT_SUBSCRIBED_OWNER_TENANT)).thenReturn(emptyRepresentation);
 
         //when
-        Assertions.assertThrows(RuntimeException.class, () -> {
-            service.subscribeTenants(OWNER_TENANT);
+        Assertions.assertThrows(TenantNotSubscribedException.class, () -> {
+            service.subscribeTenants(NOT_SUBSCRIBED_OWNER_TENANT);
         });
     }
 

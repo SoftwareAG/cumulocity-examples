@@ -60,7 +60,7 @@ public class OperationSmsDeliveryTest {
         operationSmsDelivery = new OperationSmsDelivery(
                 inventoryApi,
                 outgoingMessagingClient,
-                deviceCredentialsRepo,
+                deviceTenantMappingService,
                 new MicroserviceSubscriptionsServiceWrapper(microserviceSubscriptionsService));
         
         managedObject = new ManagedObjectRepresentation();

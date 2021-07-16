@@ -11,8 +11,8 @@ package c8y.trackeragent.operations;
 
 import c8y.CommunicationMode;
 import c8y.Mobile;
+import c8y.trackeragent.devicebootstrap.MicroserviceSubscriptionsServiceWrapper;
 import c8y.trackeragent.devicemapping.DeviceTenantMappingService;
-import com.cumulocity.microservice.subscription.service.MicroserviceSubscriptionsService;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.model.sms.Address;
 import com.cumulocity.model.sms.SendMessageRequest;
@@ -34,18 +34,18 @@ public class OperationSmsDelivery {
     private final SmsMessagingApi outgoingMessagingClient;
 
     private final DeviceTenantMappingService deviceTenantMappingService;
-    private final MicroserviceSubscriptionsService microserviceSubscriptionsService;
+    private final MicroserviceSubscriptionsServiceWrapper microserviceSubscriptionsService;
 
     @Autowired
     public OperationSmsDelivery (
             InventoryApi inventoryApi,
             SmsMessagingApi outgoingMessagingClient,
             DeviceTenantMappingService deviceTenantMappingService,
-            MicroserviceSubscriptionsService microserviceSubscriptionsService) {
+            MicroserviceSubscriptionsServiceWrapper microserviceSubscriptionsServiceWrapper) {
         this.inventoryApi = inventoryApi;
         this.outgoingMessagingClient = outgoingMessagingClient;
         this.deviceTenantMappingService = deviceTenantMappingService;
-        this.microserviceSubscriptionsService = microserviceSubscriptionsService;
+        this.microserviceSubscriptionsService = microserviceSubscriptionsServiceWrapper;
     }
     
     /**

@@ -204,9 +204,4 @@ public class TrackerDeviceIT extends TrackerITSupport {
     private void myAssertEquals(BigDecimal one, BigDecimal two) {
         assertEquals(one.doubleValue(), two.doubleValue(), 0.01);
     }
-    
-    private void saveAgentCredentials(String imei) {
-    	DeviceCredentials deviceCredentials = DeviceCredentials.forDevice(imei, trackerPlatform.getTenantId());
-        deviceCredentialsRepository.saveDeviceCredentials(deviceCredentials);
-    }
 }

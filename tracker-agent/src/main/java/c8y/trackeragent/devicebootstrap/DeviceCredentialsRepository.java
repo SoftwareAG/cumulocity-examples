@@ -65,7 +65,7 @@ public class DeviceCredentialsRepository {
 	}
 
 	//only for tests
-	void saveDeviceCredentials(DeviceCredentials newCredentials) { //will be replaced by addDeviceToTenant
+	void saveDeviceCredentials(DeviceCredentials newCredentials) {
         synchronized (lock) {
             Group group = asDeviceGroup(newCredentials.getImei(), newCredentials);
             if (!group.isFullyInitialized()) {
