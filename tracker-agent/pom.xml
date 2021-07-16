@@ -13,7 +13,7 @@
     <parent>
         <groupId>c8y.example</groupId>
         <artifactId>c8y-examples</artifactId>
-        <version>1010.7.0-SNAPSHOT</version>
+        <version>1010.9.0-SNAPSHOT</version>
     </parent>
 
     <groupId>c8y</groupId>
@@ -164,10 +164,6 @@
                 <configuration>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>com.nsn.cumulocity.clients-java</groupId>

@@ -12,6 +12,10 @@ package c8y.trackeragent.operations;
 import c8y.CommunicationMode;
 import c8y.MicroserviceSubscriptionsServiceMock;
 import c8y.Mobile;
+import c8y.trackeragent.devicebootstrap.DeviceCredentials;
+import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
+import c8y.trackeragent.devicebootstrap.MicroserviceSubscriptionsServiceWrapper;
+import com.cumulocity.microservice.context.credentials.MicroserviceCredentials;
 import c8y.trackeragent.devicemapping.DeviceTenantMappingService;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.model.sms.Address;
@@ -24,6 +28,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
+import java.util.Map;
+import java.util.Optional;
+
 import static com.cumulocity.model.sms.Address.phoneNumber;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
@@ -33,6 +40,8 @@ public class OperationSmsDeliveryTest {
 
     private final InventoryApi inventoryApi = mock(InventoryApi.class);
     private final SmsMessagingApi outgoingMessagingClient = mock(SmsMessagingApi.class);
+    private final DeviceCredentialsRepository deviceCredentialsRepo = mock(DeviceCredentialsRepository.class);
+    private final MicroserviceSubscriptionsServiceMock microserviceSubscriptionsService = new MicroserviceSubscriptionsServiceMock();
     private final DeviceTenantMappingService deviceTenantMappingService = mock(DeviceTenantMappingService.class);
     private OperationSmsDelivery operationSmsDelivery;
 
@@ -42,16 +51,17 @@ public class OperationSmsDeliveryTest {
     String tenant = "tenant";
     GId deviceId;
     ManagedObjectRepresentation managedObject;
+    DeviceCredentials deviceCredentials = DeviceCredentials.forDevice(imei, tenant);
     ArgumentCaptor<SendMessageRequest> messageRequestCaptor = ArgumentCaptor.forClass(SendMessageRequest.class);
 
     @Before
     public void setup() {
-        
+
         operationSmsDelivery = new OperationSmsDelivery(
                 inventoryApi,
                 outgoingMessagingClient,
-                deviceTenantMappingService,
-                new MicroserviceSubscriptionsServiceMock());
+                deviceCredentialsRepo,
+                new MicroserviceSubscriptionsServiceWrapper(microserviceSubscriptionsService));
         
         managedObject = new ManagedObjectRepresentation();
         Mobile mobile = new Mobile();
@@ -78,12 +88,18 @@ public class OperationSmsDeliveryTest {
     
     @Test
     public void shouldSendSmsToMsisdn() {
+        //given
+        microserviceSubscriptionsService.setOptionalMicroserviceCredentials(Map.of(
+                tenant, Optional.of(new MicroserviceCredentials())
+        ));
         setupMOtoDeliverSms();
         Address address = phoneNumber(msisdn);
         SendMessageRequest request = SendMessageRequest.builder().withReceiver(address).withSender(address).withMessage(translation).build();
 
+        //when
         operationSmsDelivery.deliverSms(translation, deviceId, imei);
 
+        //then
         verify(outgoingMessagingClient).sendMessage(messageRequestCaptor.capture());
         assertEquals(request.toString(), messageRequestCaptor.getValue().toString());
         verify(outgoingMessagingClient).sendMessage(any());

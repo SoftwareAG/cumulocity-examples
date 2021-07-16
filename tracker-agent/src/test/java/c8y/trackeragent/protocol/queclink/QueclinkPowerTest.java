@@ -10,8 +10,6 @@
 package c8y.trackeragent.protocol.queclink;
 
 import static c8y.trackeragent.protocol.TrackingProtocol.QUECLINK;
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
 import org.joda.time.DateTime;

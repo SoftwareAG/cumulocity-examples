@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import c8y.trackeragent.devicemapping.DeviceTenantMappingService;
+import c8y.trackeragent.exception.TenantNotSubscribedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -127,6 +128,8 @@ public abstract class BaseConnectedTracker<F extends Fragment> implements Connec
             } catch (InterruptedException e) {
             }
             processReport(reportContext);
+        } catch (TenantNotSubscribedException e) {
+            logger.error(e.getLocalizedMessage(), e);
         }
     }
 

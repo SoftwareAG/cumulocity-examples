@@ -9,6 +9,7 @@
 
 package c8y.trackeragent.devicebootstrap;
 
+import c8y.trackeragent.exception.UnknownDeviceException;
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,6 +42,20 @@ public class DeviceCredentialsRepositoryTest {
 	}
 
 	@Test
+	public void shouldSaveAndGetDeviceCredentials() throws Exception {
+		credentialsRepository.saveDeviceCredentials(deviceCredentials);
+		
+		assertThat(credentialsRepository.getDeviceCredentials(IMEI)).isEqualTo(deviceCredentials);
+	}
+	
+	@Test
+	public void shouldSaveAndHasDeviceCredentials() throws Exception {
+		credentialsRepository.saveDeviceCredentials(deviceCredentials);
+		
+		assertThat(credentialsRepository.hasDeviceCredentials(IMEI)).isTrue();
+	}
+	
+	@Test
 	public void shouldGetAllDeviceCredentials() throws Exception {
 		credentialsRepository.saveDeviceCredentials(deviceCredentials);
 		
@@ -52,7 +67,27 @@ public class DeviceCredentialsRepositoryTest {
 		credentialsRepository.saveDeviceCredentials(deviceCredentials);
 		
 		credentialsRepository.refresh();
-		
+
 		assertThat(credentialsRepository.getAllDeviceCredentials()).containsOnly(deviceCredentials);
+	}
+	
+	@Test
+	public void shouldGetAllDeviceCredentialsForTenant() throws Exception {
+		DeviceCredentials cred_1 = DeviceCredentials.forDevice("imei_1", "tenant_1");
+		credentialsRepository.saveDeviceCredentials(cred_1);
+		DeviceCredentials cred_2 = DeviceCredentials.forDevice("imei_2", "tenant_2");
+		credentialsRepository.saveDeviceCredentials(cred_2);
+		
+		credentialsRepository.getAllDeviceCredentials("tenant_1");
+		
+		Iterable<DeviceCredentials> allDeviceCredentials = credentialsRepository.getAllDeviceCredentials("tenant_1");
+		assertThat(allDeviceCredentials).containsOnly(cred_1);
+	}
+	
+	@Test(expected = UnknownDeviceException.class)
+	public void shouldThrowExceptionDeviceCredentialsAbsent() throws Exception {
+		DeviceCredentials deviceCredentials = credentialsRepository.getDeviceCredentials(IMEI);
+		
+		assertThat(deviceCredentials).isNull();
 	}
 }

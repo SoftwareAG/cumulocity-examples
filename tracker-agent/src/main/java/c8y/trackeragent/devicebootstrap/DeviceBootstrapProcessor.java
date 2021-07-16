@@ -20,7 +20,6 @@ import com.cumulocity.rest.representation.devicebootstrap.DeviceCredentialsRepre
 import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.devicecontrol.DeviceCredentialsApi;
 
-import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.utils.TrackerPlatformProvider;
 
 @Component
