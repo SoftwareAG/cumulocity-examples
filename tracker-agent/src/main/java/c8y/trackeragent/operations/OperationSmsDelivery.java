@@ -13,7 +13,7 @@ import c8y.CommunicationMode;
 import c8y.Mobile;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
-import com.cumulocity.microservice.subscription.service.MicroserviceSubscriptionsService;
+import c8y.trackeragent.devicebootstrap.MicroserviceSubscriptionsServiceWrapper;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.model.sms.Address;
 import com.cumulocity.model.sms.SendMessageRequest;
@@ -35,18 +35,18 @@ public class OperationSmsDelivery {
     private final SmsMessagingApi outgoingMessagingClient;
 
     private final DeviceCredentialsRepository deviceCredentials;
-    private final MicroserviceSubscriptionsService microserviceSubscriptionsService;
+    private final MicroserviceSubscriptionsServiceWrapper microserviceSubscriptionsServiceWrapper;
 
     @Autowired
     public OperationSmsDelivery (
             InventoryApi inventoryApi,
             SmsMessagingApi outgoingMessagingClient,
             DeviceCredentialsRepository deviceCredentials,
-            MicroserviceSubscriptionsService microserviceSubscriptionsService) {
+            MicroserviceSubscriptionsServiceWrapper microserviceSubscriptionsServiceWrapper) {
         this.inventoryApi = inventoryApi;
         this.outgoingMessagingClient = outgoingMessagingClient;
         this.deviceCredentials = deviceCredentials;
-        this.microserviceSubscriptionsService = microserviceSubscriptionsService;
+        this.microserviceSubscriptionsServiceWrapper = microserviceSubscriptionsServiceWrapper;
     }
     
     /**
@@ -90,7 +90,7 @@ public class OperationSmsDelivery {
         final SendMessageRequest request = SendMessageRequest.builder().withReceiver(address).withSender(address).withMessage(translation).build();
 
         final DeviceCredentials device = this.deviceCredentials.getDeviceCredentials(imei);
-        microserviceSubscriptionsService.runForTenant(device.getTenant(), () -> {
+        microserviceSubscriptionsServiceWrapper.runForTenant(device.getTenant(), () -> {
             outgoingMessagingClient.sendMessage(request);
         });
     }

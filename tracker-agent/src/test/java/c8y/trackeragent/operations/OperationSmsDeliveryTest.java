@@ -14,6 +14,8 @@ import c8y.MicroserviceSubscriptionsServiceMock;
 import c8y.Mobile;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
+import c8y.trackeragent.devicebootstrap.MicroserviceSubscriptionsServiceWrapper;
+import com.cumulocity.microservice.context.credentials.MicroserviceCredentials;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.model.sms.Address;
 import com.cumulocity.model.sms.SendMessageRequest;
@@ -25,6 +27,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
+import java.util.Map;
+import java.util.Optional;
+
 import static com.cumulocity.model.sms.Address.phoneNumber;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
@@ -35,6 +40,7 @@ public class OperationSmsDeliveryTest {
     private final InventoryApi inventoryApi = mock(InventoryApi.class);
     private final SmsMessagingApi outgoingMessagingClient = mock(SmsMessagingApi.class);
     private final DeviceCredentialsRepository deviceCredentialsRepo = mock(DeviceCredentialsRepository.class);
+    private final MicroserviceSubscriptionsServiceMock microserviceSubscriptionsService = new MicroserviceSubscriptionsServiceMock();
     private OperationSmsDelivery operationSmsDelivery;
 
     String imei = "12345";
@@ -48,12 +54,12 @@ public class OperationSmsDeliveryTest {
 
     @Before
     public void setup() {
-        
+
         operationSmsDelivery = new OperationSmsDelivery(
                 inventoryApi,
                 outgoingMessagingClient,
                 deviceCredentialsRepo,
-                new MicroserviceSubscriptionsServiceMock());
+                new MicroserviceSubscriptionsServiceWrapper(microserviceSubscriptionsService));
         
         managedObject = new ManagedObjectRepresentation();
         Mobile mobile = new Mobile();
@@ -80,12 +86,18 @@ public class OperationSmsDeliveryTest {
     
     @Test
     public void shouldSendSmsToMsisdn() {
+        //given
+        microserviceSubscriptionsService.setOptionalMicroserviceCredentials(Map.of(
+                tenant, Optional.of(new MicroserviceCredentials())
+        ));
         setupMOtoDeliverSms();
         Address address = phoneNumber(msisdn);
         SendMessageRequest request = SendMessageRequest.builder().withReceiver(address).withSender(address).withMessage(translation).build();
 
+        //when
         operationSmsDelivery.deliverSms(translation, deviceId, imei);
 
+        //then
         verify(outgoingMessagingClient).sendMessage(messageRequestCaptor.capture());
         assertEquals(request.toString(), messageRequestCaptor.getValue().toString());
         verify(outgoingMessagingClient).sendMessage(any());

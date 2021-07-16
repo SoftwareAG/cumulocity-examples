@@ -11,7 +11,7 @@ import javax.ws.rs.core.MediaType;
 @Component
 public class SubscriptionApi {
 
-    private final static String URL = "/tenant/tenants/{tenant}/applications";
+    private final static String URL = "/tenant/tenants/{tenant}/applications?pageSize=2000";
     private final static String TENANT = "{tenant}";
 
     @Autowired

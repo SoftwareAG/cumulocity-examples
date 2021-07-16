@@ -1,7 +1,8 @@
 package c8y.trackeragent.server;
 
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
-import com.cumulocity.microservice.subscription.service.MicroserviceSubscriptionsService;
+import c8y.trackeragent.devicebootstrap.MicroserviceSubscriptionsServiceWrapper;
+import c8y.trackeragent.exception.TenantNotSubscribedException;
 import com.cumulocity.rest.representation.application.ApplicationReferenceCollectionRepresentation;
 import com.cumulocity.rest.representation.application.ApplicationReferenceRepresentation;
 import com.cumulocity.sdk.client.SDKException;
@@ -21,12 +22,12 @@ public class TenantSubscriptionService {
 
     private final DeviceCredentialsRepository deviceCredentialsRepository;
     private final SubscriptionApi subscriptionApi;
-    private final MicroserviceSubscriptionsService microserviceSubscriptionsService;
+    private final MicroserviceSubscriptionsServiceWrapper microserviceSubscriptionsServiceWrapper;
 
 
     public void subscribeTenants(String ownerTenant) {
         Set<String> allTenants = deviceCredentialsRepository.getAllTenants();
-        microserviceSubscriptionsService.runForTenant(ownerTenant, () -> {
+        microserviceSubscriptionsServiceWrapper.runForTenant(ownerTenant, () -> {
             subscribeAll(ownerTenant, allTenants);
         });
     }
@@ -34,7 +35,7 @@ public class TenantSubscriptionService {
     private void subscribeAll(String ownerTenant, Set<String> tenantsToSubscribe) {
         Optional<ApplicationReferenceRepresentation> trackerAgentApplication = getTrackerAgentApplication(ownerTenant);
         if (trackerAgentApplication.isEmpty()) {
-            throw new RuntimeException("Not found application in owner tenant: " + ownerTenant);
+            throw new TenantNotSubscribedException("Not found application in owner tenant: " + ownerTenant);
         }
         for (String tenant : tenantsToSubscribe) {
             subscribeIfNeeded(tenant, trackerAgentApplication.get());

@@ -108,11 +108,7 @@ public class LocationEventBuilder {
         result.setType(TrackerDevice.LU_EVENT_TYPE);
         result.setText(aText());
         result.setSource(asSource(sourceId));
-        if (dateTime != null) {
-            result.setDateTime(dateTime);
-        } else {
-            result.setDateTime(dateTime);
-        }
+        result.setDateTime(dateTime);
         result.set(position);
         if (speedMeasurement != null) {
             result.set(speedMeasurement);

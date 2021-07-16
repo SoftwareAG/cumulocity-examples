@@ -9,7 +9,7 @@
 
 package c8y.trackeragent.service;
 
-import com.cumulocity.microservice.subscription.service.MicroserviceSubscriptionsService;
+import c8y.trackeragent.devicebootstrap.MicroserviceSubscriptionsServiceWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,14 +24,14 @@ public class TrackerDeviceContextService {
 
 	protected static Logger logger = LoggerFactory.getLogger(TrackerDeviceContextService.class);
 
-	private final MicroserviceSubscriptionsService microserviceSubscriptionsService;
+	private final MicroserviceSubscriptionsServiceWrapper microserviceSubscriptionsServiceWrapper;
     private final TrackerDeviceProvider trackerDeviceFactory;
     
     @Autowired
 	public TrackerDeviceContextService(
-			MicroserviceSubscriptionsService microserviceSubscriptionsService,
+			MicroserviceSubscriptionsServiceWrapper microserviceSubscriptionsServiceWrapper,
 			TrackerDeviceProvider trackerDeviceFactory) {
-		this.microserviceSubscriptionsService = microserviceSubscriptionsService;
+		this.microserviceSubscriptionsServiceWrapper = microserviceSubscriptionsServiceWrapper;
 		this.trackerDeviceFactory = trackerDeviceFactory;
 	}
     
@@ -48,6 +48,6 @@ public class TrackerDeviceContextService {
     }
 	
 	private void executeForTenant(String tenant, Runnable r) {
-		microserviceSubscriptionsService.runForTenant(tenant, r);
+		microserviceSubscriptionsServiceWrapper.runForTenant(tenant, r);
 	}
 }
