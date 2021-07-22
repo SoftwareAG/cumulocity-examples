@@ -56,7 +56,7 @@ public class DeviceCredentialsRepository {
     	this(ConfigUtils.get().getConfigFilePath(ConfigUtils.DEVICES_FILE_NAME));
     }
 
-    public List<DeviceCredentials> getAllDeviceCredentials() { //used only in migration service
+    public List<DeviceCredentials> getAllDeviceCredentials() {
         return new ArrayList<DeviceCredentials>(imei2DeviceCredentials.values());
     }
 
@@ -64,7 +64,7 @@ public class DeviceCredentialsRepository {
 		return tenants;
 	}
 
-	//only for tests
+	/* only for tests */
 	void saveDeviceCredentials(DeviceCredentials newCredentials) {
         synchronized (lock) {
             Group group = asDeviceGroup(newCredentials.getImei(), newCredentials);
@@ -104,7 +104,7 @@ public class DeviceCredentialsRepository {
     	return DeviceCredentials.forDevice(group.getName(), group.get("tenantId"));
     }
 
-    private Group asDeviceGroup(String imei, DeviceCredentials credentials) { //it should be removed in feature
+    private Group asDeviceGroup(String imei, DeviceCredentials credentials) {
         Group group = devicePropertyAccessor.createEmptyGroup(imei);
         group.put("tenantId", credentials.getTenant());
         return group;

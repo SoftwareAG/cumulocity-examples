@@ -12,6 +12,7 @@ import com.cumulocity.sdk.client.identity.IdentityApi;
 import com.cumulocity.sdk.client.inventory.InventoryApi;
 import com.cumulocity.sdk.client.inventory.ManagedObjectCollection;
 import com.cumulocity.sdk.client.inventory.PagedManagedObjectCollectionRepresentation;
+import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -111,7 +112,7 @@ class DeviceTenantMappingServiceTest {
         Mockito.when(inventoryApi.create(Mockito.any()))
                 .thenReturn(createRepresentationFromTenant(MY_TENANT, MY_TENANT_ID));
         Mockito.when(identityApi.getExternalId(new ID(TYPE, IMEI)))
-                .thenThrow(new SDKException("Not found"));
+                .thenThrow(new SDKException(HttpStatus.SC_NOT_FOUND, "Not found"));
 
         //when
         deviceTenantMappingService.addDeviceToTenant(IMEI, MY_TENANT);
@@ -137,7 +138,7 @@ class DeviceTenantMappingServiceTest {
         Mockito.when(inventoryApi.getManagedObjectsByFilter(Mockito.any()))
                 .thenReturn(managedObjectCollection);
         Mockito.when(identityApi.getExternalId(new ID(TYPE, IMEI)))
-                .thenThrow(new SDKException("Not found"));
+                .thenThrow(new SDKException(HttpStatus.SC_NOT_FOUND, "Not found"));
 
         //when
         deviceTenantMappingService.addDeviceToTenant(IMEI, MY_TENANT);

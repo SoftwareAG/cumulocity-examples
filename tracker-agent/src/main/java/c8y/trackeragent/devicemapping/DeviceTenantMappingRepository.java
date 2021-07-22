@@ -11,14 +11,14 @@ import com.cumulocity.sdk.client.inventory.InventoryFilter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
+@RequiredArgsConstructor
 class DeviceTenantMappingRepository {
 
     private static final String TYPE = "c8y_device_tenant_Imei";
@@ -32,7 +32,11 @@ class DeviceTenantMappingRepository {
             ExternalIDRepresentation externalId = identityApi.getExternalId(new ID(TYPE, externalDeviceId));
             return Optional.of((String) inventoryApi.get(externalId.getManagedObject().getId()).get(TENANT_FIELD));
         } catch (SDKException e) {
-            return Optional.empty();
+            if (e.getHttpStatus() == HttpStatus.SC_NOT_FOUND) {
+                return Optional.empty();
+            } else {
+                throw e;
+            }
         }
     }
 
