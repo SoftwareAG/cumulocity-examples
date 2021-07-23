@@ -71,9 +71,7 @@ class DeviceTenantMappingRepository {
         identityApi.deleteExternalId(
                 createExternalIDRepresentation(externalDeviceId, managedObjectForTenant.get())
         );
-        identityApi.create(
-                createExternalIDRepresentation(externalDeviceId, tenantObject)
-        );
+        addDeviceToExistingTenant(externalDeviceId, tenantObject);
     }
 
     ExternalIDRepresentation createExternalIDRepresentation(String externalDeviceId, ManagedObjectRepresentation tenantObject) {
