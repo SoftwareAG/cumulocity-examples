@@ -188,19 +188,8 @@ class DeviceTenantMappingServiceTest {
         deviceTenantMappingService.addDeviceToTenant(IMEI, MY_TENANT);
 
         //then
-        ArgumentCaptor<ExternalIDRepresentation> identityDeleteArgument = ArgumentCaptor.forClass(ExternalIDRepresentation.class);
-        Mockito.verify(identityApi).deleteExternalId(identityDeleteArgument.capture());
-        ExternalIDRepresentation idDeleteRepresentation = identityDeleteArgument.getValue();
-        assertThat(idDeleteRepresentation.getExternalId()).isEqualTo(IMEI);
-        assertThat(idDeleteRepresentation.getType()).isEqualTo(TYPE);
-        assertThat(idDeleteRepresentation.getManagedObject().getId().getLong()).isEqualTo(OTHER_TENANT_ID);
-
-        ArgumentCaptor<ExternalIDRepresentation> identityArgument = ArgumentCaptor.forClass(ExternalIDRepresentation.class);
-        Mockito.verify(identityApi).create(identityArgument.capture());
-        ExternalIDRepresentation idRepresentation = identityArgument.getValue();
-        assertThat(idRepresentation.getExternalId()).isEqualTo(IMEI);
-        assertThat(idRepresentation.getType()).isEqualTo(TYPE);
-        assertThat(idRepresentation.getManagedObject().getId().getLong()).isEqualTo(MY_TENANT_ID);
+        Mockito.verify(inventoryApi, Mockito.never()).create(Mockito.any());
+        Mockito.verify(identityApi, Mockito.never()).create(Mockito.any());
     }
 
     private ExternalIDRepresentation createExternalIDRepresentation(GId tenantObjectId) {

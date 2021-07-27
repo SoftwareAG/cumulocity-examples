@@ -64,16 +64,6 @@ class DeviceTenantMappingRepository {
         );
     }
 
-    void moveDeviceFromOneTenantToAnother(ManagedObjectRepresentation tenantObject,
-                                          String externalDeviceId,
-                                          String existingTenant) {
-        Optional<ManagedObjectRepresentation> managedObjectForTenant = findManagedObjectForTenant(existingTenant);
-        identityApi.deleteExternalId(
-                createExternalIDRepresentation(externalDeviceId, managedObjectForTenant.get())
-        );
-        addDeviceToExistingTenant(externalDeviceId, tenantObject);
-    }
-
     ExternalIDRepresentation createExternalIDRepresentation(String externalDeviceId, ManagedObjectRepresentation tenantObject) {
         ExternalIDRepresentation externalIDRepresentation = new ExternalIDRepresentation();
         externalIDRepresentation.setExternalId(externalDeviceId);
