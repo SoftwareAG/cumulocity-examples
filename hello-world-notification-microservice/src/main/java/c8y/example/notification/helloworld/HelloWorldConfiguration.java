@@ -14,7 +14,7 @@ public class HelloWorldConfiguration {
     @Primary
     public MicroserviceMetadataRepresentation helloWorldMicroserviceMetadata() {
         return microserviceMetadataRepresentation()
-                .requiredRole("ROLE_RELIABLE_NOTIFICATION_ADMIN")
+                .requiredRole("ROLE_NOTIFICATION_2_ADMIN")
                 .build();
     }
 }

@@ -7,7 +7,7 @@
   },
   "isolation": "PER_TENANT",
   "requiredRoles": [
-    "ROLE_RELIABLE_NOTIFICATION_ADMIN"
+    "ROLE_NOTIFICATION_2_ADMIN"
   ],
   "roles": [
   ],
