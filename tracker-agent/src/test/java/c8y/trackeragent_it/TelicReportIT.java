@@ -9,6 +9,7 @@
 
 package c8y.trackeragent_it;
 
+import com.cumulocity.microservice.subscription.service.MicroserviceSubscriptionsService;
 import org.assertj.core.api.Assertions;
 
 import org.junit.Before;
@@ -22,12 +23,16 @@ import c8y.trackeragent.protocol.telic.TelicDeviceMessages;
 import c8y.trackeragent.utils.Devices;
 import c8y.trackeragent.utils.Positions;
 import c8y.trackeragent.utils.message.TrackerMessage;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class TelicReportIT extends TrackerITSupport {
     
     private final TelicDeviceMessages deviceMessages = new TelicDeviceMessages();
-    private String imei; 
-    
+    private String imei;
+
+    @Autowired
+    private MicroserviceSubscriptionsService microserviceSubscriptionsService;
+
     @Override
     protected TrackingProtocol getTrackerProtocol() {
         return TrackingProtocol.TELIC;
@@ -40,8 +45,12 @@ public class TelicReportIT extends TrackerITSupport {
 
     @Test
     public void shouldBootstrapNewDeviceAndThenChangeItsLocation() throws Exception {
-        bootstrapDevice(imei, deviceMessages.positionUpdate(imei, Positions.ZERO));  
-        
+        try {
+            bootstrapDevice(imei, deviceMessages.positionUpdate(imei, Positions.ZERO));
+        } catch (Exception e) {
+            throw new RuntimeException("Error setup devices", e);
+        }
+
         TrackerMessage positionUpdate = deviceMessages.positionUpdate(imei, Positions.SAMPLE_4);
         writeInNewConnection(positionUpdate);
         
@@ -51,5 +60,4 @@ public class TelicReportIT extends TrackerITSupport {
         Assertions.assertThat(deviceMO).isNotNull();
         Positions.assertEqual(deviceMO.get(Position.class), Positions.SAMPLE_4);
     }
-
 }

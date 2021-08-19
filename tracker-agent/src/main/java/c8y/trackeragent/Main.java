@@ -22,12 +22,13 @@
 
 package c8y.trackeragent;
 
-import c8y.trackeragent.devicebootstrap.TenantBinder;
 import c8y.trackeragent.server.Servers;
+import c8y.trackeragent.server.TenantSubscriptionService;
 import com.cumulocity.microservice.autoconfigure.MicroserviceApplication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.ComponentScan;
@@ -41,6 +42,9 @@ import java.io.IOException;
 @ComponentScan(basePackageClasses = Main.class, value = {"c8y.trackeragent", "com.cumulocity"})
 @MicroserviceApplication
 public class Main {
+
+    @Value("${C8Y.bootstrap.tenant}")
+    private String ownerTenant;
     
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
@@ -48,8 +52,8 @@ public class Main {
     private Servers servers;
 
     @Autowired
-    private TenantBinder tenantBinder;
-    
+    private TenantSubscriptionService tenantSubscriptionService;
+
     public static void main(String[] args) {
         logger.info("tracker-agent is starting.");
         SpringApplication.run(Main.class, args);
@@ -58,6 +62,6 @@ public class Main {
     @EventListener(ApplicationReadyEvent.class)
     public void onStart() throws IOException {
         servers.startAll();
-        tenantBinder.init();
+        tenantSubscriptionService.subscribeTenants(ownerTenant);
     }
 }

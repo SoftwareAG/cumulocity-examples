@@ -31,10 +31,10 @@ import c8y.trackeragent.device.TrackerDevice;
 import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.protocol.TrackingProtocol;
 import c8y.trackeragent.tracker.BaseConnectedTracker;
-import c8y.trackeragent.tracker.MicroserviceCredentialsFactory;
 import c8y.trackeragent.utils.Devices;
 import com.cumulocity.microservice.context.ContextService;
 import com.cumulocity.microservice.context.credentials.MicroserviceCredentials;
+import com.cumulocity.microservice.subscription.service.MicroserviceSubscriptionsService;
 import com.cumulocity.model.ID;
 import com.cumulocity.model.event.CumulocityAlarmStatuses;
 import com.cumulocity.model.idtype.GId;
@@ -75,10 +75,10 @@ public class TrackerDeviceIT extends TrackerITSupport {
     public static final BigDecimal RADIUS = new BigDecimal(100);
 
     @Autowired
-    private MicroserviceCredentialsFactory microserviceCredentialsFactory;
+    private ContextService<MicroserviceCredentials> contextService;
 
     @Autowired
-    private ContextService<MicroserviceCredentials> contextService;
+    private MicroserviceSubscriptionsService microserviceSubscriptionsService;
 
     @Before
     public void setup() throws IOException {
@@ -102,8 +102,7 @@ public class TrackerDeviceIT extends TrackerITSupport {
     @Test
     public void shouldSetTrackerData() throws SDKException {
     	deviceCredentialsRepository.saveDeviceCredentials(DeviceCredentials.forDevice(imei, trackerPlatform.getTenantId()));
-    	contextService.runWithinContext(
-    	        microserviceCredentialsFactory.getForTenant(trackerPlatform.getTenantId()),
+        microserviceSubscriptionsService.runForTenant(trackerPlatform.getTenantId(),
                 () -> {
                     saveAgentCredentials(imei);
                     try {
@@ -204,11 +203,8 @@ public class TrackerDeviceIT extends TrackerITSupport {
         assertEquals(one.doubleValue(), two.doubleValue(), 0.01);
     }
     
-    private DeviceCredentials saveAgentCredentials(String imei) {
+    private void saveAgentCredentials(String imei) {
     	DeviceCredentials deviceCredentials = DeviceCredentials.forDevice(imei, trackerPlatform.getTenantId());
         deviceCredentialsRepository.saveDeviceCredentials(deviceCredentials);
-        DeviceCredentials agentCredentials = DeviceCredentials.forAgent(trackerPlatform.getTenantId(), trackerPlatform.getUser(), trackerPlatform.getPassword());
-        deviceCredentialsRepository.saveAgentCredentials(agentCredentials);
-        return agentCredentials;
     }
 }

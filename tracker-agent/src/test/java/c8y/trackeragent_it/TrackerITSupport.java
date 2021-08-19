@@ -80,7 +80,7 @@ public abstract class TrackerITSupport {
         trackerPlatform = trackerPlatform(testSettings);
         Thread.sleep(200);// avoid address already in use error
         socketWriter = new SocketWritter(testSettings, trackerAgentConfig.getPort(getTrackerProtocol()));
-        NewDeviceRequestService newDeviceRequestService = new NewDeviceRequestService(trackerPlatform.getPlatformParameters(), testSettings);
+        NewDeviceRequestService newDeviceRequestService = new NewDeviceRequestService(trackerPlatform.getPlatformParameters(), testSettings, trackerPlatform.getDeviceCredentialsApi());
         bootstraper = new Bootstraper(testSettings, socketWriter, newDeviceRequestService);
         bootstraper.deleteExistingAgentRequest();
     }
@@ -135,5 +135,4 @@ public abstract class TrackerITSupport {
                 .build();
         return new PlatformImpl(testSettings.getC8yHost(), credentials);
     }
-
 }

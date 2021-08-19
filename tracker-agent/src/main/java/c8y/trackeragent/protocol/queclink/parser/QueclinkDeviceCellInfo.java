@@ -25,7 +25,6 @@ import com.cumulocity.sdk.client.SDKException;
 
 import c8y.CellInfo;
 import c8y.CellTower;
-import c8y.Mobile;
 import c8y.trackeragent.TrackerAgent;
 import c8y.trackeragent.context.ReportContext;
 import c8y.trackeragent.device.TrackerDevice;

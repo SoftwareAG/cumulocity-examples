@@ -12,14 +12,10 @@ package c8y.trackeragent.protocol.queclink.parser;
 import java.math.BigDecimal;
 
 import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.event.EventRepresentation;
-import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 
 import c8y.Position;

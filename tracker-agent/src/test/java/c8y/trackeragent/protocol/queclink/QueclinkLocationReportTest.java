@@ -9,7 +9,6 @@
 
 package c8y.trackeragent.protocol.queclink;
 
-import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
@@ -17,8 +16,6 @@ import java.math.BigDecimal;
 import static c8y.trackeragent.protocol.TrackingProtocol.QUECLINK;
 
 import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
