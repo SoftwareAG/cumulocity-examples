@@ -35,7 +35,7 @@ import java.util.Optional;
 public class NotificationExample {
 
     private static final String SOURCE_ID = "example.source.id";
-    private final static String WEBSOCKET_URL_PATTERN = "%s/c8y/relnotif/consumer/?token=%s";
+    private final static String WEBSOCKET_URL_PATTERN = "%s/notification2/consumer/?token=%s";
 
     private final MicroserviceSubscriptionsService contextService;
     private final TokenService tokenService;
