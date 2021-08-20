@@ -6,11 +6,11 @@
 
     <groupId>c8y.example</groupId>
     <artifactId>hello-world-notification-microservice</artifactId>
-    <name>Cumulocity :: Examples :: Hello World Notification Microservice</name>
-    <version>1010.9.0-SNAPSHOT</version>
+    <name>Cumulocity :: Examples :: Hello World Notification 2.0 Microservice</name>
+    <version>1010.16.0-SNAPSHOT</version>
 
     <properties>
-        <c8y.version>1010.9.0-SNAPSHOT</c8y.version>
+        <c8y.version>1010.16.0-SNAPSHOT</c8y.version>
         <main.class>c8y.example.notification.helloworld.HelloWorldApplication</main.class>
 
         <java.version>11</java.version>
@@ -100,8 +100,8 @@
                             <goal>package</goal>
                         </goals>
                         <configuration>
-                            <name>hello-world</name>
-                            <image>hello-world</image>
+                            <name>hello-world-notification</name>
+                            <image>hello-world-notification</image>
                             <encoding>UTF-8</encoding>
                             <rpmSkip>true</rpmSkip>
                         </configuration>

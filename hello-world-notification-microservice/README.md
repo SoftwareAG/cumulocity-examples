@@ -1,4 +1,4 @@
-##Example Notification Microservice
+##Example Notification 2.0 Microservice
 This example microservice shows you how to create a subscription & consume a stream of notifications using WebSocket protocol. Before running this example microservice, please make sure to have created a device and specified its ID in `example.source.id` property located in applications.properties. As part of cleanup, you may wish to delete this device after you have finished running this example. The example microservice first creates a subscription and then proceeds to connect to the WebSocket server after obtaining the authorization token.
 
 The example microservice creates the following subscription to the specified device:
