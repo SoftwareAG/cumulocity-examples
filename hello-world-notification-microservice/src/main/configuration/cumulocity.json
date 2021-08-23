@@ -1,6 +1,6 @@
 {
   "apiVersion": "1",
-  "name": "hello-world-notification",
+  "name": "hello-notification",
   "version": "@project.version@",
   "provider": {
     "name": "Cumulocity GmbH"

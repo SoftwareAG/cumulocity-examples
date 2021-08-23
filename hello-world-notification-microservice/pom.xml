@@ -100,8 +100,8 @@
                             <goal>package</goal>
                         </goals>
                         <configuration>
-                            <name>hello-world-notification</name>
-                            <image>hello-world-notification</image>
+                            <name>hello-notification</name>
+                            <image>hello-notification</image>
                             <encoding>UTF-8</encoding>
                             <rpmSkip>true</rpmSkip>
                         </configuration>
