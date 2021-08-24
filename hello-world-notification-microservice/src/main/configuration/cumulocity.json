@@ -1,0 +1,30 @@
+{
+  "apiVersion": "1",
+  "name": "hello-notification",
+  "version": "@project.version@",
+  "provider": {
+    "name": "Cumulocity GmbH"
+  },
+  "isolation": "PER_TENANT",
+  "requiredRoles": [
+    "ROLE_NOTIFICATION_2_ADMIN"
+  ],
+  "roles": [
+  ],
+  "livenessProbe": {
+    "httpGet": {
+      "path": "/health",
+      "port": 80
+    },
+    "initialDelaySeconds": 360,
+    "periodSeconds": 10
+  },
+  "readinessProbe": {
+    "httpGet": {
+      "path": "/health",
+      "port": 80
+    },
+    "initialDelaySeconds": 30,
+    "periodSeconds": 10
+  }
+}
