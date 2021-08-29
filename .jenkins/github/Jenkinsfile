@@ -31,7 +31,7 @@ pipeline {
                     anyOf {
                         allOf {
                             equals expected: 'RELEASE', actual: params.build_type;
-                            branch 'develop'
+                            branch 'githubdev'
                         };
                         allOf {
                             equals expected: 'HOTFIX', actual: params.build_type;
@@ -80,7 +80,7 @@ pipeline {
                     equals expected: 'DEFAULT', actual: params.build_type
                     anyOf {
                         branch 'release/**';
-                        branch 'develop'
+                        branch 'githubdev'
                     }
                 }
 
@@ -101,7 +101,7 @@ pipeline {
                 anyOf {
                     allOf {
                         equals expected: 'RELEASE', actual: params.build_type;
-                        branch 'develop'
+                        branch 'githubdev'
                     };
                     allOf {
                         equals expected: 'HOTFIX', actual: params.build_type;
@@ -148,7 +148,7 @@ pipeline {
                                   sh "chmod +x .jenkins/scripts/finish_release.sh && .jenkins/scripts/finish_release.sh ${params.release_version}"
                             }
                         }
-                        stage('Bump develop branch') {
+                        stage('Bump githubdev branch') {
                             steps {
                                  sh ".jenkins/scripts/update_develop.sh ${params.hotfix_version} ${params.development_version}"
                             }
@@ -175,7 +175,7 @@ pipeline {
 
         failure {
             script {
-                if (env.BRANCH_NAME ==~ '(develop|release/.*)') {
+                if (env.BRANCH_NAME ==~ '(githubdev|release/.*)') {
                     // chat 'AAAAvnc5o90'
                 }
             }

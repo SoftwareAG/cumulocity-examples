@@ -18,7 +18,7 @@ deploy() {
 }
 setLatest(){
   echo "update latest $2 to $1"
-  ssh ${YUM_USR}@${YUM_SRV} ln -sf $1 $2/$3-latest.$4 
+  ssh ${YUM_USR}@${YUM_SRV} ln -sf $1 $2/$3-latest.$4
 }
 if [ "!$1" = "!release" ]
 then
@@ -45,7 +45,7 @@ then
     YUM_DEST_DIR=/var/www/resources/examples
     target_package=$(find ./ -regextype egrep -regex ".*cumulocity-linux-agent-[0-9]+\.[0-9]+\.[0-9]+\.tar\.gz")
     target_package_name=$(basename $target_package)
-    
+
 
         if [ -z "$target_package" ] || [ -z "$YUM_DEST_DIR" ]; then
             echo "cumulocity-linux-agent or destination  not find!"
@@ -53,10 +53,10 @@ then
         else
             deploy $target_package
 
-            if [ "!$1" = "!develop" ]
+            if [ "!$1" = "!githubdev" ]
             then
                 setLatest  $target_package_name $YUM_DEST_DIR  "cumulocity-linux-agent" "tar.gz"
             fi
         fi
-   
+
 fi

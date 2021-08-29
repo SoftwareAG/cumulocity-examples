@@ -27,7 +27,7 @@ function tag-version {
 
 echo "obtain current branch name"
 
-if [ "develop" == "${current_branch}" ]; then
+if [ "githubdev" == "${current_branch}" ]; then
   branch_name="release/r${version}"
 else
   branch_name=$current_branch
