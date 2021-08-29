@@ -1,3 +1,7 @@
+withCredentials([usernamePassword(credentialsId: 'bitbucket-m2m', passwordVariable: 'BITBUCKET_PASSWORD', usernameVariable: 'BITBUCKET_USER')]) {
+        env.REPOSITORY_BASE_URL="https://${BITBUCKET_USER}:${BITBUCKET_PASSWORD}@bitbucket.org/m2m"
+}
+
 pipeline {
      agent {
         kubernetes {
@@ -61,7 +65,7 @@ pipeline {
         stage('Build') {
             steps {
                 withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
-                    sh "chmod +x .jenkins/scripts/build.sh && .jenkins/scripts/build.sh"
+                    sh ".jenkins/scripts/build.sh"
                 }
             }
             post {
@@ -87,7 +91,7 @@ pipeline {
                 lock('deploy2yum') {
                     sshagent(['jenkins-master']) {
                         withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
-                            sh "chmod +x .jenkins/scripts/deploy.sh && .jenkins/scripts/deploy.sh snapshot"
+                            sh ".jenkins/scripts/deploy.sh snapshot"
                         }
                     }
                 }
@@ -112,9 +116,8 @@ pipeline {
                         equals expected: 'RELEASE', actual: params.build_type
                     }
                     steps {
-                        withCredentials([usernamePassword(credentialsId: 'bitbucket-m2m', passwordVariable: 'BITBUCKET_PASSWORD', usernameVariable: 'BITBUCKET_USER'),
-                                        file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
-                            sh "chmod +x .jenkins/scripts/prepare_release.sh && .jenkins/scripts/prepare_release.sh ${params.release_version}"
+                        withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
+                            sh ".jenkins/scripts/prepare_release.sh ${params.release_version}"
                         }
                     }
                 }
@@ -129,9 +132,8 @@ pipeline {
                         echo "wait for lock on deploy2yum.sh"
                         lock('deploy2yum') {
                             sshagent(['jenkins-master']) {
-                                withCredentials([usernamePassword(credentialsId: 'bitbucket-m2m', passwordVariable: 'BITBUCKET_PASSWORD', usernameVariable: 'BITBUCKET_USER'),
-                                                 file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
-                                    sh "chmod +x .jenkins/scripts/release.sh && .jenkins/scripts/release.sh -r ${params.release_version} -d ${params.hotfix_version} -b ${env.BRANCH_NAME}"
+                                withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
+                                    sh ".jenkins/scripts/release.sh -r ${params.release_version} -d ${params.hotfix_version} -b ${env.BRANCH_NAME}"
                                 }
                             }
                         }
@@ -144,16 +146,12 @@ pipeline {
                     stages {
                         stage('Close and merge release branch') {
                             steps {
-                                withCredentials([usernamePassword(credentialsId: 'bitbucket-m2m', passwordVariable: 'BITBUCKET_PASSWORD', usernameVariable: 'BITBUCKET_USER')]) {
-                                    sh "chmod +x .jenkins/scripts/finish_release.sh && .jenkins/scripts/finish_release.sh ${params.release_version}"
-                                }
+                                 sh ".jenkins/scripts/finish_release.sh ${params.release_version}"
                             }
                         }
                         stage('Bump develop branch') {
                             steps {
-                                withCredentials([usernamePassword(credentialsId: 'bitbucket-m2m', passwordVariable: 'BITBUCKET_PASSWORD', usernameVariable: 'BITBUCKET_USER')]) {
-                                    sh "chmod +x .jenkins/scripts/update_develop.sh && .jenkins/scripts/update_develop.sh ${params.hotfix_version} ${params.development_version}"
-                                }
+                                 sh ".jenkins/scripts/update_develop.sh ${params.hotfix_version} ${params.development_version}"
                             }
                         }
                     }
@@ -172,10 +170,10 @@ pipeline {
     post {
         always {
             withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
-                sh "chmod +x .jenkins/scripts/clean.sh && .jenkins/scripts/clean.sh"
+                sh ".jenkins/scripts/clean.sh"
             }
         }
-       
+
         failure {
             script {
                 if (env.BRANCH_NAME ==~ '(develop|release/.*)') {
