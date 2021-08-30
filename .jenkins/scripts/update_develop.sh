@@ -12,7 +12,7 @@ git remote -v
 git checkout githubdev
 find . -name 'pom.xml' | xargs sed -i "s/<version>${hotfix_version}<\\/version>/<version>${development_version}<\\/version>/g"
 update-dependencies ${development_version}
-
-git commit -am 'Update dependencies to next SNAPSHOT version'
+echo "Update dependencies to next SNAPSHOT version"
+git commit --allow-empty -am 'Update dependencies to next SNAPSHOT version'
 echo "git push origin githubdev"
 git push ${REPOSITORY_BASE_URL}/cumulocity-examples githubdev
