@@ -11,4 +11,5 @@ find . -name 'pom.xml' | xargs sed -i "s/<version>${hotfix_version}<\\/version>/
 update-dependencies ${development_version}
 
 git commit -am 'Update dependencies to next SNAPSHOT version'
+echo "git push origin githubdev"
 git push ${REPOSITORY_BASE_URL}/cumulocity-examples githubdev
