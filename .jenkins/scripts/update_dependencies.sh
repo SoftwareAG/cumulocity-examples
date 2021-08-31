@@ -14,7 +14,7 @@ function update-dependencies {
         update-property $property ${1}
     done
     if [ "$2" != "no-commit" ]; then
-        git commit -am "Update dependencies to new version"
+        git commit --allow-empty -am "Update dependencies to new version"
     fi
 
 }

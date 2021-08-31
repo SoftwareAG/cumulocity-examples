@@ -1,0 +1,185 @@
+withCredentials([usernamePassword(credentialsId: 'bitbucket-m2m', passwordVariable: 'BITBUCKET_PASSWORD', usernameVariable: 'BITBUCKET_USER')]) {
+        env.REPOSITORY_BASE_URL="https://${BITBUCKET_USER}:${BITBUCKET_PASSWORD}@bitbucket.org/m2m"
+}
+
+pipeline {
+     agent {
+        kubernetes {
+            inheritFrom 'jdk8'
+            defaultContainer 'default'
+        }
+    }
+    triggers {
+         bitbucketPush()
+     }
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+        timeout(time: 4, unit: 'HOURS')
+        disableConcurrentBuilds()
+    }
+    parameters {
+        choice(name: 'build_type', choices: ['DEFAULT', 'RELEASE', 'HOTFIX']);
+        string(name: 'release_version', defaultValue: '9.91.0', description: "version you want to release");
+        string(name: 'hotfix_version', defaultValue: '9.91.1-SNAPSHOT', description: "version with micro part bump, available in release branch");
+        string(name: 'development_version', defaultValue: '9.92.0-SNAPSHOT', description: "version that will be in develop branch after process")
+
+    }
+
+    stages {
+        stage('Fail in case of incorrect input parameters') {
+            when {
+                not {
+                    anyOf {
+                        allOf {
+                            equals expected: 'RELEASE', actual: params.build_type;
+                            branch 'develop'
+                        };
+                        allOf {
+                            equals expected: 'HOTFIX', actual: params.build_type;
+                            branch 'release/*'
+                        }
+                        equals expected: 'DEFAULT', actual: params.build_type
+                    }
+                }
+            }
+            steps {
+                error("Incorrect input parameters")
+            }
+        }
+        stage('Checkout') {
+            steps {
+                withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
+                    sh "chmod +x .jenkins/scripts/clean.sh && .jenkins/scripts/clean.sh"
+                }
+            }
+        }
+        // Separate Compile and Build does not make sense currently as build cannot be run in isolated network.
+        // It cannot be run in isolated network due to jarhell in tests (agent-framework 8.18) that are not resolved at compile time.
+        //stage('Compile') {
+        //    steps {
+        //        withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
+        //            sh "chmod +x .jenkins/scripts/compile.sh && .jenkins/scripts/compile.sh"
+        //        }
+        //    }
+        //}
+        stage('Build') {
+            steps {
+                withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
+                    sh ".jenkins/scripts/build.sh"
+                }
+            }
+            post {
+                always {
+                    junit(testResults: '**/TEST-*.xml', keepLongStdio: true)
+                    jacoco()
+                }
+            }
+        }
+        stage('Deploy images') {
+            when {
+                allOf {
+                    equals expected: 'DEFAULT', actual: params.build_type
+                    anyOf {
+                        branch 'release/**';
+                        branch 'develop'
+                    }
+                }
+
+            }
+             steps {
+                echo "wait for lock on deploy2yum.sh"
+                lock('deploy2yum') {
+                    sshagent(['jenkins-master']) {
+                        withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
+                            sh ".jenkins/scripts/deploy.sh snapshot"
+                        }
+                    }
+                }
+            }
+        }
+        stage('Release') {
+            when {
+                anyOf {
+                    allOf {
+                        equals expected: 'RELEASE', actual: params.build_type;
+                        branch 'develop'
+                    };
+                    allOf {
+                        equals expected: 'HOTFIX', actual: params.build_type;
+                        branch 'release/*'
+                    }
+                }
+            }
+            stages {
+                stage('Prepare release') {
+                    when {
+                        equals expected: 'RELEASE', actual: params.build_type
+                    }
+                    steps {
+                        withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
+                            sh ".jenkins/scripts/prepare_release.sh ${params.release_version}"
+                        }
+                    }
+                }
+                stage('Release') {
+                    when {
+                        anyOf {
+                            equals expected: 'RELEASE', actual: params.build_type;
+                            equals expected: 'HOTFIX', actual: params.build_type
+                        }
+                    }
+                    steps {
+                        echo "wait for lock on deploy2yum.sh"
+                        lock('deploy2yum') {
+                            sshagent(['jenkins-master']) {
+                                withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
+                                    sh ".jenkins/scripts/release.sh -r ${params.release_version} -d ${params.hotfix_version} -b ${env.BRANCH_NAME}"
+                                }
+                            }
+                        }
+                    }
+                }
+                stage('Finish release') {
+                    when {
+                        equals expected: 'RELEASE', actual: params.build_type
+                    }
+                    stages {
+                        stage('Close and merge release branch') {
+                            steps {
+                                 sh ".jenkins/scripts/finish_release.sh ${params.release_version}"
+                            }
+                        }
+                        stage('Bump develop branch') {
+                            steps {
+                                 sh ".jenkins/scripts/update_develop.sh ${params.hotfix_version} ${params.development_version}"
+                            }
+                        }
+                    }
+                }
+                /* stage('Scan third party dependencies') {
+                    steps {
+                        echo "executing scan of third party dependencies"
+                        withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
+                            sh "chmod +x .jenkins/scripts/scan_dependencies.sh && .jenkins/scripts/scan_dependencies.sh ${params.release_version}"
+                        }
+                    }
+                } */
+            }
+        }
+    }
+    post {
+        always {
+            withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
+                sh ".jenkins/scripts/clean.sh"
+            }
+        }
+
+        failure {
+            script {
+                if (env.BRANCH_NAME ==~ '(develop|release/.*)') {
+                    // chat 'AAAAvnc5o90'
+                }
+            }
+        }
+    }
+}
