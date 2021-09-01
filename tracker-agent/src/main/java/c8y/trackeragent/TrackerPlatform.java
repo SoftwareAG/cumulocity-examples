@@ -22,6 +22,8 @@ import com.cumulocity.sdk.client.identity.IdentityApi;
 import com.cumulocity.sdk.client.inventory.BinariesApi;
 import com.cumulocity.sdk.client.inventory.InventoryApi;
 import com.cumulocity.sdk.client.measurement.MeasurementApi;
+import com.cumulocity.sdk.client.messaging.notifications.NotificationSubscriptionApi;
+import com.cumulocity.sdk.client.messaging.notifications.TokenApi;
 import com.cumulocity.sdk.client.option.SystemOptionApi;
 import com.cumulocity.sdk.client.option.TenantOptionApi;
 import com.cumulocity.sdk.client.user.UserApi;
@@ -39,7 +41,7 @@ public class TrackerPlatform implements Platform {
         this.orig = orig;
         this.cache = CacheBuilder.newBuilder().build();
     }
-    
+
     public InventoryApi getInventoryApi() throws SDKException {
         return new CachedApiGetter<InventoryApi>(InventoryApi.class) {
 
@@ -127,7 +129,7 @@ public class TrackerPlatform implements Platform {
 
         }.get();
     }
-    
+
     @Override
     public BinariesApi getBinariesApi() throws SDKException {
         return new CachedApiGetter<BinariesApi>(BinariesApi.class) {
@@ -185,6 +187,28 @@ public class TrackerPlatform implements Platform {
         }.get();
     }
 
+    @Override
+    public TokenApi getTokenApi() throws SDKException {
+        return new CachedApiGetter<TokenApi>(TokenApi.class) {
+
+            @Override
+            public TokenApi call() throws Exception {
+                return orig.getTokenApi();
+            }
+        }.get();
+    }
+
+    @Override
+    public NotificationSubscriptionApi getNotificationSubscriptionApi() throws SDKException {
+        return new CachedApiGetter<NotificationSubscriptionApi>(NotificationSubscriptionApi.class) {
+
+            @Override
+            public NotificationSubscriptionApi call() throws Exception {
+                return orig.getNotificationSubscriptionApi();
+            }
+        }.get();
+    }
+
     public void close() {
         orig.close();
     }
@@ -206,14 +230,14 @@ public class TrackerPlatform implements Platform {
     }
 
     public String getPassword() {
-        CumulocityBasicCredentials cumulocityBasicCredentials = (CumulocityBasicCredentials)getPlatformParameters().getCumulocityCredentials();
+        CumulocityBasicCredentials cumulocityBasicCredentials = (CumulocityBasicCredentials) getPlatformParameters().getCumulocityCredentials();
         return cumulocityBasicCredentials.getPassword();
     }
 
     public PlatformParameters getPlatformParameters() {
         return (PlatformParameters) orig;
     }
-    
+
     @Override
     public String toString() {
         return String.format("TrackerPlatform [orig=%s, getTenantId()=%s, getHost()=%s, getUser()=%s]", orig, getTenantId(), getHost(), getUser());

@@ -24,10 +24,7 @@
 	<profiles>
 		<profile>
 			<id>develop</id>
-			<properties>
-				<!-- current SNAPSHOT version of c8y-client -->
-				<!--<c8y.version>1010.12.0-SNAPSHOT</c8y.version>-->
-			</properties>
+			<properties></properties>
 			<distributionManagement>
 				<snapshotRepository>
 					<id>snapshot</id>
@@ -40,10 +37,7 @@
 				<activeByDefault>true</activeByDefault>
 			</activation>
 			<id>production</id>
-			<properties>
-				<!-- current RELEASE version of c8y-client -->
-				<!--<c8y.version>1010.12.0-SNAPSHOT</c8y.version>-->
-			</properties>
+			<properties></properties>
 			<distributionManagement>
 				<!-- TODO remove snapshotRepository after release -->
 				<snapshotRepository>
@@ -58,9 +52,10 @@
 		</profile>
 	</profiles>
 
-  <modules>
-    <module>tracker-agent</module>
-    <module>hello-world-microservice</module>
+	<modules>
+		<module>tracker-agent</module>
+		<module>hello-world-microservice</module>
+		<module>hello-world-notification-microservice</module>
         <module>sample-lwm2m-custom-decoder</module>
     <module>sample-hex-decoder</module>
     <module>sample-json-decoder</module>
