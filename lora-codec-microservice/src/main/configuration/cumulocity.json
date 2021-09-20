@@ -1,0 +1,11 @@
+{
+  "apiVersion": "1",
+  "version": "@project.version@",
+  "contextPath": "lora-codec-microservice",
+  "provider": {
+    "name": "Cumulocity"
+  },
+  "isolation": "MULTI_TENANT",
+  "requiredRoles": [
+  ]
+}
