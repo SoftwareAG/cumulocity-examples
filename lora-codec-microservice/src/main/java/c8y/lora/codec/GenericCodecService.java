@@ -37,7 +37,7 @@ public class GenericCodecService implements BaseDeviceCodecService {
 
     private void createMappings(UplinkConfigurationMapping uplinkConfigurationMapping) {
         AlarmMapping alarmMapping = new AlarmMapping();
-        alarmMapping.setSeverity("Major");
+        alarmMapping.setSeverity("MAJOR");
         alarmMapping.setText("Codec Alarm");
         alarmMapping.setType("c8y_CodecAlarm");
         uplinkConfigurationMapping.setAlarmMapping(alarmMapping);

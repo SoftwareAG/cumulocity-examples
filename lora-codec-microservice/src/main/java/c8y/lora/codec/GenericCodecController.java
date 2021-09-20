@@ -6,8 +6,6 @@ import com.cumulocity.lpwan.codec.rest.BaseCodecRestController;
 import com.cumulocity.lpwan.devicetype.model.DecodedDataMapping;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,23 +18,23 @@ public class GenericCodecController extends BaseCodecRestController {
     GenericCodecService codecService;
 
     @Override
-    public String encode(Encode encode) {
+    public String encode(@RequestBody Encode encode) {
         return codecService.encode(encode);
     }
 
     @Override
-    public DecodedDataMapping decode(Decode decode) {
+    public DecodedDataMapping decode(@RequestBody Decode decode) {
         return codecService.decode(decode);
     }
 
     @Override
     public List<String> getModels() {
-        return null;
+        return codecService.getModels();
     }
 
     @Override
     public JSONObject getMetaData() {
-        return null;
+        return codecService.getMetData();
     }
 
     /*@PostMapping(value = "/decodeTest", consumes = MediaType.APPLICATION_JSON_VALUE)
