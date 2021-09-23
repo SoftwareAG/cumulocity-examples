@@ -7,12 +7,12 @@
     <parent>
         <groupId>c8y.example</groupId>
         <artifactId>c8y-examples</artifactId>
-        <version>1009.0.23-SNAPSHOT</version>
+        <version>1009.0.23</version>
     </parent>
 
     <groupId>c8y.example.microservices</groupId>
     <artifactId>microservices</artifactId>
-    <version>1009.0.23-SNAPSHOT</version>
+    <version>1009.0.23</version>
 
     <name>Cumulocity :: Examples :: Microservices</name>
 
