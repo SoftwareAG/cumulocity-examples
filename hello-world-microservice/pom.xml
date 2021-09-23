@@ -10,7 +10,7 @@
     <version>1009.0.23</version>
 
     <properties>
-        <c8y.version>1009.0.23</c8y.version>
+        <c8y.version>1009.0.24-SNAPSHOT</c8y.version>
         <main.class>c8y.example.helloworld.HelloWorldMain</main.class>
 
         <java.version>11</java.version>
