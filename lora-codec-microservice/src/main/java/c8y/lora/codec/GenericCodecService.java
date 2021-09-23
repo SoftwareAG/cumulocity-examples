@@ -1,24 +1,24 @@
 package c8y.lora.codec;
 
+import c8y.lora.sdk.service.BaseDeviceCodecService;
 import com.cumulocity.lpwan.codec.model.Decode;
 import com.cumulocity.lpwan.codec.model.Encode;
-import com.cumulocity.lpwan.codec.service.BaseDeviceCodecService;
 import com.cumulocity.lpwan.devicetype.model.DecodedDataMapping;
 import com.cumulocity.lpwan.devicetype.model.UplinkConfigurationMapping;
 import com.cumulocity.lpwan.mapping.model.DecodedObject;
 import com.cumulocity.lpwan.payload.uplink.model.AlarmMapping;
 import com.cumulocity.lpwan.payload.uplink.model.EventMapping;
 import com.cumulocity.lpwan.payload.uplink.model.MeasurementMapping;
+import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.stereotype.Component;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.Arrays;
 import java.util.List;
 
 @Component
 @Slf4j
-public class GenericCodecService implements BaseDeviceCodecService {
+public class GenericCodecService extends BaseDeviceCodecService {
 
     @Override
     public DecodedDataMapping decode(Decode decode) {
@@ -68,5 +68,15 @@ public class GenericCodecService implements BaseDeviceCodecService {
     @Override
     public JSONObject getMetData() {
         return new JSONObject("Metadata");
+    }
+
+    @Override
+    public String getName() {
+        return "lora-codec-microservice";
+    }
+
+    @Override
+    public String getVersion() {
+        return "1.0.0";
     }
 }
