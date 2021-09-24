@@ -115,7 +115,7 @@ pipeline {
                     }
                     steps {
                         withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS'),
-                                         usernamePassword(credentialsId: 'SAG-github.com', passwordVariable: 'REPOSITORY_PASSWORD', usernameVariable: 'REPOSITORY_USER')]) {
+                                         string(credentialsId: 'github.com_write', variable: 'REPOSITORY_CREDENTIALS')]) {
                             sh ".jenkins/scripts/prepare_release.sh ${params.release_version}"
                         }
                     }
@@ -132,7 +132,7 @@ pipeline {
                         lock('deploy2yum') {
                             sshagent(['jenkins-master']) {
                                 withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS'),
-                                                 usernamePassword(credentialsId: 'SAG-github.com', passwordVariable: 'REPOSITORY_PASSWORD', usernameVariable: 'REPOSITORY_USER')]) {
+                                                 string(credentialsId: 'github.com_write', variable: 'REPOSITORY_CREDENTIALS')]) {
                                     sh ".jenkins/scripts/release.sh -r ${params.release_version} -d ${params.hotfix_version} -b ${env.BRANCH_NAME}"
                                 }
                             }
@@ -146,14 +146,14 @@ pipeline {
                     stages {
                         stage('Close and merge release branch') {
                             steps {
-                                withCredentials([usernamePassword(credentialsId: 'SAG-github.com', passwordVariable: 'REPOSITORY_PASSWORD', usernameVariable: 'REPOSITORY_USER')]) {
+                                withCredentials([string(credentialsId: 'github.com_write', variable: 'REPOSITORY_CREDENTIALS')]) {
                                     sh ".jenkins/scripts/finish_release.sh ${params.release_version}"
                                 }
                             }
                         }
                         stage('Bump develop branch') {
                             steps {
-                                withCredentials([usernamePassword(credentialsId: 'SAG-github.com', passwordVariable: 'REPOSITORY_PASSWORD', usernameVariable: 'REPOSITORY_USER')]) {
+                                withCredentials([string(credentialsId: 'github.com_write', variable: 'REPOSITORY_CREDENTIALS')]) {
                                     sh ".jenkins/scripts/update_develop.sh ${params.hotfix_version} ${params.development_version}"
                                  }
                             }
