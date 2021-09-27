@@ -5,7 +5,7 @@
     <parent>
         <artifactId>c8y-examples</artifactId>
         <groupId>c8y.example</groupId>
-        <version>1011.2.1-SNAPSHOT</version>
+        <version>1011.3.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -15,7 +15,7 @@
 
     <artifactId>sample-hex-decoder</artifactId>
     <name>Cumulocity :: Examples :: Sample Hex Decoder</name>
-    <version>1011.2.1-SNAPSHOT</version>
+    <version>1011.3.0-SNAPSHOT</version>
 
     <licenses>
         <license>
