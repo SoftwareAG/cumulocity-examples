@@ -25,7 +25,7 @@ public abstract class BaseDeviceCodecService implements CodecServiceMetadata {
 
     final String CODEC_TYPE = "Device Codec";
 
-    public abstract DecodedDataMapping decode(Decode decode);
+    public abstract List<DecodedDataMapping> decode(Decode decode);
 
     public abstract String encode(Encode encode);
 

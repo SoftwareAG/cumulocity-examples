@@ -21,7 +21,7 @@ public class BaseCodecRestController {
     BaseDeviceCodecService codecService;
 
     @PostMapping(value = "/decode", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public DecodedDataMapping decode(@RequestBody Decode decode) {
+    public List<DecodedDataMapping> decode(@RequestBody Decode decode) {
         return codecService.decode(decode);
     }
 
