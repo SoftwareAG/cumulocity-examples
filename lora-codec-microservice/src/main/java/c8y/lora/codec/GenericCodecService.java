@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -21,11 +22,11 @@ import java.util.List;
 public class GenericCodecService extends BaseDeviceCodecService {
 
     @Override
-    public DecodedDataMapping decode(Decode decode) {
+    public List<DecodedDataMapping> decode(Decode decode) {
         log.info("Decoding logic goes here");
-        UplinkConfigurationMapping uplinkConfigurationMapping = new UplinkConfigurationMapping();
-        createMappings(uplinkConfigurationMapping);
-        return new DecodedDataMapping(getDecodedObject(), uplinkConfigurationMapping);
+        List<DecodedDataMapping> decodedDataMappings =  new ArrayList<>();
+        decodedDataMappings.add(new DecodedDataMapping(getDecodedObject(), createMappings()));
+        return decodedDataMappings;
     }
 
     private DecodedObject getDecodedObject() {
@@ -35,7 +36,8 @@ public class GenericCodecService extends BaseDeviceCodecService {
         return decodedObject;
     }
 
-    private void createMappings(UplinkConfigurationMapping uplinkConfigurationMapping) {
+    private UplinkConfigurationMapping createMappings() {
+        UplinkConfigurationMapping uplinkConfigurationMapping = new UplinkConfigurationMapping();
         AlarmMapping alarmMapping = new AlarmMapping();
         alarmMapping.setSeverity("MAJOR");
         alarmMapping.setText("Codec Alarm");
@@ -52,6 +54,8 @@ public class GenericCodecService extends BaseDeviceCodecService {
         measurementMapping.setType("c8y_CodecMeasurementMapping");
         measurementMapping.setSeries("Codec_Measurement_Mapping");
         uplinkConfigurationMapping.setMeasurementMapping(measurementMapping);
+
+        return uplinkConfigurationMapping;
     }
 
     @Override
