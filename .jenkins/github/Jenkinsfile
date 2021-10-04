@@ -1,6 +1,4 @@
-withCredentials([usernamePassword(credentialsId: 'SAG-github.com', passwordVariable: 'GITHUB_PASSWORD', usernameVariable: 'GITHUB_USER')]) {
-          env.REPOSITORY_BASE_URL="https://${GITHUB_USER}:${GITHUB_PASSWORD}@github.com/SoftwareAG"
-}
+env.REPOSITORY_BASE_URL="github.com/SoftwareAG"
 
 pipeline {
      agent {
@@ -22,6 +20,7 @@ pipeline {
         string(name: 'release_version', defaultValue: '9.91.0', description: "version you want to release");
         string(name: 'hotfix_version', defaultValue: '9.91.1-SNAPSHOT', description: "version with micro part bump, available in release branch");
         string(name: 'development_version', defaultValue: '9.92.0-SNAPSHOT', description: "version that will be in develop branch after process")
+
     }
 
     stages {
@@ -115,7 +114,8 @@ pipeline {
                         equals expected: 'RELEASE', actual: params.build_type
                     }
                     steps {
-                        withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
+                        withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS'),
+                                         string(credentialsId: 'github.com_write', variable: 'REPOSITORY_CREDENTIALS')]) {
                             sh ".jenkins/scripts/prepare_release.sh ${params.release_version}"
                         }
                     }
@@ -131,7 +131,8 @@ pipeline {
                         echo "wait for lock on deploy2yum.sh"
                         lock('deploy2yum') {
                             sshagent(['jenkins-master']) {
-                                withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
+                                withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS'),
+                                                 string(credentialsId: 'github.com_write', variable: 'REPOSITORY_CREDENTIALS')]) {
                                     sh ".jenkins/scripts/release.sh -r ${params.release_version} -d ${params.hotfix_version} -b ${env.BRANCH_NAME}"
                                 }
                             }
@@ -145,12 +146,16 @@ pipeline {
                     stages {
                         stage('Close and merge release branch') {
                             steps {
-                                  sh "chmod +x .jenkins/scripts/finish_release.sh && .jenkins/scripts/finish_release.sh ${params.release_version}"
+                                withCredentials([string(credentialsId: 'github.com_write', variable: 'REPOSITORY_CREDENTIALS')]) {
+                                    sh ".jenkins/scripts/finish_release.sh ${params.release_version}"
+                                }
                             }
                         }
                         stage('Bump develop branch') {
                             steps {
-                                 sh ".jenkins/scripts/update_develop.sh ${params.hotfix_version} ${params.development_version}"
+                                withCredentials([string(credentialsId: 'github.com_write', variable: 'REPOSITORY_CREDENTIALS')]) {
+                                    sh ".jenkins/scripts/update_develop.sh ${params.hotfix_version} ${params.development_version}"
+                                 }
                             }
                         }
                     }
@@ -169,7 +174,7 @@ pipeline {
     post {
         always {
             withCredentials([file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')]) {
-                sh "chmod +x .jenkins/scripts/clean.sh && .jenkins/scripts/clean.sh"
+                sh ".jenkins/scripts/clean.sh"
             }
         }
 
