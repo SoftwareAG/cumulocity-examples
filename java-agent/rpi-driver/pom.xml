@@ -5,7 +5,7 @@
     <parent>
 		<groupId>c8y.example</groupId>
 		<artifactId>c8y-jv</artifactId>
-        <version>1010.0.16</version>
+        <version>1010.0.17-SNAPSHOT</version>
 	</parent>
 
     <artifactId>rpi-driver</artifactId>
