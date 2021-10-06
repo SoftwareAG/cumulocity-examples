@@ -56,6 +56,10 @@ public class ConnectionDetails {
         }
     }
 
+    public synchronized void resetImei() {
+        imei = null;
+    }
+
     public String getImei() {
         return imei;
     }

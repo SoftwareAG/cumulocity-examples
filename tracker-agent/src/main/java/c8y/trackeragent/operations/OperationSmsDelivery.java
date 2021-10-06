@@ -11,9 +11,8 @@ package c8y.trackeragent.operations;
 
 import c8y.CommunicationMode;
 import c8y.Mobile;
-import c8y.trackeragent.devicebootstrap.DeviceCredentials;
-import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.devicebootstrap.MicroserviceSubscriptionsServiceWrapper;
+import c8y.trackeragent.devicemapping.DeviceTenantMappingService;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.model.sms.Address;
 import com.cumulocity.model.sms.SendMessageRequest;
@@ -34,19 +33,19 @@ public class OperationSmsDelivery {
     private final InventoryApi inventoryApi;
     private final SmsMessagingApi outgoingMessagingClient;
 
-    private final DeviceCredentialsRepository deviceCredentials;
-    private final MicroserviceSubscriptionsServiceWrapper microserviceSubscriptionsServiceWrapper;
+    private final DeviceTenantMappingService deviceTenantMappingService;
+    private final MicroserviceSubscriptionsServiceWrapper microserviceSubscriptionsService;
 
     @Autowired
     public OperationSmsDelivery (
             InventoryApi inventoryApi,
             SmsMessagingApi outgoingMessagingClient,
-            DeviceCredentialsRepository deviceCredentials,
+            DeviceTenantMappingService deviceTenantMappingService,
             MicroserviceSubscriptionsServiceWrapper microserviceSubscriptionsServiceWrapper) {
         this.inventoryApi = inventoryApi;
         this.outgoingMessagingClient = outgoingMessagingClient;
-        this.deviceCredentials = deviceCredentials;
-        this.microserviceSubscriptionsServiceWrapper = microserviceSubscriptionsServiceWrapper;
+        this.deviceTenantMappingService = deviceTenantMappingService;
+        this.microserviceSubscriptionsService = microserviceSubscriptionsServiceWrapper;
     }
     
     /**
@@ -89,8 +88,8 @@ public class OperationSmsDelivery {
         final Address address = phoneNumber(receiver);
         final SendMessageRequest request = SendMessageRequest.builder().withReceiver(address).withSender(address).withMessage(translation).build();
 
-        final DeviceCredentials device = this.deviceCredentials.getDeviceCredentials(imei);
-        microserviceSubscriptionsServiceWrapper.runForTenant(device.getTenant(), () -> {
+        String tenant = deviceTenantMappingService.findTenant(imei);
+        microserviceSubscriptionsService.runForTenant(tenant, () -> {
             outgoingMessagingClient.sendMessage(request);
         });
     }

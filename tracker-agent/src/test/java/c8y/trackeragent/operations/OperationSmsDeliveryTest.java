@@ -16,6 +16,7 @@ import c8y.trackeragent.devicebootstrap.DeviceCredentials;
 import c8y.trackeragent.devicebootstrap.DeviceCredentialsRepository;
 import c8y.trackeragent.devicebootstrap.MicroserviceSubscriptionsServiceWrapper;
 import com.cumulocity.microservice.context.credentials.MicroserviceCredentials;
+import c8y.trackeragent.devicemapping.DeviceTenantMappingService;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.model.sms.Address;
 import com.cumulocity.model.sms.SendMessageRequest;
@@ -41,6 +42,7 @@ public class OperationSmsDeliveryTest {
     private final SmsMessagingApi outgoingMessagingClient = mock(SmsMessagingApi.class);
     private final DeviceCredentialsRepository deviceCredentialsRepo = mock(DeviceCredentialsRepository.class);
     private final MicroserviceSubscriptionsServiceMock microserviceSubscriptionsService = new MicroserviceSubscriptionsServiceMock();
+    private final DeviceTenantMappingService deviceTenantMappingService = mock(DeviceTenantMappingService.class);
     private OperationSmsDelivery operationSmsDelivery;
 
     String imei = "12345";
@@ -58,7 +60,7 @@ public class OperationSmsDeliveryTest {
         operationSmsDelivery = new OperationSmsDelivery(
                 inventoryApi,
                 outgoingMessagingClient,
-                deviceCredentialsRepo,
+                deviceTenantMappingService,
                 new MicroserviceSubscriptionsServiceWrapper(microserviceSubscriptionsService));
         
         managedObject = new ManagedObjectRepresentation();
@@ -69,7 +71,7 @@ public class OperationSmsDeliveryTest {
         when(inventoryApi.get(any(GId.class))).thenReturn(managedObject);
         
         deviceId = new GId("1");
-        when(deviceCredentialsRepo.getDeviceCredentials(imei)).thenReturn(deviceCredentials);
+        when(deviceTenantMappingService.findTenant(imei)).thenReturn(tenant);
     }
     
     public void setupMOtoDeliverSms() {

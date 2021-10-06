@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import c8y.trackeragent.devicemapping.DeviceTenantMappingService;
 import c8y.trackeragent.exception.TenantNotSubscribedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,21 +59,26 @@ public abstract class BaseConnectedTracker<F extends Fragment> implements Connec
 
     @Autowired
     protected List<F> fragments = new ArrayList<F>();
+
     @Autowired
     protected DeviceBootstrapProcessor bootstrapProcessor;
+
     @Autowired
-    protected DeviceCredentialsRepository credentialsRepository;
+    protected DeviceTenantMappingService deviceTenantMappingService;
+
     @Autowired
     protected TrackerDeviceContextService contextService;
 
     protected final ReportSplitter reportSplitter;
 
-    BaseConnectedTracker(List<F> fragments, DeviceBootstrapProcessor bootstrapProcessor, DeviceCredentialsRepository credentialsRepository,
-            TrackerDeviceContextService contextService) {
+    BaseConnectedTracker(List<F> fragments,
+                         DeviceBootstrapProcessor bootstrapProcessor,
+                         DeviceTenantMappingService deviceTenantMappingService,
+                         TrackerDeviceContextService contextService) {
         this();
         this.fragments = fragments;
         this.bootstrapProcessor = bootstrapProcessor;
-        this.credentialsRepository = credentialsRepository;
+        this.deviceTenantMappingService = deviceTenantMappingService;
         this.contextService = contextService;
         
     }
@@ -155,18 +161,19 @@ public abstract class BaseConnectedTracker<F extends Fragment> implements Connec
     }
 
     private String getTenant(String imei) {
-        DeviceCredentials deviceCredentials;
+        String tenant;
         try {
-            deviceCredentials = credentialsRepository.getDeviceCredentials(imei);
+            tenant = deviceTenantMappingService.findTenant(imei);
         } catch (UnknownDeviceException ex) {
             logger.debug("Device with imei {} not yet bootstraped. Will try bootstrap the device.", imei);
-            deviceCredentials = bootstrapProcessor.tryAccessDeviceCredentials(imei);
+            DeviceCredentials deviceCredentials = bootstrapProcessor.tryAccessDeviceCredentials(imei);
             if (deviceCredentials == null) {
                 throw new NotBootstrapedException(format("Device with imei %s not yet available. Will skip the report.", imei));
             } 
             logger.debug("Device with imei {} available.", imei);
+            tenant = deviceCredentials.getTenant();
         }
-        return deviceCredentials.getTenant();
+        return tenant;
     }
 
     @Override
