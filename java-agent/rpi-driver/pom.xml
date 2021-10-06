@@ -3,10 +3,10 @@
 	<modelVersion>4.0.0</modelVersion>
 
     <parent>
-		<groupId>c8y.example</groupId>
-		<artifactId>c8y-jv</artifactId>
-        <version>1011.4.0-SNAPSHOT</version>
-	</parent>
+			<groupId>c8y.example</groupId>
+			<artifactId>c8y-jv</artifactId>
+        <version>${revision}${changelist}</version>
+		</parent>
 
     <artifactId>rpi-driver</artifactId>
     <name>Cumulocity :: Examples :: RaspPi Driver</name>
