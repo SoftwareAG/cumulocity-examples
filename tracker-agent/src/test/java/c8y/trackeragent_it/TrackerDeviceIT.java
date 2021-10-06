@@ -28,7 +28,7 @@ import c8y.MotionTracking;
 import c8y.Position;
 import c8y.SupportedOperations;
 import c8y.trackeragent.device.TrackerDevice;
-import c8y.trackeragent.devicebootstrap.DeviceCredentials;
+import c8y.trackeragent.devicemapping.DeviceTenantMappingService;
 import c8y.trackeragent.protocol.TrackingProtocol;
 import c8y.trackeragent.tracker.BaseConnectedTracker;
 import c8y.trackeragent.utils.Devices;
@@ -80,6 +80,9 @@ public class TrackerDeviceIT extends TrackerITSupport {
     @Autowired
     private MicroserviceSubscriptionsService microserviceSubscriptionsService;
 
+    @Autowired
+    private DeviceTenantMappingService deviceTenantMappingService;
+
     @Before
     public void setup() throws IOException {
         this.imei = Devices.randomImei();
@@ -101,10 +104,9 @@ public class TrackerDeviceIT extends TrackerITSupport {
 
     @Test
     public void shouldSetTrackerData() throws SDKException {
-    	deviceCredentialsRepository.saveDeviceCredentials(DeviceCredentials.forDevice(imei, trackerPlatform.getTenantId()));
+        deviceTenantMappingService.addDeviceToTenant(imei, trackerPlatform.getTenantId());
         microserviceSubscriptionsService.runForTenant(trackerPlatform.getTenantId(),
                 () -> {
-                    saveAgentCredentials(imei);
                     try {
                         GId gid = createTrackerData();
                         validateTrackerData(gid);
@@ -201,10 +203,5 @@ public class TrackerDeviceIT extends TrackerITSupport {
 
     private void myAssertEquals(BigDecimal one, BigDecimal two) {
         assertEquals(one.doubleValue(), two.doubleValue(), 0.01);
-    }
-    
-    private void saveAgentCredentials(String imei) {
-    	DeviceCredentials deviceCredentials = DeviceCredentials.forDevice(imei, trackerPlatform.getTenantId());
-        deviceCredentialsRepository.saveDeviceCredentials(deviceCredentials);
     }
 }

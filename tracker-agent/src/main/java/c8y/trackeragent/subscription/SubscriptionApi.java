@@ -1,4 +1,4 @@
-package c8y.trackeragent.server;
+package c8y.trackeragent.subscription;
 
 import com.cumulocity.rest.representation.application.ApplicationReferenceCollectionRepresentation;
 import com.cumulocity.rest.representation.application.ApplicationReferenceRepresentation;
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import javax.ws.rs.core.MediaType;
 
 @Component
-public class SubscriptionApi {
+class SubscriptionApi {
 
     private final static String URL = "/tenant/tenants/{tenant}/applications?pageSize=2000";
     private final static String TENANT = "{tenant}";

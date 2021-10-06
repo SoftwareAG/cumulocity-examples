@@ -22,8 +22,9 @@
 
 package c8y.trackeragent;
 
+import c8y.trackeragent.devicemapping.DeviceMappingMigrationService;
 import c8y.trackeragent.server.Servers;
-import c8y.trackeragent.server.TenantSubscriptionService;
+import c8y.trackeragent.subscription.TenantSubscriptionService;
 import com.cumulocity.microservice.autoconfigure.MicroserviceApplication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +46,7 @@ public class Main {
 
     @Value("${C8Y.bootstrap.tenant}")
     private String ownerTenant;
-    
+
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
     @Autowired
@@ -53,6 +54,9 @@ public class Main {
 
     @Autowired
     private TenantSubscriptionService tenantSubscriptionService;
+
+    @Autowired
+    private DeviceMappingMigrationService deviceMappingMigrationService;
 
     public static void main(String[] args) {
         logger.info("tracker-agent is starting.");
@@ -63,5 +67,6 @@ public class Main {
     public void onStart() throws IOException {
         servers.startAll();
         tenantSubscriptionService.subscribeTenants(ownerTenant);
+        deviceMappingMigrationService.doMigrationFromPropertyFileToManagedObject();
     }
 }

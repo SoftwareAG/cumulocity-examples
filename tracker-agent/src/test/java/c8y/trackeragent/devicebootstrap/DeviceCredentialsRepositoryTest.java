@@ -9,13 +9,13 @@
 
 package c8y.trackeragent.devicebootstrap;
 
-import c8y.trackeragent.exception.UnknownDeviceException;
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -42,52 +42,30 @@ public class DeviceCredentialsRepositoryTest {
 	}
 
 	@Test
-	public void shouldSaveAndGetDeviceCredentials() throws Exception {
-		credentialsRepository.saveDeviceCredentials(deviceCredentials);
-		
-		assertThat(credentialsRepository.getDeviceCredentials(IMEI)).isEqualTo(deviceCredentials);
-	}
-	
-	@Test
-	public void shouldSaveAndHasDeviceCredentials() throws Exception {
-		credentialsRepository.saveDeviceCredentials(deviceCredentials);
-		
-		assertThat(credentialsRepository.hasDeviceCredentials(IMEI)).isTrue();
-	}
-	
-	@Test
-	public void shouldGetAllDeviceCredentials() throws Exception {
-		credentialsRepository.saveDeviceCredentials(deviceCredentials);
-		
-		assertThat(credentialsRepository.getAllDeviceCredentials()).containsOnly(deviceCredentials);
-	}
-
-	@Test
 	public void shouldRefreshDataFromFile() throws Exception {
+		//given
 		credentialsRepository.saveDeviceCredentials(deviceCredentials);
-		
+
+		//when
 		credentialsRepository.refresh();
-		
+
+		//then
 		assertThat(credentialsRepository.getAllDeviceCredentials()).containsOnly(deviceCredentials);
 	}
 	
 	@Test
-	public void shouldGetAllDeviceCredentialsForTenant() throws Exception {
+	public void shouldGetAllDeviceCredentialsForTenant() {
+		//given
 		DeviceCredentials cred_1 = DeviceCredentials.forDevice("imei_1", "tenant_1");
 		credentialsRepository.saveDeviceCredentials(cred_1);
 		DeviceCredentials cred_2 = DeviceCredentials.forDevice("imei_2", "tenant_2");
 		credentialsRepository.saveDeviceCredentials(cred_2);
-		
-		credentialsRepository.getAllDeviceCredentials("tenant_1");
-		
-		Iterable<DeviceCredentials> allDeviceCredentials = credentialsRepository.getAllDeviceCredentials("tenant_1");
-		assertThat(allDeviceCredentials).containsOnly(cred_1);
-	}
-	
-	@Test(expected = UnknownDeviceException.class)
-	public void shouldThrowExceptionDeviceCredentialsAbsent() throws Exception {
-		DeviceCredentials deviceCredentials = credentialsRepository.getDeviceCredentials(IMEI);
-		
-		assertThat(deviceCredentials).isNull();
+
+		//when
+		List<DeviceCredentials> allDeviceCredentials = credentialsRepository.getAllDeviceCredentials();
+
+		//then
+		assertThat(allDeviceCredentials.size()).isEqualTo(2);
+		assertThat(allDeviceCredentials).containsOnly(cred_1, cred_2);
 	}
 }

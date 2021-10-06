@@ -56,18 +56,6 @@ public class DeviceCredentialsRepository {
     	this(ConfigUtils.get().getConfigFilePath(ConfigUtils.DEVICES_FILE_NAME));
     }
 
-    public boolean hasDeviceCredentials(String imei) {
-        return imei2DeviceCredentials.containsKey(imei);
-    }
-    
-	public DeviceCredentials getDeviceCredentials(String imei) {
-        DeviceCredentials result = imei2DeviceCredentials.get(imei);
-        if (result == null) {
-            throw UnknownDeviceException.forImei(imei);
-        }
-        return result.duplicate();
-    }
-
     public List<DeviceCredentials> getAllDeviceCredentials() {
         return new ArrayList<DeviceCredentials>(imei2DeviceCredentials.values());
     }
@@ -76,7 +64,8 @@ public class DeviceCredentialsRepository {
 		return tenants;
 	}
 
-	public void saveDeviceCredentials(DeviceCredentials newCredentials) {
+	/* only for tests */
+	void saveDeviceCredentials(DeviceCredentials newCredentials) {
         synchronized (lock) {
             Group group = asDeviceGroup(newCredentials.getImei(), newCredentials);
             if (!group.isFullyInitialized()) {
@@ -120,10 +109,6 @@ public class DeviceCredentialsRepository {
         group.put("tenantId", credentials.getTenant());
         return group;
     }
-
-	public List<DeviceCredentials> getAllDeviceCredentials(String tenant) {
-		return from(getAllDeviceCredentials()).filter(DeviceCredentials.hasTenant(tenant)).toList();
-	}
 
     private static String groupNameToTenant(String groupName) {
     	return groupName.replaceFirst(TENANT_ENTRY_PREFIX, "");
