@@ -24,7 +24,7 @@
     <parent>
         <groupId>c8y.example</groupId>
         <artifactId>snmp</artifactId>
-        <version>1009.0.24-SNAPSHOT</version>
+        <version>1009.0.24</version>
     </parent>
 
     <name>Cumulocity :: Examples :: SNMP :: Agent Gateway</name>
