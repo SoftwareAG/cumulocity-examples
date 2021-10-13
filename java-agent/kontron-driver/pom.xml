@@ -5,7 +5,7 @@
     <parent>
         <groupId>c8y.example</groupId>
         <artifactId>c8y-jv</artifactId>
-        <version>1011.5.0-SNAPSHOT</version>
+        <version>1011.5.0</version>
     </parent>
 
     <artifactId>kontron-driver</artifactId>
