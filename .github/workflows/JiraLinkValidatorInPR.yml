@@ -1,0 +1,122 @@
+name: Valid Jira ticket in PR Comment
+on:
+  workflow_dispatch:
+  pull_request:
+    types:
+      - assigned
+      - unassigned
+      - labeled
+      - unlabeled
+      - opened
+      - edited
+      - closed
+      - reopened
+      - synchronize
+      - converted_to_draft
+      - ready_for_review
+      - locked
+      - unlocked
+      - review_requested
+      - review_request_removed
+      - auto_merge_enabled
+      - auto_merge_disabled
+
+jobs:
+  Comments_Validation:
+    name: Valid Jira ticket in PR Comment
+    runs-on: c8y-ci-cd
+    steps:
+     - name: Checking comments format
+       run: |
+          #!/bin/sh   
+          
+          #Replace these with generic user in future
+          ghesAuth=70690ebd732a48e5dc52547f001d2bef3fd988e2
+          ghesUserAlias=indgo
+          jiraAuth="indgo@softwareag.com:Cw4bkDqxge1oGULwYVQ978A4"
+            
+          #Add any new jira ticket prefix here  
+          jiraTicketPrefixes='*(QA|IPG|MTM|SRE)[-]+[0-9]+*'
+        
+          #Find the source branch name
+          sourceBranchOfPR=$(jq --raw-output '.pull_request.head.ref' "$GITHUB_EVENT_PATH")          
+          echo "Source branch of this PR is : " $sourceBranchOfPR
+          
+          #Get the number of this PR
+          prNumber=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
+          echo "Current PR number is : " $prNumber
+          
+          #Get the title of this PR
+          prTitle=$(jq --raw-output .pull_request.title "$GITHUB_EVENT_PATH")
+          echo "Current PR title is : " $prTitle
+          
+          #Extract Jira ticket from PR title. echo after grep is to prevent grep failure to kill this script
+          ticketNumberInTitle=$(echo $prTitle | grep -Eio $jiraTicketPrefixes) && echo "1" || echo "0"
+          
+          #Validate if jira ticket in pr title is valid or not
+          if [ ! -z $ticketNumberInTitle ]; then
+            echo "Jira ticket is found in PR title. Checking if it is valid or not : " $ticketNumberInTitle
+              
+            #Validate if Jira ticket is a valid one or not
+            jira=$(curl -i -u $jiraAuth https://cumulocity.atlassian.net/rest/api/3 curl --location --request GET https://cumulocity.atlassian.net/rest/api/3/issue/$ticketNumberInTitle | grep 404 | cut -d ' ' -f2)
+              
+            if [[ $jira = "404" ]]; then
+               echo "Jira response " $jira
+               echo "Blocking this PR as invalid Jira ticket is found in PR title : " $ticketNumberInTitle
+               exit 1;   
+            else
+                 echo "JIRA API RESULT is verified for - " $ticketNumberInTitle
+                 exit 0;
+            fi 
+           else
+               echo "No valid jira ticket found in PR title"        
+          fi
+          
+          #Validate if jira ticket in PR comments is valid or not
+          prComments=$(curl -i -u username:$ghesAuth https://api.github.softwareag.com/users/$ghesUserAlias -H "Accept: application/vnd.github.v3+json" https://github.softwareag.com/api/v3/repos/IOTA/cumulocity-core/pulls/$prNumber | grep body | cut -d ':' -f2 | sed 's/,$//' | sed 's/\"//g')
+          echo "Comments of this PR are : " $prComments 
+            
+          #Extract jira ticket from PR comments. echo after grep is to prevent grep failure to kill this script  
+          jiraTicketInPRComments=$(echo $prComments | grep -Eio $jiraTicketPrefixes) && echo "1" || echo "0"
+          
+          #Validate if jira ticket in pr comments is valid or not
+          if [ ! -z $jiraTicketInPRComments ]; then
+            echo "Jira ticket is found in PR comment. Checking if it is valid or not : " $jiraTicketInPRComments
+              
+            jira=$(curl -i -u $jiraAuth https://cumulocity.atlassian.net/rest/api/3 curl --location --request GET https://cumulocity.atlassian.net/rest/api/3/issue/$jiraTicketInPRComments | grep 404 | cut -d ' ' -f2) 
+              
+            if [[ $jira = "404" ]]; then
+              echo "Blocking this PR as invalid Jira ticket is found in PR comments : " $jiraTicketInPRComments                
+              exit 1;  
+            else             
+                 echo "JIRA API OUTPUT " $JIRA_OUTPUT
+                 echo "JIRA ticket found in PR comment is valid - " $jiraTicketInPRComments
+                 exit 0;
+            fi
+            else
+              echo "No valid jira ticket found in PR comments"  
+          fi   
+          #Extract jira ticket from PR comments. echo after grep is to prevent grep failure to kill this script  
+          jiraTicketInPRbranchName=$(echo $sourceBranchOfPR | grep -Eio $jiraTicketPrefixes) && echo "1" || echo "0"
+            
+          #Validate if jira ticket in source branch is valid or not
+          if [ ! -z $jiraTicketInPRbranchName ]; then
+            echo "Jira ticket is found in PR branch name. Checking if it is valid or not : " $jiraTicketInPRbranchName
+              
+            jira=$(curl -i -u $jiraAuth https://cumulocity.atlassian.net/rest/api/3 curl --location --request GET https://cumulocity.atlassian.net/rest/api/3/issue/$jiraTicketInPRbranchName | grep 404 | cut -d ' ' -f2) 
+              
+            if [[ $jira = "404" ]]; then
+              echo "Blocking this PR as invalid Jira ticket is found in PR branch name : " $jiraTicketInPRbranchName                
+              exit 1;  
+            else
+                 echo "JIRA API RESULT is verified for - " $jiraTicketInPRbranchName
+                 exit 0;
+            fi            
+          else
+              echo "Blocking this PR as no valid Jira ticket is found in the comments or title or pr branch name"
+              exit 1;
+          fi           
+         
+     - name: The job has succeeded
+       if: ${{ success() }}
+       run : exit 0
