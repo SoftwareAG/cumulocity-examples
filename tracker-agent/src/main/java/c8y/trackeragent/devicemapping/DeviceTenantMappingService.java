@@ -23,7 +23,7 @@ public class DeviceTenantMappingService {
     @Autowired
     public DeviceTenantMappingService(DeviceTenantMappingRepository deviceTenantMappingRepository,
                                       MicroserviceSubscriptionsService microserviceSubscriptionsService,
-                                      @Value("${C8Y.servicebootstrap.tenant}") String ownerTenant) {
+                                      @Value("${C8Y.bootstrap.tenant}") String ownerTenant) {
         this.deviceTenantMappingRepository = deviceTenantMappingRepository;
         this.microserviceSubscriptionsService = microserviceSubscriptionsService;
         this.ownerTenant = ownerTenant;
