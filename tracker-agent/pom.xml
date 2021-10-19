@@ -13,7 +13,7 @@
     <parent>
         <groupId>c8y.example</groupId>
         <artifactId>c8y-examples</artifactId>
-        <version>1011.6.0</version>
+        <version>1011.6.1-SNAPSHOT</version>
     </parent>
 
     <groupId>c8y</groupId>
