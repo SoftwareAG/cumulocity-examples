@@ -44,7 +44,7 @@ jobs:
           bpRepoVersion=10.12.0.x
           
           #Construct bpRepoVersion for release branches
-          if [ $targetBranchOfPR != "develop_cicd" ]; then
+          if [[ $targetBranchOfPR != "develop" ]]; then
             branchVersion=$(echo $targetBranchOfPR | cut -d '/' -f2)
             echo "Target branch is :" $branchVersion
             bpRepoVersion=$(echo $branchVersion | sed 's/r//' | sed 's/0$/x/' | sed 's/^\(.\{2\}\)/\1./')
@@ -74,7 +74,7 @@ jobs:
                   #Do additional checks to confirm that the identified pr has 'pipeline-blocked' label on it
                   resPR=$(echo $getBlockerPR | awk '{print $2}')
                   echo "Found an open blocker in BP :" $resPR
-                  if [ $resPR = "pipeline-blocked" ]; then
+                  if [[ $resPR = "pipeline-blocked" ]]; then
                     echo "Checking if this PR contains any blocker fix ...."
                     response=$(curl -i -u username:$ghesAuth https://api.github.softwareag.com/users/$ghesUserAlias -H "Accept: application/vnd.github.v3+json" https://github.softwareag.com/api/v3/repos/IOTA/cumulocity-core/pulls/$pull_number | grep blocker-fix | cut -d ':' -f2 | sed 's/,$//' | sed 's/\"//g')
                     result=$(echo $response | awk '{print $2}')
