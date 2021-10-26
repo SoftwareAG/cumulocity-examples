@@ -72,10 +72,9 @@ jobs:
                   getBlockerPR=$(curl -i -u username:$ghesAuth https://api.github.softwareag.com/users/$ghesUserAlias -H "Accept: application/vnd.github.v3+json" https://github.softwareag.com/api/v3/repos/IOTA/c8y-iot-build-pipeline/pulls?head=IOTA:$postMergeBranchName | grep pipeline-blocked | cut -d ':' -f2 | sed 's/,$//' | sed 's/\"//g')
                   
                   #Do additional checks to confirm that the identified pr has 'pipeline-blocked' label on it
-                  resPR=$(echo $getBlockerPR | awk '{print $2}')
-                  echo "Found an open blocker in BP :" $resPR
+                  resPR=$(echo $getBlockerPR | awk '{print $2}')                  
                   if [[ $resPR = "pipeline-blocked" ]]; then
-                    echo "Checking if this PR contains any blocker fix ...."
+                    echo "Found an open blocker in BP. Checking if this PR contains any blocker fix ...."
                     response=$(curl -i -u username:$ghesAuth https://api.github.softwareag.com/users/$ghesUserAlias -H "Accept: application/vnd.github.v3+json" https://github.softwareag.com/api/v3/repos/IOTA/cumulocity-core/pulls/$pull_number | grep blocker-fix | cut -d ':' -f2 | sed 's/,$//' | sed 's/\"//g')
                     result=$(echo $response | awk '{print $2}')
                     echo $result
