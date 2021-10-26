@@ -11,7 +11,7 @@
 	<packaging>pom</packaging>
 
 	<properties>
-		<revision>1.204.0</revision>
+		<revision>1.205.0</revision>
     <changelist>-SNAPSHOT</changelist>
     <c8y.version>${project.version}</c8y.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
