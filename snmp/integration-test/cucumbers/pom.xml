@@ -24,7 +24,7 @@
     <parent>
         <groupId>c8y.example</groupId>
         <artifactId>snmp-integration-test</artifactId>
-        <version>1011.6.0-SNAPSHOT</version>
+        <version>1011.7.0-SNAPSHOT</version>
     </parent>
 
     <name>Cumulocity :: Examples :: SNMP :: Integration Tests :: Cucumbers</name>

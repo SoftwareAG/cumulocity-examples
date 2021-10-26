@@ -25,7 +25,7 @@
 	<parent>
 		<groupId>c8y.example</groupId>
 		<artifactId>c8y-examples</artifactId>
-		<version>1011.6.0-SNAPSHOT</version>
+		<version>1011.7.0-SNAPSHOT</version>
 	</parent>
 
 	<name>Cumulocity :: Examples :: SNMP</name>
@@ -45,7 +45,7 @@
 		<snmp4j.version>2.8.0</snmp4j.version>
 		<cometd.version>3.0.10</cometd.version>
 		<svenson.version>1.5.8</svenson.version>
-		<jetty.version>9.4.29.v20200521</jetty.version>
+		<jetty.version>9.4.43.v20210629</jetty.version>
 		<chronicle.map.version>3.17.6</chronicle.map.version>
 		<chronicle.queue.version>5.17.28</chronicle.queue.version>
 	</properties>
