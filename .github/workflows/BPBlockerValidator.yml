@@ -27,9 +27,9 @@ jobs:
     steps:
      - name: Checking branches status
        run: |          
-          #Credentials of generic user used to poll build pipeline status
-          ghesAuth=a7ce55fe47cd1c243ac714f82fafdcbf9d8610e5
-          ghesUserAlias=tech-c8y-github 
+          #This auth has read-only access
+          ghesAuth=70690ebd732a48e5dc52547f001d2bef3fd988e2
+          ghesUserAlias=indgo 
             
           #Fetch the number of the pr for which this check is running 
           pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
