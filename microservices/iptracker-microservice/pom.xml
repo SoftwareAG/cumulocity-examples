@@ -9,11 +9,13 @@
   <url>http://maven.apache.org</url>
 
   <properties>
+    <revision>1.206.0</revision>
+    <changelist>-SNAPSHOT</changelist>
     <java.version>13</java.version>
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
     <spring-boot-dependencies.version>2.1.4.RELEASE</spring-boot-dependencies.version>
-    <c8y.version>1011.7.0-SNAPSHOT</c8y.version>
+    <c8y.version>${revision}${changelist}</c8y.version>
     <microservice.name>iptracker-microservice</microservice.name>
   </properties>
 
