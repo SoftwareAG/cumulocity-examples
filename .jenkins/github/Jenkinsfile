@@ -24,14 +24,21 @@ pipeline {
     }
 
     stages {
+        stage('Disable release from develop branch') {
+            when {
+                expression { params.build_type == "RELEASE" && params.branch == "develop" }
+            }
+            steps {
+                script {
+                    currentBuild.result = 'ABORTED'
+                    error('Release build from develop should be no longer executed. New releases are running from new CI/CD proccess')
+                }
+            }
+        }
         stage('Fail in case of incorrect input parameters') {
             when {
                 not {
                     anyOf {
-                        allOf {
-                            equals expected: 'RELEASE', actual: params.build_type;
-                            branch 'develop'
-                        };
                         allOf {
                             equals expected: 'HOTFIX', actual: params.build_type;
                             branch 'release/*'
