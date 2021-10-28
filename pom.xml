@@ -1,62 +1,60 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
 
-	<groupId>c8y.example</groupId>
-	<artifactId>c8y-examples</artifactId>
-	<version>${revision}${changelist}</version>
-	<name>Cumulocity :: Examples</name>
-	<packaging>pom</packaging>
+  <groupId>c8y.example</groupId>
+  <artifactId>c8y-examples</artifactId>
+  <version>${revision}${changelist}</version>
+  <name>Cumulocity :: Examples</name>
+  <packaging>pom</packaging>
 
-	<properties>
-		<revision>1.206.0</revision>
+  <properties>
+    <revision>1.206.0</revision>
     <changelist>-SNAPSHOT</changelist>
     <c8y.version>${project.version}</c8y.version>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<java.version>11</java.version>
-		<maven.compiler.target>${java.version}</maven.compiler.target>
-		<nexus.url>http://localhost:8080</nexus.url>
-		<nexus.basePath>/nexus/content/repositories</nexus.basePath>
-	</properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <java.version>11</java.version>
+    <maven.compiler.target>${java.version}</maven.compiler.target>
+    <nexus.url>http://localhost:8080</nexus.url>
+    <nexus.basePath>/nexus/content/repositories</nexus.basePath>
+  </properties>
 
-	<profiles>
-		<profile>
-			<id>develop</id>
-			<properties></properties>
-			<distributionManagement>
-				<snapshotRepository>
-					<id>snapshot</id>
-					<url>${nexus.url}${nexus.basePath}/snapshots/</url>
-				</snapshotRepository>
-			</distributionManagement>
-		</profile>
-		<profile>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-			<id>production</id>
-			<properties></properties>
-			<distributionManagement>
-				<!-- TODO remove snapshotRepository after release -->
-				<snapshotRepository>
-					<id>snapshot</id>
-					<url>${nexus.url}${nexus.basePath}/snapshots/</url>
-				</snapshotRepository>
-				<repository>
-					<id>release</id>
-					<url>${nexus.url}/${nexus.basePath}/releases/</url>
-				</repository>
-			</distributionManagement>
-		</profile>
-	</profiles>
+  <profiles>
+    <profile>
+      <id>develop</id>
+      <distributionManagement>
+        <snapshotRepository>
+          <id>snapshot</id>
+          <url>${nexus.url}${nexus.basePath}/snapshots/</url>
+        </snapshotRepository>
+      </distributionManagement>
+    </profile>
+    <profile>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <id>production</id>
+      <distributionManagement>
+        <!-- TODO remove snapshotRepository after release -->
+        <snapshotRepository>
+          <id>snapshot</id>
+          <url>${nexus.url}${nexus.basePath}/snapshots/</url>
+        </snapshotRepository>
+        <repository>
+          <id>release</id>
+          <url>${nexus.url}/${nexus.basePath}/releases/</url>
+        </repository>
+      </distributionManagement>
+    </profile>
+  </profiles>
 
-	<modules>
-		<module>tracker-agent</module>
-		<module>hello-world-microservice</module>
-		<module>hello-world-notification-microservice</module>
-        <module>sample-lwm2m-custom-decoder</module>
+  <modules>
+    <module>tracker-agent</module>
+    <module>hello-world-microservice</module>
+    <module>hello-world-notification-microservice</module>
+    <module>sample-lwm2m-custom-decoder</module>
     <module>sample-hex-decoder</module>
     <module>sample-json-decoder</module>
     <module>java-agent</module>
@@ -87,7 +85,7 @@
     IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
     DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
     ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-            </comments>
+      </comments>
     </license>
   </licenses>
 
@@ -115,26 +113,26 @@
           <artifactId>flatten-maven-plugin</artifactId>
           <version>1.1.0</version>
           <configuration>
-              <updatePomFile>true</updatePomFile>
-              <flattenMode>resolveCiFriendliesOnly</flattenMode>
+            <updatePomFile>true</updatePomFile>
+            <flattenMode>resolveCiFriendliesOnly</flattenMode>
           </configuration>
           <executions>
-              <execution>
+            <execution>
               <id>flatten</id>
               <phase>process-resources</phase>
               <goals>
-                  <goal>flatten</goal>
+                <goal>flatten</goal>
               </goals>
-              </execution>
-              <execution>
+            </execution>
+            <execution>
               <id>flatten.clean</id>
               <phase>clean</phase>
               <goals>
-                  <goal>clean</goal>
+                <goal>clean</goal>
               </goals>
-              </execution>
+            </execution>
           </executions>
-      </plugin>    
+        </plugin>
         <plugin>
           <artifactId>maven-assembly-plugin</artifactId>
           <version>3.1.1</version>
