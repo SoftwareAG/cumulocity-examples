@@ -1,0 +1,48 @@
+name: Build Pipeline Blocked
+on:
+  pull_request:
+    types:
+      - assigned
+      - unassigned
+      - labeled
+      - unlabeled
+      - opened
+      - edited
+      - closed
+      - reopened
+      - synchronize
+      - converted_to_draft
+      - ready_for_review
+      - locked
+      - unlocked
+      - review_requested
+      - review_request_removed
+      - auto_merge_enabled
+      - auto_merge_disabled
+
+jobs:
+  Target_branch_locked:
+    name: Build Pipeline Blocked
+    runs-on: c8y-ci-cd
+    steps:
+     - name: Checking branches status
+       env:
+         CICD_READONLY_TOKEN: ${{ secrets.CICD_READONLY_TOKEN }}
+         CICD_BP_REPO: ${{ secrets.CICD_BP_REPO }}
+         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}         
+       run: |
+          #Remove stale code
+          rm -Rf c8y-iot-build-pipeline
+          
+          #Checkout latest Blocker checker script
+          git clone https://.:${{ secrets.CICD_READONLY_TOKEN }}@${{ secrets.CICD_BP_REPO }} c8y-iot-build-pipeline
+          cd c8y-iot-build-pipeline
+          git checkout main
+          
+          #Execute blocker checker script
+          cd src
+          . ./BPBlockerValidator.sh
+          
+     - name: The job has succeeded
+       if: ${{ success() }}
+       run : exit 0
