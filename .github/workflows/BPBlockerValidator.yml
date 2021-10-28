@@ -28,7 +28,7 @@ jobs:
      - name: Checking branches status
        env:
          CICD_READONLY_TOKEN: ${{ secrets.CICD_READONLY_TOKEN }}
-         GITHUB_TOKEN: ${{ secrets.CICD_READONLY_TOKEN }}
+         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
        run: |
           #Remove stale code
           rm -Rf c8y-iot-build-pipeline
