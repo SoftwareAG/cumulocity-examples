@@ -7,7 +7,7 @@
     <groupId>c8y.example</groupId>
     <artifactId>hello-world-microservice</artifactId>
     <name>Cumulocity :: Examples :: Hello World Microservice</name>
-    <version>1010.0.18</version>
+    <version>1010.0.19-SNAPSHOT</version>
 
     <properties>
         <c8y.version>1010.0.19-SNAPSHOT</c8y.version>
