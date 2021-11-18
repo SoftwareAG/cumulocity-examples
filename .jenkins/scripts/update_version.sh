@@ -8,4 +8,11 @@ function update-property {
 
 version=$(echo $1 | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')
 
+if [[ "$version" == "$1" ]]; then
+  update-property changelist ""
+else 
+  changelist=$(echo $1 | sed -e "s/^$version//")
+  update-property changelist $changelist
+fi
+
 update-property revision $version
