@@ -1,79 +1,73 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-	<modelVersion>4.0.0</modelVersion>
+  <modelVersion>4.0.0</modelVersion>
 
-	<groupId>c8y.example</groupId>
-	<artifactId>c8y-examples</artifactId>
-	<version>1011.7.0-SNAPSHOT</version>
-	<name>Cumulocity :: Examples</name>
-	<packaging>pom</packaging>
+  <groupId>c8y.example</groupId>
+  <artifactId>c8y-examples</artifactId>
+  <version>${revision}${changelist}</version>
+  <name>Cumulocity :: Examples</name>
+  <packaging>pom</packaging>
 
-	<properties>
-		<c8y.version>1011.7.0-SNAPSHOT</c8y.version>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<java.version>11</java.version>
-		<maven.compiler.target>${java.version}</maven.compiler.target>
-		<nexus.url>http://localhost:8080</nexus.url>
-		<nexus.basePath>/nexus/content/repositories</nexus.basePath>
-	</properties>
+  <properties>
+    <revision>1011.28.0</revision>
+    <changelist>-SNAPSHOT</changelist>
+    <c8y.version>${project.version}</c8y.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <java.version>11</java.version>
+    <maven.compiler.target>${java.version}</maven.compiler.target>
+    <nexus.url>http://localhost:8080</nexus.url>
+    <nexus.basePath>/nexus/content/repositories</nexus.basePath>
+  </properties>
 
-	<profiles>
-		<profile>
-			<id>develop</id>
-			<properties>
-				<!-- current SNAPSHOT version of c8y-client -->
-				<!--<c8y.version>1011.7.0-SNAPSHOT</c8y.version>-->
-			</properties>
-			<distributionManagement>
-				<snapshotRepository>
-					<id>snapshot</id>
-					<url>${nexus.url}${nexus.basePath}/snapshots/</url>
-				</snapshotRepository>
-			</distributionManagement>
-		</profile>
-		<profile>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-			<id>production</id>
-			<properties>
-				<!-- current RELEASE version of c8y-client -->
-				<!--<c8y.version>1011.7.0-SNAPSHOT</c8y.version>-->
-			</properties>
-			<distributionManagement>
-				<!-- TODO remove snapshotRepository after release -->
-				<snapshotRepository>
-					<id>snapshot</id>
-					<url>${nexus.url}${nexus.basePath}/snapshots/</url>
-				</snapshotRepository>
-				<repository>
-					<id>release</id>
-					<url>${nexus.url}/${nexus.basePath}/releases/</url>
-				</repository>
-			</distributionManagement>
-		</profile>
-	</profiles>
+  <profiles>
+    <profile>
+      <id>develop</id>
+      <distributionManagement>
+        <snapshotRepository>
+          <id>snapshot</id>
+          <url>${nexus.url}${nexus.basePath}/snapshots/</url>
+        </snapshotRepository>
+      </distributionManagement>
+    </profile>
+    <profile>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <id>production</id>
+      <distributionManagement>
+        <!-- TODO remove snapshotRepository after release -->
+        <snapshotRepository>
+          <id>snapshot</id>
+          <url>${nexus.url}${nexus.basePath}/snapshots/</url>
+        </snapshotRepository>
+        <repository>
+          <id>release</id>
+          <url>${nexus.url}/${nexus.basePath}/releases/</url>
+        </repository>
+      </distributionManagement>
+    </profile>
+  </profiles>
 
-	<modules>
-		<module>tracker-agent</module>
-		<module>hello-world-microservice</module>
-		<module>hello-world-notification-microservice</module>
-        <module>sample-lwm2m-custom-decoder</module>
-		<module>sample-hex-decoder</module>
-		<module>sample-json-decoder</module>
-		<module>java-agent</module>
-		<module>snmp</module>
-		<module>mqtt-client</module>
-		<module>microservices</module>
-	</modules>
+  <modules>
+    <module>tracker-agent</module>
+    <module>hello-world-microservice</module>
+    <module>hello-world-notification-microservice</module>
+    <module>sample-lwm2m-custom-decoder</module>
+    <module>sample-hex-decoder</module>
+    <module>sample-json-decoder</module>
+    <module>java-agent</module>
+    <module>snmp</module>
+    <module>mqtt-client</module>
+    <module>microservices</module>
+  </modules>
 
-	<licenses>
-		<license>
-			<name>MIT License</name>
-			<url>http://en.wikipedia.org/wiki/MIT_License</url>
-			<comments>
+  <licenses>
+    <license>
+      <name>MIT License</name>
+      <url>http://en.wikipedia.org/wiki/MIT_License</url>
+      <comments>
                     Copyright (C) 2013 Cumulocity GmbH
 
     Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -91,63 +85,88 @@
     IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
     DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
     ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-            </comments>
-		</license>
-	</licenses>
+      </comments>
+    </license>
+  </licenses>
 
 
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>com.nsn.cumulocity.clients-java</groupId>
-				<artifactId>java-client</artifactId>
-				<version>${c8y.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.nsn.cumulocity.model</groupId>
-				<artifactId>device-capability-model</artifactId>
-				<version>${c8y.version}</version>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>com.nsn.cumulocity.clients-java</groupId>
+        <artifactId>java-client</artifactId>
+        <version>${c8y.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.nsn.cumulocity.model</groupId>
+        <artifactId>device-capability-model</artifactId>
+        <version>${c8y.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
-	<build>
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<artifactId>maven-assembly-plugin</artifactId>
-					<version>3.1.1</version>
-				</plugin>
-				<plugin>
-					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.8.1</version>
-					<configuration>
-						<source>${java.version}</source>
-						<target>${java.version}</target>
-					</configuration>
-				</plugin>
-				<plugin>
-					<artifactId>maven-deploy-plugin</artifactId>
-					<version>2.8.1</version>
-				</plugin>
-				<plugin>
-					<artifactId>maven-jar-plugin</artifactId>
-					<version>3.1.2</version>
-				</plugin>
-				<plugin>
-					<artifactId>maven-resources-plugin</artifactId>
-					<version>3.1.0</version>
-				</plugin>
-				<plugin>
-					<artifactId>maven-surefire-plugin</artifactId>
-					<version>2.22.2</version>
-				</plugin>
-				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>rpm-maven-plugin</artifactId>
-					<version>2.2.0</version>
-				</plugin>
-			</plugins>
-		</pluginManagement>
-	</build>
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>flatten-maven-plugin</artifactId>
+          <version>1.1.0</version>
+          <configuration>
+            <updatePomFile>true</updatePomFile>
+            <flattenMode>resolveCiFriendliesOnly</flattenMode>
+          </configuration>
+          <executions>
+            <execution>
+              <id>flatten</id>
+              <phase>process-resources</phase>
+              <goals>
+                <goal>flatten</goal>
+              </goals>
+            </execution>
+            <execution>
+              <id>flatten.clean</id>
+              <phase>clean</phase>
+              <goals>
+                <goal>clean</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <artifactId>maven-assembly-plugin</artifactId>
+          <version>3.1.1</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.8.1</version>
+          <configuration>
+            <source>${java.version}</source>
+            <target>${java.version}</target>
+          </configuration>
+        </plugin>
+        <plugin>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>2.8.1</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>3.1.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>3.1.0</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>2.22.2</version>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>rpm-maven-plugin</artifactId>
+          <version>2.2.0</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
 </project>

@@ -1,4 +1,4 @@
 #!/bin/bash
 set -e
-./mvnw clean install -s $MVN_SETTINGS -U
+./mvnw install -s $MVN_SETTINGS -U "$@"
 
