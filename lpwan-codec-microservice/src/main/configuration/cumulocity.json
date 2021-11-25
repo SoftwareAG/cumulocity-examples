@@ -1,0 +1,29 @@
+{
+  "apiVersion": "1",
+  "version": "@project.version@",
+  "contextPath": "lpwan-codec-microservice-sample",
+  "provider": {
+    "name": "Cumulocity"
+  },
+  "isolation": "MULTI_TENANT",
+  "requiredRoles": [
+    "ROLE_INVENTORY_READ",
+    "ROLE_INVENTORY_CREATE"
+  ],
+  "livenessProbe": {
+    "httpGet": {
+      "path": "/health",
+      "port": 80
+    },
+    "initialDelaySeconds": 200,
+    "periodSeconds": 10
+  },
+  "readinessProbe": {
+    "httpGet": {
+      "path": "/health",
+      "port": 80
+    },
+    "initialDelaySeconds": 220,
+    "periodSeconds": 10
+  }
+}
