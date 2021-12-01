@@ -1,7 +1,9 @@
 package c8y.example.service;
 
+import com.cumulocity.lpwan.codec.Codec;
 import com.cumulocity.lpwan.codec.CodecMicroservice;
 import com.cumulocity.lpwan.codec.model.DeviceInfo;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -9,8 +11,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@Service
-public class DeviceCodecMicroservice extends CodecMicroservice {
+@Component
+public class DeviceCodecMicroservice implements Codec {
 
     /**
      * This method should populate a set of unique devices identified by their manufacturer and model.
