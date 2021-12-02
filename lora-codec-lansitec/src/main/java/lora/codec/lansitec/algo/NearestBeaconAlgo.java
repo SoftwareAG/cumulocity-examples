@@ -1,6 +1,7 @@
-package lora.codec.lansitec;
+package lora.codec.lansitec.algo;
 
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
+import lora.codec.lansitec.model.Beacon;
 
 import java.util.List;
 

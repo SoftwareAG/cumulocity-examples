@@ -1,8 +1,9 @@
-package lora.codec.lansitec;
+package lora.codec.lansitec.algo;
 
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.sdk.client.inventory.InventoryApi;
 import com.cumulocity.sdk.client.measurement.MeasurementApi;
+import lora.codec.lansitec.model.Beacon;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;

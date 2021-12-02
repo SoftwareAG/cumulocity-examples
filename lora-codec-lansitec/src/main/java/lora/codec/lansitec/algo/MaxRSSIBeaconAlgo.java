@@ -1,4 +1,4 @@
-package lora.codec.lansitec;
+package lora.codec.lansitec.algo;
 
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
@@ -9,6 +9,7 @@ import com.cumulocity.sdk.client.measurement.MeasurementFilter;
 import com.cumulocity.sdk.client.measurement.PagedMeasurementCollectionRepresentation;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lora.codec.lansitec.model.Beacon;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
