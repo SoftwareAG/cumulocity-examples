@@ -7,7 +7,6 @@
 		<artifactId>c8y-examples</artifactId>
 		<version>${revision}${changelist}</version>
 	</parent>
-	<groupId>c8y.example</groupId>
 	<artifactId>lora-codec-lansitec</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
 	<name>lora-codec-lansitec</name>

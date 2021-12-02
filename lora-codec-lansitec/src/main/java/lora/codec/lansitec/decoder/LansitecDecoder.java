@@ -6,7 +6,7 @@ import c8y.RequiredAvailability;
 import com.cumulocity.lpwan.codec.decoder.Decoder;
 import com.cumulocity.lpwan.codec.decoder.model.DecoderInput;
 import com.cumulocity.lpwan.codec.decoder.model.DecoderOutput;
-import com.cumulocity.lpwan.codec.exception.DecoderException;
+import com.cumulocity.lpwan.codec.decoder.exception.DecoderException;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjects;
 import com.google.common.io.BaseEncoding;
