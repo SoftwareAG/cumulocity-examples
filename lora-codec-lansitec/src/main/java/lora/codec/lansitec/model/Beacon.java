@@ -1,4 +1,4 @@
-package lora.codec.lansitec;
+package lora.codec.lansitec.model;
 
 public class Beacon {
 	private String major;

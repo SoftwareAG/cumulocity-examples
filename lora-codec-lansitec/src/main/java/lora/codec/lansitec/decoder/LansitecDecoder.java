@@ -1,17 +1,18 @@
-package lora.codec.lansitec;
+package lora.codec.lansitec.decoder;
 
+import c8y.Configuration;
 import c8y.Position;
+import c8y.RequiredAvailability;
 import com.cumulocity.lpwan.codec.decoder.Decoder;
+import com.cumulocity.lpwan.codec.decoder.model.DecoderInput;
+import com.cumulocity.lpwan.codec.decoder.model.DecoderOutput;
 import com.cumulocity.lpwan.codec.exception.DecoderException;
-import com.cumulocity.lpwan.codec.model.DecoderInput;
-import com.cumulocity.lpwan.codec.model.DecoderOutput;
-import com.cumulocity.lpwan.codec.model.ManagedObjectProperty;
-import com.cumulocity.model.idtype.GId;
-import com.cumulocity.rest.representation.event.EventRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjects;
-import com.cumulocity.rest.representation.measurement.MeasurementRepresentation;
 import com.google.common.io.BaseEncoding;
+import lora.codec.lansitec.LansitecCodec;
+import lora.codec.lansitec.algo.Algo;
+import lora.codec.lansitec.model.Beacon;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -135,6 +136,7 @@ public class LansitecDecoder implements Decoder {
 			@Override
 			public DecoderOutput process(DecoderInput decoderInput, byte type, ByteBuffer buffer, Algo algo) {
 				DecoderOutput decoderOutput = new DecoderOutput();
+
 				String adr = (type & 8) != 0 ? "ON" : "OFF";
 				MODE mode = MODE.BY_MODE.get((byte) (type & 0x7));
 				byte smode = buffer.get();
@@ -154,12 +156,11 @@ public class LansitecDecoder implements Decoder {
 						"ADR: %s%nMODE: %s%nSMODE: %s%nPOWER: %ddBm%nDR: %s%nBREAKPOINT: %s%nSELFADAPT: %s%nONEOFF: %s%nALREPORT: %s%nPOS: %ds%nHB: %dmn%nCRC: %d",
 						adr, mode.name(), String.join(",", supportedModes), power, dr, breakpoint, selfadapt, oneoff,
 						alreport, pos, hb, crc);
-				ManagedObjectProperty c8y_Configuration = new ManagedObjectProperty("c8y_Configuration", new ManagedObjectProperty("config", configString));
-				decoderOutput.addPropertyToUpdateDeviceMo(c8y_Configuration);
 
-				ManagedObjectProperty c8y_RequiredAvailability = new ManagedObjectProperty("c8y_RequiredAvailability",
-						new ManagedObjectProperty("responseInterval", hb));
-				decoderOutput.addPropertyToUpdateDeviceMo(c8y_RequiredAvailability);
+				ManagedObjectRepresentation deviceManagedObjectToUpdate = ManagedObjects.asManagedObject(decoderInput.getDeviceMoIdAsGId());
+				deviceManagedObjectToUpdate.set(new Configuration(configString));
+				deviceManagedObjectToUpdate.set(new RequiredAvailability(hb));
+				decoderOutput.setDeviceManagedObjectToUpdate(deviceManagedObjectToUpdate);
 
 				return decoderOutput;
 			}
@@ -168,6 +169,7 @@ public class LansitecDecoder implements Decoder {
 			@Override
 			public DecoderOutput process(DecoderInput decoderInput, byte type, ByteBuffer buffer, Algo algo) {
 				DecoderOutput decoderOutput = new DecoderOutput();
+
 				long vol = buffer.get();
 				long rssi = -buffer.get();
 				long snr = 0;
@@ -180,35 +182,11 @@ public class LansitecDecoder implements Decoder {
 				byte chgstat = buffer.get();
 				CHGSTATE chgState = CHGSTATE.BY_VALUE.get((byte) ((chgstat&0xff) >> 4));
 
-				ManagedObjectRepresentation source = ManagedObjects.asManagedObject(GId.asGId(decoderInput.getDeviceMoId()));
+				decoderOutput.addEventToCreate(decoderInput.getDeviceMoIdAsGId(), "Tracker status", String.format("GPSSTATE: %s\nVIBSTATE: %d\nCHGSTATE: %s", gpsState != null ? gpsState.name() : "UNKNOWN(" + gpsstat + ")", vibState, chgState != null ? chgState.name() : "UNKNOWN(" + chgstat + ")"), null, DateTime.now());
 
-				EventRepresentation event = new EventRepresentation();
-				event.setType("Tracker status");
-				event.setText(String.format("GPSSTATE: %s\nVIBSTATE: %d\nCHGSTATE: %s", gpsState != null ? gpsState.name() : "UNKNOWN(" + gpsstat + ")", vibState, chgState != null ? chgState.name() : "UNKNOWN(" + chgstat + ")"));
-				event.setDateTime(new DateTime());
-				event.setSource(source);
-				decoderOutput.addEventToCreate(event);
-
-				MeasurementRepresentation battery = new MeasurementRepresentation();
-				ManagedObjectProperty c8y_Battery = new ManagedObjectProperty("c8y_Battery", new ManagedObjectProperty("level",  BigDecimal.valueOf(vol), "%"));
-				battery.setAttrs(c8y_Battery.getPropertyAsMap());
-				battery.setSource(source);
-				battery.setDateTime(new DateTime());
-				decoderOutput.addMeasurementToCreate(battery);
-
-				MeasurementRepresentation signalStrength = new MeasurementRepresentation();
-				ManagedObjectProperty signalStrength_rssi = new ManagedObjectProperty("Tracker Signal Strength", new ManagedObjectProperty("rssi",  BigDecimal.valueOf(rssi), "dBm"));
-				signalStrength.setAttrs(signalStrength_rssi.getPropertyAsMap());
-				signalStrength.setSource(source);
-				signalStrength.setDateTime(new DateTime(decoderInput.getUpdateTime()));
-				decoderOutput.addMeasurementToCreate(signalStrength);
-
-				MeasurementRepresentation signalStrength_snr_measurement = new MeasurementRepresentation();
-				ManagedObjectProperty signalStrength_snr = new ManagedObjectProperty("Tracker Signal Strength", new ManagedObjectProperty("snr",  BigDecimal.valueOf(snr), "dBm"));
-				signalStrength_snr_measurement.setAttrs(signalStrength_snr.getPropertyAsMap());
-				signalStrength_snr_measurement.setSource(source);
-				signalStrength_snr_measurement.setDateTime(new DateTime(decoderInput.getUpdateTime()));
-				decoderOutput.addMeasurementToCreate(signalStrength_snr_measurement);
+				decoderOutput.addMeasurementToCreate(decoderInput.getDeviceMoIdAsGId(), "c8y_Battery", "c8y_Battery", "level", BigDecimal.valueOf(vol), "%", DateTime.now());
+				decoderOutput.addMeasurementToCreate(decoderInput.getDeviceMoIdAsGId(), "Tracker Signal Strength", "Tracker Signal Strength", "rssi", BigDecimal.valueOf(rssi), "dBm", new DateTime(decoderInput.getUpdateTime()));
+				decoderOutput.addMeasurementToCreate(decoderInput.getDeviceMoIdAsGId(), "Tracker Signal Strength", "Tracker Signal Strength", "snr", BigDecimal.valueOf(rssi), "dBm", new DateTime(decoderInput.getUpdateTime()));
 
 				return decoderOutput;
 			}
@@ -217,25 +195,20 @@ public class LansitecDecoder implements Decoder {
 			@Override
 			public DecoderOutput process(DecoderInput decoderInput, byte type, ByteBuffer buffer, Algo algo) {
 				DecoderOutput decoderOutput = new DecoderOutput();
+
 				float lng = buffer.getFloat();
 				float lat = buffer.getFloat();
 				long time = buffer.getInt() * 1000L;
-				Position position = new Position();
-				position.setLat(BigDecimal.valueOf(lat));
-				position.setLng(BigDecimal.valueOf(lng));
+				Position p = new Position();
+				p.setLat(BigDecimal.valueOf(lat));
+				p.setLng(BigDecimal.valueOf(lng));
 
-				ManagedObjectProperty c8y_Position = new ManagedObjectProperty("c8y_Position", new ManagedObjectProperty[]{new ManagedObjectProperty("lat", position.getLat()), new ManagedObjectProperty("lng", position.getLng())});
-				decoderOutput.addPropertyToUpdateDeviceMo(c8y_Position);
+				ManagedObjectRepresentation deviceManagedObjectToUpdate = ManagedObjects.asManagedObject(decoderInput.getDeviceMoIdAsGId());
+				deviceManagedObjectToUpdate.set(p);
+				decoderOutput.setDeviceManagedObjectToUpdate(deviceManagedObjectToUpdate);
 
-				ManagedObjectRepresentation source = ManagedObjects.asManagedObject(GId.asGId(decoderInput.getDeviceMoId()));
-
-				EventRepresentation locationUpdate = new EventRepresentation();
-				locationUpdate.setSource(source);
-				locationUpdate.setType("c8y_LocationUpdate");
-				locationUpdate.set(position);
-				locationUpdate.setText("Location updated");
-				locationUpdate.setDateTime(new DateTime(time));
-				decoderOutput.addEventToCreate(locationUpdate);
+				decoderOutput.addEventToCreate(decoderInput.getDeviceMoIdAsGId(), "c8y_LocationUpdate", "Location updated", null, new DateTime(time))
+						.set(p);
 
 				return decoderOutput;
 			}
@@ -244,26 +217,21 @@ public class LansitecDecoder implements Decoder {
 			@Override
 			public DecoderOutput process(DecoderInput decoderInput, byte type, ByteBuffer buffer, Algo algo) {
 				DecoderOutput decoderOutput = new DecoderOutput();
+
 				buffer.get();
 				float lng = buffer.getFloat();
 				float lat = buffer.getFloat();
 				long time = buffer.getInt() * 1000L;
-				Position position = new Position();
-				position.setLat(BigDecimal.valueOf(lat));
-				position.setLng(BigDecimal.valueOf(lng));
+				Position p = new Position();
+				p.setLat(BigDecimal.valueOf(lat));
+				p.setLng(BigDecimal.valueOf(lng));
 
-				ManagedObjectProperty c8y_Position = new ManagedObjectProperty("c8y_Position", new ManagedObjectProperty[]{new ManagedObjectProperty("lat", position.getLat()), new ManagedObjectProperty("lng", position.getLng())});
-				decoderOutput.addPropertyToUpdateDeviceMo(c8y_Position);
+				ManagedObjectRepresentation deviceManagedObjectToUpdate = ManagedObjects.asManagedObject(decoderInput.getDeviceMoIdAsGId());
+				deviceManagedObjectToUpdate.set(p);
+				decoderOutput.setDeviceManagedObjectToUpdate(deviceManagedObjectToUpdate);
 
-				ManagedObjectRepresentation source = ManagedObjects.asManagedObject(GId.asGId(decoderInput.getDeviceMoId()));
-
-				EventRepresentation locationUpdate = new EventRepresentation();
-				locationUpdate.setSource(source);
-				locationUpdate.setType("c8y_LocationUpdate");
-				locationUpdate.set(position);
-				locationUpdate.setText("Location updated");
-				locationUpdate.setDateTime(new DateTime(time));
-				decoderOutput.addEventToCreate(locationUpdate);
+				decoderOutput.addEventToCreate(decoderInput.getDeviceMoIdAsGId(), "c8y_LocationUpdate", "Location updated", null, new DateTime(time))
+						.set(p);
 
 				return decoderOutput;
 			}
@@ -288,7 +256,8 @@ public class LansitecDecoder implements Decoder {
 			@Override
 			public DecoderOutput process(DecoderInput decoderInput, byte type, ByteBuffer buffer, Algo algo) {
 				DecoderOutput decoderOutput = new DecoderOutput();
-				ManagedObjectRepresentation source = ManagedObjects.asManagedObject(GId.asGId(decoderInput.getDeviceMoId()));
+
+				Beacon beacon = null;
 				byte move = buffer.get();
 				buffer.getInt();
 				//boolean beaconChanged = false;
@@ -298,34 +267,20 @@ public class LansitecDecoder implements Decoder {
 					short minor = buffer.getShort();
 					byte rssi = buffer.get();
 
-					EventRepresentation event = new EventRepresentation();
-					event.setType("BLE coordinate");
-					event.setText(String.format("MOVE: %d\nMAJOR: %04X\nMINOR: %04X\nRSSI: %d", move, major, minor, rssi));
-					event.setDateTime(new DateTime(decoderInput.getUpdateTime()));
-					event.setSource(source);
-					decoderOutput.addEventToCreate(event);
+					decoderOutput.addEventToCreate(decoderInput.getDeviceMoIdAsGId(), "BLE coordinate", String.format("MOVE: %d\nMAJOR: %04X\nMINOR: %04X\nRSSI: %d", move, major, minor, rssi), null, new DateTime(decoderInput.getUpdateTime()));
 
-					Beacon beacon = new Beacon(String.format("%04X", major), String.format("%04X", minor), rssi);
+					beacon = new Beacon(String.format("%04X", major), String.format("%04X", minor), rssi);
 					beacons.add(beacon);
 
-					MeasurementRepresentation signalStrength = new MeasurementRepresentation();
-					ManagedObjectProperty signalStrength_rssi = new ManagedObjectProperty("Max rssi", new ManagedObjectProperty("rssi",  BigDecimal.valueOf(beacon.getRssi()), "dBm"));
-					signalStrength.setAttrs(signalStrength_rssi.getPropertyAsMap());
-					signalStrength.setSource(source);
-					signalStrength.setDateTime(new DateTime(decoderInput.getUpdateTime()));
-					decoderOutput.addMeasurementToCreate(signalStrength);
+					decoderOutput.addMeasurementToCreate(decoderInput.getDeviceMoIdAsGId(), "Max rssi", "Max rssi", "rssi", BigDecimal.valueOf(beacon.getRssi()), "dBm", new DateTime(decoderInput.getUpdateTime()));
 
-					MeasurementRepresentation beacon_measurement = new MeasurementRepresentation();
-					ManagedObjectProperty beacon_rssi = new ManagedObjectProperty(String.format("%04X", major) + "-" + String.format("%04X", minor), new ManagedObjectProperty("rssi",  BigDecimal.valueOf(rssi), "dBm"));
-					beacon_measurement.setAttrs(beacon_rssi.getPropertyAsMap());
-					beacon_measurement.setSource(source);
-					beacon_measurement.setDateTime(new DateTime(decoderInput.getUpdateTime()));
-					decoderOutput.addMeasurementToCreate(beacon_measurement);
+					String fragmentName = String.format("%04X", major) + "-" + String.format("%04X", minor);
+					decoderOutput.addMeasurementToCreate(decoderInput.getDeviceMoIdAsGId(), fragmentName, fragmentName, "rssi", BigDecimal.valueOf(rssi), "dBm", new DateTime(decoderInput.getUpdateTime()));
 				}
 
-				Beacon beacon = algo.getPosition(source, beacons);
-				ManagedObjectProperty lansitec_Beacon = new ManagedObjectProperty("lora_codec_lansitec_Beacon", new ManagedObjectProperty[]{new ManagedObjectProperty("major", beacon.getMajor()), new ManagedObjectProperty("minor", beacon.getMinor()),  new ManagedObjectProperty("rssi", beacon.getRssi())});
-				decoderOutput.addPropertyToUpdateDeviceMo(lansitec_Beacon);
+				ManagedObjectRepresentation deviceManagedObjectToUpdate = ManagedObjects.asManagedObject(decoderInput.getDeviceMoIdAsGId());
+				deviceManagedObjectToUpdate.set(algo.getPosition(deviceManagedObjectToUpdate, beacons));
+				decoderOutput.setDeviceManagedObjectToUpdate(deviceManagedObjectToUpdate);
 
 				/*if (beacon != null) {
 					if (beacon.getMajor().equals(newBeacon.getMajor()) && beacon.getMinor().equals(newBeacon.getMinor()) || newBeacon.getRssi() > beacon.getRssi()) {
@@ -352,8 +307,9 @@ public class LansitecDecoder implements Decoder {
 			public DecoderOutput process(DecoderInput decoderInput, byte type, ByteBuffer buffer, Algo algo) {
 				DecoderOutput decoderOutput = new DecoderOutput();
 
-				ManagedObjectProperty c8y_Configuration = new ManagedObjectProperty("c8y_Configuration", "Configuration requested...");
-				decoderOutput.addPropertyToUpdateDeviceMo(c8y_Configuration);
+				ManagedObjectRepresentation deviceManagedObjectToUpdate = ManagedObjects.asManagedObject(decoderInput.getDeviceMoIdAsGId());
+				deviceManagedObjectToUpdate.set(new Configuration("Configuration requested..."));
+				decoderOutput.setDeviceManagedObjectToUpdate(deviceManagedObjectToUpdate);
 
 				return decoderOutput;
 			}
@@ -398,7 +354,7 @@ public class LansitecDecoder implements Decoder {
 				return t.process(decoderInput, type, buffer, currentAlgo);
 			} catch(Exception e) {
 				logger.error(e.getMessage());
-				e.printStackTrace();
+				new DecoderException(e.getMessage(), e);
 			}
 		}
 
