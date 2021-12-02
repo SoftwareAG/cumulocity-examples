@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2012-2020 Cumulocity GmbH
- * Copyright (c) 2021 Software AG, Darmstadt, Germany and/or Software AG USA Inc., Reston, VA, USA, 
+ * Copyright (c) 2021 Software AG, Darmstadt, Germany and/or Software AG USA Inc., Reston, VA, USA,
  * and/or its subsidiaries and/or its affiliates and/or their licensors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,6 +23,7 @@ import com.cumulocity.agent.snmp.platform.model.GatewayManagedObjectWrapper;
 import com.cumulocity.agent.snmp.platform.pubsub.service.MeasurementPubSub;
 import com.cumulocity.agent.snmp.platform.service.GatewayDataProvider;
 import com.cumulocity.agent.snmp.platform.service.PlatformProvider;
+import com.cumulocity.rest.representation.measurement.MeasurementCollectionRepresentation;
 import com.cumulocity.sdk.client.SDKException;
 import com.cumulocity.sdk.client.measurement.MeasurementApi;
 import org.junit.Before;
@@ -71,7 +72,7 @@ public class MeasurementSubscriberTest {
     private MeasurementSubscriber measurementSubscriber;
 
     private ArgumentCaptor<MeasurementSubscriber.MeasurementRepresentation> measurementRepresentationCaptor;
-    
+
     private ArgumentCaptor<MeasurementSubscriber.MeasurementCollectionRepresentation> measurementCollectionRepresentationCaptor;
 
     @Before
@@ -143,11 +144,10 @@ public class MeasurementSubscriberTest {
 
     @Test
     public void shouldHandleMessagesSuccessfully() {
-        Mockito.when(measurementApi.createBulk(Mockito.any(MeasurementSubscriber.MeasurementCollectionRepresentation.class))).thenReturn(null);
 
         measurementSubscriber.handleMessages(JSON_STRINGS);
 
-        Mockito.verify(measurementApi).createBulk(measurementCollectionRepresentationCaptor.capture());
+        Mockito.verify(measurementApi).createBulkWithoutResponse(measurementCollectionRepresentationCaptor.capture());
 
         assertEquals("{\"measurements\":["
                 + String.join(",", JSON_STRINGS)
@@ -157,8 +157,7 @@ public class MeasurementSubscriberTest {
     @Test(expected = SDKException.class)
     public void should_HandleMessages_RethrowSDKException_whenMeasurementApiThrowsSDKException() {
         SDKException sdkException = new SDKException(500, "SOME ERROR MESSAGE");
-        Mockito.when(measurementApi.createBulk(Mockito.any(MeasurementSubscriber.MeasurementCollectionRepresentation.class))).thenThrow(sdkException);
-
+        doThrow(sdkException).when(measurementApi).createBulkWithoutResponse(any(MeasurementCollectionRepresentation.class));
         List<String> jsonStrings = Arrays.asList("Message 1", "Message 2");
         measurementSubscriber.handleMessages(jsonStrings);
     }
@@ -188,7 +187,7 @@ public class MeasurementSubscriberTest {
         try {
             measurementSubscriber.onMessage("SOME STRING");
         } catch (SubscriberException e) {
-            verifyZeroInteractions(platformProvider);
+            verifyNoInteractions(platformProvider);
             verify(measurementApi).create(measurementRepresentationCaptor.capture());
             assertEquals("SOME STRING", measurementRepresentationCaptor.getValue().toJSON());
 
@@ -205,7 +204,7 @@ public class MeasurementSubscriberTest {
         try {
             measurementSubscriber.onMessage("SOME STRING");
         } catch (SubscriberException e) {
-            verifyZeroInteractions(platformProvider);
+            verifyNoInteractions(platformProvider);
             verify(measurementApi).create(measurementRepresentationCaptor.capture());
             assertEquals("SOME STRING", measurementRepresentationCaptor.getValue().toJSON());
 
@@ -232,7 +231,6 @@ public class MeasurementSubscriberTest {
 
     @Test
     public void should_onMessages_Successfully() {
-        Mockito.when(measurementApi.createBulk(Mockito.any(MeasurementSubscriber.MeasurementCollectionRepresentation.class))).thenReturn(null);
 
         List<String> jsonStrings = Arrays.asList("Message 1", "Message 2");
         try {
@@ -242,7 +240,7 @@ public class MeasurementSubscriberTest {
             fail(e.getMessage());
         }
 
-        Mockito.verify(measurementApi).createBulk(measurementCollectionRepresentationCaptor.capture());
+        Mockito.verify(measurementApi).createBulkWithoutResponse(measurementCollectionRepresentationCaptor.capture());
 
         assertEquals("{\"measurements\":["
                 + String.join(",", jsonStrings)
@@ -252,14 +250,14 @@ public class MeasurementSubscriberTest {
     @Test(expected = SubscriberException.class)
     public void should_onMessages_whenMeasurementApiThrowsSDKException_with_HTTPStatus_500() throws SubscriberException {
         SDKException sdkException = new SDKException(500, "SOME ERROR MESSAGE");
-        Mockito.when(measurementApi.createBulk(Mockito.any(MeasurementSubscriber.MeasurementCollectionRepresentation.class))).thenThrow(sdkException);
+        doThrow(sdkException).when(measurementApi).createBulkWithoutResponse(any(MeasurementCollectionRepresentation.class));
 
         List<String> jsonStrings = Arrays.asList("Message 1", "Message 2");
         try {
             measurementSubscriber.onMessages(jsonStrings);
         } catch (SubscriberException ppe) {
             verify(platformProvider).markPlatfromAsUnavailable();
-            verify(measurementApi).createBulk(measurementCollectionRepresentationCaptor.capture());
+            verify(measurementApi).createBulkWithoutResponse(measurementCollectionRepresentationCaptor.capture());
             assertEquals("{\"measurements\":["
                     + String.join(",", jsonStrings)
                     + "]}", measurementCollectionRepresentationCaptor.getValue().toJSON());
@@ -271,14 +269,14 @@ public class MeasurementSubscriberTest {
     @Test(expected = SubscriberException.class)
     public void should_onMessages_whenMeasurementApiThrowsSDKException_with_HTTPStatus_400() throws SubscriberException {
         SDKException sdkException = new SDKException(400, "SOME ERROR MESSAGE");
-        Mockito.when(measurementApi.createBulk(Mockito.any(MeasurementSubscriber.MeasurementCollectionRepresentation.class))).thenThrow(sdkException);
+        doThrow(sdkException).when(measurementApi).createBulkWithoutResponse(any(MeasurementCollectionRepresentation.class));
 
         List<String> jsonStrings = Arrays.asList("Message 1", "Message 2");
         try {
             measurementSubscriber.onMessages(jsonStrings);
         } catch (SubscriberException e) {
-            verifyZeroInteractions(platformProvider);
-            verify(measurementApi).createBulk(measurementCollectionRepresentationCaptor.capture());
+            verifyNoInteractions(platformProvider);
+            verify(measurementApi).createBulkWithoutResponse(measurementCollectionRepresentationCaptor.capture());
             assertEquals("{\"measurements\":["
                     + String.join(",", jsonStrings)
                     + "]}", measurementCollectionRepresentationCaptor.getValue().toJSON());
@@ -290,14 +288,14 @@ public class MeasurementSubscriberTest {
     @Test(expected = SubscriberException.class)
     public void should_onMessages_whenMeasurementApiThrowsSDKException_with_HTTPStatus_404() throws SubscriberException {
         SDKException sdkException = new SDKException(404, "SOME ERROR MESSAGE");
-        Mockito.when(measurementApi.createBulk(Mockito.any(MeasurementSubscriber.MeasurementCollectionRepresentation.class))).thenThrow(sdkException);
+        doThrow(sdkException).when(measurementApi).createBulkWithoutResponse(any(MeasurementCollectionRepresentation.class));
 
         List<String> jsonStrings = Arrays.asList("Message 1", "Message 2");
         try {
             measurementSubscriber.onMessages(jsonStrings);
         } catch (SubscriberException e) {
-            verifyZeroInteractions(platformProvider);
-            verify(measurementApi).createBulk(measurementCollectionRepresentationCaptor.capture());
+            verifyNoInteractions(platformProvider);
+            verify(measurementApi).createBulkWithoutResponse(measurementCollectionRepresentationCaptor.capture());
             assertEquals("{\"measurements\":["
                     + String.join(",", jsonStrings)
                     + "]}", measurementCollectionRepresentationCaptor.getValue().toJSON());
@@ -365,7 +363,7 @@ public class MeasurementSubscriberTest {
 
         measurementSubscriber.refreshSubscription();
 
-        Mockito.verifyZeroInteractions(measurementPubSub);
+        Mockito.verifyNoInteractions(measurementPubSub);
 
         assertEquals(-1, measurementSubscriber.getTransmitRateInSeconds());
     }

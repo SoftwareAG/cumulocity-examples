@@ -60,7 +60,7 @@ public class MeasurementSubscriber extends Subscriber<MeasurementPubSub> {
 
     @Override
     public void handleMessages(Collection<String> messageCollection) {
-        measurementApi.createBulk(new MeasurementCollectionRepresentation(messageCollection));
+        measurementApi.createBulkWithoutResponse(new MeasurementCollectionRepresentation(messageCollection));
     }
 
 
