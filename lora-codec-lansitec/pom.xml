@@ -28,7 +28,10 @@
 		<dependency>
 			<groupId>c8y.agents.lpwan.codec.sdk</groupId>
 			<artifactId>lpwan-codec-sdk</artifactId>
+
+			<!--TODO: Replace this version with ${c8y.version} before merging it into develop-->
 			<version>1011.42.0-SNAPSHOT</version>
+			<!--<version>${c8y.version}</version>-->
 		</dependency>
 		<dependency>
 			<groupId>com.nsn.cumulocity.clients-java</groupId>
