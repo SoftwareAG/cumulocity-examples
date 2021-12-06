@@ -1,6 +1,6 @@
 package lora;
 
-import com.cumulocity.lpwan.codec.annotation.CodecMicroserviceApplication;
+import com.cumulocity.microservice.lpwan.codec.annotation.CodecMicroserviceApplication;
 import org.springframework.boot.SpringApplication;
 
 @CodecMicroserviceApplication
