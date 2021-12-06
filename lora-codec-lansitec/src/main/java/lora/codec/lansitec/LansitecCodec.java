@@ -1,7 +1,7 @@
 package lora.codec.lansitec;
 
-import com.cumulocity.lpwan.codec.Codec;
-import com.cumulocity.lpwan.codec.model.DeviceInfo;
+import com.cumulocity.microservice.lpwan.codec.Codec;
+import com.cumulocity.microservice.lpwan.codec.model.DeviceInfo;
 import org.springframework.stereotype.Component;
 
 import java.util.HashSet;

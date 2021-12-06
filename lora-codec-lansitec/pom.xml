@@ -11,14 +11,16 @@
 	<name>lora-codec-lansitec</name>
 	<url>http://maven.apache.org</url>
 	<properties>
+		<spring-boot-dependencies.version>2.3.3.RELEASE</spring-boot-dependencies.version>
 		<microservice.name>lora-codec-lansitec</microservice.name>
+		<main.class>c8y.example.notification.helloworld.HelloWorldApplication</main.class>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
 				<groupId>com.nsn.cumulocity.clients-java</groupId>
 				<artifactId>microservice-dependencies</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}${changelist}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -26,9 +28,8 @@
 	</dependencyManagement>
 	<dependencies>
 		<dependency>
-			<groupId>c8y.agents.lpwan.codec.sdk</groupId>
-			<artifactId>lpwan-codec-sdk</artifactId>
-
+			<groupId>com.nsn.cumulocity.clients-java</groupId>
+			<artifactId>lpwan-custom-codec</artifactId>
 			<!--TODO: Replace this version with ${c8y.version} before merging it into develop-->
 			<version>1011.42.0-SNAPSHOT</version>
 			<!--<version>${c8y.version}</version>-->
@@ -48,8 +49,9 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<version>${spring-boot-dependencies.version}</version>
 				<configuration>
-					<mainClass>lora.Application</mainClass>
+					<mainClass>${main.class}</mainClass>
 				</configuration>
 				<executions>
 					<execution>
