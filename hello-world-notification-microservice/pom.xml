@@ -10,7 +10,7 @@
     <version>1010.17.0-SNAPSHOT</version>
 
     <properties>
-        <c8y.version>1011.0.10-SNAPSHOT</c8y.version>
+        <c8y.version>1011.0.10</c8y.version>
         <main.class>c8y.example.notification.helloworld.HelloWorldApplication</main.class>
 
         <java.version>11</java.version>
