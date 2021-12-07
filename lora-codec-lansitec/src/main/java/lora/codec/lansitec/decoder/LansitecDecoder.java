@@ -7,7 +7,9 @@ import com.cumulocity.microservice.customdecoders.api.model.MeasurementDto;
 import com.cumulocity.microservice.customdecoders.api.model.MeasurementValueDto;
 import com.cumulocity.microservice.customdecoders.api.service.DecoderService;
 import com.cumulocity.microservice.lpwan.codec.decoder.model.LpwanDecoderInputData;
+import com.cumulocity.model.event.CumulocitySeverities;
 import com.cumulocity.model.idtype.GId;
+import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
 import com.cumulocity.rest.representation.event.EventRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjects;
 import com.google.common.io.BaseEncoding;
@@ -417,7 +419,18 @@ public class LansitecDecoder implements DecoderService {
 				return t.process(decoderInput, type, buffer, currentAlgo);
 			} catch(Exception e) {
 				logger.error(e.getMessage());
-				throw new DecoderServiceException(e, e.getMessage(), DecoderResult.empty());
+
+				// Create an alarm on the device, so the decoder issue is shown as an alarm
+				DecoderResult decoderResult = new DecoderResult();
+				AlarmRepresentation alarm = new AlarmRepresentation();
+				alarm.setSource(ManagedObjects.asManagedObject(deviceId));
+				alarm.setType("DecoderError");
+				alarm.setSeverity(CumulocitySeverities.CRITICAL.name());
+				alarm.setText(e.getMessage());
+				alarm.setDateTime(DateTime.now());
+				decoderResult.addAlarm(alarm, true);
+
+				throw new DecoderServiceException(e, e.getMessage(), decoderResult);
 			}
 		}
 
