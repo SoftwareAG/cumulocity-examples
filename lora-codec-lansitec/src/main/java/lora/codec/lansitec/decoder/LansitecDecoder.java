@@ -211,7 +211,7 @@ public class LansitecDecoder implements DecoderService {
 				valueDto.setUnit("dBm");
 				measurementValueDtos.add(valueDto);
 				measurementToAdd.setValues(measurementValueDtos);
-				measurementToAdd.setTime(new DateTime(decoderInput.getUpdateTime()));
+				measurementToAdd.setTime(new DateTime(decoderInput.getUpdateTime() != null?decoderInput.getUpdateTime() : System.currentTimeMillis()));
 				decoderResult.addMeasurement(measurementToAdd);
 
 				measurementToAdd = new MeasurementDto();
@@ -224,7 +224,7 @@ public class LansitecDecoder implements DecoderService {
 				valueDto.setUnit("dBm");
 				measurementValueDtos.add(valueDto);
 				measurementToAdd.setValues(measurementValueDtos);
-				measurementToAdd.setTime(new DateTime(decoderInput.getUpdateTime()));
+				measurementToAdd.setTime(new DateTime(decoderInput.getUpdateTime() != null?decoderInput.getUpdateTime() : System.currentTimeMillis()));
 				decoderResult.addMeasurement(measurementToAdd);
 
 				return decoderResult;
@@ -307,7 +307,7 @@ public class LansitecDecoder implements DecoderService {
 					EventRepresentation event = new EventRepresentation();
 					event.setType("BLE coordinate");
 					event.setText(String.format("MOVE: %d\nMAJOR: %04X\nMINOR: %04X\nRSSI: %d", move, major, minor, rssi));
-					event.setDateTime(new DateTime(decoderInput.getUpdateTime()));
+					event.setDateTime(new DateTime(decoderInput.getUpdateTime() != null?decoderInput.getUpdateTime() : System.currentTimeMillis()));
 					decoderResult.addEvent(event, false);
 
 					Beacon beacon = new Beacon(String.format("%04X", major), String.format("%04X", minor), rssi);
@@ -323,7 +323,7 @@ public class LansitecDecoder implements DecoderService {
 					valueDto.setUnit("dBm");
 					measurementValueDtos.add(valueDto);
 					measurementToAdd.setValues(measurementValueDtos);
-					measurementToAdd.setTime(new DateTime(decoderInput.getUpdateTime()));
+					measurementToAdd.setTime(new DateTime(decoderInput.getUpdateTime() != null?decoderInput.getUpdateTime() : System.currentTimeMillis()));
 					decoderResult.addMeasurement(measurementToAdd);
 
 
@@ -338,7 +338,7 @@ public class LansitecDecoder implements DecoderService {
 					valueDto.setUnit("dBm");
 					measurementValueDtos.add(valueDto);
 					measurementToAdd.setValues(measurementValueDtos);
-					measurementToAdd.setTime(new DateTime(decoderInput.getUpdateTime()));
+					measurementToAdd.setTime(new DateTime(decoderInput.getUpdateTime() != null?decoderInput.getUpdateTime() : System.currentTimeMillis()));
 					decoderResult.addMeasurement(measurementToAdd);
 				}
 
