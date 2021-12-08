@@ -24,7 +24,7 @@
     <parent>
         <groupId>c8y.example</groupId>
         <artifactId>snmp</artifactId>
-        <version>1009.0.29</version>
+        <version>1009.0.30-SNAPSHOT</version>
     </parent>
 
     <name>Cumulocity :: Examples :: SNMP :: MIB Parser Microservice</name>
