@@ -14,7 +14,7 @@ public class LansitecCodec implements Codec {
 
     /**
      * This method should populate a set of unique devices identified by their manufacturer and model.
-     * @return Set<DeviceInfo>: A set of unique devices identified by their manufacturer and model.
+     * @return Set: A set of unique devices identified by their manufacturer and model.
      */
     public Set<DeviceInfo> supportsDevices() {
 
@@ -23,13 +23,5 @@ public class LansitecCodec implements Codec {
         DeviceInfo deviceInfo_Lansitec_Temperature_Sensor = new DeviceInfo("LANSITEC", "Temperature Sensor");
 
         return Stream.of(deviceInfo_Lansitec_Asset_Tracker, deviceInfo_Lansitec_Temperature_Sensor).collect(Collectors.toCollection(HashSet::new));
-    }
-
-    /**
-     *
-     * @return String : The context path of the codec microservice
-     */
-    public String getMicroserviceContextPath() {
-        return "lora-codec-lansitec";
     }
 }

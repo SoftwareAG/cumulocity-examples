@@ -183,6 +183,7 @@ public class LansitecDecoder implements DecoderService {
 				CHGSTATE chgState = CHGSTATE.BY_VALUE.get((byte) ((chgstat&0xff) >> 4));
 
 				EventRepresentation event = new EventRepresentation();
+				event.setSource(ManagedObjects.asManagedObject(GId.asGId(decoderInput.getSourceDeviceId())));
 				event.setType("Tracker status");
 				event.setText(String.format("GPSSTATE: %s\nVIBSTATE: %d\nCHGSTATE: %s", gpsState != null ? gpsState.name() : "UNKNOWN(" + gpsstat + ")", vibState, chgState != null ? chgState.name() : "UNKNOWN(" + chgstat + ")"));
 				event.setDateTime(DateTime.now());
@@ -243,6 +244,7 @@ public class LansitecDecoder implements DecoderService {
 				decoderResult.addDataFragment(new DataFragmentUpdate("c8y_Position/lng", BigDecimal.valueOf(lng)));
 
 				EventRepresentation event = new EventRepresentation();
+				event.setSource(ManagedObjects.asManagedObject(GId.asGId(decoderInput.getSourceDeviceId())));
 				event.setType("c8y_LocationUpdate");
 				event.setText("Location updated");
 				event.setDateTime(new DateTime(time));
@@ -265,6 +267,7 @@ public class LansitecDecoder implements DecoderService {
 				decoderResult.addDataFragment(new DataFragmentUpdate("c8y_Position/lng", BigDecimal.valueOf(lng)));
 
 				EventRepresentation event = new EventRepresentation();
+				event.setSource(ManagedObjects.asManagedObject(GId.asGId(decoderInput.getSourceDeviceId())));
 				event.setType("c8y_LocationUpdate");
 				event.setText("Location updated");
 				event.setDateTime(new DateTime(time));
@@ -305,6 +308,7 @@ public class LansitecDecoder implements DecoderService {
 
 
 					EventRepresentation event = new EventRepresentation();
+					event.setSource(ManagedObjects.asManagedObject(GId.asGId(decoderInput.getSourceDeviceId())));
 					event.setType("BLE coordinate");
 					event.setText(String.format("MOVE: %d\nMAJOR: %04X\nMINOR: %04X\nRSSI: %d", move, major, minor, rssi));
 					event.setDateTime(new DateTime(decoderInput.getUpdateTime() != null?decoderInput.getUpdateTime() : System.currentTimeMillis()));
