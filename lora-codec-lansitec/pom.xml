@@ -13,7 +13,7 @@
 	<properties>
 		<spring-boot-dependencies.version>2.3.3.RELEASE</spring-boot-dependencies.version>
 		<microservice.name>lora-codec-lansitec</microservice.name>
-		<main.class>c8y.example.notification.helloworld.HelloWorldApplication</main.class>
+		<main.class>lora.Application</main.class>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
