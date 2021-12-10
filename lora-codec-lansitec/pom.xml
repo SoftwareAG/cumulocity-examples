@@ -30,9 +30,7 @@
 		<dependency>
 			<groupId>com.nsn.cumulocity.clients-java</groupId>
 			<artifactId>lpwan-custom-codec</artifactId>
-			<!--TODO: Replace this version with ${c8y.version} before merging it into develop-->
-			<version>1011.42.0-SNAPSHOT</version>
-			<!--<version>${c8y.version}</version>-->
+			<version>${c8y.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.nsn.cumulocity.model</groupId>
