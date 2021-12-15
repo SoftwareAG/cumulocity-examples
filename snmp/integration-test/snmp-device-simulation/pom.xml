@@ -23,7 +23,7 @@
     <parent>
         <groupId>c8y.example</groupId>
         <artifactId>snmp-integration-test</artifactId>
-        <version>1009.0.30</version>
+        <version>1009.0.31-SNAPSHOT</version>
     </parent>
 
     <name>Cumulocity :: Examples :: SNMP :: Integration Tests :: Snmp Device Simulation</name>
