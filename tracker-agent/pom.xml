@@ -4,7 +4,7 @@
     <parent>
         <groupId>c8y.example</groupId>
         <artifactId>c8y-examples</artifactId>
-        <version>1009.0.30-SNAPSHOT</version>
+        <version>1009.0.30</version>
     </parent>
 
     <groupId>c8y</groupId>
