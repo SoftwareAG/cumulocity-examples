@@ -1,5 +1,5 @@
-withCredentials([usernamePassword(credentialsId: 'SAG-github.com', passwordVariable: 'GITHUB_PASSWORD', usernameVariable: 'GITHUB_USER')]) {
-          env.REPOSITORY_BASE_URL="https://${GITHUB_USER}:${GITHUB_PASSWORD}@github.com/SoftwareAG"
+withCredentials([string(credentialsId: 'github.com_write', variable: 'REPOSITORY_CREDENTIALS')]){
+          env.REPOSITORY_BASE_URL="https://${REPOSITORY_CREDENTIALS}@github.com/SoftwareAG"
 }
 
 pipeline {
