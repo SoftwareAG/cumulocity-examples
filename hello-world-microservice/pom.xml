@@ -7,14 +7,14 @@
     <groupId>c8y.example</groupId>
     <artifactId>hello-world-microservice</artifactId>
     <name>Cumulocity :: Examples :: Hello World Microservice</name>
-    <version>1006.6.40-SNAPSHOT</version>
+    <version>1006.6.41-SNAPSHOT</version>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <spring-boot-dependencies.version>1.5.22.RELEASE</spring-boot-dependencies.version>
         <main.class>c8y.example.helloworld.HelloWorldMain</main.class>
-        <c8y.version>1006.6.40-SNAPSHOT</c8y.version>
+        <c8y.version>1006.6.41-SNAPSHOT</c8y.version>
     </properties>
 
     <dependencyManagement>
