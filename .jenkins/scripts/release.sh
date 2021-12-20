@@ -37,7 +37,7 @@ echo "branch name: $branch_name"
 git checkout ${branch_name}
 
 echo "pull latest changes from the branch ${branch_name}"
-git pull https://${BITBUCKET_USER}:${BITBUCKET_PASSWORD}@bitbucket.org/m2m/cumulocity-examples ${branch_name}
+git pull ${REPOSITORY_BASE_URL}/cumulocity-examples ${branch_name}
 
 echo "Update version to ${version}"
 ./mvnw -s $MVN_SETTINGS versions:set -DnewVersion=${version}
@@ -71,6 +71,6 @@ cd ..
 
 git commit --allow-empty -am "[maven-release-plugin] prepare for next development iteration"
 
-git push https://${BITBUCKET_USER}:${BITBUCKET_PASSWORD}@bitbucket.org/m2m/cumulocity-examples ${branch_name}
-git push https://${BITBUCKET_USER}:${BITBUCKET_PASSWORD}@bitbucket.org/m2m/cumulocity-examples ${tag}
+git push ${REPOSITORY_BASE_URL}/cumulocity-examples ${branch_name}
+git push ${REPOSITORY_BASE_URL}/cumulocity-examples ${tag}
 

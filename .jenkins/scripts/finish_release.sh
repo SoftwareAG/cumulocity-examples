@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -e
 
 release_version=$1
 
@@ -6,7 +7,7 @@ echo "equivalent of git flow release finish r${release_version}"
 
 echo "git checkout develop; git pull..."
 git checkout develop
-git pull https://${BITBUCKET_USER}:${BITBUCKET_PASSWORD}@bitbucket.org/m2m/cumulocity-examples
+git pull ${REPOSITORY_BASE_URL}/cumulocity-examples
 
 echo "git merge"
 git merge -s recursive -Xtheirs release/r${release_version}
@@ -16,6 +17,6 @@ git add -A
 git commit --allow-empty --message "flow: Merged <release> r${release_version} to <develop> (develop)."
 
 echo "git push to release/r${release_version}"
-git push https://${BITBUCKET_USER}:${BITBUCKET_PASSWORD}@bitbucket.org/m2m/cumulocity-examples release/r${release_version}
+git push ${REPOSITORY_BASE_URL}/cumulocity-examples release/r${release_version}
 echo "git push to develop"
-git push https://${BITBUCKET_USER}:${BITBUCKET_PASSWORD}@bitbucket.org/m2m/cumulocity-examples develop
+git push ${REPOSITORY_BASE_URL}/cumulocity-examples develop
