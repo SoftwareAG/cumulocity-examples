@@ -3,8 +3,8 @@ env.REPOSITORY_BASE_URL="github.com/SoftwareAG"
 pipeline {
      agent {
         kubernetes {
-            inheritFrom 'jdk11'
-            defaultContainer 'default'
+            inheritFrom 'jdk8'
+            defaultContainer 'default'        
         }
     }
     triggers {
