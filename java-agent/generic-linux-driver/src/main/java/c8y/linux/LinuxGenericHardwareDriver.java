@@ -28,6 +28,7 @@ import java.io.Reader;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
+import java.util.Objects;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.io.IOUtils;
@@ -114,8 +115,10 @@ public class LinuxGenericHardwareDriver implements Driver, OperationExecutor, Ha
 		if (interfaces.hasMoreElements()) {
 			NetworkInterface networkInterface = interfaces.nextElement();
 			byte[] mac = networkInterface.getHardwareAddress();
-			String address = Hex.encodeHexString(mac).toUpperCase();
-			hardware.setSerialNumber(address);
+			if (Objects.nonNull(mac)) {
+				String address = Hex.encodeHexString(mac).toUpperCase();
+				hardware.setSerialNumber(address);
+			}
 		}
 	}
 
