@@ -16,7 +16,7 @@ LPWAN codec microservice automatically exposes one REST endpoint using the path 
 
 #### Request JSON body format
 
-When posting data to the decoder microservice, the LPWAN agents posts the data using the following JSON format:
+Following is the request JSON input accepted by the /decode endpoint:
 
 ```
 {
@@ -55,7 +55,7 @@ The LPWAN agent passes in the following fragments to the codec microservice.
 
 #### Response JSON body format
 
-If the decoder microservice is able to handle the request, it responds with the following JSON format:
+Following is the response JSON format emitted by the /decode endpoint:
 
 ```
 {
@@ -226,10 +226,80 @@ The fragments above are used as follows:
 
 ```
 
+#### The REST endpoint: /encode
+
+LPWAN codec microservice automatically exposes one REST endpoint using the path */encode*
+
+#### Request JSON body format
+
+Following is the request JSON input accepted by the /encode endpoint:
+
+```
+{
+    "sourceDeviceId":"<<device Id>>",
+    "commandName":"<<name of the command to be encoded>>",
+    "commandData":"<<text of the command to be encoded>>",
+    "args":{
+        "deviceModel": "<<device model>>",
+   		"deviceManufacturer": "<<device manufacturer>>",
+   		"sourceDeviceEui": "<<device external Id>>"
+    }
+}
+```
+
+The LPWAN agent populates the below fragments while invoking the codec microservice.
+
+*args* - Meta information that is required by codec microservice to know the model and manufacturer of the device, along with the EUI of the device.
+
+*sourceDeviceId* - The ID of the source device in the Cumulocity IoT inventory
+
+*commandName* - The name of the command to be encoded
+
+*commandData* - The text of the command to be encoded
+
+**Example**:
+
+```
+{
+      "commandName": "position request",
+      "commandData" : {position request -latitude 10.25 -longitude -5.67},
+      "sourceDeviceId" : 26413,
+      "args" : {
+        "deviceModel": "Asset Tracker", 
+        "deviceManufacturer": "LANSITEC", 
+        "sourceDeviceEui": "AABB03AABB030000"
+      }
+}
+```
+
+#### Response JSON body format
+
+Following is the response JSON format emitted by the /encode endpoint:
+
+```
+{
+    "encodedCommand": <<the encoded hexadecimal command>>,
+    "fport": <<the target fport>>
+}
+```
+
+The fragments above are used as follows:
+
+*encodedCommand* - The hexadecimal command obtained post encode, which will be executed as an operation
+
+*fport* - The target fport
+
+```json
+{
+    "encodedCommand": "9F5000",
+    "fport": 20
+}
+```
+
 ## Steps to implement LPWAN codec microservice:
 
-Decoder microservices can be easily built on top of [Cumulocity IoT Microservices](http://www.cumulocity.com/guides/microservice-sdk/java).
-In order to serve as a LPWAN decoder microservice, two requirements have to be met
+The codec microservice can be easily built on top of [Cumulocity IoT Microservices](http://www.cumulocity.com/guides/microservice-sdk/java).
+In order to serve as a LPWAN codec microservice, two requirements need to be met
 
 1. The codec microservice Main class needs to be annotated as `@CodecMicroserviceApplication`.
 2. The microservice needs to provide implementation for the following interfaces.
@@ -265,9 +335,22 @@ public interface DecoderService {
 
 ```
 
-## Sample decoder microservice implementation
+```java
+public interface EncoderService {
+    /**
+     * Encodes the EncoderInput object into EncoderResult object
+     * 
+     * @param encoderInputData the EncoderInputData object containing the source device id, command name, command data and the properties
+     * @return EncoderResult the EncoderResult object that contains the encoded hexadecimal command and/or additional properties like fport
+     * @throws EncoderServiceException
+     */
+    EncoderResult encode(EncoderInputData encoderInputData) throws EncoderServiceException;
+}
+```
 
-In this repository, you'll find a very straightforward decoder example, the lansitec decoder (`lora-codec-lansitec`). It is implemented in Spring Boot. 
+## Sample codec microservice implementation
+
+In this repository, you'll find a very straightforward codec example, the lansitec codec (`lora-codec-lansitec`). It is implemented in Spring Boot. 
 
 Below are the steps to be followed while implementing the microservice. 
 
@@ -290,12 +373,39 @@ public class LansitecCodec implements Codec {
 
     /**
      * This method should populate a set of unique devices identified by their manufacturer and model.
+     *
      * @return Set: A set of unique devices identified by their manufacturer and model.
      */
     public Set<DeviceInfo> supportsDevices() {
 
         // The manufacturer "LANSITEC" has 2 different devices with model "Outdoor Asset Tracker" and "Temperature Sensor"
-        DeviceInfo deviceInfo_Lansitec_Asset_Tracker = new DeviceInfo("LANSITEC", "Asset Tracker");
+        DeviceCommand positionRequestCommand = new DeviceCommand(LansitecEncoder.POSITION_REQUEST, "Device Config", LansitecEncoder.POSITION_REQUEST);
+        DeviceCommand deviceRequestCommand = new DeviceCommand(LansitecEncoder.DEVICE_REQUEST, "Device Config", LansitecEncoder.DEVICE_REQUEST);
+        DeviceCommand registerRequestCommand = new DeviceCommand(LansitecEncoder.REGISTER_REQUEST, "Device Config", LansitecEncoder.REGISTER_REQUEST);
+
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode deviceOperationElements = mapper.createObjectNode();
+        deviceOperationElements.put("breakpoint", Boolean.TRUE);
+        deviceOperationElements.put("selfadapt", Boolean.TRUE);
+        deviceOperationElements.put("oneoff", Boolean.TRUE);
+        deviceOperationElements.put("alreport", Boolean.TRUE);
+        deviceOperationElements.put("pos", 0);
+        deviceOperationElements.put("hb", 0);
+        String json = null;
+        try {
+            json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(deviceOperationElements);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        DeviceCommand setConfigCommand = new DeviceCommand(LansitecEncoder.SET_CONFIG, "Device Config", json);
+
+        Set<DeviceCommand> deviceCommands = new HashSet<>();
+        deviceCommands.add(positionRequestCommand);
+        deviceCommands.add(deviceRequestCommand);
+        deviceCommands.add(registerRequestCommand);
+        deviceCommands.add(setConfigCommand);
+
+        DeviceInfo deviceInfo_Lansitec_Asset_Tracker = new DeviceInfo("LANSITEC", "Asset Tracker", deviceCommands);
         DeviceInfo deviceInfo_Lansitec_Temperature_Sensor = new DeviceInfo("LANSITEC", "Temperature Sensor");
 
         return Stream.of(deviceInfo_Lansitec_Asset_Tracker, deviceInfo_Lansitec_Temperature_Sensor).collect(Collectors.toCollection(HashSet::new));
@@ -338,6 +448,61 @@ public class LansitecDecoder implements DecoderService {
 ```
 
 A flexible option named `success` is provided in the DecoderResult which represents whether the `decode` operation is successful or not. 
+
+4) Implement `EncoderService` interface
+
+```java
+@Component
+public class LansitecEncoder implements EncoderService {
+    public static final String SET_CONFIG = "set config";
+    public static final String DEVICE_REQUEST = "device request";
+    public static final String REGISTER_REQUEST = "register request";
+    public static final String POSITION_REQUEST = "position request";
+
+    @Override
+    public EncoderResult encode(EncoderInputData encoderInputData) throws EncoderServiceException {
+        LpwanEncoderInputData lpwanEncoderInputData = new LpwanEncoderInputData(GId.asGId(encoderInputData.getSourceDeviceId()),
+                encoderInputData.getCommandName(),
+                encoderInputData.getCommandData(),
+                encoderInputData.getArgs());
+
+        LpwanEncoderResult encoderResult = null;
+        if (lpwanEncoderInputData.getSourceDeviceInfo().getManufacturer().equalsIgnoreCase("Lansitec") && lpwanEncoderInputData.getSourceDeviceInfo().getModel().equals("Asset Tracker")) {
+            ObjectMapper mapper = new ObjectMapper();
+            String payload = null;
+            try {
+                if (lpwanEncoderInputData.getCommandName().equals(POSITION_REQUEST)) {
+                    payload = "A1FF";
+                } else if (lpwanEncoderInputData.getCommandName().equals(REGISTER_REQUEST)) {
+                    payload = "A2FF";
+                } else if (lpwanEncoderInputData.getCommandName().equals(DEVICE_REQUEST)) {
+                    payload = "A3FF";
+                } else if (lpwanEncoderInputData.getCommandName().equals(SET_CONFIG)) {
+                    JsonNode params = mapper.readTree(lpwanEncoderInputData.getCommandData());
+                    ByteBuffer buffer = ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN);
+                    byte breakpoint = params.get("breakpoint").asBoolean() ? (byte) 8 : 0;
+                    byte selfadapt = params.get("selfadapt").asBoolean() ? (byte) 4 : 0;
+                    byte oneoff = params.get("oneoff").asBoolean() ? (byte) 2 : 0;
+                    byte alreport = params.get("alreport").asBoolean() ? (byte) 1 : 0;
+                    buffer.put((byte) ((byte) 0x90 | (byte) breakpoint | (byte) selfadapt | (byte) oneoff | (byte) alreport));
+                    buffer.putShort((short) params.get("pos").asInt());
+                    buffer.put((byte) params.get("hb").asInt());
+                    payload = BaseEncoding.base16().encode(buffer.array());
+                }
+
+                encoderResult = new LpwanEncoderResult(payload, 20);
+                encoderResult.setSuccess(true);
+                encoderResult.setMessage("Successfully Encoded the payload");
+            } catch (IOException e) {
+                e.printStackTrace();
+                encoderResult = new LpwanEncoderResult();
+                encoderResult.setSuccess(false);
+                encoderResult.setMessage("Encoding Payload Failed");
+            }
+        }
+        return encoderResult;
+    }
+```
 
 ## Deploying the example codec microservice
 
