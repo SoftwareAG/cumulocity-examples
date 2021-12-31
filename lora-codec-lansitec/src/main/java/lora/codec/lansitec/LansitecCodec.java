@@ -1,7 +1,12 @@
 package lora.codec.lansitec;
 
 import com.cumulocity.microservice.lpwan.codec.Codec;
+import com.cumulocity.microservice.lpwan.codec.model.DeviceCommand;
 import com.cumulocity.microservice.lpwan.codec.model.DeviceInfo;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import lora.codec.lansitec.encoder.LansitecEncoder;
 import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
@@ -14,12 +19,39 @@ public class LansitecCodec implements Codec {
 
     /**
      * This method should populate a set of unique devices identified by their manufacturer and model.
+     *
      * @return Set: A set of unique devices identified by their manufacturer and model.
      */
     public Set<DeviceInfo> supportsDevices() {
 
         // The manufacturer "LANSITEC" has 2 different devices with model "Outdoor Asset Tracker" and "Temperature Sensor"
-        DeviceInfo deviceInfo_Lansitec_Asset_Tracker = new DeviceInfo("LANSITEC", "Asset Tracker");
+        DeviceCommand positionRequestCommand = new DeviceCommand(LansitecEncoder.POSITION_REQUEST, "Device Config", LansitecEncoder.POSITION_REQUEST);
+        DeviceCommand deviceRequestCommand = new DeviceCommand(LansitecEncoder.DEVICE_REQUEST, "Device Config", LansitecEncoder.DEVICE_REQUEST);
+        DeviceCommand registerRequestCommand = new DeviceCommand(LansitecEncoder.REGISTER_REQUEST, "Device Config", LansitecEncoder.REGISTER_REQUEST);
+
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode deviceOperationElements = mapper.createObjectNode();
+        deviceOperationElements.put("breakpoint",Boolean.TRUE);
+        deviceOperationElements.put("selfadapt",Boolean.TRUE);
+        deviceOperationElements.put("oneoff",Boolean.TRUE);
+        deviceOperationElements.put("alreport",Boolean.TRUE);
+        deviceOperationElements.put("pos",0);
+        deviceOperationElements.put("hb",0);
+        String json =null;
+        try {
+            json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(deviceOperationElements);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        DeviceCommand setConfigCommand = new DeviceCommand(LansitecEncoder.SET_CONFIG, "Device Config", json);
+
+        Set<DeviceCommand> deviceCommands = new HashSet<>();
+        deviceCommands.add(positionRequestCommand);
+        deviceCommands.add(deviceRequestCommand);
+        deviceCommands.add(registerRequestCommand);
+        deviceCommands.add(setConfigCommand);
+
+        DeviceInfo deviceInfo_Lansitec_Asset_Tracker = new DeviceInfo("LANSITEC", "Asset Tracker", deviceCommands);
         DeviceInfo deviceInfo_Lansitec_Temperature_Sensor = new DeviceInfo("LANSITEC", "Temperature Sensor");
 
         return Stream.of(deviceInfo_Lansitec_Asset_Tracker, deviceInfo_Lansitec_Temperature_Sensor).collect(Collectors.toCollection(HashSet::new));
