@@ -34,7 +34,7 @@ public class LansitecEncoder implements EncoderService {
                 encoderInputData.getArgs());
 
         LpwanEncoderResult encoderResult = null;
-        if (lpwanEncoderInputData.getSourceDeviceInfo().getManufacturer().equalsIgnoreCase("Lansitec") && lpwanEncoderInputData.getSourceDeviceInfo().getModel().equals("Asset Tracker")) {
+        if (lpwanEncoderInputData.getSourceDeviceInfo().getDeviceManufacturer().equalsIgnoreCase("Lansitec") && lpwanEncoderInputData.getSourceDeviceInfo().getDeviceModel().equals("Asset Tracker")) {
             ObjectMapper mapper = new ObjectMapper();
             String payload = null;
             try {

@@ -415,7 +415,7 @@ public class LansitecDecoder implements DecoderService {
 
 		ByteBuffer buffer = ByteBuffer.wrap(BaseEncoding.base16().decode(inputData.toUpperCase()));
 
-		if (decoderInput.getSourceDeviceInfo().getModel().equals(ASSET_TRACKER)) {
+		if (decoderInput.getSourceDeviceInfo().getDeviceModel().equals(ASSET_TRACKER)) {
 			byte type = buffer.get();
 			TYPE t = TYPE.BY_VALUE.get((byte) (type & 0xf0));
 			logger.info("Frame type: {}", t.name());
