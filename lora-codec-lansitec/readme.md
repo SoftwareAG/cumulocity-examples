@@ -2,21 +2,21 @@
 
 ## Introduction
 
-Cumulocity IoT has the ability to integrate LPWAN devices via LPWAN agents. Supported list of LPWAN agents. (https://cumulocity.com/guides/protocol-integration/overview/)   
+Cumulocity IoT has the ability to integrate LPWAN devices via LPWAN agents, for a list of all supported LPWAN agents see the [Protocol integration guide] (https://cumulocity.com/guides/protocol-integration/overview/).
 
-In the following, we describe how to implement a custom codec microservice for implementing LPWAN device specific codec for decoding and encoding the device payload.
+The following section explains how to implement a custom codec microservice for implementing LPWAN device specific codec for decoding and encoding the device payload.
 
 ## Codec Workflow
 
-We have to deploy the codec microservice into Cumulocity where the codec microservice creates the device types with the list of supported device models.
+First you need to deploy the codec microservice into Cumulocity IoT where the codec microservice creates the device types with the list of supported device models.
 
 #### The REST endpoint: /decode
 
-LPWAN codec microservice automatically exposes one REST endpoint using the path */decode*
+LPWAN codec microservice automatically exposes one REST endpoint using the path */decode*.
 
 #### Request JSON body format
 
-Following is the request JSON input accepted by the /decode endpoint:
+Below you see the request JSON input accepted by the /decode endpoint:
 
 ```
 {
@@ -34,8 +34,8 @@ Following is the request JSON input accepted by the /decode endpoint:
 The LPWAN agent passes in the following fragments to the codec microservice:
 
 * *args* - Meta information that is required by codec microservice to know the model and manufacturer of the device, along with the EUI of the device.
-* *sourceDeviceId* - The ID of the source device in the Cumulocity IoT inventory
-* *value* - The actual value to be decoded. The value is a series of bytes encoded as a hexadecimal string
+* *sourceDeviceId* - The ID of the source device in the Cumulocity IoT inventory.
+* *value* - The actual value to be decoded. The value is a series of bytes encoded as a hexadecimal string.
 
 **Example:**
 
@@ -73,7 +73,7 @@ The fragments above are used as follows:
 * *alarmTypesToUpdate* - A list of alaram types to be updated by LPWAN agent.
 * *dataFragments* - The data fragments can be used by a decoder to hand over a set of fragment updates.
 * *success* - An informative boolean flag (true or false) that indicates if decoding by the microservice was successful.
-* *measurements* - A list of measurements to be created by the LPWAN agent. The syntax here follows an own DTO format, like this example shows:
+* *measurements* - A list of measurements to be created by the LPWAN agent. The syntax here follows an own DTO format. See the example below:
 
 
 ```json
@@ -243,9 +243,9 @@ Following is the request JSON input accepted by the /encode endpoint:
 The LPWAN agent populates the following fragments while invoking the codec microservice:
 
 * *args* - Meta information that is required by codec microservice to know the model and manufacturer of the device, along with the EUI of the device.
-* *sourceDeviceId* - The ID of the source device in the Cumulocity IoT inventory
-* *commandName* - The name of the command to be encoded
-* *commandData* - The text of the command to be encoded
+* *sourceDeviceId* - The ID of the source device in the Cumulocity IoT inventory.
+* *commandName* - The name of the command to be encoded.
+* *commandData* - The text of the command to be encoded.
 
 **Example:**
 
@@ -275,8 +275,8 @@ Following is the response JSON format emitted by the /encode endpoint:
 
 The fragments above are used as follows:
 
-* *encodedCommand* - The hexadecimal command obtained post encode, which will be executed as an operation
-* *fport* - The target fport
+* *encodedCommand* - The hexadecimal command obtained post encode, which will be executed as an operation.
+* *fport* - The target fport.
 
 ```json
 {
@@ -288,7 +288,7 @@ The fragments above are used as follows:
 ## Steps to implement LPWAN codec microservice:
 
 The codec microservice can be easily built on top of [Cumulocity IoT Microservices](http://www.cumulocity.com/guides/microservice-sdk/java).
-In order to serve as a LPWAN codec microservice, two requirements need to be met:
+In order to serve as a LPWAN codec microservice, two requirements have to be met:
 
 1. The codec microservice Main class needs to be annotated as `@CodecMicroserviceApplication`.
 2. The microservice needs to provide implementation for the following interfaces.
@@ -344,7 +344,7 @@ In this repository, you'll find a very straightforward codec example, the lansit
 
 Follow the steps below while implementing the microservice:
 
-1) Annotate the Main class with `@CodecMicroserviceApplication`
+1) Annotate the Main class with `@CodecMicroserviceApplication`.
 
 ```java
 @CodecMicroserviceApplication
@@ -498,6 +498,6 @@ public class LansitecEncoder implements EncoderService {
 
 In order to build and deploy the sample codec microservice, follow the [Microservice SDK guide](http://www.cumulocity.com/guides/microservice-sdk/java/).
 
-Clone this repository first. Next, build the microservice using `mvn clean install`. The build will create a zip file of the decoder microservice.
+First, clone this repository. Next, build the microservice using `mvn clean install`. The build will create a zip file of the decoder microservice.
 
 In the next step, deploy the microservice using the Cumulocity IoT UI. Once the decoder microservice has been deployed, it can take couple of minutes for Cumulocity IoT to discover the new decoder. Then, open the device management application. Under device protocols, you should now see the device types with type as 'lpwan' created by codec microservice. Map one of the device types to the LPWAN device and send an uplink message to see the respective measurements created in Cumulocity IoT.
