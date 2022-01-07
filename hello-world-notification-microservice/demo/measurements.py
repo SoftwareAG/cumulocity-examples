@@ -82,7 +82,7 @@ if __name__ == '__main__':
                 try:
                     request_session = get_session()
                     post_delete_device(request_session, args[1])
-                    print(f'Device id: {device_id} deleted')
+                    print(f'Device id: {args[1]} deleted')
                 except IndexError:
                     print('Usage script.py delete [deviceId]')
             if command == 'send':
@@ -93,7 +93,7 @@ if __name__ == '__main__':
                     count = 0
                     while count < duration:
                         response = post_measurement(create_measurement_str(args[1]), request_session)
-                        print(response)
+                        print(f'Measurement created [{response.status_code}]')
                         count += 1
                         sleep(1)
                 except (IndexError, ValueError):
