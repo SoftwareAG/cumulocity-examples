@@ -1,4 +1,4 @@
-##Example Notification 2.0 Microservice
+## Example Notification 2.0 Microservice
 This example microservice shows you how to create a subscription & consume a stream of notifications using WebSocket protocol. Before running this example microservice, please make sure to have created a device and specified its ID in `example.source.id` property located in applications.properties. As part of cleanup, you may wish to delete this device after you have finished running this example. The example microservice first creates a subscription and then proceeds to connect to the WebSocket server after obtaining the authorization token.
 
 The example microservice creates the following subscription to the specified device:
@@ -73,3 +73,42 @@ we will receive the following message as we have specified to transform the filt
   "type": "c8y_Speed"
 }
 ```
+
+## Device creation and measurement sending
+
+The included [Python script](demo/measurements.py) has everything to get you started with the microservice and has example code for device creation, deletion and sending out measurements.
+To use the script you will need to provide authentication details, edit the script and provide values to the following fields:
+
+```python
+_tenant_id = ''
+_username = 'admin'
+_password = ''
+_platform_url = ''
+```
+
+To use, run the script with one of the options:
+
+### To create a device
+```console
+user@host:~$ python measurements.py device
+user@host:~$ Device id: <DEVICE_ID>
+```
+
+After creating the device you need to enter its ID in `example.source.id` property and deploy the microservice, before proceeding with sending out measurements.
+
+### To start sending measurements
+```console
+user@host:~$ python measurements.py send <DEVICE_ID> <DURATION_IN_SECONDS>
+user@host:~$ Measurement created [201]
+user@host:~$ Measurement created [201]
+...
+```
+
+### To delete a device
+```console
+user@host:~$ python measurements.py delete <DEVICE_ID>
+user@host:~$ Device id: <DEVICE_ID> deleted
+```
+
+
+
