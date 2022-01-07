@@ -1,6 +1,6 @@
 {
   "apiVersion":"1",
-  "version":"1.0-SNAPSHOT",
+  "version":"@project.version@",
   "contextPath": "lora-codec-lansitec",
   "provider": {
     "name":"Software AG"
