@@ -459,8 +459,6 @@ public class LansitecDecoder implements DecoderService {
 		return DecoderResult.empty();
 	}
 
-	//UGLY!!!!!! not scalable!!!!!
-	//Need to store that in a managed object!!!
 	private Algo currentAlgo;
 
 	@Autowired
