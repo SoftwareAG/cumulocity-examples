@@ -58,7 +58,6 @@
     <module>sample-hex-decoder</module>
     <module>sample-json-decoder</module>
     <module>java-agent</module>
-    <module>lora-codec-lansitec</module>
     <module>snmp</module>
     <module>mqtt-client</module>
     <module>microservices</module>
