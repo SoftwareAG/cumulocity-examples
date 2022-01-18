@@ -5,7 +5,7 @@
     <parent>
         <groupId>c8y.example</groupId>
         <artifactId>c8y-jv</artifactId>
-        <version>1011.0.14</version>
+        <version>1011.0.15-SNAPSHOT</version>
     </parent>
 
     <artifactId>remote-access-driver</artifactId>

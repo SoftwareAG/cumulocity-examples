@@ -7,7 +7,7 @@
     <parent>
         <groupId>c8y.example</groupId>
         <artifactId>jv-packages</artifactId>
-        <version>1011.0.14</version>
+        <version>1011.0.15-SNAPSHOT</version>
     </parent>
 
     <artifactId>cumulocity-win-agent</artifactId>
