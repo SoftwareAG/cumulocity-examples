@@ -1,25 +1,29 @@
-## Example Notification 2.0 Microservice
-This example microservice shows you how to create a subscription & consume a stream of notifications using WebSocket protocol. Before running this example microservice, please make sure to have created a device and specified its ID in `example.source.id` property located in applications.properties. As part of cleanup, you may wish to delete this device after you have finished running this example. The example microservice first creates a subscription and then proceeds to connect to the WebSocket server after obtaining the authorization token.
+# Introduction
+This example microservice demonstrates how to create a subscription and consume a stream of notifications using WebSocket protocol. The example microservice first creates a subscription and then proceeds to connect to the WebSocket server after obtaining the authorization token.
 
 The example microservice creates the following subscription to the specified device:
 
 ```json
 {
-  "source": { "id": "<DEVICE ID>" }, 
-  "context": "mo", 
-  "subscription": "<SUBSCRIPTION NAME>", 
+  "source": { "id": "<DEVICE_ID>" },
+  "context": "mo",
+  "subscription": "<SUBSCRIPTION_NAME>",
   "subscriptionFilter": {
-    "apis": ["measurements"], 
+    "apis": ["measurements"],
     "typeFilter": "c8y_Speed"
-  }, 
+  },
   "fragmentsToCopy": ["c8y_SpeedMeasurement", "c8y_MaxSpeedMeasurement"]
 }
 ```
-The example first creates the above subscription and uses it to create a token that permits access to that subscription. Then a WebSocket client using that token is connected; the client will now start receiving notifications of messages that meet the subscription criteria as they are sent to Cumulocity by the device.
 
-In the above example, we have expressed interest in receiving only measurements that bear the type `c8y_speed`. The `fragmentsToCopy` property further transforms the filtered measurement to *only* include c8y_SpeedMeasurement and c8y_MaxSpeedMeasurement fragments.
+The example microservice first creates the above subscription and then uses it to obtain a token. This token is used to access the subscription's WebSocket channel. Next a WebSocket client is connected; the client will listen for notifications of messages that meet the subscription criteria as they are sent to Cumulocity by the device.
+
+In the above subscription example, we have expressed interest in receiving only measurements that bear the type of `c8y_speed`. The `fragmentsToCopy` property further transforms the filtered measurement to *only* include c8y_SpeedMeasurement and c8y_MaxSpeedMeasurement fragments.
 
 As an example, if we post the following measurement from the specified device that meets our filter criteria above:
+
+
+
 
 ```json
 {
@@ -46,9 +50,9 @@ As an example, if we post the following measurement from the specified device th
       "value": 300,
       "unit": "km/h"
     }
-  },            
+  },
   "time":"2021-06-11T17:03:14.000+02:00",
-  "source": {"id":"<DEVICE ID>"},
+  "source": {"id":"<DEVICE_ID>"},
   "type": "c8y_Speed"
 }
 ```
@@ -58,10 +62,10 @@ we will receive the following message as we have specified to transform the filt
 {
   "c8y_SpeedMeasurement": {
     "T": {
-      "value": 100, 
+      "value": 100,
       "unit": "km/h"
     }
-  }, 
+  },
   "c8y_MaxSpeedMeasurement": {
     "T": {
       "value": 300,
@@ -74,41 +78,67 @@ we will receive the following message as we have specified to transform the filt
 }
 ```
 
-## Device creation and measurement sending
 
-The included [Python script](demo/measurements.py) has everything to get you started with the microservice and has example code for device creation, deletion and sending out measurements.
-To use the script you will need to provide authentication details, edit the script and provide values to the following fields:
+## Prerequisite
+- cumulocity tenant with microservice hosting feature enabled
+    - for free trial account on cumulocity.com you will need to request this feature by contacting
+- contents of this repository
 
-```python
-_tenant_id = ''
-_username = 'admin'
-_password = ''
-_platform_url = ''
-```
-
-To use, run the script with one of the options:
-
-### To create a device
-```console
-user@host:~$ python measurements.py device
-user@host:~$ Device id: <DEVICE_ID>
-```
-
-After creating the device you need to enter its ID in `example.source.id` property and deploy the microservice, before proceeding with sending out measurements.
-
-### To start sending measurements
-```console
-user@host:~$ python measurements.py send <DEVICE_ID> <DURATION_IN_SECONDS>
-user@host:~$ Measurement created [201]
-user@host:~$ Measurement created [201]
-...
-```
-
-### To delete a device
-```console
-user@host:~$ python measurements.py delete <DEVICE_ID>
-user@host:~$ Device id: <DEVICE_ID> deleted
-```
-
-
+### Instructions
+1. Creating a test user
+    - From the Application Switcher select Administration
+    - In the Navigation pane expand Accounts and go to 'Users'
+    - Click on 'Add user', fill in the form for the new user, untick "Send password reset link as email" and provide a password
+    - Click Save
+    - Enable notification support:
+      - Using Navigation pane go to Accounts and then Roles, click on "Add global role"
+      - Name the role "Notifications" and from the list of permissions tick "Notification 2" in Admin column
+      - click Save
+      - go to Accounts then Users
+      - in the list find the username created a few steps before and under "Global roles" open the dropdown
+      - find and tick "Notifications" and click "Apply"
+2. Creating a test device
+    - open the demo directory
+    - edit the `measurements.py` script and provide the following credentials for your newly created user as well as the platform url:
+      ```python
+      _tenant_id = ''
+      _username = ''
+      _password = ''
+      _platform_url = ''
+        ```
+    - create a device and make note of its id:
+       ```console
+       user@host:~$ python3 measurements.py device
+       user@host:~$ Device id: <DEVICE_ID>
+       ```
+3. Build the microservice
+    - edit the `application.properties` located in `src/main/resources`
+        - supply the device id in `example.source.id`
+    - build the microservice using `mvn clean install`
+        - the microservice will build under `target/` and will be named `hello-notification-1011.62.0-SNAPSHOT.zip`
+4. Deploy the microservice
+   - by uploading application to the platform:
+       - back in your browser, in Administration dashboard, from Navigation expand Applications and select Own applications
+       - click on Add application, Upload Microservice and Upload file
+       - select the `zip` microservice file built in step 3
+       - when prompted to subscribe select `Dont' subscribe`
+       - switch to the test user, under Applications, Own applications select `Hello-notification` and subscribe
+   - by running the application locally:
+     - edit the `application.properties`
+     - uncomment the line containing `C8Y.baseURL` entry and provide the cumulocity platform url
+     - start the application
+5. Start sending measurements
+   - run the `measurements.py` script again with the following parameters:
+       ```console
+       user@host:~$ python measurements.py send <DEVICE_ID> <DURATION_IN_SECONDS>
+       user@host:~$ Measurement created [201]
+       user@host:~$ Measurement created [201]
+                    ...
+       ```
+   1. (Optional) Delete the device
+      - run the script again with these parameters:
+       ```console
+       user@host:~$ python measurements.py delete <DEVICE_ID>
+       user@host:~$ Device id: <DEVICE_ID> deleted
+       ```
 

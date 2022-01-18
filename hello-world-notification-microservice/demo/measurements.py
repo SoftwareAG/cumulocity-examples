@@ -8,7 +8,7 @@ from requests import Session
 from requests.adapters import HTTPAdapter
 
 _tenant_id = ''
-_username = 'admin'
+_username = ''
 _password = ''
 _platform_url = ''
 
@@ -16,7 +16,7 @@ _platform_url = ''
 def get_session(tenant_id=_tenant_id, username=_username, password=_password):
     auth_string = f'{tenant_id}/{username}:{password}'
     session = Session()
-    session.verify = False
+    session.verify = True
     session.headers.update({
         'Content-Type': 'application/json',
         'Accept': 'application/json',
