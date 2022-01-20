@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>c8y.example</groupId>
 		<artifactId>c8y-jv</artifactId>
-        <version>1010.0.25</version>
+        <version>1010.0.26-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>piface-driver</artifactId>
