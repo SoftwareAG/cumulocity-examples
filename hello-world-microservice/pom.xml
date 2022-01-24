@@ -10,7 +10,7 @@
     <version>${revision}${changelist}</version>
 
     <properties>
-        <revision>1011.128.0</revision>
+        <revision>1011.150.0</revision>
         <changelist>-SNAPSHOT</changelist>
         <c8y.version>${revision}${changelist}</c8y.version>
         <main.class>c8y.example.helloworld.HelloWorldMain</main.class>
@@ -77,7 +77,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>2.3.3.RELEASE</version>
+                <version>2.5.8</version>
                 <executions>
                     <execution>
                         <goals>
