@@ -87,16 +87,16 @@ we will receive the following message as we have specified to transform the filt
 ### Instructions
 1. Creating a test user
     - From the Application Switcher select Administration
-    - In the Navigation pane expand Accounts and go to 'Users'
+    - In the Navigation pane expand Accounts and go to Users
     - Click on 'Add user', fill in the form for the new user, untick "Send password reset link as email" and provide a password
     - Click Save
     - Enable notification support:
-      - Using Navigation pane go to Accounts and then Roles, click on "Add global role"
-      - Name the role "Notifications" and from the list of permissions tick "Notification 2" in Admin column
-      - click Save
-      - go to Accounts then Users
-      - in the list find the username created a few steps before and under "Global roles" open the dropdown
-      - find and tick "Notifications" and click "Apply"
+        - Using Navigation pane go to Accounts and then Roles, click on "Add global role"
+        - Name the role "Notifications" and from the list of permissions tick "Notification 2" in Admin column
+        - click Save
+        - go to Accounts then Users
+        - in the list find the username created a few steps before and under "Global roles" open the dropdown
+        - find and tick "Notifications" and click "Apply"
 2. Creating a test device
     - open the demo directory
     - edit the `measurements.py` script and provide the following credentials for your newly created user as well as the platform url:
@@ -115,30 +115,30 @@ we will receive the following message as we have specified to transform the filt
     - edit the `application.properties` located in `src/main/resources`
         - supply the device id in `example.source.id`
     - build the microservice using `mvn clean install`
-        - the microservice will build under `target/` and will be named `hello-notification-1011.62.0-SNAPSHOT.zip`
+        - the microservice will build under `target/` and will be named `hello-notification-<VERSION>.zip`
 4. Deploy the microservice
-   - by uploading application to the platform:
-       - back in your browser, in Administration dashboard, from Navigation expand Applications and select Own applications
-       - click on Add application, Upload Microservice and Upload file
-       - select the `zip` microservice file built in step 3
-       - when prompted to subscribe select `Dont' subscribe`
-       - switch to the test user, under Applications, Own applications select `Hello-notification` and subscribe
-   - by running the application locally:
-     - edit the `application.properties`
-     - uncomment the line containing `C8Y.baseURL` entry and provide the cumulocity platform url
-     - start the application
+    - by uploading application to the platform:
+        - back in your browser, in Administration dashboard, from Navigation expand Applications and select Own applications
+        - click on 'Add application', 'Upload Microservice' and 'Upload file'
+        - select the `zip` microservice file built in step 3
+        - when prompted to subscribe select 'Don't subscribe'
+        - switch to the test user, under Applications, Own applications select `Hello-notification` and subscribe
+    - by running the application locally:
+        - edit the `application.properties`
+        - uncomment the line containing `C8Y.baseURL` entry and provide the cumulocity platform url
+        - start the application
 5. Start sending measurements
-   - run the `measurements.py` script again with the following parameters:
-       ```console
-       user@host:~$ python measurements.py send <DEVICE_ID> <DURATION_IN_SECONDS>
-       user@host:~$ Measurement created [201]
-       user@host:~$ Measurement created [201]
-                    ...
-       ```
-   1. (Optional) Delete the device
-      - run the script again with these parameters:
-       ```console
-       user@host:~$ python measurements.py delete <DEVICE_ID>
-       user@host:~$ Device id: <DEVICE_ID> deleted
-       ```
+    - run the `measurements.py` script again with the following parameters:
+        ```console
+        user@host:~$ python measurements.py send <DEVICE_ID> <DURATION_IN_SECONDS>
+        user@host:~$ Measurement created [201]
+        user@host:~$ Measurement created [201]
+                     ...
+        ```
+6. (Optional) Delete the device
+    - run the script again with these parameters:
+      ```console
+      user@host:~$ python measurements.py delete <DEVICE_ID>
+      user@host:~$ Device id: <DEVICE_ID> deleted
+      ```
 
