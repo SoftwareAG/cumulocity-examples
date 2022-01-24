@@ -11,7 +11,7 @@
   <packaging>pom</packaging>
 
   <properties>
-    <revision>1011.62.0</revision>
+    <revision>1011.151.0</revision>
     <changelist>-SNAPSHOT</changelist>
     <c8y.version>${project.version}</c8y.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -58,6 +58,7 @@
     <module>sample-hex-decoder</module>
     <module>sample-json-decoder</module>
     <module>java-agent</module>
+    <module>lora-codec-lansitec</module>
     <module>snmp</module>
     <module>mqtt-client</module>
     <module>microservices</module>
