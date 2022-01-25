@@ -70,32 +70,32 @@ def check_status_code(_response, expected_code):
 
 if __name__ == '__main__':
     args = sys.argv[1:]
-    if len(args) > 0:
+    if len(args) > 0 and args[0] in ['device', 'delete', 'send']:
         command = args[0]
-        if command in ['device', 'delete', 'send']:
-            if command == 'device':
-                print('Creating new device with c8y_Speed measurement support')
+        if command == 'device':
+            print('Creating new device with c8y_Speed measurement support')
+            request_session = get_session()
+            device_id = post_create_device(request_session).json()['id']
+            print(f'Device id: {device_id}')
+        if command == 'delete':
+            try:
                 request_session = get_session()
-                device_id = post_create_device(request_session).json()['id']
-                print(f'Device id: {device_id}')
-            if command == 'delete':
-                try:
-                    request_session = get_session()
-                    post_delete_device(request_session, args[1])
-                    print(f'Device id: {args[1]} deleted')
-                except IndexError:
-                    print('Usage script.py delete [deviceId]')
-            if command == 'send':
-                try:
-                    print(f'Attempting to send c8y_Speed measurements for {args[2]} seconds')
-                    request_session = get_session()
-                    duration = int(args[2])
-                    count = 0
-                    while count < duration:
-                        response = post_measurement(create_measurement_str(args[1]), request_session)
-                        print(f'Measurement created [{response.status_code}]')
-                        count += 1
-                        sleep(1)
-                except (IndexError, ValueError):
-                    print('Usage script.py send [deviceId] [duration in seconds]')
+                post_delete_device(request_session, args[1])
+                print(f'Device id: {args[1]} deleted')
+            except IndexError:
+                print('Usage script.py delete [deviceId]')
+        if command == 'send':
+            try:
+                print(f'Attempting to send c8y_Speed measurements for {args[2]} seconds')
+                request_session = get_session()
+                duration = int(args[2])
+                count = 0
+                while count < duration:
+                    response = post_measurement(create_measurement_str(args[1]), request_session)
+                    print(f'Measurement created [{response.status_code}]')
+                    count += 1
+                    sleep(1)
+            except (IndexError, ValueError):
+                print('Usage script.py send [deviceId] [duration in seconds]')
+    else: print(f'Unknown option; use device, delete or create')
 
