@@ -91,32 +91,32 @@ we will receive the following message as we have specified to transform the filt
     - Click on 'Add user', fill in the form for the new user, untick "Send password reset link as email" and provide a password
     - Click Save
     - Enable notification support:
-        - Using Navigation pane go to Accounts and then Roles, click on "Add global role"
+        - Using Navigation pane, go to Accounts and then Roles, click on "Add global role"
         - Name the role "Notifications" and from the list of permissions tick "Notification 2" in Admin column
         - click Save
         - go to Accounts then Users
-        - in the list find the username created a few steps before and under "Global roles" open the dropdown
+        - in the list, find the username created a few steps before and under "Global roles" open the dropdown
         - find and tick "Notifications" and click "Apply"
 2. Creating a test device
     - open the demo directory
-    - edit the `measurements.py` script and provide the following credentials for your newly created user as well as the platform url:
+    - edit the `device.py` script and provide the following credentials for your newly created user as well as the platform url:
       ```python
       _tenant_id = ''
       _username = ''
       _password = ''
       _platform_url = ''
         ```
-    - create a device and make note of its id:
+    - create a device using `python3 device.py device` and make note of its id, example:
        ```console
-       user@host:~$ python3 measurements.py device
-       user@host:~$ Device id: <DEVICE_ID>
+       user@host:~$ python3 device.py device
+       user@host:~$ Device id: 123
        ```
 3. Build the microservice
     - edit the `application.properties` located in `src/main/resources`
         - supply the device id in `example.source.id`
     - build the microservice using `mvn clean install`
         - the microservice will build under `target/` and will be named `hello-notification-<VERSION>.zip`
-4. Deploy the microservice
+4. Deploy the microservice either
     - by uploading application to the platform:
         - back in your browser, in Administration dashboard, from Navigation expand Applications and select Own applications
         - click on 'Add application', 'Upload Microservice' and 'Upload file'
@@ -128,17 +128,17 @@ we will receive the following message as we have specified to transform the filt
         - uncomment the line containing `C8Y.baseURL` entry and provide the cumulocity platform url
         - start the application
 5. Start sending measurements
-    - run the `measurements.py` script again with the following parameters:
+    - run the script again with the following parameters `python3 device.py send <DEVICE_ID> <DURATION_IN_SECONDS>`:
         ```console
-        user@host:~$ python measurements.py send <DEVICE_ID> <DURATION_IN_SECONDS>
+        user@host:~$ python device.py send 123 10
         user@host:~$ Measurement created [201]
         user@host:~$ Measurement created [201]
                      ...
         ```
 6. (Optional) Delete the device
-    - run the script again with these parameters:
+    - run the script once more using `python3 device.py delete <DEVICE_ID>`, the output will look similar to:
       ```console
-      user@host:~$ python measurements.py delete <DEVICE_ID>
-      user@host:~$ Device id: <DEVICE_ID> deleted
+      user@host:~$ 
+      user@host:~$ Device id: 123 deleted
       ```
 
