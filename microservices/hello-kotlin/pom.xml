@@ -6,11 +6,11 @@
     <parent>
         <groupId>c8y.example.microservices</groupId>
         <artifactId>microservices</artifactId>
-        <version>1009.0.32-SNAPSHOT</version>
+        <version>1009.0.32</version>
     </parent>
 
     <artifactId>hello-kotlin</artifactId>
-    <version>1009.0.32-SNAPSHOT</version>
+    <version>1009.0.32</version>
     <name>Cumulocity :: Examples :: Microservices :: Hello Kotlin Microservice</name>
     <description>Cumulocity Sample Kotlin Microservice</description>
 
