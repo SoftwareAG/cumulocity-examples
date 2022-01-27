@@ -81,7 +81,7 @@ we will receive the following message as we have specified to transform the filt
 
 ## Prerequisite
 - cumulocity tenant with microservice hosting feature enabled
-    - for free trial account on cumulocity.com you will need to request this feature by contacting
+  > Important: The Microservice hosting feature must be activated on your tenant, otherwise your request will return an error message like “security/Forbidden, access is denied”. This feature is not assigned to tenants by default, so trial accounts won’t have it. Contact [product support](https://cumulocity.com/guides/welcome/contacting-support/) so that we can assist you with the activation. Note that this is a paid feature. Microservice SDK for Java - Cumulocity IoT Guides
 - contents of this repository
 
 ### Instructions
