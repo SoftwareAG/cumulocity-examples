@@ -1,11 +1,11 @@
 import base64
 import json
+import random
 import sys
 from datetime import datetime
-from time import sleep
-
 from requests import Session
 from requests.adapters import HTTPAdapter
+from time import sleep
 
 _tenant_id = ''
 _username = ''
@@ -50,7 +50,7 @@ def create_measurement_str(device_id):
     measurement = {
         'c8y_SpeedMeasurement': {
             'T': {
-                'value': 100,
+                'value': 100 + random.randrange(0,20),
                 'unit': 'km/h'
             }
         },
