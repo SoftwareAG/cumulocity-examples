@@ -85,7 +85,7 @@ we will receive the following message as we have specified to transform the filt
 - contents of this repository
 
 ### Instructions
-1. Creating a test user
+1. Create a test user in the Cumulocity Management UI
     - From the Application Switcher select Administration
     - In the Navigation pane expand Accounts and go to Users
     - Click on 'Add user', fill in the form for the new user, untick "Send password reset link as email" and provide a password
@@ -135,7 +135,12 @@ we will receive the following message as we have specified to transform the filt
         user@host:~$ Measurement created [201]
                      ...
         ```
-6. (Optional) Delete the device
+6. Observe the microservice log to see notifications 
+   - in the browser, from Navigation expand Applications, Own applications, select 'Hello-notification' and go to Logs tab
+7. (Optional) Unsubscribe the microservice
+   - in the Properties tab of 'Hello-notification' application (Navigation, expand Applications, go to Own applications)
+   - click 'Unsubscribe'
+8. (Optional) Delete the device
     - run the script once more using `python3 device.py delete <DEVICE_ID>`, the output will look similar to:
       ```console
       user@host:~$ 
