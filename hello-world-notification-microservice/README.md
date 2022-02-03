@@ -85,7 +85,7 @@ we will receive the following message as we have specified to transform the filt
 - contents of this repository
 
 ### Instructions
-1. Create a test user in the Cumulocity Management UI
+1. Create a test user using the Cumulocity Management UI
     - From the Application Switcher select Administration
     - In the Navigation pane expand Accounts and go to Users
     - Click on 'Add user', fill in the form for the new user, untick "Send password reset link as email" and provide a password
@@ -113,7 +113,7 @@ we will receive the following message as we have specified to transform the filt
        ```
 3. Build the microservice
     - edit the `application.properties` located in `src/main/resources`
-        - supply the device id in `example.source.id`
+        - replace the device id `203` in `example.source.id` with your device id
     - build the microservice using `mvn clean install`
         - the microservice will build under `target/` and will be named `hello-notification-<VERSION>.zip`
 4. Deploy the microservice either
