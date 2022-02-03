@@ -109,7 +109,7 @@ we will receive the following message as we have specified to transform the filt
     - create a device using `python3 device.py device` and make note of its id, example:
        ```console
        user@host:~$ python3 device.py device
-       user@host:~$ Device id: 123
+       user@host:~$ Device id: 203
        ```
 3. Build the microservice
     - edit the `application.properties` located in `src/main/resources`
@@ -130,7 +130,7 @@ we will receive the following message as we have specified to transform the filt
 5. Start sending measurements
     - run the script again with the following parameters `python3 device.py send <DEVICE_ID> <DURATION_IN_SECONDS>`:
         ```console
-        user@host:~$ python device.py send 123 10
+        user@host:~$ python device.py send 203 10
         user@host:~$ Measurement created [201]
         user@host:~$ Measurement created [201]
                      ...
@@ -144,6 +144,6 @@ we will receive the following message as we have specified to transform the filt
     - run the script once more using `python3 device.py delete <DEVICE_ID>`, the output will look similar to:
       ```console
       user@host:~$ 
-      user@host:~$ Device id: 123 deleted
+      user@host:~$ Device id: 203 deleted
       ```
 
