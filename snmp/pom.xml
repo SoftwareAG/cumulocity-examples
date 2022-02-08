@@ -48,6 +48,7 @@
 		<jetty.version>9.4.29.v20200521</jetty.version>
 		<chronicle.map.version>3.17.6</chronicle.map.version>
 		<chronicle.queue.version>5.17.28</chronicle.queue.version>
+		<spring-boot-dependencies.version>2.5.8</spring-boot-dependencies.version>
 	</properties>
 
 	<dependencies>
