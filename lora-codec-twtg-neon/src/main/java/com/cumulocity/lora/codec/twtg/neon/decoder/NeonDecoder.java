@@ -46,6 +46,8 @@ import java.util.Map;
 public class NeonDecoder implements DecoderService {
     private final Logger logger = LoggerFactory.getLogger(NeonDecoder.class);
 
+    private ObjectMapper jsonObjectMapper = new ObjectMapper();
+
     @Autowired
     private JavaScriptEngine graalJavaScriptEngineProxy;
 
@@ -55,14 +57,14 @@ public class NeonDecoder implements DecoderService {
 
         try {
             // Decode the device payload by invoking the DecodeForGraaljs Javascript function,
-            // a wrapper which in turn invokes the Decode function from '/js/codec/decoder_ts_prot-2_doc-v2.2.1_rev-0'.
+            // a wrapper which in turn invokes the Decode() function from '/js/codec/decoder_ts_prot-2_doc-v2.2.1_rev-0'.
             //
             // This wrapper function (from '/js/codec/wrapper_functions.js') is created to overcome the
             // limitations of Graaljs with its handling of multilevel json objects and certain other data types.
             byte[] payloadBytes = BaseEncoding.base16().decode(inputData.toUpperCase()); /*TODO: Depends on the Device if it is Base64 or Base16 */
             String decodedString = graalJavaScriptEngineProxy.invokeFunction("DecodeForGraaljs", String.class, decoderData.getFport(), new String(payloadBytes));
 
-            Map<String, Object> decodedMap = new ObjectMapper().readValue(decodedString, Map.class);
+            Map<String, Object> decodedMap = jsonObjectMapper.readValue(decodedString, Map.class);
 
             return processDecodedUplinkData(decodedMap);
 

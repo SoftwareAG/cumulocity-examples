@@ -53,7 +53,7 @@ public class NeonEncoder implements EncoderService {
             int fport = 20;
 
             // Encode the device payload by invoking the EncodeForGraaljs Javascript function,
-            // a wrapper which in turn invokes the Encode function from '/js/codec/encoder_ts_prot-2_doc-v2.2.1_rev-0'.
+            // a wrapper which in turn invokes the Encode() function from '/js/codec/encoder_ts_prot-2_doc-v2.2.1_rev-0'.
             //
             // This wrapper function (from '/js/codec/wrapper_functions.js') is created to overcome the
             // limitations of Graaljs with its handling of multilevel json objects and certain other data types.
