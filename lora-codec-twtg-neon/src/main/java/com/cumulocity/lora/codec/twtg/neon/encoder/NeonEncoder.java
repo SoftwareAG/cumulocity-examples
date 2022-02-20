@@ -57,11 +57,10 @@ public class NeonEncoder implements EncoderService {
             //
             // This wrapper function (from '/js/codec/wrapper_functions.js') is created to overcome the
             // limitations of Graaljs with its handling of multilevel json objects and certain other data types.
-            String decodedData = graalJavaScriptEngineProxy.invokeFunction("EncodeForGraaljs", String.class, fport, encoderInputData.getCommandData());
+            String encodedData = graalJavaScriptEngineProxy.invokeFunction("EncodeForGraaljs", String.class, fport, encoderInputData.getCommandData());
 
             return new LpwanEncoderResult(
-                    /*TODO: Depends on the Device if it is Base64 or Base16 */
-                    BaseEncoding.base16().encode(decodedData.getBytes(StandardCharsets.UTF_16)),
+                    encodedData, // Passing the encoded data returned by the the wrapper function as is, assuming that the Device expects a Base16 encoded string.
                     fport);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);

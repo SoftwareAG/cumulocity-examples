@@ -30,7 +30,6 @@ import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjects;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.io.BaseEncoding;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,12 +60,11 @@ public class NeonDecoder implements DecoderService {
             //
             // This wrapper function (from '/js/codec/wrapper_functions.js') is created to overcome the
             // limitations of Graaljs with its handling of multilevel json objects and certain other data types.
-            byte[] payloadBytes = BaseEncoding.base16().decode(inputData.toUpperCase()); /*TODO: Depends on the Device if it is Base64 or Base16 */
-            String decodedString = graalJavaScriptEngineProxy.invokeFunction("DecodeForGraaljs", String.class, decoderData.getFport(), new String(payloadBytes));
 
-            Map<String, Object> decodedMap = jsonObjectMapper.readValue(decodedString, Map.class);
+            // Passing the inputData without any conversions assuming that it is a Base16 encoded string.
+            String decodedString = graalJavaScriptEngineProxy.invokeFunction("DecodeForGraaljs", String.class, decoderData.getFport(), inputData);
 
-            return processDecodedUplinkData(decodedMap);
+            return processDecodedUplinkData(jsonObjectMapper.readValue(decodedString, Map.class));
 
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
@@ -95,24 +93,41 @@ public class NeonDecoder implements DecoderService {
         }
         Map<String, Object> applicationEventMap = (Map<String, Object>) decodedMap.get("application_event");
 
-        if (applicationEventMap.containsKey("temperature")) {
+        if (!applicationEventMap.containsKey("temperature")) {
             throw new Exception("Error decoding the payload: 'temperature' field not available in the decoded result.");
         }
         Map<String, Object> temperatureMap = (Map<String, Object>) applicationEventMap.get("temperature");
 
-        String averageTemperature = temperatureMap.get("avg").toString();
+        String minTemp = temperatureMap.get("min").toString();
+        String maxTemp = temperatureMap.get("max").toString();
+        String avgTemp = temperatureMap.get("avg").toString();
 
         // Add a measurement for average temperature value
         MeasurementDto measurementToAdd = new MeasurementDto();
 
         measurementToAdd.setType("c8y_Temperature");
         measurementToAdd.setSeries("c8y_Temperature");
+
         List<MeasurementValueDto> measurementValueDtos = new ArrayList<>();
-        MeasurementValueDto valueDto = new MeasurementValueDto();
-        valueDto.setSeriesName("T");
-        valueDto.setValue(new BigDecimal(averageTemperature));
-        valueDto.setUnit("C");
-        measurementValueDtos.add(valueDto);
+
+        MeasurementValueDto minTempDto = new MeasurementValueDto();
+        minTempDto.setSeriesName("min");
+        minTempDto.setValue(new BigDecimal(minTemp));
+        minTempDto.setUnit("C");
+        measurementValueDtos.add(minTempDto);
+
+        MeasurementValueDto maxTempDto = new MeasurementValueDto();
+        maxTempDto.setSeriesName("max");
+        maxTempDto.setValue(new BigDecimal(maxTemp));
+        maxTempDto.setUnit("C");
+        measurementValueDtos.add(maxTempDto);
+
+        MeasurementValueDto avgTempDto = new MeasurementValueDto();
+        avgTempDto.setSeriesName("avg");
+        avgTempDto.setValue(new BigDecimal(avgTemp));
+        avgTempDto.setUnit("C");
+        measurementValueDtos.add(avgTempDto);
+
         measurementToAdd.setValues(measurementValueDtos);
         measurementToAdd.setTime(DateTime.now());
 
