@@ -32,6 +32,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
+
 @Component
 public class NeonEncoder implements EncoderService {
     private final Logger logger = LoggerFactory.getLogger(NeonEncoder.class);
@@ -50,15 +52,16 @@ public class NeonEncoder implements EncoderService {
             // TODO: Should be changed based on the device specification
             int fport = 20;
 
-            // Encode the device command by invoking the EncodeForGraaljs Javascript function (a wrapper function
-            // which inturn invokes Encode created to overcome the limitations of Graaljs with handling of
-            // multilevel json objects and certain other data types) loaded by the GraalJavaScriptEngine
-            // from /js/codec/encoder_ts_prot-2_doc-v2.2.1_rev-0.js
+            // Encode the device payload by invoking the EncodeForGraaljs Javascript function,
+            // a wrapper which in turn invokes the Encode function from '/js/codec/encoder_ts_prot-2_doc-v2.2.1_rev-0'.
+            //
+            // This wrapper function (from '/js/codec/wrapper_functions.js') is created to overcome the
+            // limitations of Graaljs with its handling of multilevel json objects and certain other data types.
             String decodedData = graalJavaScriptEngineProxy.invokeFunction("EncodeForGraaljs", String.class, fport, encoderInputData.getCommandData());
 
             return new LpwanEncoderResult(
                     /*TODO: Depends on the Device if it is Base64 or Base16 */
-                    BaseEncoding.base16().encode(decodedData.getBytes()),
+                    BaseEncoding.base16().encode(decodedData.getBytes(StandardCharsets.UTF_16)),
                     fport);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);

@@ -19,6 +19,8 @@
 package com.cumulocity.lora.codec.twtg.neon.javascript.engine.graaljs;
 
 import com.cumulocity.lora.codec.twtg.neon.javascript.engine.JavaScriptEngine;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -28,54 +30,63 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import java.io.BufferedReader;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Map;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component(GraalJavaScriptEngine.GRAAL_JAVA_SCRIPT_ENGINE_BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class GraalJavaScriptEngine implements JavaScriptEngine {
-    public static final String GRAAL_JAVA_SCRIPT_ENGINE_BEAN_NAME = "graalJavaScriptEngineTarget";
+    private final Logger logger = LoggerFactory.getLogger(GraalJavaScriptEngine.class);
 
-    private static final String DECODER_TS_PROT_2_DOC_V_2_2_1_REV_0_JS = "/js/codec/decoder_ts_prot-2_doc-v2.2.1_rev-0.js";
-    private static final String ENCODER_TS_PROT_2_DOC_V_2_2_1_REV_0_JS = "/js/codec/encoder_ts_prot-2_doc-v2.2.1_rev-0.js";
+    public static final String GRAAL_JAVA_SCRIPT_ENGINE_BEAN_NAME = "graalJavaScriptEngineTarget";
 
     private Invocable invocable;
 
-    public GraalJavaScriptEngine() throws Exception {
+    public GraalJavaScriptEngine() throws ScriptException, IOException, URISyntaxException {
         ScriptEngine engine = new ScriptEngineManager().getEngineByName("graal.js");
 
-        try (BufferedReader decoderScriptReader = Files.newBufferedReader(Paths.get(this.getClass().getResource(DECODER_TS_PROT_2_DOC_V_2_2_1_REV_0_JS).toURI()))) {
-            engine.eval(decoderScriptReader);
-        }
-        try (BufferedReader encoderScriptReader = Files.newBufferedReader(Paths.get(this.getClass().getResource(ENCODER_TS_PROT_2_DOC_V_2_2_1_REV_0_JS).toURI()))) {
-            engine.eval(encoderScriptReader);
+        try {
+            // Load the JavaScript files present under the '/js/codec' resources folder
+            List<Path> javaScriptResourcePaths = Files.walk(Paths.get(this.getClass().getClassLoader().getResource("js/codec").toURI()))
+                    .filter(Files::isRegularFile)
+                    .map(Path::toAbsolutePath)
+                    .collect(Collectors.toList());
 
-            // A wrapper for Encode function, so we can pass the Json object as a String and
-            // also read the response as a String instead of a byte[] to overcome the limitations
-            // of Graaljs with handling of multilevel json objects and certain other data types
-            // function EncodeForGraaljs(fPort, obj) {
-            //      return String.fromCharCode.apply(String, Encode(fPort, JSON.parse(obj)));
-            // }
-            engine.eval("function EncodeForGraaljs(fPort, obj) { return String.fromCharCode.apply(String, Encode(fPort, JSON.parse(obj))); }");
+            for (Path oneResourcePath: javaScriptResourcePaths) {
+                try (BufferedReader scriptReader = Files.newBufferedReader(oneResourcePath)) {
+                    engine.eval(scriptReader);
+                }
+                logger.info("Loaded the JavaScript file {}", oneResourcePath);
+            }
+        } catch (Exception e) {
+            logger.error("Error while accessing and loading the JavaScript resources under '/js/codec'", e);
+            throw e;
         }
 
         invocable = (Invocable) engine;
     }
 
     public <T> T invokeFunction(String functionName, Class<T> resultType, Object... args) throws ScriptException, NoSuchMethodException {
-        Object result = invocable.invokeFunction(functionName, args);
-
-        if (result == null) {
-            return null;
+        Object result;
+        try {
+            result = invocable.invokeFunction(functionName, args);
+            if (result == null) {
+                return null;
+            }
+        } catch (Exception e) {
+            logger.error("Error invoking the function {}", functionName, e);
+            throw e;
         }
 
-        if (resultType.isAssignableFrom(Map.class)) {
-            return (T) deepClone((Map<String, Object>) result);
-        } else if (resultType.isAssignableFrom(result.getClass())) {
+        if (resultType.isAssignableFrom(result.getClass())) {
             return resultType.cast(result);
         } else {
-            throw new IllegalArgumentException("Invoked fuction returned an unprocessable response.");
+            throw new IllegalArgumentException("Return type of the invoked function doesn't match the passed in resultType.");
         }
     }
 }

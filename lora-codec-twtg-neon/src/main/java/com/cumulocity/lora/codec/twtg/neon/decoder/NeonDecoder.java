@@ -29,6 +29,8 @@ import com.cumulocity.model.event.CumulocitySeverities;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
 import com.cumulocity.rest.representation.inventory.ManagedObjects;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.io.BaseEncoding;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,9 +54,15 @@ public class NeonDecoder implements DecoderService {
         LpwanDecoderInputData decoderData = new LpwanDecoderInputData(inputData, deviceId, args);
 
         try {
-            // Decode the payload by invoking the Decode Javascript function
-            // loaded by the GraalJavaScriptEngine from /js/codec/decoder_ts_prot-2_doc-v2.2.1_rev-0.js
-            Map<String, Object> decodedMap = graalJavaScriptEngineProxy.invokeFunction("Decode", Map.class, decoderData.getFport(), decoderData.getValue());
+            // Decode the device payload by invoking the DecodeForGraaljs Javascript function,
+            // a wrapper which in turn invokes the Decode function from '/js/codec/decoder_ts_prot-2_doc-v2.2.1_rev-0'.
+            //
+            // This wrapper function (from '/js/codec/wrapper_functions.js') is created to overcome the
+            // limitations of Graaljs with its handling of multilevel json objects and certain other data types.
+            byte[] payloadBytes = BaseEncoding.base16().decode(inputData.toUpperCase()); /*TODO: Depends on the Device if it is Base64 or Base16 */
+            String decodedString = graalJavaScriptEngineProxy.invokeFunction("DecodeForGraaljs", String.class, decoderData.getFport(), new String(payloadBytes));
+
+            Map<String, Object> decodedMap = new ObjectMapper().readValue(decodedString, Map.class);
 
             return processDecodedUplinkData(decodedMap);
 

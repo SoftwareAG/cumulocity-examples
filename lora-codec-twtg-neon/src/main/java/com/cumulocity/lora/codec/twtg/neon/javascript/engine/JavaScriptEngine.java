@@ -19,41 +19,9 @@
 package com.cumulocity.lora.codec.twtg.neon.javascript.engine;
 
 import javax.script.ScriptException;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public interface JavaScriptEngine {
 
     <T> T invokeFunction(String functionName, Class<T> resultType, Object... args) throws ScriptException, NoSuchMethodException;
 
-    default Map<String, Object> deepClone(Map<String, Object> original) {
-        return original.entrySet()
-                .stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, (entry) -> {
-
-                    Object value = entry.getValue();
-                    if (value == null) {
-                        return null;
-                    }
-
-                    if (value.getClass().isArray()) {
-                        return Arrays.stream(((Object[]) value)).map((v) -> {
-                            if (v == null) {
-                                return null;
-                            }
-
-                            if (Map.class.isAssignableFrom(v.getClass())) {
-                                return deepClone((Map<String, Object>) v);
-                            } else {
-                                return v;
-                            }
-                        }).toArray(Object[]::new);
-                    } else if (Map.class.isAssignableFrom(value.getClass())) {
-                        return deepClone((Map<String, Object>) value);
-                    } else {
-                        return value;
-                    }
-                }));
-    }
 }

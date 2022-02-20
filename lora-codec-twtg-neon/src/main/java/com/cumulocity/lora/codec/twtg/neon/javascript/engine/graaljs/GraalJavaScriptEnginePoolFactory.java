@@ -19,12 +19,10 @@
 package com.cumulocity.lora.codec.twtg.neon.javascript.engine.graaljs;
 
 
-import com.cumulocity.lora.codec.twtg.neon.javascript.engine.JavaScriptEngineConfiguration;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.ProxyFactoryBean;
 import org.springframework.aop.target.AbstractPoolingTargetSource;
 import org.springframework.aop.target.CommonsPool2TargetSource;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,8 +30,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class GraalJavaScriptEnginePoolFactory {
 
-    @Autowired
-    JavaScriptEngineConfiguration engineConfiguration;
+    @Value("${javascript.engine.pool.size.max}")
+    private int enginePoolMaxSize;
 
     /**
      * Returns the Object pool containing JavaScriptEngine beans.
@@ -41,12 +39,9 @@ public class GraalJavaScriptEnginePoolFactory {
      * @return the pool
      */
     @Bean
-    public TargetSource javaScriptEngineSource(
-            // You probably would externalize this value to your application.properties
-            @Value("1") int maxSize
-    ) {
+    public TargetSource javaScriptEngineSource() {
         final AbstractPoolingTargetSource poolingConfig = new CommonsPool2TargetSource();
-        poolingConfig.setMaxSize(engineConfiguration.getEnginePoolMaxSize());
+        poolingConfig.setMaxSize(enginePoolMaxSize);
 
         // The targetBeanName is mandatory
         poolingConfig.setTargetBeanName(GraalJavaScriptEngine.GRAAL_JAVA_SCRIPT_ENGINE_BEAN_NAME);
