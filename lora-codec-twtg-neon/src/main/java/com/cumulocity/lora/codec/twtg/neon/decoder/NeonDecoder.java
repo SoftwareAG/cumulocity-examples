@@ -67,19 +67,20 @@ public class NeonDecoder implements DecoderService {
             return processDecodedUplinkData(jsonObjectMapper.readValue(decodedString, Map.class));
 
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+            logger.error("Decoding payload failed. Error: " + e.getMessage(), e);
 
             // Create an alarm on the device, so the decoder issue is shown as an alarm
-            DecoderResult decoderResult = new DecoderResult();
             AlarmRepresentation alarm = new AlarmRepresentation();
             alarm.setSource(ManagedObjects.asManagedObject(deviceId));
             alarm.setType("DecoderError");
             alarm.setSeverity(CumulocitySeverities.CRITICAL.name());
             alarm.setText(e.getMessage());
             alarm.setDateTime(DateTime.now());
+
+            DecoderResult decoderResult = new DecoderResult();
             decoderResult.addAlarm(alarm, true);
 
-            throw new DecoderServiceException(e, e.getMessage(), decoderResult);
+            throw new DecoderServiceException(e, "Decoding payload failed. Error: " + e.getMessage(), decoderResult);
         }
     }
 

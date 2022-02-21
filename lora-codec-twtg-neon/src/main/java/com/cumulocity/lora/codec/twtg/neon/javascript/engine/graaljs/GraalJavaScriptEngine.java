@@ -23,20 +23,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Component;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.io.InputStreamReader;
 
 @Component(GraalJavaScriptEngine.GRAAL_JAVA_SCRIPT_ENGINE_BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -45,27 +41,23 @@ public class GraalJavaScriptEngine implements JavaScriptEngine {
 
     public static final String GRAAL_JAVA_SCRIPT_ENGINE_BEAN_NAME = "graalJavaScriptEngineTarget";
 
+    private static final String JAVA_SCRIPT_RESOURCE_FOLDER_NAME = "/js/codec/*";
+
     private Invocable invocable;
 
-    public GraalJavaScriptEngine() throws ScriptException, IOException, URISyntaxException {
+    public GraalJavaScriptEngine() throws ScriptException, IOException {
         ScriptEngine engine = new ScriptEngineManager().getEngineByName("graal.js");
 
-        try {
-            // Load the JavaScript files present under the '/js/codec' resources folder
-            List<Path> javaScriptResourcePaths = Files.walk(Paths.get(this.getClass().getClassLoader().getResource("js/codec").toURI()))
-                    .filter(Files::isRegularFile)
-                    .map(Path::toAbsolutePath)
-                    .collect(Collectors.toList());
-
-            for (Path oneResourcePath: javaScriptResourcePaths) {
-                try (BufferedReader scriptReader = Files.newBufferedReader(oneResourcePath)) {
-                    engine.eval(scriptReader);
-                }
-                logger.info("Loaded the JavaScript file {}", oneResourcePath);
+        // Load the JavaScript files present under the '/js/codec/' resources folder
+        Resource[] javaScriptResources = new PathMatchingResourcePatternResolver().getResources(JAVA_SCRIPT_RESOURCE_FOLDER_NAME);
+        for (Resource oneJavaScriptResource : javaScriptResources) {
+            try (InputStreamReader scriptReader = new InputStreamReader(oneJavaScriptResource.getInputStream())) {
+                engine.eval(scriptReader);
+                logger.info("Loaded the JavaScript file {}", oneJavaScriptResource.getFilename());
+            } catch (IOException | ScriptException e) {
+                logger.error("Error while loading the JavaScript file '{}'", oneJavaScriptResource.getFilename(), e);
+                throw e;
             }
-        } catch (Exception e) {
-            logger.error("Error while accessing and loading the JavaScript resources under '/js/codec'", e);
-            throw e;
         }
 
         invocable = (Invocable) engine;

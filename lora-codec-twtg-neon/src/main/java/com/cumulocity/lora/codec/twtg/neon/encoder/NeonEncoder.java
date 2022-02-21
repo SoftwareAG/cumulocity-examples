@@ -26,13 +26,10 @@ import com.cumulocity.microservice.customencoders.api.service.EncoderService;
 import com.cumulocity.microservice.lpwan.codec.encoder.model.LpwanEncoderInputData;
 import com.cumulocity.microservice.lpwan.codec.encoder.model.LpwanEncoderResult;
 import com.cumulocity.model.idtype.GId;
-import com.google.common.io.BaseEncoding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.nio.charset.StandardCharsets;
 
 @Component
 public class NeonEncoder implements EncoderService {
@@ -63,11 +60,9 @@ public class NeonEncoder implements EncoderService {
                     encodedData, // Passing the encoded data returned by the the wrapper function as is, assuming that the Device expects a Base16 encoded string.
                     fport);
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-            LpwanEncoderResult encoderResult = new LpwanEncoderResult();
-            encoderResult.setAsFailed("Encoding payload failed. Error: " + e.getMessage());
+            logger.error("Encoding payload failed. Error: " + e.getMessage(), e);
 
-            throw new EncoderServiceException(e, e.getMessage(), encoderResult);
+            throw new EncoderServiceException(e, "Encoding payload failed. Error: " + e.getMessage(), new LpwanEncoderResult());
         }
     }
 }
