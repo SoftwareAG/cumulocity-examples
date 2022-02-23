@@ -21,18 +21,24 @@ package c8y.example.decoders.json.configuration;
 
 import com.cumulocity.model.DateTimeConverter;
 import com.cumulocity.model.JSONBase;
-import com.cumulocity.sdk.client.rest.providers.SvensonHttpMessageConverter;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.HttpInputMessage;
+import org.springframework.http.HttpOutputMessage;
+import org.springframework.http.converter.AbstractHttpMessageConverter;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.svenson.JSON;
 import org.svenson.JSONParser;
+import org.svenson.tokenize.InputStreamSource;
+
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 
 @Slf4j
-public class JsonDecoderMessageConverter extends SvensonHttpMessageConverter {
+public class JsonDecoderMessageConverter extends AbstractHttpMessageConverter<Object> {
 
     private final JSONParser jsonParser;
-    private final MappingJackson2HttpMessageConverter jacksonConverter;
 
     public JsonDecoderMessageConverter() {
         super();
@@ -41,8 +47,25 @@ public class JsonDecoderMessageConverter extends SvensonHttpMessageConverter {
         JSON jsonGenerator = JSONBase.getJSONGenerator();
 
         DateTimeConverter dateTimeConverter = new DateTimeConverter();
-        jacksonConverter = new MappingJackson2HttpMessageConverter();
         jsonParser.registerTypeConversion(DateTime.class, dateTimeConverter);
         jsonGenerator.registerTypeConversion(DateTime.class, dateTimeConverter);
+    }
+
+    @Override
+    protected boolean supports(Class<?> clazz) {
+        return true;
+    }
+
+    @Override
+    protected Object readInternal(Class<?> clazz, HttpInputMessage inputMessage) throws IOException, HttpMessageNotReadableException {
+        return JSONBase.getJSONParser().parse(clazz, new InputStreamSource(inputMessage.getBody(), true));
+    }
+
+    @Override
+    protected void writeInternal(Object object, HttpOutputMessage outputMessage) throws IOException, HttpMessageNotWritableException {
+        try (OutputStreamWriter writer = new OutputStreamWriter(outputMessage.getBody())) {
+            JSONBase.getJSONGenerator().writeJSONToWriter(object, writer);
+            writer.flush();
+        }
     }
 }
