@@ -20,9 +20,7 @@ package com.cumulocity.lora.codec.twtg.neon;
 
 import com.cumulocity.microservice.lpwan.codec.annotation.CodecMicroserviceApplication;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication
 @CodecMicroserviceApplication
 public class Application {
 	public static void main(String[] args) {
