@@ -6,7 +6,7 @@
 
     <groupId>c8y.example</groupId>
     <artifactId>jv-agent-assembly</artifactId>
-    <version>1011.0.18-SNAPSHOT</version>
+    <version>1011.0.18</version>
 
     <name>Cumulocity :: Examples :: Java Agent Base Assembly</name>
     <description>Base assembly package for all environments</description>
