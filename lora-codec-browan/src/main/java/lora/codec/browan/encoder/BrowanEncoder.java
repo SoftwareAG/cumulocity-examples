@@ -1,24 +1,22 @@
-/*
- * Copyright (c) 2012-2020 Cumulocity GmbH
- * Copyright (c) 2022 Software AG, Darmstadt, Germany and/or Software AG USA Inc., Reston, VA, USA,
- * and/or its subsidiaries and/or its affiliates and/or their licensors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package lora.codec.browan.encoder;
 
+import org.springframework.stereotype.Component;
 
-public class BrowanEncoder {
+import com.cumulocity.microservice.customencoders.api.exception.EncoderServiceException;
+import com.cumulocity.microservice.customencoders.api.model.EncoderInputData;
+import com.cumulocity.microservice.customencoders.api.model.EncoderResult;
+import com.cumulocity.microservice.customencoders.api.service.EncoderService;
+import com.cumulocity.microservice.lpwan.codec.encoder.model.LpwanEncoderResult;
+
+@Component
+public class BrowanEncoder implements EncoderService {
+
+	@Override
+	public EncoderResult encode(EncoderInputData arg0) throws EncoderServiceException {
+        LpwanEncoderResult encoderResult = new LpwanEncoderResult();
+        encoderResult.setSuccess(false);
+        encoderResult.setMessage("Encoding Payload Failed");
+		return encoderResult;
+	}
 
 }

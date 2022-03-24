@@ -12,7 +12,7 @@
 
   <properties>
     <revision>1013.108.0</revision>
-    <changelist></changelist>
+    <changelist>-SNAPSHOT</changelist>
     <c8y.version>${project.version}</c8y.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <java.version>11</java.version>
