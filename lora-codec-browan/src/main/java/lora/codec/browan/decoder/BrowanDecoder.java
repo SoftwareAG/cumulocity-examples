@@ -33,11 +33,11 @@ public class BrowanDecoder implements DecoderService {
 		result.addMeasurement(measurement(decoderInput, "pcb_Temperature", "T", pcbTemperature, "C"));
 		int humidity = Byte.toUnsignedInt(buffer.get());
 		result.addMeasurement(measurement(decoderInput, "c8y_Humidity", "H", humidity, "%"));
-		int co2 = Short.toUnsignedInt(buffer.getShort());
+		int co2 = Short.toUnsignedInt(Short.reverseBytes(buffer.getShort()));
 		result.addMeasurement(measurement(decoderInput, "CO2", "C", co2, "ppm"));
-		int voc = Short.toUnsignedInt(buffer.getShort());
+		int voc = Short.toUnsignedInt(Short.reverseBytes(buffer.getShort()));
 		result.addMeasurement(measurement(decoderInput, "VOC", "V", voc, "ppm"));
-		int iaq = Short.toUnsignedInt(buffer.getShort());
+		int iaq = Short.toUnsignedInt(Short.reverseBytes(buffer.getShort()));
 		result.addMeasurement(measurement(decoderInput, "IAQ", "Q", iaq, "Q"));
 		int envTemperature = Byte.toUnsignedInt(buffer.get()) - 32;
 		result.addMeasurement(measurement(decoderInput, "c8y_Temperature", "T", envTemperature, "C"));
