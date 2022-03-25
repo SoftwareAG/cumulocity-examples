@@ -2,7 +2,6 @@ package lora.codec.browan.decoder;
 
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
 
@@ -15,7 +14,10 @@ import com.cumulocity.microservice.customdecoders.api.model.MeasurementDto;
 import com.cumulocity.microservice.customdecoders.api.model.MeasurementValueDto;
 import com.cumulocity.microservice.customdecoders.api.service.DecoderService;
 import com.cumulocity.microservice.lpwan.codec.decoder.model.LpwanDecoderInputData;
+import com.cumulocity.model.event.CumulocitySeverities;
 import com.cumulocity.model.idtype.GId;
+import com.cumulocity.rest.representation.alarm.AlarmRepresentation;
+import com.cumulocity.rest.representation.inventory.ManagedObjects;
 import com.google.common.io.BaseEncoding;
 
 @Component
@@ -27,20 +29,30 @@ public class BrowanDecoder implements DecoderService {
 		ByteBuffer buffer = ByteBuffer.wrap(BaseEncoding.base16().decode(inputData.toUpperCase()));
 		DecoderResult result = new DecoderResult();
 		
-		buffer.get();
-		buffer.get();
-		int pcbTemperature = Byte.toUnsignedInt(buffer.get()) - 32;
-		result.addMeasurement(measurement(decoderInput, "pcb_Temperature", "T", pcbTemperature, "C"));
-		int humidity = Byte.toUnsignedInt(buffer.get());
-		result.addMeasurement(measurement(decoderInput, "c8y_Humidity", "H", humidity, "%"));
-		int co2 = Short.toUnsignedInt(Short.reverseBytes(buffer.getShort()));
-		result.addMeasurement(measurement(decoderInput, "CO2", "C", co2, "ppm"));
-		int voc = Short.toUnsignedInt(Short.reverseBytes(buffer.getShort()));
-		result.addMeasurement(measurement(decoderInput, "VOC", "V", voc, "ppm"));
-		int iaq = Short.toUnsignedInt(Short.reverseBytes(buffer.getShort()));
-		result.addMeasurement(measurement(decoderInput, "IAQ", "Q", iaq, "Q"));
-		int envTemperature = Byte.toUnsignedInt(buffer.get()) - 32;
-		result.addMeasurement(measurement(decoderInput, "c8y_Temperature", "T", envTemperature, "C"));
+		if(decoderInput.getFport() == 103) {
+			buffer.get();
+			buffer.get();
+			int pcbTemperature = Byte.toUnsignedInt(buffer.get()) - 32;
+			result.addMeasurement(measurement(decoderInput, "pcb_Temperature", "T", pcbTemperature, "C"));
+			int humidity = Byte.toUnsignedInt(buffer.get());
+			result.addMeasurement(measurement(decoderInput, "c8y_Humidity", "H", humidity, "%"));
+			int co2 = Short.toUnsignedInt(Short.reverseBytes(buffer.getShort()));
+			result.addMeasurement(measurement(decoderInput, "CO2", "C", co2, "ppm"));
+			int voc = Short.toUnsignedInt(Short.reverseBytes(buffer.getShort()));
+			result.addMeasurement(measurement(decoderInput, "VOC", "V", voc, "ppm"));
+			int iaq = Short.toUnsignedInt(Short.reverseBytes(buffer.getShort()));
+			result.addMeasurement(measurement(decoderInput, "IAQ", "Q", iaq, "Q"));
+			int envTemperature = Byte.toUnsignedInt(buffer.get()) - 32;
+			result.addMeasurement(measurement(decoderInput, "c8y_Temperature", "T", envTemperature, "C"));			
+		} else {
+			AlarmRepresentation alarm = new AlarmRepresentation();
+			alarm.setSource(ManagedObjects.asManagedObject(deviceId));
+			alarm.setType("DecoderError");
+			alarm.setSeverity(CumulocitySeverities.CRITICAL.name());
+			alarm.setText(String.format("Unknown port: %s", decoderInput.getFport()));
+			alarm.setDateTime(DateTime.now());
+			result.addAlarm(alarm, true);
+		}
 		
 		return result;
 	}
