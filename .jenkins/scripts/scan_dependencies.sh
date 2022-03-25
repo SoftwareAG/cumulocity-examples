@@ -9,8 +9,8 @@ TPP_URL_PARAM="-Dtpp.fetcher.url=$TPP_FETCHER_URL"
 ENABLE_SCAN="-Dtpp.fetcher.scan.enabled=true"
 MVN_SCAN_TPP="$MVN_GOAL $TPP_URL_PARAM $ENABLE_SCAN"
 
-./mvnw -f ./tracker-agent/pom.xml $MVN_SCAN_TPP -Dtpp.fetcher.project.name=tracker-agent
-./mvnw -f ./sample-hex-decoder/pom.xml $MVN_SCAN_TPP -Dtpp.fetcher.project.name=impact-custom-processor
-./mvnw -f ./sample-json-decoder/pom.xml $MVN_SCAN_TPP -Dtpp.fetcher.project.name=impact-custom-processor
-./mvnw -f ./snmp/snmp-device-gateway/pom.xml $MVN_SCAN_TPP -Dtpp.fetcher.project.name=snmp-agent-gateway
-./mvnw -f ./snmp/mib-parser/pom.xml $MVN_SCAN_TPP -Dtpp.fetcher.project.name=c8y-mib-parser
+./mvnw -B -f ./tracker-agent/pom.xml $MVN_SCAN_TPP -Dtpp.fetcher.project.name=tracker-agent
+./mvnw -B -f ./sample-hex-decoder/pom.xml $MVN_SCAN_TPP -Dtpp.fetcher.project.name=impact-custom-processor
+./mvnw -B -f ./sample-json-decoder/pom.xml $MVN_SCAN_TPP -Dtpp.fetcher.project.name=impact-custom-processor
+./mvnw -B -f ./snmp/snmp-device-gateway/pom.xml $MVN_SCAN_TPP -Dtpp.fetcher.project.name=snmp-agent-gateway
+./mvnw -B -f ./snmp/mib-parser/pom.xml $MVN_SCAN_TPP -Dtpp.fetcher.project.name=c8y-mib-parser

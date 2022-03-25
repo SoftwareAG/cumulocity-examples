@@ -1,6 +1,6 @@
 #!/bin/sh
 set -e
-# ./mvnw clean deploy -DskipTests -s $MVN_SETTINGS
+# ./mvnw -B clean deploy -DskipTests -s $MVN_SETTINGS
 #/var/lib/jenkins/bin/deploy2yum.sh -p $(find ./ -name *.rpm)
 
 YUM_USR=hudson
