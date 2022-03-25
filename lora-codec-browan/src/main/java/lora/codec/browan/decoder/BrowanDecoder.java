@@ -43,18 +43,27 @@ public class BrowanDecoder implements DecoderService {
 			int iaq = Short.toUnsignedInt(Short.reverseBytes(buffer.getShort()));
 			result.addMeasurement(measurement(decoderInput, "IAQ", "Q", iaq, "Q"));
 			int envTemperature = Byte.toUnsignedInt(buffer.get()) - 32;
-			result.addMeasurement(measurement(decoderInput, "c8y_Temperature", "T", envTemperature, "C"));			
+			result.addMeasurement(measurement(decoderInput, "c8y_Temperature", "T", envTemperature, "C"));	
+			
+			if(iaq > 100) {
+				result.addAlarm(alarm(deviceId, "AirQualityWarning", CumulocitySeverities.WARNING, 
+						String.format("Air quality indicator > 100. Actual value:  %d. Please open window", iaq)), true);	
+			}
 		} else {
-			AlarmRepresentation alarm = new AlarmRepresentation();
-			alarm.setSource(ManagedObjects.asManagedObject(deviceId));
-			alarm.setType("DecoderError");
-			alarm.setSeverity(CumulocitySeverities.CRITICAL.name());
-			alarm.setText(String.format("Unknown port: %s", decoderInput.getFport()));
-			alarm.setDateTime(DateTime.now());
-			result.addAlarm(alarm, true);
+			result.addAlarm(alarm(deviceId, "DecoderError", CumulocitySeverities.CRITICAL, String.format("Unknown port: %s", decoderInput.getFport())), true);
 		}
 		
 		return result;
+	}
+
+	private AlarmRepresentation alarm(GId deviceId, String alarmType, CumulocitySeverities severity, String alarmText) {
+		AlarmRepresentation alarm = new AlarmRepresentation();
+		alarm.setSource(ManagedObjects.asManagedObject(deviceId));
+		alarm.setType(alarmType);
+		alarm.setSeverity(severity.name());
+		alarm.setText(alarmText);
+		alarm.setDateTime(DateTime.now());
+		return alarm;
 	}
 
 	private MeasurementDto measurement(LpwanDecoderInputData decoderInput, String fragmentName, String seriesName, long v, String unit) {
