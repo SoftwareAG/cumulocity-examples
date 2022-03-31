@@ -47,7 +47,8 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <executions>
+		<version>2.2.4.RELEASE</version>
+		<executions>
                     <execution>
                         <goals>
                             <goal>repackage</goal>
