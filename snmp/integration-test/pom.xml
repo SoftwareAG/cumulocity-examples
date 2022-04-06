@@ -25,7 +25,7 @@
     <parent>
         <groupId>c8y.example</groupId>
         <artifactId>snmp</artifactId>
-        <version>1010.0.32</version>
+        <version>1010.0.33-SNAPSHOT</version>
     </parent>
 
     <name>Cumulocity :: Examples :: SNMP :: Integration Tests</name>
