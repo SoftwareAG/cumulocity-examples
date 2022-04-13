@@ -17,7 +17,6 @@
         <jssc.version>2.6.0</jssc.version>
         <logback.version>1.0.13</logback.version>
         <tinkerforge.version>2.1.17</tinkerforge.version>
-        <java.version>1.8</java.version>
     </properties>
 
 	<modules>
@@ -189,10 +188,20 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>rpm-maven-plugin</artifactId>
-                    <version>2.1-alpha-1</version>
+                    <version>2.2.0</version>
                 </plugin>
 			</plugins>
 		</pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.22.2</version>
+                <configuration>
+                    <argLine>--add-opens java.base/java.lang=ALL-UNNAMED</argLine>
+                </configuration>
+            </plugin>
+        </plugins>
 	</build>
 
 </project>
