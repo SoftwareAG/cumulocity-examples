@@ -87,6 +87,10 @@
 							<name>${microservice.name}</name>
 							<image>${microservice.name}</image>
 							<encoding>UTF-8</encoding>
+							<perm>
+								<min>92m</min>
+								<max>172m</max>
+							</perm>
 						</configuration>
 					</execution>
 				</executions>
