@@ -23,7 +23,7 @@ function tag-version {
     git tag -f -m "copy for tag ${tag}" -a "${tag}"
 }
 
-./mvnw -s $MVN_SETTINGS clean -T 4
+./mvnw -B -s $MVN_SETTINGS clean -T 4
 
 echo "obtain current branch name"
 
@@ -40,18 +40,18 @@ echo "pull latest changes from the branch ${branch_name}"
 git pull https://${REPOSITORY_CREDENTIALS}@${REPOSITORY_BASE_URL}/cumulocity-examples ${branch_name}
 
 echo "Update version to ${version}"
-./mvnw -s $MVN_SETTINGS versions:set -DnewVersion=${version}
+./mvnw -B -s $MVN_SETTINGS versions:set -DnewVersion=${version}
 cd java-agent/assembly/
-../../mvnw -s $MVN_SETTINGS versions:set -DnewVersion=${version}
+../../mvnw -B -s $MVN_SETTINGS versions:set -DnewVersion=${version}
 cd ../..
 cd hello-world-microservice
-../mvnw -s $MVN_SETTINGS versions:set -DnewVersion=${version}
+../mvnw -B -s $MVN_SETTINGS versions:set -DnewVersion=${version}
 cd ..
 .jenkins/scripts/update_dependencies.sh ${version}
 
 # tests are run to make sure all dependencies with ${project.version} work correctly
 # same for usage of -s $MVN_SETTINGS.
-./mvnw clean install -Dmaven.javadoc.skip=true -s $MVN_SETTINGS
+./mvnw -B clean install -Dmaven.javadoc.skip=true -s $MVN_SETTINGS
 chmod +x .jenkins/scripts/deploy.sh
 .jenkins/scripts/deploy.sh release
 
@@ -60,13 +60,13 @@ tag-version "c8y-examples-${version}"
 
 echo "Update version to ${next_version}"
 .jenkins/scripts/update_dependencies.sh ${next_version}
-./mvnw versions:set -DnewVersion=${next_version} -DgenerateBackupPoms=false -s $MVN_SETTINGS
+./mvnw -B versions:set -DnewVersion=${next_version} -DgenerateBackupPoms=false -s $MVN_SETTINGS
 cd java-agent/assembly/
-../../mvnw versions:set -DnewVersion=${next_version} -DgenerateBackupPoms=false -s $MVN_SETTINGS
+../../mvnw -B versions:set -DnewVersion=${next_version} -DgenerateBackupPoms=false -s $MVN_SETTINGS
 cd ../..
 
 cd hello-world-microservice
-../mvnw versions:set -DnewVersion=${next_version} -DgenerateBackupPoms=false -s $MVN_SETTINGS
+../mvnw -B versions:set -DnewVersion=${next_version} -DgenerateBackupPoms=false -s $MVN_SETTINGS
 cd ..
 
 git commit --allow-empty -am "[maven-release-plugin] prepare for next development iteration"
