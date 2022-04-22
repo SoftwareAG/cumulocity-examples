@@ -56,7 +56,14 @@ public abstract class AbstractQueue implements Queue {
 
     private boolean isClosed = false;
 
-
+    static {
+        // Since the rolling cycle is set to minutely and we also delete the old files periodically,
+        // we are fine with not shrinking the data files.
+        // Hence we disable the data file shrinking
+        if (System.getProperty("chronicle.queue.disableFileShrinking") == null) {
+            System.setProperty("chronicle.queue.disableFileShrinking", Boolean.TRUE.toString());
+        }
+    }
 
     public AbstractQueue(String queueName, File persistenceFolder) {
         if (queueName == null) {
@@ -73,13 +80,6 @@ public abstract class AbstractQueue implements Queue {
         this.persistenceFolder = persistenceFolder;
 
         log.info("Creating/Loading '{}' Queue, backed by the folder '{}'", this.name, persistenceFolder.getPath());
-
-        // Since the rolling cycle is set to minutely and we also delete the old files periodically,
-        // we are fine with not shrinking the data files.
-        // Hence we disable the data file shrinking, unless it is explicitly requested by setting the
-        // system property "chronicle.queue.disableFileShrinking"
-        QueueFileShrinkManager.DISABLE_QUEUE_FILE_SHRINKING = Boolean.parseBoolean(
-                System.getProperty("chronicle.queue.disableFileShrinking", Boolean.TRUE.toString()));
 
         // Create producer/consumer queue
         StoreFileListenerForDeletion storeFileListenerForDeletionOfReleasedFiles = new StoreFileListenerForDeletion(this.name);

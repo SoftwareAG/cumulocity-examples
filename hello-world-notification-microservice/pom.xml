@@ -10,8 +10,8 @@
     <version>${revision}${changelist}</version>
 
     <properties>
-        <revision>1013.108.0</revision>
-        <changelist></changelist>
+        <revision>1013.154.0</revision>
+        <changelist>-SNAPSHOT</changelist>
         <c8y.version>${revision}${changelist}</c8y.version>
         <main.class>c8y.example.notification.helloworld.HelloWorldApplication</main.class>
 
@@ -63,6 +63,12 @@
             <artifactId>Java-WebSocket</artifactId>
             <version>1.5.1</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -95,7 +101,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
+                <version>3.10.1</version>
                 <configuration>
                     <release>${java.version}</release>
                 </configuration>
