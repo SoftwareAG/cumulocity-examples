@@ -112,12 +112,13 @@ public class LinuxGenericHardwareDriver implements Driver, OperationExecutor, Ha
 
 	private void initializeUsingNetworkInterface() throws SocketException {
 		Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
-		if (interfaces.hasMoreElements()) {
+		while (interfaces.hasMoreElements()) {
 			NetworkInterface networkInterface = interfaces.nextElement();
 			byte[] mac = networkInterface.getHardwareAddress();
 			if (Objects.nonNull(mac)) {
 				String address = Hex.encodeHexString(mac).toUpperCase();
 				hardware.setSerialNumber(address);
+				return;
 			}
 		}
 	}

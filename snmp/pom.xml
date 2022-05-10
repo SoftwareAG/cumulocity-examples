@@ -46,8 +46,6 @@
 		<cometd.version>3.0.10</cometd.version>
 		<svenson.version>1.5.8</svenson.version>
 		<jetty.version>9.4.43.v20210629</jetty.version>
-		<chronicle.map.version>3.17.6</chronicle.map.version>
-		<chronicle.queue.version>5.17.28</chronicle.queue.version>
 		<spring-boot-dependencies.version>2.5.8</spring-boot-dependencies.version>
 	</properties>
 
@@ -155,35 +153,10 @@
 			<!-- Chronicle -->
 			<dependency>
 				<groupId>net.openhft</groupId>
-				<artifactId>chronicle-queue</artifactId>
-				<version>${chronicle.queue.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.openhft</groupId>
-				<artifactId>chronicle-map</artifactId>
-				<version>${chronicle.map.version}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>net.java.dev.jna</groupId>
-						<artifactId>jna</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>net.java.dev.jna</groupId>
-						<artifactId>jna-platform</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-
-			<dependency>
-				<groupId>net.java.dev.jna</groupId>
-				<artifactId>jna</artifactId>
-				<version>5.10.0</version>
-			</dependency>
-
-			<dependency>
-				<groupId>net.java.dev.jna</groupId>
-				<artifactId>jna-platform</artifactId>
-				<version>5.10.0</version>
+				<artifactId>chronicle-bom</artifactId>
+				<type>pom</type>
+				<scope>import</scope>
+				<version>2.22.132</version>
 			</dependency>
 
 			<!--SNMP4J -->
