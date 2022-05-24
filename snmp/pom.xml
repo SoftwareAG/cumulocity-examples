@@ -25,7 +25,7 @@
 	<parent>
 		<groupId>c8y.example</groupId>
 		<artifactId>c8y-examples</artifactId>
-		<version>1011.0.26-SNAPSHOT</version>
+		<version>1011.0.26</version>
 	</parent>
 
 	<name>Cumulocity :: Examples :: SNMP</name>
