@@ -7,7 +7,7 @@
     <parent>
         <groupId>c8y.example</groupId>
         <artifactId>jv-packages</artifactId>
-        <version>1010.0.36-SNAPSHOT</version>
+        <version>1010.0.36</version>
     </parent>
 
     <artifactId>cumulocity-rpi-agent</artifactId>
