@@ -7,14 +7,19 @@ from requests import Session
 from requests.adapters import HTTPAdapter
 from time import sleep
 
-_tenant_id = ''
+_tenant_id = '' 
 _username = ''
 _password = ''
-_platform_url = ''
+_platform_url = '' # Use tenants full DNS name.
 
+add_tenant_in_auth = False
 
 def get_session(tenant_id=_tenant_id, username=_username, password=_password):
-    auth_string = f'{tenant_id}/{username}:{password}'
+    if add_tenant_in_auth:
+        auth_string = f'{tenant_id}/{username}:{password}'
+    else:
+        auth_string = f'{username}:{password}'
+
     session = Session()
     session.verify = True
     session.headers.update({
