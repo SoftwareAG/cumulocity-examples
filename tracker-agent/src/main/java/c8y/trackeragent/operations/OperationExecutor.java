@@ -9,24 +9,6 @@
 
 package c8y.trackeragent.operations;
 
-import static com.cumulocity.rest.representation.operation.Operations.asExecutingOperation;
-import static com.cumulocity.rest.representation.operation.Operations.asFailedOperation;
-import static com.cumulocity.rest.representation.operation.Operations.asSuccessOperation;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
-
-import com.cumulocity.model.idtype.GId;
-import com.cumulocity.model.operation.OperationStatus;
-import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
-import com.cumulocity.rest.representation.operation.OperationRepresentation;
-import com.cumulocity.sdk.client.SDKException;
-import com.cumulocity.sdk.client.devicecontrol.DeviceControlApi;
-import com.cumulocity.sdk.client.devicecontrol.OperationFilter;
-
 import c8y.LogfileRequest;
 import c8y.trackeragent.context.OperationContext;
 import c8y.trackeragent.device.TrackerDevice;
@@ -36,6 +18,20 @@ import c8y.trackeragent.server.ConnectionDetails;
 import c8y.trackeragent.server.ConnectionsContainer;
 import c8y.trackeragent.tracker.BaseTracker;
 import c8y.trackeragent.tracker.ConnectedTracker;
+import com.cumulocity.model.idtype.GId;
+import com.cumulocity.model.operation.OperationStatus;
+import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
+import com.cumulocity.rest.representation.operation.OperationRepresentation;
+import com.cumulocity.sdk.client.SDKException;
+import com.cumulocity.sdk.client.devicecontrol.DeviceControlApi;
+import com.cumulocity.sdk.client.devicecontrol.OperationFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+
+import static c8y.trackeragent.operations.Operations.*;
 
 @Component
 public class OperationExecutor {
