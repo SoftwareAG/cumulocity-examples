@@ -2,10 +2,9 @@ package c8y.trackeragent.operations;
 
 import c8y.LogfileRequest;
 import com.cumulocity.model.idtype.GId;
+import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
-import com.cumulocity.rest.representation.operation.Operations;
-import com.cumulocity.model.operation.OperationStatus;
 import com.cumulocity.sdk.client.SDKException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
