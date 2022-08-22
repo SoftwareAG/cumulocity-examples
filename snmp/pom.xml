@@ -96,21 +96,6 @@
 				<artifactId>device-capability-model</artifactId>
 				<version>${c8y.version}</version>
 			</dependency>
-			<dependency>
-				<groupId>com.nsn.cumulocity.model</groupId>
-				<artifactId>core-model</artifactId>
-				<version>${c8y.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.nsn.cumulocity.shared-components</groupId>
-				<artifactId>common-rest</artifactId>
-				<version>${c8y.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.nsn.cumulocity.dependencies.osgi</groupId>
-				<artifactId>svenson</artifactId>
-				<version>${svenson.version}-${c8y.version}</version>
-			</dependency>
 
 			<!-- Cometd -->
 			<dependency>
