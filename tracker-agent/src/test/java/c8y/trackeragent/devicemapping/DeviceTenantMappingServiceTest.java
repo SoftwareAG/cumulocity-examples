@@ -31,9 +31,9 @@ class DeviceTenantMappingServiceTest {
     private static final String OWNER_TENANT = "ownerTenant";
 
     private static final String MY_TENANT = "myTenant";
-    private static final long MY_TENANT_ID = 123L;
+    private static final String MY_TENANT_ID = "abc123";
     private static final String OTHER_TENANT = "otherTenant";
-    private static final long OTHER_TENANT_ID = 321L;
+    private static final String OTHER_TENANT_ID = "cba321";
 
     private static final String IMEI = "imei_1";
 
@@ -63,7 +63,7 @@ class DeviceTenantMappingServiceTest {
         ExternalIDRepresentation externalIDRepresentation = createExternalIDRepresentation(new GId(TYPE, IMEI, null));
         Mockito.when(identityApi.getExternalId(tenantObjectId))
                 .thenReturn(externalIDRepresentation);
-        ManagedObjectRepresentation tenantRepresentation = createRepresentationFromTenant(MY_TENANT, 1L);
+        ManagedObjectRepresentation tenantRepresentation = createRepresentationFromTenant(MY_TENANT, "aaa1");
         Mockito.when(inventoryApi.get(new GId(TYPE, IMEI, null)))
                 .thenReturn(tenantRepresentation);
 
@@ -128,7 +128,7 @@ class DeviceTenantMappingServiceTest {
         ExternalIDRepresentation idRepresentation = identityArgument.getValue();
         assertThat(idRepresentation.getExternalId()).isEqualTo(IMEI);
         assertThat(idRepresentation.getType()).isEqualTo(TYPE);
-        assertThat(idRepresentation.getManagedObject().getId().getLong()).isEqualTo(MY_TENANT_ID);
+        assertThat(idRepresentation.getManagedObject().getId().getValue()).isEqualTo(MY_TENANT_ID);
     }
 
     @Test
@@ -151,7 +151,7 @@ class DeviceTenantMappingServiceTest {
         ExternalIDRepresentation idRepresentation = identityArgument.getValue();
         assertThat(idRepresentation.getExternalId()).isEqualTo(IMEI);
         assertThat(idRepresentation.getType()).isEqualTo(TYPE);
-        assertThat(idRepresentation.getManagedObject().getId().getLong()).isEqualTo(MY_TENANT_ID);
+        assertThat(idRepresentation.getManagedObject().getId().getValue()).isEqualTo(MY_TENANT_ID);
     }
 
     @Test
@@ -222,7 +222,7 @@ class DeviceTenantMappingServiceTest {
         return managedObjectCollection;
     }
 
-    private ManagedObjectRepresentation createRepresentationFromTenant(String tenant, long id) {
+    private ManagedObjectRepresentation createRepresentationFromTenant(String tenant, String id) {
         ManagedObjectRepresentation representation = new ManagedObjectRepresentation();
         representation.set(tenant, TENANT_FIELD);
         representation.setId(GId.asGId(id));
