@@ -10,7 +10,7 @@ The example microservice creates the following subscription to the specified dev
   "subscription": "<SUBSCRIPTION_NAME>",
   "subscriptionFilter": {
     "apis": ["measurements"],
-    "typeFilter": "c8y_Speed"
+    "typeFilter": "'c8y_Speed'"
   },
   "fragmentsToCopy": ["c8y_SpeedMeasurement", "c8y_MaxSpeedMeasurement"]
 }
@@ -18,7 +18,7 @@ The example microservice creates the following subscription to the specified dev
 
 The example microservice first creates the above subscription and then uses it to obtain a token. This token is used to access the subscription's WebSocket channel. Next a WebSocket client is connected; the client will listen for notifications of messages that meet the subscription criteria as they are sent to Cumulocity by the device.
 
-In the above subscription example, we have expressed interest in receiving only measurements that bear the type of `c8y_speed`. The `fragmentsToCopy` property further transforms the filtered measurement to *only* include c8y_SpeedMeasurement and c8y_MaxSpeedMeasurement fragments.
+In the above subscription example, we have expressed interest in receiving only measurements that bear the type of `'c8y_speed'`. The `fragmentsToCopy` property further transforms the filtered measurement to *only* include c8y_SpeedMeasurement and c8y_MaxSpeedMeasurement fragments.
 
 As an example, if we post the following measurement from the specified device that meets our filter criteria above:
 

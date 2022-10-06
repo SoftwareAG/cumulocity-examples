@@ -147,7 +147,7 @@ public class NotificationExample {
 
         final NotificationSubscriptionFilterRepresentation filterRepresentation = new NotificationSubscriptionFilterRepresentation();
         filterRepresentation.setApis(List.of("measurements"));
-        filterRepresentation.setTypeFilter("c8y_Speed");
+        filterRepresentation.setTypeFilter("'c8y_Speed'");
 
         final NotificationSubscriptionRepresentation subscriptionRepresentation = new NotificationSubscriptionRepresentation();
         subscriptionRepresentation.setContext("mo");
