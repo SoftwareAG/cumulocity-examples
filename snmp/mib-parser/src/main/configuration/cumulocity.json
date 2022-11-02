@@ -2,7 +2,7 @@
   "name": "snmp-mib-parser",
   "contextPath": "mibparser",
   "isolation": "MULTI_TENANT",
-  "apiVersion": "1",
+  "apiVersion": "2",
   "version": "@project.version@",
   "provider": {
     "name": "Cumulocity GmbH"
