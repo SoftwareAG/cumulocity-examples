@@ -11,7 +11,7 @@
   <packaging>pom</packaging>
 
   <properties>
-    <revision>1016.0.30</revision>
+    <revision>1016.0.31</revision>
     <changelist></changelist>
     <c8y.version>${project.version}</c8y.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
