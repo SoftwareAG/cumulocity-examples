@@ -33,9 +33,6 @@ public class GatewayProperties {
 	@Autowired
 	private BootstrapProperties bootstrapProperties;
 
-	@Autowired
-	private SnmpProperties snmpProperties;
-
 	@Value("#{'${gateway.identifier:snmp-agent}'.trim()}")
 	private String gatewayIdentifier;
 
