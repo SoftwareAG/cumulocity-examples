@@ -209,6 +209,7 @@ public abstract class AbstractQueue implements Queue {
 
         DocumentContext documentContext = null;
         try {
+            tailer.disableThreadSafetyCheck(true);
             documentContext = tailer.readingDocument();
             if(documentContext.isPresent()) {
                 pauser.reset();
