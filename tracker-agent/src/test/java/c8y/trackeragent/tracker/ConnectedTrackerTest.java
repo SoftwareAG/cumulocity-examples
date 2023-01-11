@@ -26,10 +26,10 @@ import static c8y.trackeragent.utils.ByteHelper.getBytes;
 import static c8y.trackeragent.utils.Devices.IMEI_1;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import c8y.TrackerDeviceContextServiceMock;
@@ -93,7 +93,7 @@ public class ConnectedTrackerTest {
         tracker.executeReports(connectionDetails, getBytes("dummyReport"));
 
         verify(parser).parse(dummyReport);
-        verifyZeroInteractions(translator);
+        verifyNoInteractions(translator);
         assertThat(connectionDetails.getImei()).isEqualTo(IMEI_1);
     }
     
@@ -110,7 +110,7 @@ public class ConnectedTrackerTest {
         
         assertThat(connectionDetails.getImei()).isNull();
         verify(bootstrapProcessor).tryAccessDeviceCredentials(IMEI_1);
-        verifyZeroInteractions(translator);
+        verifyNoInteractions(translator);
     }
 
     @Test
@@ -123,7 +123,7 @@ public class ConnectedTrackerTest {
 
         tracker.executeOperation(operationContext);
 
-        verifyZeroInteractions(parser);
+        verifyNoInteractions(parser);
         verify(translator).translate(operationContext);
         assertThat(connectionDetails.getOut()).isEqualTo(translation);
     }

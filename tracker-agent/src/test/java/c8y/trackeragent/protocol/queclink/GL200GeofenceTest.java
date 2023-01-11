@@ -25,12 +25,12 @@ package c8y.trackeragent.protocol.queclink;
 import static c8y.trackeragent.protocol.TrackingProtocol.QUECLINK;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
@@ -129,7 +129,7 @@ public class GL200GeofenceTest {
         wrongCorrelation[5] = "0002";
         gl200gf.parse(wrongCorrelation);
 
-        verifyZeroInteractions(trackerAgent);
+        verifyNoInteractions(trackerAgent);
     }
 
     @Test

@@ -159,7 +159,7 @@ public class EventSubscriberTest {
         try {
             eventSubscriber.onMessage("SOME STRING");
         } catch (SubscriberException e) {
-            verifyZeroInteractions(platformProvider);
+            verifyNoInteractions(platformProvider);
             verify(eventApi).create(eventRepresentationCaptor.capture());
             assertEquals("SOME STRING", eventRepresentationCaptor.getValue().toJSON());
 
@@ -176,7 +176,7 @@ public class EventSubscriberTest {
         try {
             eventSubscriber.onMessage("SOME STRING");
         } catch (SubscriberException e) {
-            verifyZeroInteractions(platformProvider);
+            verifyNoInteractions(platformProvider);
             verify(eventApi).create(eventRepresentationCaptor.capture());
             assertEquals("SOME STRING", eventRepresentationCaptor.getValue().toJSON());
 
@@ -240,10 +240,10 @@ public class EventSubscriberTest {
 
         eventSubscriber.refreshSubscription();
 
-        verifyZeroInteractions(gatewayDataProvider);
-        verifyZeroInteractions(gatewayManagedObjectWrapper);
-        verifyZeroInteractions(snmpCommunicationProperties);
-        verifyZeroInteractions(eventPubSub);
+        verifyNoInteractions(gatewayDataProvider);
+        verifyNoInteractions(gatewayManagedObjectWrapper);
+        verifyNoInteractions(snmpCommunicationProperties);
+        verifyNoInteractions(eventPubSub);
 
         assertEquals(-1, eventSubscriber.getTransmitRateInSeconds());
     }

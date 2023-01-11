@@ -160,7 +160,7 @@ public class AlarmSubscriberTest {
 		try {
 			alarmSubscriber.onMessage("SOME STRING");
 		} catch (SubscriberException e) {
-			verifyZeroInteractions(platformProvider);
+			verifyNoInteractions(platformProvider);
 			verify(alarmApi).create(alarmRepresentationCaptor.capture());
 			assertEquals("SOME STRING", alarmRepresentationCaptor.getValue().toJSON());
 
@@ -177,7 +177,7 @@ public class AlarmSubscriberTest {
 		try {
 			alarmSubscriber.onMessage("SOME STRING");
 		} catch (SubscriberException e) {
-			verifyZeroInteractions(platformProvider);
+			verifyNoInteractions(platformProvider);
 			verify(alarmApi).create(alarmRepresentationCaptor.capture());
 			assertEquals("SOME STRING", alarmRepresentationCaptor.getValue().toJSON());
 
@@ -241,10 +241,10 @@ public class AlarmSubscriberTest {
 
 		alarmSubscriber.refreshSubscription();
 
-		verifyZeroInteractions(gatewayDataProvider);
-		verifyZeroInteractions(gatewayManagedObjectWrapper);
-		verifyZeroInteractions(snmpCommunicationProperties);
-		verifyZeroInteractions(alarmPubSub);
+		verifyNoInteractions(gatewayDataProvider);
+		verifyNoInteractions(gatewayManagedObjectWrapper);
+		verifyNoInteractions(snmpCommunicationProperties);
+		verifyNoInteractions(alarmPubSub);
 
 		assertEquals(-1, alarmSubscriber.getTransmitRateInSeconds());
 	}

@@ -1,7 +1,7 @@
 package c8y.kontron;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.*;
 
 import java.util.Properties;

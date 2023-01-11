@@ -112,7 +112,7 @@ public class BootstrapServiceTest {
 
 		verify(taskScheduler).scheduleWithFixedDelay(pollingDeviceCredentialsCaptor.capture(), eq(10000L));
 		pollingDeviceCredentialsCaptor.getValue().run();
-		verifyZeroInteractions(platformProvider);
+		verifyNoInteractions(platformProvider);
 		verify(eventPublisher).publishEvent(any(CredentialsAvailableEvent.class));
 	}
 

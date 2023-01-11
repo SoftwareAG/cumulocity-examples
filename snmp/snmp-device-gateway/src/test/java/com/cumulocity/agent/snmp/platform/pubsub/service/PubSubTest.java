@@ -93,7 +93,7 @@ public class PubSubTest {
 
         pubSub.subscribe(subscriber);
 
-        Mockito.verifyZeroInteractions(taskScheduler);
+        Mockito.verifyNoInteractions(taskScheduler);
 
         assertNull(((ScheduledFuture[])ReflectionTestUtils.getField(pubSub, "subscriptions")));
     }
@@ -171,7 +171,7 @@ public class PubSubTest {
 
         pubSub.unsubscribe(subscriber);
 
-        Mockito.verifyZeroInteractions(mockScheduledFuture);
+        Mockito.verifyNoInteractions(mockScheduledFuture);
 
         assertNull(((ScheduledFuture[])ReflectionTestUtils.getField(pubSub, "subscriptions")));
     }

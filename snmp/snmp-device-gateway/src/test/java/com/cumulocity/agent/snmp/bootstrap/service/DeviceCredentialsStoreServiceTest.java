@@ -76,7 +76,7 @@ public class DeviceCredentialsStoreServiceTest {
     @Test(expected = NullPointerException.class)
     public void shouldFailToStoreNullCredentials() {
         deviceCredentialsStoreService.store(null);
-        Mockito.verifyZeroInteractions(deviceCredentialsStore);
+        Mockito.verifyNoInteractions(deviceCredentialsStore);
     }
 
     @Test
