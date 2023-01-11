@@ -14,7 +14,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -23,8 +23,8 @@ import static com.cumulocity.route.service.RouteTestUtils.*;
 import static com.cumulocity.route.service.engine.From.every;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.joda.time.DateTime.now;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.*;
 
 @Slf4j(topic = "machine")

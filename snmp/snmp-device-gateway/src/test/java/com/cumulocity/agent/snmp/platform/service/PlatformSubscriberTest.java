@@ -26,7 +26,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import org.junit.Before;
@@ -172,7 +172,7 @@ public class PlatformSubscriberTest {
 			}
 		}, operationRepresentation);
 
-		verifyZeroInteractions(eventPublisher);
+		verifyNoInteractions(eventPublisher);
 
 		// when onError
 		subscriptionListenerCaptor.getValue().onError(new Subscription<GId>() {
@@ -186,7 +186,7 @@ public class PlatformSubscriberTest {
 			}
 		}, new Exception("SOME EXCEPTION"));
 
-		verifyZeroInteractions(eventPublisher);
+		verifyNoInteractions(eventPublisher);
 	}
 
 	@Test
@@ -224,7 +224,7 @@ public class PlatformSubscriberTest {
 		// Action
 		ReflectionTestUtils.invokeMethod(platformSubscriber, "subscribeGatewayInventoryNotification");
 
-		verifyZeroInteractions(gatewayDataProvider);
+		verifyNoInteractions(gatewayDataProvider);
 	}
 
 	@Test
@@ -238,7 +238,7 @@ public class PlatformSubscriberTest {
 		// Action
 		ReflectionTestUtils.invokeMethod(platformSubscriber, "subscribeGatewayDeviceOperation");
 
-		verifyZeroInteractions(operationNotificationSubscriberMock);
+		verifyNoInteractions(operationNotificationSubscriberMock);
 		assertNotNull(ReflectionTestUtils.getField(platformSubscriber, "subscriberForOperationsOnGateway"));
 	}
 }

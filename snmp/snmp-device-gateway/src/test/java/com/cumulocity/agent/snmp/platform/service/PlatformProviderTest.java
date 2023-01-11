@@ -175,7 +175,7 @@ public class PlatformProviderTest {
 
         platformAvailabilityMonitorRunnable.getValue().run();
 
-        verifyZeroInteractions(platform);
+        verifyNoInteractions(platform);
     }
 
     @Test

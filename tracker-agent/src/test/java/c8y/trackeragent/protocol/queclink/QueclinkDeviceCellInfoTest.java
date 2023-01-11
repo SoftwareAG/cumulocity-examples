@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.Mockito.verify;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.anyString;
 
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;

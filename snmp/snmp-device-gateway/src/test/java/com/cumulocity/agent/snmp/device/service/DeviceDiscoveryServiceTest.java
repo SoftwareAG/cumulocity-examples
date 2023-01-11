@@ -707,7 +707,7 @@ public class DeviceDiscoveryServiceTest {
         deviceDiscoveryService.scheduleAutoDiscoveryProcess();
 
         // then
-        verifyZeroInteractions(taskScheduler);
+        verifyNoInteractions(taskScheduler);
         assertNull(ReflectionTestUtils.getField(deviceDiscoveryService, "autoDiscoverySchedule"));
         assertNull(ReflectionTestUtils.getField(deviceDiscoveryService, "autoDiscoveryIpRangesList"));
         assertEquals(givenIpRange, ReflectionTestUtils.getField(deviceDiscoveryService, "autoDiscoveryIpRanges"));
@@ -735,7 +735,7 @@ public class DeviceDiscoveryServiceTest {
         deviceDiscoveryService.scheduleAutoDiscoveryProcess();
 
         // then
-        verifyZeroInteractions(taskScheduler);
+        verifyNoInteractions(taskScheduler);
         assertNull(ReflectionTestUtils.getField(deviceDiscoveryService, "autoDiscoverySchedule"));
         assertNull(ReflectionTestUtils.getField(deviceDiscoveryService, "autoDiscoveryIpRangesList"));
         assertEquals(givenIpRange, ReflectionTestUtils.getField(deviceDiscoveryService, "autoDiscoveryIpRanges"));
@@ -758,7 +758,7 @@ public class DeviceDiscoveryServiceTest {
         deviceDiscoveryService.scheduleAutoDiscoveryProcess();
 
         // then
-        verifyZeroInteractions(taskScheduler);
+        verifyNoInteractions(taskScheduler);
         assertNull(ReflectionTestUtils.getField(deviceDiscoveryService, "autoDiscoverySchedule"));
         assertNull(ReflectionTestUtils.getField(deviceDiscoveryService, "autoDiscoveryIpRangesList"));
         assertEquals(givenIpRange, ReflectionTestUtils.getField(deviceDiscoveryService, "autoDiscoveryIpRanges"));
@@ -857,7 +857,7 @@ public class DeviceDiscoveryServiceTest {
         deviceDiscoveryService.refreshAutoDiscoverySchedule();
 
         // then
-        verifyZeroInteractions(autoDiscoveryScheduleMock);
+        verifyNoInteractions(autoDiscoveryScheduleMock);
         assertNotNull(ReflectionTestUtils.getField(deviceDiscoveryService, "autoDiscoverySchedule"));
 
         verify(deviceDiscoveryService, times(0)).scheduleAutoDiscoveryProcess();

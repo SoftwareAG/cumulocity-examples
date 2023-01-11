@@ -29,7 +29,7 @@ import c8y.trackeragent.server.TestConnectionDetails;
 import c8y.trackeragent.utils.LocationEventBuilder;
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.times;
