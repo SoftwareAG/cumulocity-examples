@@ -159,7 +159,7 @@ public class App {
 	}
 
 	// Track the client's approximate location
-	@RequestMapping("location/track")
+	@RequestMapping(value = "location/track", produces="application/json")
 	public String trackLocation (HttpServletRequest request) {
 		// Get the public IP address and create the event
 		return createLocationUpdateEvent(request.getHeader("x-real-ip")).toJSON();
