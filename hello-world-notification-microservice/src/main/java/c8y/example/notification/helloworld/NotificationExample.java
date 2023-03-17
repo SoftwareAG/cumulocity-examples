@@ -4,10 +4,12 @@ import c8y.example.notification.helloworld.platform.SubscriptionRepository;
 import c8y.example.notification.helloworld.platform.TokenService;
 import c8y.example.notification.helloworld.websocket.Notification;
 import c8y.example.notification.helloworld.websocket.NotificationCallback;
+import c8y.example.notification.helloworld.websocket.WebSocketClient;
 import c8y.example.notification.helloworld.websocket.jetty.JettyWebSocketClient;
 import c8y.example.notification.helloworld.websocket.tootallnate.TooTallNateWebSocketClient;
 import com.cumulocity.microservice.settings.service.MicroserviceSettingsService;
 import com.cumulocity.microservice.subscription.model.MicroserviceSubscriptionAddedEvent;
+import com.cumulocity.microservice.subscription.model.MicroserviceSubscriptionRemovedEvent;
 import com.cumulocity.microservice.subscription.service.MicroserviceSubscriptionsService;
 import com.cumulocity.model.idtype.GId;
 import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
@@ -41,6 +43,7 @@ public class NotificationExample {
     private final TokenService tokenService;
     private final SubscriptionRepository subscriptionRepository;
     private final Properties properties;
+    private WebSocketClient client;
 
     @Autowired(required = false)
     private MicroserviceSettingsService microserviceSettingsService;
@@ -54,6 +57,11 @@ public class NotificationExample {
         overrideProperties(tenantId);
 
         runExample();
+    }
+
+    @EventListener
+    public void destroy(MicroserviceSubscriptionRemovedEvent event) throws Exception {
+        this.client.close();
     }
 
     private void runExample() throws Exception {
@@ -95,15 +103,14 @@ public class NotificationExample {
         };
 
         final String webSocketLibrary = properties.getWebSocketLibrary();
-        if (webSocketLibrary != null && webSocketLibrary.equalsIgnoreCase("jetty")) {
+        if ("jetty".equalsIgnoreCase(webSocketLibrary)) {
             log.info("WebSocket library: Jetty");
-            final JettyWebSocketClient client = new JettyWebSocketClient(webSocketUri, callback);
-            client.connect();
+            client = new JettyWebSocketClient(webSocketUri, callback);
         } else {
             log.info("WebSocket library: TooTallNate");
-            final TooTallNateWebSocketClient client = new TooTallNateWebSocketClient(webSocketUri, callback);
-            client.connect();
+            client = new TooTallNateWebSocketClient(webSocketUri, callback);
         }
+        client.connect();
     }
 
     private URI getWebSocketUrl(String token) throws URISyntaxException {

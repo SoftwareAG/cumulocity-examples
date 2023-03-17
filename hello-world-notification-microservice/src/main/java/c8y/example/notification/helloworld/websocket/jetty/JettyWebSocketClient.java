@@ -8,12 +8,13 @@ import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
 import org.eclipse.jetty.websocket.api.annotations.*;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
 @WebSocket
 @Slf4j
-public class JettyWebSocketClient{
+public class JettyWebSocketClient implements c8y.example.notification.helloworld.websocket.WebSocketClient {
 
     private final NotificationCallback callback;
     private Session session = null;
@@ -24,10 +25,19 @@ public class JettyWebSocketClient{
         this.callback = callback;
     }
 
+    @Override
     public void connect() throws Exception {
-        WebSocketClient client = new WebSocketClient();
+        final WebSocketClient client = new WebSocketClient();
         client.start();
         client.connect(this, this.serverUri, new ClientUpgradeRequest());
+    }
+
+    @Override
+    public void close() throws IOException {
+        if (this.session != null) {
+            this.session.close();
+            this.session.disconnect();
+        }
     }
 
     @OnWebSocketConnect

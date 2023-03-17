@@ -6,6 +6,9 @@
     "name": "Cumulocity GmbH"
   },
   "isolation": "PER_TENANT",
+  "resources": {
+    "memory": "768Mi"
+  },
   "requiredRoles": [
     "ROLE_NOTIFICATION_2_ADMIN"
   ],
