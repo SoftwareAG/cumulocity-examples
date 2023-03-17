@@ -12,64 +12,77 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-@WebSocket
 @Slf4j
 public class JettyWebSocketClient implements c8y.example.notification.helloworld.websocket.WebSocketClient {
 
-    private final NotificationCallback callback;
-    private Session session = null;
-    private URI serverUri;
+    private final CallbackAdapter callbackAdapter;
+    private final URI serverUri;
 
     public JettyWebSocketClient(URI serverUri, NotificationCallback callback) {
         this.serverUri = serverUri;
-        this.callback = callback;
+        this.callbackAdapter = new CallbackAdapter(callback);
     }
 
     @Override
     public void connect() throws Exception {
         final WebSocketClient client = new WebSocketClient();
         client.start();
-        client.connect(this, this.serverUri, new ClientUpgradeRequest());
+        client.connect(this.callbackAdapter, this.serverUri, new ClientUpgradeRequest());
     }
 
     @Override
     public void close() throws IOException {
-        if (this.session != null) {
-            this.session.close();
-            this.session.disconnect();
+        this.callbackAdapter.close();
+    }
+
+    // CallbackAdapter must be a public class due to use of Runtime annotations!
+    @WebSocket
+    public static class CallbackAdapter {
+        private final NotificationCallback callback;
+        private Session session = null;
+
+        private CallbackAdapter(NotificationCallback callback) {
+            this.callback = callback;
         }
-    }
 
-    @OnWebSocketConnect
-    public void onOpen(Session session) throws URISyntaxException {
-        this.session = session;
-        this.callback.onOpen(new URI("ws", session.getRemoteAddress().getHostName(), null));
-    }
-
-    @OnWebSocketMessage
-    public void onMessage(String message) {
-        Notification notification = Notification.parse(message);
-        this.callback.onNotification(notification);
-        if (notification.getAckHeader() != null) {
-            try {
-                session.getRemote().sendString(notification.getAckHeader()); // ack message
-            } catch (Exception e) {
-                log.error("Failed to ack message " + notification.getAckHeader(), e);
+        public void close() throws IOException {
+            if (this.session != null) {
+                this.session.close();
+                this.session.disconnect();
             }
-        } else {
-            log.warn("No message id found for ack");
         }
-    }
 
-    @OnWebSocketClose
-    public void onClose(int statusCode, String reason) {
-        log.info("WebSocket closed. Code:" + statusCode + ", reason: " + reason);
-        this.callback.onClose();
-    }
+        @OnWebSocketConnect
+        public void onOpen(Session session) throws URISyntaxException {
+            this.session = session;
+            this.callback.onOpen(new URI("ws", session.getRemoteAddress().getHostName(), null));
+        }
 
-    @OnWebSocketError
-    public void onError(Throwable t) {
-        log.error("WebSocket error:" + t);
-        this.callback.onError(t);
+        @OnWebSocketMessage
+        public void onMessage(String message) {
+            Notification notification = Notification.parse(message);
+            this.callback.onNotification(notification);
+            if (notification.getAckHeader() != null) {
+                try {
+                    session.getRemote().sendString(notification.getAckHeader()); // ack message
+                } catch (Exception e) {
+                    log.error("Failed to ack message " + notification.getAckHeader(), e);
+                }
+            } else {
+                log.warn("No message id found for ack");
+            }
+        }
+
+        @OnWebSocketClose
+        public void onClose(int statusCode, String reason) {
+            log.info("WebSocket closed. Code:" + statusCode + ", reason: " + reason);
+            this.callback.onClose();
+        }
+
+        @OnWebSocketError
+        public void onError(Throwable t) {
+            log.error("WebSocket error:" + t);
+            this.callback.onError(t);
+        }
     }
 }
