@@ -5,7 +5,6 @@ import c8y.example.notification.helloworld.platform.TokenService;
 import c8y.example.notification.helloworld.websocket.Notification;
 import c8y.example.notification.helloworld.websocket.NotificationCallback;
 import c8y.example.notification.helloworld.websocket.WebSocketClient;
-import c8y.example.notification.helloworld.websocket.jetty.JettyWebSocketClient;
 import c8y.example.notification.helloworld.websocket.tootallnate.TooTallNateWebSocketClient;
 import com.cumulocity.microservice.settings.service.MicroserviceSettingsService;
 import com.cumulocity.microservice.subscription.model.MicroserviceSubscriptionAddedEvent;
@@ -102,14 +101,8 @@ public class NotificationExample {
             }
         };
 
-        final String webSocketLibrary = properties.getWebSocketLibrary();
-        if ("jetty".equalsIgnoreCase(webSocketLibrary)) {
-            log.info("WebSocket library: Jetty");
-            client = new JettyWebSocketClient(webSocketUri, callback);
-        } else {
-            log.info("WebSocket library: TooTallNate");
-            client = new TooTallNateWebSocketClient(webSocketUri, callback);
-        }
+        log.info("Connecting WebSocket client ...");
+        client = new TooTallNateWebSocketClient(webSocketUri, callback);
         client.connect();
     }
 
