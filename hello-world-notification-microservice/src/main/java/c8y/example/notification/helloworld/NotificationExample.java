@@ -59,8 +59,10 @@ public class NotificationExample {
     }
 
     @EventListener
-    public void destroy(MicroserviceSubscriptionRemovedEvent event) throws Exception {
-        this.client.close();
+    public void onSubscriptionRemoved(MicroserviceSubscriptionRemovedEvent event) throws Exception {
+        if (client != null) {
+            client.close();
+        }
     }
 
     private void runExample() throws Exception {
