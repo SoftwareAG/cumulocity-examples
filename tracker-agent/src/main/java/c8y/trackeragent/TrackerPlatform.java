@@ -14,7 +14,6 @@ import com.cumulocity.model.authentication.CumulocityBasicCredentials;
 import com.cumulocity.sdk.client.*;
 import com.cumulocity.sdk.client.alarm.AlarmApi;
 import com.cumulocity.sdk.client.audit.AuditRecordApi;
-import com.cumulocity.sdk.client.cep.CepApi;
 import com.cumulocity.sdk.client.devicecontrol.DeviceControlApi;
 import com.cumulocity.sdk.client.devicecontrol.DeviceCredentialsApi;
 import com.cumulocity.sdk.client.event.EventApi;
@@ -114,17 +113,6 @@ public class TrackerPlatform implements Platform {
             @Override
             public AuditRecordApi call() throws Exception {
                 return orig.getAuditRecordApi();
-            }
-
-        }.get();
-    }
-
-    public CepApi getCepApi() throws SDKException {
-        return new CachedApiGetter<CepApi>(CepApi.class) {
-
-            @Override
-            public CepApi call() throws Exception {
-                return orig.getCepApi();
             }
 
         }.get();
