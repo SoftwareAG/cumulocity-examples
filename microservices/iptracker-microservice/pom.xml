@@ -9,7 +9,7 @@
   <url>http://maven.apache.org</url>
 
   <properties>
-    <revision>1017.220.0</revision>
+    <revision>1017.222.0</revision>
     <changelist>-SNAPSHOT</changelist>
     <java.version>11</java.version>
     <maven.compiler.source>${java.version}</maven.compiler.source>
