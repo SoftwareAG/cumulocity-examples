@@ -2,6 +2,7 @@ package c8y.trackeragent.subscription;
 
 import com.cumulocity.rest.representation.application.ApplicationReferenceCollectionRepresentation;
 import com.cumulocity.rest.representation.application.ApplicationReferenceRepresentation;
+import com.cumulocity.sdk.client.Platform;
 import com.cumulocity.sdk.client.PlatformImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -15,7 +16,7 @@ class SubscriptionApi {
     private final static String TENANT = "{tenant}";
 
     @Autowired
-    private PlatformImpl platform;
+    private Platform platform;
 
     ApplicationReferenceCollectionRepresentation getApplications(String tenant) {
         return platform.rest().get(
@@ -34,6 +35,6 @@ class SubscriptionApi {
     }
 
     String getApplicationKey() {
-        return platform.getApplicationKey();
+        return "tracker-agent-key";
     }
 }

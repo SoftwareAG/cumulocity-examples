@@ -204,6 +204,8 @@ public class TrackerConfiguration {
         builder.append(bootstrapUser);
         builder.append(", bootstrapTenant=");
         builder.append(bootstrapTenant);
+        builder.append(", bootstrapPassword=");
+        builder.append(bootstrapPassword);
         builder.append(", optionsReaderUser=");
         builder.append(smsGatewayUser);
         builder.append(", clientTimeout=");

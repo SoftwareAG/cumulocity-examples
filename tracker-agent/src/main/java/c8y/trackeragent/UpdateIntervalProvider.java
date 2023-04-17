@@ -75,6 +75,7 @@ public class UpdateIntervalProvider {
 		}
 	}
 
+	// what is this bird for?
 	private static class SilentResponseParser extends ResponseParser {
 
 		protected String getErrorRepresentation(Response response) {

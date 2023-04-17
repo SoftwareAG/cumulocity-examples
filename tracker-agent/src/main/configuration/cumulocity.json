@@ -1,5 +1,5 @@
 {
-  "apiVersion":"1",
+  "apiVersion":"2",
   "version":"@project.version@",
   "provider": {
     "name":"Cumulocity GmbH"
@@ -26,17 +26,17 @@
       "port": 80
 
     },
-    "initialDelaySeconds": 200,
+    "initialDelaySeconds": 30,
     "periodSeconds": 10
   },
   "readinessProbe":{
     "httpGet":{
       "path": "/health",
       "port": 80
-
     },
-    "initialDelaySeconds": 220,
-    "periodSeconds": 10
+    "initialDelaySeconds": 30,
+    "periodSeconds": 30,
+    "timeoutSeconds": 10
   },
   "c8y_ImpactDecoder": {}
 }
