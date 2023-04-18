@@ -30,7 +30,6 @@ import c8y.trackeragent.configuration.TrackerConfiguration;
 import javax.ws.rs.core.Response;
 
 @Component
-@TenantScope
 public class UpdateIntervalProvider {
 
 	private final static Logger logger = LoggerFactory.getLogger(UpdateIntervalProvider.class);
@@ -77,19 +76,6 @@ public class UpdateIntervalProvider {
 		} catch (NumberFormatException nfe) {
 			return null;
 		}
-	}
-
-	// what is this bird for?
-	private static class SilentResponseParser extends ResponseParser {
-
-		protected String getErrorRepresentation(Response response) {
-			if (isJsonResponse(response)) {
-				return super.getErrorRepresentation(response);
-			}
-			logger.error("Failed to parse error message to json.");
-			return null;
-		}
-
 	}
 
 }
