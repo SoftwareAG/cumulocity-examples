@@ -9,6 +9,7 @@
 
 package c8y.trackeragent.tracker;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 
 import org.slf4j.Logger;
@@ -39,7 +40,10 @@ public class ConnectedTrackerFactoryImpl implements ConnectedTrackerFactory {
     public ConnectedTracker create(ReadDataEvent readData) throws Exception {
         logger.debug("Will peek tracker for new connection...");
         int localPort = readData.getChannel().socket().getLocalPort();
+
         byte markingByte = readData.getData()[0];
+
+        logger.info("Marking byte: " + markingByte);
         ConnectedTracker result = create(localPort, markingByte);
         if (result == null) {
             throw new RuntimeException("No matching tracker found for first byte " + markingByte + " on port " + localPort);

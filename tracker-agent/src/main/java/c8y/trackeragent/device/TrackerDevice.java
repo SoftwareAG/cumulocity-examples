@@ -202,6 +202,10 @@ public class TrackerDevice {
         return gid;
     }
 
+    public String getTenant() {
+        return tenant;
+    }
+
     public void setPosition(Position position) throws SDKException {
         EventRepresentation event = aLocationUpdateEvent();
         setPosition(event, position);

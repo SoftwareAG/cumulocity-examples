@@ -165,12 +165,12 @@ public abstract class BaseConnectedTracker<F extends Fragment> implements Connec
         try {
             tenant = deviceTenantMappingService.findTenant(imei);
         } catch (UnknownDeviceException ex) {
-            logger.debug("Device with imei {} not yet bootstraped. Will try bootstrap the device.", imei);
+            logger.info("Device with imei {} not yet bootstraped. Will try bootstrap the device.", imei);
             DeviceCredentials deviceCredentials = bootstrapProcessor.tryAccessDeviceCredentials(imei);
             if (deviceCredentials == null) {
                 throw new NotBootstrapedException(format("Device with imei %s not yet available. Will skip the report.", imei));
             } 
-            logger.debug("Device with imei {} available.", imei);
+            logger.info("Device with imei {} available.", imei);
             tenant = deviceCredentials.getTenant();
         }
         return tenant;

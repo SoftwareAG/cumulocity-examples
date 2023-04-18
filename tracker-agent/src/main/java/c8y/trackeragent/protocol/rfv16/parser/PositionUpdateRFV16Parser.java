@@ -129,7 +129,7 @@ public class PositionUpdateRFV16Parser extends RFV16Parser implements Parser {
     }
 
     private String getLocationReportInterval(TrackerDevice device) {
-        Integer locationReportInterval = device.getUpdateIntervalProvider().findUpdateInterval();
+        Integer locationReportInterval = device.getUpdateIntervalProvider().findUpdateInterval(device.getTenant());
         if (locationReportInterval == null) {
             return config.getRfv16LocationReportTimeInterval().toString();
         } else {
