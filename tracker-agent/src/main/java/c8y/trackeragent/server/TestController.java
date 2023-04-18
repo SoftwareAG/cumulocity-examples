@@ -68,7 +68,8 @@ public class TestController {
         s.connect(new InetSocketAddress("localhost", 9092));
         s.getOutputStream().write(message.getBytes(StandardCharsets.UTF_8));
 
-        Thread.sleep(5000);
+        log.info("Sleeping for 30 seconds...");
+        Thread.sleep(30000);
 
         // read the response if any
         s.setSoTimeout(5000);
