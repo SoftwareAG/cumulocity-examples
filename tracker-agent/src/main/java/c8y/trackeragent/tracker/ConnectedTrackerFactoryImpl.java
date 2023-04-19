@@ -9,18 +9,16 @@
 
 package c8y.trackeragent.tracker;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Collection;
-
+import c8y.trackeragent.configuration.TrackerConfiguration;
+import c8y.trackeragent.protocol.TrackingProtocol;
+import c8y.trackeragent.server.TrackerServerEvent.ReadDataEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import c8y.trackeragent.configuration.TrackerConfiguration;
-import c8y.trackeragent.protocol.TrackingProtocol;
-import c8y.trackeragent.server.TrackerServerEvent.ReadDataEvent;
+import java.util.Collection;
 
 @Component
 public class ConnectedTrackerFactoryImpl implements ConnectedTrackerFactory {
@@ -40,10 +38,7 @@ public class ConnectedTrackerFactoryImpl implements ConnectedTrackerFactory {
     public ConnectedTracker create(ReadDataEvent readData) throws Exception {
         logger.debug("Will peek tracker for new connection...");
         int localPort = readData.getChannel().socket().getLocalPort();
-
         byte markingByte = readData.getData()[0];
-
-        logger.info("Marking byte: " + markingByte);
         ConnectedTracker result = create(localPort, markingByte);
         if (result == null) {
             throw new RuntimeException("No matching tracker found for first byte " + markingByte + " on port " + localPort);

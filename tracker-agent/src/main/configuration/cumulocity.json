@@ -27,7 +27,7 @@
       "port": 80
 
     },
-    "initialDelaySeconds": 30,
+    "initialDelaySeconds": 200,
     "periodSeconds": 10
   },
   "readinessProbe":{
@@ -35,8 +35,8 @@
       "path": "/health",
       "port": 80
     },
-    "initialDelaySeconds": 30,
-    "periodSeconds": 30,
+    "initialDelaySeconds": 220,
+    "periodSeconds": 10,
     "timeoutSeconds": 10
   },
   "c8y_ImpactDecoder": {}

@@ -147,11 +147,11 @@ public class TrackerDevice {
 
     private DeviceControlApi deviceControl;
 
-    protected IdentityApi identities;
+    private IdentityApi identities;
 
-    protected InventoryApi inventory;
+    private InventoryApi inventory;
 
-    protected String tenant;
+    private String tenant;
 
     private String imei;
 

@@ -79,17 +79,4 @@ public class UpdateIntervalProvider {
 		}
 	}
 
-	// what is this bird for?
-	private static class SilentResponseParser extends ResponseParser {
-
-		protected String getErrorRepresentation(Response response) {
-			if (isJsonResponse(response)) {
-				return super.getErrorRepresentation(response);
-			}
-			logger.error("Failed to parse error message to json.");
-			return null;
-		}
-
-	}
-
 }
