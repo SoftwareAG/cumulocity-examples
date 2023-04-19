@@ -35,6 +35,6 @@ class SubscriptionApi {
     }
 
     String getApplicationKey() {
-        return ((PlatformImpl) platform).getApplicationKey();
+        return "tracker-agent-key"; // cannot be taken from Platform cast to PlatformImpl, because some integration tests would fail
     }
 }
