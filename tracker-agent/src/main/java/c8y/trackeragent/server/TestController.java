@@ -30,7 +30,7 @@ public class TestController {
 
     /**
      * Tests the microservice by sending a valid Coban login message to localhost:9092, on which presumably the tracker
-     * server is listening. Check the logs to see the result.
+     * server is listening. Returns the response of the tracker server.
      *
      * @param imei imei of the hypothetical device sending the message
      * @see <a href="https://drive.google.com/file/d/1wU3tOZ-Ets7RqbvharhEhyMb6IZGpy2R/view">coban protocol</a>

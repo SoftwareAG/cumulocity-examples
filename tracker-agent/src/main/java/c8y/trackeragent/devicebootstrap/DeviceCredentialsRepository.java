@@ -9,28 +9,20 @@
 
 package c8y.trackeragent.devicebootstrap;
 
-import static com.google.common.collect.FluentIterable.from;
-import static java.util.Arrays.asList;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
-import javax.annotation.PostConstruct;
-
+import c8y.trackeragent.configuration.ConfigUtils;
+import c8y.trackeragent.utils.GroupPropertyAccessor;
+import c8y.trackeragent.utils.GroupPropertyAccessor.Group;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import c8y.trackeragent.configuration.ConfigUtils;
-import c8y.trackeragent.exception.UnknownDeviceException;
-import c8y.trackeragent.utils.GroupPropertyAccessor;
-import c8y.trackeragent.utils.GroupPropertyAccessor.Group;
+import javax.annotation.PostConstruct;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+
+import static java.util.Arrays.asList;
 
 @Component
 public class DeviceCredentialsRepository {
