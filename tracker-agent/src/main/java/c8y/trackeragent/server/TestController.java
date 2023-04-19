@@ -59,7 +59,7 @@ public class TestController {
             throws Exception {
 
         Socket s = new Socket();
-        s.connect(new InetSocketAddress("localhost", 9092));
+        s.connect(new InetSocketAddress("localhost", port));
 
         log.info("Sending message [{}] to http://localhost:[{}] ...", message, port);
         s.getOutputStream().write(message.getBytes(StandardCharsets.UTF_8));
