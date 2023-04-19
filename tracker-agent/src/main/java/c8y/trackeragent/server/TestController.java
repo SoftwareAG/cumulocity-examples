@@ -11,17 +11,17 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 
 /**
- * This controller was created to test tracking-agent deployed to the platform as a regular microservice.
+ * This controller was created to test tracking-agent deployed to the platform as a microservice.
  * <p>
- * Since in that case only standard communication via HTTP is allowed this controller is needed to bypass
- * the platform restrictions and simulate messages sent from the tracking devices.
+ * For deployed microservices only HTTP communication is allowed and only through whitelisted ports. This controller
+ * bypasses the restrictions by transmitting received messages to the ports at localhost on which the tracker server is
+ * listening.
  */
 @Slf4j
 @RestController
@@ -29,59 +29,44 @@ import java.nio.charset.StandardCharsets;
 public class TestController {
 
     /**
-     * Tests the microservice by sending a valid Coban login message to the local socket on port 9092.
-     * <p>
-     * Check the logs to see the result.
+     * Tests the microservice by sending a valid Coban login message to localhost:9092, on which presumably the tracker
+     * server is listening. Check the logs to see the result.
      *
-     * @param imei imei of the hypothetical device sending heartbeat
-     *
+     * @param imei imei of the hypothetical device sending the message
      * @see <a href="https://drive.google.com/file/d/1wU3tOZ-Ets7RqbvharhEhyMb6IZGpy2R/view">coban protocol</a>
      */
     @RequestMapping(path = "test1", method = RequestMethod.POST)
-    public ResponseEntity<Void> testBySendingCobanHeartbeat(@RequestParam(required = false) String imei) throws Exception {
+    public ResponseEntity<String> sendCobanLoginMsgToTrackerServer(
+            @RequestParam(required = false) String imei)
+            throws Exception {
+
         if (imei == null) {
-            imei = "359586015829802";
+            imei = "359586015829802"; // as in the example in the Coban specs
         }
         Preconditions.checkArgument(imei.matches("\\d+"));
 
-        log.info("Sending valid Coban heartbeat message to http://localhost:9092 ...");
-
-        Socket s = new Socket();
-        s.connect(new InetSocketAddress("localhost", 9092));
-        s.getOutputStream().write(("##,imei:" + imei + ",A;").getBytes(StandardCharsets.UTF_8));
-        s.close();
-
-        return new ResponseEntity<>(null, HttpStatus.OK);
+        return sendCustomMsgToTrackerServer(9092, "##,imei:" + imei + ",A;");
     }
 
     /**
-     * Tests the microservice to the local socket on given port. Returns the message and the response for it.
+     * Tests the microservice by sending the message to the given port at localhost, on which presumably the tracker
+     * server is listening. Returns the response of the tracker server.
      */
     @RequestMapping(path = "test2", method = RequestMethod.POST, produces = MediaType.TEXT_PLAIN_VALUE)
-    public ResponseEntity<String> testBySendingCustomMessage(@RequestParam int port, @RequestParam String message) throws Exception {
-
-        log.info("Sending message [{}] to http://localhost:[{}] ...", message, port);
+    public ResponseEntity<String> sendCustomMsgToTrackerServer(
+            @RequestParam int port,
+            @RequestParam String message)
+            throws Exception {
 
         Socket s = new Socket();
-
-        // send the message
         s.connect(new InetSocketAddress("localhost", 9092));
+
+        log.info("Sending message [{}] to http://localhost:[{}] ...", message, port);
         s.getOutputStream().write(message.getBytes(StandardCharsets.UTF_8));
 
-        log.info("Sleeping for 30 seconds...");
-        Thread.sleep(30000);
-
-        // read the response if any
-        s.setSoTimeout(5000);
-        try {
-            return new ResponseEntity<>(new String(s.getInputStream().readAllBytes(), StandardCharsets.UTF_8), HttpStatus.OK);
-        } catch (IOException e) {
-            log.error(e.getMessage());
-        } finally {
-            s.close();
-        }
-
-        return new ResponseEntity<>(null, HttpStatus.I_AM_A_TEAPOT);
+        log.info("Waiting for the response...");
+        char[] ch = new char[1024];
+        new InputStreamReader(s.getInputStream()).read(ch);
+        return new ResponseEntity<>(new String(ch).trim(), HttpStatus.OK);
     }
-
 }
