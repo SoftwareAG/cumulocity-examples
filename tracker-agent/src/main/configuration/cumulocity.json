@@ -1,5 +1,5 @@
 {
-  "apiVersion":"1",
+  "apiVersion":"2",
   "version":"@project.version@",
   "provider": {
     "name":"Cumulocity GmbH"
@@ -14,6 +14,7 @@
     "ROLE_ALARM_READ",
     "ROLE_ALARM_ADMIN",
     "ROLE_DEVICE_CONTROL_READ",
+    "ROLE_DEVICE_BOOTSTRAP",
     "ROLE_EVENT_READ",
     "ROLE_TENANT_MANAGEMENT_READ",
     "ROLE_TENANT_MANAGEMENT_ADMIN"
@@ -26,7 +27,7 @@
       "port": 80
 
     },
-    "initialDelaySeconds": 200,
+    "initialDelaySeconds": 10,
     "periodSeconds": 10
   },
   "readinessProbe":{
@@ -35,7 +36,7 @@
       "port": 80
 
     },
-    "initialDelaySeconds": 220,
+    "initialDelaySeconds": 10,
     "periodSeconds": 10
   },
   "c8y_ImpactDecoder": {}
