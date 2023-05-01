@@ -58,7 +58,7 @@ public class DeviceBootstrapProcessor {
             return deviceCredentialsApi.pollCredentials(newDeviceRequestId);
         } catch (SDKException e) {
             if (e.getHttpStatus() == HttpStatus.NOT_FOUND.value()) {
-                logger.debug("Credentials not yet available for device: " + newDeviceRequestId);
+                logger.info("Credentials not yet available for device: " + newDeviceRequestId);
             } else {
                 logger.error("Failed to retrieve credentials from cumulocity.", e);
             }
