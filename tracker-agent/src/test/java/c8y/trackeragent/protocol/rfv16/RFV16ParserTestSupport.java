@@ -10,6 +10,7 @@
 package c8y.trackeragent.protocol.rfv16;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -60,7 +61,7 @@ public class RFV16ParserTestSupport {
         when(deviceMock.getGId()).thenReturn(GId.asGId("1001"));
         when(deviceMock.aLocationUpdateEvent()).thenReturn(new EventRepresentation());
         when(deviceMock.getUpdateIntervalProvider()).thenReturn(updateIntervalProvider);
-        when(updateIntervalProvider.findUpdateInterval()).thenReturn(null);
+        when(updateIntervalProvider.findUpdateInterval(any())).thenReturn(null);
     }
     
     protected void currentDeviceConfigIs(RFV16Config rFV16Config) {

@@ -140,17 +140,17 @@ public abstract class BaseConnectedTracker<F extends Fragment> implements Connec
             }
             logger.info("Finished processing report");
         } catch (NotBootstrapedException nbex) {
-            logger.debug(nbex.getMessage());
+            logger.info(nbex.getMessage());
         }
     }
 
     private void processReport(ReportContext reportContext, Parser parser) {
-        logger.debug("Using parser " + parser.getClass());
+        logger.info("Using parser " + parser.getClass());
         String imei = parser.parse(reportContext.getReport());
         if (imei == null) {
             return;
         }
-        logger.debug("Got report from IMEI: " + imei);
+        logger.info("Got report from IMEI: " + imei);
         String tenant = getTenant(imei);
         contextService.executeWithContext(tenant, imei, reportContext.getTrackingProtocol(),
                 () -> {
@@ -165,12 +165,12 @@ public abstract class BaseConnectedTracker<F extends Fragment> implements Connec
         try {
             tenant = deviceTenantMappingService.findTenant(imei);
         } catch (UnknownDeviceException ex) {
-            logger.debug("Device with imei {} not yet bootstraped. Will try bootstrap the device.", imei);
+            logger.info("Device with imei {} not yet bootstraped. Will try bootstrap the device.", imei);
             DeviceCredentials deviceCredentials = bootstrapProcessor.tryAccessDeviceCredentials(imei);
             if (deviceCredentials == null) {
                 throw new NotBootstrapedException(format("Device with imei %s not yet available. Will skip the report.", imei));
             } 
-            logger.debug("Device with imei {} available.", imei);
+            logger.info("Device with imei {} available.", imei);
             tenant = deviceCredentials.getTenant();
         }
         return tenant;
