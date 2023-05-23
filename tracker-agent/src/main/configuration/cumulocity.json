@@ -27,7 +27,7 @@
       "port": 80
 
     },
-    "initialDelaySeconds": 10,
+    "initialDelaySeconds": 200,
     "periodSeconds": 10
   },
   "readinessProbe":{
