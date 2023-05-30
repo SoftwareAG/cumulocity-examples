@@ -5,6 +5,7 @@ import com.cumulocity.rest.representation.application.ApplicationReferenceRepres
 import com.cumulocity.sdk.client.Platform;
 import com.cumulocity.sdk.client.PlatformImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.ws.rs.core.MediaType;
@@ -17,6 +18,9 @@ class SubscriptionApi {
 
     @Autowired
     private Platform platform;
+
+    @Value("${application.key}")
+    private String applicationKey;
 
     ApplicationReferenceCollectionRepresentation getApplications(String tenant) {
         return platform.rest().get(
@@ -35,6 +39,6 @@ class SubscriptionApi {
     }
 
     String getApplicationKey() {
-        return "tracker-agent-key"; // cannot be taken from Platform cast to PlatformImpl, because some integration tests would fail
+        return applicationKey;
     }
 }
