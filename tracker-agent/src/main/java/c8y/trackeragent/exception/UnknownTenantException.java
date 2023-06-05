@@ -16,7 +16,7 @@ public class UnknownTenantException extends SDKException {
     private static final long serialVersionUID = 7464141119234912762L;
 
     public static UnknownTenantException forTenantId(String tenantId) {
-        return new UnknownTenantException("Unknwon tenant: " + tenantId);
+        return new UnknownTenantException("Unknown tenant: " + tenantId);
     }
 
     private UnknownTenantException(String message) {

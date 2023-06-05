@@ -147,11 +147,11 @@ public class TrackerDevice {
 
     private DeviceControlApi deviceControl;
 
-    protected IdentityApi identities;
+    private IdentityApi identities;
 
-    protected InventoryApi inventory;
+    private InventoryApi inventory;
 
-    protected String tenant;
+    private String tenant;
 
     private String imei;
 
@@ -200,6 +200,10 @@ public class TrackerDevice {
 
     public GId getGId() {
         return gid;
+    }
+
+    public String getTenant() {
+        return tenant;
     }
 
     public void setPosition(Position position) throws SDKException {

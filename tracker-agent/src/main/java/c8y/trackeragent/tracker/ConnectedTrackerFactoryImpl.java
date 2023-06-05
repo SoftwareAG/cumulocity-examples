@@ -9,17 +9,16 @@
 
 package c8y.trackeragent.tracker;
 
-import java.util.Collection;
-
+import c8y.trackeragent.configuration.TrackerConfiguration;
+import c8y.trackeragent.protocol.TrackingProtocol;
+import c8y.trackeragent.server.TrackerServerEvent.ReadDataEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import c8y.trackeragent.configuration.TrackerConfiguration;
-import c8y.trackeragent.protocol.TrackingProtocol;
-import c8y.trackeragent.server.TrackerServerEvent.ReadDataEvent;
+import java.util.Collection;
 
 @Component
 public class ConnectedTrackerFactoryImpl implements ConnectedTrackerFactory {
