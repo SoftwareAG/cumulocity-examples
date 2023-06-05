@@ -27,7 +27,7 @@
       "port": 80
 
     },
-    "initialDelaySeconds": 10,
+    "initialDelaySeconds": 200,
     "periodSeconds": 10
   },
   "readinessProbe":{
@@ -36,7 +36,7 @@
       "port": 80
 
     },
-    "initialDelaySeconds": 10,
+    "initialDelaySeconds": 220,
     "periodSeconds": 10
   },
   "c8y_ImpactDecoder": {}
