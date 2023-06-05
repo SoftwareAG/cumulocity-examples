@@ -36,7 +36,7 @@
       "port": 80
 
     },
-    "initialDelaySeconds": 10,
+    "initialDelaySeconds": 220,
     "periodSeconds": 10
   },
   "c8y_ImpactDecoder": {}
