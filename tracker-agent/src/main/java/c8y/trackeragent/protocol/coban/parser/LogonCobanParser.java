@@ -59,7 +59,7 @@ public class LogonCobanParser extends CobanParser {
     }
 
     private String getLocationReportInterval(TrackerDevice device, CobanDevice cobanDevice) {
-        Integer locationReportInterval = device.getUpdateIntervalProvider().findUpdateInterval();
+        Integer locationReportInterval = device.getUpdateIntervalProvider().findUpdateInterval(device.getTenant());
         if (locationReportInterval == null) {
             return cobanDevice.getLocationReportInterval();
         } else {

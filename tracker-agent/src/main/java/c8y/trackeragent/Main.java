@@ -40,7 +40,6 @@ import java.io.IOException;
 /**
  * Main class reading the configuration and starting the server.
  */
-@ComponentScan(basePackageClasses = Main.class, value = {"c8y.trackeragent", "com.cumulocity"})
 @MicroserviceApplication
 public class Main {
 
