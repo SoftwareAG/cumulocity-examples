@@ -11,6 +11,7 @@ package c8y.trackeragent;
 
 import static com.cumulocity.rest.representation.tenant.OptionMediaType.OPTION;
 
+import c8y.trackeragent.utils.TrackerPlatformProvider;
 import com.cumulocity.microservice.context.inject.TenantScope;
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
@@ -36,11 +37,11 @@ public class UpdateIntervalProvider {
 	private final static String optionEndpoint = "tenant/system/options/device/update.interval";
 
 	private final String path;
-	private final RestConnector connector;
+	private final TrackerPlatformProvider trackerPlatformProvider;
 
 	@Autowired
-	public UpdateIntervalProvider(TrackerConfiguration conf, PlatformParameters platformParameters) {
-		this.connector = new RestConnector(platformParameters, new SilentResponseParser());
+	public UpdateIntervalProvider(TrackerConfiguration conf, TrackerPlatformProvider trackerPlatformProvider) {
+		this.trackerPlatformProvider = trackerPlatformProvider;
 		String host = conf.getPlatformHost();
 		if (host == null) {
 			throw new RuntimeException("Host cannot be null for options repository.");
@@ -53,10 +54,12 @@ public class UpdateIntervalProvider {
 		logger.info("Will use the following path to get update interval option: {}", path);
 	}
 
-	public Integer findUpdateInterval() {
+	public Integer findUpdateInterval(String tenantId) {
 		logger.info("Find update interval in tenant options.");
 		try {
-			OptionRepresentation option = connector.get(path, OPTION, OptionRepresentation.class);
+			OptionRepresentation option = trackerPlatformProvider.getTenantPlatform(tenantId)
+					.rest()
+					.get(path, OPTION, OptionRepresentation.class);
 			logger.info("Update interval value is: {}", option.getValue());
 			return Integer.parseInt(option.getValue());
 		} catch (SDKException ex) {
@@ -73,18 +76,6 @@ public class UpdateIntervalProvider {
 		} catch (NumberFormatException nfe) {
 			return null;
 		}
-	}
-
-	private static class SilentResponseParser extends ResponseParser {
-
-		protected String getErrorRepresentation(Response response) {
-			if (isJsonResponse(response)) {
-				return super.getErrorRepresentation(response);
-			}
-			logger.error("Failed to parse error message to json.");
-			return null;
-		}
-
 	}
 
 }
