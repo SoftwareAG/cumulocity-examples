@@ -69,8 +69,8 @@ public class TrackerDeviceIT extends TrackerITSupport {
 
     private String imei = Devices.IMEI_1;
     private ID extId = new ID(imei);
-    public static final BigDecimal LATITUDE = new BigDecimal(37.0625);
-    public static final BigDecimal LONGITUDE = new BigDecimal(-95.677068);
+    public static final BigDecimal LATITUDE = new BigDecimal("37.0625");
+    public static final BigDecimal LONGITUDE = new BigDecimal("-95.677068");
     public static final BigDecimal ALTITUDE = new BigDecimal(1);
     public static final BigDecimal RADIUS = new BigDecimal(100);
 
@@ -132,9 +132,9 @@ public class TrackerDeviceIT extends TrackerITSupport {
         device.setGeofence(fence);
 
         Position pos = new Position();
-        pos.setLat(new BigDecimal(51.427085));
-        pos.setLng(new BigDecimal(7.663989));
-        pos.setAlt(new BigDecimal(8848));
+        pos.setLat(new BigDecimal("51.427085"));
+        pos.setLng(new BigDecimal("7.663989"));
+        pos.setAlt(new BigDecimal("8848"));
         device.setPosition(pos);
 
         pos.setLat(LATITUDE);
