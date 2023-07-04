@@ -1,4 +1,4 @@
-package c8y.example.common.platform;
+package c8y.example.notification.common.platform;
 
 import com.cumulocity.rest.representation.reliable.notification.NotificationTokenRequestRepresentation;
 import com.cumulocity.sdk.client.messaging.notifications.Token;

@@ -1,11 +1,11 @@
 package c8y.example.notification.microservice;
 
-import c8y.example.common.websocket.Notification;
-import c8y.example.common.websocket.NotificationCallback;
-import c8y.example.common.websocket.WebSocketClient;
-import c8y.example.common.websocket.tootallnate.TooTallNateWebSocketClient;
-import c8y.example.common.platform.SubscriptionRepository;
-import c8y.example.common.platform.TokenService;
+import c8y.example.notification.common.websocket.Notification;
+import c8y.example.notification.common.websocket.NotificationCallback;
+import c8y.example.notification.common.websocket.WebSocketClient;
+import c8y.example.notification.common.websocket.tootallnate.TooTallNateWebSocketClient;
+import c8y.example.notification.common.platform.SubscriptionRepository;
+import c8y.example.notification.common.platform.TokenService;
 import com.cumulocity.microservice.settings.service.MicroserviceSettingsService;
 import com.cumulocity.microservice.subscription.model.MicroserviceSubscriptionAddedEvent;
 import com.cumulocity.microservice.subscription.model.MicroserviceSubscriptionRemovedEvent;

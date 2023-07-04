@@ -3,29 +3,69 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
     <parent>
-        <groupId>c8y.example</groupId>
+        <groupId>c8y.example.notification</groupId>
         <artifactId>notification2-examples</artifactId>
         <version>${revision}${changelist}</version>
     </parent>
 
     <artifactId>java-examples</artifactId>
     <name>Cumulocity :: Examples :: Notification 2.0 Examples :: Java Examples</name>
+    <packaging>jar</packaging>
 
     <properties>
         <commons-configuration2.version>2.9.0</commons-configuration2.version>
+        <slf4j.version>1.7.36</slf4j.version>
     </properties>
 
     <dependencies>
         <dependency>
-            <groupId>com.nsn.cumulocity.clients-java</groupId>
-            <artifactId>java-client</artifactId>
+            <groupId>c8y.example.notification</groupId>
+            <artifactId>shared-components</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-configuration2</artifactId>
             <version>${commons-configuration2.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.2.4</version>
+                <configuration>
+                    <shadedArtifactAttached>true</shadedArtifactAttached>
+                    <shadedClassifierName>jar-with-dependencies</shadedClassifierName>
+                    <transformers>
+                        <transformer
+                                implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                    </transformers>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

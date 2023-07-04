@@ -1,7 +1,7 @@
 package c8y.example.notification.microservice;
 
-import c8y.example.common.platform.SubscriptionRepository;
-import c8y.example.common.platform.TokenService;
+import c8y.example.notification.common.platform.SubscriptionRepository;
+import c8y.example.notification.common.platform.TokenService;
 import com.cumulocity.microservice.autoconfigure.MicroserviceApplication;
 import com.cumulocity.microservice.subscription.model.MicroserviceMetadataRepresentation;
 import com.cumulocity.sdk.client.messaging.notifications.NotificationSubscriptionApi;

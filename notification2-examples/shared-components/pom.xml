@@ -5,19 +5,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>c8y.example</groupId>
+        <groupId>c8y.example.notification</groupId>
         <artifactId>notification2-examples</artifactId>
         <version>${revision}${changelist}</version>
     </parent>
 
     <artifactId>shared-components</artifactId>
     <name>Cumulocity :: Examples :: Notification 2.0 Examples :: Shared Components</name>
-
-    <dependencies>
-        <dependency>
-            <groupId>com.nsn.cumulocity.clients-java</groupId>
-            <artifactId>java-client</artifactId>
-        </dependency>
-    </dependencies>
+    <packaging>jar</packaging>
 
 </project>

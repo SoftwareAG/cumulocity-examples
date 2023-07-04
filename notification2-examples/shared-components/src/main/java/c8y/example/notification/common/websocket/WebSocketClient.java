@@ -1,4 +1,4 @@
-package c8y.example.common.websocket;
+package c8y.example.notification.common.websocket;
 
 public interface WebSocketClient extends AutoCloseable {
 
