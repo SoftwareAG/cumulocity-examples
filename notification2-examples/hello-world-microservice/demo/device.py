@@ -8,9 +8,9 @@ from requests.adapters import HTTPAdapter
 from time import sleep
 
 _tenant_id = ''
-_username = 'rohit'
-_password = 'pyb0eqe8BKF6atj!cfn'
-_platform_url = 'https://rohit.latest.stage.c8y.io/'
+_username = ''
+_password = ''
+_platform_url = ''
 
 
 def get_session(tenant_id=_tenant_id, username=_username, password=_password):
