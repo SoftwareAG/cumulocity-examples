@@ -16,14 +16,6 @@ import static com.cumulocity.microservice.subscription.model.MicroserviceMetadat
 public class HelloWorldConfiguration {
 
     @Bean
-    @Primary
-    public MicroserviceMetadataRepresentation helloWorldMicroserviceMetadata() {
-        return microserviceMetadataRepresentation()
-                .requiredRole("ROLE_NOTIFICATION_2_ADMIN")
-                .build();
-    }
-
-    @Bean
     @Autowired
     public TokenService tokenService(TokenApi tokenApi) {
         return new TokenService(tokenApi);

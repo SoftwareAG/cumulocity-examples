@@ -18,6 +18,4 @@ public class Properties {
     @Value("${example.subscriber}")
     private String subscriber;
 
-    @Value("${example.websocket.library:@null}")
-    private String webSocketLibrary;
 }
