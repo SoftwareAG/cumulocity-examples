@@ -106,7 +106,7 @@ we will receive the following message as we have specified to transform the filt
       _password = ''
       _platform_url = ''
         ```
-    - create a device using `python3 device.py device` and make note of its id, example:
+    - create a device using `python3 device.py device` and make note of its id, for example:
        ```console
        user@host:~$ python3 device.py device
        user@host:~$ Device id: 203
