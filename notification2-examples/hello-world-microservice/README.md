@@ -99,7 +99,7 @@ we will receive the following message as we have specified to transform the filt
         - find and tick "Notifications" and click "Apply"
 2. Creating a test device
     - open the demo directory
-    - edit the `device.py` script and provide the following credentials for your newly created user as well as the platform url:
+    - edit the `device.py` script and provide values for the following variables for your newly created user as well as the platform url:
       ```python
       _tenant_id = ''
       _username = ''
