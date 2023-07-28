@@ -125,7 +125,7 @@ we will receive the following message as we have specified to transform the filt
         - switch to the test user, under Applications, Own applications select `Hello-notification` and subscribe
     - by running the application locally:
         - edit the `application.properties`
-        - uncomment the line containing `C8Y.baseURL` entry and provide the cumulocity platform url
+        - uncomment the line containing `C8Y.baseURL` entry and provide the Cumulocity IoT platform url
         - start the application
 5. Start sending measurements
     - run the script again with the following parameters `python3 device.py send <DEVICE_ID> <DURATION_IN_SECONDS>`:
