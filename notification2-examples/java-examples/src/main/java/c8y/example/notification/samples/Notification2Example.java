@@ -1,9 +1,9 @@
 package c8y.example.notification.samples;
 
-import c8y.example.notification.common.websocket.Notification;
-import c8y.example.notification.common.websocket.NotificationCallback;
-import c8y.example.notification.common.websocket.WebSocketClient;
-import c8y.example.notification.common.websocket.tootallnate.TooTallNateWebSocketClient;
+import c8y.example.notification.client.websocket.Notification;
+import c8y.example.notification.client.websocket.NotificationCallback;
+import c8y.example.notification.client.websocket.WebSocketClient;
+import c8y.example.notification.client.websocket.tootallnate.TooTallNateWebSocketClient;
 import com.cumulocity.rest.representation.reliable.notification.NotificationSubscriptionRepresentation;
 import com.cumulocity.rest.representation.reliable.notification.NotificationTokenRequestRepresentation;
 import com.cumulocity.sdk.client.messaging.notifications.NotificationSubscriptionCollection;
@@ -16,11 +16,11 @@ import java.util.List;
 import java.util.Optional;
 
 @Slf4j
-public abstract class Notification2Example {
-    final static String WEBSOCKET_URL_PATTERN = "%s/notification2/consumer/?token=%s";
-    final PlatformConfiguration platformConfiguration = PlatformConfiguration.getPlatformConfiguration();
+public class Notification2Example {
+    private static final String WEBSOCKET_URL_PATTERN = "%s/notification2/consumer/?token=%s";
+    private final PlatformConfiguration platformConfiguration = PlatformConfiguration.getPlatformConfiguration();
 
-    void createSubscription(NotificationSubscriptionRepresentation subscriptionRepresentation) {
+    public void createSubscription(NotificationSubscriptionRepresentation subscriptionRepresentation) {
         final NotificationSubscriptionCollection notificationSubscriptionCollection = platformConfiguration
                 .getSubscriptionRepository()
                 .getByFilter(new NotificationSubscriptionFilter().bySource(subscriptionRepresentation.getSource().getId()));
@@ -39,7 +39,7 @@ public abstract class Notification2Example {
         platformConfiguration.getSubscriptionRepository().create(subscriptionRepresentation);
     }
 
-    String createToken(String subscriber, String subscription) {
+    public String createToken(String subscriber, String subscription) {
         final NotificationTokenRequestRepresentation tokenRequestRepresentation = new NotificationTokenRequestRepresentation(
                 subscriber,
                 subscription,
@@ -49,7 +49,7 @@ public abstract class Notification2Example {
         return platformConfiguration.getTokenService().create(tokenRequestRepresentation);
     }
 
-    WebSocketClient connectAndReceiveNotifications(String token, String subscriber) throws Exception {
+    public WebSocketClient connectAndReceiveNotifications(String token, String subscriber) throws Exception {
 
         final URI webSocketUri = getWebSocketUrl(token);
 
@@ -83,7 +83,7 @@ public abstract class Notification2Example {
         return client;
     }
 
-    void unsubscribe(String token) {
+    public void unsubscribe(String token) {
         log.info("Unsubscribing ...");
         if (token != null) {
             // To unsubscribe, you can pass any token to the unsubscribe API. It does not have to be the one first obtained. You can generate a fresh token

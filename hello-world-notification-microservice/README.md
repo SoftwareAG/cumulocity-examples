@@ -1,0 +1,1 @@
+This example is moved to ../notification2-examples/hello-world-microservice. Please use the new location.

@@ -1,11 +1,11 @@
 package c8y.example.notification.microservice;
 
-import c8y.example.notification.common.websocket.Notification;
-import c8y.example.notification.common.websocket.NotificationCallback;
-import c8y.example.notification.common.websocket.WebSocketClient;
-import c8y.example.notification.common.websocket.tootallnate.TooTallNateWebSocketClient;
-import c8y.example.notification.common.platform.SubscriptionRepository;
-import c8y.example.notification.common.platform.TokenService;
+import c8y.example.notification.client.platform.SubscriptionRepository;
+import c8y.example.notification.client.platform.TokenService;
+import c8y.example.notification.client.websocket.Notification;
+import c8y.example.notification.client.websocket.NotificationCallback;
+import c8y.example.notification.client.websocket.WebSocketClient;
+import c8y.example.notification.client.websocket.tootallnate.TooTallNateWebSocketClient;
 import com.cumulocity.microservice.settings.service.MicroserviceSettingsService;
 import com.cumulocity.microservice.subscription.model.MicroserviceSubscriptionAddedEvent;
 import com.cumulocity.microservice.subscription.model.MicroserviceSubscriptionRemovedEvent;
@@ -192,8 +192,10 @@ public class NotificationExample {
 
     private void unsubscribe() {
         if (token != null) {
-            // To unsubscribe, you can pass any token to the unsubscribe API. It does not have to be the one first obtained. You can generate a fresh token
-            // if needed with the matching subscriber and subscription fields and pass that along to unsubscribe API.
+            /*
+             * To unsubscribe, you can pass any token to the unsubscribe API (even expired one's). You can generate a fresh token
+             * if needed with the matching subscriber and subscription fields and pass that along to unsubscribe API.
+             */
             tokenService.unsubscribe(token);
         }
     }

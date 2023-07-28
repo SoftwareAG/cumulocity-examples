@@ -1,8 +1,8 @@
-package c8y.example.notification.common.websocket.tootallnate;
+package c8y.example.notification.client.websocket.tootallnate;
 
-import c8y.example.notification.common.websocket.Notification;
-import c8y.example.notification.common.websocket.NotificationCallback;
-import c8y.example.notification.common.websocket.WebSocketClient;
+import c8y.example.notification.client.websocket.Notification;
+import c8y.example.notification.client.websocket.NotificationCallback;
+import c8y.example.notification.client.websocket.WebSocketClient;
 import lombok.extern.slf4j.Slf4j;
 import org.java_websocket.handshake.ServerHandshake;
 

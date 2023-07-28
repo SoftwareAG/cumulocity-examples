@@ -1,7 +1,7 @@
 package c8y.example.notification.samples;
 
-import c8y.example.notification.common.platform.SubscriptionRepository;
-import c8y.example.notification.common.platform.TokenService;
+import c8y.example.notification.client.platform.SubscriptionRepository;
+import c8y.example.notification.client.platform.TokenService;
 import com.cumulocity.model.authentication.CumulocityCredentialsFactory;
 import com.cumulocity.sdk.client.Platform;
 import com.cumulocity.sdk.client.PlatformBuilder;

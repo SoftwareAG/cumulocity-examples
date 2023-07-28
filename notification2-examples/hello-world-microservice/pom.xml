@@ -34,7 +34,7 @@
     <dependencies>
         <dependency>
             <groupId>c8y.example.notification</groupId>
-            <artifactId>shared-components</artifactId>
+            <artifactId>notification2-example-client</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

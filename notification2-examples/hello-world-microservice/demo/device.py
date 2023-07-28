@@ -14,14 +14,13 @@ _platform_url = ''
 
 
 def get_session(tenant_id=_tenant_id, username=_username, password=_password):
-    auth_string = f'{username}:{password}'
     session = Session()
     session.verify = True
     session.headers.update({
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': 'Basic ' + base64.b64encode(auth_string.encode()).decode()
+        'Accept': 'application/json'
     })
+    session.auth = (username, password)
     http_adapter = HTTPAdapter()
     session.mount('https://', http_adapter)
     session.mount('http://', http_adapter)

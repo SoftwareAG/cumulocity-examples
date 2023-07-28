@@ -10,7 +10,7 @@
         <version>${revision}${changelist}</version>
     </parent>
 
-    <artifactId>shared-components</artifactId>
+    <artifactId>notification2-example-client</artifactId>
     <name>Cumulocity :: Examples :: Notification 2.0 Examples :: Shared Components</name>
     <packaging>jar</packaging>
 

@@ -1,4 +1,4 @@
-package c8y.example.notification.common.websocket;
+package c8y.example.notification.client.websocket;
 
 import java.net.URI;
 
