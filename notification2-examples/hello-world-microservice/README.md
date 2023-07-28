@@ -85,7 +85,7 @@ we will receive the following message as we have specified to transform the filt
 - contents of this repository
 
 ### Instructions
-1. Create a test user using the Cumulocity Management UI
+1. Create a test user using the Cumulocity IoT Management UI
     - From the Application Switcher select Administration
     - In the Navigation pane expand Accounts and go to Users
     - Click on 'Add user', fill in the form for the new user, untick "Send password reset link as email" and provide a password
