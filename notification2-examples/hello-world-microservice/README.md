@@ -1,5 +1,5 @@
 # Introduction
-This example microservice demonstrates how to create a subscription and consume a stream of notifications using WebSocket protocol. The example microservice first creates a subscription and then proceeds to connect to the WebSocket server after obtaining the authorization token.
+This example microservice demonstrates how to create a subscription and consume a stream of notifications using WebSocket protocol. The example microservice first creates a subscription, then obtains an authorization token, and finally proceeds to connect to the WebSocket with that token.
 
 The example microservice creates the following subscription to the specified device:
 
