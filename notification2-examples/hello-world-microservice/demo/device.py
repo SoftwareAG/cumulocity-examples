@@ -7,7 +7,7 @@ from requests import Session
 from requests.adapters import HTTPAdapter
 from time import sleep
 
-_tenant_id = ''
+_tenant_id = '' 
 _username = ''
 _password = ''
 _platform_url = ''
@@ -20,6 +20,7 @@ def get_session(tenant_id=_tenant_id, username=_username, password=_password):
         'Content-Type': 'application/json',
         'Accept': 'application/json'
     })
+    username = tenant_id + '/' + username if tenant_id else username
     session.auth = (username, password)
     http_adapter = HTTPAdapter()
     session.mount('https://', http_adapter)
@@ -97,4 +98,3 @@ if __name__ == '__main__':
             except (IndexError, ValueError):
                 print('Usage script.py send [deviceId] [duration in seconds]')
     else: print(f'Unknown option; use device, delete or create')
-
