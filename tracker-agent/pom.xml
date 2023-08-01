@@ -142,7 +142,8 @@
                             <name>${project.artifactId}</name>
                             <image>${project.artifactId}</image>
                             <encoding>UTF-8</encoding>
-                            <rpmSkip>true</rpmSkip>
+                            <rpmSkip>false</rpmSkip>
+                            <containerSkip>true</containerSkip>
                         </configuration>
                     </execution>
                 </executions>
