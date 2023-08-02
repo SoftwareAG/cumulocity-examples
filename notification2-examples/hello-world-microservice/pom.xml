@@ -9,7 +9,7 @@
         <version>${revision}${changelist}</version>
     </parent>
 
-    <artifactId>hello-world-microservice</artifactId>
+    <artifactId>hello-notification</artifactId>
     <name>Cumulocity :: Examples :: Notification 2.0 Examples :: Hello World Notifications 2.0 Microservice</name>
 
     <properties>
@@ -110,8 +110,6 @@
                             <goal>package</goal>
                         </goals>
                         <configuration>
-                            <name>hello-notification</name>
-                            <image>hello-notification</image>
                             <encoding>UTF-8</encoding>
                             <rpmSkip>true</rpmSkip>
                         </configuration>
