@@ -18,7 +18,7 @@ import java.util.Optional;
 @Slf4j
 public class Notification2Example {
     private static final String WEBSOCKET_URL_PATTERN = "%s/notification2/consumer/?token=%s";
-    private final PlatformConfiguration platformConfiguration = PlatformConfiguration.getPlatformConfiguration();
+    private final PlatformConfiguration platformConfiguration = PlatformConfiguration.INSTANCE;
 
     public void createSubscription(NotificationSubscriptionRepresentation subscriptionRepresentation) {
         final NotificationSubscriptionCollection notificationSubscriptionCollection = platformConfiguration

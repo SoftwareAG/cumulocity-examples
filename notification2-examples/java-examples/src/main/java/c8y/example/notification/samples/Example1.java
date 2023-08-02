@@ -13,8 +13,8 @@ import java.util.List;
  */
 public class Example1 {
 
-    private static final int SOURCE_ID_1 = 883202;
-    private static final int SOURCE_ID_2 = 663208;
+    private static final int SOURCE_ID_1 = 1321104;
+    private static final int SOURCE_ID_2 = 7621105;
     private static final String SUBSCRIBER_NAME = "Example1Subscriber";
     private static final String SUBSCRIPTION_NAME = "Example1Subscription";
 
