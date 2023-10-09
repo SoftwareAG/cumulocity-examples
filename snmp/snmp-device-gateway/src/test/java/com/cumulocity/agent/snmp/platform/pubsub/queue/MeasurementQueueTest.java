@@ -32,6 +32,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static com.cumulocity.agent.snmp.util.WorkspaceUtils.getWorkspacePath;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -49,9 +50,10 @@ public class MeasurementQueueTest {
     @Before
     public void setUp() {
         Mockito.when(gatewayProperties.getGatewayIdentifier()).thenReturn(this.getClass().getSimpleName());
+        Mockito.when(gatewayProperties.getGatewayDatabaseBaseDir()).thenReturn(getWorkspacePath());
 
         persistentFolderPath = Paths.get(
-                System.getProperty("user.home"),
+                getWorkspacePath(),
                 ".snmp",
                 gatewayProperties.getGatewayIdentifier().toLowerCase(),
                 "chronicle",
