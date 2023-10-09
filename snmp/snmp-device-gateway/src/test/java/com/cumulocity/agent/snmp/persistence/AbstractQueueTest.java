@@ -21,8 +21,8 @@ package com.cumulocity.agent.snmp.persistence;
 import net.openhft.chronicle.queue.impl.single.QueueFileShrinkManager;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
 import org.junit.Ignore;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static com.cumulocity.agent.snmp.util.WorkspaceUtils.getWorkspacePath;
 import static org.junit.Assert.*;
 
 public class AbstractQueueTest {
@@ -44,7 +45,7 @@ public class AbstractQueueTest {
     @Before
     public void setUp() {
         persistentFolderPath = Paths.get(
-                System.getProperty("user.home"),
+                getWorkspacePath(),
                 ".snmp",
                 this.getClass().getSimpleName().toLowerCase(),
                 "chronicle",
@@ -292,7 +293,7 @@ public class AbstractQueueTest {
     public class StoreFileListenerForDeletionTest {
 
         private Path parentFolderPath = Paths.get(
-                System.getProperty("user.home"),
+                getWorkspacePath(),
                 ".snmp",
                 this.getClass().getSimpleName().toLowerCase(),
                 "chronicle",

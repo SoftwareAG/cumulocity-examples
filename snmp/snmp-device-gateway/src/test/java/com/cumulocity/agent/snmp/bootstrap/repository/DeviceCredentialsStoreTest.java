@@ -33,6 +33,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.cumulocity.agent.snmp.util.WorkspaceUtils.getWorkspacePath;
 import static org.junit.Assert.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -49,7 +50,7 @@ public class DeviceCredentialsStoreTest {
     @Before
     public void setUp() {
         persistentFilePath = Paths.get(
-                System.getProperty("user.home"),
+                getWorkspacePath(),
                 ".snmp",
                 this.getClass().getSimpleName().toLowerCase(),
                 "chronicle",
@@ -57,6 +58,7 @@ public class DeviceCredentialsStoreTest {
                 "device-credentials-store.dat");
 
         Mockito.when(gatewayProperties.getGatewayIdentifier()).thenReturn(this.getClass().getSimpleName());
+        Mockito.when(gatewayProperties.getGatewayDatabaseBaseDir()).thenReturn(getWorkspacePath());
         deviceCredentialsStore = new DeviceCredentialsStore(gatewayProperties);
     }
 
