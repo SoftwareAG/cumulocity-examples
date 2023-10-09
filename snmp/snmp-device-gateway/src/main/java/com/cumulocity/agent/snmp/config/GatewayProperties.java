@@ -36,6 +36,9 @@ public class GatewayProperties {
 	@Value("#{'${gateway.identifier:snmp-agent}'.trim()}")
 	private String gatewayIdentifier;
 
+	@Value("#{'${gateway.db.baseDir:${user.home}}'.trim()}")
+	private String gatewayDatabaseBaseDir;
+
 	@Value("#{'${gateway.bootstrapFixedDelay:10000}'.trim()}")
 	private int bootstrapFixedDelay;
 

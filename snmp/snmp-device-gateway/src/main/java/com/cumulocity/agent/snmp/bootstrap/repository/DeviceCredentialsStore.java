@@ -40,7 +40,7 @@ public class DeviceCredentialsStore extends AbstractMap<DeviceCredentialsKey, St
                 10_000,
                 10, // Chronicle Map is optimized for 10 entries as we actually store only one entry with device credentials
                 Paths.get(
-                        System.getProperty("user.home"),
+                        gatewayProperties.getGatewayDatabaseBaseDir(),
                         ".snmp",
                         gatewayProperties.getGatewayIdentifier().toLowerCase(),
                         "chronicle",
