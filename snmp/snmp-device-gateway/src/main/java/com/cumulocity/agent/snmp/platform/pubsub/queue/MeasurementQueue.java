@@ -33,7 +33,7 @@ public class MeasurementQueue extends AbstractQueue {
     public MeasurementQueue(GatewayProperties gatewayProperties) {
         super(MEASUREMENT_QUEUE_NAME,
                 Paths.get(
-                        System.getProperty("user.home"),
+                        gatewayProperties.getGatewayDatabaseBaseDir(),
                         ".snmp",
                         gatewayProperties.getGatewayIdentifier().toLowerCase(),
                         "chronicle",

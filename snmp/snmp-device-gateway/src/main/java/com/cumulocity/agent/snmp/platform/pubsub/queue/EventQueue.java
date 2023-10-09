@@ -33,7 +33,7 @@ public class EventQueue extends AbstractQueue {
     public EventQueue(GatewayProperties gatewayProperties) {
         super(EVENT_QUEUE_NAME,
                 Paths.get(
-                        System.getProperty("user.home"),
+                        gatewayProperties.getGatewayDatabaseBaseDir(),
                         ".snmp",
                         gatewayProperties.getGatewayIdentifier().toLowerCase(),
                         "chronicle",
