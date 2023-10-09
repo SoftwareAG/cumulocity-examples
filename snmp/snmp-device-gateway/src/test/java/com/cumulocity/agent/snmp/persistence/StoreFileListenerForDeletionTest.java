@@ -38,6 +38,7 @@ import java.util.Calendar;
 import java.util.Comparator;
 import java.util.GregorianCalendar;
 
+import static com.cumulocity.agent.snmp.util.WorkspaceUtils.getWorkspacePath;
 import static org.junit.Assert.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -50,7 +51,7 @@ public class StoreFileListenerForDeletionTest {
     private final Calendar NOW = new GregorianCalendar();
 
     private Path parentFolderPath = Paths.get(
-            System.getProperty("user.home"),
+            getWorkspacePath(),
             ".snmp",
             this.getClass().getSimpleName().toLowerCase());
 
