@@ -31,6 +31,7 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import static com.cumulocity.agent.snmp.util.WorkspaceUtils.getWorkspacePath;
 import static org.junit.Assert.*;
 
 public class AbstractMapTest {
@@ -43,7 +44,7 @@ public class AbstractMapTest {
     @Before
     public void setUp() {
         persistentFilePath = Paths.get(
-                System.getProperty("user.home"),
+                getWorkspacePath(),
                 ".snmp",
                 "chronicle",
                 "maps",
@@ -75,7 +76,7 @@ public class AbstractMapTest {
     @Test
     public void shouldCreatePersistenceFileIfRequired() {
         Path filePath = Paths.get(
-                System.getProperty("user.home"),
+                getWorkspacePath(),
                 ".snmp",
                 "test",
                 AbstractMapImplForTest.class.getSimpleName().toLowerCase() + ".dat");

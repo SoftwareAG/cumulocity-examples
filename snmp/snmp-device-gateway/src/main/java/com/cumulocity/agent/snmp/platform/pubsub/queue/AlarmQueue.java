@@ -33,7 +33,7 @@ public class AlarmQueue extends AbstractQueue {
     public AlarmQueue(GatewayProperties gatewayProperties) {
         super(ALARM_QUEUE_NAME,
                 Paths.get(
-                        System.getProperty("user.home"),
+                        gatewayProperties.getGatewayDatabaseBaseDir(),
                         ".snmp",
                         gatewayProperties.getGatewayIdentifier().toLowerCase(),
                         "chronicle",
