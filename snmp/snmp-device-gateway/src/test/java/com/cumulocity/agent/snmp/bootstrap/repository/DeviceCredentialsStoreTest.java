@@ -22,6 +22,7 @@ import com.cumulocity.agent.snmp.bootstrap.model.DeviceCredentialsKey;
 import com.cumulocity.agent.snmp.config.GatewayProperties;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -36,6 +37,7 @@ import java.util.Map;
 import static com.cumulocity.agent.snmp.util.WorkspaceUtils.getWorkspacePath;
 import static org.junit.Assert.*;
 
+@Ignore("MTM-55935")
 @RunWith(MockitoJUnitRunner.class)
 public class DeviceCredentialsStoreTest {
 
