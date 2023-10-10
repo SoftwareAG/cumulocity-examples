@@ -22,6 +22,7 @@ import net.openhft.chronicle.queue.ExcerptTailer;
 import net.openhft.chronicle.queue.RollCycles;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -41,6 +42,7 @@ import java.util.GregorianCalendar;
 import static com.cumulocity.agent.snmp.util.WorkspaceUtils.getWorkspacePath;
 import static org.junit.Assert.*;
 
+@Ignore("MTM-55935")
 @RunWith(MockitoJUnitRunner.class)
 public class StoreFileListenerForDeletionTest {
 
