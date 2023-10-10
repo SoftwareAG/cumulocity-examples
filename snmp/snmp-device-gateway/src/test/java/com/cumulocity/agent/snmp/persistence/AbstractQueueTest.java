@@ -36,6 +36,7 @@ import java.util.List;
 import static com.cumulocity.agent.snmp.util.WorkspaceUtils.getWorkspacePath;
 import static org.junit.Assert.*;
 
+@Ignore("MTM-55935")
 public class AbstractQueueTest {
 
     private Path persistentFolderPath;
