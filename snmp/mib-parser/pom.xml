@@ -157,7 +157,7 @@
             <plugin>
                 <groupId>com.nsn.cumulocity.dependencies</groupId>
                 <artifactId>3rd-license-maven-plugin</artifactId>
-                <version>${c8y.version}</version>
+                <version>1020.40.0</version>
                 <executions>
                     <execution>
                         <id>3rd-license-generate</id>
