@@ -60,6 +60,7 @@
     <module>snmp</module>
     <module>mqtt-client</module>
     <module>microservices</module>
+    <module>device-jwt-rest-client</module>
   </modules>
 
   <licenses>
