@@ -19,7 +19,7 @@ import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
 
-public class DeviceAccessTokenRestClient {
+public class X509RestClient {
 
 	// Configuration
 	private static final String KEYSTORE_NAME = "";

@@ -9,8 +9,8 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>device-jwt-rest-client</artifactId>
-    <name>Cumulocity :: Examples :: Sample java REST client</name>
+    <artifactId>x509-rest-client</artifactId>
+    <name>Cumulocity :: Examples :: Sample x509 REST client</name>
 
     <build>
         <plugins>

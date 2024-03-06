@@ -5,7 +5,7 @@ Before run, configuration is required.
 
 Place in resource folder keystore and truststore file. 
 
-In DeviceAccessTokenRestClient.java provide:
+In X509RestClient.java provide:
 
 
 * **KEYSTORE_NAME** -  key store file name (placed in resource folder)  

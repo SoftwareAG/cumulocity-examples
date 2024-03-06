@@ -11,7 +11,7 @@
   <packaging>pom</packaging>
 
   <properties>
-    <revision>1020.86.0</revision>
+    <revision>1020.88.0</revision>
     <changelist>-SNAPSHOT</changelist>
     <c8y.version>${project.version}</c8y.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -60,7 +60,7 @@
     <module>snmp</module>
     <module>mqtt-client</module>
     <module>microservices</module>
-    <module>device-jwt-rest-client</module>
+    <module>x509-rest-client</module>
   </modules>
 
   <licenses>
