@@ -1,4 +1,4 @@
-package com.c8y.mtls;
+package com.c8y.x509;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -35,13 +35,6 @@ public class X509RestClient {
 	
 	//PEM format
 	// example. LOCAL_DEVICE_CHAIN = "-----BEGIN CERTIFICATE----- MIIDaDCCAlCgAwIBAgIUTPAh+EgbLfzb2JL/q7wT90ypqgcwDQYJKoZIhvcNAQEL BQAwTzELMAkGA1UEBhMCRVUxCzAJBgNVBAgMAlBMMRswGQYDVQQKDBJJb3QgRGV2 aWNlIEZhY3RvcnkxFjAUBgNVBAMMDUlvdERldkZhY3RvcnkwHhcNMjMxMjA4MDc0 MDU5WhcNMzMxMjA1MDc0MDU5WjBPMQswCQYDVQQGEwJFVTELMAkGA1UECAwCUEwx GzAZBgNVBAoMEklvdCBEZXZpY2UgRmFjdG9yeTEWMBQGA1UEAwwNSW90RGV2RmFj dG9yeTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKVSPuT68PMLjBX7 1jZpOX0SJx99pwCoIxpBAOyR7aC4CX6mpdTaogjKaHQeBZ84Hvfe7J2TWsNhGtYN JuBXy1hdUuzEt3eyQXKZu/kKQhNJ1UubSJdfmxWH1dZflUFFyq7DsBtfiyvrATFm TyoJiWNHzTOB7KiPjY/0jUXdqu2k+BCNDph+6rAGwIhaZcjTInYejfeZpP2yunoc yJ9AdAEYd0m6bawHUKUTtQpu2lcJ/a0al32KuKv1mSy1o+wGb26ah3Pk4OFtFgUf +SiVjWwGJjaPU080JZ6SBJmyKJeOe25fY9BqABJQTK/baKuaBEfPD274zi7ok2FL GET0dq8CAwEAAaM8MDowDAYDVR0TBAUwAwEB/zALBgNVHQ8EBAMCAuQwHQYDVR0O BBYEFBmEY6IFiPgNX8BHkSig8ucNHyDiMA0GCSqGSIb3DQEBCwUAA4IBAQBNKF67 2MTGo5Vd3BzK1DbBQFDt2N/Hf6S1w9j5r5sqxrNOahKumlRGQ591IubwiCGvY1HJ u+WnhN8eBVfM7qQMrrYSkwTuMEvo+CoOklliZU47ZAqPCdltRLKnIH+LkHiX/Gp9 memWXdThKMcMn8Zamt3LQ6/yypKjxuZRmHg3d9gqvh2K1497k+Yxx4R92EOR+GFw /QjUb+l7+eYxsjT0yvB/GXCWTgKH9KYZ5gr+FvmfCui196OHil2VZHBRuumsTR2r TmG3EC9g5UGWQ/xTU5xCktrldo3CyzDVFOFziowOKmIHzfUUqrS/2fIPHmijTKCw ASFcQhNJJ0F/lfjm -----END CERTIFICATE-----";
-
-	/**
-	 * The main method.
-	 *
-	 * @param args the arguments
-	 * @throws Exception the exception
-	 */
 	public static void main(String[] args) throws Exception {
 		
 		TrustManagerFactory trustManagerFactory = getTrustManagerFactory();
@@ -52,14 +45,6 @@ public class X509RestClient {
 		HttpResponse<String> response = httpClient.send(buildRequest(), HttpResponse.BodyHandlers.ofString());
 		System.out.println(response.body());
 	}
-
-	/**
-	 * Gets the SSL context.
-	 *
-	 * @param trustManagerFactory the trust manager factory
-	 * @param keyManagerFactory the key manager factory
-	 * @return the SSL context
-	 */
 	private static SSLContext getSSLContext(TrustManagerFactory trustManagerFactory, KeyManagerFactory keyManagerFactory) {
 		try {
 			SSLContext sslContext = SSLContext.getInstance("TLS");
@@ -69,8 +54,7 @@ public class X509RestClient {
 			throw new RuntimeException("Error in creating SSLContext", exception);
 		}
 	}
-	
-	
+
 	private static HttpRequest buildRequest() {
 		try {
 			return HttpRequest.newBuilder().uri(new URI(PLATFORM_URL + DEVICE_ACCESS_TOKEN_PATH))
@@ -81,11 +65,6 @@ public class X509RestClient {
 		}
 	}
 
-	/**
-	 * Gets the trust manager factory.
-	 *
-	 * @return the trust manager factory
-	 */
 	private static TrustManagerFactory getTrustManagerFactory() {
 		try {
 			KeyStore trustStore = KeyStore.getInstance(TRUSTSTORE_FORMAT);
@@ -99,11 +78,6 @@ public class X509RestClient {
 		}
 	}
 
-	/**
-	 * Gets the key manager factory.
-	 *
-	 * @return the key manager factory
-	 */
 	private static KeyManagerFactory getKeyManagerFactory() {
 		try {
 			KeyStore trustStore = KeyStore.getInstance(KEYSTORE_FORMAT);

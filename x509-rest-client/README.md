@@ -1,5 +1,4 @@
 ##### The repository contains an example Java REST client with support for X509.certificates.  
-Java REST client example is documented on the online documentation (refer to [Examples](https://cumulocity.com/guides/device-sdk/device-rest-client/#rest-java-with-certificates) in the Device SDK guide).
 
 Before run, configuration is required. 
 
@@ -21,5 +20,5 @@ In X509RestClient.java provide:
 * **LOCAL_DEVICE_CHAIN** - value of header key `x-ssl-cert-chain` which contains full device chain
 
 
-After running, client tries to establish mtls connection using provided PLATFORM_URL, endpoint and client full chain.  
+After running, client tries to establish mTLS connection using provided PLATFORM_URL, endpoint and client full chain.  
 Successful connection provide device access token: in response with 200 HTTP code.
