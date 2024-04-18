@@ -1,7 +1,21 @@
-# Lines starting with '#' are comments.
-# Each line is a file pattern followed by one or more owners.
+# cumulocity-examples CODEOWNERS
+# Keep the directory order alphabetical and always list subdirectories after their parents
+# Keep in mind that cumulocity-examples is open source so everything in this file is public
 
-# Either @username or email.address@domain.com can be used
-
-# These owners will be the default owners for everything in the repo.
-* philipp.emmel@softwareag.com
+/* @martin-sag
+.*/** @martin-sag
+/device-integrations @l2p-
+/hello-world-microservice @mgrumann
+/hello-world-notification-microservice @sagscmi
+/java-agent @l2p-
+/lora-codec-lansitec @l2p-
+/lora-codec-twtg-neon @l2p-
+/microservices @mgrumann
+/microservices/node-microservice @janhommes
+/mqtt-client @sarangovindarajan
+/notification2-examples @sagscmi
+/route-microservice @mgrumann
+/sample-lwm2m-custom-decoder @Oezge-Akin
+/snmp @l2p-
+/tracker-agent @l2p-
+/x509-rest-client @sarangovindarajan
