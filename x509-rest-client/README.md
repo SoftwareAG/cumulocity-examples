@@ -15,6 +15,7 @@ In X509RestClient.java provide:
 * **TRUSTSTORE_FORMAT** - trust store format (eg. 'jks')  
 * **CLIENT_ID** - client Id which matches the certificate subject common name  
 * **PLATFORM_URL** - URL for mTLS connection
+* **PLATFORM_MTLS_PORT** - Port for established mTLS connection using certificates
 * **X_SSL_CERT_CHAIN** - constant for header key `x-ssl-cert-chain`
 * **DEVICE_ACCESS_TOKEN_PATH** - API endpoint for making mTLS protocol
 * **LOCAL_DEVICE_CHAIN** - value of header key `x-ssl-cert-chain` which contains full device chain

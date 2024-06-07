@@ -29,6 +29,7 @@ public class X509RestClient {
 	private static final String TRUSTSTORE_PASSWORD = "";
 	private static final String TRUSTSTORE_FORMAT = "";
 	private static final String PLATFORM_URL = "";
+	private static final String PLATFORM_MTLS_PORT = "2443";
 	private static final String X_SSL_CERT_CHAIN = "x-ssl-cert-chain";
 	private static final String DEVICE_ACCESS_TOKEN_PATH = "/devicecontrol/deviceAccessToken";
 	private static final String LOCAL_DEVICE_CHAIN = "";
@@ -57,7 +58,7 @@ public class X509RestClient {
 
 	private static HttpRequest buildRequest() {
 		try {
-			return HttpRequest.newBuilder().uri(new URI(PLATFORM_URL + DEVICE_ACCESS_TOKEN_PATH))
+			return HttpRequest.newBuilder().uri(new URI(PLATFORM_URL + ":" + PLATFORM_MTLS_PORT + DEVICE_ACCESS_TOKEN_PATH))
 					.POST(HttpRequest.BodyPublishers.noBody()).header("Accept", "application/json")
 					.header(X_SSL_CERT_CHAIN, LOCAL_DEVICE_CHAIN).build();
 		} catch (URISyntaxException uRISyntaxException) {
