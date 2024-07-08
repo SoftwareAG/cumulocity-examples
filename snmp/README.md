@@ -1,4 +1,7 @@
 ## Cumulocity IoT SNMP Agent ##
+
+SNMP functionality described is considered deprecated. This means that the feature is no longer actively supported by the product team.
+
 Simple Network Management Protocol (SNMP) is an application layer protocol, used widely in network management for monitoring network devices.
 
 Two components are required for SNMP enabled devices to connect to the Cumulocity IoT platform
