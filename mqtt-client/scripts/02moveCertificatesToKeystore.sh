@@ -6,6 +6,11 @@ set -x
 NAME=iot-device-0001
 FILES_WITH_CERTIFICATES="$NAME-cert.pem iot-cert.pem"
 
+# Check for the --leafonly option
+if [[ "$1" == "--leafonly" ]]; then
+  FILES_WITH_CERTIFICATES="$NAME-cert.pem"
+fi
+
 rm chain-$NAME.pem chain-with-private-key-$NAME.p12 chain-with-private-key-$NAME.jks || echo "Nothing to remove"
 
 cat $FILES_WITH_CERTIFICATES > chain-$NAME.pem
