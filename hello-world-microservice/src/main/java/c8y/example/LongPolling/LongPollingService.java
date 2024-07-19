@@ -6,20 +6,18 @@ import com.cumulocity.microservice.context.credentials.MicroserviceCredentials;
 import com.cumulocity.microservice.subscription.model.MicroserviceSubscriptionAddedEvent;
 import com.cumulocity.microservice.subscription.service.MicroserviceSubscriptionsService;
 import com.cumulocity.model.idtype.GId;
-import com.cumulocity.model.operation.OperationStatus;
-import com.cumulocity.rest.representation.inventory.ManagedObjectRepresentation;
 import com.cumulocity.rest.representation.operation.OperationRepresentation;
 import com.cumulocity.sdk.client.devicecontrol.DeviceControlApi;
-import com.cumulocity.sdk.client.devicecontrol.OperationCollection;
-import com.cumulocity.sdk.client.devicecontrol.OperationFilter;
 import com.cumulocity.sdk.client.notification.Subscription;
 import com.cumulocity.sdk.client.notification.SubscriptionListener;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
-import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @Slf4j
@@ -31,6 +29,9 @@ public class LongPollingService {
     private final CumulocityService cumulocityService;
     private final DeviceControlApi deviceControlApi;
 
+    @Getter
+    private final AtomicInteger deviceCounter;
+
     @EventListener(MicroserviceSubscriptionAddedEvent.class)
     public void onSubscriptionEvent(MicroserviceSubscriptionAddedEvent event) {
         MicroserviceCredentials credentials = event.getCredentials();
@@ -40,13 +41,17 @@ public class LongPollingService {
             public void run() {
                 try {
                     LpwanDeviceFilter loriotDeviceFilter = LpwanDeviceFilter.byServiceProvider(LORIOT_PROVIDER);
-
                     cumulocityService.getInventoryMOs(loriotDeviceFilter.
                             byFragmentType(IsDevice.class))
                             .spliterator().forEachRemaining(managedObjectRepresentation -> {
                                 log.info("Subscribing to device {}", managedObjectRepresentation.getId().getValue());
                         String devEui = cumulocityService.getExternalIdByGId(managedObjectRepresentation.getId());
-                        subscribeToOperationListener(managedObjectRepresentation.getId(), credentials.getTenant(), devEui);
+                        try {
+                            deviceCounter.getAndIncrement();
+                            subscribeToOperationListener(managedObjectRepresentation.getId(), credentials.getTenant(), devEui);
+                        } catch (Exception ex) {
+                            log.error("Subscription error for device {}", managedObjectRepresentation.getId());
+                        }
                     });
                 } catch (Exception e) {
                     log.error("Error occurred while subscribing devices of the tenant {} to the operation subscription channel. {}", credentials.getTenant(), e.getMessage());
