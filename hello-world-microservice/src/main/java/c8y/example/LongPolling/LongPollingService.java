@@ -19,6 +19,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
+import java.util.concurrent.ForkJoinPool;
+
 @Service
 @Slf4j
 @AllArgsConstructor
@@ -38,8 +40,11 @@ public class LongPollingService {
             public void run() {
                 try {
                     LpwanDeviceFilter loriotDeviceFilter = LpwanDeviceFilter.byServiceProvider(LORIOT_PROVIDER);
+
                     cumulocityService.getInventoryMOs(loriotDeviceFilter.
-                            byFragmentType(IsDevice.class)).spliterator().forEachRemaining(managedObjectRepresentation -> {
+                            byFragmentType(IsDevice.class))
+                            .spliterator().forEachRemaining(managedObjectRepresentation -> {
+                                log.info("Subscribing to device {}", managedObjectRepresentation.getId().getValue());
                         String devEui = cumulocityService.getExternalIdByGId(managedObjectRepresentation.getId());
                         subscribeToOperationListener(managedObjectRepresentation.getId(), credentials.getTenant(), devEui);
                     });

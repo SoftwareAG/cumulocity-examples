@@ -123,6 +123,14 @@
                             <image>hello-world</image>
                             <encoding>UTF-8</encoding>
                             <rpmSkip>true</rpmSkip>
+                            <metaspace>
+                                <min>64m</min>
+                                <max>400m</max>
+                            </metaspace>
+                            <heap>
+                                <min>256m</min>
+                                <max>5000m</max>
+                            </heap>
                         </configuration>
                     </execution>
                 </executions>
