@@ -44,6 +44,17 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>c8y.agents.lpwan.backend</groupId>
+            <artifactId>lpwan-backend</artifactId>
+            <version>1020.98.0</version>
+        </dependency>
     </dependencies>
 
     <build>
