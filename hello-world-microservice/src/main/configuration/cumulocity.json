@@ -5,7 +5,14 @@
     "name":"Cumulocity GmbH"
   },
   "isolation":"MULTI_TENANT",
+  "resources": {
+    "cpu": "1000m",
+    "memory": "1000Mi"
+  },
   "requiredRoles": [
+    "ROLE_INVENTORY_ADMIN",
+    "ROLE_INVENTORY_READ",
+    "ROLE_INVENTORY_CREATE"
   ],
   "roles":[
   ],
