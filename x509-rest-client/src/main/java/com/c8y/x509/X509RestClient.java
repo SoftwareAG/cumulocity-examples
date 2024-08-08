@@ -32,6 +32,7 @@ public class X509RestClient {
 	private static final String PLATFORM_MTLS_PORT = "8443";
 	private static final String X_SSL_CERT_CHAIN = "x-ssl-cert-chain";
 	private static final String DEVICE_ACCESS_TOKEN_PATH = "/devicecontrol/deviceAccessToken";
+	// Not mandatory header. Not required if immediate issuer of device certificate is present in platform.
 	private static final String LOCAL_DEVICE_CHAIN = "";
 	
 	//PEM format
@@ -61,6 +62,16 @@ public class X509RestClient {
 			return HttpRequest.newBuilder().uri(new URI(PLATFORM_URL + ":" + PLATFORM_MTLS_PORT + DEVICE_ACCESS_TOKEN_PATH))
 					.POST(HttpRequest.BodyPublishers.noBody()).header("Accept", "application/json")
 					.header(X_SSL_CERT_CHAIN, LOCAL_DEVICE_CHAIN).build();
+		} catch (URISyntaxException uRISyntaxException) {
+			throw new RuntimeException("Error in creating SSLContext", uRISyntaxException);
+		}
+	}
+
+	private static HttpRequest buildRequestWhenImmediateIssuerIsPresentInPlatform() {
+		try {
+			return HttpRequest.newBuilder().uri(new URI(PLATFORM_URL + ":" + PLATFORM_MTLS_PORT + DEVICE_ACCESS_TOKEN_PATH))
+					.POST(HttpRequest.BodyPublishers.noBody()).header("Accept", "application/json")
+					.build();
 		} catch (URISyntaxException uRISyntaxException) {
 			throw new RuntimeException("Error in creating SSLContext", uRISyntaxException);
 		}
