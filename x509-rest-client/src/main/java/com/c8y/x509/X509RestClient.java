@@ -62,6 +62,8 @@ public class X509RestClient {
 		try {
 			Builder builder = HttpRequest.newBuilder().uri(new URI(PLATFORM_URL + ":" + PLATFORM_MTLS_PORT + DEVICE_ACCESS_TOKEN_PATH))
 					.POST(HttpRequest.BodyPublishers.noBody()).header("Accept", "application/json");
+			// X_SSL_CERT_CHAIN: This header is not mandatory, if you have uploaded the immediate issuer of the device certificate
+			// as trusted certificate in Platform
 			if (LOCAL_DEVICE_CHAIN != null && !LOCAL_DEVICE_CHAIN.isEmpty()) {
 				builder.header(X_SSL_CERT_CHAIN, LOCAL_DEVICE_CHAIN);
 			}
