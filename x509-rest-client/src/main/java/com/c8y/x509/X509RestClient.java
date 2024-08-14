@@ -8,6 +8,7 @@ import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.net.http.HttpRequest.Builder;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -32,6 +33,7 @@ public class X509RestClient {
 	private static final String PLATFORM_MTLS_PORT = "8443";
 	private static final String X_SSL_CERT_CHAIN = "x-ssl-cert-chain";
 	private static final String DEVICE_ACCESS_TOKEN_PATH = "/devicecontrol/deviceAccessToken";
+	// Not mandatory header. Not required if immediate issuer of device certificate is present in platform.
 	private static final String LOCAL_DEVICE_CHAIN = "";
 	
 	//PEM format
@@ -58,9 +60,14 @@ public class X509RestClient {
 
 	private static HttpRequest buildRequest() {
 		try {
-			return HttpRequest.newBuilder().uri(new URI(PLATFORM_URL + ":" + PLATFORM_MTLS_PORT + DEVICE_ACCESS_TOKEN_PATH))
-					.POST(HttpRequest.BodyPublishers.noBody()).header("Accept", "application/json")
-					.header(X_SSL_CERT_CHAIN, LOCAL_DEVICE_CHAIN).build();
+			Builder builder = HttpRequest.newBuilder().uri(new URI(PLATFORM_URL + ":" + PLATFORM_MTLS_PORT + DEVICE_ACCESS_TOKEN_PATH))
+					.POST(HttpRequest.BodyPublishers.noBody()).header("Accept", "application/json");
+			// X_SSL_CERT_CHAIN: This header is not mandatory, if you have uploaded the immediate issuer of the device certificate
+			// as trusted certificate in Platform
+			if (LOCAL_DEVICE_CHAIN != null && !LOCAL_DEVICE_CHAIN.isEmpty()) {
+				builder.header(X_SSL_CERT_CHAIN, LOCAL_DEVICE_CHAIN);
+			}
+			return builder.build();
 		} catch (URISyntaxException uRISyntaxException) {
 			throw new RuntimeException("Error in creating SSLContext", uRISyntaxException);
 		}
