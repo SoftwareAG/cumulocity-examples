@@ -15,7 +15,7 @@
         <c8y.version>${revision}${changelist}</c8y.version>
         <main.class>c8y.example.helloworld.HelloWorldMain</main.class>
 
-        <java.version>11</java.version>
+        <java.version>17</java.version>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring-boot-dependencies.version>2.7.6</spring-boot-dependencies.version>

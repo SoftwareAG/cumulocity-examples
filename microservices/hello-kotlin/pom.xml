@@ -15,8 +15,8 @@
     <description>Cumulocity Sample Kotlin Microservice</description>
 
     <properties>
-        <java.version>11</java.version>
-        <kotlin.version>1.4.0</kotlin.version>
+        <java.version>17</java.version>
+        <kotlin.version>1.6.0</kotlin.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
