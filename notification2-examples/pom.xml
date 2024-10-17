@@ -24,7 +24,7 @@
 
     <properties>
         <c8y.version>${revision}${changelist}</c8y.version>
-        <java.version>11</java.version>
+        <java.version>17</java.version>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>

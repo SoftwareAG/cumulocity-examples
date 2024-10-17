@@ -13,8 +13,8 @@
 
     <properties>
         <c8y.clients.version>${c8y.version}</c8y.clients.version>
-        <maven.compiler.target>11</maven.compiler.target>
-        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <agent.main.class>c8y.example.mqtt.service.microservice.MqttServiceMicroservice</agent.main.class>
     </properties>
