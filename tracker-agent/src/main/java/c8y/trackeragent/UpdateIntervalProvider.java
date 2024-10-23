@@ -13,7 +13,7 @@ import static com.cumulocity.rest.representation.tenant.OptionMediaType.OPTION;
 
 import c8y.trackeragent.utils.TrackerPlatformProvider;
 import com.cumulocity.microservice.context.inject.TenantScope;
-import org.apache.http.HttpStatus;
+import org.apache.hc.core5.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,7 @@ import com.cumulocity.sdk.client.SDKException;
 
 import c8y.trackeragent.configuration.TrackerConfiguration;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 
 @Component
 @TenantScope
