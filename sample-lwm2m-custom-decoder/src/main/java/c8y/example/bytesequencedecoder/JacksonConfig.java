@@ -1,7 +1,6 @@
 package c8y.example.bytesequencedecoder;
 
 import tools.jackson.databind.DeserializationFeature;
-import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.SerializationFeature;
 import tools.jackson.databind.cfg.DateTimeFeature;
 import tools.jackson.databind.json.JsonMapper;
@@ -11,8 +10,9 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class JacksonConfig {
+    // Declared as JsonMapper so that Spring Boot's JacksonAutoConfiguration backs off and this mapper is used.
     @Bean
-    public ObjectMapper objectMapper() {
+    public JsonMapper objectMapper() {
         // Jackson 3 mappers are immutable, and date/time features moved to DateTimeFeature.
         return JsonMapper.builder()
                 .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
